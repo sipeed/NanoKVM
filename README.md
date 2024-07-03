@@ -36,8 +36,8 @@ The NanoKVM Full is a full version with a sophisticated case and complete access
 | Video encoding  | MJPEG, H264(developing) | MJPEG, H264(developing) | MJPEG, H264 |
 | Video delay     | 90～230ms | 90～230ms | 100～230ms |
 | UEFI/BIOS               | ✓ | ✓ | ✓ |
-| Keyboard and Mouse<br>Virtual HID | ✓ | ✓ | ✓ |
-| USB storage  <br> Virtual CD-ROM | ✓ | ✓ | ✓ |
+| Virtual HID | ✓ | ✓ | ✓ |
+| Virtual CD-ROM | ✓ | ✓ | ✓ |
 | IPMI      | ✓ | ✓ | ✓ |
 | Wake-on-LAN | ✓ | ✓ | ✓ |
 | ATX power control | None，Users can connect by their own | USB interface IO control board | RJ-45 interface IO control board |
@@ -63,6 +63,7 @@ The NanoKVM image is built on LicheeRV Nano SDK and MaixCDK, and is compatible w
 + [HDMItoCSI Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_B_30131.pdf)
 + [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
++ [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
 ## Community
 

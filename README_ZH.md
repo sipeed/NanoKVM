@@ -36,8 +36,8 @@ NanoKVM Full 为完整版配置，带精致外壳和完整配件，内置开机�
 | 视频编码                | MJPEG, H264(developing) | MJPEG, H264(developing) | MJPEG, H264 |
 | 视频延迟                | 90～230ms | 90～230ms | 100～230ms |
 | UEFI/BIOS               | ✓ | ✓ | ✓ |
-| 模拟USB键鼠 <br>Virtual HID | ✓ | ✓ | ✓ |
-| 模拟USB存储 <br> Virtual CD-ROM | ✓ | ✓ | ✓ |
+| 模拟USB键鼠 | ✓ | ✓ | ✓ |
+| 模拟USB存储 | ✓ | ✓ | ✓ |
 | IPMI      | ✓ | ✓ | ✓ |
 | Wake-on-LAN | ✓ | ✓ | ✓ |
 | ATX电源控制 | 无，用户可自行连接 | USB接口IO控制板 | RJ45接口IO控制板 |
@@ -63,6 +63,8 @@ NanoKVM 镜像在LicheeRV Nano SDK 和 MaixCDK 基础上构建，可以兼容使
 + [HDMItoCSI 板原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_B_30131.pdf)
 + [NanoKVM-A 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 + [NanoKVM-B 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
++ [NanoKVM 镜像下载](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
+
 
 ## 社区
 
