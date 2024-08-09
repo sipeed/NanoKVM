@@ -1,0 +1,97 @@
+.keyboardContainer {
+  display: flex;
+  background-color: #e5e5e5;
+  justify-content: center;
+  margin: 0 auto;
+  border-radius: 0 5px;
+}
+
+.simple-keyboard.hg-theme-default {
+  display: inline-block;
+}
+
+.simple-keyboard-main.simple-keyboard {
+  width: 640px;
+  min-width: 640px;
+  background: none;
+}
+
+.simple-keyboard-main.simple-keyboard .hg-button {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.simple-keyboard-main.simple-keyboard .hg-row:first-child {
+  margin-bottom: 10px;
+}
+
+.simple-keyboard-arrows.simple-keyboard {
+  align-self: flex-end;
+  background: none;
+}
+
+.simple-keyboard .hg-button.selectedButton {
+  background: rgba(5, 25, 70, 0.53);
+  color: white;
+}
+
+.simple-keyboard .hg-button.emptySpace {
+  pointer-events: none;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.simple-keyboard-arrows .hg-row {
+  justify-content: center;
+}
+
+.simple-keyboard-arrows .hg-button {
+  width: 50px;
+  flex-grow: 0;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.controlArrows {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-flow: column;
+}
+
+.simple-keyboard-control.simple-keyboard {
+  background: none;
+}
+
+.simple-keyboard-control.simple-keyboard .hg-row:first-child {
+  margin-bottom: 10px;
+}
+
+.simple-keyboard-control .hg-button {
+  width: 50px;
+  flex-grow: 0;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.hg-button.hg-functionBtn.hg-button-space {
+  width: 350px;
+}
+
+.simple-keyboard.hg-layout-default .hg-button.hg-highlight {
+  background: rgb(37 99 235);
+  border-bottom: 1px solid #2563eb;
+  box-shadow: 0 1px 3px 0 rgb(37 99 235 / 0.1), 0 1px 2px -1px rgb(37 99 235 / 0.1);
+  color: white;
+}
+
+.simple-keyboard.hg-layout-default .hg-button.hg-double{
+  text-align: center;
+  font-size: 14px;
+  line-height: 16px;
+}

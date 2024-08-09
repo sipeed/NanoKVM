@@ -1,0 +1,17 @@
+*.log
+pnpm-debug.log*
+
+web/node_modules
+web/dist
+web/web
+
+.DS_Store
+*.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+.idea
+.vscode
