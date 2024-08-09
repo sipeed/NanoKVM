@@ -64,6 +64,13 @@ The NanoKVM image is built on LicheeRV Nano SDK and MaixCDK, and is compatible w
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
 + [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
+## Where to buy
+
+* [Aliexpress(global except USA&Russia)](https://www.aliexpress.com/item/1005007369816019.html)
+* [淘宝](https://item.taobao.com/item.htm?id=811206560480)
+* [Preorder (anyother country that not support in Aliexpress or Taobao)](https://sipeed.com/nanokvm)
+
+
 ## Community
 
 * [MaixHub Discussion](https://maixhub.com/discussion/nanokvm)
