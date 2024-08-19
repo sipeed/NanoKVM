@@ -5,7 +5,7 @@
 ```shell
 src
 ├── api                // backend api
-├── assets             // static resouces
+├── assets             // static resources
 ├── components         // public components
 ├── i18n               // i18n
 ├── jotai              // Global jotai variables

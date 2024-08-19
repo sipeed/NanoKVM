@@ -29,6 +29,16 @@ export const Language = () => {
       <div
         className={clsx(
           'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
+          i18n.language === 'fr' ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
+        )}
+        onClick={() => changeLanguage('fr')}
+      >
+        Français
+      </div>
+
+      <div
+        className={clsx(
+          'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
           i18n.language === 'zh' ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
         )}
         onClick={() => changeLanguage('zh')}

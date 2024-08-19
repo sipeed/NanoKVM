@@ -44,11 +44,17 @@ export function getLanguage() {
   const lang = localStorage.getItem(LANGUAGE_KEY);
   if (lang) return lang;
 
-  if (navigator.language.indexOf('zh') > -1) {
-    return 'zh';
+  const language = navigator.language;
+
+  switch (true) {
+    case language.indexOf('zh') > -1:
+      return 'zh';
+    case language.indexOf('fr') > -1:
+      return 'fr';
+    default:
+      return 'en'; // Default language
   }
 
-  return 'en';
 }
 
 export function setLanguage(language: string) {
