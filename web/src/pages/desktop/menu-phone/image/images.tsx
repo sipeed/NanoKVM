@@ -53,6 +53,7 @@ export const Images = ({ setIsMounted }: ImagesProps) => {
       if (rsp.code !== 0) return;
 
       const file = rsp.data?.file;
+      setMountedImage(file);
       setIsMounted(!!file);
     } catch (e) {
       console.log(e);
