@@ -40,6 +40,7 @@ The NanoKVM Full is a full version with a sophisticated case and complete access
 | Virtual CD-ROM | ✓ | ✓ | ✓ |
 | IPMI      | ✓ | ✓ | ✓ |
 | Wake-on-LAN | ✓ | ✓ | ✓ |
+| ETH | 100M/10M | 100M/10M | 1000M/100M/10M |
 | ATX power control | None，Users can connect by their own | USB interface IO control board | RJ-45 interface IO control board |
 | OLED | None，Users can connect by their own | 128x64 0.96" white | 128x32 0.91" white |
 | UART | 2 | 2 | 1 |
