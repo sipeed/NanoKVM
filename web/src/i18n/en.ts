@@ -4,9 +4,6 @@ export const en = {
     changePassword: 'Change Password',
     logout: 'Logout',
     keyboard: 'Keyboard',
-    images: 'Images',
-    loading: 'Loading',
-    empty: 'Nothing Found',
     settings: 'Settings',
     showMouse: 'Show mouse',
     hideMouse: 'Hide mouse',
@@ -69,6 +66,26 @@ export const en = {
       relative: 'Relative mode',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
       resetHid: 'Reset HID'
+    },
+    image: {
+      title: 'Images',
+      loading: 'Loading...',
+      empty: 'Nothing Found',
+      tips: {
+        title: 'How to upload',
+        usb1: 'Connect the NanoKVM to your computer via USB.',
+        usb2: 'Ensure that the Virtual USB is mounted (Settings - Virtual USB).',
+        usb3: 'Open the virtual usb disk on your computer and copy the image file to the root directory of the usb disk.',
+        scp1: 'Make sure the NanoKVM and your computer are on the same local network.',
+        scp2: 'Open a terminal on your computer and use the SCP command to upload the image file to the /data directory on the NanoKVM.',
+        scp3: 'Example: scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF Card',
+        tf1: 'This method is supported on Linux system',
+        tf2: 'Get TF card from the NanoKVM (for the FULL version, disassemble the case first).',
+        tf3: 'Insert the TF card into a card reader and connect it to your computer.',
+        tf4: 'Copy the image file to the /data directory on the TF card.',
+        tf5: 'Insert the TF card into the NanoKVM.'
+      }
     },
     script: {
       title: 'Script',

@@ -114,9 +114,7 @@ export const Script = () => {
   const content = (
     <div className="min-w-[250px]">
       <div className="flex items-center justify-between">
-        <div className="flex items-center justify-between px-1">
-          <span className="text-base font-bold text-neutral-300">{t('script.title')}</span>
-        </div>
+        <span className="text-base font-bold text-neutral-300">{t('script.title')}</span>
 
         <input
           ref={inputRef}

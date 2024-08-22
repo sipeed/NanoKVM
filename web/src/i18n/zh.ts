@@ -5,9 +5,6 @@ export const zh = {
     changePassword: '修改密码',
     logout: '登出',
     keyboard: '键盘',
-    images: '镜像',
-    loading: '加载中',
-    empty: '无镜像文件',
     settings: '设置',
     showMouse: '显示鼠标',
     hideMouse: '隐藏鼠标',
@@ -68,6 +65,26 @@ export const zh = {
       relative: '相对模式',
       requestPointer: '正在使用鼠标相对模式，请点击桌面获取鼠标指针。',
       resetHid: '重置 HID'
+    },
+    image: {
+      title: '镜像',
+      loading: '加载中',
+      empty: '无镜像文件',
+      tips: {
+        title: '如何上传',
+        usb1: '将 NanoKVM 通过 USB 连接到你的电脑；',
+        usb2: '确保已经挂载了虚拟U盘（设置 - 虚拟U盘）；',
+        usb3: '在电脑上打开虚拟U盘，将镜像文件拷贝到虚拟U盘的根目录下。',
+        scp1: '确保 NanoKVM 和你的电脑在同一个局域网内；',
+        scp2: '在电脑上打开终端软件，使用 SCP 命令将镜像文件上传到 NanoKVM 的 /data 目录。',
+        scp3: '示例：scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF 卡',
+        tf1: '该方式适用于 Linux 系统',
+        tf2: '将 TF 卡从 NanoKVM 中取出（FULL 版本需要先拆开外壳）；',
+        tf3: '将 TF 卡插入读卡器并连接到你的电脑；',
+        tf4: '从电脑上拷贝镜像文件到 TF 卡的 /data 目录下；',
+        tf5: '将 TF 卡重新插入 NanoKVM。'
+      }
     },
     script: {
       title: '脚本',

@@ -4,13 +4,13 @@ import clsx from 'clsx';
 import { MenuIcon, XIcon } from 'lucide-react';
 
 import { Fullscreen } from './fullscreen';
+import { Image } from './image';
 import { Keyboard } from './keyboard';
 import { Mouse } from './mouse';
 import { Power } from './power';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
-import { Storage } from './storage';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
 
@@ -35,7 +35,7 @@ export const Menu = () => {
           <Mouse />
           <Divider type="vertical" />
 
-          <Storage />
+          <Image />
           <Script />
           <Terminal />
           <Wol />

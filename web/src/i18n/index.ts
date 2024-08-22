@@ -4,19 +4,35 @@ import { initReactI18next } from 'react-i18next';
 import { getLanguage } from '@/lib/localstorage.ts';
 
 import { en } from './en';
-import { zh } from './zh';
 import { fr } from './fr';
+import { zh } from './zh';
 
-const lng = getLanguage();
+const resources = { en, fr, zh };
+
+function getCurrentLanguage(): string {
+  const languages = Object.keys(resources);
+
+  const cookieLng = getLanguage();
+  if (cookieLng && languages.includes(cookieLng)) {
+    return cookieLng;
+  }
+
+  const navigatorLng = navigator.language.split('-')[0];
+  if (languages.includes(navigatorLng)) {
+    return navigatorLng;
+  }
+
+  return 'en';
+}
 
 i18n
-  .use(initReactI18next) // passes i18n down to react-i18next
+  .use(initReactI18next)
   .init({
-    resources: { zh, en, fr },
-    lng,
-
+    resources: resources,
+    lng: getCurrentLanguage(),
+    fallbackLng: 'en',
     interpolation: {
-      escapeValue: false // react already safes from xss
+      escapeValue: false
     }
   })
   .then();

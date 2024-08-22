@@ -8,7 +8,7 @@ const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
 
-type Item = {
+type ItemWithExpiry = {
   value: string;
   expiry: number;
 };
@@ -17,7 +17,7 @@ type Item = {
 function setWithExpiry(key: string, value: string, ttl: number) {
   const now = new Date();
 
-  const item: Item = {
+  const item: ItemWithExpiry = {
     value: value,
     expiry: now.getTime() + ttl
   };
@@ -30,7 +30,7 @@ function getWithExpiry(key: string) {
   const itemStr = localStorage.getItem(key);
   if (!itemStr) return null;
 
-  const item: Item = JSON.parse(itemStr);
+  const item: ItemWithExpiry = JSON.parse(itemStr);
   const now = new Date();
   if (now.getTime() > item.expiry) {
     localStorage.removeItem(key);
@@ -41,20 +41,7 @@ function getWithExpiry(key: string) {
 }
 
 export function getLanguage() {
-  const lang = localStorage.getItem(LANGUAGE_KEY);
-  if (lang) return lang;
-
-  const language = navigator.language;
-
-  switch (true) {
-    case language.indexOf('zh') > -1:
-      return 'zh';
-    case language.indexOf('fr') > -1:
-      return 'fr';
-    default:
-      return 'en'; // Default language
-  }
-
+  return localStorage.getItem(LANGUAGE_KEY);
 }
 
 export function setLanguage(language: string) {

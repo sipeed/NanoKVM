@@ -8,43 +8,33 @@ import { setLanguage } from '@/lib/localstorage.ts';
 export const Language = () => {
   const { t, i18n } = useTranslation();
 
-  function changeLanguage(language: string) {
-    if (i18n.language === language) return;
-    i18n.changeLanguage(language).then();
-    setLanguage(language);
+  function changeLanguage(lng: string) {
+    if (i18n.language === lng) return;
+
+    i18n.changeLanguage(lng);
+    setLanguage(lng);
   }
+
+  const languageItems = [
+    { lng: 'en', name: 'English' },
+    { lng: 'fr', name: 'Français' },
+    { lng: 'zh', name: '中文' }
+  ];
 
   const content = (
     <>
-      <div
-        className={clsx(
-          'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
-          i18n.language === 'en' ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
-        )}
-        onClick={() => changeLanguage('en')}
-      >
-        English
-      </div>
-
-      <div
-        className={clsx(
-          'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
-          i18n.language === 'fr' ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
-        )}
-        onClick={() => changeLanguage('fr')}
-      >
-        Français
-      </div>
-
-      <div
-        className={clsx(
-          'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
-          i18n.language === 'zh' ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
-        )}
-        onClick={() => changeLanguage('zh')}
-      >
-        中文
-      </div>
+      {languageItems.map((item) => (
+        <div
+          key={item.lng}
+          className={clsx(
+            'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
+            i18n.language === item.lng ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
+          )}
+          onClick={() => changeLanguage(item.lng)}
+        >
+          {item.name}
+        </div>
+      ))}
     </>
   );
 

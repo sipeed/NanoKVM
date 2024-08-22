@@ -2,13 +2,13 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { MenuIcon } from 'lucide-react';
 
+import { Image } from './image';
 import { Keyboard } from './keyboard';
 import { Mouse } from './mouse';
 import { Power } from './power';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
-import { Storage } from './storage';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
 
@@ -39,7 +39,7 @@ export const MenuPhone = () => {
           <Screen />
           <Keyboard />
           <Mouse />
-          <Storage />
+          <Image />
           <Script />
           <Terminal />
           <Wol />
