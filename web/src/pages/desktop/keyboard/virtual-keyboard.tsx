@@ -153,7 +153,7 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
             <div className="flex flex-row">
-              <div className="w-fit my-auto mr-2 text-sm font-bold text-neutral-500">
+              <div className="keyboard-header w-fit my-auto mr-2 text-sm font-bold text-neutral-500">
                 {t('keyboard')}
               </div>
               <Radio.Group
