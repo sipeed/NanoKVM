@@ -6,6 +6,7 @@ import Keyboard, { KeyboardButtonTheme } from 'react-simple-keyboard';
 import { Drawer } from 'vaul';
 import { Radio } from 'antd';
 import type { RadioChangeEvent } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import 'react-simple-keyboard/build/css/index.css';
 import '@/assets/styles/keyboard.css';
@@ -33,6 +34,8 @@ const keyboardLayoutOptions = [
 ];
 
 export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
+  const { t } = useTranslation();
+
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
 
   const [isCapsLock, setIsCapsLock] = useState(false);
@@ -150,7 +153,9 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
             <div className="flex flex-row">
-              <div className="w-fit my-auto mr-2 text-sm font-bold text-neutral-500">Keyboard</div>
+              <div className="w-fit my-auto mr-2 text-sm font-bold text-neutral-500">
+                {t('keyboard')}
+              </div>
               <Radio.Group
                 options={keyboardLayoutOptions}
                 onChange={selectLayout}
