@@ -18,6 +18,7 @@ export const Language = () => {
   const languageItems = [
     { lng: 'en', name: 'English' },
     { lng: 'fr', name: 'Français' },
+    { lng: 'ru', name: 'Русский' },
     { lng: 'zh', name: '中文' }
   ];
 
