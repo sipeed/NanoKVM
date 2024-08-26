@@ -20,6 +20,39 @@ src
 └── types              // types
 ```
 
+## Development
+
+Here are some steps you can follow to develop based on your needs:
+
+- Log in to NanoKVM via SSH: `ssh root@your-nanokvm-ip` (default password is root);
+- Stop the current service: `killall NanoKVM-Server`.
+
+1. Build the frontend project: `pnpm build`;
+2. Remove the files in NanoKVM: `rm -rf /kvmapp/server/web`;
+3. Upload the new files: `scp -r dist root@your-nanokvm-ip:/kvmapp/server/web`;
+4. Start the service: `/kvmapp/server/NanoKVM-Server`.
+
+Then, refresh the page in the browser to see the changes.
+
+### Configuration
+
+**Note: Do not enable these settings in production environment unless you fully understand their purpose!**
+
+In development mode, you can edit the configuration file `/etc/kvm/server.yaml` for easier development:
+
+
+- Add `log: debug` to print service logs. This option may cause service slowdowns, so avoid using it in production.
+- Add `authentication: disable` to disable all authentication, so don't need to log in again after restarting the service. This option should not be enabled in production!
+
+### Browser
+
+It's recommended to disable browser caching to avoid access issues during development:
+
+1. Open the browser Developer Tools;
+2. Go to the `Network` tab;
+3. Check `Disable cache` option;
+4. Refresh the page.
+
 ## Deployment
 
 Build:
