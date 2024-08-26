@@ -6,8 +6,9 @@ import { getLanguage } from '@/lib/localstorage.ts';
 import { en } from './en';
 import { fr } from './fr';
 import { zh } from './zh';
+import { ru } from './ru';
 
-const resources = { en, fr, zh };
+const resources = { en, fr, ru, zh };
 
 function getCurrentLanguage(): string {
   const languages = Object.keys(resources);

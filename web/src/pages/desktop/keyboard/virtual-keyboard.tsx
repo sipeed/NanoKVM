@@ -4,6 +4,9 @@ import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
 import Keyboard, { KeyboardButtonTheme } from 'react-simple-keyboard';
 import { Drawer } from 'vaul';
+import { Radio } from 'antd';
+import type { RadioChangeEvent } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 import 'react-simple-keyboard/build/css/index.css';
 import '@/assets/styles/keyboard.css';
@@ -25,11 +28,19 @@ type KeyboardProps = {
   isBigScreen: boolean;
 };
 
+const keyboardLayoutOptions = [
+  { label: 'Win', value: 'default' },
+  { label: 'Mac', value: 'mac' }
+];
+
 export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
+  const { t } = useTranslation();
+
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
 
   const [isCapsLock, setIsCapsLock] = useState(false);
   const [activeModifierKeys, setActiveModifierKeys] = useState<string[]>([]);
+  const [layout, setLayout] = useState('default');
 
   const keyboardRef = useRef<any>(null);
 
@@ -126,6 +137,10 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
     return theme;
   }
 
+  function selectLayout({ target: { value } }: RadioChangeEvent) {
+    setLayout(value);
+  }
+
   return (
     <Drawer.Root open={isKeyboardOpen} onOpenChange={setIsKeyboardOpen} modal={false}>
       <Drawer.Portal>
@@ -137,7 +152,18 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
         >
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
-            <div className="w-[100px] text-sm font-bold text-neutral-500">Keyboard</div>
+            <div className="flex flex-row">
+              <div className="keyboard-header w-fit my-auto mr-2 text-sm font-bold text-neutral-500">
+                {t('keyboard')}
+              </div>
+              <Radio.Group
+                options={keyboardLayoutOptions}
+                onChange={selectLayout}
+                value={layout}
+                optionType='button'
+                buttonStyle='solid'
+              />
+            </div>
             <div className="h-1.5 w-12 flex-shrink-0 rounded-full bg-zinc-300" />
             <div className="flex w-[100px] items-center justify-end">
               <div
@@ -157,6 +183,7 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
               keyboardRef={(r) => (keyboardRef.current = r)}
               onKeyPress={onKeyPress}
               onKeyReleased={onKeyReleased}
+              layoutName={layout}
               {...keyboardOptions}
             />
 
