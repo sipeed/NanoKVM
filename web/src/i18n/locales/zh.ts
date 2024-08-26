@@ -1,4 +1,4 @@
-export const zh = {
+const zh = {
   translation: {
     currentVersion: '版本',
     latestVersion: '最新版本：',
@@ -158,3 +158,5 @@ export const zh = {
     }
   }
 };
+
+export default zh;

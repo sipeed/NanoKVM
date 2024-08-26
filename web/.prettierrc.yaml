@@ -11,6 +11,7 @@ importOrder:
   - ^types$
   - ^@/assets(.*)$
   - ^@/api/(.*)$
+  - ^@/i18n/(.*)$
   - ^@/types$
   - ^@/lib/(.*)$
   - ^@/jotai/(.*)$

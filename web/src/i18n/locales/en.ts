@@ -1,4 +1,4 @@
-export const en = {
+const en = {
   translation: {
     language: 'Language',
     changePassword: 'Change Password',
@@ -159,3 +159,5 @@ export const en = {
     }
   }
 };
+
+export default en;
