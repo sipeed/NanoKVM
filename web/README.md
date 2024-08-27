@@ -20,31 +20,18 @@ src
 └── types              // types
 ```
 
-## Development
+## Local Development
 
-Here are some steps you can follow to develop based on your needs:
+Due to CORS restrictions, authentication needs to be disabled during local development.
 
-- Log in to NanoKVM via SSH: `ssh root@your-nanokvm-ip` (default password is root);
-- Stop the current service: `killall NanoKVM-Server`.
+To develop authentication features, you need to build the project and test in NanoKVM.
 
-1. Build the frontend project: `pnpm build`;
-2. Remove the files in NanoKVM: `rm -rf /kvmapp/server/web`;
-3. Upload the new files: `scp -r dist root@your-nanokvm-ip:/kvmapp/server/web`;
-4. Start the service: `/kvmapp/server/NanoKVM-Server`.
+1. Log in to NanoKVM via SSH: `ssh root@your-nanokvm-ip` (default password is root).
+2. Open the configuration file `/etc/kvm/server.yaml/` and add `authentication: disable`. ⚠️CAUTION: This option disables all authentication and should NOT be enabled in production environment!
+3. Restart the service: `/etc/init.d/S95nanokvm restart`.
+4. Edit the `.env.development` file and change `VITE_SERVER_IP` to your NanoKVM IP address.
+5. Run `pnpm dev` to start the server and visit http://localhost:3001/ in browser.
 
-Then, refresh the page in the browser to see the changes.
-
-### Configuration
-
-**Note: Do not enable these settings in production environment unless you fully understand their purpose!**
-
-In development mode, you can edit the configuration file `/etc/kvm/server.yaml` for easier development:
-
-
-- Add `log: debug` to print service logs. This option may cause service slowdowns, so avoid using it in production.
-- Add `authentication: disable` to disable all authentication, so don't need to log in again after restarting the service. This option should not be enabled in production!
-
-### Browser
 
 It's recommended to disable browser caching to avoid access issues during development:
 

@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai';
 
 import MonitorXIcon from '@/assets/images/monitor-x.svg';
 import { stopFrameDetect } from '@/api/stream.ts';
+import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/resolution.ts';
 
@@ -31,7 +32,7 @@ export const Screen = () => {
         )}
         width={resolution!.width}
         height={resolution!.height}
-        src={`${window.location.protocol}//${window.location.host}/api/stream/mjpeg`}
+        src={`${getBaseUrl('http')}/api/stream/mjpeg`}
         fallback={MonitorXIcon}
         preview={false}
       />

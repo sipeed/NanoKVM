@@ -1,23 +1,20 @@
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import { getBaseUrl } from '@/lib/service.ts';
+
 class WsClient {
+  private readonly url: string;
   private instance: W3cWebSocket;
 
   constructor() {
-    const url = this.getUrl();
-    this.instance = new W3cWebSocket(url);
-  }
-
-  private getUrl() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    return `${protocol}//${window.location.host}/api/ws`;
+    this.url = `${getBaseUrl('ws')}/api/ws`;
+    this.instance = new W3cWebSocket(this.url);
   }
 
   public connect() {
     this.close();
 
-    const url = this.getUrl();
-    this.instance = new W3cWebSocket(url);
+    this.instance = new W3cWebSocket(this.url);
   }
 
   public send(data: number[]) {

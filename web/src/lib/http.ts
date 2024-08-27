@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 import { removeToken } from '@/lib/cookie.ts';
+import { getBaseUrl } from '@/lib/service.ts';
 
 type Response = {
   code: number;
@@ -12,9 +13,12 @@ class Http {
   private instance: AxiosInstance;
 
   constructor() {
+    const baseURL = getBaseUrl('http');
+    const withCredentials = (import.meta.env.VITE_WITH_CREDENTIALS as string) !== 'false';
+
     this.instance = axios.create({
-      baseURL: this.getBaseURL(),
-      withCredentials: true,
+      baseURL,
+      withCredentials,
       timeout: 60 * 1000
     });
 
@@ -44,10 +48,6 @@ class Http {
         return Promise.reject(error);
       }
     );
-  }
-
-  public getBaseURL() {
-    return `${window.location.protocol}//${window.location.host}`;
   }
 
   public get(url: string, params?: any): Promise<Response> {
