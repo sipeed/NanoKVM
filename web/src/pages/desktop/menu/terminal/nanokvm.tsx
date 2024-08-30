@@ -1,4 +1,4 @@
-import { TerminalIcon } from 'lucide-react';
+import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 type NanokvmProps = {
@@ -15,10 +15,10 @@ export const Nanokvm = ({ setIsPopoverOpen }: NanokvmProps) => {
 
   return (
     <div
-      className="flex h-[28px] cursor-pointer select-none items-center space-x-2 rounded px-2 py-1 hover:bg-neutral-700/80"
+      className="flex h-[28px] cursor-pointer select-none items-center space-x-1 rounded px-2 py-1 hover:bg-neutral-700/80"
       onClick={openTerminal}
     >
-      <TerminalIcon size={16} />
+      <SquareTerminalIcon size={14} />
       <span>{t('terminal.nanokvm')}</span>
     </div>
   );

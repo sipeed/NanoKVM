@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { CheckIcon } from 'lucide-react';
+import { Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/virtual-device';
 
-export const VirtualDevice = () => {
+export const VirtualDevices = () => {
   const { t } = useTranslation();
   const [isNetworkOn, setIsNetworkOn] = useState(false);
   const [isUSBOn, setIsUSBOn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(''); // '' | 'network' | 'usb'
 
   useEffect(() => {
     api.getVirtualDevice().then((rsp) => {
@@ -23,8 +23,8 @@ export const VirtualDevice = () => {
   }, []);
 
   function update(device: string) {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (loading) return;
+    setLoading(device);
 
     api
       .updateVirtualDevice(device)
@@ -41,25 +41,26 @@ export const VirtualDevice = () => {
         }
       })
       .finally(() => {
-        setIsLoading(false);
+        setLoading('');
       });
   }
 
   return (
     <>
       <div
-        className="flex cursor-pointer select-none items-center space-x-1 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
+        className="flex cursor-pointer select-none items-center justify-between space-x-3 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
         onClick={() => update('network')}
       >
-        {isNetworkOn && <CheckIcon size={18} color="#3b82f6" />}
-        <span>{t('virtualDevice.network')}</span>
+        <div>{t('virtualDevice.network')}</div>
+        <Switch size="small" checked={isNetworkOn} loading={loading === 'network'} />
       </div>
+
       <div
-        className="flex cursor-pointer select-none items-center space-x-1 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
+        className="flex cursor-pointer select-none items-center justify-between space-x-3 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
         onClick={() => update('usb')}
       >
-        {isUSBOn && <CheckIcon size={18} color="#3b82f6" />}
-        <span>{t('virtualDevice.usb')}</span>
+        <div>{t('virtualDevice.usb')}</div>
+        <Switch size="small" checked={isUSBOn} loading={loading === 'usb'} />
       </div>
     </>
   );

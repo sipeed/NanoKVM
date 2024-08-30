@@ -141,12 +141,9 @@ const zh = {
     },
     tailscale: {
       loading: '加载中...',
-      notInstalled: '未检测到 Tailscale，请先安装',
+      notInstall: '未检测到 Tailscale，请先安装',
       install: '安装',
-      installing: '安装中...',
-      urlPeriod: '该链接10分钟内有效',
-      installed: 'Tailscale 已安装，请执行登录操作',
-      login: '登录',
+      installing: '安装中',
       failed: '安装失败',
       retry: '请刷新后重试，或尝试手动安装',
       download: '下载',
@@ -154,7 +151,17 @@ const zh = {
       unzip: '并解压',
       upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
       upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
-      refresh: '刷新页面'
+      refresh: '刷新页面',
+      notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
+      urlPeriod: '该链接10分钟内有效',
+      login: '登录',
+      loginSuccess: '登录完成',
+      enable: '启用 Tailscale',
+      deviceName: '设备名称',
+      deviceIP: '设备地址',
+      account: '账号',
+      logout: '退出',
+      logout2: '确认退出？'
     }
   }
 };

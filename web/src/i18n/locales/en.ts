@@ -142,12 +142,9 @@ const en = {
     },
     tailscale: {
       loading: 'Loading...',
-      notInstalled: 'Tailscale not found! Please install.',
+      notInstall: 'Tailscale not found! Please install.',
       install: 'Install',
-      installing: 'Installing...',
-      urlPeriod: 'This url is valid for 10 minutes',
-      installed: 'Tailscale already installed. Please login.',
-      login: 'Login',
+      installing: 'Installing',
       failed: 'Install failed',
       retry: 'Please refresh and try again. Or try to install manually',
       download: 'Download the',
@@ -155,7 +152,18 @@ const en = {
       unzip: 'and unzip it',
       upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
       upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
-      refresh: 'Refresh current page'
+      refresh: 'Refresh current page',
+      notLogin:
+        'The device has not been bound yet. Please login and bind this device to your account.',
+      urlPeriod: 'This url is valid for 10 minutes',
+      login: 'Login',
+      loginSuccess: 'Login Success',
+      enable: 'Enable Tailscale',
+      deviceName: 'Device Name',
+      deviceIP: 'Device IP',
+      account: 'Account',
+      logout: 'Logout',
+      logout2: 'Sure to logout?'
     }
   }
 };

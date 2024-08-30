@@ -3,14 +3,14 @@ import clsx from 'clsx';
 import { MenuIcon } from 'lucide-react';
 
 import { Image } from './image';
-import { Keyboard } from './keyboard';
-import { Mouse } from './mouse';
-import { Power } from './power';
+import { Keyboard } from './keyboard.tsx';
+import { Mouse } from './mouse.tsx';
+import { Power } from './power.tsx';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
-import { Wol } from './wol';
+import { Wol } from './wol.tsx';
 
 export const MenuPhone = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

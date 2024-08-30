@@ -1,7 +1,7 @@
 import { ChangeEvent, useState } from 'react';
 import { Button, Input, InputNumber, Modal, Radio, RadioChangeEvent } from 'antd';
 import { useSetAtom } from 'jotai';
-import { TerminalIcon } from 'lucide-react';
+import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
@@ -56,10 +56,10 @@ export const SerialPort = ({ setIsPopoverOpen }: SerialPortProps) => {
   return (
     <>
       <div
-        className="flex h-[28px] cursor-pointer select-none items-center space-x-2 rounded px-2 py-1 hover:bg-neutral-700/80"
+        className="flex h-[28px] cursor-pointer select-none items-center space-x-1 rounded px-2 py-1 hover:bg-neutral-700/80"
         onClick={openModal}
       >
-        <TerminalIcon size={16} />
+        <SquareTerminalIcon size={14} />
         <span>{t('terminal.serial')}</span>
       </div>
 

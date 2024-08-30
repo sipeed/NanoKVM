@@ -146,12 +146,9 @@ const fr = {
     },
     tailscale: {
       loading: 'Chargement...',
-      notInstalled: "Tailscale non trouvé! Veuillez l'installer.",
+      notInstall: "Tailscale non trouvé! Veuillez l'installer.",
       install: 'Installer',
-      installing: 'Installation...',
-      urlPeriod: "L'URL est valide pendant 10 minutes",
-      installed: 'Tailscale est déjà installé. Veuillez vous connecter.',
-      login: 'Connexion',
+      installing: 'Installation',
       failed: 'Installation échouée',
       retry: "Veuillez rafraîchir et réessayer. Ou essayez d'installer manuellement",
       download: 'Télécharger le',
@@ -159,7 +156,17 @@ const fr = {
       unzip: 'et décompressez-le',
       upTailscale: 'Téléverser tailscale dans le répertoire NanoKVM /usr/sbin/',
       upTailscaled: 'Téléverser tailscaled dans le répertoire NanoKVM /usr/sbin/',
-      refresh: 'Rafraîchir la page courante'
+      refresh: 'Rafraîchir la page courante',
+      notLogin: "L'appareil n'est pas relié. Connectez-vous et liez cet appareil à votre compte.",
+      urlPeriod: "L'URL est valide pendant 10 minutes",
+      login: 'Connexion',
+      loginSuccess: 'Connexion réussie',
+      enable: 'Démarrer Tailscale',
+      deviceName: "Nom de l'appareil",
+      deviceIP: "IP de l'appareil",
+      account: 'Compte',
+      logout: 'Déconnexion',
+      logout2: 'Voulez-vous vous déconnecter?'
     }
   }
 };

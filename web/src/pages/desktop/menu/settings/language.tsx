@@ -34,7 +34,7 @@ export const Language = () => {
   );
 
   return (
-    <Popover content={content} placement="right" trigger="hover" arrow>
+    <Popover content={content} placement="rightTop" trigger="hover" arrow>
       <div className="flex cursor-pointer select-none items-center space-x-2 rounded px-3 py-1.5 text-white hover:bg-neutral-600">
         <LanguagesIcon size={16} />
         <span>{t('language')}</span>

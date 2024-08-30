@@ -147,12 +147,9 @@ const ru = {
     },
     tailscale: {
       loading: 'Загрузка...',
-      notInstalled: 'Tailscale не найден! Пожалуйста, установите.',
+      notInstall: 'Tailscale не найден! Пожалуйста, установите.',
       install: 'Установить',
-      installing: 'Установка...',
-      urlPeriod: 'Этот адрес действителен в течение 10 минут',
-      installed: 'Tailscale уже установлен. Пожалуйста, войдите в систему.',
-      login: 'Войти',
+      installing: 'Установка',
       failed: 'Не удалось установить',
       retry: 'Пожалуйста, обновите и попробуйте снова, или попробуйте установить вручную',
       download: 'Скачайте',
@@ -160,7 +157,17 @@ const ru = {
       unzip: 'и разархивируйте его',
       upTailscale: 'Переместите tailscale в каталог /usr/bin/ на NanoKVM',
       upTailscaled: 'Переместите tailscaled в каталог /usr/sbin/ на NanoKVM',
-      refresh: 'Обновите текущую страницу'
+      refresh: 'Обновите текущую страницу',
+      notLogin: 'Устройство не привязано. Войдите, чтобы привязать его к аккаунту.',
+      urlPeriod: 'Этот адрес действителен в течение 10 минут',
+      login: 'Войти',
+      loginSuccess: 'Вход выполнен',
+      enable: 'Включить Tailscale',
+      deviceName: 'Имя устройства',
+      deviceIP: 'IP адрес устройства',
+      account: 'аккаунт',
+      logout: 'Выход',
+      logout2: 'Вы действительно хотите выйти?'
     }
   }
 };
