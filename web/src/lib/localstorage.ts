@@ -7,6 +7,7 @@ const QUALITY_KEY = 'nano-kvm-quality';
 const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
+const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
 
 type ItemWithExpiry = {
   value: string;
@@ -107,4 +108,12 @@ export function getSkipUpdate() {
 export function setSkipUpdate(skip: boolean) {
   const expiry = 3 * 24 * 60 * 60 * 1000; // 3天
   setWithExpiry(SKIP_UPDATE_KEY, String(skip), expiry);
+}
+
+export function setKeyboardLayout(layout: string) {
+  localStorage.setItem(KEYBOARD_LAYOUT_KEY, layout);
+}
+
+export function getKeyboardLayout() {
+  return localStorage.getItem(KEYBOARD_LAYOUT_KEY);
 }
