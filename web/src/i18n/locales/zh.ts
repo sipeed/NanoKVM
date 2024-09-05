@@ -51,7 +51,8 @@ const zh = {
       customizeFps: '自定义',
       quality: '图像质量',
       frameDetect: '帧差检测',
-      frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流'
+      frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流',
+      fitInWindow: '适应窗口'
     },
     cursor: {
       default: '默认指针',

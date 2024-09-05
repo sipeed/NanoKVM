@@ -52,7 +52,8 @@ const en = {
       quality: 'Quality',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-        "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen."
+        "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
+      fitInWindow: "Fit in window",
     },
     cursor: {
       default: 'Default cursor',

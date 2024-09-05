@@ -58,8 +58,8 @@ export const Absolute = () => {
       disableEvent(event);
 
       const rect = canvas!.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / resolution!.width;
-      const y = (event.clientY - rect.top) / resolution!.height;
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
       const hexX = x < 0 ? 0x0001 : Math.floor(0x7fff * x) + 0x0001;
       const hexY = y < 0 ? 0x0001 : Math.floor(0x7fff * y) + 0x0001;
 
