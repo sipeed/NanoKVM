@@ -3,7 +3,6 @@ const ko = {
     language: '언어',
     changePassword: '비밀번호 변경',
     logout: '로그아웃',
-    keyboard: '키보드',
     settings: '설정',
     showMouse: '마우스 보이기',
     hideMouse: '마우스 숨기기',
@@ -29,7 +28,8 @@ const ko = {
       placeholderPassword2: '비밀번호를 다시 입력하세요.',
       noEmptyUsername: '유저 이름은 비어있을 수 없습니다.',
       noEmptyPassword: '비밀번호는 비어있을 수 없습니다.',
-      noAccount: '유저 정보를 불러오는데 실패하였습니다. 새로고침하거나, 비밀번호를 초기화 해주세요.',
+      noAccount:
+        '유저 정보를 불러오는데 실패하였습니다. 새로고침하거나, 비밀번호를 초기화 해주세요.',
       invalidUser: '유저 이름이나 비밀번호가 틀렸습니다.',
       error: '정의되지 않은 에러',
       changePassword: '비밀번호 변경',
@@ -52,10 +52,17 @@ const ko = {
       quality: '품질',
       frameDetect: '프레임 탐지',
       frameDetectTip:
-        "프레임 간의 차이를 계산합니다. 원격 호스트 화면에 변경 사항이 감지되지 않으면 비디오 스트림 전송을 중지합니다.",
-      fitInWindow: "창에 맞추기"
+        '프레임 간의 차이를 계산합니다. 원격 호스트 화면에 변경 사항이 감지되지 않으면 비디오 스트림 전송을 중지합니다.',
+      fitInWindow: '창에 맞추기'
     },
-    cursor: {
+    keyboard: {
+      paste: '붙여넣기',
+      tips: '표준 키보드 문자 및 기호만 지원됩니다',
+      placeholder: '입력하세요',
+      submit: '제출하다',
+      virtual: '키보드'
+    },
+    mouse: {
       default: '기본 커서',
       pointer: '포인터 커서',
       cell: '셀 커서',
@@ -154,8 +161,7 @@ const ko = {
       upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
       upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
       refresh: '현재 페이지 새로고침',
-      notLogin:
-        '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+      notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
       urlPeriod: '이 주소는 10분간 유효합니다.',
       login: '로그인',
       loginSuccess: '로그인 성공',

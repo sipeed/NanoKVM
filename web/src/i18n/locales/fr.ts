@@ -3,7 +3,6 @@ const fr = {
     language: 'Langue',
     changePassword: 'Changer le mot de passe',
     logout: 'Déconnexion',
-    keyboard: 'Clavier',
     settings: 'Réglages',
     showMouse: 'Afficher la souris',
     hideMouse: 'Masquer la souris',
@@ -56,9 +55,16 @@ const fr = {
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
-      fitInWindow: "Ajuster à la fenêtre"
+      fitInWindow: 'Ajuster à la fenêtre'
     },
-    cursor: {
+    keyboard: {
+      paste: 'Coller',
+      tips: 'Seuls les caractères et symboles standard du clavier sont pris en charge',
+      placeholder: 'Veuillez saisir',
+      submit: 'Soumettre',
+      virtual: 'Clavier'
+    },
+    mouse: {
       default: 'Curseur par défaut',
       pointer: 'Curseur de la souris',
       cell: 'Curseur de cellule',

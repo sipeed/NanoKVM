@@ -3,7 +3,6 @@ const en = {
     language: 'Language',
     changePassword: 'Change Password',
     logout: 'Logout',
-    keyboard: 'Keyboard',
     settings: 'Settings',
     showMouse: 'Show mouse',
     hideMouse: 'Hide mouse',
@@ -53,9 +52,16 @@ const en = {
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
-      fitInWindow: "Fit in window",
+      fitInWindow: 'Fit in window'
     },
-    cursor: {
+    keyboard: {
+      paste: 'Paste',
+      tips: 'Only standard keyboard letters and symbols are supported',
+      placeholder: 'Please input',
+      submit: 'Submit',
+      virtual: 'Keyboard'
+    },
+    mouse: {
       default: 'Default cursor',
       pointer: 'Pointer cursor',
       cell: 'Cell cursor',

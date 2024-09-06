@@ -24,7 +24,7 @@ export const Relative = () => {
 
     messageApi.open({
       type: 'info',
-      content: t('cursor.requestPointer'),
+      content: t('mouse.requestPointer'),
       duration: 3,
       style: {
         marginTop: '40vh'

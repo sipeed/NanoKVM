@@ -4,7 +4,6 @@ const zh = {
     latestVersion: '最新版本：',
     changePassword: '修改密码',
     logout: '登出',
-    keyboard: '键盘',
     settings: '设置',
     showMouse: '显示鼠标',
     hideMouse: '隐藏鼠标',
@@ -54,7 +53,14 @@ const zh = {
       frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流',
       fitInWindow: '适应窗口'
     },
-    cursor: {
+    keyboard: {
+      paste: '粘贴',
+      tips: '仅支持标准键盘的字母和符号',
+      placeholder: '请输入内容',
+      submit: '确定',
+      virtual: '虚拟键盘'
+    },
+    mouse: {
       default: '默认指针',
       pointer: '悬浮指针',
       cell: '单元指针',

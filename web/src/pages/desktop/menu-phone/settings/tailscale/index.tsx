@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal } from 'antd';
-import { useSetAtom } from 'jotai/index';
+import { useSetAtom } from 'jotai';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

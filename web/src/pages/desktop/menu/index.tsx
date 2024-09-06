@@ -5,7 +5,7 @@ import { MenuIcon, XIcon } from 'lucide-react';
 
 import { Fullscreen } from './fullscreen.tsx';
 import { Image } from './image';
-import { Keyboard } from './keyboard.tsx';
+import { Keyboard } from './keyboard';
 import { Mouse } from './mouse.tsx';
 import { Power } from './power.tsx';
 import { Screen } from './screen';
