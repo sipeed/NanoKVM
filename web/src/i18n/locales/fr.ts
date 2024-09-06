@@ -55,7 +55,8 @@ const fr = {
       quality: 'Qualité',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant"
+        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
+      fitInWindow: "Ajuster à la fenêtre"
     },
     cursor: {
       default: 'Curseur par défaut',

@@ -8,10 +8,12 @@ import { stopFrameDetect } from '@/api/stream.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/resolution.ts';
+import { fitInWindowAtom } from '@/jotai/scaling.ts';
 
 export const Screen = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
+  const fitInWindow = useAtomValue(fitInWindowAtom);
 
   useEffect(() => {
     // stop frame detect for a while
@@ -20,18 +22,22 @@ export const Screen = () => {
 
   return (
     <div
-      className="flex h-full w-full items-start justify-center xl:items-center"
-      style={{ minWidth: `${resolution!.width}px`, minHeight: `${resolution!.height}px` }}
+      className={clsx(
+        'flex h-full w-full justify-center',
+        fitInWindow ? 'items-center' : 'items-start xl:items-center'
+      )}
+      style={fitInWindow ? undefined : { minWidth: `${resolution!.width}px`, minHeight: `${resolution!.height}px` }}
     >
       <Image
         id="screen"
         className={clsx(
           'block select-none bg-neutral-950',
           mouseStyle,
-          resolution!.width === 800 ? 'object-cover' : 'object-none'
+          fitInWindow ? undefined : (resolution!.width === 800 ? 'object-cover' : 'object-none'),
         )}
-        width={resolution!.width}
-        height={resolution!.height}
+        style={fitInWindow ? { maxWidth: '100vw', maxHeight: '100vh' } : undefined}
+        width={fitInWindow ? undefined : resolution!.width}
+        height={fitInWindow ? undefined : resolution!.height}
         src={`${getBaseUrl('http')}/api/stream/mjpeg`}
         fallback={MonitorXIcon}
         preview={false}
