@@ -56,7 +56,7 @@ export const Menu = () => {
 
         {!isMenuOpen && (
           <div
-            className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/80 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-800 hover:text-white"
             onClick={() => setIsMenuOpen((o) => !o)}
           >
             <MenuIcon />

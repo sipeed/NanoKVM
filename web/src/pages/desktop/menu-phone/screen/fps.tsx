@@ -10,12 +10,10 @@ import { setFps as setCookie } from '@/lib/localstorage';
 const fpsList = [
   { key: 60, label: '60Hz' },
   { key: 30, label: '30Hz' },
-  { key: 24, label: '24Hz' },
-  { key: 15, label: '15Hz' },
-  { key: 10, label: '10Hz' }
+  { key: 24, label: '24Hz' }
 ];
 
-const defaultFps = [60, 30, 24, 15, 10];
+const defaultFps = [60, 30, 24];
 
 type FpsProps = {
   fps: number;

@@ -46,12 +46,14 @@ const zh = {
     },
     screen: {
       resolution: '分辨率',
+      auto: '自动',
+      autoTips:
+        '在某些分辨率下可能存在花屏或鼠标偏移的情况，请调整远程主机分辨率或者不使用自动模式。',
       fps: '帧率',
       customizeFps: '自定义',
       quality: '图像质量',
       frameDetect: '帧差检测',
-      frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流',
-      fitInWindow: '适应窗口'
+      frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流'
     },
     keyboard: {
       paste: '粘贴',

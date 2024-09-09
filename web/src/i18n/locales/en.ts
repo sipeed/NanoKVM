@@ -46,13 +46,15 @@ const en = {
     },
     screen: {
       resolution: 'Resolution',
+      auto: 'Automatic',
+      autoTips:
+        "Screen tearing or mouse offset may occur at specific resolutions. Consider adjusting the remote host's resolution or disable automatic mode.",
       fps: 'FPS',
       customizeFps: 'Customize',
       quality: 'Quality',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-        "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
-      fitInWindow: 'Fit in window'
+        "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen."
     },
     keyboard: {
       paste: 'Paste',

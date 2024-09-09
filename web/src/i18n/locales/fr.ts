@@ -49,13 +49,15 @@ const fr = {
     },
     screen: {
       resolution: 'Résolution',
+      auto: 'Automatique',
+      autoTips:
+        "Sous certaines résolutions, il peut y avoir des artefacts visuels ou un décalage de la souris. Veuillez ajuster la résolution de l'hôte distant ou désactiver le mode automatique.",
       fps: 'FPS',
       customizeFps: 'Personnaliser',
       quality: 'Qualité',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
-      fitInWindow: 'Ajuster à la fenêtre'
+        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant"
     },
     keyboard: {
       paste: 'Coller',

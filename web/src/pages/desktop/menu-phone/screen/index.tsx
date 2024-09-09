@@ -5,7 +5,7 @@ import { MonitorIcon } from 'lucide-react';
 
 import { updateScreen } from '@/api/vm';
 import * as ls from '@/lib/localstorage';
-import { resolutionAtom } from '@/jotai/resolution';
+import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { Fps } from './fps';
 import { FrameDetect } from './frame-detect';

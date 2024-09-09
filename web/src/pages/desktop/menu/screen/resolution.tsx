@@ -1,14 +1,15 @@
-import { Popover } from 'antd';
+import { Popover, Tooltip } from 'antd';
 import { useAtom } from 'jotai';
-import { CheckIcon, RatioIcon } from 'lucide-react';
+import { CheckIcon, CircleHelpIcon, RatioIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { updateScreen } from '@/api/vm';
 import { Resolution as TypeResolution } from '@/types';
 import { setResolution as setCookie } from '@/lib/localstorage';
-import { resolutionAtom } from '@/jotai/resolution.ts';
+import { resolutionAtom } from '@/jotai/screen.ts';
 
 const resolutions: TypeResolution[] = [
+  { width: 0, height: 0 },
   { width: 1920, height: 1080 },
   { width: 1280, height: 720 },
   { width: 800, height: 600 },
@@ -31,18 +32,34 @@ export const Resolution = () => {
 
   const content = (
     <>
-      {resolutions.map((item) => (
+      {resolutions.map((res) => (
         <div
-          key={item.height}
+          key={res.height}
           className="flex cursor-pointer select-none items-center space-x-1 rounded py-1.5 pl-1 pr-5 hover:bg-neutral-600"
-          onClick={() => update(item)}
+          onClick={() => update(res)}
         >
           <div className="flex h-[14px] w-[20px] items-end">
-            {item.height === resolution?.height && <CheckIcon size={14} />}
+            {res.height === resolution?.height && <CheckIcon size={15} />}
           </div>
-          <span className="flex w-[32px]">{item.width}</span>
-          <span>x</span>
-          <span className="w-[36px]">{item.height}</span>
+
+          {res.height === 0 ? (
+            <div className="flex items-center justify-between space-x-2">
+              <span>{t('screen.auto')}</span>
+              <Tooltip
+                title={t('screen.autoTips')}
+                placement="right"
+                overlayInnerStyle={{ width: '300px' }}
+              >
+                <CircleHelpIcon size={14} />
+              </Tooltip>
+            </div>
+          ) : (
+            <>
+              <span className="flex w-[32px]">{res.width}</span>
+              <span>x</span>
+              <span className="w-[36px]">{res.height}</span>
+            </>
+          )}
         </div>
       ))}
     </>

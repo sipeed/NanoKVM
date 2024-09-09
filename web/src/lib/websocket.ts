@@ -1,6 +1,10 @@
-import { w3cwebsocket as W3cWebSocket } from 'websocket';
+import { IMessageEvent, w3cwebsocket as W3cWebSocket } from 'websocket';
 
 import { getBaseUrl } from '@/lib/service.ts';
+
+type Event = (message: IMessageEvent) => void;
+
+const eventMap: Map<string, Event> = new Map<string, Event>();
 
 class WsClient {
   private readonly url: string;
@@ -9,12 +13,14 @@ class WsClient {
   constructor() {
     this.url = `${getBaseUrl('ws')}/api/ws`;
     this.instance = new W3cWebSocket(this.url);
+    this.setEvents();
   }
 
   public connect() {
     this.close();
 
     this.instance = new W3cWebSocket(this.url);
+    this.setEvents();
   }
 
   public send(data: number[]) {
@@ -30,6 +36,30 @@ class WsClient {
     if (this.instance.readyState === W3cWebSocket.OPEN) {
       this.instance.close();
     }
+  }
+
+  public register(type: string, fn: (message: IMessageEvent) => void) {
+    eventMap.set(type, fn);
+
+    this.setEvents();
+  }
+
+  public unregister(type: string) {
+    eventMap.delete(type);
+
+    this.setEvents();
+  }
+
+  private setEvents() {
+    this.instance.onmessage = (message) => {
+      const data = JSON.parse(message.data as string);
+      if (!data) return;
+
+      const fn = eventMap.get(data.type);
+      if (!fn) return;
+
+      fn(message);
+    };
   }
 }
 
