@@ -45,7 +45,7 @@ The NanoKVM Full is a full version with a sophisticated case and complete access
 | OLED | None，Users can connect by their own | 128x64 0.96" white | 128x32 0.91" white |
 | UART | 2 | 2 | 1 |
 | TF Card | None | ✓ | ✓ |
-| Expansion | None | WiFi or PoE | WiFi/LTE |
+| Expansion | None | PoE | WiFi/LTE |
 | Power consumption | 0.2A@5V | 0.2A@5V | Peak 2.6A@5V |
 | Power input | PC USB can be powered | PC USB or auxiliary power supply | DC 5V 3A power supply is required |
 | Cooling | Silent fanless | Silent fanless | Fan cooling |
