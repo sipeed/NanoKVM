@@ -1,10 +1,9 @@
-export const zh = {
+const zh = {
   translation: {
     currentVersion: '版本',
     latestVersion: '最新版本：',
     changePassword: '修改密码',
     logout: '登出',
-    keyboard: '键盘',
     settings: '设置',
     showMouse: '显示鼠标',
     hideMouse: '隐藏鼠标',
@@ -47,13 +46,23 @@ export const zh = {
     },
     screen: {
       resolution: '分辨率',
+      auto: '自动',
+      autoTips:
+        '在某些分辨率下可能存在花屏或鼠标偏移的情况，请调整远程主机分辨率或者不使用自动模式。',
       fps: '帧率',
       customizeFps: '自定义',
       quality: '图像质量',
       frameDetect: '帧差检测',
       frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流'
     },
-    cursor: {
+    keyboard: {
+      paste: '粘贴',
+      tips: '仅支持标准键盘的字母和符号',
+      placeholder: '请输入内容',
+      submit: '确定',
+      virtual: '虚拟键盘'
+    },
+    mouse: {
       default: '默认指针',
       pointer: '悬浮指针',
       cell: '单元指针',
@@ -141,12 +150,9 @@ export const zh = {
     },
     tailscale: {
       loading: '加载中...',
-      notInstalled: '未检测到 Tailscale，请先安装',
+      notInstall: '未检测到 Tailscale，请先安装',
       install: '安装',
-      installing: '安装中...',
-      urlPeriod: '该链接10分钟内有效',
-      installed: 'Tailscale 已安装，请执行登录操作',
-      login: '登录',
+      installing: '安装中',
       failed: '安装失败',
       retry: '请刷新后重试，或尝试手动安装',
       download: '下载',
@@ -154,7 +160,19 @@ export const zh = {
       unzip: '并解压',
       upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
       upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
-      refresh: '刷新页面'
+      refresh: '刷新页面',
+      notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
+      urlPeriod: '该链接10分钟内有效',
+      login: '登录',
+      loginSuccess: '登录完成',
+      enable: '启用 Tailscale',
+      deviceName: '设备名称',
+      deviceIP: '设备地址',
+      account: '账号',
+      logout: '退出',
+      logout2: '确认退出？'
     }
   }
 };
+
+export default zh;

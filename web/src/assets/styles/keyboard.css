@@ -80,18 +80,26 @@
 }
 
 .hg-button.hg-functionBtn.hg-button-space {
+  width: 250px;
+}
+
+.hg-layout-mac .hg-button.hg-functionBtn.hg-button-space {
   width: 350px;
 }
 
-.simple-keyboard.hg-layout-default .hg-button.hg-highlight {
+.simple-keyboard .hg-highlight {
   background: rgb(37 99 235);
   border-bottom: 1px solid #2563eb;
   box-shadow: 0 1px 3px 0 rgb(37 99 235 / 0.1), 0 1px 2px -1px rgb(37 99 235 / 0.1);
   color: white;
 }
 
-.simple-keyboard.hg-layout-default .hg-button.hg-double{
+.simple-keyboard .hg-button.hg-double{
   text-align: center;
   font-size: 14px;
   line-height: 16px;
+}
+
+.keyboard-header {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }

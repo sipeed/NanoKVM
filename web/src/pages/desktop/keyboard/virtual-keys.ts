@@ -1,9 +1,17 @@
 // main keys
 export const keyboardOptions = {
-  theme: 'simple-keyboard hg-theme-default hg-layout-default',
+  theme: 'simple-keyboard hg-theme-default',
   baseClass: 'simple-keyboard-main',
   layout: {
     default: [
+      '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
+      'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal {backspace}',
+      '{tab} KeyQ KeyW KeyE KeyR KeyT KeyY KeyU KeyI KeyO KeyP BracketLeft BracketRight Backslash',
+      '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon Quote {enter}',
+      '{shiftleft} KeyZ KeyX KeyC KeyV KeyB KeyN KeyM Comma Period Slash {shiftright}',
+      '{controlleft} {winleft} {altleft} {space} {altright} {winright} {menu} {controlright}'
+    ],
+    mac: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
       'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal {backspace}',
       '{tab} KeyQ KeyW KeyE KeyR KeyT KeyY KeyU KeyI KeyO KeyP BracketLeft BracketRight Backslash',
@@ -74,15 +82,19 @@ export const keyboardOptions = {
     '{controlleft}': 'Ctrl',
     '{altleft}': 'Alt',
     '{metaleft}': 'Cmd',
+    '{winleft}': 'Win',
     '{space}': 'Space',
     '{metaright}': 'Cmd',
-    '{altright}': 'Alt'
+    '{winright}': 'Win',
+    '{altright}': 'Alt',
+    '{menu}': "Menu",
+    '{controlright}': 'Ctrl',
   }
 };
 
 // control keys
 export const keyboardControlPadOptions = {
-  theme: 'simple-keyboard hg-theme-default hg-layout-default',
+  theme: 'simple-keyboard hg-theme-default',
   baseClass: 'simple-keyboard-control',
   layout: {
     default: [
@@ -107,7 +119,7 @@ export const keyboardControlPadOptions = {
 
 // arrow keys
 export const keyboardArrowsOptions = {
-  theme: 'simple-keyboard hg-theme-default hg-layout-default',
+  theme: 'simple-keyboard hg-theme-default',
   baseClass: 'simple-keyboard-arrows',
   layout: {
     default: ['{arrowup}', '{arrowleft} {arrowdown} {arrowright}']
@@ -126,8 +138,10 @@ export const specialKeyMap = new Map([
   ['{controlleft}', 'ControlLeft'],
   ['{altleft}', 'AltLeft'],
   ['{metaleft}', 'MetaLeft'],
+  ['{winleft}', 'WinLeft'],
   ['{space}', 'Space'],
   ['{metaright}', 'MetaRight'],
+  ['{winright}', 'WinRight'],
   ['{altright}', 'AltRight'],
   ['{prtscr}', 'PrintScreen'],
   ['{scrolllock}', 'ScrollLock'],
@@ -150,10 +164,12 @@ export const modifierKeys = [
   '{controlleft}',
   '{altleft}',
   '{metaleft}',
+  '{winleft}',
   '{shiftright}',
   '{controlright}',
   '{altright}',
-  '{metaright}'
+  '{metaright}',
+  '{winright}'
 ];
 
 // double line display buttons

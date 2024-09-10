@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { LanguagesIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { languages } from '@/i18n/languages.ts';
 import { setLanguage } from '@/lib/localstorage.ts';
 
 export const Language = () => {
@@ -15,31 +16,25 @@ export const Language = () => {
     setLanguage(lng);
   }
 
-  const languageItems = [
-    { lng: 'en', name: 'English' },
-    { lng: 'fr', name: 'Français' },
-    { lng: 'zh', name: '中文' }
-  ];
-
   const content = (
     <>
-      {languageItems.map((item) => (
+      {languages.map((lng) => (
         <div
-          key={item.lng}
+          key={lng.key}
           className={clsx(
             'flex cursor-pointer select-none items-center space-x-1 rounded px-5 py-1',
-            i18n.language === item.lng ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
+            i18n.language === lng.key ? 'text-blue-500' : 'text-white hover:bg-neutral-700'
           )}
-          onClick={() => changeLanguage(item.lng)}
+          onClick={() => changeLanguage(lng.key)}
         >
-          {item.name}
+          {lng.name}
         </div>
       ))}
     </>
   );
 
   return (
-    <Popover content={content} placement="right" trigger="hover" arrow>
+    <Popover content={content} placement="rightTop" trigger="hover" arrow>
       <div className="flex cursor-pointer select-none items-center space-x-2 rounded px-3 py-1.5 text-white hover:bg-neutral-600">
         <LanguagesIcon size={16} />
         <span>{t('language')}</span>

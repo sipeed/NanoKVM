@@ -106,6 +106,8 @@ export const KeyboardCodes: Map<string, number> = new Map([
   ['NumpadDecimal', 99],
   ['KeyKpDot', 99],
 
+  ['Menu', 118],
+
   ['ControlLeft', 224],
   ['ShiftLeft', 225],
   ['AltLeft', 226],

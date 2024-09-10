@@ -20,6 +20,26 @@ src
 └── types             // 类型定义
 ```
 
+## 本地开发
+
+由于 CORS 的限制，在本地开发时，需要关闭鉴权功能。
+
+如果想要开发鉴权相关的功能，需要编译后在 NanoKVM 中进行测试。
+
+1. 通过 ssh 登录到 NanoKVM：`ssh root@your-nanokvm-ip`（默认密码为 root）；
+2. 修改配置文件 `/etc/kvm/server.yaml`，添加一行 `authentication: disable`。⚠️注意：该选项会禁用所有鉴权功能，生产环境请勿开启该选项！
+3. 执行 `/etc/init.d/S95nanokvm restart` 重启服务。
+4. 编辑 `.env.development` 文件，将 `VITE_SERVER_IP` 修改为你的 NanoKVM IP 地址。
+5. 执行 `pnpm dev` 启动服务，然后在浏览器中访问 http://localhost:3001/ 。
+
+
+建议在浏览器中禁用缓存，防止在开发过程中出现无法访问的情况。
+
+1. 打开开发者工具；
+2. 点击 `Network` 选项卡；
+3. 勾选 `Disable cache` 选项；
+4. 刷新页面。
+
 ## 部署
 
 编译：
@@ -37,4 +57,3 @@ pnpm build
 
 
 注意：更新 web 目录后，浏览器可能会有缓存。如果遇到打不开页面的情况，请强制刷新或清空缓存。
-

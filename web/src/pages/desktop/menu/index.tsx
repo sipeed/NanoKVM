@@ -3,16 +3,16 @@ import { Divider } from 'antd';
 import clsx from 'clsx';
 import { MenuIcon, XIcon } from 'lucide-react';
 
-import { Fullscreen } from './fullscreen';
+import { Fullscreen } from './fullscreen.tsx';
 import { Image } from './image';
 import { Keyboard } from './keyboard';
-import { Mouse } from './mouse';
-import { Power } from './power';
+import { Mouse } from './mouse.tsx';
+import { Power } from './power.tsx';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
-import { Wol } from './wol';
+import { Wol } from './wol.tsx';
 
 export const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -56,7 +56,7 @@ export const Menu = () => {
 
         {!isMenuOpen && (
           <div
-            className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/80 text-neutral-300 hover:bg-neutral-800 hover:text-white"
+            className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-800 hover:text-white"
             onClick={() => setIsMenuOpen((o) => !o)}
           >
             <MenuIcon />

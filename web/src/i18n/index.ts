@@ -1,13 +1,23 @@
 import i18n from 'i18next';
+import type { Resource } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 import { getLanguage } from '@/lib/localstorage.ts';
 
-import { en } from './en';
-import { fr } from './fr';
-import { zh } from './zh';
+function getResources(): Resource {
+  const resources: Resource = {};
 
-const resources = { en, fr, zh };
+  const modules: Record<string, Resource> = import.meta.glob('./locales/*.ts', { eager: true });
+
+  for (const path in modules) {
+    const moduleName = path.split('/').pop()?.replace('.ts', '');
+    if (moduleName) {
+      resources[moduleName] = modules[path].default;
+    }
+  }
+
+  return resources;
+}
 
 function getCurrentLanguage(): string {
   const languages = Object.keys(resources);
@@ -25,11 +35,14 @@ function getCurrentLanguage(): string {
   return 'en';
 }
 
+const resources = getResources();
+const lng = getCurrentLanguage();
+
 i18n
   .use(initReactI18next)
   .init({
-    resources: resources,
-    lng: getCurrentLanguage(),
+    resources,
+    lng,
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false

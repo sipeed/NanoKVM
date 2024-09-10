@@ -5,6 +5,8 @@ import { Terminal as XtermTerminal } from '@xterm/xterm';
 
 import '@xterm/xterm/css/xterm.css';
 
+import { getBaseUrl } from '@/lib/service.ts';
+
 type TerminalProps = {
   token: string;
   setToken: (token: string) => void;
@@ -21,8 +23,7 @@ export const Xterm = ({ token, setToken }: TerminalProps) => {
     terminal.open(terminalEle);
     fitAddon.fit();
 
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const url = `${protocol}//${window.location.host}/api/vm/terminal?${token}`;
+    const url = `${getBaseUrl('ws')}/api/vm/terminal?${token}`;
     const webSocket = new WebSocket(url);
 
     const sendSize = () => {

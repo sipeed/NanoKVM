@@ -4,12 +4,14 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
 import { client } from '@/lib/websocket.ts';
-import { resolutionAtom } from '@/jotai/resolution.ts';
+import { resolutionAtom, streamUrlAtom } from '@/jotai/screen.ts';
 
 import { MouseButton, MouseEvent } from './constants';
 
 export const Relative = () => {
   const { t } = useTranslation();
+
+  const streamUrl = useAtomValue(streamUrlAtom);
   const resolution = useAtomValue(resolutionAtom);
 
   const isLockedRef = useRef(false);
@@ -24,7 +26,7 @@ export const Relative = () => {
 
     messageApi.open({
       type: 'info',
-      content: t('cursor.requestPointer'),
+      content: t('mouse.requestPointer'),
       duration: 3,
       style: {
         marginTop: '40vh'
@@ -124,7 +126,7 @@ export const Relative = () => {
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('contextmenu', disableEvent);
     };
-  }, [resolution]);
+  }, [resolution, streamUrl]);
 
   // disable default events
   function disableEvent(event: any) {

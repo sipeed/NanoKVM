@@ -17,8 +17,3 @@ export function mountImage(file?: string) {
   };
   return http.post('/api/storage/image/mount', data);
 }
-
-// reset hid
-export function resetHid() {
-  return http.post('/api/storage/hid/reset');
-}

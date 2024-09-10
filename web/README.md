@@ -20,6 +20,26 @@ src
 └── types              // types
 ```
 
+## Local Development
+
+Due to CORS restrictions, authentication needs to be disabled during local development.
+
+To develop authentication features, you need to build the project and test in NanoKVM.
+
+1. Log in to NanoKVM via SSH: `ssh root@your-nanokvm-ip` (default password is root).
+2. Open the configuration file `/etc/kvm/server.yaml/` and add `authentication: disable`. ⚠️CAUTION: This option disables all authentication and should NOT be enabled in production environment!
+3. Restart the service: `/etc/init.d/S95nanokvm restart`.
+4. Edit the `.env.development` file and change `VITE_SERVER_IP` to your NanoKVM IP address.
+5. Run `pnpm dev` to start the server and visit http://localhost:3001/ in browser.
+
+
+It's recommended to disable browser caching to avoid access issues during development:
+
+1. Open the browser Developer Tools;
+2. Go to the `Network` tab;
+3. Check `Disable cache` option;
+4. Refresh the page.
+
 ## Deployment
 
 Build:

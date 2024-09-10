@@ -21,17 +21,27 @@ export function deleteWolMac(mac: string) {
   });
 }
 
-// check if tailscale exists
-export function getTailscale() {
-  return http.get('/api/network/tailscale');
-}
-
 // install tailscale
 export function installTailscale() {
   return http.post('/api/network/tailscale/install');
 }
 
-// run tailscale
-export function runTailscale() {
-  return http.post('/api/network/tailscale/run');
+// get tailscale status
+export function getTailscaleStatus() {
+  return http.get('/api/network/tailscale/status');
+}
+
+// update tailscale status
+export function updateTailscaleStatus(command: 'up' | 'down') {
+  return http.post('/api/network/tailscale/status', { command });
+}
+
+// login tailscale
+export function loginTailscale() {
+  return http.post('/api/network/tailscale/login');
+}
+
+// logout tailscale
+export function logoutTailscale() {
+  return http.post('/api/network/tailscale/logout');
 }

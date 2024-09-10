@@ -36,15 +36,21 @@ export const FrameDetect = () => {
   return (
     <Tooltip placement="rightTop" title={t('screen.frameDetectTip')} color="#262626" arrow>
       <div
-        className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700"
+        className="group flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700"
         onClick={update}
       >
         {isLoading ? (
           <LoaderCircleIcon className="animate-spin" size={18} />
         ) : isEnabled ? (
-          <Tally4Icon color="#22c55e" size={18} />
+          <div>
+            <Tally4Icon color="#22c55e" size={18} className="block group-hover:hidden" />
+            <Tally5Icon color="#ef4444" size={18} className="hidden group-hover:block" />
+          </div>
         ) : (
-          <Tally5Icon size={18} />
+          <div>
+            <Tally5Icon size={18} className="block group-hover:hidden" />
+            <Tally4Icon color="#22c55e" size={18} className="hidden group-hover:block" />
+          </div>
         )}
         <span className="select-none text-sm">{t('screen.frameDetect')}</span>
       </div>

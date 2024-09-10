@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { AppleOutlined, WindowsOutlined } from '@ant-design/icons';
+import { ConfigProvider, Segmented, theme } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
@@ -8,6 +10,7 @@ import { Drawer } from 'vaul';
 import 'react-simple-keyboard/build/css/index.css';
 import '@/assets/styles/keyboard.css';
 
+import { getKeyboardLayout, setKeyboardLayout } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
@@ -28,10 +31,17 @@ type KeyboardProps = {
 export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
 
-  const [isCapsLock, setIsCapsLock] = useState(false);
+  const [layout, setLayout] = useState('default');
   const [activeModifierKeys, setActiveModifierKeys] = useState<string[]>([]);
 
   const keyboardRef = useRef<any>(null);
+
+  useEffect(() => {
+    const keyboardLayout = getKeyboardLayout();
+    if (keyboardLayout && ['default', 'mac'].includes(keyboardLayout)) {
+      setLayout(keyboardLayout);
+    }
+  }, []);
 
   function onKeyPress(key: string) {
     if (modifierKeys.includes(key)) {
@@ -41,13 +51,10 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
       } else {
         setActiveModifierKeys([...activeModifierKeys, key]);
       }
-    } else {
-      if (key === '{capslock}') {
-        setIsCapsLock(!isCapsLock);
-      }
-
-      sendKeydown(key);
+      return;
     }
+
+    sendKeydown(key);
   }
 
   function onKeyReleased(key: string) {
@@ -115,15 +122,17 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
   function getButtonTheme(): KeyboardButtonTheme[] {
     const theme = [{ class: 'hg-double', buttons: doubleKeys.join(' ') }];
 
-    const activeKeys = [...activeModifierKeys];
-    if (isCapsLock) {
-      activeKeys.push('{capslock}');
-    }
-    if (activeKeys.length > 0) {
-      theme.push({ class: 'hg-highlight', buttons: activeKeys.join(' ') });
+    if (activeModifierKeys.length > 0) {
+      const buttons = activeModifierKeys.join(' ');
+      theme.push({ class: 'hg-highlight', buttons });
     }
 
     return theme;
+  }
+
+  function selectLayout(value: string) {
+    setKeyboardLayout(value);
+    setLayout(value);
   }
 
   return (
@@ -137,8 +146,23 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
         >
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
-            <div className="w-[100px] text-sm font-bold text-neutral-500">Keyboard</div>
-            <div className="h-1.5 w-12 flex-shrink-0 rounded-full bg-zinc-300" />
+            <div className="flex flex-row">
+              <ConfigProvider
+                theme={{
+                  algorithm: theme.defaultAlgorithm
+                }}
+              >
+                <Segmented
+                  options={[
+                    { label: 'Win', value: 'default', icon: <WindowsOutlined /> },
+                    { label: 'Mac', value: 'mac', icon: <AppleOutlined /> }
+                  ]}
+                  value={layout}
+                  onChange={selectLayout}
+                />
+              </ConfigProvider>
+            </div>
+
             <div className="flex w-[100px] items-center justify-end">
               <div
                 className="flex h-[20px] w-[20px] cursor-pointer items-center justify-center rounded text-neutral-600 hover:bg-neutral-300 hover:text-white"
@@ -148,6 +172,7 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
               </div>
             </div>
           </div>
+
           <div className="h-px flex-shrink-0 border-b bg-neutral-300" />
 
           <div data-vaul-no-drag className="keyboardContainer w-full">
@@ -157,6 +182,7 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
               keyboardRef={(r) => (keyboardRef.current = r)}
               onKeyPress={onKeyPress}
               onKeyReleased={onKeyReleased}
+              layoutName={layout}
               {...keyboardOptions}
             />
 

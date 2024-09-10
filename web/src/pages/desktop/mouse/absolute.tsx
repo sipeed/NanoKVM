@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useAtomValue } from 'jotai';
 
 import { client } from '@/lib/websocket.ts';
-import { resolutionAtom } from '@/jotai/resolution.ts';
+import { resolutionAtom, streamUrlAtom } from '@/jotai/screen.ts';
 
 import { MouseButton, MouseEvent } from './constants';
 
 export const Absolute = () => {
+  const streamUrl = useAtomValue(streamUrlAtom);
   const resolution = useAtomValue(resolutionAtom);
 
   // listen mouse events
@@ -58,8 +59,8 @@ export const Absolute = () => {
       disableEvent(event);
 
       const rect = canvas!.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / resolution!.width;
-      const y = (event.clientY - rect.top) / resolution!.height;
+      const x = (event.clientX - rect.left) / rect.width;
+      const y = (event.clientY - rect.top) / rect.height;
       const hexX = x < 0 ? 0x0001 : Math.floor(0x7fff * x) + 0x0001;
       const hexY = y < 0 ? 0x0001 : Math.floor(0x7fff * y) + 0x0001;
 
@@ -85,7 +86,7 @@ export const Absolute = () => {
       canvas.removeEventListener('click', disableEvent);
       canvas.removeEventListener('contextmenu', disableEvent);
     };
-  }, [resolution]);
+  }, [resolution, streamUrl]);
 
   // disable default events
   function disableEvent(event: any) {

@@ -1,9 +1,8 @@
-export const fr = {
+const fr = {
   translation: {
     language: 'Langue',
     changePassword: 'Changer le mot de passe',
     logout: 'Déconnexion',
-    keyboard: 'Clavier',
     settings: 'Réglages',
     showMouse: 'Afficher la souris',
     hideMouse: 'Masquer la souris',
@@ -50,6 +49,9 @@ export const fr = {
     },
     screen: {
       resolution: 'Résolution',
+      auto: 'Automatique',
+      autoTips:
+        "Sous certaines résolutions, il peut y avoir des artefacts visuels ou un décalage de la souris. Veuillez ajuster la résolution de l'hôte distant ou désactiver le mode automatique.",
       fps: 'FPS',
       customizeFps: 'Personnaliser',
       quality: 'Qualité',
@@ -57,7 +59,14 @@ export const fr = {
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant"
     },
-    cursor: {
+    keyboard: {
+      paste: 'Coller',
+      tips: 'Seuls les caractères et symboles standard du clavier sont pris en charge',
+      placeholder: 'Veuillez saisir',
+      submit: 'Soumettre',
+      virtual: 'Clavier'
+    },
+    mouse: {
       default: 'Curseur par défaut',
       pointer: 'Curseur de la souris',
       cell: 'Curseur de cellule',
@@ -146,12 +155,9 @@ export const fr = {
     },
     tailscale: {
       loading: 'Chargement...',
-      notInstalled: "Tailscale non trouvé! Veuillez l'installer.",
+      notInstall: "Tailscale non trouvé! Veuillez l'installer.",
       install: 'Installer',
-      installing: 'Installation...',
-      urlPeriod: "L'URL est valide pendant 10 minutes",
-      installed: 'Tailscale est déjà installé. Veuillez vous connecter.',
-      login: 'Connexion',
+      installing: 'Installation',
       failed: 'Installation échouée',
       retry: "Veuillez rafraîchir et réessayer. Ou essayez d'installer manuellement",
       download: 'Télécharger le',
@@ -159,7 +165,19 @@ export const fr = {
       unzip: 'et décompressez-le',
       upTailscale: 'Téléverser tailscale dans le répertoire NanoKVM /usr/sbin/',
       upTailscaled: 'Téléverser tailscaled dans le répertoire NanoKVM /usr/sbin/',
-      refresh: 'Rafraîchir la page courante'
+      refresh: 'Rafraîchir la page courante',
+      notLogin: "L'appareil n'est pas relié. Connectez-vous et liez cet appareil à votre compte.",
+      urlPeriod: "L'URL est valide pendant 10 minutes",
+      login: 'Connexion',
+      loginSuccess: 'Connexion réussie',
+      enable: 'Démarrer Tailscale',
+      deviceName: "Nom de l'appareil",
+      deviceIP: "IP de l'appareil",
+      account: 'Compte',
+      logout: 'Déconnexion',
+      logout2: 'Voulez-vous vous déconnecter?'
     }
   }
 };
+
+export default fr;

@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/storage';
+import * as api from '@/api/hid';
 import * as ls from '@/lib/localstorage';
 import { client } from '@/lib/websocket';
 import { mouseModeAtom, mouseStyleAtom } from '@/jotai/mouse';
@@ -27,16 +27,16 @@ export const Mouse = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const mouseStyles = [
-    { name: t('cursor.default'), icon: <MousePointerIcon size={14} />, value: 'cursor-default' },
-    { name: t('cursor.grab'), icon: <HandIcon size={14} />, value: 'cursor-grab' },
-    { name: t('cursor.cell'), icon: <PlusIcon size={14} />, value: 'cursor-cell' },
-    { name: t('cursor.text'), icon: <TextCursorIcon size={14} />, value: 'cursor-text' },
-    { name: t('cursor.hide'), icon: <EyeOffIcon size={14} />, value: 'cursor-none' }
+    { name: t('mouse.default'), icon: <MousePointerIcon size={14} />, value: 'cursor-default' },
+    { name: t('mouse.grab'), icon: <HandIcon size={14} />, value: 'cursor-grab' },
+    { name: t('mouse.cell'), icon: <PlusIcon size={14} />, value: 'cursor-cell' },
+    { name: t('mouse.text'), icon: <TextCursorIcon size={14} />, value: 'cursor-text' },
+    { name: t('mouse.hide'), icon: <EyeOffIcon size={14} />, value: 'cursor-none' }
   ];
 
   const mouseModes = [
-    { name: t('cursor.absolute'), value: 'absolute' },
-    { name: t('cursor.relative'), value: 'relative' }
+    { name: t('mouse.absolute'), value: 'absolute' },
+    { name: t('mouse.relative'), value: 'relative' }
   ];
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export const Mouse = () => {
 
     client.close();
 
-    api.resetHid().finally(() => {
+    api.reset().finally(() => {
       client.connect();
     });
   }
@@ -121,7 +121,7 @@ export const Mouse = () => {
           <div className="flex h-[14px] w-[20px] items-end">
             <SquareMousePointerIcon size={14} />
           </div>
-          <span>{t('cursor.mode')}</span>
+          <span>{t('mouse.mode')}</span>
         </div>
       </Popover>
 
@@ -132,7 +132,7 @@ export const Mouse = () => {
         <div className="flex h-[14px] w-[20px] items-end">
           <RefreshCwIcon size={14} />
         </div>
-        <span>{t('cursor.resetHid')}</span>
+        <span>{t('mouse.resetHid')}</span>
       </div>
     </>
   );

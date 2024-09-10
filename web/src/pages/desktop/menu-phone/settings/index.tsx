@@ -6,12 +6,12 @@ import { SettingsIcon } from 'lucide-react';
 import { isSettingsOpenAtom } from '@/jotai/settings.ts';
 
 import { About } from './about.tsx';
-import { ChangePassword } from './change-password.tsx';
 import { Language } from './language.tsx';
 import { Logout } from './logout.tsx';
-import { Tailscale } from './tailscale.tsx';
+import { Password } from './password.tsx';
+import { Tailscale } from './tailscale';
 import { Update } from './update.tsx';
-import { VirtualDevice } from './virtual-device.tsx';
+import { VirtualDevices } from './virtual-devices.tsx';
 
 export const Settings = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useAtom(isSettingsOpenAtom);
@@ -22,13 +22,15 @@ export const Settings = () => {
       <Language />
       <About />
       <Update setIsBadgeVisible={setIsBadgeVisible} />
-      <Divider style={{ margin: '10px 0' }} />
+      <Divider style={{ margin: '5px 0' }} />
 
-      <VirtualDevice />
+      <VirtualDevices />
+      <Divider style={{ margin: '5px 0' }} />
+
       <Tailscale />
-      <Divider style={{ margin: '10px 0' }} />
+      <Divider style={{ margin: '5px 0' }} />
 
-      <ChangePassword />
+      <Password />
       <Logout />
     </>
   );

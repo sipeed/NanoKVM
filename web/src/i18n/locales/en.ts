@@ -1,9 +1,8 @@
-export const en = {
+const en = {
   translation: {
     language: 'Language',
     changePassword: 'Change Password',
     logout: 'Logout',
-    keyboard: 'Keyboard',
     settings: 'Settings',
     showMouse: 'Show mouse',
     hideMouse: 'Hide mouse',
@@ -47,6 +46,9 @@ export const en = {
     },
     screen: {
       resolution: 'Resolution',
+      auto: 'Automatic',
+      autoTips:
+        "Screen tearing or mouse offset may occur at specific resolutions. Consider adjusting the remote host's resolution or disable automatic mode.",
       fps: 'FPS',
       customizeFps: 'Customize',
       quality: 'Quality',
@@ -54,7 +56,14 @@ export const en = {
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen."
     },
-    cursor: {
+    keyboard: {
+      paste: 'Paste',
+      tips: 'Only standard keyboard letters and symbols are supported',
+      placeholder: 'Please input',
+      submit: 'Submit',
+      virtual: 'Keyboard'
+    },
+    mouse: {
       default: 'Default cursor',
       pointer: 'Pointer cursor',
       cell: 'Cell cursor',
@@ -142,12 +151,9 @@ export const en = {
     },
     tailscale: {
       loading: 'Loading...',
-      notInstalled: 'Tailscale not found! Please install.',
+      notInstall: 'Tailscale not found! Please install.',
       install: 'Install',
-      installing: 'Installing...',
-      urlPeriod: 'This url is valid for 10 minutes',
-      installed: 'Tailscale already installed. Please login.',
-      login: 'Login',
+      installing: 'Installing',
       failed: 'Install failed',
       retry: 'Please refresh and try again. Or try to install manually',
       download: 'Download the',
@@ -155,7 +161,20 @@ export const en = {
       unzip: 'and unzip it',
       upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
       upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
-      refresh: 'Refresh current page'
+      refresh: 'Refresh current page',
+      notLogin:
+        'The device has not been bound yet. Please login and bind this device to your account.',
+      urlPeriod: 'This url is valid for 10 minutes',
+      login: 'Login',
+      loginSuccess: 'Login Success',
+      enable: 'Enable Tailscale',
+      deviceName: 'Device Name',
+      deviceIP: 'Device IP',
+      account: 'Account',
+      logout: 'Logout',
+      logout2: 'Sure to logout?'
     }
   }
 };
+
+export default en;
