@@ -17,6 +17,9 @@ English | [中文](./README_ZH.md)
 > Your NanoKVM Power by RISC-V !
 > If you have any issues or suggestions, creating issue here, or tell us with [MaixHub Discussion](https://maixhub.com/discussion/nanokvm).
 
+## Opensource
+
+The star is coming to 2K! We will organize and opensource backend source code in Mid October！(and it is also the time all preoreders ship out)
 
 ## Introduction
 
