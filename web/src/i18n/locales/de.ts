@@ -1,4 +1,4 @@
-const en = {
+const de = {
   translation: {
     language: 'Sprache',
     changePassword: 'Passwort ändern',
@@ -25,11 +25,11 @@ const en = {
       login: 'Einloggen',
       placeholderUsername: 'Bitte den Benutzernamen eingeben',
       placeholderPassword: 'Bitte das Passwort eingeben',
-      placeholderPassword2: 'Bitte das Passwort erneut eingeben',
+      placeholderPassword2: 'Passwort wiederholen',
       noEmptyUsername: 'Der Benutzername darf nicht leer sein',
       noEmptyPassword: 'Das Passwort darf nicht leer sein',
       noAccount: 'Fehler beim Auslsen der Benutzerinformation, bitte die Seite neu laden oder das Passwort zurücksetzen',
-      invalidUser: 'Ungültiger Username oder ungültiges Passwort',
+      invalidUser: 'Falscher Benutzername oder falsches Passwort',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
       differentPassword: 'Passwörter stimmt nicht überein',
@@ -82,7 +82,7 @@ const en = {
       empty: 'Nichts gefunden',
       tips: {
         title: 'Wie man Abbilder hochlädt',
-        usb1: 'Den NanoKVM via USB mit dem Computer verbinden.',
+        usb1: 'NanoKVM per USB mit dem Computer verbindenn.',
         usb2: 'Stellen sie sicher, das das Virtuelle USB-Gerät eingebunden ist. (Einstellungen - Virtuelles USB-Gerät).',
         usb3: 'Öffnen sie die virtuelle USB-Disk auf ihrem Computer und kopieren sie die Abbilddatei in das root-Verzeichnis des USB-Geräts.',
         scp1: 'Stellen sie sicher, das sich der NanoKVM und ihr Computer im gleichen lokalen Netzwerk befinden.',
@@ -114,7 +114,7 @@ const en = {
       nanokvm: 'NanoKVM Terminal',
       serial: 'Terminal über den Seriellen Port',
       serialPort: 'Serieller Port',
-      serialPortPlaceholder: 'Bitte die Nummer des seriellen Ports angeben',
+      serialPortPlaceholder: 'Serielle Portnummer eingeben',
       baudrate: 'Baudrate',
       confirm: 'Ok'
     },
@@ -168,7 +168,7 @@ const en = {
       login: 'Einloggen',
       loginSuccess: 'Das Einloggen war erfolgreich',
       enable: 'Tailscale aktivieren',
-      deviceName: 'Gerätename',
+      deviceName: 'Name des Geräts',
       deviceIP: 'Geräte-IP',
       account: 'Benutzerkonto',
       logout: 'Ausloggen',
