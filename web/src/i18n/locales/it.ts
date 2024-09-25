@@ -13,7 +13,7 @@ const it = {
     hddLed: 'LED HDD',
     checkLibFailed: 'Impossibile verificare la libreria runtime, riprova',
     updateLibFailed: 'Impossibile aggiornare la libreria runtime, riprova',
-    updatingLib: 'Aggiornamento libreria runtime. Aggiorna la pagina dopo l\'aggiornamento.',
+    updatingLib: "Aggiornamento libreria runtime. Aggiorna la pagina dopo l'aggiornamento.",
     checkForUpdate: 'Controlla Aggiornamenti',
     head: {
       desktop: 'Desktop Remoto',
@@ -28,7 +28,8 @@ const it = {
       placeholderPassword2: 'Inserisci nuovamente la password',
       noEmptyUsername: 'Il nome utente non può essere vuoto',
       noEmptyPassword: 'La password non può essere vuota',
-      noAccount: 'Impossibile ottenere informazioni utente, aggiorna la pagina o reimposta la password',
+      noAccount:
+        'Impossibile ottenere informazioni utente, aggiorna la pagina o reimposta la password',
       invalidUser: 'Nome utente o password non validi',
       error: 'Errore imprevisto',
       changePassword: 'Cambia Password',
@@ -40,19 +41,21 @@ const it = {
       reset1: 'Se hai dimenticato la password, segui questi passaggi per reimpostarla:',
       reset2: '1. Accedi al dispositivo NanoKVM tramite SSH;',
       reset3: '2. Elimina il file nel dispositivo: ',
-      reset4: '3. Usa l\'account predefinito per accedere: ',
+      reset4: "3. Usa l'account predefinito per accedere: ",
       ok: 'Ok',
       cancel: 'Annulla'
     },
     screen: {
       resolution: 'Risoluzione',
       auto: 'Automatico',
-      autoTips: 'Potrebbero verificarsi tearing dello schermo o spostamento del mouse a risoluzioni specifiche. Considera di regolare la risoluzione del dispositivo remoto o disabilitare la modalità automatica.',
+      autoTips:
+        'Potrebbero verificarsi tearing dello schermo o spostamento del mouse a risoluzioni specifiche. Considera di regolare la risoluzione del dispositivo remoto o disabilitare la modalità automatica.',
       fps: 'FPS',
       customizeFps: 'Personalizza',
       quality: 'Qualità',
       frameDetect: 'Rilevamento Frame',
-      frameDetectTip: 'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.'
+      frameDetectTip:
+        'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.'
     },
     keyboard: {
       paste: 'Incolla',
@@ -71,18 +74,22 @@ const it = {
       mode: 'Modalità mouse',
       absolute: 'Modalità assoluta',
       relative: 'Modalità relativa',
-      requestPointer: 'Usando la modalità relativa. Clicca sul desktop per ottenere il puntatore del mouse.',
+      requestPointer:
+        'Usando la modalità relativa. Clicca sul desktop per ottenere il puntatore del mouse.',
       resetHid: 'Reimposta HID'
     },
     image: {
       title: 'Immagini',
       loading: 'Caricamento...',
       empty: 'Nessun risultato',
+      mountFailed: 'Montaggio immagine fallito',
+      mountDesc:
+        "In alcuni sistemi, è necessario espellere il disco virtuale sull'host remoto prima di montare l'immagine.",
       tips: {
         title: 'Come caricare',
         usb1: 'Collega il NanoKVM al tuo computer tramite USB.',
-        usb2: 'Assicurati che la Virtual USB sia montata (Impostazioni - Virtual USB).',
-        usb3: 'Apri il disco virtuale usb sul tuo computer e copia il file immagine nella directory principale del disco usb.',
+        usb2: 'Assicurati che la Virtual Disk sia montata (Impostazioni - Virtual Disk).',
+        usb3: 'Apri il disk virtuale sul tuo computer e copia il file immagine nella directory principale del disk.',
         scp1: 'Assicurati che il NanoKVM e il tuo computer siano sulla stessa rete locale.',
         scp2: 'Apri un terminale sul tuo computer e usa il comando SCP per caricare il file immagine nella directory /data del NanoKVM.',
         scp3: 'Esempio: scp il-tuo-percorso-immagine root@il-tuo-ip-nanokvm:/data',
@@ -145,7 +152,7 @@ const it = {
     },
     virtualDevice: {
       network: 'Rete Virtuale',
-      usb: 'USB Virtuale'
+      usb: 'Disk Virtuale'
     },
     tailscale: {
       loading: 'Caricamento...',
@@ -160,7 +167,8 @@ const it = {
       upTailscale: 'Carica tailscale nella directory /usr/bin/ del NanoKVM',
       upTailscaled: 'Carica tailscaled nella directory /usr/sbin/ del NanoKVM',
       refresh: 'Aggiorna la pagina corrente',
-      notLogin: 'Il dispositivo non è ancora stato associato. Effettua il login e associa questo dispositivo al tuo account.',
+      notLogin:
+        'Il dispositivo non è ancora stato associato. Effettua il login e associa questo dispositivo al tuo account.',
       urlPeriod: 'Questo URL è valido per 10 minuti',
       login: 'Accedi',
       loginSuccess: 'Accesso riuscito',

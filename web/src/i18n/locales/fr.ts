@@ -84,11 +84,14 @@ const fr = {
       title: 'Images',
       loading: 'Chargement',
       empty: 'Vide',
+      mountFailed: "Échec du montage de l'image.",
+      mountDesc:
+        "Dans certains systèmes, il est nécessaire de déséjecter le disque virtuel sur l'hôte distant avant de monter l'image.",
       tips: {
         title: 'Comment télécharger',
         usb1: 'Connectez le NanoKVM à votre ordinateur via USB.',
         usb2: 'Assurez-vous que le disque virtuel est monté (Paramètres - Disque virtuel).',
-        usb3: 'Ouvrez le disque virtuel sur votre ordinateur et copiez le fichier image dans le répertoire racine du disque.',
+        usb3: 'Ouvrez le disque virtuel sur votre ordinateur et copiez le fichier image dans le répertoire racine du disque virtuel.',
         scp1: 'Assurez-vous que le NanoKVM et votre ordinateur sont sur le même réseau local.',
         scp2: 'Ouvrez un terminal sur votre ordinateur et utilisez la commande SCP pour télécharger le fichier image dans le répertoire /data du NanoKVM.',
         scp3: 'Exemple : scp chemin-de-votre-image root@ip-de-votre-nanokvm:/data',
@@ -150,8 +153,8 @@ const fr = {
       cancel: 'Annuler'
     },
     virtualDevice: {
-      network: 'Réseau virtuel',
-      usb: 'USB virtuel'
+      network: 'carte réseau virtuelle',
+      disk: 'disque virtuel'
     },
     tailscale: {
       loading: 'Chargement...',

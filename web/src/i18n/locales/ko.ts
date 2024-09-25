@@ -81,11 +81,14 @@ const ko = {
       title: '이미지',
       loading: 'Loading...',
       empty: '아무것도 없습니다.',
+      mountFailed: '이미지 마운트 실패',
+      mountDesc:
+        '일부 시스템에서는 이미지를 마운트하기 전에 원격 호스트에서 가상 디스크를 제거해야 합니다.',
       tips: {
         title: '업로드 방법',
         usb1: 'USB를 통해 NanoKVM을 컴퓨터에 연결하세요.',
-        usb2: '가상 USB가 마운트되어 있는지 확인하세요(설정 - 가상 USB).',
-        usb3: '컴퓨터에서 가상 USB 디스크를 열고 이미지 파일을 USB 디스크의 루트 디렉터리에 복사하세요.',
+        usb2: '가상 디스크가 마운트되었는지 확인하세요. (설정 - 가상 디스크).',
+        usb3: '컴퓨터에서 가상 디스크를 열고 이미지 파일을 가상 디스크의 루트 디렉토리로 복사하세요.',
         scp1: 'NanoKVM과 컴퓨터가 동일한 로컬 네트워크에 있는지 확인하세요.',
         scp2: '컴퓨터에서 터미널을 열고 SCP 명령을 사용하여 이미지 파일을 NanoKVM의 /data 디렉터리에 업로드하세요.',
         scp3: '예: scp your-image-path root@your-nanokvm-ip:/data',
@@ -147,8 +150,8 @@ const ko = {
       cancel: '취소'
     },
     virtualDevice: {
-      network: '가상 네트워크',
-      usb: '가상 USB'
+      network: '가상 네트워크 카드',
+      disk: '가상 디스크'
     },
     tailscale: {
       loading: 'Loading...',

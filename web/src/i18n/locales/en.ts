@@ -80,11 +80,14 @@ const en = {
       title: 'Images',
       loading: 'Loading...',
       empty: 'Nothing Found',
+      mountFailed: 'Mount Failed',
+      mountDesc:
+        "In some systems, it's necessary to eject the virtual disk on the remote host before mounting the image.",
       tips: {
         title: 'How to upload',
         usb1: 'Connect the NanoKVM to your computer via USB.',
-        usb2: 'Ensure that the Virtual USB is mounted (Settings - Virtual USB).',
-        usb3: 'Open the virtual usb disk on your computer and copy the image file to the root directory of the usb disk.',
+        usb2: 'Ensure that the virtual disk is mounted (Settings - Virtual Disk).',
+        usb3: 'Open the virtual disk on your computer and copy the image file to the root directory of the virtual disk.',
         scp1: 'Make sure the NanoKVM and your computer are on the same local network.',
         scp2: 'Open a terminal on your computer and use the SCP command to upload the image file to the /data directory on the NanoKVM.',
         scp3: 'Example: scp your-image-path root@your-nanokvm-ip:/data',
@@ -147,7 +150,7 @@ const en = {
     },
     virtualDevice: {
       network: 'Virtual Network',
-      usb: 'Virtual USB'
+      disk: 'Virtual Disk'
     },
     tailscale: {
       loading: 'Loading...',

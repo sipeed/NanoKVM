@@ -79,11 +79,13 @@ const zh = {
       title: '镜像',
       loading: '加载中',
       empty: '无镜像文件',
+      mountFailed: '挂载失败',
+      mountDesc: '在某些系统中，需要在远程主机中弹出虚拟硬盘后再挂载镜像。',
       tips: {
         title: '如何上传',
         usb1: '将 NanoKVM 通过 USB 连接到你的电脑；',
-        usb2: '确保已经挂载了虚拟U盘（设置 - 虚拟U盘）；',
-        usb3: '在电脑上打开虚拟U盘，将镜像文件拷贝到虚拟U盘的根目录下。',
+        usb2: '确保已经挂载了虚拟硬盘（设置 - 虚拟硬盘）；',
+        usb3: '在电脑上打开虚拟硬盘，将镜像文件拷贝到虚拟硬盘的根目录下。',
         scp1: '确保 NanoKVM 和你的电脑在同一个局域网内；',
         scp2: '在电脑上打开终端软件，使用 SCP 命令将镜像文件上传到 NanoKVM 的 /data 目录。',
         scp3: '示例：scp your-image-path root@your-nanokvm-ip:/data',
@@ -145,8 +147,8 @@ const zh = {
       cancel: '取消'
     },
     virtualDevice: {
-      network: '虚拟网口',
-      usb: '虚拟U盘'
+      network: '虚拟网卡',
+      disk: '虚拟硬盘'
     },
     tailscale: {
       loading: '加载中...',

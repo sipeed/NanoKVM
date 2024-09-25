@@ -5,7 +5,8 @@ import { client } from '@/lib/websocket.ts';
 import { KeyboardCodes } from './mappings.ts';
 
 export const Keyboard = () => {
-  const metaRef = useRef(false);
+  const isMetaPressedRef = useRef(false);
+  const isAltRightPressedRef = useRef(false);
 
   // listen keyboard events
   useEffect(() => {
@@ -16,11 +17,15 @@ export const Keyboard = () => {
     function handleKeyDown(event: any) {
       disableEvent(event);
 
-      if (event.code === 'MetaLeft' || event.code === 'MetaRight') {
-        metaRef.current = true;
+      if (['MetaLeft', 'MetaRight'].includes(event.code)) {
+        isMetaPressedRef.current = true;
         return;
       }
-      metaRef.current = false;
+      isMetaPressedRef.current = false;
+
+      if (event.code === 'AltRight') {
+        isAltRightPressedRef.current = true;
+      }
 
       const code = KeyboardCodes.get(event.code);
       if (!code) {
@@ -30,7 +35,7 @@ export const Keyboard = () => {
 
       const ctrl = event.ctrlKey ? 1 : 0;
       const shift = event.shiftKey ? 1 : 0;
-      const alt = event.altKey ? 1 : 0;
+      const alt = event.altKey ? (isAltRightPressedRef.current ? 2 : 1) : 0;
       const meta = event.metaKey ? 1 : 0;
 
       const data = [1, code, ctrl, shift, alt, meta];
@@ -41,13 +46,16 @@ export const Keyboard = () => {
     function handleKeyUp(event: any) {
       disableEvent(event);
 
-      if (metaRef.current) {
+      if (isMetaPressedRef.current) {
         client.send([1, KeyboardCodes.get('MetaLeft')!, 0, 0, 0, 1]);
-        metaRef.current = false;
+        isMetaPressedRef.current = false;
       }
 
-      const data = [1, 0, 0, 0, 0, 0];
-      client.send(data);
+      if (event.code === 'AltRight') {
+        isAltRightPressedRef.current = false;
+      }
+
+      client.send([1, 0, 0, 0, 0, 0]);
     }
 
     return () => {

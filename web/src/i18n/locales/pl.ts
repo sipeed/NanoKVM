@@ -28,7 +28,8 @@ const pl = {
       placeholderPassword2: 'wprowadź hasło ponownie',
       noEmptyUsername: 'nazwa użykownika nie może być pusta',
       noEmptyPassword: 'hasło nie może być puste',
-      noAccount: 'Nie udało się uzyskać informacji o użytkowniku, odśwież stronę lub zresetuj hasło',
+      noAccount:
+        'Nie udało się uzyskać informacji o użytkowniku, odśwież stronę lub zresetuj hasło',
       invalidUser: 'Błędne hasło lub nazwa użykownika',
       error: 'niespodziewany błąd',
       changePassword: 'Zmień Hasło',
@@ -48,13 +49,13 @@ const pl = {
       resolution: 'Rozdzielczość',
       auto: 'Automatyczny',
       autoTips:
-        "W określonych rozdzielczościach może wystąpić rozrywanie ekranu lub przesunięcie myszy. Rozważ dostosowanie rozdzielczości zdalnego hosta lub wyłącz tryb automatyczny.",
+        'W określonych rozdzielczościach może wystąpić rozrywanie ekranu lub przesunięcie myszy. Rozważ dostosowanie rozdzielczości zdalnego hosta lub wyłącz tryb automatyczny.',
       fps: 'FPS',
       customizeFps: 'Personalizuj',
       quality: 'Jakość',
       frameDetect: 'Wykrywanie klatek',
       frameDetectTip:
-        "Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany."
+        'Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany.'
     },
     keyboard: {
       paste: 'Wklej',
@@ -80,11 +81,14 @@ const pl = {
       title: 'Obrazy',
       loading: 'Ładowanie...',
       empty: 'Nic nie znaleziono',
+      mountFailed: 'Nie udało się zamontować obrazu',
+      mountDesc:
+        'W niektórych systemach wymagane jest wyjęcie dysku wirtualnego na zdalnym hoście przed zamontowaniem obrazu.',
       tips: {
         title: 'Jak przesłać obrazy',
         usb1: 'Podłącz urządzenie NanoKVM do komputera przez USB.',
-        usb2: 'Upewnij się że Wirtualny USB jest zamontowany (Ustawienia - Wirtualny USB).',
-        usb3: 'Otwórz wirtualny dysk USB na komputerze i prześlij obraz do katalogu głównego (tzw. root) dysku USB.',
+        usb2: 'Upewnij się, że dysk wirtualny jest zamontowany (Ustawienia - Dysk wirtualny).',
+        usb3: 'Otwórz dysk wirtualny na swoim komputerze i skopiuj plik obrazu do katalogu głównego dysku wirtualnego.',
         scp1: 'Upewnij się że NanoKVM i twój komputer są na tej samej sieci lokalnej.',
         scp2: 'Otwórz terminal na komputerze i użyj komendę SCP aby przesłać obraz do katalogu /data na NanoKVM.',
         scp3: 'Przykład: scp lokalizacja-zrodlowego-obrazu root@ip-twojego-nanokvm:/data',
@@ -147,7 +151,7 @@ const pl = {
     },
     virtualDevice: {
       network: 'Sieć wirtualna',
-      usb: 'Wirtualny USB'
+      usb: 'Dysk wirtualny'
     },
     tailscale: {
       loading: 'Ładowanie...',
