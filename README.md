@@ -64,6 +64,8 @@ The NanoKVM Lite is constructed by the LicheeRV Nano and HDMItoCSI board, and th
 
 The NanoKVM image is built on LicheeRV Nano SDK and MaixCDK, and is compatible with materials that use the LicheeRV Nano, opposite the KVM software cannot be used with the LicheeRV Nano or other SG2002 products. If you would like to build an HDMI input application on LicheeRV Nano or MaixCam, please contact us for technical support.
 
+Note: Out of the 256MB memory in SG2002, 105MB is currently allocated for the multimedia subsystem, which NanoKVM will use for video image acquisition and processing
+
 + [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
 + [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
