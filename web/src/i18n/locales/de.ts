@@ -1,4 +1,4 @@
-const en = {
+const de = {
   translation: {
     language: 'Sprache',
     changePassword: 'Passwort ändern',
@@ -12,7 +12,8 @@ const en = {
     powerLong: 'Einschalten (Langes Drücken)',
     hddLed: 'Festplatten-LED',
     checkLibFailed: 'Überprüfung der Laufzeitbibliothek fehlgeschlagen, bitte erneut versuchen.',
-    updateLibFailed: 'Aktualisierung der Laufzeitbibliothek fehlgeschlagen, bitte erneut versuchen.',
+    updateLibFailed:
+      'Aktualisierung der Laufzeitbibliothek fehlgeschlagen, bitte erneut versuchen.',
     updatingLib: 'Aktualiserung der Laufzeitbibliothek. Bitte nach dem Update die Seite neu laden.',
     checkForUpdate: 'Nach Update suchen',
     head: {
@@ -25,11 +26,12 @@ const en = {
       login: 'Einloggen',
       placeholderUsername: 'Bitte den Benutzernamen eingeben',
       placeholderPassword: 'Bitte das Passwort eingeben',
-      placeholderPassword2: 'Bitte das Passwort erneut eingeben',
+      placeholderPassword2: 'Passwort wiederholen',
       noEmptyUsername: 'Der Benutzername darf nicht leer sein',
       noEmptyPassword: 'Das Passwort darf nicht leer sein',
-      noAccount: 'Fehler beim Auslsen der Benutzerinformation, bitte die Seite neu laden oder das Passwort zurücksetzen',
-      invalidUser: 'Ungültiger Username oder ungültiges Passwort',
+      noAccount:
+        'Fehler beim Auslsen der Benutzerinformation, bitte die Seite neu laden oder das Passwort zurücksetzen',
+      invalidUser: 'Falscher Benutzername oder falsches Passwort',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
       differentPassword: 'Passwörter stimmt nicht überein',
@@ -37,7 +39,8 @@ const en = {
       illegalPassword: 'Passwort beinhaltet ungültige Zeichen',
       forgetPassword: 'Passwort vergessen',
       resetPassword: 'Password zurücksetzen',
-      reset1: 'Falls sie das Passwort vergessen haben, führen sie folgende Schritte durch um dieses zurückzusetzen:',
+      reset1:
+        'Falls sie das Passwort vergessen haben, führen sie folgende Schritte durch um dieses zurückzusetzen:',
       reset2: '1. In das NanoKVM via SSH einloggen;',
       reset3: '2. Die Datei auf dem Gerät löschen: ',
       reset4: '3. Den Standardaccount zum Einloggen benutzen: ',
@@ -48,13 +51,13 @@ const en = {
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
-        "Falls es bei bestimmten Auflösungen zu Screen-Tearing oder einem Offset des Mauszeigers kommen sollte, bitte die Auflösung des Remote Hosts anpassen oder den automatischen Modus ausschalten.",
+        'Falls es bei bestimmten Auflösungen zu Screen-Tearing oder einem Offset des Mauszeigers kommen sollte, bitte die Auflösung des Remote Hosts anpassen oder den automatischen Modus ausschalten.',
       fps: 'FPS',
       customizeFps: 'Anpassen',
       quality: 'Qualität',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-		"Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann."
+        'Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.'
     },
     keyboard: {
       paste: 'Einfügen',
@@ -73,18 +76,22 @@ const en = {
       mode: 'Maus Modus',
       absolute: 'Absoluter Modus',
       relative: 'Relativer Modus',
-      requestPointer: 'Der Relative Modus wird benutzt. Bitte auf den Desktop klicken um einen Mauszeiger anzuzeigen.',
+      requestPointer:
+        'Der Relative Modus wird benutzt. Bitte auf den Desktop klicken um einen Mauszeiger anzuzeigen.',
       resetHid: 'Eingeabegeräte zurücksetzen'
     },
     image: {
       title: 'ISO oder Festplatten Abbilder',
       loading: 'Laden...',
       empty: 'Nichts gefunden',
+      mountFailed: 'Mounten fehlgeschlagen',
+      mountDesc:
+        'Bei einigen Systemen muss die virtuelle Festplatte auf dem Remote-Host ausgeworfen werden, bevor das Image gemountet werden kann.',
       tips: {
         title: 'Wie man Abbilder hochlädt',
         usb1: 'Den NanoKVM via USB mit dem Computer verbinden.',
-        usb2: 'Stellen sie sicher, das das Virtuelle USB-Gerät eingebunden ist. (Einstellungen - Virtuelles USB-Gerät).',
-        usb3: 'Öffnen sie die virtuelle USB-Disk auf ihrem Computer und kopieren sie die Abbilddatei in das root-Verzeichnis des USB-Geräts.',
+        usb2: 'Stellen sie sicher, das das Virtuelle Festplatte eingebunden ist. (Einstellungen - Virtuelle Festplatte).',
+        usb3: 'Öffnen sie die Virtuelle Festplatte auf ihrem Computer und kopieren sie die Abbilddatei in das root-Verzeichnis des USB-Geräts.',
         scp1: 'Stellen sie sicher, das sich der NanoKVM und ihr Computer im gleichen lokalen Netzwerk befinden.',
         scp2: 'Öffnen sie ein Terminal auf ihrem Computer und benutzen sie den SCP-Befehl um die Abbilddatei in das /data Verzeichnis des NanoKVM zu kopieren.',
         scp3: 'Beispiel: scp ihr-abbild-verzeichnis root@ihre-nanokvm-ip:/data',
@@ -114,7 +121,7 @@ const en = {
       nanokvm: 'NanoKVM Terminal',
       serial: 'Terminal über den Seriellen Port',
       serialPort: 'Serieller Port',
-      serialPortPlaceholder: 'Bitte die Nummer des seriellen Ports angeben',
+      serialPortPlaceholder: 'Serielle Portnummer eingeben',
       baudrate: 'Baudrate',
       confirm: 'Ok'
     },
@@ -140,14 +147,15 @@ const en = {
       queryFailed: 'Versionsnummer konnte nicht erkannt werden',
       updateFailed: 'Update gescheitert. Bitte versuchen sie es erneut.',
       isLatest: 'Die aktuelle Version ist bereits installiert.',
-      available: 'Ein Update ist verfügbar. Sind sie sicher, dass sie diese Version aktualisieren möchten?',
+      available:
+        'Ein Update ist verfügbar. Sind sie sicher, dass sie diese Version aktualisieren möchten?',
       updating: 'Update wird gestartet. Bitte warten...',
       confirm: 'Bestätigen',
       cancel: 'Abbrechen'
     },
     virtualDevice: {
       network: 'Virtuelles Netzwerk',
-      usb: 'Virtuelles USB Gerät'
+      disk: 'Virtuelle Festplatte'
     },
     tailscale: {
       loading: 'Lade...',
@@ -155,7 +163,8 @@ const en = {
       install: 'Installieren',
       installing: 'Installation wird durchgeführt',
       failed: 'Installation gescheitert',
-      retry: 'Bitte neu laden und noch einmal versuchen. Oder versuchen sie Tailscale manuell zu installieren',
+      retry:
+        'Bitte neu laden und noch einmal versuchen. Oder versuchen sie Tailscale manuell zu installieren',
       download: 'Laden sie das',
       package: 'Installationspaket',
       unzip: 'und entpacken sie es manuell',
@@ -168,7 +177,7 @@ const en = {
       login: 'Einloggen',
       loginSuccess: 'Das Einloggen war erfolgreich',
       enable: 'Tailscale aktivieren',
-      deviceName: 'Gerätename',
+      deviceName: 'Name des Geräts',
       deviceIP: 'Geräte-IP',
       account: 'Benutzerkonto',
       logout: 'Ausloggen',

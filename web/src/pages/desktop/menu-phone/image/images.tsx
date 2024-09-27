@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { notification } from 'antd';
 import clsx from 'clsx';
 import { FileBoxIcon, LoaderCircleIcon, PackageIcon, PackageSearchIcon, XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ type ImagesProps = {
 
 export const Images = ({ setIsMounted }: ImagesProps) => {
   const { t } = useTranslation();
+  const [notify, contextHolder] = notification.useNotification();
 
   const [isLoading, setIsLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
@@ -72,6 +74,7 @@ export const Images = ({ setIsMounted }: ImagesProps) => {
       .mountImage(filename)
       .then((rsp) => {
         if (rsp.code !== 0) {
+          openNotification();
           return;
         }
 
@@ -84,8 +87,18 @@ export const Images = ({ setIsMounted }: ImagesProps) => {
       });
   }
 
+  function openNotification() {
+    notify.open({
+      message: t('image.mountFailed'),
+      description: t('image.mountDesc'),
+      duration: 6
+    });
+  }
+
   return (
     <>
+      {contextHolder}
+
       {isLoading ? (
         // loading
         <div className="flex items-center space-x-2 py-2 pl-2 pr-4 text-neutral-400">

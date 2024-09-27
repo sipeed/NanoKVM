@@ -49,7 +49,7 @@ export const Desktop = () => {
       } else {
         setIsLoading(false);
         const now = Date.now();
-        setStreamUrl(`${getBaseUrl('http')}/api/stream/mjpeg?${now}`);
+        setStreamUrl(`${getBaseUrl('http')}/api/stream/mjpeg?n=${now}`);
       }
     });
 

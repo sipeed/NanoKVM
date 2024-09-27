@@ -7,22 +7,21 @@ import * as api from '@/api/virtual-device';
 export const VirtualDevices = () => {
   const { t } = useTranslation();
   const [isNetworkOn, setIsNetworkOn] = useState(false);
-  const [isUSBOn, setIsUSBOn] = useState(false);
-  const [loading, setLoading] = useState(''); // '' | 'network' | 'usb'
+  const [isDiskOn, setIsDiskOn] = useState(false);
+  const [loading, setLoading] = useState(''); // '' | 'network' | 'disk'
 
   useEffect(() => {
     api.getVirtualDevice().then((rsp) => {
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
         return;
       }
 
       setIsNetworkOn(rsp.data.network);
-      setIsUSBOn(rsp.data.usb);
+      setIsDiskOn(rsp.data.disk);
     });
   }, []);
 
-  function update(device: string) {
+  function update(device: 'network' | 'disk') {
     if (loading) return;
     setLoading(device);
 
@@ -30,14 +29,13 @@ export const VirtualDevices = () => {
       .updateVirtualDevice(device)
       .then((rsp) => {
         if (rsp.code !== 0) {
-          console.log(rsp.msg);
           return;
         }
 
         if (device === 'network') {
           setIsNetworkOn(rsp.data.on);
         } else {
-          setIsUSBOn(rsp.data.on);
+          setIsDiskOn(rsp.data.on);
         }
       })
       .finally(() => {
@@ -49,18 +47,18 @@ export const VirtualDevices = () => {
     <>
       <div
         className="flex cursor-pointer select-none items-center justify-between space-x-3 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
-        onClick={() => update('network')}
+        onClick={() => update('disk')}
       >
-        <div>{t('virtualDevice.network')}</div>
-        <Switch size="small" checked={isNetworkOn} loading={loading === 'network'} />
+        <div>{t('virtualDevice.disk')}</div>
+        <Switch size="small" checked={isDiskOn} loading={loading === 'disk'} />
       </div>
 
       <div
         className="flex cursor-pointer select-none items-center justify-between space-x-3 rounded px-3 py-1.5 text-white hover:bg-neutral-600"
-        onClick={() => update('usb')}
+        onClick={() => update('network')}
       >
-        <div>{t('virtualDevice.usb')}</div>
-        <Switch size="small" checked={isUSBOn} loading={loading === 'usb'} />
+        <div>{t('virtualDevice.network')}</div>
+        <Switch size="small" checked={isNetworkOn} loading={loading === 'network'} />
       </div>
     </>
   );
