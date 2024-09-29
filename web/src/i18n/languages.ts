@@ -6,5 +6,6 @@ export const languages = [
   { key: 'pl', name: 'Polski' },
   { key: 'ru', name: 'Русский' },
   { key: 'ko', name: '한국어' },
-  { key: 'zh', name: '中文' }
+  { key: 'zh', name: '中文' },
+  { key: 'vi', name: 'Tiếng Việt' }
 ];
