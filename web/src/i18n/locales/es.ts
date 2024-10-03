@@ -38,7 +38,7 @@ const en = {
       forgetPassword: 'Contraseña olvidada',
       resetPassword: 'Reiniciar contraseña',
       reset1: 'Si has olvidado tu contraseña, por favor, sigue los siguientes pasos para recuperarla:',
-      reset2: '1. Inicia sesión en el dispositivo NanoKVM a través de SSH;',
+      reset2: '1. Inicia sesión en el dispositivo NanoKVM a través de SSH',
       reset3: '2. Elimina este archivo en el dispositivo: ',
       reset4: '3. Utiliza la cuenta por defecto para iniciar sesión: ',
       ok: 'Aceptar',
