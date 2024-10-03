@@ -1,6 +1,7 @@
 export const languages = [
   { key: 'de', name: 'Deutsch' },
   { key: 'en', name: 'English' },
+  { key: 'es', name: 'Español' },
   { key: 'fr', name: 'Français' },
   { key: 'it', name: 'Italian' },
   { key: 'pl', name: 'Polski' },
