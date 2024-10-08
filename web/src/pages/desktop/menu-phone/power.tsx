@@ -30,7 +30,7 @@ export const Power = () => {
   }, []);
 
   function getLed() {
-    api.getLedGpio().then((rsp: any) => {
+    api.getGpio().then((rsp: any) => {
       if (rsp.code !== 0) {
         console.log(rsp.msg);
         return;

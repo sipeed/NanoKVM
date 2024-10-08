@@ -134,7 +134,7 @@ const it = {
       information: 'Informazioni',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Versione Applicazione',
+      application: 'Versione Applicazione',
       image: 'Versione Immagine',
       deviceKey: 'Chiave Dispositivo',
       queryFailed: 'Query fallita',

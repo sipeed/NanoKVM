@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { message } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/firmware.ts';
+import * as api from '@/api/application.ts';
 
 type LibProps = {
   setIsLoading: (isLoading: boolean) => void;
@@ -41,16 +41,15 @@ export const Lib = ({ setIsLoading, setTips }: LibProps) => {
       .then((rsp) => {
         if (rsp.code !== 0) {
           showMessage(t('updateLibFailed'));
-          return;
         }
-
-        setTimeout(() => {
-          window.location.reload();
-        }, 6000);
       })
       .finally(() => {
         setIsLoading(false);
         setTips('');
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 6000);
       });
   }
 

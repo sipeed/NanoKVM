@@ -137,7 +137,7 @@ const ru = {
       information: 'Информация',
       ip: 'IP-адрес',
       mdns: 'Доменное имя mDNS',
-      firmware: 'Версия ПО',
+      application: 'Версия ПО',
       image: 'Версия прошивки',
       deviceKey: 'Ключ устройства',
       queryFailed: 'Запрос не удался',

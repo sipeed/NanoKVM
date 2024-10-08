@@ -132,7 +132,7 @@ const en = {
       information: 'Information',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Application Version',
+      application: 'Application Version',
       image: 'Image Version',
       deviceKey: 'Device Key',
       queryFailed: 'Query failed',

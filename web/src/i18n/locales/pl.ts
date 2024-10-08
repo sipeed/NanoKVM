@@ -133,7 +133,7 @@ const pl = {
       information: 'Informacje o systemie',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Wersja oprogramowania',
+      application: 'Wersja oprogramowania',
       image: 'Wersja obrazu',
       deviceKey: 'Klucz urządzenia',
       queryFailed: 'Zapytanie nie powiodło się',

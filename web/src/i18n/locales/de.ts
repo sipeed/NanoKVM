@@ -136,7 +136,7 @@ const de = {
       information: 'Information',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Versionsnummer',
+      application: 'Versionsnummer',
       image: 'Image Version',
       deviceKey: 'Geräte-Key',
       queryFailed: 'Anfrage gescheitert',

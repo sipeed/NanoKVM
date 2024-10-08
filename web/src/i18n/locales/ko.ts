@@ -133,7 +133,7 @@ const ko = {
       information: '정보',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: '펌웨어 버전',
+      application: '펌웨어 버전',
       image: '이미지 버전',
       deviceKey: '장치 키',
       queryFailed: '불러오기 실패',

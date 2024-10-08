@@ -130,7 +130,7 @@ const zh = {
       information: '信息',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: '应用版本',
+      application: '应用版本',
       image: '镜像版本',
       deviceKey: '设备码',
       queryFailed: '查询失败',

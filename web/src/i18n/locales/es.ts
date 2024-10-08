@@ -129,7 +129,7 @@ const en = {
       information: 'Información',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Versión de la aplicación',
+      application: 'Versión de la aplicación',
       image: 'Versión de la imagen',
       deviceKey: 'Clave del dispositivo',
       queryFailed: 'Consulta fallida',

@@ -4,7 +4,7 @@ import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import semver from 'semver';
 
-import * as api from '@/api/firmware.ts';
+import * as api from '@/api/application.ts';
 import { getSkipUpdate, setSkipUpdate } from '@/lib/localstorage.ts';
 import { isSettingsOpenAtom } from '@/jotai/settings.ts';
 
@@ -82,17 +82,17 @@ export const Update = ({ setIsBadgeVisible }: UpdateProps) => {
       .then((rsp: any) => {
         if (rsp.code !== 0) {
           setErrMsg(t('update.updateFailed'));
-          setIsUpdating(false);
-          return;
         }
+      })
+      .catch(() => {
+        setErrMsg(t('update.updateFailed'));
+      })
+      .finally(() => {
+        setIsUpdating(false);
 
         setTimeout(() => {
           window.location.reload();
         }, 6000);
-      })
-      .catch(() => {
-        setErrMsg(t('update.updateFailed'));
-        setIsUpdating(false);
       });
   }
 

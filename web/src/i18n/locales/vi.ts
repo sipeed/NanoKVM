@@ -134,7 +134,7 @@ const vi = {
       information: 'Thông tin',
       ip: 'IP',
       mdns: 'mDNS',
-      firmware: 'Phiên bản Ứng dụng',
+      application: 'Phiên bản Ứng dụng',
       image: 'Phiên bản Hình ảnh',
       deviceKey: 'Khóa Thiết bị',
       queryFailed: 'Truy vấn thất bại',

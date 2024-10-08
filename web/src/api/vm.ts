@@ -14,9 +14,9 @@ export function setGpio(type: string, duration: number) {
   return http.post('/api/vm/gpio', data);
 }
 
-// get led gpio enabled
-export function getLedGpio() {
-  return http.get('/api/vm/gpio/led');
+// get gpio value
+export function getGpio() {
+  return http.get('/api/vm/gpio');
 }
 
 // update screen arguments

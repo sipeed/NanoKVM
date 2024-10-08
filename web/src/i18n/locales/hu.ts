@@ -132,7 +132,7 @@ const hu = {
         information: 'Információ',
         ip: 'IP',
         mdns: 'mDNS',
-        firmware: 'Alkalmazás verzió',
+        application: 'Alkalmazás verzió',
         image: 'Képfájl verzió',
         deviceKey: 'Eszköz kulcs',
         queryFailed: 'Lekérdezés sikertelen',

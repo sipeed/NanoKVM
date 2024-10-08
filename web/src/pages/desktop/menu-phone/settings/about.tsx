@@ -11,7 +11,7 @@ type Info = {
   ip: string;
   mdns: string;
   image: string;
-  firmware: string;
+  application: string;
   deviceKey: string;
 };
 

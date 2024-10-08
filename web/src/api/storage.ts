@@ -2,12 +2,12 @@ import { http } from '@/lib/http.ts';
 
 // get image list
 export function getImages() {
-  return http.get('/api/storage/images');
+  return http.get('/api/storage/image');
 }
 
 // get mounted image
 export function getMountedImage() {
-  return http.get('/api/storage/images/mounted');
+  return http.get('/api/storage/image/mounted');
 }
 
 // mount/unmount image

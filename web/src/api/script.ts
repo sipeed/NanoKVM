@@ -12,16 +12,7 @@ export function uploadScript(formData: FormData) {
 }
 
 export function runScript(name: string, type: string) {
-  const data = {
-    name,
-    type
-  };
-
-  return http.request({
-    url: '/api/vm/script/run',
-    method: 'post',
-    data
-  });
+  return http.post('/api/vm/script/run', { name, type });
 }
 
 export function getScripts() {
