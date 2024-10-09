@@ -1,26 +1,28 @@
 package storage
 
 import (
-	"NanoKVM-Server/proto"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
 )
 
 const (
-	ImageDirectory = "/data"
-	ImageNone      = "/dev/mmcblk0p3"
-	MountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	imageDirectory = "/data"
+	imageNone      = "/dev/mmcblk0p3"
+	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
 )
 
 func (s *Service) GetImages(c *gin.Context) {
 	var rsp proto.Response
 	var images []string
 
-	err := filepath.Walk(ImageDirectory, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(imageDirectory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -34,7 +36,6 @@ func (s *Service) GetImages(c *gin.Context) {
 
 		return nil
 	})
-
 	if err != nil {
 		rsp.ErrRsp(c, -2, "get images failed")
 		return
@@ -57,11 +58,11 @@ func (s *Service) MountImage(c *gin.Context) {
 
 	image := req.File
 	if image == "" {
-		image = ImageNone
+		image = imageNone
 	}
 
 	// mount
-	if err := os.WriteFile(MountDevice, []byte(image), 0666); err != nil {
+	if err := os.WriteFile(mountDevice, []byte(image), 0o666); err != nil {
 		log.Errorf("mount file %s failed: %s", image, err)
 		rsp.ErrRsp(c, -2, "mount image failed")
 		return
@@ -88,14 +89,14 @@ func (s *Service) MountImage(c *gin.Context) {
 func (s *Service) GetMountedImage(c *gin.Context) {
 	var rsp proto.Response
 
-	content, err := os.ReadFile(MountDevice)
+	content, err := os.ReadFile(mountDevice)
 	if err != nil {
 		rsp.ErrRsp(c, -2, "read failed")
 		return
 	}
 
 	image := strings.ReplaceAll(string(content), "\n", "")
-	if image == ImageNone {
+	if image == imageNone {
 		image = ""
 	}
 

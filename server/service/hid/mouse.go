@@ -3,31 +3,34 @@ package hid
 import (
 	"encoding/binary"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
-func Mouse(queue <-chan []int) {
+func (h *Hid) Mouse(queue <-chan []int) {
 	for event := range queue {
+		h.mouseMutex.Lock()
 		switch event[0] {
 		case MouseDown:
-			mouseDown(event)
+			h.mouseDown(event)
 		case MouseUp:
-			mouseUp()
+			h.mouseUp()
 		case MouseMoveAbsolute:
-			mouseMoveAbsolute(event)
+			h.mouseMoveAbsolute(event)
 		case MouseMoveRelative:
-			mouseMoveRelative(event)
+			h.mouseMoveRelative(event)
 		case MouseScroll:
-			scroll(event)
+			h.scroll(event)
 		default:
 			log.Debugf("invalid mouse event: %+v", event)
 		}
+		h.mouseMutex.Unlock()
 	}
 }
 
-func mouseDown(event []int) {
+func (h *Hid) mouseDown(event []int) {
 	var button byte
 
 	switch event[1] {
@@ -43,52 +46,52 @@ func mouseDown(event []int) {
 	}
 
 	data := []byte{button, 0, 0, 0}
-	writeWithTimeout(Hidg1, data)
+	h.writeWithTimeout(h.g1, data)
 }
 
-func mouseUp() {
+func (h *Hid) mouseUp() {
 	data := []byte{0, 0, 0, 0}
-	writeWithTimeout(Hidg1, data)
+	h.writeWithTimeout(h.g1, data)
 }
 
-func scroll(event []int) {
+func (h *Hid) scroll(event []int) {
 	direction := 0x01
 	if event[3] > 0 {
 		direction = -0x1
 	}
 
 	data := []byte{0, 0, 0, byte(direction)}
-	writeWithTimeout(Hidg1, data)
+	h.writeWithTimeout(h.g1, data)
 }
 
-func mouseMoveAbsolute(event []int) {
+func (h *Hid) mouseMoveAbsolute(event []int) {
 	x := make([]byte, 2)
 	y := make([]byte, 2)
 	binary.LittleEndian.PutUint16(x, uint16(event[2]))
 	binary.LittleEndian.PutUint16(y, uint16(event[3]))
 
 	data := []byte{0, x[0], x[1], y[0], y[1], 0}
-	writeWithTimeout(Hidg2, data)
-
+	h.writeWithTimeout(h.g2, data)
 }
 
-func mouseMoveRelative(event []int) {
+func (h *Hid) mouseMoveRelative(event []int) {
 	data := []byte{byte(event[1]), byte(event[2]), byte(event[3]), 0}
-	writeWithTimeout(Hidg1, data)
+	h.writeWithTimeout(h.g1, data)
 }
 
-func writeWithTimeout(file *os.File, data []byte) {
+func (h *Hid) writeWithTimeout(file *os.File, data []byte) {
 	deadline := time.Now().Add(9 * time.Millisecond)
 	_ = file.SetWriteDeadline(deadline)
 
 	_, err := file.Write(data)
 	if err != nil {
-		if errors.Is(err, os.ErrClosed) {
-			Open()
+		switch {
+		case errors.Is(err, os.ErrClosed):
 			log.Debugf("hid already closed, reopen it...")
-		} else if errors.Is(err, os.ErrDeadlineExceeded) {
+			h.Open()
+		case errors.Is(err, os.ErrDeadlineExceeded):
 			log.Debugf("write to hid timeout")
-		} else {
+		default:
 			log.Errorf("write to hid failed: %s", err)
 		}
 

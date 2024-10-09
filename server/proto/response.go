@@ -1,8 +1,9 @@
 package proto
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Response struct {
@@ -26,14 +27,14 @@ func (r *Response) Err(code int, msg string) {
 	r.Msg = msg
 }
 
-// OkRsp Successful response without data
+// OkRsp Successful response without data.
 func (r *Response) OkRsp(c *gin.Context) {
 	r.Ok()
 
 	c.JSON(http.StatusOK, r)
 }
 
-// OkRspWithData Successful response with data
+// OkRspWithData Successful response with data.
 func (r *Response) OkRspWithData(c *gin.Context, data interface{}) {
 	r.Ok()
 	r.Data = data
@@ -41,7 +42,7 @@ func (r *Response) OkRspWithData(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, r)
 }
 
-// ErrRsp Failed response
+// ErrRsp Failed response.
 func (r *Response) ErrRsp(c *gin.Context, code int, msg string) {
 	r.Err(code, msg)
 

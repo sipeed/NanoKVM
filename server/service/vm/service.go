@@ -1,7 +1,15 @@
 package vm
 
-type Service struct{}
+import (
+	"NanoKVM-Server/config"
+)
+
+type Service struct {
+	config *config.Config
+}
 
 func NewService() *Service {
-	return &Service{}
+	return &Service{
+		config: config.GetInstance(),
+	}
 }

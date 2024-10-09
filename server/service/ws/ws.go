@@ -1,13 +1,15 @@
 package ws
 
 import (
-	"NanoKVM-Server/service/hid"
 	"encoding/json"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"time"
+
+	"NanoKVM-Server/service/hid"
 )
 
 const (
@@ -17,6 +19,7 @@ const (
 
 type WsClient struct {
 	conn     *websocket.Conn
+	hid      *hid.Hid
 	keyboard chan []int
 	mouse    chan []int
 	watcher  chan struct{}
@@ -39,6 +42,7 @@ func (s *Service) Connect(c *gin.Context) {
 	log.Debug("websocket connected")
 
 	client := &WsClient{
+		hid:      hid.GetHid(),
 		conn:     conn,
 		keyboard: make(chan []int, 200),
 		mouse:    make(chan []int, 200),
@@ -51,10 +55,10 @@ func (s *Service) Connect(c *gin.Context) {
 func (c *WsClient) Start() {
 	defer c.Clean()
 
-	hid.Open()
+	c.hid.Open()
 
-	go hid.Keyboard(c.keyboard)
-	go hid.Mouse(c.mouse)
+	go c.hid.Keyboard(c.keyboard)
+	go c.hid.Mouse(c.mouse)
 
 	go c.Watch()
 
@@ -97,7 +101,7 @@ func (c *WsClient) Watch() {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 
-	var fileModMap = map[string]time.Time{
+	fileModMap := map[string]time.Time{
 		StreamState: time.Unix(0, 0),
 	}
 
@@ -133,7 +137,7 @@ func (c *WsClient) Clean() {
 
 	close(c.watcher)
 
-	hid.Close()
+	c.hid.Close()
 
 	log.Debug("websocket disconnected")
 }

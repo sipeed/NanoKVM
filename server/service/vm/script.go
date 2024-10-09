@@ -1,15 +1,17 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 )
 
 const ScriptDirectory = "/etc/kvm/scripts"
@@ -29,7 +31,6 @@ func (s *Service) GetScripts(c *gin.Context) {
 
 		return nil
 	})
-
 	if err != nil {
 		log.Errorf("get scripts failed: %s", err)
 		rsp.ErrRsp(c, -1, "get scripts failed")
@@ -58,7 +59,7 @@ func (s *Service) UploadScript(c *gin.Context) {
 	}
 
 	if _, err = os.Stat(ScriptDirectory); err != nil {
-		_ = os.MkdirAll(ScriptDirectory, 0755)
+		_ = os.MkdirAll(ScriptDirectory, 0o755)
 	}
 
 	target := fmt.Sprintf("%s/%s", ScriptDirectory, header.Filename)
@@ -68,7 +69,7 @@ func (s *Service) UploadScript(c *gin.Context) {
 		return
 	}
 
-	_ = utils.EnsurePermission(target, 0100)
+	_ = utils.EnsurePermission(target, 0o100)
 
 	data := &proto.UploadScriptRsp{
 		File: header.Filename,
@@ -103,7 +104,12 @@ func (s *Service) RunScript(c *gin.Context) {
 	} else {
 		cmd.Stdout = nil
 		cmd.Stderr = nil
-		go cmd.Run()
+		go func() {
+			err := cmd.Run()
+			if err != nil {
+				log.Errorf("run script %s in background failed: %s", req.Name, err)
+			}
+		}()
 	}
 
 	if err != nil {

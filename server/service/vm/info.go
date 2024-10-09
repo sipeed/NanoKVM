@@ -1,13 +1,15 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net"
 	"os"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
 )
 
 var imageVersionMap = map[string]string{

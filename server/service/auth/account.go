@@ -1,12 +1,14 @@
 package auth
 
 import (
-	"NanoKVM-Server/utils"
 	"encoding/json"
 	"errors"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/utils"
 )
 
 const AccountFile = "/etc/kvm/pwd"
@@ -56,14 +58,18 @@ func setAccount(username string, password string) error {
 		Username: username,
 		Password: password,
 	})
+	if err != nil {
+		log.Errorf("failed to marshal account information to json: %s", err)
+		return err
+	}
 
-	err = os.MkdirAll(filepath.Dir(AccountFile), 0644)
+	err = os.MkdirAll(filepath.Dir(AccountFile), 0o644)
 	if err != nil {
 		log.Errorf("create directory %s failed: %s", AccountFile, err)
 		return err
 	}
 
-	err = os.WriteFile(AccountFile, account, 0644)
+	err = os.WriteFile(AccountFile, account, 0o644)
 	if err != nil {
 		log.Errorf("write password failed: %s", err)
 		return err

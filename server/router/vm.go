@@ -1,9 +1,10 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/vm"
-	"github.com/gin-gonic/gin"
 )
 
 func vmRouter(r *gin.Engine) {
@@ -12,9 +13,8 @@ func vmRouter(r *gin.Engine) {
 
 	api.GET("/vm/info", service.GetInfo) // get device information
 
-	api.POST("/vm/gpio", service.SetGpio) // update gpio
-	api.GET("/vm/gpio", service.GetGpio)  // get gpio
-
+	api.POST("/vm/gpio", service.SetGpio)     // update gpio
+	api.GET("/vm/gpio", service.GetGpio)      // get gpio
 	api.POST("/vm/screen", service.SetScreen) // update screen
 
 	api.GET("/vm/terminal", service.Terminal) // web terminal

@@ -1,12 +1,13 @@
 package auth
 
 import (
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/utils"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *Service) Login(c *gin.Context) {

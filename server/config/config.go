@@ -1,30 +1,54 @@
 package config
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/spf13/viper"
+	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/spf13/viper"
+	"gopkg.in/yaml.v3"
+)
+
+const (
+	hwVersionFile = "/etc/kvm/hw"
+
+	gpioPower    = "/sys/class/gpio/gpio503/value"
+	gpioPowerLED = "/sys/class/gpio/gpio504/value"
+
+	gpioResetAlpha  = "/sys/class/gpio/gpio507/value"
+	gpioHDDLedAlpha = "/sys/class/gpio/gpio505/value"
+
+	gpioResetBeta = "/sys/class/gpio/gpio505/value"
 )
 
 var (
 	config Config
 	once   sync.Once
-)
 
-var defaultConfig = []byte(`proto: http
-port:
-  http: 80 
-  https: 443
-cert:
-  crt: server.crt
-  key: server.key
-`)
+	defaultConfig = &Config{
+		Protocol: "http",
+		Port: Port{
+			Http:  80,
+			Https: 443,
+		},
+		Cert: Cert{
+			Crt: "server.crt",
+			Key: "server.key",
+		},
+		Logger: LoggerConfig{
+			Level: "info",
+			File:  "stdout",
+		},
+		Authentication: "enable",
+		SecretKey:      generateRandomString(),
+	}
+)
 
 func GetInstance() *Config {
 	once.Do(read)
@@ -40,48 +64,68 @@ func read() {
 	if err := viper.ReadInConfig(); err != nil {
 		if errors.As(err, &viper.ConfigFileNotFoundError{}) {
 			create()
-			fmt.Printf("File /etc/kvm/server.yaml not exists. Use default configuration.\n")
+			log.Println("File /etc/kvm/server.yaml not found. Create a new one with default configuration.")
 		} else {
-			fmt.Printf("Read file /etc/kvm/server.yaml failed. Use default configuration.\n")
+			log.Println("Failed to read config file /etc/kvm/server.yaml. Using default configuration.")
 		}
 	}
 
 	if err := viper.Unmarshal(&config); err != nil {
-		panic(fmt.Sprintf("Can't read configuration file /etc/kvm/nanokvm.yaml.\n%s", err))
+		log.Fatalf("Failed to parse configuration file /etc/kvm/server.yaml: %s", err)
 	}
 
 	validate()
 
 	if config.SecretKey == "" {
-		config.SecretKey = generateRandomString()
+		config.SecretKey = defaultConfig.SecretKey
 	}
 
 	if config.Authentication == "disable" {
-		fmt.Println("NOTICE: Authentication is disabled! Please ensure your service is secure!")
+		log.Println("NOTICE: Authentication is disabled! Please ensure your service is secure!")
 	}
 
-	fmt.Printf("load config success\n")
+	log.Println("config loaded successfully")
+	config.HW.Version = getHwVersion()
+	config.HW.GPIOPower = gpioPower
+	config.HW.GPIOPowerLED = gpioPowerLED
+	switch config.HW.Version {
+	case HWVersionAlpha:
+		config.HW.GPIOHDDLed = gpioHDDLedAlpha
+		config.HW.GPIOReset = gpioResetAlpha
+	case HWVersionBeta:
+		config.HW.GPIOReset = gpioResetBeta
+	default:
+		log.Fatalf("Unsupported hardware version: %s", config.HW.Version)
+	}
 }
 
 func create() {
-	_ = os.MkdirAll("/etc/kvm", 0644)
+	_ = os.MkdirAll("/etc/kvm", 0o644)
 
-	file, err := os.OpenFile("/etc/kvm/server.yaml", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.OpenFile("/etc/kvm/server.yaml", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		fmt.Printf("open config failed: %s\n", err)
+		log.Printf("open config failed: %s", err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
-	_, err = file.Write(defaultConfig)
+	data, err := yaml.Marshal(defaultConfig)
 	if err != nil {
-		fmt.Printf("save config failed: %s\n", err)
+		log.Printf("failed to marshal default config: %s", err)
+		return
+	}
+
+	_, err = file.Write(data)
+	if err != nil {
+		log.Printf("failed to save config: %s", err)
 		return
 	}
 
 	err = file.Sync()
 	if err != nil {
-		fmt.Printf("sync config failed: %s\n", err)
+		log.Printf("failed to sync config: %s", err)
 		return
 	}
 }
@@ -93,19 +137,14 @@ func validate() {
 
 	_ = os.Remove("/etc/kvm/server.yaml")
 
-	if err := viper.ReadConfig(bytes.NewBuffer(defaultConfig)); err != nil {
-		panic("load default config failed")
-	}
-
 	if err := viper.Unmarshal(&config); err != nil {
-		panic("Can't read configuration file /etc/kvm/server.yaml.")
+		log.Fatalf("Failed to read configuration file /etc/kvm/server.yaml: %v", err)
 	}
 }
 
 func generateRandomString() string {
 	b := make([]byte, 64)
 	_, err := rand.Read(b)
-
 	if err != nil {
 		currentTime := time.Now().UnixNano()
 		timeString := fmt.Sprintf("%d", currentTime)
@@ -113,4 +152,16 @@ func generateRandomString() string {
 	}
 
 	return base64.URLEncoding.EncodeToString(b)
+}
+
+func getHwVersion() HWVersion {
+	content, err := os.ReadFile(hwVersionFile)
+	if err == nil {
+		version := strings.ReplaceAll(string(content), "\n", "")
+		if version == "beta" {
+			return HWVersionBeta
+		}
+	}
+
+	return HWVersionAlpha
 }

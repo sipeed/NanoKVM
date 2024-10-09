@@ -1,10 +1,12 @@
 package hid
 
 import (
-	"NanoKVM-Server/proto"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"time"
+
+	"NanoKVM-Server/proto"
 )
 
 type Char struct {
@@ -30,6 +32,7 @@ func (s *Service) Paste(c *gin.Context) {
 		return
 	}
 
+	s.hid.kbMutex.Lock()
 	for _, char := range req.Content {
 		key, ok := charMap[char]
 		if !ok {
@@ -43,18 +46,19 @@ func (s *Service) Paste(c *gin.Context) {
 		// only handle shift. Need to handle all modifiers?
 		if key.Modifiers > 0 {
 			keyShift := []byte{0x00, 0x00, byte(225), 0x00, 0x00, 0x00, 0x00, 0x00}
-			Write(Hidg0, keyShift)
+			s.hid.Write(s.hid.g0, keyShift)
 		}
 
-		Write(Hidg0, keyDown)
-		Write(Hidg0, keyUp)
+		s.hid.Write(s.hid.g0, keyDown)
+		s.hid.Write(s.hid.g0, keyUp)
 
 		if key.Modifiers > 0 {
-			Write(Hidg0, keyUp)
+			s.hid.Write(s.hid.g0, keyUp)
 		}
 
 		time.Sleep(50 * time.Millisecond)
 	}
+	s.hid.kbMutex.Unlock()
 
 	rsp.OkRsp(c)
 	log.Debugf("hid paste success, total %d", len(req.Content))

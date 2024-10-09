@@ -1,9 +1,10 @@
 package utils
 
 import (
+	"net/url"
+
 	"github.com/mervick/aes-everywhere/go/aes256"
 	log "github.com/sirupsen/logrus"
-	"net/url"
 )
 
 const EncryptSecretKey = "nanokvm-sipeed-2024"

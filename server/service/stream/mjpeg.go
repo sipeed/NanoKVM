@@ -1,9 +1,10 @@
 package stream
 
 import (
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func (s *Service) Mjpeg(c *gin.Context) {
@@ -14,7 +15,9 @@ func (s *Service) Mjpeg(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Failed to connect to MJPEG server")
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		c.String(resp.StatusCode, "MJPEG server returned an error")
@@ -23,5 +26,9 @@ func (s *Service) Mjpeg(c *gin.Context) {
 
 	c.Header("Content-Type", resp.Header.Get("Content-Type"))
 
-	_, _ = io.Copy(c.Writer, resp.Body)
+	_, err = io.Copy(c.Writer, resp.Body)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Failed to copy MJPEG stream")
+		return
+	}
 }

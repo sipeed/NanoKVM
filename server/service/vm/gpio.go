@@ -1,25 +1,16 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
+	"fmt"
 	"os"
 	"strconv"
-	"strings"
 	"time"
-)
 
-const (
-	HW_VERSION_FILE = "/etc/kvm/hw"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 
-	GPIO_PWR     = "/sys/class/gpio/gpio503/value"
-	GPIO_PWR_LED = "/sys/class/gpio/gpio504/value"
-
-	GPIO_RST_ALPHA     = "/sys/class/gpio/gpio507/value"
-	GPIO_HDD_LED_ALPHA = "/sys/class/gpio/gpio505/value"
-
-	GPIO_RST_BETA = "/sys/class/gpio/gpio505/value"
+	"NanoKVM-Server/config"
+	"NanoKVM-Server/proto"
 )
 
 func (s *Service) SetGpio(c *gin.Context) {
@@ -27,23 +18,19 @@ func (s *Service) SetGpio(c *gin.Context) {
 	var rsp proto.Response
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
-		rsp.ErrRsp(c, -1, "invalid arguments")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("invalid arguments: %s", err))
 		return
 	}
 
-	version := getHwVersion()
 	device := ""
 
-	if req.Type == "power" {
-		device = GPIO_PWR
-	} else if req.Type == "reset" {
-		if version == "alpha" {
-			device = GPIO_RST_ALPHA
-		} else {
-			device = GPIO_RST_BETA
-		}
-	} else {
-		rsp.ErrRsp(c, -2, "invalid power event")
+	switch req.Type {
+	case "power":
+		device = s.config.HW.GPIOPower
+	case "reset":
+		device = s.config.HW.GPIOReset
+	default:
+		rsp.ErrRsp(c, -2, fmt.Sprintf("invalid power event: %s", req.Type))
 		return
 	}
 
@@ -55,27 +42,30 @@ func (s *Service) SetGpio(c *gin.Context) {
 	}
 
 	if err := writeGpio(device, duration); err != nil {
-		rsp.ErrRsp(c, -3, "operation failed")
+		rsp.ErrRsp(c, -3, fmt.Sprintf("operation failed: %s", err))
 		return
 	}
 
-	log.Debugf("set gpio %s success", device)
+	log.Debugf("gpio %s set sucessfully", device)
 	rsp.OkRsp(c)
 }
 
 func (s *Service) GetGpio(c *gin.Context) {
 	var rsp proto.Response
 
-	pwr, err := readGpio(GPIO_PWR_LED)
+	pwr, err := readGpio(s.config.HW.GPIOPowerLED)
 	if err != nil {
-		rsp.ErrRsp(c, -2, "read led failed")
+		rsp.ErrRsp(c, -2, fmt.Sprintf("failed to read power led: %s", err))
 		return
 	}
 
 	hdd := false
-	version := getHwVersion()
-	if version == "alpha" {
-		hdd, err = readGpio(GPIO_HDD_LED_ALPHA)
+	if s.config.HW.Version == config.HWVersionAlpha {
+		hdd, err = readGpio(s.config.HW.GPIOHDDLed)
+		if err != nil {
+			rsp.ErrRsp(c, -2, fmt.Sprintf("failed to read hdd led: %s", err))
+			return
+		}
 	}
 
 	data := &proto.GetGpioRsp{
@@ -85,28 +75,15 @@ func (s *Service) GetGpio(c *gin.Context) {
 	rsp.OkRspWithData(c, data)
 }
 
-// get hardware version: alpha or beta
-func getHwVersion() string {
-	content, err := os.ReadFile(HW_VERSION_FILE)
-	if err == nil {
-		version := strings.ReplaceAll(string(content), "\n", "")
-		if version == "beta" {
-			return "beta"
-		}
-	}
-
-	return "alpha"
-}
-
 func writeGpio(device string, duration time.Duration) error {
-	if err := os.WriteFile(device, []byte("1"), 0666); err != nil {
+	if err := os.WriteFile(device, []byte("1"), 0o666); err != nil {
 		log.Errorf("write gpio %s failed: %s", device, err)
 		return err
 	}
 
 	time.Sleep(duration)
 
-	if err := os.WriteFile(device, []byte("0"), 0666); err != nil {
+	if err := os.WriteFile(device, []byte("0"), 0o666); err != nil {
 		log.Errorf("write gpio %s failed: %s", device, err)
 		return err
 	}

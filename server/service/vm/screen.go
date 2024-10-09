@@ -1,11 +1,13 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
 	"fmt"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"os"
+
+	"NanoKVM-Server/proto"
 )
 
 var screenFileMap = map[string]string{
@@ -30,7 +32,7 @@ func (s *Service) SetScreen(c *gin.Context) {
 	}
 
 	data := fmt.Sprintf("%d", req.Value)
-	err := os.WriteFile(file, []byte(data), 0666)
+	err := os.WriteFile(file, []byte(data), 0o666)
 	if err != nil {
 		log.Errorf("write kvm %s failed: %s", file, err)
 		rsp.ErrRsp(c, -3, "update screen failed")

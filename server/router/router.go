@@ -2,10 +2,11 @@ package router
 
 import (
 	"fmt"
-	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
 	"os"
 	"path/filepath"
+
+	"github.com/gin-gonic/contrib/static"
+	"github.com/gin-gonic/gin"
 )
 
 func Init(r *gin.Engine) {

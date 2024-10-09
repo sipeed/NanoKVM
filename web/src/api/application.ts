@@ -10,7 +10,7 @@ export function update() {
   return http.request({
     method: 'post',
     url: '/api/application/update',
-    timeout: 5 * 60 * 1000
+    timeout: 15 * 60 * 1000
   });
 }
 
