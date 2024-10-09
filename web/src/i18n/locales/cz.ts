@@ -178,3 +178,5 @@ const cs = {
     }
   }
 };
+
+export default cz;
