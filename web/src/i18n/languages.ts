@@ -1,4 +1,5 @@
 export const languages = [
+  { key: 'da', name: 'Danish' },
   { key: 'de', name: 'Deutsch' },
   { key: 'en', name: 'English' },
   { key: 'es', name: 'Español' },
