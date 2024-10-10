@@ -10,5 +10,6 @@ export const languages = [
   { key: 'zh', name: '中文' },
   { key: 'hu', name: 'Magyar' },
   { key: 'vi', name: 'Tiếng Việt' },
+  { key: 'ja', name: '日本語' },
   { key: 'cz', name: 'Česky' }
 ];
