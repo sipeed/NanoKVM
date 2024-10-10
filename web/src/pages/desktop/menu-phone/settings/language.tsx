@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { LanguagesIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { languages } from '@/i18n/languages.ts';
+import languages from '@/i18n/languages.ts';
 import { setLanguage } from '@/lib/localstorage.ts';
 
 export const Language = () => {

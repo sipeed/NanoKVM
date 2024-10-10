@@ -1,4 +1,4 @@
-const cs = {
+const cz = {
   translation: {
     language: 'Jazyk',
     changePassword: 'Změnit heslo',

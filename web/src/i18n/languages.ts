@@ -1,4 +1,4 @@
-export const languages = [
+const languages = [
   { key: 'da', name: 'Danish' },
   { key: 'de', name: 'Deutsch' },
   { key: 'en', name: 'English' },
@@ -14,3 +14,7 @@ export const languages = [
   { key: 'ja', name: '日本語' },
   { key: 'cz', name: 'Česky' }
 ];
+
+languages.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+
+export default languages;
