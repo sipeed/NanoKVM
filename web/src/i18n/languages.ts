@@ -1,4 +1,5 @@
 const languages = [
+  { key: 'nl', name: 'Nederlands' },
   { key: 'da', name: 'Danish' },
   { key: 'de', name: 'Deutsch' },
   { key: 'en', name: 'English' },
