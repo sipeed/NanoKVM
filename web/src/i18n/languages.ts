@@ -13,7 +13,8 @@ const languages = [
   { key: 'hu', name: 'Magyar' },
   { key: 'vi', name: 'Tiếng Việt' },
   { key: 'ja', name: '日本語' },
-  { key: 'cz', name: 'Česky' }
+  { key: 'cz', name: 'Česky' },
+  { key: 'uk', name: 'Українська' }
 ];
 
 languages.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
