@@ -1,12 +1,14 @@
 package middleware
 
 import (
-	"NanoKVM-Server/config"
+	"net/http"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"time"
+
+	"NanoKVM-Server/config"
 )
 
 type Token struct {
@@ -38,7 +40,6 @@ func CheckToken() gin.HandlerFunc {
 
 		c.JSON(http.StatusUnauthorized, "unauthorized")
 		c.Abort()
-		return
 	}
 }
 
@@ -64,7 +65,6 @@ func ParseJWT(jwtToken string) (*Token, error) {
 		secretKey := conf.SecretKey
 		return []byte(secretKey), nil
 	})
-
 	if err != nil {
 		log.Debugf("parse jwt error: %s", err)
 		return nil, err

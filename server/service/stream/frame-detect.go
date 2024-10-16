@@ -1,17 +1,19 @@
 package stream
 
 import (
-	"NanoKVM-Server/proto"
 	"errors"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
 )
 
 const (
-	FrameDetect    = "/etc/kvm/frame_detact"
-	FrameDetectTmp = "/etc/kvm/frame_detact_tmp"
+	frameDetect    = "/etc/kvm/frame_detact"
+	frameDetectTmp = "/etc/kvm/frame_detact_tmp"
 )
 
 type UpdateFrameDetectRsp struct {
@@ -43,15 +45,17 @@ func (s *Service) UpdateFrameDetect(c *gin.Context) {
 	}
 
 	if isEnabled {
-		_ = os.Remove(FrameDetect)
-		_ = os.Remove(FrameDetectTmp)
+		_ = os.Remove(frameDetect)
+		_ = os.Remove(frameDetectTmp)
 	} else {
-		file, err2 := os.OpenFile(FrameDetect, os.O_CREATE|os.O_TRUNC, 0644)
+		file, err2 := os.OpenFile(frameDetect, os.O_CREATE|os.O_TRUNC, 0o644)
 		if err2 != nil {
 			rsp.ErrRsp(c, -3, "enable frame detect failed")
 			return
 		}
-		defer file.Close()
+		defer func() {
+			_ = file.Close()
+		}()
 	}
 
 	isEnabled, err = isFrameDetectEnabled()
@@ -69,7 +73,7 @@ func (s *Service) UpdateFrameDetect(c *gin.Context) {
 func (s *Service) StopFrameDetect(c *gin.Context) {
 	var rsp proto.Response
 
-	exist, err := isFileExist(FrameDetect)
+	exist, err := isFileExist(frameDetect)
 	if err != nil {
 		rsp.ErrRsp(c, -1, "unknown frame status")
 		return
@@ -80,7 +84,7 @@ func (s *Service) StopFrameDetect(c *gin.Context) {
 		return
 	}
 
-	err = os.Rename(FrameDetect, FrameDetectTmp)
+	err = os.Rename(frameDetect, frameDetectTmp)
 	if err != nil {
 		rsp.ErrRsp(c, -2, "stop operation failed")
 		return
@@ -88,7 +92,7 @@ func (s *Service) StopFrameDetect(c *gin.Context) {
 
 	go func() {
 		time.Sleep(20 * time.Second)
-		_ = os.Rename(FrameDetectTmp, FrameDetect)
+		_ = os.Rename(frameDetectTmp, frameDetect)
 		log.Debugf("frame detect started")
 	}()
 
@@ -97,7 +101,7 @@ func (s *Service) StopFrameDetect(c *gin.Context) {
 }
 
 func isFrameDetectEnabled() (bool, error) {
-	exist, err := isFileExist(FrameDetect)
+	exist, err := isFileExist(frameDetect)
 	if err != nil {
 		return false, err
 	}
@@ -106,7 +110,7 @@ func isFrameDetectEnabled() (bool, error) {
 		return true, nil
 	}
 
-	exist, err = isFileExist(FrameDetectTmp)
+	exist, err = isFileExist(frameDetectTmp)
 	if err != nil {
 		return false, err
 	}

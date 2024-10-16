@@ -1,16 +1,18 @@
 package vm
 
 import (
-	"NanoKVM-Server/utils"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
-	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/ssh"
 	"io"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/ssh"
+
+	"NanoKVM-Server/utils"
 )
 
 const (
@@ -161,10 +163,12 @@ func (s *SshClient) bridgeWSAndSSH() {
 
 	s.client, err = ssh.Dial("tcp", s.addr, config)
 	if err != nil {
-		//log.Errorf("init ssh failed: %s", err)
+		// log.Errorf("init ssh failed: %s", err)
 		return
 	}
-	defer s.client.Close()
+	defer func() {
+		_ = s.client.Close()
+	}()
 
 	s.session, err = s.client.NewSession()
 	if err != nil {
@@ -185,7 +189,9 @@ func (s *SshClient) bridgeWSAndSSH() {
 		log.Errorf("open ssh session in failed: %s", err)
 		return
 	}
-	defer s.sessionIn.Close()
+	defer func() {
+		_ = s.sessionIn.Close()
+	}()
 
 	if err = s.session.RequestPty("xterm", size.Height, size.Width, terminalModes); err != nil {
 		log.Errorf("oen session request pty failed: %s", err)

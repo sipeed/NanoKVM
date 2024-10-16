@@ -1,18 +1,20 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/service/hid"
 	"errors"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/hid"
 )
 
 const (
-	VirtualNetwork = "/boot/usb.rndis0"
-	VirtualDisk    = "/boot/usb.disk0"
+	virtualNetwork = "/boot/usb.rndis0"
+	virtualDisk    = "/boot/usb.disk0"
 )
 
 var (
@@ -46,8 +48,8 @@ var (
 func (s *Service) GetVirtualDevice(c *gin.Context) {
 	var rsp proto.Response
 
-	network, _ := isDeviceExist(VirtualNetwork)
-	disk, _ := isDeviceExist(VirtualDisk)
+	network, _ := isDeviceExist(virtualNetwork)
+	disk, _ := isDeviceExist(virtualDisk)
 
 	rsp.OkRspWithData(c, &proto.GetVirtualDeviceRsp{
 		Network: network,
@@ -68,8 +70,9 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 	var device string
 	var commands []string
 
-	if req.Device == "network" {
-		device = VirtualNetwork
+	switch req.Device {
+	case "network":
+		device = virtualNetwork
 
 		exist, _ := isDeviceExist(device)
 		if !exist {
@@ -77,8 +80,8 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		} else {
 			commands = unmountNetworkCommands
 		}
-	} else if req.Device == "disk" {
-		device = VirtualDisk
+	case "disk":
+		device = virtualDisk
 
 		exist, _ := isDeviceExist(device)
 		if !exist {
@@ -86,13 +89,18 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		} else {
 			commands = unmountDiskCommands
 		}
-	} else {
+	default:
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
 	}
 
-	hid.Close()
-	defer hid.Open()
+	h := hid.GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
 
 	for _, command := range commands {
 		err := exec.Command("sh", "-c", command).Run()

@@ -1,13 +1,9 @@
 package network
 
 import (
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
 	"net/http"
@@ -15,12 +11,40 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 )
 
 const (
-	TailscalePath  = "/usr/bin/tailscale"
-	TailscaledPath = "/usr/sbin/tailscaled"
+	tailscalePath  = "/usr/bin/tailscale"
+	tailscaledPath = "/usr/sbin/tailscaled"
+
+	backendStateRunning    = "Running"
+	backendStateNeedsLogin = "NeedsLogin"
+	backendStateStopped    = "Stopped"
+
+	responseStateRunning      = "running"
+	responseStateNeedsLogin   = "notLogin"
+	responseStateStopped      = "stopped"
+	responseStateNotInstalled = "notInstall"
 )
+
+var backendToResponseStates = map[string]string{
+	backendStateRunning:    responseStateRunning,
+	backendStateNeedsLogin: responseStateNeedsLogin,
+	backendStateStopped:    responseStateStopped,
+}
+
+func stateToJson(state string) string {
+	if resp, ok := backendToResponseStates[state]; ok {
+		return resp
+	}
+	return ""
+}
 
 type TailscaleStatus struct {
 	BackendState string `json:"BackendState"`
@@ -43,48 +67,52 @@ func (s *Service) InstallTailscale(c *gin.Context) {
 		return
 	}
 
-	var (
+	const (
 		downloadUrl = "http://cdn.sipeed.com/nanokvm/resources/tailscale_riscv64.zip"
 		workspace   = "/root/.tailscale"
+	)
 
+	var (
 		zipFile    = fmt.Sprintf("%s/tailscale_riscv64.zip", workspace)
 		tailscale  = fmt.Sprintf("%s/tailscale_riscv64/tailscale", workspace)
 		tailscaled = fmt.Sprintf("%s/tailscale_riscv64/tailscaled", workspace)
 	)
 
 	// download
-	_ = os.MkdirAll(workspace, 0755)
-	defer exec.Command("sh", "-c", fmt.Sprintf("rm -rf %s", workspace)).Run()
+	_ = os.MkdirAll(workspace, 0o755)
+	defer func() {
+		_ = os.RemoveAll(workspace)
+	}()
 
 	req, err := http.NewRequest("GET", downloadUrl, nil)
 	if err != nil {
-		log.Errorf("new request err: %s", err)
+		log.Errorf("failed to create new request: %s", err)
 		rsp.ErrRsp(c, -1, "request failed")
 		return
 	}
 
 	err = utils.Download(req, zipFile)
 	if err != nil {
+		log.Errorf("download failed: %s", err)
 		rsp.ErrRsp(c, -2, "download failed")
 		return
 	}
 
 	// install
-	command := fmt.Sprintf("unzip %s -d %s", zipFile, workspace)
-	err = exec.Command("sh", "-c", command).Run()
+	err = utils.Unzip(zipFile, workspace)
 	if err != nil {
 		log.Errorf("unzip failed: %s", err)
 		rsp.ErrRsp(c, -3, "unzip failed")
 		return
 	}
 
-	err = os.Rename(tailscale, TailscalePath)
+	err = utils.MoveFile(tailscale, tailscalePath)
 	if err != nil {
-		log.Debugf("rename %s failed: %s", tailscale, err)
+		log.Errorf("rename %s failed: %s", tailscale, err)
 	}
-	err = os.Rename(tailscaled, TailscaledPath)
+	err = utils.MoveFile(tailscaled, tailscaledPath)
 	if err != nil {
-		log.Debugf("rename %s failed: %s", tailscaled, err)
+		log.Errorf("rename %s failed: %s", tailscaled, err)
 	}
 
 	_ = runTailscale()
@@ -107,9 +135,9 @@ func (s *Service) LoginTailscale(c *gin.Context) {
 		return
 	}
 
-	if status.BackendState == "Running" {
+	if status.BackendState == backendStateRunning {
 		rsp.OkRspWithData(c, &proto.LoginTailscaleRsp{
-			Status: "running",
+			Status: responseStateRunning,
 		})
 		return
 	}
@@ -121,13 +149,17 @@ func (s *Service) LoginTailscale(c *gin.Context) {
 		return
 	}
 
-	defer stderr.Close()
+	defer func() {
+		_ = stderr.Close()
+	}()
 
-	go cmd.Run()
+	go func() {
+		_ = cmd.Run()
+	}()
 
 	url := parseLoginUrl(stderr)
 	rsp.OkRspWithData(c, &proto.LoginTailscaleRsp{
-		Status: "notLogin",
+		Status: responseStateNeedsLogin,
 		Url:    url,
 	})
 	log.Debugf("tailscale login url: %s", url)
@@ -152,26 +184,20 @@ func (s *Service) GetTailscaleStatus(c *gin.Context) {
 	var data proto.GetTailscaleStatusRsp
 
 	if exist := isTailscaleExist(); !exist {
-		data.Status = "notInstall"
+		data.Status = responseStateNotInstalled
 		rsp.OkRspWithData(c, data)
 		return
 	}
 
 	status, err := getTailscaleStatus()
 	if err != nil {
-		data.Status = "notLogin"
+		data.Status = responseStateNeedsLogin
 		rsp.OkRspWithData(c, data)
 		return
 	}
 
-	switch status.BackendState {
-	case "NeedsLogin":
-		data.Status = "notLogin"
-	case "Running":
-		data.Status = "running"
-	case "Stopped":
-		data.Status = "stopped"
-	default:
+	data.Status = stateToJson(status.BackendState)
+	if data.Status == "" {
 		rsp.ErrRsp(c, -1, "unknown state")
 		return
 	}
@@ -215,11 +241,12 @@ func (s *Service) UpdateTailscaleStatus(c *gin.Context) {
 
 	data := &proto.UpdateTailscaleStatusRsp{}
 
-	if status.BackendState == "Running" {
-		data.Status = "running"
-	} else if status.BackendState == "Stopped" {
-		data.Status = "stopped"
-	} else {
+	switch status.BackendState {
+	case backendStateRunning:
+		data.Status = responseStateRunning
+	case backendStateStopped:
+		data.Status = responseStateStopped
+	default:
 		rsp.ErrRsp(c, -4, "unknown tailscale status")
 		return
 	}
@@ -229,15 +256,15 @@ func (s *Service) UpdateTailscaleStatus(c *gin.Context) {
 }
 
 func isTailscaleExist() bool {
-	_, err1 := os.Stat(TailscalePath)
-	_, err2 := os.Stat(TailscaledPath)
+	_, err1 := os.Stat(tailscalePath)
+	_, err2 := os.Stat(tailscaledPath)
 
 	return err1 == nil && err2 == nil
 }
 
 func runTailscale() error {
-	for _, filePath := range []string{TailscalePath, TailscaledPath} {
-		if err := utils.EnsurePermission(filePath, 0100); err != nil {
+	for _, filePath := range []string{tailscalePath, tailscaledPath} {
+		if err := utils.EnsurePermission(filePath, 0o100); err != nil {
 			return err
 		}
 	}
@@ -288,7 +315,7 @@ func parseLoginUrl(r io.Reader) string {
 		}
 
 		if strings.Contains(line, "https") {
-			reg := regexp.MustCompile("\\s+")
+			reg := regexp.MustCompile(`\s+`)
 			return reg.ReplaceAllString(line, "")
 		}
 	}

@@ -1,7 +1,11 @@
 package hid
 
-type Service struct{}
+type Service struct {
+	hid *Hid
+}
 
 func NewService() *Service {
-	return &Service{}
+	return &Service{
+		hid: GetHid(),
+	}
 }

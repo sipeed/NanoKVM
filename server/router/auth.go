@@ -1,9 +1,10 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/auth"
-	"github.com/gin-gonic/gin"
 )
 
 func authRouter(r *gin.Engine) {

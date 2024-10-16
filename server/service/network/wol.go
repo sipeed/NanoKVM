@@ -1,14 +1,16 @@
 package network
 
 import (
-	"NanoKVM-Server/proto"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
 )
 
 const (
@@ -83,7 +85,7 @@ func (s *Service) DeleteMac(c *gin.Context) {
 	}
 
 	data := strings.Join(newMacs, "\n")
-	err = os.WriteFile(WolHistory, []byte(data), 0644)
+	err = os.WriteFile(WolHistory, []byte(data), 0o644)
 	if err != nil {
 		log.Errorf("write %s failed: %s", WolHistory, err)
 		rsp.ErrRsp(c, -3, "write failed")
@@ -99,18 +101,20 @@ func saveMac(mac string) {
 		return
 	}
 
-	err := os.MkdirAll(filepath.Dir(WolHistory), 0644)
+	err := os.MkdirAll(filepath.Dir(WolHistory), 0o644)
 	if err != nil {
 		log.Errorf("create dir failed: %s", err)
 		return
 	}
 
-	file, err := os.OpenFile(WolHistory, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(WolHistory, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		log.Errorf("open %s failed: %s", WolHistory, err)
 		return
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	content := fmt.Sprintf("%s\n", mac)
 	_, err = file.WriteString(content)

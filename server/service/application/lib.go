@@ -1,16 +1,19 @@
 package application
 
 import (
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 )
 
 func (s *Service) GetLib(c *gin.Context) {
@@ -39,18 +42,17 @@ func (s *Service) UpdateLib(c *gin.Context) {
 		return
 	}
 
-	cleanCmd := exec.Command("sh", "-c", fmt.Sprintf("rm -rf %s", Temporary))
-	_ = cleanCmd.Run()
-	_ = os.MkdirAll(Temporary, 0755)
-	defer cleanCmd.Run()
+	_ = os.MkdirAll(temporary, 0o755)
+	defer func() {
+		_ = os.RemoveAll(temporary)
+	}()
 
 	if err := downloadLib(); err != nil {
 		rsp.ErrRsp(c, -1, "download lib failed")
 		return
 	}
 
-	command := fmt.Sprintf("mv -f %s/%s %s/", Temporary, LibName, LibDir) // update lib
-	err := exec.Command("sh", "-c", command).Run()
+	err := utils.MoveFile(temporary+"/"+libName, libDir+"/") // update lib
 	if err != nil {
 		rsp.ErrRsp(c, -2, "update lib failed")
 		return
@@ -63,7 +65,7 @@ func (s *Service) UpdateLib(c *gin.Context) {
 }
 
 func isLibExist() (bool, error) {
-	libPath := fmt.Sprintf("%s/%s", LibDir, LibName)
+	libPath := fmt.Sprintf("%s/%s", libDir, libName)
 	_, err := os.Stat(libPath)
 
 	if err == nil {
@@ -78,22 +80,37 @@ func isLibExist() (bool, error) {
 }
 
 func downloadLib() error {
+	log.Debugf("downloading libs...")
 	content, err := os.ReadFile("/device_key")
 	if err != nil {
-		log.Errorf("read devcie key err: %s", err)
+		log.Errorf("error reading device key: %s", err)
 		return err
 	}
 	deviceKey := strings.ReplaceAll(string(content), "\n", "")
 
-	url := fmt.Sprintf("%s?uid=%s", LibURL, deviceKey)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		log.Errorf("new request err: %s", err)
-		return err
+	for i := range maxTries {
+		log.Debugf("attempt #%d/%d", i+1, maxTries)
+		if i > 0 {
+			time.Sleep(time.Second * 3) // wait for 3 seconds before retrying the download attempt
+		}
+
+		var req *http.Request
+		url := fmt.Sprintf("%s?uid=%s", libURL, deviceKey)
+		req, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Errorf("error creating new request: %s", err)
+			continue
+		}
+		req.Header.Set("token", "MaixVision2024")
+
+		target := fmt.Sprintf("%s/%s", temporary, libName)
+
+		err = utils.Download(req, target)
+		if err != nil {
+			log.Errorf("downloading lib failed: %s", err)
+			continue
+		}
+		return nil
 	}
-	req.Header.Set("token", "MaixVision2024")
-
-	target := fmt.Sprintf("%s/%s", Temporary, LibName)
-
-	return utils.Download(req, target)
+	return err
 }

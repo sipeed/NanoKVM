@@ -1,9 +1,10 @@
 package router
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/hid"
-	"github.com/gin-gonic/gin"
 )
 
 func hidRouter(r *gin.Engine) {

@@ -3,8 +3,9 @@ package logger
 import (
 	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"path/filepath"
+
+	"github.com/sirupsen/logrus"
 )
 
 type formatter struct{}

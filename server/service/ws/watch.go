@@ -2,11 +2,12 @@ package ws
 
 import (
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
