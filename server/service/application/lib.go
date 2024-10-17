@@ -1,6 +1,8 @@
 package application
 
 import (
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,9 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
 )
 
 func (s *Service) GetLib(c *gin.Context) {
@@ -52,7 +51,7 @@ func (s *Service) UpdateLib(c *gin.Context) {
 		return
 	}
 
-	err := utils.MoveFile(temporary+"/"+libName, libDir+"/") // update lib
+	err := utils.MoveFile(temporary+"/"+libName, libDir+"/"+libName) // update lib
 	if err != nil {
 		rsp.ErrRsp(c, -2, "update lib failed")
 		return

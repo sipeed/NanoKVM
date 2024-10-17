@@ -61,7 +61,7 @@ func (h *Hid) Write(file *os.File, data []byte) {
 	if err != nil {
 		if errors.Is(err, os.ErrClosed) {
 			log.Debugf("hid already closed, reopen it...")
-			h.Open()
+			h.OpenNoLock()
 		} else {
 			log.Errorf("write to hid failed: %s", err)
 		}

@@ -21,5 +21,9 @@ export function getLib() {
 
 // download lib
 export function updateLib() {
-  return http.post('/api/application/lib');
+  return http.request({
+    method: 'post',
+    url: '/api/application/lib',
+    timeout: 15 * 60 * 1000
+  });
 }

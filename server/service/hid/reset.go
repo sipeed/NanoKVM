@@ -1,12 +1,11 @@
 package hid
 
 import (
+	"NanoKVM-Server/proto"
 	"os"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-
-	"NanoKVM-Server/proto"
 )
 
 func (s *Service) Reset(c *gin.Context) {
@@ -15,7 +14,7 @@ func (s *Service) Reset(c *gin.Context) {
 	defer s.hid.kbMutex.Unlock()
 
 	// reset USB
-	f, err := os.Open("/sys/kernel/config/usb_gadget/g0/UDC")
+	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
 	if err != nil {
 		log.Errorf("open /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
 		rsp.ErrRsp(c, -1, "open usb gadget file failed")
@@ -51,7 +50,7 @@ func (s *Service) Reset(c *gin.Context) {
 		return
 	}
 
-	f, err = os.Open("/sys/kernel/config/usb_gadget/g0/UDC")
+	f, err = os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
 	if err != nil {
 		log.Errorf("open /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
 		rsp.ErrRsp(c, -1, "open usb gadget file failed")

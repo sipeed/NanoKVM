@@ -44,10 +44,10 @@ export const Lib = ({ setIsLoading, setTips }: LibProps) => {
         }
       })
       .finally(() => {
-        setIsLoading(false);
-        setTips('');
-
         setTimeout(() => {
+          setIsLoading(false);
+          setTips('');
+
           window.location.reload();
         }, 6000);
       });

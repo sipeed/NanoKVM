@@ -80,7 +80,7 @@ func (h *Hid) mouseMoveRelative(event []int) {
 }
 
 func (h *Hid) writeWithTimeout(file *os.File, data []byte) {
-	deadline := time.Now().Add(9 * time.Millisecond)
+	deadline := time.Now().Add(8 * time.Millisecond)
 	_ = file.SetWriteDeadline(deadline)
 
 	_, err := file.Write(data)
@@ -88,7 +88,7 @@ func (h *Hid) writeWithTimeout(file *os.File, data []byte) {
 		switch {
 		case errors.Is(err, os.ErrClosed):
 			log.Debugf("hid already closed, reopen it...")
-			h.Open()
+			h.OpenNoLock()
 		case errors.Is(err, os.ErrDeadlineExceeded):
 			log.Debugf("write to hid timeout")
 		default:

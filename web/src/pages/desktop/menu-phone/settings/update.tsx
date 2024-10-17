@@ -84,13 +84,11 @@ export const Update = ({ setIsBadgeVisible }: UpdateProps) => {
           setErrMsg(t('update.updateFailed'));
         }
       })
-      .catch(() => {
-        setErrMsg(t('update.updateFailed'));
-      })
       .finally(() => {
-        setIsUpdating(false);
-
         setTimeout(() => {
+          setIsUpdating(false);
+          setErrMsg('');
+
           window.location.reload();
         }, 6000);
       });

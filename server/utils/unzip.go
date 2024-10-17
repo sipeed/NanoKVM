@@ -25,7 +25,7 @@ func Unzip(filename string, dest string) error {
 			}
 		} else {
 			err = unzipFile(dstPath, f)
-			if err == nil {
+			if err != nil {
 				return err
 			}
 		}

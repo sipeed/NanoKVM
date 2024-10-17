@@ -26,9 +26,9 @@ func (s *Service) SetGpio(c *gin.Context) {
 
 	switch req.Type {
 	case "power":
-		device = s.config.HW.GPIOPower
+		device = s.config.Hardware.GPIOPower
 	case "reset":
-		device = s.config.HW.GPIOReset
+		device = s.config.Hardware.GPIOReset
 	default:
 		rsp.ErrRsp(c, -2, fmt.Sprintf("invalid power event: %s", req.Type))
 		return
@@ -53,15 +53,15 @@ func (s *Service) SetGpio(c *gin.Context) {
 func (s *Service) GetGpio(c *gin.Context) {
 	var rsp proto.Response
 
-	pwr, err := readGpio(s.config.HW.GPIOPowerLED)
+	pwr, err := readGpio(s.config.Hardware.GPIOPowerLED)
 	if err != nil {
 		rsp.ErrRsp(c, -2, fmt.Sprintf("failed to read power led: %s", err))
 		return
 	}
 
 	hdd := false
-	if s.config.HW.Version == config.HWVersionAlpha {
-		hdd, err = readGpio(s.config.HW.GPIOHDDLed)
+	if s.config.Hardware.Version == config.HWVersionAlpha {
+		hdd, err = readGpio(s.config.Hardware.GPIOHDDLed)
 		if err != nil {
 			rsp.ErrRsp(c, -2, fmt.Sprintf("failed to read hdd led: %s", err))
 			return
