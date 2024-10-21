@@ -68,7 +68,7 @@ func (s *Service) InstallTailscale(c *gin.Context) {
 	}
 
 	const (
-		downloadUrl = "http://cdn.sipeed.com/nanokvm/resources/tailscale_riscv64.zip"
+		downloadUrl = "https://cdn.sipeed.com/nanokvm/resources/tailscale_riscv64.zip"
 		workspace   = "/root/.tailscale"
 	)
 
