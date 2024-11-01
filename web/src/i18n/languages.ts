@@ -5,6 +5,7 @@ const languages = [
   { key: 'en', name: 'English' },
   { key: 'es', name: 'Español' },
   { key: 'fr', name: 'Français' },
+  { key: 'id', name: 'Indonesia' },
   { key: 'it', name: 'Italian' },
   { key: 'pl', name: 'Polski' },
   { key: 'ru', name: 'Русский' },
