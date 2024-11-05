@@ -42,7 +42,8 @@ const en = {
       reset3: '2. Delete the file in the device: ',
       reset4: '3. Use the default account to login: ',
       ok: 'Ok',
-      cancel: 'Cancel'
+      cancel: 'Cancel',
+      loginButtonText: 'Login',
     },
     screen: {
       resolution: 'Resolution',
