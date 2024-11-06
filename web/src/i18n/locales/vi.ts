@@ -19,7 +19,7 @@ const vi = {
       desktop: 'Remote Desktop',
       login: 'Đăng nhập',
       changePassword: 'Đổi mật khẩu',
-      terminal: 'Terminal',
+      terminal: 'Terminal'
     },
     auth: {
       login: 'Đăng nhập',
@@ -33,6 +33,7 @@ const vi = {
       invalidUser: 'tên người dùng hoặc mật khẩu không hợp lệ',
       error: 'lỗi không mong đợi',
       changePassword: 'Đổi mật khẩu',
+      changePasswordDesc: 'Để bảo mật thiết bị của bạn, vui lòng thay đổi mật khẩu đăng nhập web.',
       differentPassword: 'mật khẩu không khớp',
       illegalUsername: 'tên người dùng chứa ký tự không hợp lệ',
       illegalPassword: 'mật khẩu chứa ký tự không hợp lệ',
@@ -43,9 +44,10 @@ const vi = {
       reset3: '2. Xóa tệp trong thiết bị: ',
       reset4: '3. Sử dụng tài khoản mặc định để đăng nhập: ',
       ok: 'OK',
-      cancel: 'Hủy',
+      cancel: 'Hủy'
     },
     screen: {
+      video: 'Chế độ video',
       resolution: 'Độ phân giải',
       auto: 'Tự động',
       autoTips:
@@ -53,16 +55,20 @@ const vi = {
       fps: 'FPS',
       customizeFps: 'Tùy chỉnh',
       quality: 'Chất lượng',
+      qualityLossless: 'Không mất dữ liệu',
+      qualityHigh: 'Cao',
+      qualityMedium: 'Trung bình',
+      qualityLow: 'Thấp',
       frameDetect: 'Phát hiện khung hình',
       frameDetectTip:
-        'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.',
+        'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.'
     },
     keyboard: {
       paste: 'Dán',
       tips: 'Chỉ hỗ trợ các chữ cái và ký hiệu bàn phím tiêu chuẩn',
       placeholder: 'Vui lòng nhập',
       submit: 'Gửi',
-      virtual: 'Bàn phím',
+      virtual: 'Bàn phím'
     },
     mouse: {
       default: 'Con trỏ mặc định',
@@ -76,15 +82,14 @@ const vi = {
       relative: 'Chế độ tương đối',
       requestPointer:
         'Đang sử dụng chế độ tương đối. Vui lòng nhấp vào màn hình để lấy con trỏ chuột.',
-      resetHid: 'Đặt lại HID',
+      resetHid: 'Đặt lại HID'
     },
     image: {
       title: 'Hình ảnh',
       loading: 'Đang tải...',
       empty: 'Không tìm thấy',
       mountFailed: 'Mount thất bại',
-      mountDesc:
-        'Trong một số hệ thống, cần phải eject đĩa ảo trên máy remote trước khi mount.',
+      mountDesc: 'Trong một số hệ thống, cần phải eject đĩa ảo trên máy remote trước khi mount.',
       tips: {
         title: 'Cách tải lên',
         usb1: 'Kết nối NanoKVM với máy tính của bạn qua USB.',
@@ -98,8 +103,8 @@ const vi = {
         tf2: 'Lấy thẻ TF từ NanoKVM (với phiên bản FULL, hãy tháo vỏ trước).',
         tf3: 'Chèn thẻ TF vào đầu đọc thẻ và kết nối với máy tính của bạn.',
         tf4: 'Sao chép tệp hình ảnh vào thư mục /data trên thẻ TF.',
-        tf5: 'Chèn thẻ TF vào NanoKVM.',
-      },
+        tf5: 'Chèn thẻ TF vào NanoKVM.'
+      }
     },
     script: {
       title: 'Script',
@@ -112,7 +117,7 @@ const vi = {
       confirm: 'Có',
       cancel: 'Không',
       delete: 'Xóa',
-      close: 'Đóng',
+      close: 'Đóng'
     },
     terminal: {
       title: 'Terminal',
@@ -121,13 +126,13 @@ const vi = {
       serialPort: 'Cổng Nối Tiếp',
       serialPortPlaceholder: 'Vui lòng nhập cổng nối tiếp',
       baudrate: 'Tốc độ Baud',
-      confirm: 'OK',
+      confirm: 'OK'
     },
     wol: {
       sending: 'Đang gửi lệnh...',
       sent: 'Đã gửi lệnh',
       input: 'Vui lòng nhập địa chỉ MAC',
-      ok: 'OK',
+      ok: 'OK'
     },
     about: {
       title: 'Giới thiệu về NanoKVM',
@@ -138,7 +143,7 @@ const vi = {
       image: 'Phiên bản Hình ảnh',
       deviceKey: 'Khóa Thiết bị',
       queryFailed: 'Truy vấn thất bại',
-      community: 'Cộng đồng',
+      community: 'Cộng đồng'
     },
     update: {
       title: 'Kiểm tra cập nhật',
@@ -148,11 +153,11 @@ const vi = {
       available: 'Có bản cập nhật mới. Bạn có chắc chắn muốn cập nhật không?',
       updating: 'Bắt đầu cập nhật. Vui lòng chờ...',
       confirm: 'Xác nhận',
-      cancel: 'Hủy',
+      cancel: 'Hủy'
     },
     virtualDevice: {
       network: 'Mạng Ảo',
-      disk: 'Đĩa Ảo',
+      disk: 'Đĩa Ảo'
     },
     tailscale: {
       loading: 'Đang tải...',
@@ -177,9 +182,9 @@ const vi = {
       deviceIP: 'IP Thiết bị',
       account: 'Tài khoản',
       logout: 'Đăng xuất',
-      logout2: 'Bạn có chắc chắn muốn đăng xuất không?',
-    },
-  },
+      logout2: 'Bạn có chắc chắn muốn đăng xuất không?'
+    }
+  }
 };
 
 export default vi;

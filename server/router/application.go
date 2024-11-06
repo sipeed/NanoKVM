@@ -13,6 +13,4 @@ func applicationRouter(r *gin.Engine) {
 
 	api.GET("/application/version", service.GetVersion) // get application version
 	api.POST("/application/update", service.Update)     // update application
-	api.GET("/application/lib", service.GetLib)         // check if lib exists
-	api.POST("/application/lib", service.UpdateLib)     // update lib
 }

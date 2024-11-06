@@ -1,6 +1,7 @@
 import { Resolution } from '@/types';
 
 const LANGUAGE_KEY = 'nano-kvm-language';
+const VIDEO_MODE_KEY = 'nano-kvm-vide-mode';
 const WEB_RESOLUTION_KEY = 'nano-kvm-web-resolution';
 const FPS_KEY = 'nano-kvm-fps';
 const QUALITY_KEY = 'nano-kvm-quality';
@@ -8,6 +9,7 @@ const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
 const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
+const SKIP_MODIFY_PASSWORD = 'nano-kvm-skip-modify-password';
 
 type ItemWithExpiry = {
   value: string;
@@ -47,6 +49,14 @@ export function getLanguage() {
 
 export function setLanguage(language: string) {
   localStorage.setItem(LANGUAGE_KEY, language);
+}
+
+export function getVideoMode() {
+  return localStorage.getItem(VIDEO_MODE_KEY);
+}
+
+export function setVideoMode(mode: string) {
+  localStorage.setItem(VIDEO_MODE_KEY, mode);
 }
 
 export function getResolution(): Resolution | null {
@@ -99,14 +109,11 @@ export function setMouseMode(mouse: string) {
 
 export function getSkipUpdate() {
   const skip = getWithExpiry(SKIP_UPDATE_KEY);
-  if (skip) {
-    return Boolean(skip);
-  }
-  return false;
+  return skip ? Boolean(skip) : false;
 }
 
 export function setSkipUpdate(skip: boolean) {
-  const expiry = 3 * 24 * 60 * 60 * 1000; // 3天
+  const expiry = 3 * 24 * 60 * 60 * 1000; // 3 days
   setWithExpiry(SKIP_UPDATE_KEY, String(skip), expiry);
 }
 
@@ -116,4 +123,14 @@ export function setKeyboardLayout(layout: string) {
 
 export function getKeyboardLayout() {
   return localStorage.getItem(KEYBOARD_LAYOUT_KEY);
+}
+
+export function setSkipModifyPassword(skip: boolean) {
+  const expiry = 3 * 24 * 60 * 60 * 1000; // 3 days
+  setWithExpiry(SKIP_MODIFY_PASSWORD, String(skip), expiry);
+}
+
+export function getSkipModifyPassword() {
+  const skip = getWithExpiry(SKIP_MODIFY_PASSWORD);
+  return skip ? Boolean(skip) : false;
 }

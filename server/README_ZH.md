@@ -25,13 +25,6 @@ server
 
 ## 部署
 
-```shell
-# 编译
-cd server
-go mod tidy
-GOARCH=riscv64 GOOS=linux go build
-```
+待完善。
 
-1. 编译完成后会生成可执行文件 `NanoKVM-Server`；
-2. 将 `NanoKVM-Server` 文件上传到 NanoKVM 的 `/kvmapp/server/` 目录下；
-3. 在 NanoKVM 中执行 `/etc/init.d/S95nanokvm restart` 重启服务。
+项目中使用了 CGO，需要使用 Linux 并安装工具链后才能编译。这部分内容会晚一点更新。

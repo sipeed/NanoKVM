@@ -32,6 +32,7 @@ const en = {
       invalidUser: 'Invalid username or password',
       error: 'Unexpected error',
       changePassword: 'Change Password',
+      changePasswordDesc: 'For the security of your device, please modify the web login password.',
       differentPassword: 'Passwords do not match',
       illegalUsername: 'Username contains illegal characters',
       illegalPassword: 'Password contains illegal characters',
@@ -45,6 +46,7 @@ const en = {
       cancel: 'Cancel'
     },
     screen: {
+      video: 'Video Mode',
       resolution: 'Resolution',
       auto: 'Automatic',
       autoTips:
@@ -52,6 +54,10 @@ const en = {
       fps: 'FPS',
       customizeFps: 'Customize',
       quality: 'Quality',
+      qualityLossless: 'Lossless',
+      qualityHigh: 'High',
+      qualityMedium: 'Medium',
+      qualityLow: 'Low',
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen."

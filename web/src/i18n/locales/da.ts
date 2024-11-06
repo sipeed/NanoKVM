@@ -28,10 +28,12 @@ const da = {
       placeholderPassword2: 'indtast adgangskode igen',
       noEmptyUsername: 'brugernavn kan ikke være tom',
       noEmptyPassword: 'adgangskode kan ikke være tom',
-      noAccount: 'Kunne ikke hente brugeroplysninger. Prøv at opdater siden eller nulstil adgangskoden',
+      noAccount:
+        'Kunne ikke hente brugeroplysninger. Prøv at opdater siden eller nulstil adgangskoden',
       invalidUser: 'ugyldigt brugernavn eller adgangskode',
       error: 'uventet fejl',
       changePassword: 'Skift adgangskode',
+      changePasswordDesc: 'For sikkerheden af din enhed, bedes du ændre web-login adgangskoden.',
       differentPassword: 'Adgangskoder er ikke ens',
       illegalUsername: 'brugernavn indeholder ugyldige tegn',
       illegalPassword: 'adgangskode indeholder ugyldige tegn',
@@ -45,16 +47,21 @@ const da = {
       cancel: 'Annuller'
     },
     screen: {
+      video: 'Videotilstand',
       resolution: 'Opløsning',
       auto: 'Automatisk',
       autoTips:
-        "Screen-tearing eller mouse-offset kan opstå ved enkelte opløsninger. Hvis du oplever dette, kan du prøve at justere fjerncomputerens skærmopløsning eller deaktivere automatisk tilstand.",
+        'Screen-tearing eller mouse-offset kan opstå ved enkelte opløsninger. Hvis du oplever dette, kan du prøve at justere fjerncomputerens skærmopløsning eller deaktivere automatisk tilstand.',
       fps: 'FPS',
       customizeFps: 'Tilpas',
       quality: 'Kvalitet',
+      qualityLossless: 'Tabsfri',
+      qualityHigh: 'Høj',
+      qualityMedium: 'Mellem',
+      qualityLow: 'Lav',
       frameDetect: 'Beregn frames',
       frameDetectTip:
-        "Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm."
+        'Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm.'
     },
     keyboard: {
       paste: 'Indsæt',
@@ -82,7 +89,7 @@ const da = {
       empty: 'Ingen fundet',
       mountFailed: 'Montering af diskbillede mislykkedes',
       mountDesc:
-        "På nogle systemer kan det være nødvendigt at skubbe den virtuelle disk ud på fjerncomputeren før du kan montere diskbilledet.",
+        'På nogle systemer kan det være nødvendigt at skubbe den virtuelle disk ud på fjerncomputeren før du kan montere diskbilledet.',
       tips: {
         title: 'Sådan uploader du',
         usb1: 'Forbind din NanoKVM til din computer via USB.',
@@ -165,7 +172,8 @@ const da = {
       upTailscale: 'Upload tailscale til følgende mappe på enheden: /usr/bin/',
       upTailscaled: 'Upload tailscaled til følgende mappe på enheden: /usr/sbin/',
       refresh: 'Opdater sides',
-      notLogin: 'Enheden er ikke tilknyttet en Tailscale-konto endnu. Log ind for at fuldføre tilknytningen til din konto.',
+      notLogin:
+        'Enheden er ikke tilknyttet en Tailscale-konto endnu. Log ind for at fuldføre tilknytningen til din konto.',
       urlPeriod: 'Denne URL er gyldig i 10 minutter',
       login: 'Log ind',
       loginSuccess: 'Log ind lykkedes',

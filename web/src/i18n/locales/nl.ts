@@ -28,10 +28,13 @@ const nl = {
       placeholderPassword2: 'Voer wachtwoord nogmaals in',
       noEmptyUsername: 'Gebruikersnaam mag niet leeg zijn',
       noEmptyPassword: 'Wachtwoord mag niet leeg zijn',
-      noAccount: 'Ophalen van gebruikersinformatie mislukt, vernieuw de webpagina of reset het wachtwoord',
+      noAccount:
+        'Ophalen van gebruikersinformatie mislukt, vernieuw de webpagina of reset het wachtwoord',
       invalidUser: 'Ongeldige gebruikersnaam of wachtwoord',
       error: 'Onverwachte fout',
       changePassword: 'Wachtwoord wijzigen',
+      changePasswordDesc:
+        'Voor de veiligheid van uw apparaat, wijzig alstublieft het webaanmeldingswachtwoord.',
       differentPassword: 'Wachtwoorden komen niet overeen',
       illegalUsername: 'Gebruikersnaam bevat ongeldige tekens',
       illegalPassword: 'Wachtwoord bevat ongeldige tekens',
@@ -45,6 +48,7 @@ const nl = {
       cancel: 'Annuleren'
     },
     screen: {
+      video: 'Videomodus',
       resolution: 'Resolutie',
       auto: 'Automatisch',
       autoTips:
@@ -52,6 +56,10 @@ const nl = {
       fps: 'FPS',
       customizeFps: 'Aanpassen',
       quality: 'Kwaliteit',
+      qualityLossless: 'Verliesvrij',
+      qualityHigh: 'Hoog',
+      qualityMedium: 'Gemiddeld',
+      qualityLow: 'Laag',
       frameDetect: 'Frame detectie',
       frameDetectTip:
         'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.'
@@ -73,7 +81,8 @@ const nl = {
       mode: 'Muismodus',
       absolute: 'Absolute modus',
       relative: 'Relatieve modus',
-      requestPointer: 'Relatieve modus wordt gebruikt. Klik op het bureaublad om de muisaanwijzer te krijgen.',
+      requestPointer:
+        'Relatieve modus wordt gebruikt. Klik op het bureaublad om de muisaanwijzer te krijgen.',
       resetHid: 'HID resetten'
     },
     image: {
@@ -165,8 +174,7 @@ const nl = {
       upTailscale: 'Upload tailscale naar NanoKVM directory /usr/bin/',
       upTailscaled: 'Upload tailscaled naar NanoKVM directory /usr/sbin/',
       refresh: 'Vernieuw huidige pagina',
-      notLogin:
-        'Het apparaat is nog niet gekoppeld. Log in en koppel dit apparaat aan uw account.',
+      notLogin: 'Het apparaat is nog niet gekoppeld. Log in en koppel dit apparaat aan uw account.',
       urlPeriod: 'Deze url is 10 minuten geldig',
       login: 'Inloggen',
       loginSuccess: 'Inloggen gelukt',

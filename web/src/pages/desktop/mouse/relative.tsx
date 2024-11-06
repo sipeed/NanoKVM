@@ -4,14 +4,13 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
 import { client } from '@/lib/websocket.ts';
-import { resolutionAtom, streamUrlAtom } from '@/jotai/screen.ts';
+import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseButton, MouseEvent } from './constants';
 
 export const Relative = () => {
   const { t } = useTranslation();
 
-  const streamUrl = useAtomValue(streamUrlAtom);
   const resolution = useAtomValue(resolutionAtom);
 
   const isLockedRef = useRef(false);
@@ -126,7 +125,7 @@ export const Relative = () => {
       canvas.removeEventListener('mouseup', handleMouseUp);
       canvas.removeEventListener('contextmenu', disableEvent);
     };
-  }, [resolution, streamUrl]);
+  }, [resolution]);
 
   // disable default events
   function disableEvent(event: any) {

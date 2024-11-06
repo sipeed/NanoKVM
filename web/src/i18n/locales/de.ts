@@ -34,6 +34,8 @@ const de = {
       invalidUser: 'Falscher Benutzername oder falsches Passwort',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
+      changePasswordDesc:
+        'Für die Sicherheit Ihres Geräts ändern Sie bitte das Web-Login-Passwort.',
       differentPassword: 'Passwörter stimmt nicht überein',
       illegalUsername: 'Benutzername beinhaltet ungültige Zeichen',
       illegalPassword: 'Passwort beinhaltet ungültige Zeichen',
@@ -48,6 +50,7 @@ const de = {
       cancel: 'Abbrechen'
     },
     screen: {
+      video: 'Videomodus',
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
@@ -55,6 +58,10 @@ const de = {
       fps: 'FPS',
       customizeFps: 'Anpassen',
       quality: 'Qualität',
+      qualityLossless: 'Verlustfrei',
+      qualityHigh: 'Hoch',
+      qualityMedium: 'Mittel',
+      qualityLow: 'Niedrig',
       frameDetect: 'Frame Detect',
       frameDetectTip:
         'Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.'

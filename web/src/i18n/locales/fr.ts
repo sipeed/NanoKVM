@@ -34,6 +34,8 @@ const fr = {
       invalidUser: "Nom d'utilisateur ou mot de passe invalide",
       error: 'Erreur inattendue',
       changePassword: 'Changer le mot de passe',
+      changePasswordDesc:
+        'Pour la sécurité de votre appareil, veuillez modifier le mot de passe de connexion Web.',
       differentPassword: 'Les mots de passe ne correspondent pas',
       illegalUsername: "Le nom d'utilisateur contient des caractères illégaux",
       illegalPassword: 'Le mot de passe contient des caractères illégaux',
@@ -48,6 +50,7 @@ const fr = {
       cancel: 'Annuler'
     },
     screen: {
+      video: 'Mode vidéo',
       resolution: 'Résolution',
       auto: 'Automatique',
       autoTips:
@@ -55,6 +58,10 @@ const fr = {
       fps: 'FPS',
       customizeFps: 'Personnaliser',
       quality: 'Qualité',
+      qualityLossless: 'Sans perte',
+      qualityHigh: 'Élevé',
+      qualityMedium: 'Moyen',
+      qualityLow: 'Bas',
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant"

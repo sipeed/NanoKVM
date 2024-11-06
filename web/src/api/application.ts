@@ -13,17 +13,3 @@ export function update() {
     timeout: 15 * 60 * 1000
   });
 }
-
-// check if lib exists
-export function getLib() {
-  return http.get('/api/application/lib');
-}
-
-// download lib
-export function updateLib() {
-  return http.request({
-    method: 'post',
-    url: '/api/application/lib',
-    timeout: 15 * 60 * 1000
-  });
-}

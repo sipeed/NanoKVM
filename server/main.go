@@ -1,19 +1,24 @@
 package main
 
 import (
-	"fmt"
-
+	"NanoKVM-Server/common"
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/logger"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
 )
 
 func main() {
-	logger.Init()
+	initialize()
+	defer dispose()
+	signalHandler()
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
@@ -23,6 +28,12 @@ func main() {
 	router.Init(r)
 
 	run(r)
+}
+
+func initialize() {
+	logger.Init()
+	_ = common.GetScreen()
+	_ = common.GetKvmVision()
 }
 
 func run(r *gin.Engine) {
@@ -48,4 +59,21 @@ func run(r *gin.Engine) {
 			panic("start http server failed")
 		}
 	}
+}
+
+func dispose() {
+	common.GetKvmVision().Close()
+}
+
+func signalHandler() {
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
+	go func() {
+		sig := <-sigChan
+		fmt.Printf("\nReceived signal: %v\n", sig)
+
+		dispose()
+		os.Exit(0)
+	}()
 }

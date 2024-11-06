@@ -14,5 +14,6 @@ func authRouter(r *gin.Engine) {
 
 	api := r.Group("/api").Use(middleware.CheckToken())
 
-	api.POST("/auth/password", service.ChangePassword) // change password
+	api.GET("/auth/password", service.IsPasswordUpdated) // is password updated
+	api.POST("/auth/password", service.ChangePassword)   // change password
 }

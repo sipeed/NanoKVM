@@ -1,18 +1,13 @@
 import { Popover } from 'antd';
+import { useAtomValue } from 'jotai';
 import { CheckIcon, SquareActivityIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { updateScreen } from '@/api/vm';
 import { setQuality as setCookie } from '@/lib/localstorage.ts';
+import { videoModeAtom } from '@/jotai/screen.ts';
 
-const qualityList = [
-  { key: 99, label: '100%' },
-  { key: 90, label: '90%' },
-  { key: 80, label: '80%' },
-  { key: 70, label: '70%' },
-  { key: 60, label: '60%' },
-  { key: 51, label: '50%' }
-];
+import { BitRateMap, QualityMap } from './constants.ts';
 
 type QualityProps = {
   quality: number;
@@ -21,16 +16,25 @@ type QualityProps = {
 
 export const Quality = ({ quality, setQuality }: QualityProps) => {
   const { t } = useTranslation();
+  const videoMode = useAtomValue(videoModeAtom);
 
-  async function update(value: number) {
+  const qualityList = [
+    { key: 1, label: t('screen.qualityLossless') },
+    { key: 2, label: t('screen.qualityHigh') },
+    { key: 3, label: t('screen.qualityMedium') },
+    { key: 4, label: t('screen.qualityLow') }
+  ];
+
+  async function update(key: number) {
+    const value = videoMode === 'mjpeg' ? QualityMap.get(key)! : BitRateMap.get(key)!;
+
     const rsp = await updateScreen('quality', value);
-
     if (rsp.code !== 0) {
       return;
     }
 
-    setQuality(value);
-    setCookie(value);
+    setQuality(key);
+    setCookie(key);
   }
 
   const content = (
@@ -44,7 +48,7 @@ export const Quality = ({ quality, setQuality }: QualityProps) => {
           <div className="flex h-[14px] w-[20px] items-end">
             {item.key === quality && <CheckIcon size={14} />}
           </div>
-          <span className="flex w-[32px]">{item.label}</span>
+          <span className="flex w-[50px]">{item.label}</span>
         </div>
       ))}
     </>

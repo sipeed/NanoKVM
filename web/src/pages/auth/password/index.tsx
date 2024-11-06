@@ -58,6 +58,10 @@ export const Password = () => {
     return !regex.test(str);
   }
 
+  function cancel() {
+    window.location.replace('/');
+  }
+
   return (
     <>
       <Head title={t('head.changePassword')} />
@@ -105,7 +109,7 @@ export const Password = () => {
               <Button type="primary" htmlType="submit" className="w-1/2">
                 {t('auth.ok')}
               </Button>
-              <Button className="w-1/2" onClick={() => navigate('/')}>
+              <Button className="w-1/2" onClick={cancel}>
                 {t('auth.cancel')}
               </Button>
             </div>

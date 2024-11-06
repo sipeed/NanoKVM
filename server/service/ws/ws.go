@@ -22,7 +22,6 @@ type WsClient struct {
 	hid      *hid.Hid
 	keyboard chan []int
 	mouse    chan []int
-	watcher  chan struct{}
 }
 
 var upgrader = websocket.Upgrader{
@@ -46,7 +45,6 @@ func (s *Service) Connect(c *gin.Context) {
 		conn:     conn,
 		keyboard: make(chan []int, 200),
 		mouse:    make(chan []int, 200),
-		watcher:  make(chan struct{}, 1),
 	}
 
 	go client.Start()
@@ -59,8 +57,6 @@ func (c *WsClient) Start() {
 
 	go c.hid.Keyboard(c.keyboard)
 	go c.hid.Mouse(c.mouse)
-
-	go c.Watch()
 
 	_ = c.Read()
 }
@@ -97,35 +93,6 @@ func (c *WsClient) Write(message []byte) error {
 	return c.conn.WriteMessage(websocket.TextMessage, message)
 }
 
-func (c *WsClient) Watch() {
-	ticker := time.NewTicker(1 * time.Second)
-	defer ticker.Stop()
-
-	fileModMap := map[string]time.Time{
-		StreamState: time.Unix(0, 0),
-	}
-
-	for {
-		select {
-		case <-ticker.C:
-			{
-				message, err := watchStreamState(fileModMap)
-				if err != nil || message == nil {
-					continue
-				}
-
-				err = c.Write(message)
-				if err != nil {
-					return
-				}
-			}
-
-		case <-c.watcher:
-			return
-		}
-	}
-}
-
 func (c *WsClient) Clean() {
 	_ = c.conn.Close()
 
@@ -134,8 +101,6 @@ func (c *WsClient) Clean() {
 
 	go clearQueue(c.mouse)
 	close(c.mouse)
-
-	close(c.watcher)
 
 	c.hid.Close()
 

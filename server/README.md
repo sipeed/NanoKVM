@@ -26,13 +26,6 @@ The configuration file path is `/etc/kvm/server.yaml`. There are two configurabl
 
 ## Deployment
 
-```shell
-# Build
-cd server
-go mod tidy
-GOARCH=riscv64 GOOS=linux go build
-```
+Work in progress.
 
-1. After the compilation is complete, the executable file `NanoKVM-Server` will be generated;
-2. Upload the `NanoKVM-Server` file to the `/kvmapp/server/` directory of NanoKVM;
-3. Execute `/etc/init.d/S95nanokvm restart` in NanoKVM to restart the service.
+The project requires CGO. It must be compiled on Linux with a toolchain installed. More details will be added later.

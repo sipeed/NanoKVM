@@ -173,3 +173,39 @@ func downloadApp() error {
 	}
 	return err
 }
+
+func downloadLib() error {
+	log.Debugf("downloading libs...")
+	content, err := os.ReadFile("/device_key")
+	if err != nil {
+		log.Errorf("error reading device key: %s", err)
+		return err
+	}
+	deviceKey := strings.ReplaceAll(string(content), "\n", "")
+
+	for i := range maxTries {
+		log.Debugf("attempt #%d/%d", i+1, maxTries)
+		if i > 0 {
+			time.Sleep(time.Second * 3) // wait for 3 seconds before retrying the download attempt
+		}
+
+		var req *http.Request
+		url := fmt.Sprintf("%s?uid=%s", libURL, deviceKey)
+		req, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Errorf("error creating new request: %s", err)
+			continue
+		}
+		req.Header.Set("token", "MaixVision2024")
+
+		target := fmt.Sprintf("%s/%s", temporary, libName)
+
+		err = utils.Download(req, target)
+		if err != nil {
+			log.Errorf("downloading lib failed: %s", err)
+			continue
+		}
+		return nil
+	}
+	return err
+}

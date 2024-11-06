@@ -33,6 +33,7 @@ const ko = {
       invalidUser: '유저 이름이나 비밀번호가 틀렸습니다.',
       error: '정의되지 않은 에러',
       changePassword: '비밀번호 변경',
+      changePasswordDesc: '기기의 보안을 위해 웹 로그인 비밀번호를 수정해 주세요.',
       differentPassword: '두 비밀번호가 서로 상이합니다.',
       illegalUsername: '유저 이름에 사용할 수 없는 문자가 있습니다.',
       illegalPassword: '비밀번호에 사용할 수 없는 문자가 있습니다.',
@@ -46,6 +47,7 @@ const ko = {
       cancel: '취소'
     },
     screen: {
+      video: '비디오 모드',
       resolution: '해상도',
       auto: '오토매틱',
       autoTips:
@@ -53,6 +55,10 @@ const ko = {
       fps: 'FPS',
       customizeFps: 'FPS 설정',
       quality: '품질',
+      qualityLossless: '무손실',
+      qualityHigh: '높음',
+      qualityMedium: '중간',
+      qualityLow: '낮음',
       frameDetect: '프레임 탐지',
       frameDetectTip:
         '프레임 간의 차이를 계산합니다. 원격 호스트 화면에 변경 사항이 감지되지 않으면 비디오 스트림 전송을 중지합니다.'

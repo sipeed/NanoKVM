@@ -33,6 +33,8 @@ const it = {
       invalidUser: 'Nome utente o password non validi',
       error: 'Errore imprevisto',
       changePassword: 'Cambia Password',
+      changePasswordDesc:
+        'Per la sicurezza del tuo dispositivo, modifica la password di accesso web.',
       differentPassword: 'Le password non corrispondono',
       illegalUsername: 'Il nome utente contiene caratteri non validi',
       illegalPassword: 'La password contiene caratteri non validi',
@@ -46,6 +48,7 @@ const it = {
       cancel: 'Annulla'
     },
     screen: {
+      video: 'Modalità video',
       resolution: 'Risoluzione',
       auto: 'Automatico',
       autoTips:
@@ -53,6 +56,10 @@ const it = {
       fps: 'FPS',
       customizeFps: 'Personalizza',
       quality: 'Qualità',
+      qualityLossless: 'Senza perdita',
+      qualityHigh: 'Alto',
+      qualityMedium: 'Medio',
+      qualityLow: 'Basso',
       frameDetect: 'Rilevamento Frame',
       frameDetectTip:
         'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.'

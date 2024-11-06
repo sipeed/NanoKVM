@@ -28,10 +28,12 @@ const id = {
       placeholderPassword2: 'Silahkan masukkan password again',
       noEmptyUsername: 'nama user tidak boleh kosong',
       noEmptyPassword: 'sandi  tidak boleh kosong',
-      noAccount: 'Gagal mendapatkan informasi user, silahkan segarkan halaman atau atur ulang sandi',
+      noAccount:
+        'Gagal mendapatkan informasi user, silahkan segarkan halaman atau atur ulang sandi',
       invalidUser: 'invalid username or password',
       error: 'terjadi kesalahan tak terduga',
       changePassword: 'Ganti Sandi',
+      changePasswordDesc: 'Untuk keamanan perangkat Anda, silakan ubah kata sandi masuk web.',
       differentPassword: 'sandi tidak sesuai',
       illegalUsername: 'ada karakter ilegal pada nama user',
       illegalPassword: 'ada karakter ilegal pada sandi',
@@ -45,16 +47,21 @@ const id = {
       cancel: 'Batalkan'
     },
     screen: {
+      video: 'Mode Video',
       resolution: 'Resolusi',
       auto: 'Otomatis',
       autoTips:
-        "Tearing layar atau offset tetikus dapat terjadi pada resolusi tertentu. Pertimbangkan untuk menyesuaikan resolusi host jarak jauh atau menonaktifkan mode otomatis.",
+        'Tearing layar atau offset tetikus dapat terjadi pada resolusi tertentu. Pertimbangkan untuk menyesuaikan resolusi host jarak jauh atau menonaktifkan mode otomatis.',
       fps: 'FPS',
       customizeFps: 'Sesuaikan',
       quality: 'Kualitas',
+      qualityLossless: 'Tanpa Kehilangan',
+      qualityHigh: 'Tinggi',
+      qualityMedium: 'Sedang',
+      qualityLow: 'Rendah',
       frameDetect: 'Deteksi bingkai',
       frameDetectTip:
-        "Hitung selisih antar frame. Hentikan transmisi aliran video saat tidak ada perubahan yang terdeteksi di layar host jarak jauh."
+        'Hitung selisih antar frame. Hentikan transmisi aliran video saat tidak ada perubahan yang terdeteksi di layar host jarak jauh.'
     },
     keyboard: {
       paste: 'Tempel',
@@ -73,7 +80,8 @@ const id = {
       mode: 'Mode tetikus',
       absolute: 'Mode absolut',
       relative: 'Mode relatif',
-      requestPointer: 'Menggunakan mode relatf. Silakan klik desktop untuk mendapatkan penunjuk tetikus.',
+      requestPointer:
+        'Menggunakan mode relatf. Silakan klik desktop untuk mendapatkan penunjuk tetikus.',
       resetHid: 'Setel ulang HID'
     },
     image: {
@@ -82,7 +90,7 @@ const id = {
       empty: 'Tidak ada yang ditemukan',
       mountFailed: 'Pemasangan Gagal',
       mountDesc:
-        "Di beberapa sistem, perlu mengeluarkan disk virtual pada host jarak jauh sebelum memasang gambar.",
+        'Di beberapa sistem, perlu mengeluarkan disk virtual pada host jarak jauh sebelum memasang gambar.',
       tips: {
         title: 'Cara mengunggah',
         usb1: 'Hubungkan NanoKVM ke komputer Anda melalui USB.',
@@ -165,8 +173,7 @@ const id = {
       upTailscale: 'Unggah tailscale ke direktori NanoKVM /usr/bin/',
       upTailscaled: 'Unggah tailscaled ke direktori NanoKVM /usr/sbin/',
       refresh: 'Segarkan halaman ini',
-      notLogin:
-        'Perangkat belum ditautkan. Silakan masuk dan tautkan perangkat ini ke akun Anda.',
+      notLogin: 'Perangkat belum ditautkan. Silakan masuk dan tautkan perangkat ini ke akun Anda.',
       urlPeriod: 'Url ini berlaku selama 10 menit',
       login: 'Masuk',
       loginSuccess: 'Berhasil masuk',

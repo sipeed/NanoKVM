@@ -1,4 +1,4 @@
-package stream
+package mjpeg
 
 import (
 	"errors"
@@ -20,7 +20,7 @@ type UpdateFrameDetectRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
-func (s *Service) GetFrameDetect(c *gin.Context) {
+func GetFrameDetect(c *gin.Context) {
 	var rsp proto.Response
 
 	isEnabled, err := isFrameDetectEnabled()
@@ -35,7 +35,7 @@ func (s *Service) GetFrameDetect(c *gin.Context) {
 	log.Debugf("get frame detect success, enabled: %t", isEnabled)
 }
 
-func (s *Service) UpdateFrameDetect(c *gin.Context) {
+func UpdateFrameDetect(c *gin.Context) {
 	var rsp proto.Response
 
 	isEnabled, err := isFrameDetectEnabled()
@@ -70,7 +70,7 @@ func (s *Service) UpdateFrameDetect(c *gin.Context) {
 	log.Debugf("update frame detect success, enabled: %t", isEnabled)
 }
 
-func (s *Service) StopFrameDetect(c *gin.Context) {
+func StopFrameDetect(c *gin.Context) {
 	var rsp proto.Response
 
 	exist, err := isFileExist(frameDetect)

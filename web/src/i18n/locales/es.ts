@@ -28,16 +28,20 @@ const en = {
       placeholderPassword2: 'Introduce tu contraseña de nuevo',
       noEmptyUsername: 'El usuario no puede estar vacío',
       noEmptyPassword: 'La contraseña no puede estar vacía',
-      noAccount: 'No se ha encontrado la cuenta. Por favor, recarga la página o recupera tu contraseña.',
+      noAccount:
+        'No se ha encontrado la cuenta. Por favor, recarga la página o recupera tu contraseña.',
       invalidUser: 'Usuario o contraseña incorrectos',
       error: 'Error inesperado',
       changePassword: 'Cambiar contraseña',
       differentPassword: 'Las contraseñas no coinciden',
+      changePasswordDesc:
+        'Para la seguridad de su dispositivo, por favor modifique la contraseña de inicio de sesión en la web.',
       illegalUsername: 'El usuario contiene caracteres no permitidos',
       illegalPassword: 'La contraseña contiene caracteres no permitidos',
       forgetPassword: 'Contraseña olvidada',
       resetPassword: 'Reiniciar contraseña',
-      reset1: 'Si has olvidado tu contraseña, por favor, sigue los siguientes pasos para recuperarla:',
+      reset1:
+        'Si has olvidado tu contraseña, por favor, sigue los siguientes pasos para recuperarla:',
       reset2: '1. Inicia sesión en el dispositivo NanoKVM a través de SSH',
       reset3: '2. Elimina este archivo en el dispositivo: ',
       reset4: '3. Utiliza la cuenta por defecto para iniciar sesión: ',
@@ -45,14 +49,21 @@ const en = {
       cancel: 'Cancelar'
     },
     screen: {
+      video: 'Modo de vídeo',
       resolution: 'Resolución',
       auto: 'Automático',
-      autoTips: "En determinadas resoluciones pueden producirse rasgado de imagen o desplazamiento del ratón. Prueba a ajustar la resolución del host remoto o desactiva el modo automático.",
+      autoTips:
+        'En determinadas resoluciones pueden producirse rasgado de imagen o desplazamiento del ratón. Prueba a ajustar la resolución del host remoto o desactiva el modo automático.',
       fps: 'FPS',
       customizeFps: 'Personalizar',
       quality: 'Calidad',
+      qualityLossless: 'Sin pérdida',
+      qualityHigh: 'Alto',
+      qualityMedium: 'Medio',
+      qualityLow: 'Bajo',
       frameDetect: 'Detectar fotogramas',
-      frameDetectTip: "Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto."
+      frameDetectTip:
+        'Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto.'
     },
     keyboard: {
       paste: 'Pegar',
@@ -71,7 +82,8 @@ const en = {
       mode: 'Modo de ratón',
       absolute: 'Modo absoluto',
       relative: 'Modo relativo',
-      requestPointer: 'Usando modo relativo. Por favor, haz clic en el escritorio para obtener el cursor del ratón.',
+      requestPointer:
+        'Usando modo relativo. Por favor, haz clic en el escritorio para obtener el cursor del ratón.',
       resetHid: 'Restablecer HID'
     },
     image: {
@@ -79,7 +91,8 @@ const en = {
       loading: 'Cargando...',
       empty: 'No se ha encontrado nada',
       mountFailed: 'Fallo al montar',
-      mountDesc: "En algunos sistemas, es necesario expulsar el disco virtual en el host remoto antes de montar una imagen.",
+      mountDesc:
+        'En algunos sistemas, es necesario expulsar el disco virtual en el host remoto antes de montar una imagen.',
       tips: {
         title: 'Cómo subir imágenes',
         usb1: 'Conecta el NanoKVM a tu computadora mediante USB.',
@@ -144,7 +157,7 @@ const en = {
       updating: 'Actualización iniciada. Por favor, espera...',
       confirm: 'Confirmar',
       cancel: 'Cancelar'
-      },
+    },
     virtualDevice: {
       network: 'Red Virtual',
       disk: 'Disco Virtual'
@@ -155,14 +168,16 @@ const en = {
       install: 'Instalar',
       installing: 'Instalando',
       failed: 'La instalación falló',
-      retry: 'Por favor, actualiza la página e inténtalo de nuevo. O intenta instalarlo manualmente',
+      retry:
+        'Por favor, actualiza la página e inténtalo de nuevo. O intenta instalarlo manualmente',
       download: 'Descargar el',
       package: 'paquete de instalación',
       unzip: 'y descomprimirlo',
       upTailscale: 'Sube tailscale al directorio /usr/bin/ del NanoKVM',
       upTailscaled: 'Sube tailscaled al directorio /usr/sbin/ del NanoKVM',
       refresh: 'Actualizar la página actual',
-      notLogin: 'El dispositivo aún no ha sido vinculado. Por favor, inicia sesión y vincula este dispositivo a tu cuenta.',
+      notLogin:
+        'El dispositivo aún no ha sido vinculado. Por favor, inicia sesión y vincula este dispositivo a tu cuenta.',
       urlPeriod: 'Esta URL es válida por 10 minutos',
       login: 'Iniciar sesión',
       loginSuccess: 'Inicio de sesión exitoso',
