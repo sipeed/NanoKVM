@@ -93,7 +93,7 @@ export const Login = () => {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" className="w-full">
-              {t('auth.ok')}
+              {t('auth.loginButtonText')}
             </Button>
           </Form.Item>
 
