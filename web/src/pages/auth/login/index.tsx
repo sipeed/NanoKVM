@@ -63,13 +63,14 @@ export const Login = () => {
       <Head title={t('head.login')} />
 
       <div className="flex h-screen w-screen flex-col items-center justify-center">
-        <h2 className="text-xl font-semibold text-neutral-100">{t('auth.login')}</h2>
 
         <Form
           style={{ minWidth: 300, maxWidth: 500 }}
           initialValues={{ remember: true }}
           onFinish={login}
         >
+          <h2 className="text-xl font-semibold text-neutral-100 text-center">{t('auth.login')}</h2>
+
           <Form.Item
             name="username"
             rules={[{ required: true, message: t('auth.noEmptyUsername'), min: 1 }]}
