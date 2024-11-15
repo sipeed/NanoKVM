@@ -43,7 +43,8 @@ const zh = {
       reset3: '2. 删除设备中的文件：',
       reset4: '3. 使用默认的账号登录： ',
       ok: '确定',
-      cancel: '取消'
+      cancel: '取消',
+      loginButtonText: '登录'
     },
     screen: {
       video: '视频模式',

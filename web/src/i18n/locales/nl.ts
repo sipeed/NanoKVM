@@ -45,7 +45,8 @@ const nl = {
       reset3: '2. Verwijder het bestand in het apparaat: ',
       reset4: '3. Gebruik het standaardaccount om in te loggen: ',
       ok: 'Ok',
-      cancel: 'Annuleren'
+      cancel: 'Annuleren',
+      loginButtonText: 'Inloggen'
     },
     screen: {
       video: 'Videomodus',

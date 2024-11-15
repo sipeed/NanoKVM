@@ -44,7 +44,8 @@ const da = {
       reset3: '2. Slet filen på enheden: ',
       reset4: '3. Brug standardkontoen til at logge ind: ',
       ok: 'OK',
-      cancel: 'Annuller'
+      cancel: 'Annuller',
+      loginButtonText: 'Log ind'
     },
     screen: {
       video: 'Videotilstand',

@@ -44,7 +44,8 @@ const ko = {
       reset3: '2. 기기내 파일을 제거합니다.: ',
       reset4: '3. 기본 계정으로 로그인 합니다.: ',
       ok: '확인',
-      cancel: '취소'
+      cancel: '취소',
+      loginButtonText: '로그인'
     },
     screen: {
       video: '비디오 모드',

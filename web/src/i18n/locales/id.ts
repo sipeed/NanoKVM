@@ -44,7 +44,8 @@ const id = {
       reset3: '2. Hapus arsip di dalam perangkat: ',
       reset4: '3. Gunakan akun awal untuk masuk: ',
       ok: 'Ok',
-      cancel: 'Batalkan'
+      cancel: 'Batalkan',
+      loginButtonText: 'Masuk'
     },
     screen: {
       video: 'Mode Video',

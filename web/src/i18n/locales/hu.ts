@@ -46,7 +46,8 @@ const hu = {
       reset3: '2. Törölje a fájlt az eszközről:',
       reset4: '3. Használja az alapértelmezett fiókot a bejelentkezéshez:',
       ok: 'Ok',
-      cancel: 'Mégse'
+      cancel: 'Mégse',
+      loginButtonText: 'Bejelentkezés'
     },
     screen: {
       video: 'Videó mód',

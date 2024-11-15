@@ -45,7 +45,8 @@ const cz = {
       reset3: '2. Smažte soubor v zařízení: ',
       reset4: '3. Přihlaste se pomocí výchozího účtu: ',
       ok: 'OK',
-      cancel: 'Zrušit'
+      cancel: 'Zrušit',
+      loginButtonText: 'Přihlášení'
     },
     screen: {
       video: 'Režim videa',

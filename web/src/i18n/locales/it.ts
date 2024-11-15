@@ -45,7 +45,8 @@ const it = {
       reset3: '2. Elimina il file nel dispositivo: ',
       reset4: "3. Usa l'account predefinito per accedere: ",
       ok: 'Ok',
-      cancel: 'Annulla'
+      cancel: 'Annulla',
+      loginButtonText: 'Accedi'
     },
     screen: {
       video: 'Modalità video',

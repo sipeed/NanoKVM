@@ -47,7 +47,8 @@ const fr = {
       reset3: "2. Supprimez le fichier de l'appareil: ",
       reset4: '3. Utilisez le compte par défaut pour vous connecter: ',
       ok: 'Se connecter',
-      cancel: 'Annuler'
+      cancel: 'Annuler',
+      loginButtonText: 'Connexion'
     },
     screen: {
       video: 'Mode vidéo',

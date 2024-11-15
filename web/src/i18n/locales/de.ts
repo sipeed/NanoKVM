@@ -47,7 +47,8 @@ const de = {
       reset3: '2. Die Datei auf dem Gerät löschen: ',
       reset4: '3. Den Standardaccount zum Einloggen benutzen: ',
       ok: 'Ok',
-      cancel: 'Abbrechen'
+      cancel: 'Abbrechen',
+      loginButtonText: 'Einloggen'
     },
     screen: {
       video: 'Videomodus',

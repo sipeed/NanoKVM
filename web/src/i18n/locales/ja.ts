@@ -45,7 +45,8 @@ const ja = {
       reset3: '2. デバイス内のファイルを削除します：',
       reset4: '3. デフォルトのアカウントでログインします：',
       ok: 'OK',
-      cancel: 'キャンセル'
+      cancel: 'キャンセル',
+      loginButtonText: 'ログイン'
     },
     screen: {
       video: 'ビデオモード',

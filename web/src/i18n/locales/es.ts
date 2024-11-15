@@ -46,7 +46,8 @@ const en = {
       reset3: '2. Elimina este archivo en el dispositivo: ',
       reset4: '3. Utiliza la cuenta por defecto para iniciar sesión: ',
       ok: 'Aceptar',
-      cancel: 'Cancelar'
+      cancel: 'Cancelar',
+      loginButtonText: 'Iniciar sesión'
     },
     screen: {
       video: 'Modo de vídeo',

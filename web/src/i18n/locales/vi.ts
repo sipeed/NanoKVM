@@ -44,7 +44,8 @@ const vi = {
       reset3: '2. Xóa tệp trong thiết bị: ',
       reset4: '3. Sử dụng tài khoản mặc định để đăng nhập: ',
       ok: 'OK',
-      cancel: 'Hủy'
+      cancel: 'Hủy',
+      loginButtonText: 'Đăng nhập'
     },
     screen: {
       video: 'Chế độ video',

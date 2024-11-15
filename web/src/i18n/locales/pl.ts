@@ -45,7 +45,8 @@ const pl = {
       reset3: '2. Usuń ten plik z urządzenia: ',
       reset4: '3. Użyj domyślnego login aby zalogować: ',
       ok: 'Ok',
-      cancel: 'Anuluj'
+      cancel: 'Anuluj',
+      loginButtonText: 'Zaloguj się'
     },
     screen: {
       video: 'Tryb wideo',
