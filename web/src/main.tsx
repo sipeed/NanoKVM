@@ -11,22 +11,33 @@ import { router } from './router';
 import './i18n';
 import './assets/styles/index.css';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <Suspense
-      fallback={
-        <div className="flex h-screen w-screen items-center justify-center">
-          <Spin size="large" />
-        </div>
-      }
-    >
-      <ErrorBoundary FallbackComponent={MainError}>
-        <HelmetProvider>
-          <ConfigProvider theme={{ algorithm: theme.darkAlgorithm }}>
-            <RouterProvider router={router} />
-          </ConfigProvider>
-        </HelmetProvider>
-      </ErrorBoundary>
-    </Suspense>
-  </React.StrictMode>
-);
+const renderApp = () => {
+  return ReactDOM.createRoot(document.getElementById('root')!).render(
+    <React.StrictMode>
+      <Suspense
+        fallback={
+          <div className="flex h-screen w-screen items-center justify-center">
+            <Spin size="large" />
+          </div>
+        }
+      >
+        <ErrorBoundary FallbackComponent={MainError}>
+          <HelmetProvider>
+            <ConfigProvider theme={{ algorithm: theme.darkAlgorithm }}>
+              <RouterProvider router={router} />
+            </ConfigProvider>
+          </HelmetProvider>
+        </ErrorBoundary>
+      </Suspense>
+    </React.StrictMode>
+  );
+};
+
+if (import.meta.env.MODE === 'mocked') {
+  const { worker } = await import('./mocks/browser')
+  worker.start().then(() => {
+    return renderApp();
+  });
+}
+
+renderApp();
