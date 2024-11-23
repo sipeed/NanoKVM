@@ -11,6 +11,7 @@ const languages = [
   { key: 'ru', name: 'Русский' },
   { key: 'ko', name: '한국어' },
   { key: 'zh', name: '中文' },
+  { key: 'zh_tw', name: '中文(台灣)'},
   { key: 'hu', name: 'Magyar' },
   { key: 'vi', name: 'Tiếng Việt' },
   { key: 'ja', name: '日本語' },
