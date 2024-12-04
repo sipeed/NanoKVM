@@ -56,26 +56,30 @@ export const H264 = () => {
     };
 
     ws.onmessage = (event) => {
-      const msg = JSON.parse(event.data as string);
-      if (!msg) return;
+      try {
+        const msg = JSON.parse(event.data as string);
+        if (!msg) return;
 
-      const data = JSON.parse(msg.data);
-      if (!data) return;
+        const data = JSON.parse(msg.data);
+        if (!data) return;
 
-      switch (msg.event) {
-        case 'answer':
-          pc.setRemoteDescription(data).catch(console.log);
-          break;
+        switch (msg.event) {
+          case 'answer':
+            pc.setRemoteDescription(data).catch(console.log);
+            break;
 
-        case 'candidate':
-          pc.addIceCandidate(data).catch(console.log);
-          break;
+          case 'candidate':
+            pc.addIceCandidate(data).catch(console.log);
+            break;
 
-        case 'heartbeat':
-          break;
+          case 'heartbeat':
+            break;
 
-        default:
-          console.log('unhandled event: ', msg.event);
+          default:
+            console.log('unhandled event: ', msg.event);
+        }
+      } catch (err) {
+        console.log(err);
       }
     };
 

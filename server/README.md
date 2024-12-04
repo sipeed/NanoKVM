@@ -1,31 +1,76 @@
 # NanoKVM Server
 
-The code of NanoKVM backend server. For more documentation, please refer to [Wiki](https://wiki.sipeed.com/nanokvm).
+This is the backend server implementation for NanoKVM.
+
+For detailed documentation, please visit our [Wiki](https://wiki.sipeed.com/nanokvm).
 
 ## Structure
 
 ```shell
 server
-├── config       // server config
-├── logger       // server log
-├── main.go
-├── middleware   // server middleware
-├── proto        // api request and response arguments
-├── router       // api routes
-├── service      // api handlers
-└── utils        // utils functions
+├── common       // Common utility components
+├── config       // Server configuration
+├── dl_lib       // Shared object libraries
+├── include      // Header files for shared objects
+├── logger       // Logging system
+├── middleware   // Server middleware components 
+├── proto        // API request/response definitions
+├── router       // API route handlers
+├── service      // Core service implementations
+├── utils        // Utility functions
+└── main.go
 ```
 
-## Development
+## Configuration
 
-The configuration file path is `/etc/kvm/server.yaml`. There are two configurable options:
+The configuration file path is `/etc/kvm/server.yaml`.
 
-- `log: error`: log level, default is `error`. Too many logs may affect service performance, it is recommended to use the `error` level in production environment.
+```yaml
+proto: http
+port:
+    http: 80
+    https: 443
+cert:
+    crt: server.crt
+    key: server.key
 
-- `authentication: enable`: Whether to enable authentication, default is `enable`. Logging in is required after each service restart, use `disable` will skip the authentication check and don't need to log in again. Please delete this configuration for production environments!
+# Log level (debug/info/warn/error)
+# Note: Use 'info' or 'error' in production, 'debug' only for development
+logger:
+    level: info
+    file: stdout
+    
+# Authentication setting (enable/disable)
+# Note: Only disable authentication in development environment
+authentication: enable
 
-## Deployment
+# JWT secret key configuration
+# If left empty, a random key will be generated on each server start
+secretKey: ""
+```
 
-Work in progress.
 
-The project requires CGO. It must be compiled on Linux with a toolchain installed. More details will be added later.
+## Compile & Deploy
+
+Note: Use Linux operating system (x86-64). This build process is not compatible with ARM, Windows or macOS.
+
+1. Install the Toolchain
+    1. Download the toolchain from the following link: [Download Link](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz).
+    2. Extract the file and add the `host-tools/gcc/riscv64-linux-musl-x86_64/bin` directory to your PATH environment variable.
+    3. Run `riscv64-unknown-linux-musl-gcc -v`. If there is version information in the output, the installation is successful.
+
+2. Compile the Project
+    1. Run `cd server` from the project root directory.
+    2. Run `go mod tidy` to install Go dependencies.
+    3. Run `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` to compile the project.
+    4. After compilation, an executable file named `NanoKVM-Server` will be generated.
+
+3. Modify RPATH
+    1. Run `sudo apt install patchelf` or `pip install patchelf` to install patchelf.
+    2. Run `patchelf --version`. Ensure the version is 0.14 or higher`.
+    3. Run `patchelf --add-rpath \$ORIGIN/dl_lib NanoKVM-Server` to modify the RPATH of the executable file.
+
+4. Deploy the Application
+    1. Before deploying, update the application to the latest version in your browser. Follow the instructions [here](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/system/updating.html).
+    2. Replace the original file in the NanoKVM `/kvmapp/server/` directory with the newly compiled `NanoKVM-Server`.
+    3. Restart the service on NanoKVM by executing `/etc/init.d/S95nanokvm restart`.

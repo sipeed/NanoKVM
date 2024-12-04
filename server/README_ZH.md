@@ -6,25 +6,68 @@ NanoKVM 后端服务的代码。更多文档请参考 [Wiki](https://wiki.sipeed
 
 ```shell
 server
+├── common       // 公用组件
 ├── config       // 服务配置
+├── dl_lib       // so 文件
+├── include      // 头文件
 ├── logger       // 服务日志
-├── main.go
 ├── middleware   // 中间件
 ├── proto        // api 请求响应参数
 ├── router       // api 路由
 ├── service      // api 处理逻辑
-└── utils        // 工具函数
+├── utils        // 工具函数
+└── main.go
 ```
 
-## 开发
+## 配置文件
 
-配置文件路径为 `/etc/kvm/server.yaml`。有两个可配置的选项：
+配置文件路径为 `/etc/kvm/server.yaml`。
 
-- `log: error`：日志等级，默认为 `error`。日志过多可能会影响服务性能，生产环境中建议使用 `error` 等级。
-- `authentication: enable`：是否启用鉴权，默认开启。服务每次重启后都需要重新登录，将该选项设为 `disable` 会跳过鉴权检查，可以不用重复登录。生产环境请删除该条配置！
+```yaml
+proto: http
+port:
+    http: 80
+    https: 443
+cert:
+    crt: server.crt
+    key: server.key
+    
+# 日志级别（debug/info/warn/error）
+# 注意：在生产环境中使用 info 或 error。debug 模式仅在开发环境中使用。
+logger:
+    level: info
+    file: stdout
+    
+# 鉴权设置（enable/disable）
+# 注意：生产环境中请勿使用 disable。
+authentication: enable
 
-## 部署
+# JWT 密钥
+# 如果不设置，则每次服务启动时使用随机生成的密钥。
+secretKey: ""
+```
 
-待完善。
+## 编译部署
 
-项目中使用了 CGO，需要使用 Linux 并安装工具链后才能编译。这部分内容会晚一点更新。
+**注意：请使用 Linux 操作系统（x86-64）。该工具链无法在 ARM、Windows 或 macOS 下使用。**
+
+1. 安装工具链
+   1. 下载工具链：[下载地址](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)；
+   2. 解压下载文件，然后将 `host-tools/gcc/riscv64-linux-musl-x86_64/bin` 目录加入到环境变量；
+   3. 执行 `riscv64-unknown-linux-musl-gcc -v`，如果显示版本信息则安装成功。
+
+2. 编译
+   1. 在项目根目录下执行 `cd server` 进入 server 目录；
+   2. 执行 `go mod tidy` 安装 Go 依赖包；
+   3. 执行 `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` 进行编译；
+   4. 编译完成后，会生成可执行文件 `NanoKVM-Server`。
+
+3. 修改 RPATH
+   1. 执行 `sudo apt install patchelf` 或 `pip install patchelf` 安装 patchelf；
+   2. 执行 `patchelf --version`，确保版本大于等于 0.14；
+   3. 执行 `patchelf --add-rpath \$ORIGIN/dl_lib NanoKVM-Server` 修改可执行文件的 RPATH 属性。
+
+4. 部署
+   1. 部署前，请先在浏览器中将应用[更新](https://wiki.sipeed.com/hardware/zh/kvm/NanoKVM/system/updating.html)到最新版本；
+   2. 使用编译生成的 `NanoKVM-Server` 文件，替换 NanoKVM 中 `/kvmapp/server/` 目录下的原始文件；
+   3. 在 NanoKVM 中执行 `/etc/init.d/S95nanokvm restart` 重启服务。

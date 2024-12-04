@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"NanoKVM-Server/config"
 	"fmt"
 	"net"
 	"os"
@@ -16,16 +17,20 @@ var imageVersionMap = map[string]string{
 	"2024-06-23-20-59-2d2bfb.img": "v1.0.0",
 	"2024-07-23-20-18-587710.img": "v1.1.0",
 	"2024-08-08-19-44-bef2ca.img": "v1.2.0",
+	"2024-11-13-09-59-9c961a.img": "v1.3.0",
 }
 
 func (s *Service) GetInfo(c *gin.Context) {
 	var rsp proto.Response
+
+	conf := config.GetInstance()
 
 	data := &proto.GetInfoRsp{
 		Ip:          getIp(),
 		Mdns:        getMdns(),
 		Image:       getImageVersion(),
 		Application: getApplicationVersion(),
+		Hardware:    conf.Hardware.Version.String(),
 		DeviceKey:   getDeviceKey(),
 	}
 

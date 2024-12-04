@@ -31,7 +31,9 @@ export const Fullscreen = () => {
       className="flex h-[30px] cursor-pointer items-center justify-center space-x-1 rounded px-2 text-white hover:bg-neutral-700"
       onClick={handleFullscreen}
     >
-      {isFullscreen ? <MinimizeIcon size={18} /> : <MaximizeIcon size={18} />}
+      <span className="pt-[2px]">
+        {isFullscreen ? <MinimizeIcon size={18} /> : <MaximizeIcon size={18} />}
+      </span>
     </div>
   );
 };

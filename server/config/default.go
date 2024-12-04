@@ -1,7 +1,7 @@
 package config
 
 var defaultConfig = &Config{
-	Protocol: "http",
+	Proto: "http",
 	Port: Port{
 		Http:  80,
 		Https: 443,

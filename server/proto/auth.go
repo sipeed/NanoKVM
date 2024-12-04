@@ -17,3 +17,8 @@ type ChangePasswordReq struct {
 type IsPasswordUpdatedRsp struct {
 	IsUpdated bool `json:"isUpdated"`
 }
+
+type ConnectWifiReq struct {
+	Ssid     string `validate:"required"`
+	Password string `valid:"required"`
+}

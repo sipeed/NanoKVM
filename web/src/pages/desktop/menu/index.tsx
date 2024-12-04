@@ -50,7 +50,9 @@ export const Menu = () => {
             className="mr-2 flex h-[30px] cursor-pointer items-center justify-center space-x-1 rounded px-2 text-white hover:bg-neutral-700"
             onClick={() => setIsMenuOpen((o) => !o)}
           >
-            <XIcon size={20} />
+            <span className="pt-[2px]">
+              <XIcon size={20} />
+            </span>
           </div>
         </div>
 

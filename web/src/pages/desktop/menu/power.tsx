@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Popover, Slider, Tooltip } from 'antd';
+import { Popover, Slider } from 'antd';
 import clsx from 'clsx';
-import {
-  CirclePowerIcon,
-  HardDriveIcon,
-  LoaderCircleIcon,
-  PowerIcon,
-  RotateCcwIcon
-} from 'lucide-react';
+import { CirclePowerIcon, LoaderCircleIcon, PowerIcon, RotateCcwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm';
@@ -16,7 +10,6 @@ export const Power = () => {
   const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPowerOn, setIsPowerOn] = useState(false);
-  const [isHddOn, setIsHddOn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [powerDuration, setPowerDuration] = useState(8);
 
@@ -37,7 +30,6 @@ export const Power = () => {
       }
 
       setIsPowerOn(rsp.data.pwr);
-      setIsHddOn(rsp.data.hdd);
     });
   }
 
@@ -97,37 +89,24 @@ export const Power = () => {
   );
 
   return (
-    <>
-      <Popover
-        content={content}
-        placement="bottomLeft"
-        trigger="click"
-        open={isPopoverOpen}
-        onOpenChange={setIsPopoverOpen}
-      >
-        <div className="flex h-[30px] cursor-pointer items-center justify-center rounded px-2 hover:bg-neutral-700/80">
-          <div
-            className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-500')}
-          >
-            {isLoading ? (
-              <LoaderCircleIcon className="animate-spin" size={18} />
-            ) : (
-              <PowerIcon size={18} />
-            )}
-          </div>
-        </div>
-      </Popover>
-
-      <Tooltip placement="bottom" title={t('hddLed')}>
+    <Popover
+      content={content}
+      placement="bottomLeft"
+      trigger="click"
+      open={isPopoverOpen}
+      onOpenChange={setIsPopoverOpen}
+    >
+      <div className="flex h-[30px] cursor-pointer items-center justify-center rounded px-2 hover:bg-neutral-700/80">
         <div
-          className={clsx(
-            'flex h-[30px] w-[18px] items-center justify-center px-2',
-            isHddOn ? 'text-green-600' : 'text-neutral-500'
-          )}
+          className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-500')}
         >
-          <HardDriveIcon size={18} />
+          {isLoading ? (
+            <LoaderCircleIcon className="animate-spin" size={18} />
+          ) : (
+            <PowerIcon size={18} />
+          )}
         </div>
-      </Tooltip>
-    </>
+      </div>
+    </Popover>
   );
 };

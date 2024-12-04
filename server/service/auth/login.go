@@ -1,18 +1,25 @@
 package auth
 
 import (
-	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
-
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/utils"
+	"fmt"
+	"os"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *Service) Login(c *gin.Context) {
 	var req proto.LoginReq
 	var rsp proto.Response
+
+	if !isLibExist() {
+		rsp.ErrRsp(c, -6, "Lib not exist! Please connect to internet and update.")
+		return
+	}
 
 	// authentication disabled
 	conf := config.GetInstance()
@@ -58,39 +65,8 @@ func (s *Service) Login(c *gin.Context) {
 	log.Debugf("login success, username: %s", req.Username)
 }
 
-func (s *Service) ChangePassword(c *gin.Context) {
-	var req proto.ChangePasswordReq
-	var rsp proto.Response
-
-	if err := proto.ParseFormRequest(c, &req); err != nil {
-		rsp.ErrRsp(c, -1, "invalid parameters")
-		return
-	}
-
-	if err := setAccount(req.Username, req.Password); err != nil {
-		rsp.ErrRsp(c, -2, "change password failed")
-		return
-	}
-
-	rsp.OkRsp(c)
-	log.Debugf("change password success, username: %s", req.Username)
-}
-
-func (s *Service) IsPasswordUpdated(c *gin.Context) {
-	var rsp proto.Response
-
-	account, err := getAccount()
-	if err != nil {
-		rsp.ErrRsp(c, -1, "failed to get password")
-	}
-
-	isUpdated := true
-	if account == nil || account.Password == "admin" {
-		isUpdated = false
-	}
-
-	rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
-		IsUpdated: isUpdated,
-	})
-	log.Debugf("get password success")
+func isLibExist() bool {
+	libPath := fmt.Sprintf("/kvmapp/kvm_system/dl_lib/libmaixcam_lib.so")
+	_, err := os.Stat(libPath)
+	return err == nil
 }

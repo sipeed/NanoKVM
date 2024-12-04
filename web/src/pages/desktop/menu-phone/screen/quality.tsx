@@ -1,5 +1,5 @@
 import { Popover } from 'antd';
-import { useAtomValue } from 'jotai/index';
+import { useAtomValue } from 'jotai';
 import { CheckIcon, SquareActivityIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 

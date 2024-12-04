@@ -19,3 +19,11 @@ export function changePassword(username: string, password: string) {
 export function isPasswordUpdated() {
   return http.get('/api/auth/password');
 }
+
+export function connectWifi(ssid: string, password: string) {
+  const data = {
+    ssid,
+    password
+  };
+  return http.post('/api/auth/wifi', data);
+}

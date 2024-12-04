@@ -41,8 +41,9 @@ func run(r *gin.Engine) {
 
 	httpAddr := fmt.Sprintf(":%d", conf.Port.Http)
 	httpsAddr := fmt.Sprintf(":%d", conf.Port.Https)
+	fmt.Printf("proto: %s, port: %d %d\n", conf.Proto, conf.Port.Http, conf.Port.Https)
 
-	if conf.Protocol == "https" {
+	if conf.Proto == "https" {
 		r.Use(middleware.Tls())
 
 		go func() {

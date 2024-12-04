@@ -12,19 +12,34 @@ type HWVersion int
 const (
 	HWVersionAlpha HWVersion = iota
 	HWVersionBeta
+	HWVersionPcie
+
+	HWVersionFile = "/etc/kvm/hw"
 )
 
-const (
-	hwVersionFile = "/etc/kvm/hw"
+var HWAlpha = Hardware{
+	Version:      HWVersionAlpha,
+	GPIOReset:    "/sys/class/gpio/gpio507/value",
+	GPIOPower:    "/sys/class/gpio/gpio503/value",
+	GPIOPowerLED: "/sys/class/gpio/gpio504/value",
+	GPIOHDDLed:   "/sys/class/gpio/gpio505/value",
+}
 
-	gpioPower    = "/sys/class/gpio/gpio503/value"
-	gpioPowerLED = "/sys/class/gpio/gpio504/value"
+var HWBeta = Hardware{
+	Version:      HWVersionBeta,
+	GPIOReset:    "/sys/class/gpio/gpio505/value",
+	GPIOPower:    "/sys/class/gpio/gpio503/value",
+	GPIOPowerLED: "/sys/class/gpio/gpio504/value",
+	GPIOHDDLed:   "",
+}
 
-	gpioResetAlpha  = "/sys/class/gpio/gpio507/value"
-	gpioHDDLedAlpha = "/sys/class/gpio/gpio505/value"
-
-	gpioResetBeta = "/sys/class/gpio/gpio505/value"
-)
+var HWPcie = Hardware{
+	Version:      HWVersionPcie,
+	GPIOReset:    "/sys/class/gpio/gpio505/value",
+	GPIOPower:    "/sys/class/gpio/gpio503/value",
+	GPIOPowerLED: "/sys/class/gpio/gpio504/value",
+	GPIOHDDLed:   "",
+}
 
 func (h HWVersion) String() string {
 	switch h {
@@ -32,39 +47,46 @@ func (h HWVersion) String() string {
 		return "Alpha"
 	case HWVersionBeta:
 		return "Beta"
+	case HWVersionPcie:
+		return "PCIE"
 	default:
 		return "Unknown"
 	}
 }
 
 func getHwVersion() HWVersion {
-	content, err := os.ReadFile(hwVersionFile)
-	if err == nil {
-		version := strings.ReplaceAll(string(content), "\n", "")
-		if version == "beta" {
-			return HWVersionBeta
-		}
+	content, err := os.ReadFile(HWVersionFile)
+	if err != nil {
+		return HWVersionAlpha
+	}
+
+	version := strings.ReplaceAll(string(content), "\n", "")
+	if version == "beta" {
+		return HWVersionBeta
+	} else if version == "pcie" {
+		return HWVersionPcie
 	}
 
 	return HWVersionAlpha
 }
 
-func getHardware() Hardware {
-	h := Hardware{}
+func getHardware() (h Hardware) {
+	version := getHwVersion()
 
-	h.Version = getHwVersion()
-	h.GPIOPower = gpioPower
-	h.GPIOPowerLED = gpioPowerLED
-
-	switch h.Version {
+	switch version {
 	case HWVersionAlpha:
-		h.GPIOHDDLed = gpioHDDLedAlpha
-		h.GPIOReset = gpioResetAlpha
+		h = HWAlpha
+
 	case HWVersionBeta:
-		h.GPIOReset = gpioResetBeta
+		h = HWBeta
+
+	case HWVersionPcie:
+		h = HWPcie
+
 	default:
-		log.Fatalf("Unsupported hardware version: %s", h.Version)
+		h = HWAlpha
+		log.Error("Unsupported hardware version: %s", version)
 	}
 
-	return h
+	return
 }
