@@ -10,7 +10,7 @@ NanoKVM
     <a href="https://cn.dl.sipeed.com/shareURL/KVM/nanoKVM"> 硬件资料 </a>
 </h3>
 
-[English](./README.md) | 中文
+[English](./README.md) | 中文 | [日本語](./README_JA.md)
 
 </div>
 
@@ -78,6 +78,3 @@ NanoKVM 镜像在LicheeRV Nano SDK 和 MaixCDK 基础上构建，可以兼容使
 
 * [MaixHub Discussion](https://maixhub.com/discussion/nanokvm)
 * QQ group: 703230713
-
-
-
