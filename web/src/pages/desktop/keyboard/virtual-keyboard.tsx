@@ -14,7 +14,7 @@ import { getKeyboardLayout, setKeyboardLayout } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
-import { KeyboardCodes } from './mappings.ts';
+import { KeyboardCodes, ModifierCodes } from './mappings.ts';
 import {
   doubleKeys,
   keyboardArrowsOptions,
@@ -90,17 +90,19 @@ export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
     let meta = 0;
 
     activeModifierKeys.forEach((modifierKey) => {
-      const specialKey = specialKeyMap.get(modifierKey)!;
-      const code = KeyboardCodes.get(specialKey)!;
+      const key = specialKeyMap.get(modifierKey)!;
 
-      if ([224, 228].includes(code)) {
-        ctrl = 1;
-      } else if ([225, 229].includes(code)) {
-        shift = 1;
-      } else if ([226, 230].includes(code)) {
-        alt = 1;
-      } else if ([227, 231].includes(code)) {
-        meta = 1;
+      const code = KeyboardCodes.get(key)!;
+      const modifier = ModifierCodes.get(key)!;
+
+      if ([1, 16].includes(modifier)) {
+        ctrl = modifier;
+      } else if ([2, 32].includes(modifier)) {
+        shift = modifier;
+      } else if ([4, 64].includes(modifier)) {
+        alt = modifier;
+      } else if ([8, 128].includes(modifier)) {
+        meta = modifier;
       }
 
       client.send([1, code, ctrl, shift, alt, meta]);

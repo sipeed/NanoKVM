@@ -9,9 +9,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	MouseUp = iota
+	MouseDown
+	MouseMoveAbsolute
+	MouseMoveRelative
+	MouseScroll
+)
+
+var mouseButtonMap = map[byte]bool{
+	0x01: true,
+	0x02: true,
+	0x04: true,
+}
+
 func (h *Hid) Mouse(queue <-chan []int) {
 	for event := range queue {
 		h.mouseMutex.Lock()
+
 		switch event[0] {
 		case MouseDown:
 			h.mouseDown(event)
@@ -22,25 +37,19 @@ func (h *Hid) Mouse(queue <-chan []int) {
 		case MouseMoveRelative:
 			h.mouseMoveRelative(event)
 		case MouseScroll:
-			h.scroll(event)
+			h.mouseScroll(event)
 		default:
 			log.Debugf("invalid mouse event: %+v", event)
 		}
+
 		h.mouseMutex.Unlock()
 	}
 }
 
 func (h *Hid) mouseDown(event []int) {
-	var button byte
+	button := byte(event[1])
 
-	switch event[1] {
-	case MouseLeft:
-		button = HidMouseLeft
-	case MouseRight:
-		button = HidMouseRight
-	case MouseWheel:
-		button = HidMouseWheel
-	default:
+	if _, ok := mouseButtonMap[button]; !ok {
 		log.Debugf("invalid mouse button: %+v", event)
 		return
 	}
@@ -54,7 +63,7 @@ func (h *Hid) mouseUp() {
 	h.writeWithTimeout(h.g1, data)
 }
 
-func (h *Hid) scroll(event []int) {
+func (h *Hid) mouseScroll(event []int) {
 	direction := 0x01
 	if event[3] > 0 {
 		direction = -0x1

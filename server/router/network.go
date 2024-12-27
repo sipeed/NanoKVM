@@ -20,4 +20,6 @@ func networkRouter(r *gin.Engine) {
 	api.POST("/network/tailscale/status", service.UpdateTailscaleStatus) // update tailscale status
 	api.POST("/network/tailscale/login", service.LoginTailscale)         // tailscale login
 	api.POST("/network/tailscale/logout", service.LogoutTailscale)       // tailscale logout
+
+	api.GET("/network/wifi", service.GetWifi) // get wifi information
 }

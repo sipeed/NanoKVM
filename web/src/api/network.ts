@@ -45,3 +45,8 @@ export function loginTailscale() {
 export function logoutTailscale() {
   return http.post('/api/network/tailscale/logout');
 }
+
+// get wifi information
+export function getWiFi() {
+  return http.get('/api/network/wifi');
+}

@@ -31,3 +31,8 @@ type LoginTailscaleRsp struct {
 	Status string `json:"status"`
 	Url    string `json:"url"`
 }
+
+type GetWifiRsp struct {
+	Supported bool `json:"supported"`
+	Connected bool `json:"connected"`
+}

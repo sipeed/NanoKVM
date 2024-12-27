@@ -87,8 +87,8 @@ export const keyboardOptions = {
     '{metaright}': 'Cmd',
     '{winright}': 'Win',
     '{altright}': 'Alt',
-    '{menu}': "Menu",
-    '{controlright}': 'Ctrl',
+    '{menu}': 'Menu',
+    '{controlright}': 'Ctrl'
   }
 };
 
@@ -136,6 +136,7 @@ export const specialKeyMap = new Map([
   ['{shiftleft}', 'ShiftLeft'],
   ['{shiftright}', 'ShiftRight'],
   ['{controlleft}', 'ControlLeft'],
+  ['{controlright}', 'ControlRight'],
   ['{altleft}', 'AltLeft'],
   ['{metaleft}', 'MetaLeft'],
   ['{winleft}', 'WinLeft'],

@@ -2,60 +2,58 @@ import { useEffect, useRef } from 'react';
 
 import { client } from '@/lib/websocket.ts';
 
-import { KeyboardCodes } from './mappings.ts';
+import { KeyboardCodes, ModifierCodes } from './mappings.ts';
 
 export const Keyboard = () => {
-  const isMetaPressedRef = useRef(false);
-  const isAltRightPressedRef = useRef(false);
+  const lastCodeRef = useRef('');
+  const modifierRef = useRef({
+    ctrl: 0,
+    shift: 0,
+    alt: 0,
+    meta: 0
+  });
 
   // listen keyboard events
   useEffect(() => {
+    const modifiers = ['Control', 'Shift', 'Alt', 'Meta'];
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
     // press button
-    function handleKeyDown(event: any) {
+    function handleKeyDown(event: KeyboardEvent) {
       disableEvent(event);
 
-      if (['MetaLeft', 'MetaRight'].includes(event.code)) {
-        isMetaPressedRef.current = true;
-        return;
-      }
-      isMetaPressedRef.current = false;
+      lastCodeRef.current = event.code;
 
-      if (event.code === 'AltRight') {
-        isAltRightPressedRef.current = true;
-      }
+      if (modifiers.includes(event.key)) {
+        const code = ModifierCodes.get(event.code)!;
+        setModifier(event.key, code);
 
-      const code = KeyboardCodes.get(event.code);
-      if (!code) {
-        console.log('unknown code: ', event.code);
-        return;
+        if (event.key === 'Meta') {
+          return;
+        }
       }
 
-      const ctrl = event.ctrlKey ? 1 : 0;
-      const shift = event.shiftKey ? 1 : 0;
-      const alt = event.altKey ? (isAltRightPressedRef.current ? 2 : 1) : 0;
-      const meta = event.metaKey ? 1 : 0;
-
-      const data = [1, code, ctrl, shift, alt, meta];
-      client.send(data);
+      sendKeyDown(event);
     }
 
     // release button
-    function handleKeyUp(event: any) {
+    function handleKeyUp(event: KeyboardEvent) {
       disableEvent(event);
 
-      if (isMetaPressedRef.current) {
-        client.send([1, KeyboardCodes.get('MetaLeft')!, 0, 0, 0, 1]);
-        isMetaPressedRef.current = false;
+      if (modifiers.includes(event.key)) {
+        if (event.key === 'Meta' && lastCodeRef.current === event.code) {
+          sendKeyDown(event, true);
+          sendKeyUp();
+        }
+
+        setModifier(event.key, 0);
       }
 
-      if (event.code === 'AltRight') {
-        isAltRightPressedRef.current = false;
+      if (event.key !== 'Meta') {
+        sendKeyUp();
       }
-
-      client.send([1, 0, 0, 0, 0, 0]);
     }
 
     return () => {
@@ -64,8 +62,46 @@ export const Keyboard = () => {
     };
   }, []);
 
+  function setModifier(key: string, code: number) {
+    switch (key) {
+      case 'Control':
+        modifierRef.current.ctrl = code;
+        break;
+      case 'Alt':
+        modifierRef.current.alt = code;
+        break;
+      case 'Shift':
+        modifierRef.current.shift = code;
+        break;
+      case 'Meta':
+        modifierRef.current.meta = code;
+        break;
+      default:
+        console.log('unknown key: ', key);
+    }
+  }
+
+  function sendKeyDown(event: KeyboardEvent, isMeta?: boolean) {
+    const code = KeyboardCodes.get(event.code);
+    if (!code) {
+      console.log('unknown code: ', event.code);
+      return;
+    }
+
+    const ctrl = event.ctrlKey ? modifierRef.current.ctrl || 1 : 0;
+    const shift = event.shiftKey ? modifierRef.current.shift || 2 : 0;
+    const alt = event.altKey ? modifierRef.current.alt || 4 : 0;
+    const meta = event.metaKey || isMeta ? modifierRef.current.meta || 8 : 0;
+
+    client.send([1, code, ctrl, shift, alt, meta]);
+  }
+
+  function sendKeyUp() {
+    client.send([1, 0, 0, 0, 0, 0]);
+  }
+
   // disable the default keyboard events
-  function disableEvent(event: any) {
+  function disableEvent(event: KeyboardEvent) {
     event.preventDefault();
     event.stopPropagation();
   }

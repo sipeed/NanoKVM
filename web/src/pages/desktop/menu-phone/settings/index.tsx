@@ -3,7 +3,7 @@ import { Badge, Divider, Popover } from 'antd';
 import { useAtom } from 'jotai';
 import { SettingsIcon } from 'lucide-react';
 
-import { getInfo } from '@/api/vm.ts';
+import { getWiFi } from '@/api/network.ts';
 import { isSettingsOpenAtom } from '@/jotai/settings.ts';
 
 import { About } from './about.tsx';
@@ -16,14 +16,14 @@ import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
 
 export const Settings = () => {
-  const [hardware, setHardware] = useState('');
+  const [isWifiSupported, setIsWifiSupported] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useAtom(isSettingsOpenAtom);
   const [isBadgeVisible, setIsBadgeVisible] = useState(false);
 
   useEffect(() => {
-    getInfo().then((rsp) => {
-      if (rsp.code === 0 && rsp.data.hardware) {
-        setHardware(rsp.data.hardware);
+    getWiFi().then((rsp) => {
+      if (rsp.code === 0 && rsp.data.supported) {
+        setIsWifiSupported(true);
       }
     });
   }, []);
@@ -39,7 +39,7 @@ export const Settings = () => {
       <Divider style={{ margin: '5px 0' }} />
 
       <Tailscale />
-      {hardware === 'PCIE' && <Wifi />}
+      {isWifiSupported && <Wifi />}
       <Divider style={{ margin: '5px 0' }} />
 
       <Password />
