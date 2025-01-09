@@ -183,7 +183,13 @@ const en = {
       account: 'Account',
       logout: 'Logout',
       logout2: 'Sure to logout?'
-    }
+    },
+    download: {
+      download: 'Download Image',
+      input: 'Please enter a remote image URL',
+      ok: 'Ok',
+      disabled: '/data partition is RO, so we cannot download the image',
+      }
   }
 };
 

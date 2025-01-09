@@ -13,6 +13,7 @@ import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
 import { Wol } from './wol.tsx';
+import { DownloadImage } from './download.tsx';
 
 export const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(true);
@@ -39,6 +40,7 @@ export const Menu = () => {
           <Script />
           <Terminal />
           <Wol />
+          <DownloadImage />
           <Divider type="vertical" />
 
           <Power />
