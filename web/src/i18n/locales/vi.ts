@@ -1,25 +1,11 @@
 const vi = {
   translation: {
-    language: 'Ngôn ngữ',
-    changePassword: 'Đổi mật khẩu',
-    logout: 'Đăng xuất',
-    settings: 'Cài đặt',
-    showMouse: 'Hiển thị chuột',
-    hideMouse: 'Ẩn chuột',
-    power: 'Nguồn',
-    reset: 'Đặt lại',
-    powerShort: 'Nguồn (nhấp ngắn)',
-    powerLong: 'Nguồn (nhấp dài)',
-    hddLed: 'Đèn HDD',
-    checkLibFailed: 'Kiểm tra thư viện runtime thất bại, vui lòng thử lại',
-    updateLibFailed: 'Cập nhật thư viện runtime thất bại, vui lòng thử lại',
-    updatingLib: 'Đang cập nhật thư viện runtime. Vui lòng làm mới trang sau khi cập nhật.',
-    checkForUpdate: 'Kiểm tra cập nhật',
     head: {
       desktop: 'Remote Desktop',
       login: 'Đăng nhập',
       changePassword: 'Đổi mật khẩu',
-      terminal: 'Terminal'
+      terminal: 'Terminal',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Đăng nhập',
@@ -38,14 +24,28 @@ const vi = {
       illegalUsername: 'tên người dùng chứa ký tự không hợp lệ',
       illegalPassword: 'mật khẩu chứa ký tự không hợp lệ',
       forgetPassword: 'Quên mật khẩu',
-      resetPassword: 'Đặt lại mật khẩu',
-      reset1: 'Nếu bạn quên mật khẩu, vui lòng làm theo các bước sau để đặt lại:',
-      reset2: '1. Đăng nhập vào thiết bị NanoKVM qua SSH;',
-      reset3: '2. Xóa tệp trong thiết bị: ',
-      reset4: '3. Sử dụng tài khoản mặc định để đăng nhập: ',
       ok: 'OK',
       cancel: 'Hủy',
-      loginButtonText: 'Đăng nhập'
+      loginButtonText: 'Đăng nhập',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Chế độ video',
@@ -130,60 +130,113 @@ const vi = {
       confirm: 'OK'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Đang gửi lệnh...',
       sent: 'Đã gửi lệnh',
       input: 'Vui lòng nhập địa chỉ MAC',
       ok: 'OK'
     },
-    about: {
-      title: 'Giới thiệu về NanoKVM',
-      information: 'Thông tin',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Phiên bản Ứng dụng',
-      image: 'Phiên bản Hình ảnh',
-      deviceKey: 'Khóa Thiết bị',
-      queryFailed: 'Truy vấn thất bại',
-      community: 'Cộng đồng'
+    power: {
+      title: 'Nguồn',
+      reset: 'Đặt lại',
+      power: 'Nguồn',
+      powerShort: 'Nguồn (nhấp ngắn)',
+      powerLong: 'Nguồn (nhấp dài)'
     },
-    update: {
-      title: 'Kiểm tra cập nhật',
-      queryFailed: 'Lấy phiên bản thất bại',
-      updateFailed: 'Cập nhật thất bại. Vui lòng thử lại.',
-      isLatest: 'Bạn đã có phiên bản mới nhất.',
-      available: 'Có bản cập nhật mới. Bạn có chắc chắn muốn cập nhật không?',
-      updating: 'Bắt đầu cập nhật. Vui lòng chờ...',
-      confirm: 'Xác nhận',
-      cancel: 'Hủy'
-    },
-    virtualDevice: {
-      network: 'Mạng Ảo',
-      disk: 'Đĩa Ảo'
-    },
-    tailscale: {
-      loading: 'Đang tải...',
-      notInstall: 'Không tìm thấy Tailscale! Vui lòng cài đặt.',
-      install: 'Cài đặt',
-      installing: 'Đang cài đặt',
-      failed: 'Cài đặt thất bại',
-      retry: 'Vui lòng làm mới và thử lại. Hoặc thử cài đặt thủ công',
-      download: 'Tải xuống',
-      package: 'gói cài đặt',
-      unzip: 'và giải nén nó',
-      upTailscale: 'Tải tailscale lên thư mục /usr/bin/ của NanoKVM',
-      upTailscaled: 'Tải tailscaled lên thư mục /usr/sbin/ của NanoKVM',
-      refresh: 'Làm mới trang hiện tại',
-      notLogin:
-        'Thiết bị chưa được liên kết. Vui lòng đăng nhập và liên kết thiết bị này với tài khoản của bạn.',
-      urlPeriod: 'URL này có hiệu lực trong 10 phút',
-      login: 'Đăng nhập',
-      loginSuccess: 'Đăng nhập thành công',
-      enable: 'Kích hoạt Tailscale',
-      deviceName: 'Tên Thiết bị',
-      deviceIP: 'IP Thiết bị',
-      account: 'Tài khoản',
-      logout: 'Đăng xuất',
-      logout2: 'Bạn có chắc chắn muốn đăng xuất không?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Giới thiệu về NanoKVM',
+        information: 'Thông tin',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Phiên bản Ứng dụng',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Phiên bản Hình ảnh',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Khóa Thiết bị',
+        community: 'Cộng đồng'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Đang tải...',
+        notInstall: 'Không tìm thấy Tailscale! Vui lòng cài đặt.',
+        install: 'Cài đặt',
+        installing: 'Đang cài đặt',
+        failed: 'Cài đặt thất bại',
+        retry: 'Vui lòng làm mới và thử lại. Hoặc thử cài đặt thủ công',
+        download: 'Tải xuống',
+        package: 'gói cài đặt',
+        unzip: 'và giải nén nó',
+        upTailscale: 'Tải tailscale lên thư mục /usr/bin/ của NanoKVM',
+        upTailscaled: 'Tải tailscaled lên thư mục /usr/sbin/ của NanoKVM',
+        refresh: 'Làm mới trang hiện tại',
+        notLogin:
+          'Thiết bị chưa được liên kết. Vui lòng đăng nhập và liên kết thiết bị này với tài khoản của bạn.',
+        urlPeriod: 'URL này có hiệu lực trong 10 phút',
+        login: 'Đăng nhập',
+        loginSuccess: 'Đăng nhập thành công',
+        enable: 'Kích hoạt Tailscale',
+        deviceName: 'Tên Thiết bị',
+        deviceIP: 'IP Thiết bị',
+        account: 'Tài khoản',
+        logout: 'Đăng xuất',
+        logout2: 'Bạn có chắc chắn muốn đăng xuất không?'
+      },
+      update: {
+        title: 'Kiểm tra cập nhật',
+        queryFailed: 'Lấy phiên bản thất bại',
+        updateFailed: 'Cập nhật thất bại. Vui lòng thử lại.',
+        isLatest: 'Bạn đã có phiên bản mới nhất.',
+        available: 'Có bản cập nhật mới. Bạn có chắc chắn muốn cập nhật không?',
+        updating: 'Bắt đầu cập nhật. Vui lòng chờ...',
+        confirm: 'Xác nhận',
+        cancel: 'Hủy'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

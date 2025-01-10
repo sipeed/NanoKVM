@@ -1,52 +1,51 @@
-import { useState } from 'react';
-import { Modal } from 'antd';
-import { useSetAtom } from 'jotai';
+import { useEffect, useState } from 'react';
+import { Divider } from 'antd';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { getTailscaleStatus } from '@/api/network.ts';
-import { isSettingsOpenAtom } from '@/jotai/settings.ts';
+import * as api from '@/api/network.ts';
 
 import { Device } from './device.tsx';
 import { Install } from './install.tsx';
 import { Login } from './login.tsx';
 
-type Status = 'notInstall' | 'notLogin' | 'stopped' | 'running';
+type State = 'notInstall' | 'notLogin' | 'stopped' | 'running';
 
-export const Tailscale = () => {
+type Status = {
+  state: State;
+  name: string;
+  ip: string;
+  account: string;
+};
+
+type TailscaleProps = {
+  setIsLocked: (isLocked: boolean) => void;
+};
+
+export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
   const { t } = useTranslation();
-  const setIsSettingsOpen = useSetAtom(isSettingsOpenAtom);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<Status>('notInstall');
-  const [name, setName] = useState('');
-  const [ip, setIp] = useState('');
-  const [account, setAccount] = useState('');
+  const [status, setStatus] = useState<Status>();
   const [errMsg, setErrMsg] = useState('');
 
-  function openModal() {
+  useEffect(() => {
     getStatus();
-
-    setIsModalOpen(true);
-    setIsSettingsOpen(false);
-  }
+  }, []);
 
   function getStatus() {
     if (isLoading) return;
     setIsLoading(true);
 
-    getTailscaleStatus()
+    api
+      .getTailscaleStatus()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
           return;
         }
 
-        setStatus(rsp.data.status);
-        setName(rsp.data.name);
-        setIp(rsp.data.ip);
-        setAccount(rsp.data.account);
+        setStatus(rsp.data);
       })
       .finally(() => {
         setIsLoading(false);
@@ -55,39 +54,29 @@ export const Tailscale = () => {
 
   return (
     <>
-      <div
-        className="flex cursor-pointer select-none items-center rounded px-3 py-1.5 hover:bg-neutral-600"
-        onClick={openModal}
-      >
-        Tailscale
-      </div>
+      <div className="text-base font-bold">{t('settings.tailscale.title')}</div>
+      <Divider />
 
-      <Modal
-        title="Tailscale"
-        open={isModalOpen}
-        width={500}
-        footer={null}
-        centered={true}
-        maskClosable={false}
-        onCancel={() => setIsModalOpen(false)}
-      >
-        <div className="flex min-h-[200px] flex-col items-center justify-center space-y-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center space-x-2 text-neutral-500">
-              <LoaderCircleIcon className="animate-spin" size={18} />
-              <span>{t('tailscale.loading')}</span>
-            </div>
-          ) : status === 'notInstall' ? (
-            <Install onSuccess={getStatus} />
-          ) : status === 'notLogin' ? (
-            <Login onSuccess={getStatus} />
-          ) : (
-            <Device status={status} ip={ip} account={account} name={name} setStatus={setStatus} />
+      {isLoading ? (
+        <div className="flex items-center justify-center space-x-2 pt-5 text-neutral-500">
+          <LoaderCircleIcon className="animate-spin" size={18} />
+          <span>{t('settings.tailscale.loading')}</span>
+        </div>
+      ) : (
+        <>
+          {status?.state === 'notInstall' && (
+            <Install setIsLocked={setIsLocked} onSuccess={getStatus} />
           )}
 
-          {errMsg && <span className="text-red-500">{errMsg}</span>}
-        </div>
-      </Modal>
+          {status?.state === 'notLogin' && <Login onSuccess={getStatus} />}
+
+          {(status?.state === 'stopped' || status?.state === 'running') && (
+            <Device status={status} onLogout={getStatus} />
+          )}
+
+          {errMsg && <div className="pt-5 text-red-500">{errMsg}</div>}
+        </>
+      )}
     </>
   );
 };

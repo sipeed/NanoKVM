@@ -1,25 +1,11 @@
 const cz = {
   translation: {
-    language: 'Jazyk',
-    changePassword: 'Změnit heslo',
-    logout: 'Odhlásit se',
-    settings: 'Nastavení',
-    showMouse: 'Zobrazit kurzor myši',
-    hideMouse: 'Skrýt kurzor myši',
-    power: 'Napájení',
-    reset: 'Resetovat',
-    powerShort: 'Napájení (krátký stisk)',
-    powerLong: 'Napájení (dlouhý stisk)',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'Nepodařilo se zkontrolovat runtime knihovnu, zkuste to prosím znovu',
-    updateLibFailed: 'Nepodařilo se aktualizovat runtime knihovnu, zkuste to prosím znovu',
-    updatingLib: 'Aktualizuji runtime knihovnu. Po dokončení aktualizace prosím obnovte stránku.',
-    checkForUpdate: 'Zkontrolovat aktualizaci',
     head: {
       desktop: 'Vzdálená plocha',
       login: 'Přihlášení',
       changePassword: 'Změna hesla',
-      terminal: 'Terminál'
+      terminal: 'Terminál',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Přihlášení',
@@ -39,14 +25,28 @@ const cz = {
       illegalUsername: 'Uživatelské jméno obsahuje nepovolené znaky',
       illegalPassword: 'Heslo obsahuje nepovolené znaky',
       forgetPassword: 'Zapomenuté heslo',
-      resetPassword: 'Resetovat heslo',
-      reset1: 'Pokud jste zapomněli heslo, postupujte podle následujících kroků pro reset:',
-      reset2: '1. Přihlaste se k zařízení NanoKVM pomocí SSH;',
-      reset3: '2. Smažte soubor v zařízení: ',
-      reset4: '3. Přihlaste se pomocí výchozího účtu: ',
       ok: 'OK',
       cancel: 'Zrušit',
-      loginButtonText: 'Přihlášení'
+      loginButtonText: 'Přihlášení',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Režim videa',
@@ -132,60 +132,113 @@ const cz = {
       confirm: 'OK'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Odesílání příkazu...',
       sent: 'Příkaz odeslán',
       input: 'Zadejte prosím MAC adresu',
       ok: 'OK'
     },
-    about: {
-      title: 'O NanoKVM',
-      information: 'Informace',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Verze aplikace',
-      image: 'Verze obrazu',
-      deviceKey: 'Klíč zařízení',
-      queryFailed: 'Dotaz se nezdařil',
-      community: 'Komunita'
+    power: {
+      title: 'Napájení',
+      reset: 'Resetovat',
+      power: 'Napájení',
+      powerShort: 'Napájení (krátký stisk)',
+      powerLong: 'Napájení (dlouhý stisk)'
     },
-    update: {
-      title: 'Zkontrolovat aktualizaci',
-      queryFailed: 'Nepodařilo se získat verzi',
-      updateFailed: 'Aktualizace se nezdařila. Zkuste to prosím znovu.',
-      isLatest: 'Máte nejnovější verzi.',
-      available: 'Je dostupná aktualizace. Opravdu chcete aktualizovat?',
-      updating: 'Aktualizace zahájena. Prosím čekejte...',
-      confirm: 'Potvrdit',
-      cancel: 'Zrušit'
-    },
-    virtualDevice: {
-      network: 'Virtuální síť',
-      disk: 'Virtuální disk'
-    },
-    tailscale: {
-      loading: 'Načítání...',
-      notInstall: 'Tailscale nebyl nalezen! Prosím nainstalujte.',
-      install: 'Nainstalovat',
-      installing: 'Instalace probíhá',
-      failed: 'Instalace se nezdařila',
-      retry: 'Obnovte stránku a zkuste to znovu. Nebo zkuste instalaci manuálně',
-      download: 'Stáhnout',
-      package: 'instalační balíček',
-      unzip: 'a rozbalit ho',
-      upTailscale: 'Nahrajte Tailscale do adresáře NanoKVM /usr/bin/',
-      upTailscaled: 'Nahrajte Tailscaled do adresáře NanoKVM /usr/sbin/',
-      refresh: 'Obnovit stránku',
-      notLogin:
-        'Zařízení nebylo dosud spárováno. Přihlaste se prosím a spárujte toto zařízení s vaším účtem.',
-      urlPeriod: 'Tento odkaz je platný po dobu 10 minut',
-      login: 'Přihlášení',
-      loginSuccess: 'Přihlášení úspěšné',
-      enable: 'Povolit Tailscale',
-      deviceName: 'Název zařízení',
-      deviceIP: 'IP zařízení',
-      account: 'Účet',
-      logout: 'Odhlásit se',
-      logout2: 'Opravdu se chcete odhlásit?'
+    settings: {
+      title: 'Nastavení',
+      about: {
+        title: 'O NanoKVM',
+        information: 'Informace',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Verze aplikace',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Verze obrazu',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Klíč zařízení',
+        community: 'Komunita'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Jazyk',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Načítání...',
+        notInstall: 'Tailscale nebyl nalezen! Prosím nainstalujte.',
+        install: 'Nainstalovat',
+        installing: 'Instalace probíhá',
+        failed: 'Instalace se nezdařila',
+        retry: 'Obnovte stránku a zkuste to znovu. Nebo zkuste instalaci manuálně',
+        download: 'Stáhnout',
+        package: 'instalační balíček',
+        unzip: 'a rozbalit ho',
+        upTailscale: 'Nahrajte Tailscale do adresáře NanoKVM /usr/bin/',
+        upTailscaled: 'Nahrajte Tailscaled do adresáře NanoKVM /usr/sbin/',
+        refresh: 'Obnovit stránku',
+        notLogin:
+          'Zařízení nebylo dosud spárováno. Přihlaste se prosím a spárujte toto zařízení s vaším účtem.',
+        urlPeriod: 'Tento odkaz je platný po dobu 10 minut',
+        login: 'Přihlášení',
+        loginSuccess: 'Přihlášení úspěšné',
+        enable: 'Povolit Tailscale',
+        deviceName: 'Název zařízení',
+        deviceIP: 'IP zařízení',
+        account: 'Účet',
+        logout: 'Odhlásit se',
+        logout2: 'Opravdu se chcete odhlásit?'
+      },
+      update: {
+        title: 'Zkontrolovat aktualizaci',
+        queryFailed: 'Nepodařilo se získat verzi',
+        updateFailed: 'Aktualizace se nezdařila. Zkuste to prosím znovu.',
+        isLatest: 'Máte nejnovější verzi.',
+        available: 'Je dostupná aktualizace. Opravdu chcete aktualizovat?',
+        updating: 'Aktualizace zahájena. Prosím čekejte...',
+        confirm: 'Potvrdit',
+        cancel: 'Zrušit'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

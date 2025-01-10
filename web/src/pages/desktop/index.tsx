@@ -12,7 +12,6 @@ import { Head } from '@/components/head.tsx';
 import { Keyboard } from './keyboard';
 import { VirtualKeyboard } from './keyboard/virtual-keyboard';
 import { Menu } from './menu';
-import { MenuPhone } from './menu-phone';
 import { Mouse } from './mouse';
 import { Notification } from './notification.tsx';
 import { Screen } from './screen';
@@ -51,16 +50,14 @@ export const Desktop = () => {
 
       {videoMode && resolution && (
         <>
-          {isBigScreen ? <Menu /> : <MenuPhone />}
-
+          <Menu />
           <Screen />
-
           <Mouse />
           {isKeyboardEnable && <Keyboard />}
         </>
       )}
 
-      <VirtualKeyboard isBigScreen={isBigScreen} />
+      <VirtualKeyboard />
     </>
   );
 };

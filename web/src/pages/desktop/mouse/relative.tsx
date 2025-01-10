@@ -24,6 +24,7 @@ export const Relative = () => {
     if (!canvas) return;
 
     messageApi.open({
+      key: 'no_mouse_relative',
       type: 'info',
       content: t('mouse.requestPointer'),
       duration: 3,

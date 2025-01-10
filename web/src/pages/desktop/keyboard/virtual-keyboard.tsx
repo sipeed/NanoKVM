@@ -10,6 +10,8 @@ import { Drawer } from 'vaul';
 import 'react-simple-keyboard/build/css/index.css';
 import '@/assets/styles/keyboard.css';
 
+import { useMediaQuery } from 'react-responsive';
+
 import { getKeyboardLayout, setKeyboardLayout } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
@@ -24,11 +26,9 @@ import {
   specialKeyMap
 } from './virtual-keys.ts';
 
-type KeyboardProps = {
-  isBigScreen: boolean;
-};
+export const VirtualKeyboard = () => {
+  const isBigScreen = useMediaQuery({ minWidth: 850 });
 
-export const VirtualKeyboard = ({ isBigScreen }: KeyboardProps) => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
 
   const [layout, setLayout] = useState('default');

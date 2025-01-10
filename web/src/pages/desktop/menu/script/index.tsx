@@ -2,8 +2,9 @@ import { ChangeEvent, useRef, useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
 import { Button, Divider, Popconfirm, Popover } from 'antd';
 import clsx from 'clsx';
-import { ChevronRightIcon, FileCodeIcon } from 'lucide-react';
+import { ChevronRightIcon, FileJsonIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from 'react-responsive';
 
 import * as api from '@/api/script.ts';
 
@@ -11,6 +12,8 @@ import { Run } from './run';
 
 export const Script = () => {
   const { t } = useTranslation();
+  const isBigScreen = useMediaQuery({ minWidth: 640 });
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [scripts, setScripts] = useState<string[]>([]);
   const [currentScript, setCurrentScript] = useState('');
@@ -141,7 +144,7 @@ export const Script = () => {
           key={script}
           className={clsx(
             'my-1 cursor-pointer rounded',
-            script === currentScript ? 'bg-neutral-700/50' : 'hover:bg-neutral-700/50'
+            script === currentScript ? 'bg-neutral-700/50' : 'hover:bg-neutral-700/70'
           )}
         >
           <div
@@ -187,13 +190,14 @@ export const Script = () => {
     <>
       <Popover
         content={content}
-        placement="bottomLeft"
+        placement={isBigScreen ? 'bottomLeft' : 'bottom'}
         trigger="click"
+        arrow={false}
         open={isPopoverOpen}
         onOpenChange={handleOpenChange}
       >
-        <div className="flex h-[30px] cursor-pointer items-center justify-center rounded px-2 text-neutral-300 hover:bg-neutral-700">
-          <FileCodeIcon size={18} />
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+          <FileJsonIcon size={18} />
         </div>
       </Popover>
 

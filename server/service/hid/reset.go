@@ -3,6 +3,7 @@ package hid
 import (
 	"NanoKVM-Server/proto"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -42,6 +43,8 @@ func (s *Service) Reset(c *gin.Context) {
 		return
 	}
 	_ = f.Close()
+
+	time.Sleep(1 * time.Second)
 
 	devices, err := os.ReadDir("/sys/class/udc/")
 	if err != nil {

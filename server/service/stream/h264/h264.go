@@ -37,7 +37,10 @@ func Connect(c *gin.Context) {
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
+				URLs: []string{
+					"stun:stun.l.google.com:19302",
+					"stun:turn.cloudflare.com:3478",
+				},
 			},
 		},
 	}

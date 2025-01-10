@@ -1,105 +1,96 @@
 import { useEffect, useState } from 'react';
 import { LogoutOutlined } from '@ant-design/icons';
-import { Button, Divider, Switch } from 'antd';
+import { Button, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { logoutTailscale, updateTailscaleStatus } from '@/api/network.ts';
+import * as api from '@/api/network.ts';
 
 type DeviceProps = {
-  status: string;
-  name: string;
-  ip: string;
-  account: string;
-  setStatus: (status: 'notLogin') => void;
+  status: any;
+  onLogout: () => void;
 };
 
-export const Device = ({ status, name, ip, account, setStatus }: DeviceProps) => {
+export const Device = ({ status, onLogout }: DeviceProps) => {
   const { t } = useTranslation();
 
   const [isRunning, setIsRunning] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isConfirmation, setIsConfirmation] = useState(false);
+  const [isLogging, setIsLogging] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
   useEffect(() => {
-    setIsRunning(status === 'running');
-  }, []);
+    setIsRunning(status.state === 'running');
+  }, [status]);
 
-  function updateStatus() {
+  async function update() {
     if (isUpdating) return;
     setIsUpdating(true);
 
-    const command = isRunning ? 'down' : 'up';
+    try {
+      const rsp = isRunning ? await api.downTailscale() : await api.upTailscale();
+      if (rsp.code !== 0) {
+        setErrMsg(rsp.msg);
+        return;
+      }
 
-    updateTailscaleStatus(command)
-      .then((rsp) => {
-        if (rsp.code !== 0) {
-          setErrMsg(rsp.msg);
-          return;
-        }
-
-        setIsRunning(rsp.data.status === 'running');
-      })
-      .finally(() => {
-        setIsUpdating(false);
-      });
+      setIsRunning(!isRunning);
+    } finally {
+      setIsUpdating(false);
+    }
   }
 
-  function logout() {
-    if (isLoggingOut) return;
-    setIsLoggingOut(true);
+  async function logout() {
+    if (isLogging) return;
+    setIsLogging(true);
 
-    logoutTailscale()
+    api
+      .logoutTailscale()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
           return;
         }
 
-        setStatus('notLogin');
+        onLogout();
       })
       .finally(() => {
-        setIsLoggingOut(false);
+        setIsLogging(false);
       });
   }
 
   return (
-    <div className="w-full pt-10">
-      <div className="flex justify-between px-3">
-        <span>{t('tailscale.enable')}</span>
-        <Switch checked={isRunning} loading={isUpdating} onClick={updateStatus} />
+    <div className="flex flex-col space-y-6 pt-5">
+      <div className="flex justify-between">
+        <span>{t('settings.tailscale.enable')}</span>
+        <Switch checked={isRunning} loading={isUpdating} onClick={update} />
       </div>
-      <Divider style={{ margin: '20px 0' }} />
 
-      <div className="flex justify-between px-3">
-        <span>{t('tailscale.deviceName')}</span>
-        <span>{name}</span>
+      <div className="flex justify-between">
+        <span>{t('settings.tailscale.deviceName')}</span>
+        <span>{status.name}</span>
       </div>
-      <Divider style={{ margin: '20px 0' }} />
 
-      <div className="flex justify-between px-3">
-        <span>{t('tailscale.deviceIP')}</span>
-        <span>{ip}</span>
+      <div className="flex justify-between">
+        <span>{t('settings.tailscale.deviceIP')}</span>
+        <span>{status.ip}</span>
       </div>
-      <Divider style={{ margin: '20px 0' }} />
 
-      <div className="flex justify-between px-3">
-        <span>{t('tailscale.account')}</span>
-        <span>{account}</span>
+      <div className="flex justify-between">
+        <span>{t('settings.tailscale.account')}</span>
+        <span>{status.account}</span>
       </div>
-      <Divider style={{ margin: '20px 0' }} />
 
-      <div className="flex justify-center py-5">
-        {!showLogoutConfirmation ? (
+      <div className="flex justify-center pt-10">
+        {!isConfirmation ? (
           <Button
             type="primary"
             size="large"
             shape="round"
             icon={<LogoutOutlined />}
-            onClick={() => setShowLogoutConfirmation(true)}
+            onClick={() => setIsConfirmation(true)}
           >
-            {t('tailscale.logout')}
+            {t('settings.tailscale.logout')}
           </Button>
         ) : (
           <Button
@@ -107,10 +98,10 @@ export const Device = ({ status, name, ip, account, setStatus }: DeviceProps) =>
             type="primary"
             size="large"
             icon={<LogoutOutlined />}
-            loading={isLoggingOut}
+            loading={isLogging}
             onClick={logout}
           >
-            {t('tailscale.logout2')}
+            {t('settings.tailscale.logout2')}
           </Button>
         )}
       </div>

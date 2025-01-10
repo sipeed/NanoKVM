@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { notification } from 'antd';
 import clsx from 'clsx';
-import { FileBoxIcon, LoaderCircleIcon, PackageIcon, PackageSearchIcon, XIcon } from 'lucide-react';
+import {
+  ArrowBigDownDashIcon,
+  ArrowBigUpDashIcon,
+  LoaderCircleIcon,
+  PackageIcon,
+  PackageSearchIcon
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/storage.ts';
@@ -117,28 +123,28 @@ export const Images = ({ setIsMounted }: ImagesProps) => {
           <div
             key={image}
             className={clsx(
-              'group my-1 flex max-w-[300px] cursor-pointer select-none items-center space-x-2 rounded py-2 pl-2 pr-4 hover:bg-neutral-700/80',
-              { 'text-blue-500': mountedImage === image }
+              'group flex max-w-[300px] cursor-pointer select-none items-center space-x-1 rounded p-2 hover:bg-neutral-700/70',
+              mountedImage === image && 'text-blue-500'
             )}
             onClick={() => mountImage(image)}
           >
-            {/* image state icon */}
-            {mountedImage === image ? (
-              <div className="h-[18px] w-[18px] group-hover:text-red-500">
-                <PackageIcon size={18} className="block group-hover:hidden" />
-                <XIcon size={18} className="hidden group-hover:block" />
-              </div>
-            ) : mountingImage === image ? (
-              <div className="h-[18px] w-[18px]">
+            <div className="h-[18px] w-[18px]">
+              {mountingImage === image ? (
                 <LoaderCircleIcon className="animate-spin" size={18} />
-              </div>
-            ) : (
-              <div className="h-[18px] w-[18px]">
-                <FileBoxIcon size={18} />
-              </div>
-            )}
+              ) : (
+                <PackageIcon size={18} />
+              )}
+            </div>
 
-            <span className="break-all">{image.replace(/^.*[\\/]/, '')}</span>
+            <div className="flex-1 truncate">{image.replace(/^.*[\\/]/, '')}</div>
+
+            <div className="h-[18px] w-[18px]">
+              {mountedImage === image ? (
+                <ArrowBigDownDashIcon size={18} className="hidden text-red-500 group-hover:block" />
+              ) : (
+                <ArrowBigUpDashIcon size={18} className="hidden text-blue-500 group-hover:block" />
+              )}
+            </div>
           </div>
         ))
       )}

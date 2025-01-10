@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
@@ -20,7 +19,11 @@ export const H264 = () => {
     const videoElement = document.getElementById('screen') as HTMLVideoElement;
 
     const pc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+      iceServers: [
+        {
+          urls: ['stun:stun.l.google.com:19302', 'stun:turn.cloudflare.com:3478']
+        }
+      ]
     });
 
     pc.ontrack = function (event) {
@@ -85,23 +88,23 @@ export const H264 = () => {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 10 * 1000);
+    }, 15 * 1000);
 
     return () => {
-      heartbeatTimer && clearInterval(heartbeatTimer);
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+      }
       ws.close();
       pc.close();
     };
   }, []);
 
   return (
-    <>
-      {isLoading && <Spin indicator={<LoadingOutlined spin />} size="large" fullscreen />}
-
+    <Spin size="large" tip="Loading" spinning={isLoading}>
       <div className={clsx('flex h-screen w-screen items-start justify-center xl:items-center')}>
         <video
           id="screen"
-          className={clsx('block select-none bg-neutral-950', mouseStyle)}
+          className={clsx('block min-h-[240px] min-w-[380px] select-none', mouseStyle)}
           style={
             resolution?.width
               ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
@@ -120,6 +123,6 @@ export const H264 = () => {
           }}
         />
       </div>
-    </>
+    </Spin>
   );
 };

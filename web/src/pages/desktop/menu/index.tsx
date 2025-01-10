@@ -1,32 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Divider } from 'antd';
 import clsx from 'clsx';
+import { useAtom } from 'jotai';
 import { MenuIcon, XIcon } from 'lucide-react';
 
-import { Fullscreen } from './fullscreen.tsx';
+import { getMenuDisabledItems } from '@/lib/localstorage.ts';
+import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
+
+import { Fullscreen } from './fullscreen';
 import { Image } from './image';
 import { Keyboard } from './keyboard';
-import { Mouse } from './mouse.tsx';
-import { Power } from './power.tsx';
+import { Mouse } from './mouse';
+import { Power } from './power';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
-import { Wol } from './wol.tsx';
+import { Wol } from './wol';
 
 export const Menu = () => {
+  const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
+
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+
+  useEffect(() => {
+    const items = getMenuDisabledItems();
+    setMenuDisabledItems(items);
+  }, []);
 
   return (
     <div className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
       <div className="sticky top-[10px]">
         <div
           className={clsx(
-            'h-[40px] items-center justify-between rounded bg-neutral-800/90',
+            'h-[36px] items-center rounded bg-neutral-800/80',
             isMenuOpen ? 'flex' : 'hidden'
           )}
         >
-          <div className="flex h-[30px] select-none items-center px-3">
+          <div className="hidden h-[30px] select-none items-center px-3 sm:flex">
             <img src="/sipeed.ico" width={18} height={18} alt="sipeed" />
           </div>
 
@@ -35,24 +46,30 @@ export const Menu = () => {
           <Mouse />
           <Divider type="vertical" />
 
-          <Image />
-          <Script />
-          <Terminal />
-          <Wol />
-          <Divider type="vertical" />
+          {!menuDisabledItems.includes('image') && <Image />}
+          {!menuDisabledItems.includes('script') && <Script />}
+          {!menuDisabledItems.includes('terminal') && <Terminal />}
+          {!menuDisabledItems.includes('wol') && <Wol />}
 
-          <Power />
-          <Divider type="vertical" />
+          {['image', 'script', 'terminal', 'wol'].some(
+            (key) => !menuDisabledItems.includes(key)
+          ) && <Divider type="vertical" />}
+
+          {!menuDisabledItems.includes('power') && (
+            <>
+              <Power />
+              <Divider type="vertical" />
+            </>
+          )}
 
           <Settings />
           <Fullscreen />
+
           <div
-            className="mr-2 flex h-[30px] cursor-pointer items-center justify-center space-x-1 rounded px-2 text-white hover:bg-neutral-700"
+            className="mr-1 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white"
             onClick={() => setIsMenuOpen((o) => !o)}
           >
-            <span className="pt-[2px]">
-              <XIcon size={20} />
-            </span>
+            <XIcon size={20} />
           </div>
         </div>
 

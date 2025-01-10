@@ -10,11 +10,11 @@ import (
 func authRouter(r *gin.Engine) {
 	service := auth.NewService()
 
-	r.POST("/api/auth/login", service.Login)      // login
-	r.POST("/api/auth/wifi", service.ConnectWifi) // connect Wi-Fi
+	r.POST("/api/auth/login", service.Login) // login
 
 	api := r.Group("/api").Use(middleware.CheckToken())
 
 	api.GET("/auth/password", service.IsPasswordUpdated) // is password updated
+	api.GET("/auth/account", service.GetAccount)         // get account
 	api.POST("/auth/password", service.ChangePassword)   // change password
 }

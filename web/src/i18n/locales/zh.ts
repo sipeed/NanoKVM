@@ -1,25 +1,11 @@
 const zh = {
   translation: {
-    currentVersion: '版本',
-    latestVersion: '最新版本：',
-    changePassword: '修改密码',
-    logout: '登出',
-    settings: '设置',
-    showMouse: '显示鼠标',
-    hideMouse: '隐藏鼠标',
-    power: '电源',
-    reset: '重启',
-    powerShort: '电源（短按）',
-    powerLong: '电源（长按）',
-    hddLed: '硬盘指示灯',
-    checkLibFailed: '检查运行库失败，请重试',
-    updateLibFailed: '更新运行库失败，请重试',
-    updatingLib: '正在更新运行库。更新完成后请刷新页面。',
     head: {
       desktop: '远程桌面',
       login: '登录',
       changePassword: '修改密码',
-      terminal: '终端'
+      terminal: '终端',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: '登录',
@@ -32,19 +18,32 @@ const zh = {
       invalidUser: '用户名或密码错误',
       error: '未知错误',
       changePassword: '修改密码',
-      changePasswordDesc: '为了您的设备安全，请修改网页登录密码。',
+      changePasswordDesc: '为了您的设备安全，请修改密码!',
       differentPassword: '两次密码不一致',
       illegalUsername: '用户名中包含非法字符',
       illegalPassword: '密码中包含非法字符',
       forgetPassword: '忘记密码',
-      resetPassword: '重置密码',
-      reset1: '如果您忘记了登录密码，请按照以下步骤重置密码：',
-      reset2: '1. 通过 SSH 登录到您的 NanoKVM 设备',
-      reset3: '2. 删除设备中的文件：',
-      reset4: '3. 使用默认的账号登录： ',
       ok: '确定',
       cancel: '取消',
-      loginButtonText: '登录'
+      loginButtonText: '登录',
+      tips: {
+        reset1: '长按 NanoKVM 上的 BOOT 按键 10 秒钟来重置帐号。',
+        reset2: '详细操作步骤可参考此文档：',
+        reset3: '网页默认帐号：',
+        reset4: 'SSH 默认帐号：',
+        change1: '请注意，此操作将同时更新以下密码：',
+        change2: '网页的登录密码',
+        change3: '系统 root 用户的密码（SSH 登录密码）',
+        change4: '如果您忘记了密码，需要长按 NanoKVM 上的 BOOT 按键来重置密码。'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: '配置 NanoKVM Wi-Fi 信息',
+      success: '请检查 NanoKVM 的网络状态，并访问新的 IP 地址。',
+      failed: '操作失败，请重试。',
+      confirmBtn: '确定',
+      finishBtn: '完成'
     },
     screen: {
       video: '视频模式',
@@ -127,59 +126,112 @@ const zh = {
       confirm: '确定'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: '指令发送中...',
       sent: '指令已发送',
       input: '请输入MAC地址',
       ok: '确定'
     },
-    about: {
-      title: '关于 NanoKVM',
-      information: '信息',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: '应用版本',
-      image: '镜像版本',
-      deviceKey: '设备码',
-      queryFailed: '查询失败',
-      community: '社区'
+    power: {
+      title: '电源',
+      reset: '重启',
+      power: '电源',
+      powerShort: '电源（短按）',
+      powerLong: '电源（长按）'
     },
-    update: {
-      title: '检查更新',
-      queryFailed: '获取版本号失败',
-      updateFailed: '更新失败，请重试',
-      isLatest: '已经是最新版本。',
-      available: '有新的可用版本，确定要更新吗？',
-      updating: '更新中，请稍候...',
-      confirm: '确定',
-      cancel: '取消'
-    },
-    virtualDevice: {
-      network: '虚拟网卡',
-      disk: '虚拟硬盘'
-    },
-    tailscale: {
-      loading: '加载中...',
-      notInstall: '未检测到 Tailscale，请先安装',
-      install: '安装',
-      installing: '安装中',
-      failed: '安装失败',
-      retry: '请刷新后重试，或尝试手动安装',
-      download: '下载',
-      package: '安装包',
-      unzip: '并解压',
-      upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
-      upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
-      refresh: '刷新页面',
-      notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
-      urlPeriod: '该链接10分钟内有效',
-      login: '登录',
-      loginSuccess: '登录完成',
-      enable: '启用 Tailscale',
-      deviceName: '设备名称',
-      deviceIP: '设备地址',
-      account: '账号',
-      logout: '退出',
-      logout2: '确认退出？'
+    settings: {
+      title: '设置',
+      about: {
+        title: '关于 NanoKVM',
+        information: '信息',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: '应用版本',
+        applicationTip: 'NanoKVM 网页应用版本',
+        image: '镜像版本',
+        imageTip: 'NanoKVM 系统镜像版本',
+        deviceKey: '设备码',
+        community: '社区'
+      },
+      appearance: {
+        title: '外观',
+        display: '显示',
+        language: '语言',
+        menuBar: '菜单栏',
+        menuBarDesc: '是否在菜单栏中显示图标'
+      },
+      device: {
+        title: '设备',
+        oled: {
+          title: 'OLED',
+          description: '设置 OLED 屏幕自动休眠时间',
+          0: '永不',
+          15: '15秒',
+          30: '30秒',
+          60: '1分钟',
+          180: '3分钟',
+          300: '5分钟',
+          600: '10分钟',
+          1800: '30分钟',
+          3600: '1小时'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: '配置 Wi-Fi 信息',
+          setBtn: '设置'
+        },
+        disk: '虚拟U盘',
+        diskDesc: '在远程主机中挂载虚拟U盘',
+        network: '虚拟网卡',
+        networkDesc: '在远程主机中挂载虚拟网卡',
+        memory: {
+          title: '内存优化',
+          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存',
+          disable: '关闭'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: '加载中...',
+        notInstall: '未检测到 Tailscale，请先安装',
+        install: '安装',
+        installing: '安装中',
+        failed: '安装失败',
+        retry: '请刷新后重试，或尝试手动安装',
+        download: '下载',
+        package: '安装包',
+        unzip: '并解压',
+        upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
+        upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
+        refresh: '刷新页面',
+        notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
+        urlPeriod: '该链接10分钟内有效',
+        login: '登录',
+        loginSuccess: '登录完成',
+        enable: '启用 Tailscale',
+        deviceName: '设备名称',
+        deviceIP: '设备地址',
+        account: '账号',
+        logout: '退出',
+        logout2: '确认退出？'
+      },
+      update: {
+        title: '检查更新',
+        queryFailed: '获取版本号失败',
+        updateFailed: '更新失败，请重试',
+        isLatest: '已经是最新版本。',
+        available: '有新的可用版本，确定要更新吗？',
+        updating: '更新中，请稍候...',
+        confirm: '确定',
+        cancel: '取消'
+      },
+      account: {
+        title: '帐号',
+        webAccount: '网页帐号',
+        password: '密码',
+        updateBtn: '修改',
+        logoutBtn: '退出'
+      }
     }
   }
 };

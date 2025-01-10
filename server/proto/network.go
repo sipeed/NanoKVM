@@ -12,24 +12,24 @@ type DeleteMacReq struct {
 	Mac string `form:"mac" validate:"required"`
 }
 
+type TailscaleState string
+
+const (
+	TailscaleNotInstall TailscaleState = "notInstall"
+	TailscaleNotLogin   TailscaleState = "notLogin"
+	TailscaleStopped    TailscaleState = "stopped"
+	TailscaleRunning    TailscaleState = "running"
+)
+
 type GetTailscaleStatusRsp struct {
-	Status  string `json:"status"` // notInstall | notLogin | stopped | running
-	Name    string `json:"name"`
-	IP      string `json:"ip"`
-	Account string `json:"account"`
-}
-
-type UpdateTailscaleStatusReq struct {
-	Command string // up | down
-}
-
-type UpdateTailscaleStatusRsp struct {
-	Status string `json:"status"` // stopped | running
+	State   TailscaleState `json:"state"`
+	Name    string         `json:"name"`
+	IP      string         `json:"ip"`
+	Account string         `json:"account"`
 }
 
 type LoginTailscaleRsp struct {
-	Status string `json:"status"`
-	Url    string `json:"url"`
+	Url string `json:"url"`
 }
 
 type GetWifiRsp struct {

@@ -18,7 +18,7 @@ export const Screen = () => {
   const videoMode = useAtomValue(videoModeAtom);
   const resolution = useAtomValue(resolutionAtom);
   const [fps, setFps] = useState(30);
-  const [quality, setQuality] = useState(80);
+  const [quality, setQuality] = useState(2);
 
   useEffect(() => {
     updateScreen('type', videoMode === 'mjpeg' ? 0 : 1);
@@ -66,8 +66,9 @@ export const Screen = () => {
       }
       placement="bottomLeft"
       trigger="click"
+      arrow={false}
     >
-      <div className="flex h-[32px] cursor-pointer items-center justify-center rounded px-2 text-neutral-300 hover:bg-neutral-700/80">
+      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
         <MonitorIcon size={18} />
       </div>
     </Popover>

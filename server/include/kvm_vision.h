@@ -1,3 +1,5 @@
+
+
 #ifndef KVM_VISION_H_
 #define KVM_VISION_H_
 
@@ -51,6 +53,7 @@ int free_kvmv_data(uint8_t ** _pp_kvm_data);
 void free_all_kvmv_data();
 void set_h264_gop(uint8_t _gop);
 void kvmv_deinit();
+uint8_t kvmv_hdmi_control(uint8_t _en);
 
 #ifdef __cplusplus
 }

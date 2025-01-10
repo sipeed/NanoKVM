@@ -3,7 +3,7 @@ import { UserSwitchOutlined } from '@ant-design/icons';
 import { Button, Card } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { loginTailscale } from '@/api/network.ts';
+import * as api from '@/api/network.ts';
 
 type LoginProps = {
   onSuccess: () => void;
@@ -12,66 +12,64 @@ type LoginProps = {
 export const Login = ({ onSuccess }: LoginProps) => {
   const { t } = useTranslation();
 
-  const [isLogging, setIsLogging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [loginUrl, setLoginUrl] = useState('');
   const [errMsg, setErrMsg] = useState('');
 
   function login() {
-    if (isLogging) return;
-    setIsLogging(true);
+    if (isLoading) return;
+    setIsLoading(true);
 
-    loginTailscale()
+    api
+      .loginTailscale()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
           return;
         }
 
-        // already logged in
-        if (rsp.data.status === 'running') {
+        const url = rsp.data.url;
+        if (!url) {
           onSuccess();
           return;
         }
-
-        const url = rsp.data.url;
-        if (!url) return;
 
         setLoginUrl(url);
         window.open(url, '_blank');
         setTimeout(() => setLoginUrl(''), 10 * 60 * 1000);
       })
       .finally(() => {
-        setIsLogging(false);
+        setIsLoading(false);
       });
   }
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-2">
-      <Card style={{ margin: '20px 0 20px 0' }}>{t('tailscale.notLogin')}</Card>
+    <div className="flex flex-col items-center justify-center space-y-10">
+      <Card>{t('settings.tailscale.notLogin')}</Card>
 
-      {!loginUrl ? (
+      {loginUrl === '' ? (
         <Button
           type="primary"
           size="large"
           shape="round"
           icon={<UserSwitchOutlined />}
-          loading={isLogging}
+          loading={isLoading}
           onClick={login}
         >
-          {t('tailscale.login')}
+          {t('settings.tailscale.login')}
         </Button>
       ) : (
-        <>
+        <div className="flex w-full flex-col items-center justify-center space-y-5">
           <Button type="link" href={loginUrl} target="_blank">
             {loginUrl}
           </Button>
 
-          <span className="text-sm text-neutral-500">{t('tailscale.urlPeriod')}</span>
+          <span className="text-xs text-neutral-600">{t('settings.tailscale.urlPeriod')}</span>
 
           <Button type="primary" size="large" shape="round" onClick={onSuccess}>
-            {t('tailscale.loginSuccess')}
+            {t('settings.tailscale.loginSuccess')}
           </Button>
-        </>
+        </div>
       )}
 
       {errMsg && <span className="text-red-500">{errMsg}</span>}

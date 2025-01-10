@@ -41,7 +41,7 @@ func (s *Service) Login(c *gin.Context) {
 		return
 	}
 
-	account, err := getAccount()
+	account, err := utils.GetAccount()
 	if err != nil {
 		rsp.ErrRsp(c, -3, "get account failed")
 		return
@@ -63,6 +63,21 @@ func (s *Service) Login(c *gin.Context) {
 	})
 
 	log.Debugf("login success, username: %s", req.Username)
+}
+
+func (s *Service) GetAccount(c *gin.Context) {
+	var rsp proto.Response
+
+	account, err := utils.GetAccount()
+	if err != nil {
+		rsp.ErrRsp(c, -1, "get account failed")
+		return
+	}
+
+	rsp.OkRspWithData(c, &proto.GetAccountRsp{
+		Username: account.Username,
+	})
+	log.Debugf("get account successful")
 }
 
 func isLibExist() bool {

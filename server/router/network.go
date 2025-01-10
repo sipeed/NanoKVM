@@ -9,17 +9,22 @@ import (
 
 func networkRouter(r *gin.Engine) {
 	service := network.NewService()
+
+	r.POST("/api/network/wifi", service.ConnectWifi) // connect Wi-Fi
+
 	api := r.Group("/api").Use(middleware.CheckToken())
 
 	api.POST("/network/wol", service.WakeOnLAN)       // wake on lan
 	api.GET("/network/wol/mac", service.GetMac)       // get mac list
 	api.DELETE("/network/wol/mac", service.DeleteMac) // delete mac
 
-	api.POST("/network/tailscale/install", service.InstallTailscale)     // install tailscale
-	api.GET("/network/tailscale/status", service.GetTailscaleStatus)     // get tailscale status
-	api.POST("/network/tailscale/status", service.UpdateTailscaleStatus) // update tailscale status
-	api.POST("/network/tailscale/login", service.LoginTailscale)         // tailscale login
-	api.POST("/network/tailscale/logout", service.LogoutTailscale)       // tailscale logout
+	api.POST("/network/tailscale/install", service.TsInstall)     // install tailscale
+	api.POST("/network/tailscale/uninstall", service.TsUninstall) // uninstall tailscale
+	api.GET("/network/tailscale/status", service.GetTsStatus)     // get tailscale status
+	api.POST("/network/tailscale/up", service.TsUp)               // run tailscale up
+	api.POST("/network/tailscale/down", service.TsDown)           // run tailscale down
+	api.POST("/network/tailscale/login", service.TsLogin)         // tailscale login
+	api.POST("/network/tailscale/logout", service.TsLogout)       // tailscale logout
 
-	api.GET("/network/wifi", service.GetWifi) // get wifi information
+	api.GET("/network/wifi", service.GetWifi) // get Wi-Fi information
 }

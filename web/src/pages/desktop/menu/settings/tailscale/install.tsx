@@ -1,81 +1,82 @@
 import { useState } from 'react';
-import { DownloadOutlined } from '@ant-design/icons';
-import { Button, Card } from 'antd';
+import { InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Button, Card, Result } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { installTailscale } from '@/api/network.ts';
+import * as api from '@/api/network.ts';
 
 type InstallProps = {
+  setIsLocked: (setIsLocked: boolean) => void;
   onSuccess: () => void;
 };
 
-export const Install = ({ onSuccess }: InstallProps) => {
+export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
   const { t } = useTranslation();
 
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [isFailed, setIsFailed] = useState(false);
+  const [state, setState] = useState('');
 
   function install() {
-    if (isInstalling) return;
-    setIsInstalling(true);
+    if (state === 'installing') return;
+    setState('installing');
+    setIsLocked(true);
 
-    installTailscale()
+    api
+      .installTailscale()
       .then((rsp) => {
         if (rsp.code !== 0) {
-          setIsFailed(true);
+          setState('failed');
           return;
         }
 
         onSuccess();
       })
       .finally(() => {
-        setIsInstalling(false);
+        setState('');
+        setIsLocked(false);
       });
   }
 
   return (
     <>
-      {!isFailed ? (
-        <div className="flex h-full flex-col items-center justify-center space-y-7">
-          <span>{t('tailscale.notInstall')}</span>
-
-          <Button
-            type="primary"
-            size="large"
-            shape="round"
-            icon={<DownloadOutlined />}
-            loading={isInstalling}
-            onClick={install}
-          >
-            {isInstalling ? t('tailscale.installing') : t('tailscale.install')}
-          </Button>
-        </div>
+      {state !== 'failed' ? (
+        <Result
+          icon={<InboxOutlined />}
+          subTitle={t('settings.tailscale.notInstall')}
+          extra={
+            <Button type="primary" size="large" loading={state === 'installing'} onClick={install}>
+              {state === 'installing'
+                ? t('settings.tailscale.installing')
+                : t('settings.tailscale.install')}
+            </Button>
+          }
+        />
       ) : (
-        <div className="flex flex-col space-y-5 py-5">
-          <div className="flex flex-col items-center justify-center">
-            <span className="text-lg font-bold">{t('tailscale.failed')}</span>
-            <span className="text-neutral-400">{t('tailscale.retry')}</span>
-          </div>
-
-          <Card>
-            <ul className="list-decimal font-mono text-sm">
-              <li>
-                {t('tailscale.download')}
-                <a
-                  className="px-1"
-                  href="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
-                  target="_blank"
-                >
-                  {t('tailscale.package')}
-                </a>
-                {t('tailscale.unzip')}
-              </li>
-              <li>{t('tailscale.upTailscale')}</li>
-              <li>{t('tailscale.upTailscaled')}</li>
-              <li>{t('tailscale.refresh')}</li>
-            </ul>
-          </Card>
-        </div>
+        <Result
+          status="warning"
+          title={t('settings.tailscale.failed')}
+          subTitle={t('settings.tailscale.retry')}
+          icon={<InfoCircleOutlined />}
+          extra={
+            <Card styles={{ body: { padding: 0 } }}>
+              <ul className="list-decimal text-left font-mono text-sm text-neutral-300">
+                <li>
+                  {t('settings.tailscale.download')}
+                  <a
+                    className="px-1"
+                    href="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
+                    target="_blank"
+                  >
+                    {t('settings.tailscale.package')}
+                  </a>
+                  {t('settings.tailscale.unzip')}
+                </li>
+                <li>{t('settings.tailscale.upTailscale')}</li>
+                <li>{t('settings.tailscale.upTailscaled')}</li>
+                <li>{t('settings.tailscale.refresh')}</li>
+              </ul>
+            </Card>
+          }
+        />
       )}
     </>
   );

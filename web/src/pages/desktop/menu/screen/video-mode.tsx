@@ -31,10 +31,10 @@ export const VideoMode = () => {
       {videoModes.map((mode) => (
         <div
           key={mode.key}
-          className="flex cursor-pointer select-none items-center space-x-1 rounded py-1.5 pl-1 pr-5 hover:bg-neutral-600"
+          className="flex cursor-pointer select-none items-center rounded py-1.5 pl-1 pr-5 hover:bg-neutral-700/70"
           onClick={() => update(mode.key)}
         >
-          <div className="flex h-[14px] w-[20px] items-end">
+          <div className="flex h-[14px] w-[20px] items-end text-blue-500">
             {mode.key === videoMode && <CheckIcon size={15} />}
           </div>
 
@@ -46,7 +46,7 @@ export const VideoMode = () => {
 
   return (
     <Popover content={content} placement="rightTop">
-      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700">
+      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <TvMinimalPlayIcon size={18} />
         <span className="select-none text-sm">{t('screen.video')}</span>
       </div>

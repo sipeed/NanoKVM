@@ -3,6 +3,7 @@ import { Divider, Popover } from 'antd';
 import clsx from 'clsx';
 import { DiscIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from 'react-responsive';
 
 import { getMountedImage } from '@/api/storage.ts';
 
@@ -11,6 +12,7 @@ import { Tips } from './tips.tsx';
 
 export const Image = () => {
   const { t } = useTranslation();
+  const isBigScreen = useMediaQuery({ minWidth: 640 });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -38,15 +40,16 @@ export const Image = () => {
   return (
     <Popover
       content={content}
-      placement="bottomLeft"
+      placement={isBigScreen ? 'bottomLeft' : 'bottom'}
       trigger="click"
+      arrow={false}
       open={isPopoverOpen}
       onOpenChange={setIsPopoverOpen}
     >
       <div
         className={clsx(
-          'flex h-[30px] cursor-pointer items-center justify-center rounded px-2 hover:bg-neutral-700',
-          isMounted ? 'text-blue-500' : 'text-neutral-300'
+          'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
+          isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
         )}
       >
         <DiscIcon size={18} />

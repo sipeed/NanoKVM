@@ -56,3 +56,22 @@ type UpdateVirtualDeviceReq struct {
 type UpdateVirtualDeviceRsp struct {
 	On bool `json:"on"`
 }
+
+type SetMemoryLimitReq struct {
+	Enabled bool  `json:"enabled"`
+	Limit   int64 `json:"limit"`
+}
+
+type GetMemoryLimitRsp struct {
+	Enabled bool  `json:"enabled"`
+	Limit   int64 `json:"limit"`
+}
+
+type SetOledReq struct {
+	Sleep int `json:"sleep"`
+}
+
+type GetOLEDRsp struct {
+	Exist bool `json:"exist"`
+	Sleep int  `json:"sleep"`
+}

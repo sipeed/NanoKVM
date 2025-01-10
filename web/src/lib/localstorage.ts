@@ -9,7 +9,8 @@ const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
 const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
-const SKIP_MODIFY_PASSWORD = 'nano-kvm-skip-modify-password';
+const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
+const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 
 type ItemWithExpiry = {
   value: string;
@@ -127,10 +128,20 @@ export function getKeyboardLayout() {
 
 export function setSkipModifyPassword(skip: boolean) {
   const expiry = 3 * 24 * 60 * 60 * 1000; // 3 days
-  setWithExpiry(SKIP_MODIFY_PASSWORD, String(skip), expiry);
+  setWithExpiry(SKIP_MODIFY_PASSWORD_KEY, String(skip), expiry);
 }
 
 export function getSkipModifyPassword() {
-  const skip = getWithExpiry(SKIP_MODIFY_PASSWORD);
+  const skip = getWithExpiry(SKIP_MODIFY_PASSWORD_KEY);
   return skip ? Boolean(skip) : false;
+}
+
+export function setMenuDisabledItems(items: string[]) {
+  const value = JSON.stringify(items);
+  localStorage.setItem(MENU_DISABLED_ITEMS_KEY, value);
+}
+
+export function getMenuDisabledItems(): string[] {
+  const value = localStorage.getItem(MENU_DISABLED_ITEMS_KEY);
+  return value ? JSON.parse(value) : [];
 }

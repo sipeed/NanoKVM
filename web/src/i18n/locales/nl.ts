@@ -1,25 +1,11 @@
 const nl = {
   translation: {
-    language: 'Taal',
-    changePassword: 'Wachtwoord wijzigen',
-    logout: 'Uitloggen',
-    settings: 'Instellingen',
-    showMouse: 'Muis tonen',
-    hideMouse: 'Muis verbergen',
-    power: 'Aan/uit',
-    reset: 'Resetten',
-    powerShort: 'Aan/uit (kort indrukken)',
-    powerLong: 'Aan/uit (lang indrukken)',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'Controleren van runtime bibliotheek mislukt, probeer het opnieuw',
-    updateLibFailed: 'Bijwerken van runtime bibliotheek mislukt, probeer het opnieuw',
-    updatingLib: 'Runtime bibliotheek wordt bijgewerkt. Vernieuw de pagina na het bijwerken.',
-    checkForUpdate: 'Controleren op updates',
     head: {
       desktop: 'Extern bureaublad',
       login: 'Inloggen',
       changePassword: 'Wachtwoord wijzigen',
-      terminal: 'Terminal'
+      terminal: 'Terminal',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Inloggen',
@@ -39,14 +25,28 @@ const nl = {
       illegalUsername: 'Gebruikersnaam bevat ongeldige tekens',
       illegalPassword: 'Wachtwoord bevat ongeldige tekens',
       forgetPassword: 'Wachtwoord vergeten',
-      resetPassword: 'Wachtwoord resetten',
-      reset1: 'Als u uw wachtwoord bent vergeten, volg dan deze stappen om het te resetten:',
-      reset2: '1. Log in op het NanoKVM-apparaat via SSH;',
-      reset3: '2. Verwijder het bestand in het apparaat: ',
-      reset4: '3. Gebruik het standaardaccount om in te loggen: ',
       ok: 'Ok',
       cancel: 'Annuleren',
-      loginButtonText: 'Inloggen'
+      loginButtonText: 'Inloggen',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Videomodus',
@@ -132,59 +132,113 @@ const nl = {
       confirm: 'Ok'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Commando wordt verzonden...',
       sent: 'Commando verzonden',
       input: 'Voer het MAC-adres in',
       ok: 'Ok'
     },
-    about: {
-      title: 'Over NanoKVM',
-      information: 'Informatie',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Applicatie versie',
-      image: 'Image versie',
-      deviceKey: 'Apparaat sleutel',
-      queryFailed: 'Opvragen mislukt',
-      community: 'Community'
+    power: {
+      title: 'Aan/uit',
+      reset: 'Resetten',
+      power: 'Aan/uit',
+      powerShort: 'Aan/uit (kort indrukken)',
+      powerLong: 'Aan/uit (lang indrukken)'
     },
-    update: {
-      title: 'Controleren op updates',
-      queryFailed: 'Ophalen versie mislukt',
-      updateFailed: 'Update mislukt. Probeer het opnieuw.',
-      isLatest: 'U heeft al de nieuwste versie.',
-      available: 'Er is een update beschikbaar. Weet u zeker dat u wilt updaten?',
-      updating: 'Update gestart. Even geduld a.u.b...',
-      confirm: 'Bevestigen',
-      cancel: 'Annuleren'
-    },
-    virtualDevice: {
-      network: 'Virtueel netwerk',
-      disk: 'Virtuele schijf'
-    },
-    tailscale: {
-      loading: 'Laden...',
-      notInstall: 'Tailscale niet gevonden! Installeer a.u.b.',
-      install: 'Installeren',
-      installing: 'Installeren',
-      failed: 'Installatie mislukt',
-      retry: 'Vernieuw en probeer opnieuw. Of probeer handmatig te installeren',
-      download: 'Download het',
-      package: 'installatiepakket',
-      unzip: 'en pak het uit',
-      upTailscale: 'Upload tailscale naar NanoKVM directory /usr/bin/',
-      upTailscaled: 'Upload tailscaled naar NanoKVM directory /usr/sbin/',
-      refresh: 'Vernieuw huidige pagina',
-      notLogin: 'Het apparaat is nog niet gekoppeld. Log in en koppel dit apparaat aan uw account.',
-      urlPeriod: 'Deze url is 10 minuten geldig',
-      login: 'Inloggen',
-      loginSuccess: 'Inloggen gelukt',
-      enable: 'Tailscale inschakelen',
-      deviceName: 'Apparaatnaam',
-      deviceIP: 'Apparaat IP',
-      account: 'Account',
-      logout: 'Uitloggen',
-      logout2: 'Weet u zeker dat u wilt uitloggen?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Over NanoKVM',
+        information: 'Informatie',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Applicatie versie',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Image versie',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Apparaat sleutel',
+        community: 'Community'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Laden...',
+        notInstall: 'Tailscale niet gevonden! Installeer a.u.b.',
+        install: 'Installeren',
+        installing: 'Installeren',
+        failed: 'Installatie mislukt',
+        retry: 'Vernieuw en probeer opnieuw. Of probeer handmatig te installeren',
+        download: 'Download het',
+        package: 'installatiepakket',
+        unzip: 'en pak het uit',
+        upTailscale: 'Upload tailscale naar NanoKVM directory /usr/bin/',
+        upTailscaled: 'Upload tailscaled naar NanoKVM directory /usr/sbin/',
+        refresh: 'Vernieuw huidige pagina',
+        notLogin:
+          'Het apparaat is nog niet gekoppeld. Log in en koppel dit apparaat aan uw account.',
+        urlPeriod: 'Deze url is 10 minuten geldig',
+        login: 'Inloggen',
+        loginSuccess: 'Inloggen gelukt',
+        enable: 'Tailscale inschakelen',
+        deviceName: 'Apparaatnaam',
+        deviceIP: 'Apparaat IP',
+        account: 'Account',
+        logout: 'Uitloggen',
+        logout2: 'Weet u zeker dat u wilt uitloggen?'
+      },
+      update: {
+        title: 'Controleren op updates',
+        queryFailed: 'Ophalen versie mislukt',
+        updateFailed: 'Update mislukt. Probeer het opnieuw.',
+        isLatest: 'U heeft al de nieuwste versie.',
+        available: 'Er is een update beschikbaar. Weet u zeker dat u wilt updaten?',
+        updating: 'Update gestart. Even geduld a.u.b...',
+        confirm: 'Bevestigen',
+        cancel: 'Annuleren'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

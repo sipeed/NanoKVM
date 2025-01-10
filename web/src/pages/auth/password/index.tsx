@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { Button, Card, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -66,7 +66,7 @@ export const Password = () => {
     <>
       <Head title={t('head.changePassword')} />
 
-      <div className="flex h-screen w-screen flex-col items-center justify-center">
+      <div className="flex h-screen w-screen flex-col items-center justify-center space-y-5">
         <h2 className="text-xl font-semibold text-neutral-100">{t('auth.changePassword')}</h2>
 
         <Form
@@ -115,6 +115,17 @@ export const Password = () => {
             </div>
           </Form.Item>
         </Form>
+
+        <Card>
+          <div className="flex w-[450px] flex-col">
+            <div>{t('auth.tips.change1')}</div>
+            <ul className="list-outside list-decimal">
+              <li>{t('auth.tips.change2')}</li>
+              <li>{t('auth.tips.change3')}</li>
+            </ul>
+            <div className="text-red-500">{t('auth.tips.change4')}</div>
+          </div>
+        </Card>
       </div>
     </>
   );

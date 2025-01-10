@@ -26,14 +26,24 @@ export function installTailscale() {
   return http.post('/api/network/tailscale/install');
 }
 
+// uninstall tailscale
+export function uninstallTailscale() {
+  return http.post('/api/network/tailscale/uninstall');
+}
+
 // get tailscale status
 export function getTailscaleStatus() {
   return http.get('/api/network/tailscale/status');
 }
 
-// update tailscale status
-export function updateTailscaleStatus(command: 'up' | 'down') {
-  return http.post('/api/network/tailscale/status', { command });
+// run tailscale up
+export function upTailscale() {
+  return http.post('/api/network/tailscale/up');
+}
+
+// run tailscale down
+export function downTailscale() {
+  return http.post('/api/network/tailscale/down');
 }
 
 // login tailscale
@@ -49,4 +59,13 @@ export function logoutTailscale() {
 // get wifi information
 export function getWiFi() {
   return http.get('/api/network/wifi');
+}
+
+// connect wifi
+export function connectWifi(ssid: string, password: string) {
+  const data = {
+    ssid,
+    password
+  };
+  return http.post('/api/network/wifi', data);
 }
