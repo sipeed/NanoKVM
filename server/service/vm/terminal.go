@@ -213,6 +213,23 @@ func (s *SshClient) bridgeWSAndSSH() {
 	<-s.closeSig
 }
 
+func getRootPassword() string {
+	if !utils.IsAccountExist() {
+		return "root"
+	}
+
+	account, err := utils.GetAccount()
+	if err != nil {
+		return "root"
+	}
+
+	if account == nil || account.Password == "" {
+		return "root"
+	}
+
+	return account.Password
+}
+
 func (s *Service) Terminal(c *gin.Context) {
 	user := c.Query("u")
 	if user == "" {
@@ -221,7 +238,7 @@ func (s *Service) Terminal(c *gin.Context) {
 
 	password, _ := utils.Decrypt(c.Query("t"))
 	if password == "" {
-		password = "root"
+		password = getRootPassword()
 	}
 
 	upgrader.CheckOrigin = func(r *http.Request) bool {

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +15,7 @@ import (
 )
 
 const (
-	WolHistory = "/etc/kvm/cache/wol"
+	WolMacFile = "/etc/kvm/cache/wol"
 )
 
 func (s *Service) WakeOnLAN(c *gin.Context) {
@@ -26,34 +27,39 @@ func (s *Service) WakeOnLAN(c *gin.Context) {
 		return
 	}
 
-	command := fmt.Sprintf("ether-wake %s", req.Mac)
+	mac, err := parseMAC(req.Mac)
+	if err != nil {
+		rsp.ErrRsp(c, -2, "invalid MAC address")
+		return
+	}
+
+	command := fmt.Sprintf("ether-wake %s", mac)
 	cmd := exec.Command("sh", "-c", command)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Errorf("wake on lan failed: %s", err)
-		rsp.ErrRsp(c, -2, string(output))
+		log.Errorf("failed to wake on lan: %s", err)
+		rsp.ErrRsp(c, -3, string(output))
 		return
 	}
 
-	go saveMac(req.Mac)
+	go saveMac(mac)
 
 	rsp.OkRsp(c)
-	log.Debugf("wake on lan %s success", req.Mac)
+	log.Debugf("wake on lan: %s", mac)
 }
 
 func (s *Service) GetMac(c *gin.Context) {
 	var rsp proto.Response
 
-	content, err := os.ReadFile(WolHistory)
+	content, err := os.ReadFile(WolMacFile)
 	if err != nil {
 		rsp.ErrRsp(c, -2, "open file error")
 		return
 	}
 
-	macs := strings.Split(string(content), "\n")
 	data := &proto.GetMacRsp{
-		Macs: macs,
+		Macs: strings.Split(string(content), "\n"),
 	}
 
 	rsp.OkRspWithData(c, data)
@@ -68,9 +74,9 @@ func (s *Service) DeleteMac(c *gin.Context) {
 		return
 	}
 
-	content, err := os.ReadFile(WolHistory)
+	content, err := os.ReadFile(WolMacFile)
 	if err != nil {
-		log.Errorf("open %s failed: %s", WolHistory, err)
+		log.Errorf("failed to open %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -2, "read failed")
 		return
 	}
@@ -85,15 +91,41 @@ func (s *Service) DeleteMac(c *gin.Context) {
 	}
 
 	data := strings.Join(newMacs, "\n")
-	err = os.WriteFile(WolHistory, []byte(data), 0o644)
+	err = os.WriteFile(WolMacFile, []byte(data), 0o644)
 	if err != nil {
-		log.Errorf("write %s failed: %s", WolHistory, err)
+		log.Errorf("failed to write %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -3, "write failed")
 		return
 	}
 
 	rsp.OkRsp(c)
-	log.Debugf("delete mac %s success", req.Mac)
+	log.Debugf("delete wol mac: %s", req.Mac)
+}
+
+func parseMAC(mac string) (string, error) {
+	mac = strings.ToUpper(strings.TrimSpace(mac))
+
+	mac = strings.ReplaceAll(mac, "-", "")
+	mac = strings.ReplaceAll(mac, ":", "")
+	mac = strings.ReplaceAll(mac, ".", "")
+
+	matched, err := regexp.MatchString("^[0-9A-F]{12}$", mac)
+	if err != nil {
+		return "", err
+	}
+	if !matched {
+		return "", fmt.Errorf("invalid MAC address: %s", mac)
+	}
+
+	var result strings.Builder
+	for i := 0; i < 12; i += 2 {
+		if i > 0 {
+			result.WriteString(":")
+		}
+		result.WriteString(mac[i : i+2])
+	}
+
+	return result.String(), nil
 }
 
 func saveMac(mac string) {
@@ -101,15 +133,15 @@ func saveMac(mac string) {
 		return
 	}
 
-	err := os.MkdirAll(filepath.Dir(WolHistory), 0o644)
+	err := os.MkdirAll(filepath.Dir(WolMacFile), 0o644)
 	if err != nil {
-		log.Errorf("create dir failed: %s", err)
+		log.Errorf("failed to create dir: %s", err)
 		return
 	}
 
-	file, err := os.OpenFile(WolHistory, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	file, err := os.OpenFile(WolMacFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
-		log.Errorf("open %s failed: %s", WolHistory, err)
+		log.Errorf("failed to open %s: %s", WolMacFile, err)
 		return
 	}
 	defer func() {
@@ -119,13 +151,13 @@ func saveMac(mac string) {
 	content := fmt.Sprintf("%s\n", mac)
 	_, err = file.WriteString(content)
 	if err != nil {
-		log.Errorf("write %s failed: %s", WolHistory, err)
+		log.Errorf("failed to write %s: %s", WolMacFile, err)
 		return
 	}
 }
 
 func isMacExist(mac string) bool {
-	content, err := os.ReadFile(WolHistory)
+	content, err := os.ReadFile(WolMacFile)
 	if err != nil {
 		return false
 	}

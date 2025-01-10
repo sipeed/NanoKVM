@@ -22,7 +22,7 @@ export const Mjpeg = () => {
     <div className={clsx('flex h-screen w-screen items-start justify-center xl:items-center')}>
       <Image
         id="screen"
-        className={clsx('block select-none bg-neutral-950', mouseStyle)}
+        className={clsx('block min-h-[240px] min-w-[380px] select-none', mouseStyle)}
         style={
           resolution?.width
             ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }

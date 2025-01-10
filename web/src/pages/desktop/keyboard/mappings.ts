@@ -112,12 +112,10 @@ export const KeyboardCodes: Map<string, number> = new Map([
   ['ShiftLeft', 225],
   ['AltLeft', 226],
   ['MetaLeft', 227],
-  ['WinLeft', 227],
   ['ControlRight', 228],
   ['ShiftRight', 229],
   ['AltRight', 230],
-  ['MetaRight', 231],
-  ['WinRight', 231]
+  ['MetaRight', 231]
 ]);
 
 export const ModifierCodes: Map<string, number> = new Map([

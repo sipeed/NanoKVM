@@ -1,25 +1,11 @@
 const da = {
   translation: {
-    language: 'Sprog',
-    changePassword: 'Skift adgangskode',
-    logout: 'Log ud',
-    settings: 'Indstillinger',
-    showMouse: 'Vis mus',
-    hideMouse: 'Skjul mus',
-    power: 'Tænd/sluk-knap',
-    reset: 'Nulstillingsknap',
-    powerShort: 'Tænd/sluk-knap (kort tryk)',
-    powerLong: 'Tænd/sluk-knap (langt tryk)',
-    hddLed: 'HDD lysdiode',
-    checkLibFailed: 'Kunne ikke kontrollere runtime-biblioteket. Prøv igen',
-    updateLibFailed: 'Kunne ikke opdatere runtime-biblioteket. Prøv igen',
-    updatingLib: 'Opdaterer runtime-biblioteket. Opdater siden efter opdateringen.',
-    checkForUpdate: 'Kontroller for opdatering',
     head: {
       desktop: 'Fjernskrivebord',
       login: 'Log ind',
       changePassword: 'Skift adgangskode',
-      terminal: 'Terminal'
+      terminal: 'Terminal',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Log ind',
@@ -38,14 +24,28 @@ const da = {
       illegalUsername: 'brugernavn indeholder ugyldige tegn',
       illegalPassword: 'adgangskode indeholder ugyldige tegn',
       forgetPassword: 'Glem adgangskode',
-      resetPassword: 'Nulstil adgangskode',
-      reset1: 'Hvis du har glemt adgangskoden, kan du følge disse trin for at nulstille den:',
-      reset2: '1. Log ind på din NanoKVM via SSH.',
-      reset3: '2. Slet filen på enheden: ',
-      reset4: '3. Brug standardkontoen til at logge ind: ',
       ok: 'OK',
       cancel: 'Annuller',
-      loginButtonText: 'Log ind'
+      loginButtonText: 'Log ind',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Videotilstand',
@@ -130,60 +130,113 @@ const da = {
       confirm: 'OK'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Sender Wake-on-LAN magic packet',
       sent: 'Wake-on-LAN magic packet sendt',
       input: 'Angiv MAC-adresse',
       ok: 'OK'
     },
-    about: {
-      title: 'Om NanoKVM',
-      information: 'Information',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Program version',
-      image: 'Firmware version',
-      deviceKey: 'Enhedsnøgle',
-      queryFailed: 'Forespørgsel mislykkedes',
-      community: 'Fællesskab'
+    power: {
+      title: 'Tænd/sluk-knap',
+      reset: 'Nulstillingsknap',
+      power: 'Tænd/sluk-knap',
+      powerShort: 'Tænd/sluk-knap (kort tryk)',
+      powerLong: 'Tænd/sluk-knap (langt tryk)'
     },
-    update: {
-      title: 'Kontroller for opdatering',
-      queryFailed: 'Opdateringskontrol mislykkedes',
-      updateFailed: 'Opdatering fejlede. Prøv igen.',
-      isLatest: 'Du har allerede den nyeste version.',
-      available: 'En opdatering er tilgængelig. Vil du installere den?',
-      updating: 'Opdatering i gang. Vent venligst...',
-      confirm: 'Bekræft',
-      cancel: 'Annuller'
-    },
-    virtualDevice: {
-      network: 'Virtuelt netværk',
-      disk: 'Virtuel disk'
-    },
-    tailscale: {
-      loading: 'Indlæser...',
-      notInstall: 'Tailscale ikke fundet! Installer det for at fuldføre opsætningen.',
-      install: 'Installer',
-      installing: 'Installerer',
-      failed: 'Installation mislykkedes',
-      retry: 'Opdater siden og prøv igen. Ellers prøv at installere manuelt.',
-      download: 'Download',
-      package: 'installationspakken',
-      unzip: 'og udpak den',
-      upTailscale: 'Upload tailscale til følgende mappe på enheden: /usr/bin/',
-      upTailscaled: 'Upload tailscaled til følgende mappe på enheden: /usr/sbin/',
-      refresh: 'Opdater sides',
-      notLogin:
-        'Enheden er ikke tilknyttet en Tailscale-konto endnu. Log ind for at fuldføre tilknytningen til din konto.',
-      urlPeriod: 'Denne URL er gyldig i 10 minutter',
-      login: 'Log ind',
-      loginSuccess: 'Log ind lykkedes',
-      enable: 'Aktiver Tailscale',
-      deviceName: 'Enhedens navn',
-      deviceIP: 'Enhedens IP',
-      account: 'Konto',
-      logout: 'Log ud',
-      logout2: 'Er du sikker på at du vil logge ud?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Om NanoKVM',
+        information: 'Information',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Program version',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Firmware version',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Enhedsnøgle',
+        community: 'Fællesskab'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Indlæser...',
+        notInstall: 'Tailscale ikke fundet! Installer det for at fuldføre opsætningen.',
+        install: 'Installer',
+        installing: 'Installerer',
+        failed: 'Installation mislykkedes',
+        retry: 'Opdater siden og prøv igen. Ellers prøv at installere manuelt.',
+        download: 'Download',
+        package: 'installationspakken',
+        unzip: 'og udpak den',
+        upTailscale: 'Upload tailscale til følgende mappe på enheden: /usr/bin/',
+        upTailscaled: 'Upload tailscaled til følgende mappe på enheden: /usr/sbin/',
+        refresh: 'Opdater sides',
+        notLogin:
+          'Enheden er ikke tilknyttet en Tailscale-konto endnu. Log ind for at fuldføre tilknytningen til din konto.',
+        urlPeriod: 'Denne URL er gyldig i 10 minutter',
+        login: 'Log ind',
+        loginSuccess: 'Log ind lykkedes',
+        enable: 'Aktiver Tailscale',
+        deviceName: 'Enhedens navn',
+        deviceIP: 'Enhedens IP',
+        account: 'Konto',
+        logout: 'Log ud',
+        logout2: 'Er du sikker på at du vil logge ud?'
+      },
+      update: {
+        title: 'Kontroller for opdatering',
+        queryFailed: 'Opdateringskontrol mislykkedes',
+        updateFailed: 'Opdatering fejlede. Prøv igen.',
+        isLatest: 'Du har allerede den nyeste version.',
+        available: 'En opdatering er tilgængelig. Vil du installere den?',
+        updating: 'Opdatering i gang. Vent venligst...',
+        confirm: 'Bekræft',
+        cancel: 'Annuller'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

@@ -42,10 +42,10 @@ export const Quality = ({ quality, setQuality }: QualityProps) => {
       {qualityList.map((item) => (
         <div
           key={item.key}
-          className="flex h-[30px] cursor-pointer select-none items-center space-x-1 rounded pl-1 pr-5 hover:bg-neutral-600"
+          className="flex h-[30px] cursor-pointer select-none items-center rounded pl-1 pr-5 hover:bg-neutral-700/70"
           onClick={() => update(item.key)}
         >
-          <div className="flex h-[14px] w-[20px] items-end">
+          <div className="flex h-[14px] w-[20px] items-end text-blue-500">
             {item.key === quality && <CheckIcon size={14} />}
           </div>
           <span className="flex w-[50px]">{item.label}</span>
@@ -56,7 +56,7 @@ export const Quality = ({ quality, setQuality }: QualityProps) => {
 
   return (
     <Popover content={content} placement="rightTop">
-      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700">
+      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <SquareActivityIcon size={18} />
         <span className="select-none text-sm">{t('screen.quality')}</span>
       </div>

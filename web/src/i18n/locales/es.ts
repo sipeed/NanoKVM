@@ -1,25 +1,11 @@
 const en = {
   translation: {
-    language: 'Idioma',
-    changePassword: 'Cambiar contraseña',
-    logout: 'Cerrar sesión',
-    settings: 'Ajustes',
-    showMouse: 'Mostrar ratón',
-    hideMouse: 'Ocultar ratón',
-    power: 'Encender / Apagar',
-    reset: 'Reiniciar',
-    powerShort: 'Encender / Apagar (pulsación corta)',
-    powerLong: 'Encender / Apagar (pulsación larga)',
-    hddLed: 'LED HDD',
-    checkLibFailed: 'Error al comprobar la aplicación. Por favor, vuelve a intentarlo.',
-    updateLibFailed: 'Error al comprobar la aplicación. Por favor, vuelve a intentarlo.',
-    updatingLib: 'Actualizando aplicación. Por favor, recarga la página después de actualizar.',
-    checkForUpdate: 'Comprobar actualizaciones',
     head: {
       desktop: 'Escritorio remoto',
       login: 'Inicio de sesión',
       changePassword: 'Cambiar contraseña',
-      terminal: 'Consola'
+      terminal: 'Consola',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Iniciar sesión',
@@ -39,15 +25,28 @@ const en = {
       illegalUsername: 'El usuario contiene caracteres no permitidos',
       illegalPassword: 'La contraseña contiene caracteres no permitidos',
       forgetPassword: 'Contraseña olvidada',
-      resetPassword: 'Reiniciar contraseña',
-      reset1:
-        'Si has olvidado tu contraseña, por favor, sigue los siguientes pasos para recuperarla:',
-      reset2: '1. Inicia sesión en el dispositivo NanoKVM a través de SSH',
-      reset3: '2. Elimina este archivo en el dispositivo: ',
-      reset4: '3. Utiliza la cuenta por defecto para iniciar sesión: ',
       ok: 'Aceptar',
       cancel: 'Cancelar',
-      loginButtonText: 'Iniciar sesión'
+      loginButtonText: 'Iniciar sesión',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Modo de vídeo',
@@ -133,61 +132,114 @@ const en = {
       confirm: 'Confirmar'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Enviando comando...',
       sent: 'Comando enviado',
       input: 'Por favor, introduce la dirección MAC',
       ok: 'Vale'
     },
-    about: {
-      title: 'Sobre NanoKVM',
-      information: 'Información',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Versión de la aplicación',
-      image: 'Versión de la imagen',
-      deviceKey: 'Clave del dispositivo',
-      queryFailed: 'Consulta fallida',
-      community: 'Comunidad'
+    power: {
+      title: 'Encender / Apagar',
+      reset: 'Reiniciar',
+      power: 'Encender / Apagar',
+      powerShort: 'Encender / Apagar (pulsación corta)',
+      powerLong: 'Encender / Apagar (pulsación larga)'
     },
-    update: {
-      title: 'Buscar actualizaciones',
-      queryFailed: 'Error al obtener la versión',
-      updateFailed: 'La actualización falló. Por favor, inténtalo de nuevo.',
-      isLatest: 'Ya tienes la última versión.',
-      available: 'Hay una actualización disponible. ¿Estás seguro de que quieres actualizar?',
-      updating: 'Actualización iniciada. Por favor, espera...',
-      confirm: 'Confirmar',
-      cancel: 'Cancelar'
-    },
-    virtualDevice: {
-      network: 'Red Virtual',
-      disk: 'Disco Virtual'
-    },
-    tailscale: {
-      loading: 'Cargando...',
-      notInstall: '¡Tailscale no encontrado! Por favor, instálalo.',
-      install: 'Instalar',
-      installing: 'Instalando',
-      failed: 'La instalación falló',
-      retry:
-        'Por favor, actualiza la página e inténtalo de nuevo. O intenta instalarlo manualmente',
-      download: 'Descargar el',
-      package: 'paquete de instalación',
-      unzip: 'y descomprimirlo',
-      upTailscale: 'Sube tailscale al directorio /usr/bin/ del NanoKVM',
-      upTailscaled: 'Sube tailscaled al directorio /usr/sbin/ del NanoKVM',
-      refresh: 'Actualizar la página actual',
-      notLogin:
-        'El dispositivo aún no ha sido vinculado. Por favor, inicia sesión y vincula este dispositivo a tu cuenta.',
-      urlPeriod: 'Esta URL es válida por 10 minutos',
-      login: 'Iniciar sesión',
-      loginSuccess: 'Inicio de sesión exitoso',
-      enable: 'Habilitar Tailscale',
-      deviceName: 'Nombre del dispositivo',
-      deviceIP: 'IP del dispositivo',
-      account: 'Cuenta',
-      logout: 'Cerrar sesión',
-      logout2: '¿Seguro que quieres cerrar sesión?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Sobre NanoKVM',
+        information: 'Información',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Versión de la aplicación',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Versión de la imagen',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Clave del dispositivo',
+        community: 'Comunidad'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Cargando...',
+        notInstall: '¡Tailscale no encontrado! Por favor, instálalo.',
+        install: 'Instalar',
+        installing: 'Instalando',
+        failed: 'La instalación falló',
+        retry:
+          'Por favor, actualiza la página e inténtalo de nuevo. O intenta instalarlo manualmente',
+        download: 'Descargar el',
+        package: 'paquete de instalación',
+        unzip: 'y descomprimirlo',
+        upTailscale: 'Sube tailscale al directorio /usr/bin/ del NanoKVM',
+        upTailscaled: 'Sube tailscaled al directorio /usr/sbin/ del NanoKVM',
+        refresh: 'Actualizar la página actual',
+        notLogin:
+          'El dispositivo aún no ha sido vinculado. Por favor, inicia sesión y vincula este dispositivo a tu cuenta.',
+        urlPeriod: 'Esta URL es válida por 10 minutos',
+        login: 'Iniciar sesión',
+        loginSuccess: 'Inicio de sesión exitoso',
+        enable: 'Habilitar Tailscale',
+        deviceName: 'Nombre del dispositivo',
+        deviceIP: 'IP del dispositivo',
+        account: 'Cuenta',
+        logout: 'Cerrar sesión',
+        logout2: '¿Seguro que quieres cerrar sesión?'
+      },
+      update: {
+        title: 'Buscar actualizaciones',
+        queryFailed: 'Error al obtener la versión',
+        updateFailed: 'La actualización falló. Por favor, inténtalo de nuevo.',
+        isLatest: 'Ya tienes la última versión.',
+        available: 'Hay una actualización disponible. ¿Estás seguro de que quieres actualizar?',
+        updating: 'Actualización iniciada. Por favor, espera...',
+        confirm: 'Confirmar',
+        cancel: 'Cancelar'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

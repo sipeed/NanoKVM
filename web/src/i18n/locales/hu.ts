@@ -1,26 +1,11 @@
 const hu = {
   translation: {
-    language: 'Nyelv',
-    changePassword: 'Jelszó megváltoztatása',
-    logout: 'Kijelentkezés',
-    settings: 'Beállítások',
-    showMouse: 'Egér mutatása',
-    hideMouse: 'Egér elrejtése',
-    power: 'Bekapcsolás',
-    reset: 'Újraindítás',
-    powerShort: 'Bekapcsolás (rövid kattintás)',
-    powerLong: 'Bekapcsolás (hosszú kattintás)',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'Nem sikerült ellenőrizni a futási könyvtárat, próbálja újra',
-    updateLibFailed: 'Nem sikerült frissíteni a futási könyvtárat, próbálja újra',
-    updatingLib:
-      'A futási könyvtár frissítése folyamatban. Kérem, frissítse az oldalt a frissítés után.',
-    checkForUpdate: 'Frissítés keresése',
     head: {
       desktop: 'Távoli Asztal',
       login: 'Bejelentkezés',
       changePassword: 'Jelszó megváltoztatása',
-      terminal: 'Terminál'
+      terminal: 'Terminál',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Bejelentkezés',
@@ -40,14 +25,28 @@ const hu = {
       illegalUsername: 'A felhasználónév illegális karaktereket tartalmaz',
       illegalPassword: 'A jelszó illegális karaktereket tartalmaz',
       forgetPassword: 'Jelszó-emlékeztető',
-      resetPassword: 'Jelszó alaphelyzetbe állítása',
-      reset1: 'Ha elfelejtette a jelszót, kövesse az alábbi lépéseket:',
-      reset2: '1. Jelentkezzen be a NanoKVM eszközre SSH-n keresztül;',
-      reset3: '2. Törölje a fájlt az eszközről:',
-      reset4: '3. Használja az alapértelmezett fiókot a bejelentkezéshez:',
       ok: 'Ok',
       cancel: 'Mégse',
-      loginButtonText: 'Bejelentkezés'
+      loginButtonText: 'Bejelentkezés',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Videó mód',
@@ -133,60 +132,113 @@ const hu = {
       confirm: 'Ok'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Parancs küldése...',
       sent: 'Parancs elküldve',
       input: 'Adja meg a MAC címet',
       ok: 'Ok'
     },
-    about: {
-      title: 'NanoKVM Névjegy',
-      information: 'Információ',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Alkalmazás verzió',
-      image: 'Képfájl verzió',
-      deviceKey: 'Eszköz kulcs',
-      queryFailed: 'Lekérdezés sikertelen',
-      community: 'Közösség'
+    power: {
+      title: 'Bekapcsolás',
+      power: 'Bekapcsolás',
+      reset: 'Újraindítás',
+      powerShort: 'Bekapcsolás (rövid kattintás)',
+      powerLong: 'Bekapcsolás (hosszú kattintás)'
     },
-    update: {
-      title: 'Frissítés keresése',
-      queryFailed: 'Verzió lekérdezése sikertelen',
-      updateFailed: 'Frissítés sikertelen. Kérem, próbálja újra.',
-      isLatest: 'Ön már a legfrissebb verziót használja.',
-      available: 'Frissítés elérhető. Biztos, hogy frissít?',
-      updating: 'Frissítés elkezdődött. Kérem várjon...',
-      confirm: 'Megerősítés',
-      cancel: 'Mégse'
-    },
-    virtualDevice: {
-      network: 'Virtuális hálózat',
-      disk: 'Virtuális lemez'
-    },
-    tailscale: {
-      loading: 'Betöltés...',
-      notInstall: 'Tailscale nem található! Kérem, telepítse.',
-      install: 'Telepítés',
-      installing: 'Telepítés folyamatban',
-      failed: 'Telepítés sikertelen',
-      retry: 'Frissítse az oldalt, majd próbálja újra. Vagy próbálja meg manuálisan telepíteni.',
-      download: 'Letöltés a',
-      package: 'telepítési csomag',
-      unzip: 'és kicsomagolás',
-      upTailscale: 'Töltsön fel tailscale-t a NanoKVM /usr/bin/ könyvtárába',
-      upTailscaled: 'Töltsön fel tailscaled-t a NanoKVM /usr/sbin/ könyvtárába',
-      refresh: 'Frissítse az aktuális oldalt',
-      notLogin:
-        'Az eszköz még nincs kötve. Kérem, jelentkezzen be és kösse az eszközt a fiókjához.',
-      urlPeriod: 'Ez az url 10 percig érvényes',
-      login: 'Bejelentkezés',
-      loginSuccess: 'Sikeres bejelentkezés',
-      enable: 'Tailscale engedélyezése',
-      deviceName: 'Eszköz neve',
-      deviceIP: 'Eszköz IP',
-      account: 'Fiók',
-      logout: 'Kijelentkezés',
-      logout2: 'Biztos, hogy kijelentkezik?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'NanoKVM Névjegy',
+        information: 'Információ',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Alkalmazás verzió',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Képfájl verzió',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Eszköz kulcs',
+        community: 'Közösség'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Betöltés...',
+        notInstall: 'Tailscale nem található! Kérem, telepítse.',
+        install: 'Telepítés',
+        installing: 'Telepítés folyamatban',
+        failed: 'Telepítés sikertelen',
+        retry: 'Frissítse az oldalt, majd próbálja újra. Vagy próbálja meg manuálisan telepíteni.',
+        download: 'Letöltés a',
+        package: 'telepítési csomag',
+        unzip: 'és kicsomagolás',
+        upTailscale: 'Töltsön fel tailscale-t a NanoKVM /usr/bin/ könyvtárába',
+        upTailscaled: 'Töltsön fel tailscaled-t a NanoKVM /usr/sbin/ könyvtárába',
+        refresh: 'Frissítse az aktuális oldalt',
+        notLogin:
+          'Az eszköz még nincs kötve. Kérem, jelentkezzen be és kösse az eszközt a fiókjához.',
+        urlPeriod: 'Ez az url 10 percig érvényes',
+        login: 'Bejelentkezés',
+        loginSuccess: 'Sikeres bejelentkezés',
+        enable: 'Tailscale engedélyezése',
+        deviceName: 'Eszköz neve',
+        deviceIP: 'Eszköz IP',
+        account: 'Fiók',
+        logout: 'Kijelentkezés',
+        logout2: 'Biztos, hogy kijelentkezik?'
+      },
+      update: {
+        title: 'Frissítés keresése',
+        queryFailed: 'Verzió lekérdezése sikertelen',
+        updateFailed: 'Frissítés sikertelen. Kérem, próbálja újra.',
+        isLatest: 'Ön már a legfrissebb verziót használja.',
+        available: 'Frissítés elérhető. Biztos, hogy frissít?',
+        updating: 'Frissítés elkezdődött. Kérem várjon...',
+        confirm: 'Megerősítés',
+        cancel: 'Mégse'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

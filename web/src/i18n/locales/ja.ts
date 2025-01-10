@@ -1,25 +1,11 @@
 const ja = {
   translation: {
-    language: '言語',
-    changePassword: 'パスワード変更',
-    logout: 'ログアウト',
-    settings: '設定',
-    showMouse: 'マウスを表示',
-    hideMouse: 'マウスを非表示',
-    power: '電源',
-    reset: 'リセット',
-    powerShort: '電源（短いクリック）',
-    powerLong: '電源（長いクリック）',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'ランタイムライブラリのチェックに失敗しました。再試行してください。',
-    updateLibFailed: 'ランタイムライブラリの更新に失敗しました。再試行してください。',
-    updatingLib: 'ランタイムライブラリを更新中です。更新後にページをリフレッシュしてください。',
-    checkForUpdate: 'アップデートの確認',
     head: {
       desktop: 'リモートデスクトップ',
       login: 'ログイン',
       changePassword: 'パスワード変更',
-      terminal: 'ターミナル'
+      terminal: 'ターミナル',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'ログイン',
@@ -39,14 +25,28 @@ const ja = {
       illegalUsername: 'ユーザー名に不正な文字が含まれています',
       illegalPassword: 'パスワードに不正な文字が含まれています',
       forgetPassword: 'パスワードを忘れた',
-      resetPassword: 'パスワードリセット',
-      reset1: 'パスワードを忘れた場合は、以下の手順に従ってリセットしてください：',
-      reset2: '1. SSHを介してNanoKVMデバイスにログインします。',
-      reset3: '2. デバイス内のファイルを削除します：',
-      reset4: '3. デフォルトのアカウントでログインします：',
       ok: 'OK',
       cancel: 'キャンセル',
-      loginButtonText: 'ログイン'
+      loginButtonText: 'ログイン',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'ビデオモード',
@@ -132,60 +132,113 @@ const ja = {
       confirm: 'OK'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'コマンドを送信中...',
       sent: 'コマンドを送信しました',
       input: 'MACを入力してください',
       ok: 'OK'
     },
-    about: {
-      title: 'NanoKVMについて',
-      information: '情報',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'アプリケーションバージョン',
-      image: 'イメージバージョン',
-      firmware: 'ファームウェアバージョン',
-      deviceKey: 'デバイスキー',
-      queryFailed: 'クエリに失敗しました',
-      community: 'コミュニティ'
+    power: {
+      title: '電源',
+      reset: 'リセット',
+      power: '電源',
+      powerShort: '電源（短いクリック）',
+      powerLong: '電源（長いクリック）'
     },
-    update: {
-      title: 'アップデートの確認',
-      queryFailed: 'バージョンの取得に失敗しました',
-      updateFailed: '更新に失敗しました。再試行してください。',
-      isLatest: '最新のバージョンを既に持っています。',
-      available: 'アップデートが利用可能です。更新してもよろしいですか？',
-      updating: '更新を開始しました。お待ちください...',
-      confirm: '確認',
-      cancel: 'キャンセル'
-    },
-    virtualDevice: {
-      network: '仮想ネットワーク',
-      disk: '仮想ディスク'
-    },
-    tailscale: {
-      loading: '読み込み中...',
-      notInstall: 'Tailscaleが見つかりません！インストールしてください。',
-      install: 'インストール',
-      installing: 'インストール中',
-      failed: 'インストールに失敗しました',
-      retry: 'ページをリフレッシュして再試行してください。または手動でインストールしてください',
-      download: 'インストールパッケージをダウンロードして',
-      package: '解凍してください',
-      upTailscale: 'tailscaleをNanoKVMのディレクトリ/usr/bin/にアップロードしてください',
-      upTailscaled: 'tailscaledをNanoKVMのディレクトリ/usr/sbin/にアップロードしてください',
-      refresh: '現在のページをリフレッシュします',
-      notLogin:
-        'デバイスはまだバインドされていません。ログインしてこのデバイスをアカウントにバインドしてください。',
-      urlPeriod: 'このURLは10分間有効です',
-      login: 'ログイン',
-      loginSuccess: 'ログイン成功',
-      enable: 'Tailscaleを有効化',
-      deviceName: 'デバイス名',
-      deviceIP: 'デバイスIP',
-      account: 'アカウント',
-      logout: 'ログアウト',
-      logout2: 'ログアウトしてもよろしいですか？'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'NanoKVMについて',
+        information: '情報',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'アプリケーションバージョン',
+        applicationTip: 'NanoKVM web application version',
+        image: 'イメージバージョン',
+        imageTip: 'NanoKVM system image version',
+        firmware: 'ファームウェアバージョン',
+        deviceKey: 'デバイスキー',
+        community: 'コミュニティ'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: '読み込み中...',
+        notInstall: 'Tailscaleが見つかりません！インストールしてください。',
+        install: 'インストール',
+        installing: 'インストール中',
+        failed: 'インストールに失敗しました',
+        retry: 'ページをリフレッシュして再試行してください。または手動でインストールしてください',
+        download: 'インストールパッケージをダウンロードして',
+        package: '解凍してください',
+        upTailscale: 'tailscaleをNanoKVMのディレクトリ/usr/bin/にアップロードしてください',
+        upTailscaled: 'tailscaledをNanoKVMのディレクトリ/usr/sbin/にアップロードしてください',
+        refresh: '現在のページをリフレッシュします',
+        notLogin:
+          'デバイスはまだバインドされていません。ログインしてこのデバイスをアカウントにバインドしてください。',
+        urlPeriod: 'このURLは10分間有効です',
+        login: 'ログイン',
+        loginSuccess: 'ログイン成功',
+        enable: 'Tailscaleを有効化',
+        deviceName: 'デバイス名',
+        deviceIP: 'デバイスIP',
+        account: 'アカウント',
+        logout: 'ログアウト',
+        logout2: 'ログアウトしてもよろしいですか？'
+      },
+      update: {
+        title: 'アップデートの確認',
+        queryFailed: 'バージョンの取得に失敗しました',
+        updateFailed: '更新に失敗しました。再試行してください。',
+        isLatest: '最新のバージョンを既に持っています。',
+        available: 'アップデートが利用可能です。更新してもよろしいですか？',
+        updating: '更新を開始しました。お待ちください...',
+        confirm: '確認',
+        cancel: 'キャンセル'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

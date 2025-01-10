@@ -1,25 +1,11 @@
 const id = {
   translation: {
-    language: 'Bahasa',
-    changePassword: 'Ubah Sandi',
-    logout: 'Keluar',
-    settings: 'Pengaturan',
-    showMouse: 'Tampilkan tetikus',
-    hideMouse: 'Sembunyikan tetikus',
-    power: 'Daya',
-    reset: 'Mulai Ulang',
-    powerShort: 'Data (tekan sebentar)',
-    powerLong: 'Power (tekan lama)',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'Gagal memeriksa runtime library, coba lagi nanti',
-    updateLibFailed: 'Gagal memperbarui runtime library, mohon coba lagi',
-    updatingLib: 'Memperbarui runtime library. Silahkan segarkan halaman setelah memperbarui.',
-    checkForUpdate: 'Periksa pembaruan',
     head: {
       desktop: 'Remote Desktop',
       login: 'Masuk',
       changePassword: 'Ubah Sandi',
-      terminal: 'Terminal'
+      terminal: 'Terminal',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Masuk',
@@ -38,14 +24,28 @@ const id = {
       illegalUsername: 'ada karakter ilegal pada nama user',
       illegalPassword: 'ada karakter ilegal pada sandi',
       forgetPassword: 'Lupa Sandi',
-      resetPassword: 'Atur ulang Sandi',
-      reset1: 'Jika lupa sandi, ikuti langkah berikut untuk mengatur ulang:',
-      reset2: '1. Masuk ke perangkat NanoKVM melalui SSH;',
-      reset3: '2. Hapus arsip di dalam perangkat: ',
-      reset4: '3. Gunakan akun awal untuk masuk: ',
       ok: 'Ok',
       cancel: 'Batalkan',
-      loginButtonText: 'Masuk'
+      loginButtonText: 'Masuk',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Mode Video',
@@ -131,59 +131,113 @@ const id = {
       confirm: 'Ok'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Kirim perintah...',
       sent: 'Perintah terkirim',
       input: 'Silahkan masukkan MAC',
       ok: 'Ok'
     },
-    about: {
-      title: 'Tentang NanoKVM',
-      information: 'Informasi',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Versi Aplikasi',
-      image: 'Version Gambar',
-      deviceKey: 'Kunci Perangkat',
-      queryFailed: 'Kueri gagal',
-      community: 'Komunitas'
+    power: {
+      title: 'Daya',
+      reset: 'Mulai Ulang',
+      power: 'Daya',
+      powerShort: 'Data (tekan sebentar)',
+      powerLong: 'Power (tekan lama)'
     },
-    update: {
-      title: 'Periksa pembaruan',
-      queryFailed: 'Gagal mendapatkan versi',
-      updateFailed: 'Gagal memperbarui, tolong coba lagi.',
-      isLatest: 'Kamu sudah menggunakan versi terbaru.',
-      available: 'Ada pembaruan baru. apa kamu mau memperbarui?',
-      updating: 'Pembaruan dimulai. Silahkan tunggu...',
-      confirm: 'Konfirmasi',
-      cancel: 'Batalkan'
-    },
-    virtualDevice: {
-      network: 'Jaringan Virtual',
-      disk: 'Disk Virtual'
-    },
-    tailscale: {
-      loading: 'Memuat...',
-      notInstall: 'Tailscale tidak ditemukan! Silahkan pasang.',
-      install: 'Memasang',
-      installing: 'Memasangkan',
-      failed: 'Gagal memasangkan',
-      retry: 'Harap segarkan dan coba lagi. Atau coba instal secara manual',
-      download: 'Mengunduh',
-      package: 'paket instalasi',
-      unzip: 'dan unzip itu',
-      upTailscale: 'Unggah tailscale ke direktori NanoKVM /usr/bin/',
-      upTailscaled: 'Unggah tailscaled ke direktori NanoKVM /usr/sbin/',
-      refresh: 'Segarkan halaman ini',
-      notLogin: 'Perangkat belum ditautkan. Silakan masuk dan tautkan perangkat ini ke akun Anda.',
-      urlPeriod: 'Url ini berlaku selama 10 menit',
-      login: 'Masuk',
-      loginSuccess: 'Berhasil masuk',
-      enable: 'Aktifkan Tailscale',
-      deviceName: 'Nama Perangkat',
-      deviceIP: 'IP Perangkat',
-      account: 'Akun',
-      logout: 'Keluar',
-      logout2: 'Yakin untuk keluar?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Tentang NanoKVM',
+        information: 'Informasi',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Versi Aplikasi',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Version Gambar',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Kunci Perangkat',
+        community: 'Komunitas'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Memuat...',
+        notInstall: 'Tailscale tidak ditemukan! Silahkan pasang.',
+        install: 'Memasang',
+        installing: 'Memasangkan',
+        failed: 'Gagal memasangkan',
+        retry: 'Harap segarkan dan coba lagi. Atau coba instal secara manual',
+        download: 'Mengunduh',
+        package: 'paket instalasi',
+        unzip: 'dan unzip itu',
+        upTailscale: 'Unggah tailscale ke direktori NanoKVM /usr/bin/',
+        upTailscaled: 'Unggah tailscaled ke direktori NanoKVM /usr/sbin/',
+        refresh: 'Segarkan halaman ini',
+        notLogin:
+          'Perangkat belum ditautkan. Silakan masuk dan tautkan perangkat ini ke akun Anda.',
+        urlPeriod: 'Url ini berlaku selama 10 menit',
+        login: 'Masuk',
+        loginSuccess: 'Berhasil masuk',
+        enable: 'Aktifkan Tailscale',
+        deviceName: 'Nama Perangkat',
+        deviceIP: 'IP Perangkat',
+        account: 'Akun',
+        logout: 'Keluar',
+        logout2: 'Yakin untuk keluar?'
+      },
+      update: {
+        title: 'Periksa pembaruan',
+        queryFailed: 'Gagal mendapatkan versi',
+        updateFailed: 'Gagal memperbarui, tolong coba lagi.',
+        isLatest: 'Kamu sudah menggunakan versi terbaru.',
+        available: 'Ada pembaruan baru. apa kamu mau memperbarui?',
+        updating: 'Pembaruan dimulai. Silahkan tunggu...',
+        confirm: 'Konfirmasi',
+        cancel: 'Batalkan'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

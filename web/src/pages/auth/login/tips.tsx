@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Modal, Typography } from 'antd';
+import { Button, Card, Modal, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
@@ -19,32 +19,43 @@ export const Tips = () => {
   return (
     <>
       <span
-        className="cursor-pointer text-neutral-500 underline underline-offset-4"
+        className="cursor-pointer text-neutral-300 underline underline-offset-4"
         onClick={showModal}
       >
         {t('auth.forgetPassword')}
       </span>
 
       <Modal
-        title={t('auth.resetPassword')}
+        title={t('auth.forgetPassword')}
         open={isModalOpen}
         onCancel={hideModal}
         closeIcon={null}
         footer={null}
         centered={true}
       >
-        <div className="flex flex-col space-y-1 pt-1">
-          <div>{t('auth.reset1')}</div>
-          <div>{t('auth.reset2')}</div>
-          <div>
-            {t('auth.reset3')}
-            <Text code={true}>/etc/kvm/pwd</Text>
+        <Card style={{ marginTop: '20px' }}>
+          <div className="flex w-[430px] flex-col space-y-5">
+            <div>{t('auth.tips.reset1')}</div>
+
+            <div className="flex items-center space-x-1">
+              <span>{t('auth.tips.reset2')}</span>
+              <a href="https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/reset.html" target="_blank">
+                wiki
+              </a>
+            </div>
+
+            <ul className="list-outside list-disc">
+              <li>
+                {t('auth.tips.reset3')}
+                <Text code={true}>admin/admin</Text>
+              </li>
+              <li>
+                {t('auth.tips.reset4')}
+                <Text code={true}>root/root</Text>
+              </li>
+            </ul>
           </div>
-          <div>
-            {t('auth.reset4')}
-            <Text code={true}>admin/admin</Text>
-          </div>
-        </div>
+        </Card>
 
         <div className="flex justify-center pb-3 pt-10">
           <Button type="primary" className="w-24" onClick={hideModal}>

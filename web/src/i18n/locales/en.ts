@@ -1,25 +1,11 @@
 const en = {
   translation: {
-    language: 'Language',
-    changePassword: 'Change Password',
-    logout: 'Logout',
-    settings: 'Settings',
-    showMouse: 'Show mouse',
-    hideMouse: 'Hide mouse',
-    power: 'Power',
-    reset: 'Reset',
-    powerShort: 'Power (short click)',
-    powerLong: 'Power (long click)',
-    hddLed: 'HDD LED',
-    checkLibFailed: 'Failed to check runtime library, please try again',
-    updateLibFailed: 'Failed to update runtime library, please try again',
-    updatingLib: 'Updating runtime library. Please refresh the page after updating.',
-    checkForUpdate: 'Check for Update',
     head: {
       desktop: 'Remote Desktop',
       login: 'Login',
       changePassword: 'Change Password',
-      terminal: 'Terminal'
+      terminal: 'Terminal',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Login',
@@ -32,19 +18,33 @@ const en = {
       invalidUser: 'Invalid username or password',
       error: 'Unexpected error',
       changePassword: 'Change Password',
-      changePasswordDesc: 'For the security of your device, please modify the web login password.',
+      changePasswordDesc: 'For the security of your device, please change the password!',
       differentPassword: 'Passwords do not match',
       illegalUsername: 'Username contains illegal characters',
       illegalPassword: 'Password contains illegal characters',
       forgetPassword: 'Forgot Password',
-      resetPassword: 'Reset Password',
-      reset1: 'If you have forgotten the password, please follow the steps to reset it:',
-      reset2: '1. Login to the NanoKVM device via SSH;',
-      reset3: '2. Delete the file in the device: ',
-      reset4: '3. Use the default account to login: ',
       ok: 'Ok',
       cancel: 'Cancel',
       loginButtonText: 'Login',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Video Mode',
@@ -84,7 +84,7 @@ const en = {
       resetHid: 'Reset HID'
     },
     image: {
-      title: 'Images',
+      title: 'Image',
       loading: 'Loading...',
       empty: 'Nothing Found',
       mountFailed: 'Mount Failed',
@@ -129,67 +129,120 @@ const en = {
       confirm: 'Ok'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Sending command...',
       sent: 'Command sent',
       input: 'Please enter the MAC',
       ok: 'Ok'
     },
-    about: {
-      title: 'About NanoKVM',
-      information: 'Information',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Application Version',
-      image: 'Image Version',
-      deviceKey: 'Device Key',
-      queryFailed: 'Query failed',
-      community: 'Community'
-    },
-    update: {
-      title: 'Check for Update',
-      queryFailed: 'Get version failed',
-      updateFailed: 'Update failed. Please retry.',
-      isLatest: 'You already have the latest version.',
-      available: 'An update is available. Are you sure to update?',
-      updating: 'Update started. Please wait...',
-      confirm: 'Confirm',
-      cancel: 'Cancel'
-    },
-    virtualDevice: {
-      network: 'Virtual Network',
-      disk: 'Virtual Disk'
-    },
-    tailscale: {
-      loading: 'Loading...',
-      notInstall: 'Tailscale not found! Please install.',
-      install: 'Install',
-      installing: 'Installing',
-      failed: 'Install failed',
-      retry: 'Please refresh and try again. Or try to install manually',
-      download: 'Download the',
-      package: 'installation package',
-      unzip: 'and unzip it',
-      upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
-      upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
-      refresh: 'Refresh current page',
-      notLogin:
-        'The device has not been bound yet. Please login and bind this device to your account.',
-      urlPeriod: 'This url is valid for 10 minutes',
-      login: 'Login',
-      loginSuccess: 'Login Success',
-      enable: 'Enable Tailscale',
-      deviceName: 'Device Name',
-      deviceIP: 'Device IP',
-      account: 'Account',
-      logout: 'Logout',
-      logout2: 'Sure to logout?'
+    power: {
+      title: 'Power',
+      reset: 'Reset',
+      power: 'Power',
+      powerShort: 'Power (short click)',
+      powerLong: 'Power (long click)'
     },
     download: {
       download: 'Download Image',
       input: 'Please enter a remote image URL',
       ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image',
+    },
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'About NanoKVM',
+        information: 'Information',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Application Version',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Image Version',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Device Key',
+        community: 'Community'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Loading...',
+        notInstall: 'Tailscale not found! Please install.',
+        install: 'Install',
+        installing: 'Installing',
+        failed: 'Install failed',
+        retry: 'Please refresh and try again. Or try to install manually',
+        download: 'Download the',
+        package: 'installation package',
+        unzip: 'and unzip it',
+        upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
+        upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
+        refresh: 'Refresh current page',
+        notLogin:
+          'The device has not been bound yet. Please login and bind this device to your account.',
+        urlPeriod: 'This url is valid for 10 minutes',
+        login: 'Login',
+        loginSuccess: 'Login Success',
+        enable: 'Enable Tailscale',
+        deviceName: 'Device Name',
+        deviceIP: 'Device IP',
+        account: 'Account',
+        logout: 'Logout',
+        logout2: 'Sure to logout?'
+      },
+      update: {
+        title: 'Check for Updates',
+        queryFailed: 'Get version failed',
+        updateFailed: 'Update failed. Please retry.',
+        isLatest: 'You already have the latest version.',
+        available: 'An update is available. Are you sure to update?',
+        updating: 'Update started. Please wait...',
+        confirm: 'Confirm',
+        cancel: 'Cancel'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
       }
+    }
   }
 };
 

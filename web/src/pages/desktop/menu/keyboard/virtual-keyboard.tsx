@@ -12,7 +12,7 @@ export const VirtualKeyboard = () => {
   return (
     <div
       className={clsx(
-        'flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-600'
+        'flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-700/70'
       )}
       onClick={() => setIsKeyboardOpen((o) => !o)}
     >

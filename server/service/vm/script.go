@@ -32,7 +32,6 @@ func (s *Service) GetScripts(c *gin.Context) {
 		return nil
 	})
 	if err != nil {
-		log.Errorf("get scripts failed: %s", err)
 		rsp.ErrRsp(c, -1, "get scripts failed")
 		return
 	}
@@ -41,7 +40,7 @@ func (s *Service) GetScripts(c *gin.Context) {
 		Files: files,
 	})
 
-	log.Debugf("get scripts success")
+	log.Debugf("get scripts total %d", len(files))
 }
 
 func (s *Service) UploadScript(c *gin.Context) {

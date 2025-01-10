@@ -35,10 +35,10 @@ export const Resolution = () => {
       {resolutions.map((res) => (
         <div
           key={res.height}
-          className="flex cursor-pointer select-none items-center space-x-1 rounded py-1.5 pl-1 pr-5 hover:bg-neutral-600"
+          className="flex cursor-pointer select-none items-center rounded py-1.5 pl-1 pr-5 hover:bg-neutral-700/70"
           onClick={() => update(res)}
         >
-          <div className="flex h-[14px] w-[20px] items-end">
+          <div className="flex h-[14px] w-[20px] items-end text-blue-500">
             {res.height === resolution?.height && <CheckIcon size={15} />}
           </div>
 
@@ -67,7 +67,7 @@ export const Resolution = () => {
 
   return (
     <Popover content={content} placement="rightTop">
-      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700">
+      <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <RatioIcon size={18} />
         <span className="select-none text-sm">{t('screen.resolution')}</span>
       </div>

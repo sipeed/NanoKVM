@@ -28,10 +28,11 @@ export const Terminal = () => {
       content={content}
       placement="bottomLeft"
       trigger="click"
+      arrow={false}
       open={isPopoverOpen}
       onOpenChange={setIsPopoverOpen}
     >
-      <div className="flex h-[30px] cursor-pointer items-center justify-center rounded px-2 text-neutral-300 hover:bg-neutral-700">
+      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
         <SquareTerminalIcon size={18} />
       </div>
     </Popover>

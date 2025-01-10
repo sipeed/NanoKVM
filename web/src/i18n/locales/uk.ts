@@ -1,25 +1,11 @@
 const uk = {
   translation: {
-    language: 'Мова',
-    changePassword: 'Змінити пароль',
-    logout: 'Вийти',
-    settings: 'Налаштування',
-    showMouse: 'Показати мишу',
-    hideMouse: 'Сховати мишу',
-    power: 'Живлення',
-    reset: 'Скидання',
-    powerShort: 'Живлення (коротке натискання)',
-    powerLong: 'Живлення (довге натискання)',
-    hddLed: 'Індикатор HDD',
-    checkLibFailed: 'Не вдалося перевірити бібліотеку виконання, спробуйте ще раз',
-    updateLibFailed: 'Не вдалося оновити бібліотеку виконання, спробуйте ще раз',
-    updatingLib: 'Оновлення бібліотеки виконано. Оновіть сторінку після оновлення.',
-    checkForUpdate: 'Перевірити оновлення',
     head: {
       desktop: 'Віддалений робочий стіл',
       login: 'Вхід',
       changePassword: 'Змінити пароль',
-      terminal: 'Термінал'
+      terminal: 'Термінал',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: 'Вхід',
@@ -39,14 +25,28 @@ const uk = {
       illegalUsername: "ім'я користувача містить недопустимі символи",
       illegalPassword: 'пароль містить недопустимі символи',
       forgetPassword: 'Забули пароль',
-      resetPassword: 'Скинути пароль',
-      reset1: 'Якщо ви забули пароль, виконайте наступні кроки для його скидання:',
-      reset2: '1. Увійдіть на пристрій NanoKVM через SSH;',
-      reset3: '2. Видаліть файл на пристрої: ',
-      reset4: '3. Використовуйте обліковий запис за замовчуванням для входу: ',
       ok: 'Ок',
       cancel: 'Скасувати',
-      loginButtonText: 'Увійти'
+      loginButtonText: 'Увійти',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: 'Відеорежим',
@@ -132,60 +132,113 @@ const uk = {
       confirm: 'Ок'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: 'Посилання команди...',
       sent: 'Команду відправлено',
       input: 'Будь ласка, введіть MAC',
       ok: 'Ок'
     },
-    about: {
-      title: 'Про NanoKVM',
-      information: 'Інформація',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: 'Версія додатку',
-      image: 'Версія образу',
-      deviceKey: 'Ключ пристрою',
-      queryFailed: 'Запит не вдався',
-      community: 'Спільнота'
+    power: {
+      title: 'Живлення',
+      reset: 'Скидання',
+      power: 'Живлення',
+      powerShort: 'Живлення (коротке натискання)',
+      powerLong: 'Живлення (довге натискання)'
     },
-    update: {
-      title: 'Перевірити оновлення',
-      queryFailed: 'Не вдалося отримати версію',
-      updateFailed: 'Оновлення не вдалося. Будь ласка, спробуйте ще раз.',
-      isLatest: 'У вас вже остання версія.',
-      available: 'Доступне оновлення. Ви впевнені, що хочете оновити?',
-      updating: 'Оновлення розпочато. Будь ласка, зачекайте...',
-      confirm: 'Підтвердити',
-      cancel: 'Скасувати'
-    },
-    virtualDevice: {
-      network: 'Віртуальна мережа',
-      disk: 'Віртуальний диск'
-    },
-    tailscale: {
-      loading: 'Завантаження...',
-      notInstall: 'Tailscale не знайдено! Будь ласка, встановіть клієнт Tailscale.',
-      install: 'Встановити',
-      installing: 'Встановлення',
-      failed: 'Не вдалося встановити',
-      retry: 'Будь ласка, оновіть сторінку та спробуйте ще раз. Або спробуйте встановити вручну',
-      download: 'Завантажте',
-      package: 'пакет встановлення',
-      unzip: 'та розпакуйте його',
-      upTailscale: 'Завантажте tailscale до каталогу /usr/bin/ на NanoKVM',
-      upTailscaled: 'Завантажте tailscaled до каталогу /usr/sbin/ на NanoKVM',
-      refresh: 'Оновіть поточну сторінку',
-      notLogin:
-        "Пристрій ще не прив'язаний. Будь ласка, увійдіть і прив'яжіть цей пристрій до вашого облікового запису.",
-      urlPeriod: 'Ця URL-адреса дійсна протягом 10 хвилин',
-      login: 'Увійти',
-      loginSuccess: 'Успішний вхід',
-      enable: 'Увімкнути Tailscale',
-      deviceName: 'Назва пристрою',
-      deviceIP: 'IP пристрою',
-      account: 'Обліковий запис',
-      logout: 'Вийти',
-      logout2: 'Ви впевнені, що хочете вийти?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'Про NanoKVM',
+        information: 'Інформація',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: 'Версія додатку',
+        applicationTip: 'NanoKVM web application version',
+        image: 'Версія образу',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: 'Ключ пристрою',
+        community: 'Спільнота'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Завантаження...',
+        notInstall: 'Tailscale не знайдено! Будь ласка, встановіть клієнт Tailscale.',
+        install: 'Встановити',
+        installing: 'Встановлення',
+        failed: 'Не вдалося встановити',
+        retry: 'Будь ласка, оновіть сторінку та спробуйте ще раз. Або спробуйте встановити вручну',
+        download: 'Завантажте',
+        package: 'пакет встановлення',
+        unzip: 'та розпакуйте його',
+        upTailscale: 'Завантажте tailscale до каталогу /usr/bin/ на NanoKVM',
+        upTailscaled: 'Завантажте tailscaled до каталогу /usr/sbin/ на NanoKVM',
+        refresh: 'Оновіть поточну сторінку',
+        notLogin:
+          "Пристрій ще не прив'язаний. Будь ласка, увійдіть і прив'яжіть цей пристрій до вашого облікового запису.",
+        urlPeriod: 'Ця URL-адреса дійсна протягом 10 хвилин',
+        login: 'Увійти',
+        loginSuccess: 'Успішний вхід',
+        enable: 'Увімкнути Tailscale',
+        deviceName: 'Назва пристрою',
+        deviceIP: 'IP пристрою',
+        account: 'Обліковий запис',
+        logout: 'Вийти',
+        logout2: 'Ви впевнені, що хочете вийти?'
+      },
+      update: {
+        title: 'Перевірити оновлення',
+        queryFailed: 'Не вдалося отримати версію',
+        updateFailed: 'Оновлення не вдалося. Будь ласка, спробуйте ще раз.',
+        isLatest: 'У вас вже остання версія.',
+        available: 'Доступне оновлення. Ви впевнені, що хочете оновити?',
+        updating: 'Оновлення розпочато. Будь ласка, зачекайте...',
+        confirm: 'Підтвердити',
+        cancel: 'Скасувати'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

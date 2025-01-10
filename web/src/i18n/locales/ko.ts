@@ -1,25 +1,11 @@
 const ko = {
   translation: {
-    language: '언어',
-    changePassword: '비밀번호 변경',
-    logout: '로그아웃',
-    settings: '설정',
-    showMouse: '마우스 보이기',
-    hideMouse: '마우스 숨기기',
-    power: '전원',
-    reset: '리셋',
-    powerShort: '전원 (짧게 누르기)',
-    powerLong: '전원 (길게 누르기)',
-    hddLed: 'HDD LED',
-    checkLibFailed: '런타임 라이브러리를 체크하는데 실패했습니다. 다시 시도해주세요.',
-    updateLibFailed: '런타임 라이브러리를 업데이트하는데 실패했습니다. 다시 시도해주세요.',
-    updatingLib: '런타임 라이브러리를 업데이트 하는 중입니다. 업데이트 완료 후 새로고침 해주세요.',
-    checkForUpdate: '업데이트 체크하기',
     head: {
       desktop: '원격 데스크톱',
       login: '로그인',
       changePassword: '비밀번호 변경',
-      terminal: '터미널'
+      terminal: '터미널',
+      wifi: 'Wi-Fi'
     },
     auth: {
       login: '로그인',
@@ -38,14 +24,28 @@ const ko = {
       illegalUsername: '유저 이름에 사용할 수 없는 문자가 있습니다.',
       illegalPassword: '비밀번호에 사용할 수 없는 문자가 있습니다.',
       forgetPassword: '비밀번호 분실',
-      resetPassword: '비밀번호 초기화',
-      reset1: '비밀번호를 분실하신 경우, 아래 순서로 리셋하세요.:',
-      reset2: '1. NanoKVM 기기에 SSH를 통해 로그인 합니다.;',
-      reset3: '2. 기기내 파일을 제거합니다.: ',
-      reset4: '3. 기본 계정으로 로그인 합니다.: ',
       ok: '확인',
       cancel: '취소',
-      loginButtonText: '로그인'
+      loginButtonText: '로그인',
+      tips: {
+        reset1:
+          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+        reset2: 'For detailed steps, please consult this document:',
+        reset3: 'Web default account:',
+        reset4: 'SSH default account:',
+        change1: 'Please note that this action will change the following passwords:',
+        change2: 'Web login password',
+        change3: 'System root password (SSH login password)',
+        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+      }
+    },
+    wifi: {
+      title: 'Wi-Fi',
+      description: 'Configure Wi-Fi for NanoKVM',
+      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      failed: 'Operation failed, please try again.',
+      confirmBtn: 'Ok',
+      finishBtn: 'Finished'
     },
     screen: {
       video: '비디오 모드',
@@ -130,59 +130,112 @@ const ko = {
       confirm: '확인'
     },
     wol: {
+      title: 'Wake-on-LAN',
       sending: '패킷 전송 중...',
       sent: '패킷 전송 완료',
       input: 'MAC주소를 입력하세요.',
       ok: '확인'
     },
-    about: {
-      title: 'NanoKVM 정보',
-      information: '정보',
-      ip: 'IP',
-      mdns: 'mDNS',
-      application: '펌웨어 버전',
-      image: '이미지 버전',
-      deviceKey: '장치 키',
-      queryFailed: '불러오기 실패',
-      community: '커뮤니티'
+    power: {
+      title: '전원',
+      reset: '리셋',
+      power: '전원',
+      powerShort: '전원 (짧게 누르기)',
+      powerLong: '전원 (길게 누르기)'
     },
-    update: {
-      title: '업데이트 확인 중',
-      queryFailed: '버전 확인 실패',
-      updateFailed: '업데이트 실패, 재시도하세요.',
-      isLatest: '이미 최신 버전입니다.',
-      available: '업데이트가 가능합니다. 정말로 업데이트 할까요?',
-      updating: '업데이트 시작. 잠시 기다려주세요...',
-      confirm: '확인',
-      cancel: '취소'
-    },
-    virtualDevice: {
-      network: '가상 네트워크 카드',
-      disk: '가상 디스크'
-    },
-    tailscale: {
-      loading: 'Loading...',
-      notInstall: 'Tailscale이 없습니다. 설치해주세요.',
-      install: '설치',
-      installing: '설치중',
-      failed: '설치 실패',
-      retry: '새로고침하고 다시 시도하거나, 수동으로 설치하세요',
-      download: '다운로드 중 :',
-      package: '패키지 설치',
-      unzip: '압축 해제',
-      upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
-      upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
-      refresh: '현재 페이지 새로고침',
-      notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
-      urlPeriod: '이 주소는 10분간 유효합니다.',
-      login: '로그인',
-      loginSuccess: '로그인 성공',
-      enable: 'Tailscale 활성화',
-      deviceName: '장치 이름',
-      deviceIP: '장치 IP',
-      account: '계정',
-      logout: '로그아웃',
-      logout2: '정말로 로그아웃 합니까?'
+    settings: {
+      title: 'Settings',
+      about: {
+        title: 'NanoKVM 정보',
+        information: '정보',
+        ip: 'IP',
+        mdns: 'mDNS',
+        application: '펌웨어 버전',
+        applicationTip: 'NanoKVM web application version',
+        image: '이미지 버전',
+        imageTip: 'NanoKVM system image version',
+        deviceKey: '장치 키',
+        community: '커뮤니티'
+      },
+      appearance: {
+        title: 'Appearance',
+        display: 'Display',
+        language: 'Language',
+        menuBar: 'Menu Bar',
+        menuBarDesc: 'Display icons in the menu bar'
+      },
+      device: {
+        title: 'Device',
+        oled: {
+          title: 'OLED',
+          description: 'OLED screen automatically sleep',
+          0: 'Never',
+          15: '15 sec',
+          30: '30 sec',
+          60: '1 min',
+          180: '3 min',
+          300: '5 min',
+          600: '10 min',
+          1800: '30 min',
+          3600: '1 hour'
+        },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          setBtn: 'Config'
+        },
+        disk: 'Virtual Disk',
+        diskDesc: 'Mount virtual U-disk on the remote host',
+        network: 'Virtual Network',
+        networkDesc: 'Mount virtual network card on the remote host',
+        memory: {
+          title: 'Memory optimization',
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
+          disable: 'Disable'
+        }
+      },
+      tailscale: {
+        title: 'Tailscale',
+        loading: 'Loading...',
+        notInstall: 'Tailscale이 없습니다. 설치해주세요.',
+        install: '설치',
+        installing: '설치중',
+        failed: '설치 실패',
+        retry: '새로고침하고 다시 시도하거나, 수동으로 설치하세요',
+        download: '다운로드 중 :',
+        package: '패키지 설치',
+        unzip: '압축 해제',
+        upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
+        upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
+        refresh: '현재 페이지 새로고침',
+        notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+        urlPeriod: '이 주소는 10분간 유효합니다.',
+        login: '로그인',
+        loginSuccess: '로그인 성공',
+        enable: 'Tailscale 활성화',
+        deviceName: '장치 이름',
+        deviceIP: '장치 IP',
+        account: '계정',
+        logout: '로그아웃',
+        logout2: '정말로 로그아웃 합니까?'
+      },
+      update: {
+        title: '업데이트 확인 중',
+        queryFailed: '버전 확인 실패',
+        updateFailed: '업데이트 실패, 재시도하세요.',
+        isLatest: '이미 최신 버전입니다.',
+        available: '업데이트가 가능합니다. 정말로 업데이트 할까요?',
+        updating: '업데이트 시작. 잠시 기다려주세요...',
+        confirm: '확인',
+        cancel: '취소'
+      },
+      account: {
+        title: 'Account',
+        webAccount: 'Web Account Name',
+        password: 'Password',
+        updateBtn: 'Update',
+        logoutBtn: 'Logout'
+      }
     }
   }
 };

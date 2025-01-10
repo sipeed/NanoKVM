@@ -112,15 +112,15 @@ func (k *KvmVision) ReadH264SPS() ([]byte, int) {
 		dataSize C.uint32_t
 	)
 
-	result := C.kvmv_get_sps_frame(&kvmData, &dataSize)
+	result := int(C.kvmv_get_sps_frame(&kvmData, &dataSize))
 	if result < 0 {
 		log.Errorf("failed to read sps: %v", result)
-		return nil, int(result)
+		return nil, result
 	}
 
 	data := C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
 
-	return data, int(result)
+	return data, result
 }
 
 func (k *KvmVision) ReadH264PPS() ([]byte, int) {
@@ -129,14 +129,14 @@ func (k *KvmVision) ReadH264PPS() ([]byte, int) {
 		dataSize C.uint32_t
 	)
 
-	result := C.kvmv_get_pps_frame(&kvmData, &dataSize)
+	result := int(C.kvmv_get_pps_frame(&kvmData, &dataSize))
 	if result < 0 {
 		log.Errorf("failed to read pps: %v", result)
-		return nil, int(result)
+		return nil, result
 	}
 
 	data := C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
-	return data, int(result)
+	return data, result
 }
 
 func (k *KvmVision) Close() {

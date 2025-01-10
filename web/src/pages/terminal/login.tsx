@@ -16,8 +16,7 @@ export const Login = ({ setToken }: LoginProps) => {
     const username = values.username;
     const password = encrypt(values.password);
 
-    const token = username === 'root' ? `t=${password}` : `u=${values.username}&t=${password}`;
-    setToken(token);
+    setToken(`u=${username}&t=${password}`);
   }
 
   return (

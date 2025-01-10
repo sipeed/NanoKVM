@@ -23,11 +23,16 @@ export const Notification = () => {
   }, []);
 
   function openNotification() {
-    api.info({
+    api.warning({
+      key: 'no_change_password',
       message: t('auth.changePassword'),
       description: t('auth.changePasswordDesc'),
       placement: 'topRight',
-      btn: <Button onClick={changePassword}>{t('auth.ok')}</Button>,
+      btn: (
+        <Button type="primary" onClick={changePassword}>
+          {t('auth.ok')}
+        </Button>
+      ),
       duration: null,
       onClose: () => setSkipModifyPassword(true)
     });

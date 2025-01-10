@@ -6,6 +6,7 @@ import (
 	"NanoKVM-Server/logger"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
+	"NanoKVM-Server/utils"
 	"fmt"
 	"os"
 	"os/signal"
@@ -32,8 +33,11 @@ func main() {
 
 func initialize() {
 	logger.Init()
+
 	_ = common.GetScreen()
 	_ = common.GetKvmVision()
+
+	utils.InitGoMemLimit()
 }
 
 func run(r *gin.Engine) {
