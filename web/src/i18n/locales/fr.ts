@@ -63,7 +63,8 @@ const fr = {
       qualityLow: 'Bas',
       frameDetect: 'Frame Detect',
       frameDetectTip:
-        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant"
+        "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Coller',
@@ -189,15 +190,18 @@ const fr = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Chargement...',
         notInstall: "Tailscale non trouvé! Veuillez l'installer.",
         install: 'Installer',
@@ -219,7 +223,9 @@ const fr = {
         deviceIP: "IP de l'appareil",
         account: 'Compte',
         logout: 'Déconnexion',
-        logout2: 'Voulez-vous vous déconnecter?'
+        logout2: 'Voulez-vous vous déconnecter?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Vérifier les mises à jour',

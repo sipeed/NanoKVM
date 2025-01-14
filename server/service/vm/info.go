@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"NanoKVM-Server/config"
 	"fmt"
 	"net"
 	"os"
@@ -91,4 +92,15 @@ func getDeviceKey() string {
 	}
 
 	return strings.ReplaceAll(string(content), "\n", "")
+}
+
+func (s *Service) GetHardware(c *gin.Context) {
+	var rsp proto.Response
+
+	conf := config.GetInstance()
+	version := conf.Hardware.Version.String()
+
+	rsp.OkRspWithData(c, &proto.GetHardwareRsp{
+		Version: version,
+	})
 }

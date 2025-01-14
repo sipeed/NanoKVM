@@ -63,7 +63,8 @@ const en = {
       qualityLow: 'Bajo',
       frameDetect: 'Detectar fotogramas',
       frameDetectTip:
-        'Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto.'
+        'Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Pegar',
@@ -189,15 +190,18 @@ const en = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Cargando...',
         notInstall: '¡Tailscale no encontrado! Por favor, instálalo.',
         install: 'Instalar',
@@ -221,7 +225,9 @@ const en = {
         deviceIP: 'IP del dispositivo',
         account: 'Cuenta',
         logout: 'Cerrar sesión',
-        logout2: '¿Seguro que quieres cerrar sesión?'
+        logout2: '¿Seguro que quieres cerrar sesión?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Buscar actualizaciones',

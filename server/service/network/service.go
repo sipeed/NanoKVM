@@ -39,3 +39,11 @@ func (s *Service) TsLogin(c *gin.Context) {
 func (s *Service) TsLogout(c *gin.Context) {
 	tailscale.Logout(c)
 }
+
+func (s *Service) TsStop(c *gin.Context) {
+	tailscale.Stop(c)
+}
+
+func (s *Service) TsRestart(c *gin.Context) {
+	tailscale.Restart(c)
+}

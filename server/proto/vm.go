@@ -8,6 +8,10 @@ type GetInfoRsp struct {
 	DeviceKey   string `json:"deviceKey"`
 }
 
+type GetHardwareRsp struct {
+	Version string `json:"version"`
+}
+
 type SetGpioReq struct {
 	Type     string `validate:"required"`  // reset / power
 	Duration uint   `validate:"omitempty"` // press time (unit: milliseconds)

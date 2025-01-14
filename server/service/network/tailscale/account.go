@@ -2,7 +2,6 @@ package tailscale
 
 import (
 	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -38,11 +37,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// set GOMEMLIMIT = 50M
-	if !utils.IsGoMemLimitExist() {
-		_ = utils.SetGoMemLimit(50)
-	}
-
 	rsp.OkRspWithData(c, &proto.LoginTailscaleRsp{
 		Url: url,
 	})
@@ -60,9 +54,34 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	// delete GOMEMLIMIT
-	_ = utils.DelGoMemLimit()
-
 	rsp.OkRsp(c)
 	log.Debugf("tailscale logout successfully")
+}
+
+func Restart(c *gin.Context) {
+	var rsp proto.Response
+
+	err := NewCli().Restart()
+	if err != nil {
+		rsp.ErrRsp(c, -1, "restart failed")
+		log.Errorf("failed to run tailscale restart: %s", err)
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("tailscale restart successfully")
+}
+
+func Stop(c *gin.Context) {
+	var rsp proto.Response
+
+	err := NewCli().Stop()
+	if err != nil {
+		rsp.ErrRsp(c, -1, "stop failed")
+		log.Errorf("failed to run tailscale stop: %s", err)
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("tailscale stop successfully")
 }

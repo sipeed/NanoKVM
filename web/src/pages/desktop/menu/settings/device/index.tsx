@@ -1,7 +1,6 @@
 import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { Memory } from './memory.tsx';
 import { Oled } from './oled.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
@@ -19,9 +18,6 @@ export const Device = () => {
         <Wifi />
         <VirtualDevices />
       </div>
-
-      <Divider />
-      <Memory />
     </>
   );
 };

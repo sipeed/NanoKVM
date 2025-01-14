@@ -63,7 +63,8 @@ const ru = {
       qualityLow: 'Низкий',
       frameDetect: 'Экономия трафика',
       frameDetectTip:
-        'Вычисляет разницу между кадрами и прекращает передачу видеопотока, если на экране удаленного узла не обнаружено никаких изменений.'
+        'Вычисляет разницу между кадрами и прекращает передачу видеопотока, если на экране удаленного узла не обнаружено никаких изменений.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'вставить',
@@ -188,15 +189,18 @@ const ru = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Загрузка...',
         notInstall: 'Tailscale не найден! Пожалуйста, установите.',
         install: 'Установить',
@@ -218,7 +222,9 @@ const ru = {
         deviceIP: 'IP адрес устройства',
         account: 'аккаунт',
         logout: 'Выход',
-        logout2: 'Вы действительно хотите выйти?'
+        logout2: 'Вы действительно хотите выйти?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Проверить обновления',

@@ -12,12 +12,10 @@ export const Memory = () => {
   const [limit, setLimit] = useState('');
 
   const options = [
-    { value: '0', label: t('settings.device.memory.disable') },
+    { value: '0', label: t('settings.tailscale.memory.disable') },
     { value: '40', label: '40 MB' },
     { value: '50', label: '50 MB' },
-    { value: '60', label: '60 MB' },
-    { value: '70', label: '70 MB' },
-    { value: '80', label: '80 MB' }
+    { value: '60', label: '60 MB' }
   ];
 
   useEffect(() => {
@@ -59,18 +57,19 @@ export const Memory = () => {
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <div className="flex items-center space-x-1">
-            <span>{t('settings.device.memory.title')}</span>
+            <span>{t('settings.tailscale.memory.title')}</span>
             <Tooltip
-              title={t('settings.device.memory.tip')}
+              title={t('settings.tailscale.memory.tip')}
               className="cursor-pointer text-neutral-500"
               placement="top"
+              overlayStyle={{ maxWidth: '350px' }}
             >
               <CircleHelpIcon size={15} />
             </Tooltip>
           </div>
         </div>
 
-        <Select style={{ width: 150 }} value={limit} options={options} onChange={update} />
+        <Select style={{ width: 100 }} value={limit} options={options} onChange={update} />
       </div>
     </>
   );

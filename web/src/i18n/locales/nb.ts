@@ -63,7 +63,8 @@ const nb = {
       qualityLow: 'Lav',
       frameDetect: 'Bildefrekvensoppdagelse',
       frameDetectTip:
-        'Kalkuler forskjellen mellom bilder. Stopper overføring av video når det ikke oppdages forskjell på den eksterne vertens skjerm.'
+        'Kalkuler forskjellen mellom bilder. Stopper overføring av video når det ikke oppdages forskjell på den eksterne vertens skjerm.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Lim inn',
@@ -188,15 +189,18 @@ const nb = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Laster...',
         notInstall: 'Tailscale er ikke funnet! Vennligst installer.',
         install: 'Installér',
@@ -219,7 +223,9 @@ const nb = {
         deviceIP: 'Enhetens IP',
         account: 'Konto',
         logout: 'Logg ut',
-        logout2: 'Er du sikker på at du ønsker å logge ut?'
+        logout2: 'Er du sikker på at du ønsker å logge ut?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Se etter oppdatering',

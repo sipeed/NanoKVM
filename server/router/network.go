@@ -25,6 +25,8 @@ func networkRouter(r *gin.Engine) {
 	api.POST("/network/tailscale/down", service.TsDown)           // run tailscale down
 	api.POST("/network/tailscale/login", service.TsLogin)         // tailscale login
 	api.POST("/network/tailscale/logout", service.TsLogout)       // tailscale logout
+	api.POST("/network/tailscale/stop", service.TsStop)           // tailscale stop
+	api.POST("/network/tailscale/restart", service.TsRestart)     // tailscale restart
 
 	api.GET("/network/wifi", service.GetWifi) // get Wi-Fi information
 }

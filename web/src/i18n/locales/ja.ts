@@ -63,7 +63,8 @@ const ja = {
       qualityLow: '低い',
       frameDetect: 'フレーム検出',
       frameDetectTip:
-        'フレーム間の差を計算します。リモートホストの画面で変更が検出されない場合、ビデオストリームの送信を停止します。'
+        'フレーム間の差を計算します。リモートホストの画面で変更が検出されない場合、ビデオストリームの送信を停止します。',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: '貼り付け',
@@ -190,15 +191,18 @@ const ja = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: '読み込み中...',
         notInstall: 'Tailscaleが見つかりません！インストールしてください。',
         install: 'インストール',
@@ -220,7 +224,9 @@ const ja = {
         deviceIP: 'デバイスIP',
         account: 'アカウント',
         logout: 'ログアウト',
-        logout2: 'ログアウトしてもよろしいですか？'
+        logout2: 'ログアウトしてもよろしいですか？',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'アップデートの確認',

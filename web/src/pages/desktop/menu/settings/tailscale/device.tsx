@@ -5,8 +5,10 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/network.ts';
 
+import { Status } from './types.ts';
+
 type DeviceProps = {
-  status: any;
+  status: Status;
   onLogout: () => void;
 };
 

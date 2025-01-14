@@ -56,6 +56,16 @@ export function logoutTailscale() {
   return http.post('/api/network/tailscale/logout');
 }
 
+// stop tailscale
+export function stopTailscale() {
+  return http.post('/api/network/tailscale/stop');
+}
+
+// restart tailscale
+export function restartTailscale() {
+  return http.post('/api/network/tailscale/restart');
+}
+
 // get wifi information
 export function getWiFi() {
   return http.get('/api/network/wifi');

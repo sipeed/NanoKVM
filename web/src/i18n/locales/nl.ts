@@ -63,7 +63,8 @@ const nl = {
       qualityLow: 'Laag',
       frameDetect: 'Frame detectie',
       frameDetectTip:
-        'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.'
+        'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Plakken',
@@ -189,15 +190,18 @@ const nl = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Laden...',
         notInstall: 'Tailscale niet gevonden! Installeer a.u.b.',
         install: 'Installeren',
@@ -220,7 +224,9 @@ const nl = {
         deviceIP: 'Apparaat IP',
         account: 'Account',
         logout: 'Uitloggen',
-        logout2: 'Weet u zeker dat u wilt uitloggen?'
+        logout2: 'Weet u zeker dat u wilt uitloggen?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Controleren op updates',

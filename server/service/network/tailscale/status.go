@@ -9,6 +9,8 @@ import (
 )
 
 var StateMap = map[string]proto.TailscaleState{
+	"NoState":    proto.TailscaleNotRunning,
+	"Starting":   proto.TailscaleNotRunning,
 	"NeedsLogin": proto.TailscaleNotLogin,
 	"Running":    proto.TailscaleRunning,
 	"Stopped":    proto.TailscaleStopped,
@@ -28,7 +30,7 @@ func GetStatus(c *gin.Context) {
 	if err != nil {
 		log.Debugf("failed to get tailscale status: %s", err)
 		rsp.OkRspWithData(c, &proto.GetTailscaleStatusRsp{
-			State: proto.TailscaleNotLogin,
+			State: proto.TailscaleNotRunning,
 		})
 		return
 	}

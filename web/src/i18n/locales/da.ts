@@ -62,7 +62,8 @@ const da = {
       qualityLow: 'Lav',
       frameDetect: 'Beregn frames',
       frameDetectTip:
-        'Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm.'
+        'Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Indsæt',
@@ -187,15 +188,18 @@ const da = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Indlæser...',
         notInstall: 'Tailscale ikke fundet! Installer det for at fuldføre opsætningen.',
         install: 'Installer',
@@ -218,7 +222,9 @@ const da = {
         deviceIP: 'Enhedens IP',
         account: 'Konto',
         logout: 'Log ud',
-        logout2: 'Er du sikker på at du vil logge ud?'
+        logout2: 'Er du sikker på at du vil logge ud?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Kontroller for opdatering',

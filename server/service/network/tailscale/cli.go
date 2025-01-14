@@ -5,9 +5,16 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+)
+
+const (
+	ScriptPath       = "/etc/init.d/S98tailscaled"
+	ScriptBackupPath = "/kvmapp/system/init.d/S98tailscaled"
 )
 
 type Cli struct{}
@@ -36,13 +43,33 @@ func (c *Cli) Start() error {
 		}
 	}
 
-	command := "/etc/init.d/S98tailscaled start"
+	commands := []string{
+		fmt.Sprintf("cp -f %s %s", ScriptBackupPath, ScriptPath),
+		fmt.Sprintf("%s start", ScriptPath),
+	}
+
+	command := strings.Join(commands, " && ")
+	return exec.Command("sh", "-c", command).Run()
+}
+
+func (c *Cli) Restart() error {
+	commands := []string{
+		fmt.Sprintf("cp -f %s %s", ScriptBackupPath, ScriptPath),
+		fmt.Sprintf("%s restart", ScriptPath),
+	}
+
+	command := strings.Join(commands, " && ")
 	return exec.Command("sh", "-c", command).Run()
 }
 
 func (c *Cli) Stop() error {
-	command := "/etc/init.d/S98tailscaled stop"
-	return exec.Command("sh", "-c", command).Run()
+	command := fmt.Sprintf("%s stop", ScriptPath)
+	err := exec.Command("sh", "-c", command).Run()
+	if err != nil {
+		return err
+	}
+
+	return os.Remove(ScriptPath)
 }
 
 func (c *Cli) Up() error {

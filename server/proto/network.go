@@ -16,6 +16,7 @@ type TailscaleState string
 
 const (
 	TailscaleNotInstall TailscaleState = "notInstall"
+	TailscaleNotRunning TailscaleState = "notRunning"
 	TailscaleNotLogin   TailscaleState = "notLogin"
 	TailscaleStopped    TailscaleState = "stopped"
 	TailscaleRunning    TailscaleState = "running"

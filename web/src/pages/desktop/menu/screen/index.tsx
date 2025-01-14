@@ -11,6 +11,7 @@ import { BitRateMap, QualityMap } from './constants.ts';
 import { Fps } from './fps';
 import { FrameDetect } from './frame-detect';
 import { Quality } from './quality';
+import { Reset } from './reset.tsx';
 import { Resolution } from './resolution';
 import { VideoMode } from './video-mode.tsx';
 
@@ -62,6 +63,7 @@ export const Screen = () => {
           <Quality quality={quality} setQuality={setQuality} />
           <Fps fps={fps} setFps={setFps} />
           {videoMode === 'mjpeg' && <FrameDetect />}
+          <Reset />
         </div>
       }
       placement="bottomLeft"

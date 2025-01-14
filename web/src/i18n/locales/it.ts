@@ -63,7 +63,8 @@ const it = {
       qualityLow: 'Basso',
       frameDetect: 'Rilevamento Frame',
       frameDetectTip:
-        'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.'
+        'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Incolla',
@@ -189,15 +190,18 @@ const it = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Caricamento...',
         notInstall: 'Tailscale non trovato! Per favore, installa.',
         install: 'Installa',
@@ -220,7 +224,9 @@ const it = {
         deviceIP: 'IP Dispositivo',
         account: 'Account',
         logout: 'Disconnetti',
-        logout2: 'Sei sicuro di voler uscire?'
+        logout2: 'Sei sicuro di voler uscire?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Controlla Aggiornamenti',

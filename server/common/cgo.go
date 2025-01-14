@@ -139,6 +139,21 @@ func (k *KvmVision) ReadH264PPS() ([]byte, int) {
 	return data, result
 }
 
+func (k *KvmVision) EnableHdmi(enable bool) int {
+	hdmiEnable := C.uint8_t(0)
+	if enable {
+		hdmiEnable = C.uint8_t(1)
+	}
+
+	result := int(C.kvmv_hdmi_control(hdmiEnable))
+	if result < 0 {
+		log.Errorf("failed to set hdmi to %t", enable)
+		return result
+	}
+
+	return result
+}
+
 func (k *KvmVision) Close() {
 	k.mutex.Lock()
 	defer k.mutex.Unlock()

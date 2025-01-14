@@ -59,7 +59,8 @@ const zh_tw = {
       qualityMedium: '中',
       qualityLow: '低',
       frameDetect: '影格檢測',
-      frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止傳輸視訊串流。'
+      frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止傳輸視訊串流。',
+      resetHdmi: '重置 HDMI'
     },
     keyboard: {
       paste: '貼上',
@@ -183,15 +184,18 @@ const zh_tw = {
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
-        networkDesc: '在远程主机中挂载虚拟网卡',
-        memory: {
-          title: '内存优化',
-          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存',
-          disable: '关闭'
-        }
+        networkDesc: '在远程主机中挂载虚拟网卡'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: '内存优化',
+          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存。如果使用 Tailscale 推荐设置为 50MB，需重启 Tailscale 后生效。',
+          disable: '关闭'
+        },
+        restart: '取定要重启 Tailscale 吗？',
+        stop: '确定要停止 Tailscale 吗？',
+        stopDesc: '该操作会退出登录，并停止开机自动启动。',
         loading: '載入中...',
         notInstall: 'Tailscale 未找到！請先安裝。',
         install: '安裝',
@@ -213,7 +217,9 @@ const zh_tw = {
         deviceIP: '裝置 IP',
         account: '帳號',
         logout: '登出',
-        logout2: '確認登出?'
+        logout2: '確認登出?',
+        okBtn: '确认',
+        cancelBtn: '取消'
       },
       update: {
         title: '檢查更新',

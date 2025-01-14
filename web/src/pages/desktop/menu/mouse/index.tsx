@@ -25,6 +25,7 @@ export const Mouse = () => {
   const [mouseStyle, setMouseStyle] = useAtom(mouseStyleAtom);
   const [mouseMode, setMouseMode] = useAtom(mouseModeAtom);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const mouseStyles = [
     { name: t('mouse.default'), icon: <MousePointerIcon size={14} />, value: 'cursor-default' },
@@ -69,12 +70,15 @@ export const Mouse = () => {
   }
 
   function resetHid() {
-    setIsPopoverOpen(false);
+    if (isResetting) return;
+    setIsResetting(true);
 
     client.close();
 
     api.reset().finally(() => {
       client.connect();
+      setIsResetting(false);
+      setIsPopoverOpen(false);
     });
   }
 
@@ -85,7 +89,7 @@ export const Mouse = () => {
         <div
           key={style.value}
           className={clsx(
-            'flex cursor-pointer select-none items-center space-x-1 rounded px-3 py-1.5 hover:bg-neutral-700/70',
+            'flex cursor-pointer select-none items-center space-x-1 rounded py-1.5 pl-3 pr-6 hover:bg-neutral-700/70',
             style.value === mouseStyle && 'text-green-500'
           )}
           onClick={() => updateStyle(style.value)}
@@ -119,7 +123,7 @@ export const Mouse = () => {
         arrow={true}
         trigger="hover"
       >
-        <div className="flex h-[30px] cursor-pointer items-center space-x-1 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
+        <div className="flex h-[30px] cursor-pointer items-center space-x-1 rounded pl-3 pr-5 text-neutral-300 hover:bg-neutral-700/70">
           <div className="flex h-[14px] w-[20px] items-end">
             <SquareMousePointerIcon size={14} />
           </div>
@@ -133,7 +137,10 @@ export const Mouse = () => {
         onClick={resetHid}
       >
         <div className="flex h-[14px] w-[20px] items-end">
-          <RefreshCwIcon size={14} />
+          <RefreshCwIcon
+            className={clsx({ 'animate-spin text-blue-500': isResetting })}
+            size={14}
+          />
         </div>
         <span>{t('mouse.resetHid')}</span>
       </div>

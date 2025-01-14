@@ -11,7 +11,8 @@ func vmRouter(r *gin.Engine) {
 	service := vm.NewService()
 	api := r.Group("/api").Use(middleware.CheckToken())
 
-	api.GET("/vm/info", service.GetInfo) // get device information
+	api.GET("/vm/info", service.GetInfo)         // get device information
+	api.GET("/vm/hardware", service.GetHardware) // get hardware version
 
 	api.POST("/vm/gpio", service.SetGpio)     // update gpio
 	api.GET("/vm/gpio", service.GetGpio)      // get gpio
@@ -32,4 +33,6 @@ func vmRouter(r *gin.Engine) {
 
 	api.GET("/vm/oled", service.GetOLED)  // get OLED configuration
 	api.POST("/vm/oled", service.SetOLED) // set OLED configuration
+
+	api.POST("/vm/hdmi/reset", service.ResetHdmi) // reset hdmi (pcie only)
 }

@@ -62,7 +62,8 @@ const vi = {
       qualityLow: 'Thấp',
       frameDetect: 'Phát hiện khung hình',
       frameDetectTip:
-        'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.'
+        'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Dán',
@@ -187,15 +188,18 @@ const vi = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Đang tải...',
         notInstall: 'Không tìm thấy Tailscale! Vui lòng cài đặt.',
         install: 'Cài đặt',
@@ -218,7 +222,9 @@ const vi = {
         deviceIP: 'IP Thiết bị',
         account: 'Tài khoản',
         logout: 'Đăng xuất',
-        logout2: 'Bạn có chắc chắn muốn đăng xuất không?'
+        logout2: 'Bạn có chắc chắn muốn đăng xuất không?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Kiểm tra cập nhật',

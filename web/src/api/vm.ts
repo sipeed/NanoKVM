@@ -5,6 +5,11 @@ export function getInfo() {
   return http.get('/api/vm/info');
 }
 
+// get hardware information
+export function getHardware() {
+  return http.get('/api/vm/hardware');
+}
+
 // set gpio value
 export function setGpio(type: string, duration: number) {
   const data = {
@@ -50,4 +55,9 @@ export function getOLED() {
 // set OLED configuration
 export function setOLED(sleep: number) {
   return http.post('/api/vm/oled', { sleep });
+}
+
+// reset HDMI
+export function resetHdmi() {
+  return http.post('/api/vm/hdmi/reset');
 }

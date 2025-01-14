@@ -6,17 +6,11 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/network.ts';
 
 import { Device } from './device.tsx';
+import { Header } from './header.tsx';
 import { Install } from './install.tsx';
 import { Login } from './login.tsx';
-
-type State = 'notInstall' | 'notLogin' | 'stopped' | 'running';
-
-type Status = {
-  state: State;
-  name: string;
-  ip: string;
-  account: string;
-};
+import { Memory } from './memory.tsx';
+import { Status } from './types.ts';
 
 type TailscaleProps = {
   setIsLocked: (isLocked: boolean) => void;
@@ -54,7 +48,10 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
 
   return (
     <>
-      <div className="text-base font-bold">{t('settings.tailscale.title')}</div>
+      <Header status={status} onSuccess={getStatus} />
+      <Divider />
+
+      <Memory />
       <Divider />
 
       {isLoading ? (
@@ -68,7 +65,9 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
             <Install setIsLocked={setIsLocked} onSuccess={getStatus} />
           )}
 
-          {status?.state === 'notLogin' && <Login onSuccess={getStatus} />}
+          {(status?.state === 'notRunning' || status?.state === 'notLogin') && (
+            <Login onSuccess={getStatus} />
+          )}
 
           {(status?.state === 'stopped' || status?.state === 'running') && (
             <Device status={status} onLogout={getStatus} />

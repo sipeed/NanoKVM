@@ -55,7 +55,8 @@ const pl = {
       qualityLow: 'Niski',
       frameDetect: 'Wykrywanie klatek',
       frameDetectTip:
-        'Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany.'
+        'Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Wklej',
@@ -180,15 +181,18 @@ const pl = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Ładowanie...',
         notInstall: 'Nie znaleziono Tailscale! Proszę zainstalować.',
         install: 'Instaluj',
@@ -211,7 +215,9 @@ const pl = {
         deviceIP: 'Adres IP urządzenia',
         account: 'Konto',
         logout: 'Wyloguj',
-        logout2: 'Chcesz się wylogować?'
+        logout2: 'Chcesz się wylogować?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Sprawdź aktualizacje',

@@ -11,8 +11,6 @@ import (
 
 func (s *Service) Reset(c *gin.Context) {
 	var rsp proto.Response
-	s.hid.kbMutex.Lock()
-	defer s.hid.kbMutex.Unlock()
 
 	// reset USB
 	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
@@ -67,7 +65,6 @@ func (s *Service) Reset(c *gin.Context) {
 			rsp.ErrRsp(c, -1, "write to usb gadget file failed")
 			return
 		}
-
 	}
 
 	_ = f.Close()

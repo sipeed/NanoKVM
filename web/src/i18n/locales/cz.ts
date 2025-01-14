@@ -63,7 +63,8 @@ const cz = {
       qualityLow: 'Nízký',
       frameDetect: 'Detekce snímků',
       frameDetectTip:
-        'Vypočítá rozdíl mezi snímky. Přenos video streamu se zastaví, pokud nejsou detekovány změny na obrazovce vzdáleného hostitele.'
+        'Vypočítá rozdíl mezi snímky. Přenos video streamu se zastaví, pokud nejsou detekovány změny na obrazovce vzdáleného hostitele.',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       paste: 'Vložit',
@@ -189,15 +190,18 @@ const cz = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        memory: {
-          title: 'Memory optimization',
-          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory.',
-          disable: 'Disable'
-        }
+        networkDesc: 'Mount virtual network card on the remote host'
       },
       tailscale: {
         title: 'Tailscale',
+        memory: {
+          title: 'Memory optimization',
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          disable: 'Disable'
+        },
+        restart: 'Are you sure to restart Tailscale?',
+        stop: 'Are you sure to stop Tailscale?',
+        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
         loading: 'Načítání...',
         notInstall: 'Tailscale nebyl nalezen! Prosím nainstalujte.',
         install: 'Nainstalovat',
@@ -220,7 +224,9 @@ const cz = {
         deviceIP: 'IP zařízení',
         account: 'Účet',
         logout: 'Odhlásit se',
-        logout2: 'Opravdu se chcete odhlásit?'
+        logout2: 'Opravdu se chcete odhlásit?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       update: {
         title: 'Zkontrolovat aktualizaci',
