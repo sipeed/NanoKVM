@@ -143,6 +143,12 @@ const en = {
       powerShort: 'Power (short click)',
       powerLong: 'Power (long click)'
     },
+    download: {
+      download: 'Download Image',
+      input: 'Please enter a remote image URL',
+      ok: 'Ok',
+      disabled: '/data partition is RO, so we cannot download the image',
+    },
     settings: {
       title: 'Settings',
       about: {
