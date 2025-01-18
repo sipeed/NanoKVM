@@ -26,6 +26,8 @@ func NewService() *Service {
 }
 
 func (s *Service) ImageEnabled(c *gin.Context) {
+	var rsp proto.Response
+
 	// Check if /data mount is RO/RW
 	testFile := "/data/.testfile"
 	file, err := os.Create(testFile)
@@ -33,36 +35,62 @@ func (s *Service) ImageEnabled(c *gin.Context) {
 	defer os.Remove(testFile)
 	if err != nil {
 		if os.IsPermission(err) {
-			c.JSON(http.StatusOK, gin.H{"enabled": false})
+			rsp.OkRspWithData(c, &proto.ImageEnabledRsp{
+				Enabled: false,
+			})
+			return
 		}
-		c.JSON(http.StatusOK, gin.H{"enabled": false}) // Other error
+		rsp.OkRspWithData(c, &proto.ImageEnabledRsp{
+			Enabled: false,
+		})
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"enabled": true})
+	rsp.OkRspWithData(c, &proto.ImageEnabledRsp{
+		Enabled: true,
+	})
 }
 
 func (s *Service) StatusImage(c *gin.Context) {
+	var rsp proto.Response
+
 	// Check if the sentinel file exists
 	log.Debug("StatusImage")
 	if _, err := os.Stat(sentinelPath); err == nil {
 		content, err := os.ReadFile(sentinelPath)
 		if err != nil {
 			log.Error("Failed to read sentinel file")
-			c.JSON(http.StatusOK, gin.H{"status": "in_progress", "file": ""})
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "in_progress",
+				File:       "",
+				Percentage: "",
+			})
 			return
 		}
 		splitted := strings.Split(string(content), ";")
 		if len(splitted) == 1 {
 			// No percentage, just the URL
-			c.JSON(http.StatusOK, gin.H{"status": "in_progress", "file": splitted[0]})
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "in_progress",
+				File:       splitted[0],
+				Percentage: "",
+			})
 		} else {
 			// Percentage is available
-			c.JSON(http.StatusOK, gin.H{"status": "in_progress", "file": splitted[0], "percentage": splitted[1]})
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "in_progress",
+				File:       splitted[0],
+				Percentage: splitted[1],
+			})
 		}
 
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"status": "idle"})
+	rsp.OkRspWithData(c, &proto.StatusImageRsp{
+		Status:     "idle",
+		File:       "",
+		Percentage: "",
+	})
 }
 
 func (s *Service) DownloadImage(c *gin.Context) {
@@ -143,7 +171,11 @@ func (s *Service) DownloadImage(c *gin.Context) {
 		}
 		lw.stopTicker()
 	}()
-	c.JSON(http.StatusOK, gin.H{"status": "in_progress", "file": req.File})
+	rsp.OkRspWithData(c, &proto.StatusImageRsp{
+		Status:     "in_progress",
+		File:       req.File,
+		Percentage: "",
+	})
 }
 
 type loggingWriter struct {
