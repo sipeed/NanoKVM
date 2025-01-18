@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,7 +16,11 @@ import (
 const (
 	imageDirectory = "/data"
 	imageNone      = "/dev/mmcblk0p3"
+	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	removableFlag  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/removable"
+	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
+	roDisk         = "/boot/usb.disk0.ro"
 )
 
 func (s *Service) GetImages(c *gin.Context) {
@@ -59,6 +64,49 @@ func (s *Service) MountImage(c *gin.Context) {
 	image := req.File
 	if image == "" {
 		image = imageNone
+	}
+
+	imageRemovable := "1"
+
+	imageRo := "0"
+	isImageRo, _ := isFlagExist(roDisk)
+	if isImageRo {
+		imageRo = "1"
+	}
+
+	imageLow := strings.ToLower(image)
+	imageCdrom := "0"
+	if strings.HasSuffix(imageLow, ".iso") {
+		imageRo = "1"
+		imageCdrom = "1"
+	}
+
+	// unmount
+	if err := os.WriteFile(mountDevice, []byte("\n"), 0o666); err != nil {
+		log.Errorf("unmount file failed: %s", err)
+		rsp.ErrRsp(c, -2, "unmount image failed")
+		return
+	}
+
+	// removable flag
+	if err := os.WriteFile(removableFlag, []byte(imageRemovable), 0o666); err != nil {
+		log.Errorf("set removable flag failed: %s", err)
+		rsp.ErrRsp(c, -2, "set removable flag failed")
+		return
+	}
+
+	// ro flag
+	if err := os.WriteFile(roFlag, []byte(imageRo), 0o666); err != nil {
+		log.Errorf("set ro flag failed: %s", err)
+		rsp.ErrRsp(c, -2, "set ro flag failed")
+		return
+	}
+
+	// cdrom flag
+	if err := os.WriteFile(cdromFlag, []byte(imageCdrom), 0o666); err != nil {
+		log.Errorf("set cdrom flag failed: %s", err)
+		rsp.ErrRsp(c, -2, "set cdrom flag failed")
+		return
 	}
 
 	// mount
@@ -105,4 +153,19 @@ func (s *Service) GetMountedImage(c *gin.Context) {
 	}
 
 	rsp.OkRspWithData(c, data)
+}
+
+func isFlagExist(flag string) (bool, error) {
+	_, err := os.Stat(flag)
+
+	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+
+	log.Errorf("check file %s err: %s", flag, err)
+	return false, err
 }
