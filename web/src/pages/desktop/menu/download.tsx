@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, List, Popover } from 'antd';
+import { Button, Divider, Input, Popover } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -37,7 +37,7 @@ export const DownloadImage = () => {
         console.log(res.enabled);
         setDiskEnabled(res.enabled);
       })
-      .catch((err) => {
+      .catch(() => {
         setDiskEnabled(false);
       });
   }
@@ -98,12 +98,12 @@ export const DownloadImage = () => {
     setLog('Downloading: ' + url);
     // start the getDownloadStatus to tick every 5 seconds
 
-    downloadImage(url).then((rsp) => {
+    downloadImage(url).then(() => {
       getDownloadStatus();
       // Start the interval to check the download status
       if (!intervalId.current) {
         intervalId.current = setInterval(getDownloadStatus, 2500);}
-    }).catch((err) => {
+    }).catch(() => {
       clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
       setStatus('failed');
       setLog('Failed');
