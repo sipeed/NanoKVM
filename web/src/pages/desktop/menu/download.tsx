@@ -34,8 +34,8 @@ export const DownloadImage = () => {
   function checkDiskEnabled() {
     imageEnabled()
       .then((res) => {
-        console.log(res.enabled);
-        setDiskEnabled(res.enabled);
+        console.log(res.data.enabled);
+        setDiskEnabled(res.data.enabled);
       })
       .catch(() => {
         setDiskEnabled(false);
@@ -70,22 +70,22 @@ export const DownloadImage = () => {
 
   function getDownloadStatus() {
     statusImage().then((rsp) => {
-      if (rsp.status) {
-        setStatus(rsp.status);
-        if (rsp.status === 'in_progress') {
+      if (rsp.data.status) {
+        setStatus(rsp.data.status);
+        if (rsp.data.status === 'in_progress') {
           // Check if rsp has a percentage value
-          if (rsp.percentage) {
-            setLog('Downloading ('+ rsp.percentage + ')' + ': ' + rsp.file);
+          if (rsp.data.percentage) {
+            setLog('Downloading ('+ rsp.data.percentage + ')' + ': ' + rsp.data.file);
           } else {
-            setLog('Downloading' + ': ' + rsp.file);
+            setLog('Downloading' + ': ' + rsp.data.file);
           }
-          setInput(rsp.file);
+          setInput(rsp.data.file);
         };
-        if (rsp.status === 'failed') {
+        if (rsp.data.status === 'failed') {
           setLog('Failed');
           clearInterval(intervalId.current);
         };
-        if (rsp.status === 'idle') {
+        if (rsp.data.status === 'idle') {
         setLog(''); // Clear the log
         clearInterval(intervalId.current);
         };
