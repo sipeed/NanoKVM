@@ -24,7 +24,7 @@ export const DownloadImage = () => {
 
   const inputRef = useRef<InputRef>(null);
 
-  const intervalId = useRef<NodeJS.Timeout | null>(null);
+  const intervalId = useRef<NodeJS.Timeout | undefined>(undefined);
 
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export const DownloadImage = () => {
   }
   function handleOpenChange(open: boolean) {
     if (open) {
-      clearInterval(intervalId);
+      clearInterval(intervalId.current);
       checkDiskEnabled();
       getDownloadStatus();
       if (!intervalId.current) {
