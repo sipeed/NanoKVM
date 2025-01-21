@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, List, Popover } from 'antd';
+import { Button, Divider, Input, Popover } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -24,7 +24,7 @@ export const DownloadImage = () => {
 
   const inputRef = useRef<InputRef>(null);
 
-  const intervalId = useRef<NodeJS.Timeout | null>(null);
+  const intervalId = useRef<NodeJS.Timeout | undefined>(undefined);
 
 
   useEffect(() => {
@@ -34,16 +34,16 @@ export const DownloadImage = () => {
   function checkDiskEnabled() {
     imageEnabled()
       .then((res) => {
-        console.log(res.enabled);
-        setDiskEnabled(res.enabled);
+        console.log(res.data.enabled);
+        setDiskEnabled(res.data.enabled);
       })
-      .catch((err) => {
+      .catch(() => {
         setDiskEnabled(false);
       });
   }
   function handleOpenChange(open: boolean) {
     if (open) {
-      clearInterval(intervalId);
+      clearInterval(intervalId.current);
       checkDiskEnabled();
       getDownloadStatus();
       if (!intervalId.current) {
@@ -70,22 +70,22 @@ export const DownloadImage = () => {
 
   function getDownloadStatus() {
     statusImage().then((rsp) => {
-      if (rsp.status) {
-        setStatus(rsp.status);
-        if (rsp.status === 'in_progress') {
+      if (rsp.data.status) {
+        setStatus(rsp.data.status);
+        if (rsp.data.status === 'in_progress') {
           // Check if rsp has a percentage value
-          if (rsp.percentage) {
-            setLog('Downloading ('+ rsp.percentage + ')' + ': ' + rsp.file);
+          if (rsp.data.percentage) {
+            setLog('Downloading ('+ rsp.data.percentage + ')' + ': ' + rsp.data.file);
           } else {
-            setLog('Downloading' + ': ' + rsp.file);
+            setLog('Downloading' + ': ' + rsp.data.file);
           }
-          setInput(rsp.file);
+          setInput(rsp.data.file);
         };
-        if (rsp.status === 'failed') {
+        if (rsp.data.status === 'failed') {
           setLog('Failed');
           clearInterval(intervalId.current);
         };
-        if (rsp.status === 'idle') {
+        if (rsp.data.status === 'idle') {
         setLog(''); // Clear the log
         clearInterval(intervalId.current);
         };
@@ -98,12 +98,12 @@ export const DownloadImage = () => {
     setLog('Downloading: ' + url);
     // start the getDownloadStatus to tick every 5 seconds
 
-    downloadImage(url).then((rsp) => {
+    downloadImage(url).then(() => {
       getDownloadStatus();
       // Start the interval to check the download status
       if (!intervalId.current) {
         intervalId.current = setInterval(getDownloadStatus, 2500);}
-    }).catch((err) => {
+    }).catch(() => {
       clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
       setStatus('failed');
       setLog('Failed');
