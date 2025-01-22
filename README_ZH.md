@@ -3,7 +3,7 @@ NanoKVM
 
 <div align="center">
 
-![](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_3.jpg)
+![](https://wiki.sipeed.com/hardware/assets/NanoKVM/introduce/NanoKVM_3.png)
 
 <h3>
     <a href="https://wiki.sipeed.com/hardware/zh/lichee/RV_Nano/1_intro.html"> 快速开始 </a> |
