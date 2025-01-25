@@ -71,7 +71,8 @@ const nb = {
       tips: 'Kun vanlige tegn på tastatur er støttet',
       placeholder: 'Vennligst angi teksten du vil lime inn',
       submit: 'Lim inn',
-      virtual: 'Åpne tastatur'
+      virtual: 'Åpne tastatur',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Vanlig',

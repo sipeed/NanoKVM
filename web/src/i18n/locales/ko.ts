@@ -70,7 +70,8 @@ const ko = {
       tips: '표준 키보드 문자 및 기호만 지원됩니다',
       placeholder: '입력하세요',
       submit: '제출하다',
-      virtual: '키보드'
+      virtual: '키보드',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: '기본 커서',

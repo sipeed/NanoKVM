@@ -70,7 +70,8 @@ const da = {
       tips: 'Kun standard bogstaver og symboler er understøttet',
       placeholder: 'Indtast tekst',
       submit: 'Send',
-      virtual: 'Tastatur'
+      virtual: 'Tastatur',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Standard-markør',

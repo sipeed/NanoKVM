@@ -70,7 +70,8 @@ const id = {
       tips: 'Hanya huruf dan simbol keyboard standar yang didukung',
       placeholder: 'Silahkan isi',
       submit: 'Kirimkan',
-      virtual: 'Keyboard'
+      virtual: 'Keyboard',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Kursor bawaan',

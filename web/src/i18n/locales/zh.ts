@@ -67,7 +67,8 @@ const zh = {
       tips: '仅支持标准键盘的字母和符号',
       placeholder: '请输入内容',
       submit: '确定',
-      virtual: '虚拟键盘'
+      virtual: '虚拟键盘',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: '默认指针',
