@@ -47,6 +47,15 @@ authentication: enable
 # JWT secret key configuration
 # If left empty, a random key will be generated on each server start
 secretKey: ""
+
+# Address for custom STUN server
+stun: stun.l.google.com:19302
+
+# Address and authentication for custom TURN server
+turn:
+    turnAddr: turn.cloudflare.com:3478
+    turnUser: example_user
+    turnCred: example_cred
 ```
 
 
