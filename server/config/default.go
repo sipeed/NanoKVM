@@ -14,5 +14,11 @@ var defaultConfig = &Config{
 		Level: "info",
 		File:  "stdout",
 	},
+	Stun: "stun.l.google.com:19302",
+	Turn: Turn{
+		TurnAddr: "turn.cloudflare.com:3478",
+		TurnUser: "",
+		TurnCred: "",
+	},
 	Authentication: "enable",
 }
