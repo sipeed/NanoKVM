@@ -79,6 +79,28 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
 + [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
+## Roadmap
+
+### Q1 2025
+
+**Enhancements:**
+
+- [ ] Refactor the HDMI module and remove the libmaixcam_lib.so dependency
+- [ ] Disable SSH by default and add an enable/disable toggle in the web UI
+- [ ] Disable Tailscale by default and add an enable/disable toggle in the web UI
+- [ ] Add JWT configuration options to the configuration file
+
+**Distribution:**
+
+- [ ] Distribute applications via GitHub
+- [ ] Implement integrity checks for online updates
+- [ ] Support offline updates
+
+**Bug Fixes:**
+
+- [ ] Fix the DNS issue
+- [ ] Fix the CSRF vulnerability
+
 ## Where to buy
 
 * [Aliexpress(global except USA&Russia)](https://www.aliexpress.com/item/1005007369816019.html)
