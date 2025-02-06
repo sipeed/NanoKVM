@@ -45,6 +45,13 @@ authentication: enable
 # JWT 密钥
 # 如果不设置，则每次服务启动时使用随机生成的密钥。
 secretKey: ""
+
+stun: stun.l.google.com:19302
+
+turn:
+    turnAddr: turn.cloudflare.com:3478
+    turnUser: example_user
+    turnCred: example_cred
 ```
 
 ## 编译部署
