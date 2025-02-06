@@ -71,7 +71,8 @@ const ja = {
       tips: '標準的なキーボードの文字と記号のみがサポートされています',
       placeholder: '入力してください',
       submit: '送信',
-      virtual: 'キーボード'
+      virtual: 'キーボード',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'デフォルトカーソル',

@@ -70,6 +70,7 @@ const ko = {
       placeholder: '입력하세요',
       submit: '전송',
       virtual: '키보드'
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: '기본 커서',

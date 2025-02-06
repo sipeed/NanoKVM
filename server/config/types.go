@@ -7,6 +7,8 @@ type Config struct {
 	Logger         Logger `yaml:"logger"`
 	Authentication string `yaml:"authentication"`
 	SecretKey      string `yaml:"secretKey"`
+	Stun           string `yaml:"stun"`
+	Turn           Turn   `yaml:"turn"`
 
 	Hardware Hardware `yaml:"-"`
 }
@@ -24,6 +26,12 @@ type Port struct {
 type Cert struct {
 	Crt string `yaml:"crt"`
 	Key string `yaml:"key"`
+}
+
+type Turn struct {
+	TurnAddr string `yaml:"turnAddr"`
+	TurnUser string `yaml:"turnUser"`
+	TurnCred string `yaml:"turnCred"`
 }
 
 type Hardware struct {

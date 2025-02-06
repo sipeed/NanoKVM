@@ -1,6 +1,7 @@
 package h264
 
 import (
+	"NanoKVM-Server/config"
 	"net/http"
 	"sync"
 
@@ -34,18 +35,29 @@ func Connect(c *gin.Context) {
 		log.Debugf("h264 websocket disconnected")
 	}()
 
-	config := webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{
-			{
-				URLs: []string{
-					"stun:stun.l.google.com:19302",
-					"stun:turn.cloudflare.com:3478",
-				},
-			},
-		},
+	conf := config.GetInstance()
+
+	var iceServers []webrtc.ICEServer
+
+	if conf.Stun != "" {
+		iceServers = append(iceServers, webrtc.ICEServer{
+			URLs: []string{"stun:" + conf.Stun},
+		})
 	}
 
-	peerConn, err := webrtc.NewPeerConnection(config)
+	if conf.Turn.TurnAddr != "" && conf.Turn.TurnUser != "" && conf.Turn.TurnCred != "" {
+		iceServers = append(iceServers, webrtc.ICEServer{
+			URLs:       []string{"turn:" + conf.Turn.TurnAddr},
+			Username:   conf.Turn.TurnUser,
+			Credential: conf.Turn.TurnCred,
+		})
+	}
+
+	rtc_config := webrtc.Configuration{
+		ICEServers: iceServers,
+	}
+
+	peerConn, err := webrtc.NewPeerConnection(rtc_config)
 	if err != nil {
 		log.Errorf("failed to create PeerConnection: %s", err)
 		return

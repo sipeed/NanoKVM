@@ -18,11 +18,13 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 > Your NanoKVM Power by RISC-V !
 > If you have any issues or suggestions, creating issue here, or tell us with [MaixHub Discussion](https://maixhub.com/discussion/nanokvm).
 
-## Opensource & Contribution & Shipping
+## Opensource & Contribution 
 
-The star is coming to 2K! We will organize and opensource backend source code in Mid October！(and it is also the time all preoreders  (before 10.1) ship out)
+### Update 2025.02.05
+For users concerned about security, you can read this issue: https://github.com/sipeed/NanoKVM/issues/301 , you will find explanations addressing all security concerns.
+GitHub, as an open and transparent platform, provides a space for discussing so-called "backdoor" concerns. Open-source makes products more secure!
 
-### Update 10.18
+### Update 2024.10.18
 
 We have opensourced the backend code in 10.8, and thank you for Civil PR it immediately, we will give you newest NanoKVM-PCIe as a reward！   
 The mid-Oct batch is starting testing and packaging, most order before 10.1 will ship out next and next next week.   
@@ -76,6 +78,28 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 + [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
 + [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
+
+## Roadmap
+
+### Q1 2025
+
+**Enhancements:**
+
+- [ ] Refactor the HDMI module and remove the libmaixcam_lib.so dependency
+- [ ] Disable SSH by default and add an enable/disable toggle in the web UI
+- [ ] Disable Tailscale by default and add an enable/disable toggle in the web UI
+- [ ] Add JWT configuration options to the configuration file
+
+**Distribution:**
+
+- [ ] Distribute applications via GitHub
+- [ ] Implement integrity checks for online updates
+- [ ] Support offline updates
+
+**Bug Fixes:**
+
+- [ ] Fix the DNS issue
+- [ ] Fix the CSRF vulnerability
 
 ## Where to buy
 

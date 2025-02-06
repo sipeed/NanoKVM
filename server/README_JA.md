@@ -47,6 +47,13 @@ authentication: enable
 # JWT 秘密鍵の設定
 # 空のままにすると、サーバー起動時にランダムな鍵が生成されます
 secretKey: ""
+
+stun: stun.l.google.com:19302
+
+turn:
+    turnAddr: turn.cloudflare.com:3478
+    turnUser: example_user
+    turnCred: example_cred
 ```
 
 ## コンパイルとデプロイ

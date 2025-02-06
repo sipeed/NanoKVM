@@ -71,7 +71,8 @@ const de = {
       tips: 'Nur Standard-Tastaturbuchstaben und Symbole werden unterstützt.',
       placeholder: 'Bitte eingeben',
       submit: 'Senden',
-      virtual: 'Virtuelle Tastatur'
+      virtual: 'Virtuelle Tastatur',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Standard Cursor',

@@ -67,7 +67,8 @@ const zh_tw = {
       tips: '僅支援標準鍵盤字母和符號',
       placeholder: '請輸入內容',
       submit: '送出',
-      virtual: '虛擬鍵盤'
+      virtual: '虛擬鍵盤',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: '預設游標',
