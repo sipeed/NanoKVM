@@ -63,7 +63,8 @@ const pl = {
       tips: 'Tylko standardowe klawiaturowe znaki i symbole są obsługiwane.',
       placeholder: 'Proszę wprowadzić coś',
       submit: 'Prześlij',
-      virtual: 'Klawiatura'
+      virtual: 'Klawiatura',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Domyślny kursor',

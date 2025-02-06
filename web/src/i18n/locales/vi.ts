@@ -70,7 +70,8 @@ const vi = {
       tips: 'Chỉ hỗ trợ các chữ cái và ký hiệu bàn phím tiêu chuẩn',
       placeholder: 'Vui lòng nhập',
       submit: 'Gửi',
-      virtual: 'Bàn phím'
+      virtual: 'Bàn phím',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Con trỏ mặc định',

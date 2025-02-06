@@ -71,7 +71,8 @@ const cz = {
       tips: 'Podporovány jsou pouze standardní písmena a symboly klávesnice',
       placeholder: 'Zadejte text',
       submit: 'Odeslat',
-      virtual: 'Klávesnice'
+      virtual: 'Klávesnice',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Výchozí kurzor',

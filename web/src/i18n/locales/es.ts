@@ -71,7 +71,8 @@ const en = {
       tips: 'Solo están soportadas las letras y símbolos estándar del teclado',
       placeholder: 'Por favor, introduce el texto',
       submit: 'Enviar',
-      virtual: 'Teclado virtual'
+      virtual: 'Teclado virtual',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Cursor por defecto',

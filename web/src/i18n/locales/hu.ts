@@ -71,7 +71,8 @@ const hu = {
       tips: 'Csak a szabványos billentyűzet betűi és szimbólumai támogatottak',
       placeholder: 'Írja be',
       submit: 'Elküldés',
-      virtual: 'Billentyűzet'
+      virtual: 'Billentyűzet',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Alapértelmezett kurzor',

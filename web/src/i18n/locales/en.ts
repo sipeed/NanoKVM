@@ -69,7 +69,8 @@ const en = {
       tips: 'Only standard keyboard letters and symbols are supported',
       placeholder: 'Please input',
       submit: 'Submit',
-      virtual: 'Keyboard'
+      virtual: 'Keyboard',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Default cursor',

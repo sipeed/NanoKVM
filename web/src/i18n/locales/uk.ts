@@ -71,7 +71,8 @@ const uk = {
       tips: 'Підтримуються лише стандартні літери та символи клавіатури',
       placeholder: 'Будь ласка, введіть',
       submit: 'Надіслати',
-      virtual: 'Клавіатура'
+      virtual: 'Клавіатура',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Курсор за замовчуванням',

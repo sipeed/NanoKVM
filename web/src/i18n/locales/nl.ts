@@ -71,7 +71,8 @@ const nl = {
       tips: 'Alleen standaard toetsenbordletters en symbolen worden ondersteund',
       placeholder: 'Voer tekst in',
       submit: 'Verzenden',
-      virtual: 'Toetsenbord'
+      virtual: 'Toetsenbord',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Standaard cursor',

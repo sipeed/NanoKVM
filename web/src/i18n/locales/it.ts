@@ -71,7 +71,8 @@ const it = {
       tips: 'Sono supportati solo lettere e simboli standard della tastiera',
       placeholder: 'Inserisci testo',
       submit: 'Invia',
-      virtual: 'Tastiera'
+      virtual: 'Tastiera',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Cursore predefinito',

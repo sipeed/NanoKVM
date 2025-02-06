@@ -71,7 +71,8 @@ const fr = {
       tips: 'Seuls les caractères et symboles standard du clavier sont pris en charge',
       placeholder: 'Veuillez saisir',
       submit: 'Soumettre',
-      virtual: 'Clavier'
+      virtual: 'Clavier',
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Curseur par défaut',
