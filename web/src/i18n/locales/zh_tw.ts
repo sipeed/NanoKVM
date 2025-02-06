@@ -27,22 +27,22 @@ const zh_tw = {
       cancel: '取消',
       loginButtonText: '登入',
       tips: {
-        reset1: '长按 NanoKVM 上的 BOOT 按键 10 秒钟来重置帐号。',
-        reset2: '详细操作步骤可参考此文档：',
-        reset3: '网页默认帐号：',
-        reset4: 'SSH 默认帐号：',
-        change1: '请注意，此操作将同时更新以下密码：',
-        change2: '网页的登录密码',
-        change3: '系统 root 用户的密码（SSH 登录密码）',
-        change4: '如果您忘记了密码，需要长按 NanoKVM 上的 BOOT 按键来重置密码。'
+        reset1: '長按 NanoKVM 上的 BOOT 按鍵 10 秒鐘來重設帳號。',
+        reset2: '詳細操作方法可參閱本文件：',
+        reset3: '網頁預設帳號：',
+        reset4: 'SSH 預設帳號：',
+        change1: '請注意，此操作將同時更新下列密碼：',
+        change2: '網頁登入密碼',
+        change3: 'root user密碼 (SSH登入密碼)',
+        change4: '如果您忘記密碼，需要長按 NanoKVM 上的 BOOT 按鍵來重設密碼。'
       }
     },
     wifi: {
       title: 'Wi-Fi',
-      description: '配置 NanoKVM Wi-Fi 信息',
-      success: '请检查 NanoKVM 的网络状态，并访问新的 IP 地址。',
-      failed: '操作失败，请重试。',
-      confirmBtn: '确定',
+      description: '設定 NanoKVM WiFi',
+      success: '請檢查 NanoKVM 的網路狀態，並存取新的 IP 位址。',
+      failed: '操作失敗，請重試。',
+      confirmBtn: '確定',
       finishBtn: '完成'
     },
     screen: {
@@ -142,63 +142,63 @@ const zh_tw = {
       powerLong: '電源 (長按)'
     },
     settings: {
-      title: '设置',
+      title: '設定',
       about: {
         title: '關於 NanoKVM',
         information: '資訊',
         ip: 'IP',
         mdns: 'mDNS',
         application: '應用程式版本',
-        applicationTip: 'NanoKVM 网页应用版本',
+        applicationTip: 'NanoKVM 網頁程式版本',
         image: '映像版本',
         imageTip: 'NanoKVM 系统镜像版本',
         deviceKey: '設備序號',
         community: '社群'
       },
       appearance: {
-        title: '外观',
-        display: '显示',
-        language: '语言',
-        menuBar: '菜单栏',
-        menuBarDesc: '是否在菜单栏中显示图标'
+        title: '外觀',
+        display: '顯示',
+        language: '語言',
+        menuBar: '選單列',
+        menuBarDesc: '是否在選單列中顯示圖案'
       },
       device: {
-        title: '设备',
+        title: '設備',
         oled: {
           title: 'OLED',
-          description: '设置 OLED 屏幕自动休眠时间',
+          description: '設定 OLED 螢幕自動睡眠時間',
           0: '永不',
           15: '15秒',
           30: '30秒',
-          60: '1分钟',
-          180: '3分钟',
-          300: '5分钟',
-          600: '10分钟',
-          1800: '30分钟',
-          3600: '1小时'
+          60: '1分鐘',
+          180: '3分鐘',
+          300: '5分鐘',
+          600: '10分鐘',
+          1800: '30分鐘',
+          3600: '1小時'
         },
         wifi: {
           title: 'Wi-Fi',
-          description: '配置 Wi-Fi 信息',
-          setBtn: '设置'
+          description: '設定 Wi-Fi',
+          setBtn: '設定'
         },
-        disk: '虚拟U盘',
-        diskDesc: '在远程主机中挂载虚拟U盘',
-        network: '虚拟网卡',
-        networkDesc: '在远程主机中挂载虚拟网卡'
+        disk: '虛擬隨身碟',
+        diskDesc: '在遠端主機上連接虛擬隨身碟',
+        network: '虛擬網卡',
+        networkDesc: '在遠端主機上新增虛擬網卡'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: '内存优化',
-          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存。如果使用 Tailscale 推荐设置为 50MB，需重启 Tailscale 后生效。',
-          disable: '关闭'
+          title: '記憶體最佳化',
+          tip: '當記憶體使用量超過限制時，會更積極的進行垃圾回收來嘗試釋放記憶體。若使用 Tailscale 建議設定為 50MB，於重啟 Tailscale 後生效。',
+          disable: '關閉'
         },
-        restart: '取定要重启 Tailscale 吗？',
-        stop: '确定要停止 Tailscale 吗？',
-        stopDesc: '该操作会退出登录，并停止开机自动启动。',
+        restart: '確定要重啟 Tailscale 嗎？',
+        stop: '確定要停止 Tailscale 嗎？',
+        stopDesc: '此操作將會登出帳號，並停止開機自動啟動。',
         loading: '載入中...',
-        notInstall: 'Tailscale 未找到！請先安裝。',
+        notInstall: '未找到 Tailscale ！請先安裝。',
         install: '安裝',
         installing: '安裝中',
         failed: '安裝失敗',
@@ -206,8 +206,8 @@ const zh_tw = {
         download: '下載',
         package: '安裝包',
         unzip: '並解壓縮它',
-        upTailscale: '將 tailscale 上傳到 NanoKVM 目錄 /usr/bin/',
-        upTailscaled: '將 tailscale 上傳到 NanoKVM 目錄 /usr/sbin/',
+        upTailscale: '將 Tailscale 上傳到 NanoKVM 目錄 /usr/bin/',
+        upTailscaled: '將 Tailscale 上傳到 NanoKVM 目錄 /usr/sbin/',
         refresh: '重新整理頁面',
         notLogin: '設備尚未綁定。請登入並將該裝置綁定到您的帳戶。',
         urlPeriod: '此網址有效期限為 10 分鐘',
@@ -219,7 +219,7 @@ const zh_tw = {
         account: '帳號',
         logout: '登出',
         logout2: '確認登出?',
-        okBtn: '确认',
+        okBtn: '確認',
         cancelBtn: '取消'
       },
       update: {
@@ -233,11 +233,11 @@ const zh_tw = {
         cancel: '取消'
       },
       account: {
-        title: '帐号',
-        webAccount: '网页帐号',
-        password: '密码',
+        title: '帳號',
+        webAccount: '網頁帳號',
+        password: '密碼',
         updateBtn: '修改',
-        logoutBtn: '退出'
+        logoutBtn: '登出'
       }
     }
   }
