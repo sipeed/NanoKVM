@@ -1,5 +1,6 @@
 #include "config.h"
 #include "system_init.h"
+#include "system_state.h"
 
 using namespace maix;
 using namespace maix::sys;
@@ -186,7 +187,7 @@ void first_start(void)
 		}
 		uint8_t update_begin = 0;
 		while(1){
-			if(chack_net_state(ETH_ROUTE) && get_ip_addr(ETH_IP)){
+			if(kvm_sys_state.eth_state == NIC_STATE_UP){
 				OLED_Clear();
 				if(kvm_hw_ver != 2){
 					if(update_begin == 0){
@@ -216,7 +217,7 @@ void first_start(void)
 				}
 				while(1){
 					time::sleep_ms(1000);
-					if(chack_net_state(ETH_ROUTE) == 0) {
+					if(kvm_sys_state.eth_state == NIC_STATE_DOWN) {
 						OLED_Clear();
 						break;
 					}
