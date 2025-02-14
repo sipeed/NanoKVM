@@ -20,6 +20,9 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 
 ## Opensource & Contribution 
 
+### Update 2025.02.14
+Newest APP v2.1.6 add most security enhancements&bug fix, recommend regular users upgrade to this version or newer.
+
 ### Update 2025.02.05
 For users concerned about security, you can read this issue: https://github.com/sipeed/NanoKVM/issues/301 , you will find explanations addressing all security concerns.
 GitHub, as an open and transparent platform, provides a space for discussing so-called "backdoor" concerns. Open-source makes products more secure!
