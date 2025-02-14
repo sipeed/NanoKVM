@@ -45,7 +45,7 @@ The NanoKVM Full is a full version with a sophisticated case and complete access
 | --- | --- | --- | --- |
 | Compute Units   | LicheeRV Nano(RISCV) | LicheeRV Nano(RISCV) | CM4 (ARM) |
 | Resolution       | 1080P @ 60fps | 1080P @ 60fps | 1080P @ 60fps |
-| Video encoding  | MJPEG, H264(developing) | MJPEG, H264(developing) | MJPEG, H264 |
+| Video encoding  | MJPEG, H264 | MJPEG, H264 | MJPEG, H264 |
 | Video delay     | 90～230ms | 90～230ms | 100～230ms |
 | UEFI/BIOS               | ✓ | ✓ | ✓ |
 | Virtual HID | ✓ | ✓ | ✓ |
@@ -85,21 +85,28 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 
 **Enhancements:**
 
-- [ ] Refactor the HDMI module and remove the libmaixcam_lib.so dependency
-- [ ] Disable SSH by default and add an enable/disable toggle in the web UI
-- [ ] Disable Tailscale by default and add an enable/disable toggle in the web UI
-- [ ] Add JWT configuration options to the configuration file
+- [x] Refactor the HDMI module and remove the libmaixcam_lib.so dependency
+- [ ] Disable SSH by default ~~and add an enable/disable toggle in the web UI~~
+- [ ] Disable Tailscale by default ~~and add an enable/disable toggle in the web UI~~
+- [x] Add JWT configuration options to the configuration file
+- [x] Secure password storage with bcrypt
 
 **Distribution:**
 
-- [ ] Distribute applications via GitHub
-- [ ] Implement integrity checks for online updates
+- [x] Distribute applications via GitHub
+- [x] Implement integrity checks for online updates
 - [ ] Support offline updates
 
 **Bug Fixes:**
 
-- [ ] Fix the DNS issue
-- [ ] Fix the CSRF vulnerability
+- [x] Fix the DNS issue
+- [x] Fix the CSRF vulnerability
+
+**Features**
+
+- [ ] [79](https://github.com/sipeed/NanoKVM/issues/79) Support Zerotier
+- [ ] [99](https://github.com/sipeed/NanoKVM/issues/99) Support WireGuard
+- [ ] [249](https://github.com/sipeed/NanoKVM/issues/249) Add Mouse Jiggler
 
 ## Where to buy
 
@@ -107,11 +114,7 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 * [淘宝](https://item.taobao.com/item.htm?id=811206560480)
 * [Preorder (anyother country that not support in Aliexpress or Taobao)](https://sipeed.com/nanokvm)
 
-
 ## Community
 
 * [MaixHub Discussion](https://maixhub.com/discussion/nanokvm)
 * QQ group: 703230713
-
-
-

@@ -33,7 +33,7 @@ NanoKVM Full 为完整版配置，带精致外壳和完整配件，内置开机�
 | --- | --- | --- | --- |
 | 计算单元                | LicheeRV Nano(RISCV) | LicheeRV Nano(RISCV) | CM4 (ARM) |
 | 分辨率                  | 1080P @ 60fps | 1080P @ 60fps | 1080P @ 60fps |
-| 视频编码                | MJPEG, H264(developing) | MJPEG, H264(developing) | MJPEG, H264 |
+| 视频编码                | MJPEG, H264 | MJPEG, H264 | MJPEG, H264 |
 | 视频延迟                | 90～230ms | 90～230ms | 100～230ms |
 | UEFI/BIOS               | ✓ | ✓ | ✓ |
 | 模拟USB键鼠 | ✓ | ✓ | ✓ |
