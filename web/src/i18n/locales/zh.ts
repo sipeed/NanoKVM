@@ -134,6 +134,12 @@ const zh = {
       input: '请输入MAC地址',
       ok: '确定'
     },
+    download: {
+      title: '下载镜像',
+      input: '请输入镜像的下载地址',
+      ok: '确定',
+      disabled: '/data 是只读分区，无法下载镜像'
+    },
     power: {
       title: '电源',
       reset: '重启',
@@ -182,6 +188,10 @@ const zh = {
           description: '配置 Wi-Fi 信息',
           setBtn: '设置'
         },
+        ssh: {
+          description: '启用 SSH 远程访问',
+          tip: '启用前请务必设置强密码（帐号 - 修改密码）'
+        },
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
@@ -219,6 +229,7 @@ const zh = {
         account: '账号',
         logout: '退出',
         logout2: '确认退出？',
+        uninstall: '卸载 Tailscale',
         okBtn: '确认',
         cancelBtn: '取消'
       },

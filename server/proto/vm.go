@@ -79,3 +79,7 @@ type GetOLEDRsp struct {
 	Exist bool `json:"exist"`
 	Sleep int  `json:"sleep"`
 }
+
+type GetSSHStateRsp struct {
+	Enabled bool `json:"enabled"`
+}

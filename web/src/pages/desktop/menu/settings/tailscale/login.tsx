@@ -3,7 +3,7 @@ import { UserSwitchOutlined } from '@ant-design/icons';
 import { Button, Card } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/network.ts';
+import * as api from '@/api/extensions/tailscale.ts';
 
 type LoginProps = {
   onSuccess: () => void;
@@ -21,7 +21,7 @@ export const Login = ({ onSuccess }: LoginProps) => {
     setIsLoading(true);
 
     api
-      .loginTailscale()
+      .login()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);

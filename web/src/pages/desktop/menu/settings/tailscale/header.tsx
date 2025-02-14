@@ -1,46 +1,42 @@
-import { useEffect, useState } from 'react';
-import { Popconfirm } from 'antd';
-import { CircleStopIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Popconfirm, Popover } from 'antd';
+import { CircleStopIcon, EllipsisIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/network.ts';
+import * as api from '@/api/extensions/tailscale.ts';
 
-import { Status } from './types.ts';
+import { Memory } from './memory.tsx';
+import type { State } from './types.ts';
+import { Uninstall } from './uninstall.tsx';
 
 type HeaderProps = {
-  status: Status | undefined;
+  state: State | undefined;
   onSuccess: () => void;
 };
 
-export const Header = ({ status, onSuccess }: HeaderProps) => {
+type Loading = '' | 'restarting' | 'stopping';
+
+export const Header = ({ state, onSuccess }: HeaderProps) => {
   const { t } = useTranslation();
 
-  const [isRunning, setIsRunning] = useState(false);
-  const [isRestarting, setIsRestarting] = useState(false);
-  const [isStopping, setIsStopping] = useState(false);
-
-  useEffect(() => {
-    const running =
-      status !== undefined && ['notLogin', 'stopped', 'running'].includes(status.state);
-    setIsRunning(running);
-  }, [status]);
+  const [loading, setLoading] = useState<Loading>('');
 
   function restart() {
-    if (isRestarting || isStopping) return;
-    setIsRestarting(true);
+    if (loading !== '') return;
+    setLoading('restarting');
 
-    api.restartTailscale().finally(() => {
-      setIsRestarting(false);
+    api.restart().finally(() => {
+      setLoading('');
       onSuccess();
     });
   }
 
   function stop() {
-    if (isRestarting || isStopping) return;
-    setIsStopping(true);
+    if (loading !== '') return;
+    setLoading('stopping');
 
-    api.stopTailscale().finally(() => {
-      setIsStopping(false);
+    api.stop().finally(() => {
+      setLoading('');
       onSuccess();
     });
   }
@@ -48,44 +44,67 @@ export const Header = ({ status, onSuccess }: HeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <span className="text-base font-bold">{t('settings.tailscale.title')}</span>
-      {isRunning && (
-        <div className="flex items-center space-x-3">
-          <Popconfirm
-            title={t('settings.tailscale.restart')}
-            onConfirm={restart}
-            okText={t('settings.tailscale.okBtn')}
-            cancelText={t('settings.tailscale.cancelBtn')}
-            placement="bottom"
-            disabled={isRestarting || isStopping}
-          >
-            <div className="cursor-pointer text-green-500 hover:text-green-500/80">
-              {isRestarting ? (
-                <LoaderIcon className="animate-spin" size={20} />
-              ) : (
-                <RotateCwIcon size={20} />
-              )}
-            </div>
-          </Popconfirm>
 
-          <Popconfirm
-            title={t('settings.tailscale.stop')}
-            description={t('settings.tailscale.stopDesc')}
-            onConfirm={stop}
-            okText={t('settings.tailscale.okBtn')}
-            cancelText={t('settings.tailscale.cancelBtn')}
+      <div className="flex items-center space-x-2">
+        {state && ['notLogin', 'stopped', 'running'].includes(state) && (
+          <>
+            {/* restart button */}
+            <Popconfirm
+              title={t('settings.tailscale.restart')}
+              onConfirm={restart}
+              okText={t('settings.tailscale.okBtn')}
+              cancelText={t('settings.tailscale.cancelBtn')}
+              placement="bottom"
+              disabled={loading !== ''}
+            >
+              <div className="flex cursor-pointer rounded p-1 text-green-500 hover:bg-neutral-600 hover:text-green-500/80">
+                {loading === 'restarting' ? (
+                  <LoaderIcon className="animate-spin" size={18} />
+                ) : (
+                  <RotateCwIcon size={18} />
+                )}
+              </div>
+            </Popconfirm>
+
+            {/* stop button */}
+            <Popconfirm
+              title={t('settings.tailscale.stop')}
+              description={t('settings.tailscale.stopDesc')}
+              onConfirm={stop}
+              okText={t('settings.tailscale.okBtn')}
+              cancelText={t('settings.tailscale.cancelBtn')}
+              placement="bottom"
+              disabled={loading !== ''}
+            >
+              <div className="flex cursor-pointer rounded p-1 text-red-500 hover:bg-neutral-600 hover:text-red-500/80">
+                {loading === 'stopping' ? (
+                  <LoaderIcon className="animate-spin" size={18} />
+                ) : (
+                  <CircleStopIcon size={18} />
+                )}
+              </div>
+            </Popconfirm>
+          </>
+        )}
+
+        {/* more button */}
+        {state && state !== 'notInstall' && (
+          <Popover
+            content={
+              <div className="flex min-w-[250px] flex-col">
+                <Memory />
+                <Uninstall onSuccess={onSuccess} />
+              </div>
+            }
             placement="bottom"
-            disabled={isRestarting || isStopping}
+            trigger="click"
           >
-            <div className="cursor-pointer text-red-500 hover:text-red-500/80">
-              {isStopping ? (
-                <LoaderIcon className="animate-spin" size={20} />
-              ) : (
-                <CircleStopIcon size={20} />
-              )}
+            <div className="flex cursor-pointer rounded p-1 text-white hover:bg-neutral-600">
+              <EllipsisIcon size={18} />
             </div>
-          </Popconfirm>
-        </div>
-      )}
+          </Popover>
+        )}
+      </div>
     </div>
   );
 };

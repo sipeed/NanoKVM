@@ -139,7 +139,7 @@ func (k *KvmVision) ReadH264PPS() ([]byte, int) {
 	return data, result
 }
 
-func (k *KvmVision) EnableHdmi(enable bool) int {
+func (k *KvmVision) SetHDMI(enable bool) int {
 	hdmiEnable := C.uint8_t(0)
 	if enable {
 		hdmiEnable = C.uint8_t(1)

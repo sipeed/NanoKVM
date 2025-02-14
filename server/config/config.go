@@ -2,28 +2,24 @@ package config
 
 import (
 	"bytes"
-	"crypto/rand"
-	"encoding/base64"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	config Config
-	once   sync.Once
+	instance Config
+	once     sync.Once
 )
 
 func GetInstance() *Config {
 	once.Do(initialize)
 
-	return &config
+	return &instance
 }
 
 func initialize() {
@@ -43,19 +39,15 @@ func initialize() {
 		log.Fatalf("Failed to validate configuration!")
 	}
 
-	if err := viper.Unmarshal(&config); err != nil {
+	if err := viper.Unmarshal(&instance); err != nil {
 		log.Fatalf("Failed to parse configuration: %s", err)
 	}
 
-	if config.Authentication == "disable" {
+	checkDefaultValue()
+
+	if instance.Authentication == "disable" {
 		log.Println("NOTICE: Authentication is disabled! Please ensure your service is secure!")
 	}
-
-	if config.SecretKey == "" {
-		config.SecretKey = generateRandomString()
-	}
-
-	config.Hardware = getHardware()
 
 	log.Println("config loaded successfully")
 }
@@ -127,17 +119,4 @@ func validate() error {
 	create()
 
 	return readByDefault()
-}
-
-// Generate random string for secret key.
-func generateRandomString() string {
-	b := make([]byte, 64)
-	_, err := rand.Read(b)
-	if err != nil {
-		currentTime := time.Now().UnixNano()
-		timeString := fmt.Sprintf("%d", currentTime)
-		return fmt.Sprintf("%064s", timeString)
-	}
-
-	return base64.URLEncoding.EncodeToString(b)
 }

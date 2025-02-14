@@ -37,6 +37,7 @@ void kvmv_init(uint8_t _debug_info_en);
  * @param	_pp_kvm_data		@output: 	Encode data
  * @param	_p_kvmv_data_size	@output: 	Encode data size
  * @return
+        -4: Modifying image resolution, please wait
         -3: img buffer full
         -2: VENC Error
         -1: No images were acquired

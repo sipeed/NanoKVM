@@ -36,14 +36,7 @@ export const Login = () => {
       .login(username, password)
       .then((rsp: any) => {
         if (rsp.code !== 0) {
-          if (rsp.code === -3) {
-            setMsg(t('auth.noAccount'));
-          } else if (rsp.code === -4) {
-            setMsg(t('auth.invalidUser'));
-          } else {
-            setMsg(t('auth.error'));
-          }
-
+          setMsg(rsp.code === -2 ? t('auth.invalidUser') : t('auth.error'));
           return;
         }
 
@@ -63,13 +56,12 @@ export const Login = () => {
       <Head title={t('head.login')} />
 
       <div className="flex h-screen w-screen flex-col items-center justify-center">
-
         <Form
           style={{ minWidth: 300, maxWidth: 500 }}
           initialValues={{ remember: true }}
           onFinish={login}
         >
-          <h2 className="text-xl font-semibold text-neutral-100 text-center">{t('auth.login')}</h2>
+          <h2 className="text-center text-xl font-semibold text-neutral-100">{t('auth.login')}</h2>
 
           <Form.Item
             name="username"

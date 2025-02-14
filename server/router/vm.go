@@ -35,4 +35,8 @@ func vmRouter(r *gin.Engine) {
 	api.POST("/vm/oled", service.SetOLED) // set OLED configuration
 
 	api.POST("/vm/hdmi/reset", service.ResetHdmi) // reset hdmi (pcie only)
+
+	api.GET("/vm/ssh", service.GetSSHState)         // get SSH state
+	api.POST("/vm/ssh/enable", service.EnableSSH)   // enable SSH
+	api.POST("/vm/ssh/disable", service.DisableSSH) // disable SSH
 }

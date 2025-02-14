@@ -38,4 +38,5 @@ func server(r *gin.Engine) {
 	hidRouter(r)
 	wsRouter(r)
 	downloadRouter(r)
+	extensionsRouter(r)
 }

@@ -3,7 +3,7 @@ import { LogoutOutlined } from '@ant-design/icons';
 import { Button, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/network.ts';
+import * as api from '@/api/extensions/tailscale.ts';
 
 import { Status } from './types.ts';
 
@@ -30,7 +30,7 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
     setIsUpdating(true);
 
     try {
-      const rsp = isRunning ? await api.downTailscale() : await api.upTailscale();
+      const rsp = isRunning ? await api.down() : await api.up();
       if (rsp.code !== 0) {
         setErrMsg(rsp.msg);
         return;
@@ -47,7 +47,7 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
     setIsLogging(true);
 
     api
-      .logoutTailscale()
+      .logout()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);

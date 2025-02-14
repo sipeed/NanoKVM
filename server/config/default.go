@@ -14,6 +14,11 @@ var defaultConfig = &Config{
 		Level: "info",
 		File:  "stdout",
 	},
+	JWT: JWT{
+		SecretKey:            "",
+		RefreshTokenDuration: 2678400,
+		RevokeTokensOnLogout: true,
+	},
 	Stun: "stun.l.google.com:19302",
 	Turn: Turn{
 		TurnAddr: "turn.cloudflare.com:3478",
@@ -21,4 +26,25 @@ var defaultConfig = &Config{
 		TurnCred: "",
 	},
 	Authentication: "enable",
+}
+
+func checkDefaultValue() {
+	if instance.JWT.SecretKey == "" {
+		instance.JWT.SecretKey = generateRandomSecretKey()
+		instance.JWT.RevokeTokensOnLogout = true
+	}
+
+	if instance.JWT.RefreshTokenDuration == 0 {
+		instance.JWT.RefreshTokenDuration = 2678400
+	}
+
+	if instance.Stun == "" {
+		instance.Stun = "stun.l.google.com:19302"
+	}
+
+	if instance.Authentication == "" {
+		instance.Authentication = "enable"
+	}
+
+	instance.Hardware = getHardware()
 }

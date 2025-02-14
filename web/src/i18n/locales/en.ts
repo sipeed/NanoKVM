@@ -137,18 +137,18 @@ const en = {
       input: 'Please enter the MAC',
       ok: 'Ok'
     },
+    download: {
+      title: 'Download Image',
+      input: 'Please enter a remote image URL',
+      ok: 'Ok',
+      disabled: '/data partition is RO, so we cannot download the image'
+    },
     power: {
       title: 'Power',
       reset: 'Reset',
       power: 'Power',
       powerShort: 'Power (short click)',
       powerLong: 'Power (long click)'
-    },
-    download: {
-      download: 'Download Image',
-      input: 'Please enter a remote image URL',
-      ok: 'Ok',
-      disabled: '/data partition is RO, so we cannot download the image',
     },
     settings: {
       title: 'Settings',
@@ -191,6 +191,10 @@ const en = {
           description: 'Configure Wi-Fi',
           setBtn: 'Config'
         },
+        ssh: {
+          description: 'Enable SSH remote access',
+          tip: 'Set a strong password before enabling (Account - Change Password)'
+        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
@@ -205,7 +209,7 @@ const en = {
         },
         restart: 'Are you sure to restart Tailscale?',
         stop: 'Are you sure to stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        stopDesc: 'Log out Tailscale and disable automatic startup on boot.',
         loading: 'Loading...',
         notInstall: 'Tailscale not found! Please install.',
         install: 'Install',
@@ -229,6 +233,7 @@ const en = {
         account: 'Account',
         logout: 'Logout',
         logout2: 'Sure to logout?',
+        uninstall: 'Uninstall Tailscale',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
@@ -246,7 +251,7 @@ const en = {
         title: 'Account',
         webAccount: 'Web Account Name',
         password: 'Password',
-        updateBtn: 'Update',
+        updateBtn: 'Change',
         logoutBtn: 'Logout'
       }
     }

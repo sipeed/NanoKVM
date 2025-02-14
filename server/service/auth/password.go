@@ -10,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (s *Service) ChangePassword(c *gin.Context) {
@@ -21,23 +22,28 @@ func (s *Service) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	err := utils.SetAccount(req.Username, req.Password)
-	if err != nil {
-		rsp.ErrRsp(c, -2, "failed to save password")
+	password, err := utils.DecodeDecrypt(req.Password)
+	if err != nil || password == "" {
+		rsp.ErrRsp(c, -2, "invalid password")
 		return
 	}
 
-	account, err := utils.GetAccount()
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		rsp.ErrRsp(c, -3, "failed to get password")
+		rsp.ErrRsp(c, -3, "failed to hash password")
+		return
+	}
+
+	if err = SetAccount(req.Username, string(hashedPassword)); err != nil {
+		rsp.ErrRsp(c, -4, "failed to save password")
 		return
 	}
 
 	// change root password
-	err = changeRootPassword(account.Password)
+	err = changeRootPassword(password)
 	if err != nil {
-		_ = utils.DelAccount()
-		rsp.ErrRsp(c, -4, "failed to change password")
+		_ = DelAccount()
+		rsp.ErrRsp(c, -5, "failed to change password")
 		return
 	}
 
@@ -48,24 +54,24 @@ func (s *Service) ChangePassword(c *gin.Context) {
 func (s *Service) IsPasswordUpdated(c *gin.Context) {
 	var rsp proto.Response
 
-	isUpdated := false
-
-	if utils.IsAccountExist() {
-		account, err := utils.GetAccount()
-		if err != nil {
-			rsp.ErrRsp(c, -1, "failed to get password")
-			return
-		}
-
-		if account != nil && account.Password != "admin" {
-			isUpdated = true
-		}
+	if _, err := os.Stat(AccountFile); err != nil {
+		rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
+			IsUpdated: false,
+		})
+		return
 	}
 
+	account, err := GetAccount()
+	if err != nil || account == nil {
+		rsp.ErrRsp(c, -1, "failed to get password")
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte("admin"))
+
 	rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
-		IsUpdated: isUpdated,
+		IsUpdated: err == nil,
 	})
-	log.Debugf("is password updated: %t", isUpdated)
 }
 
 func changeRootPassword(password string) error {

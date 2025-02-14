@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { DownloadOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Button, Card, Result } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/network.ts';
+import * as api from '@/api/extensions/tailscale.ts';
 
 type InstallProps = {
   setIsLocked: (setIsLocked: boolean) => void;
@@ -21,7 +21,7 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
     setIsLocked(true);
 
     api
-      .installTailscale()
+      .install()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setState('failed');
@@ -40,7 +40,7 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
     <>
       {state !== 'failed' ? (
         <Result
-          icon={<InboxOutlined />}
+          icon={<DownloadOutlined />}
           subTitle={t('settings.tailscale.notInstall')}
           extra={
             <Button type="primary" size="large" loading={state === 'installing'} onClick={install}>

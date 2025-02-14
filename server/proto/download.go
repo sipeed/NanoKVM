@@ -1,7 +1,7 @@
 package proto
 
 type ImageEnabledRsp struct {
-	Enabled bool  `json:"enabled"`
+	Enabled bool `json:"enabled"`
 }
 
 type StatusImageRsp struct {

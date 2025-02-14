@@ -1,6 +1,13 @@
 import { Switch } from 'antd';
 import { useAtom } from 'jotai';
-import { DiscIcon, FileJsonIcon, NetworkIcon, PowerIcon, TerminalSquareIcon } from 'lucide-react';
+import {
+  DiscIcon,
+  DownloadIcon,
+  FileJsonIcon,
+  NetworkIcon,
+  PowerIcon,
+  TerminalSquareIcon
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as ls from '@/lib/localstorage.ts';
@@ -13,6 +20,7 @@ export const MenuBar = () => {
 
   const items = [
     { key: 'image', icon: <DiscIcon size={16} /> },
+    { key: 'download', icon: <DownloadIcon size={16} /> },
     { key: 'script', icon: <FileJsonIcon size={15} /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
     { key: 'wol', icon: <NetworkIcon size={16} /> },

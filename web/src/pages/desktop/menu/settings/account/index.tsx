@@ -25,9 +25,16 @@ export const Account = () => {
     navigate('/auth/password');
   }
 
-  function logout() {
-    removeToken();
-    navigate('/auth/login');
+  async function logout() {
+    api.logout().then((rsp) => {
+      if (rsp.code !== 0) {
+        console.log(rsp.msg);
+        return;
+      }
+
+      removeToken();
+      navigate('/auth/login');
+    });
   }
 
   return (
