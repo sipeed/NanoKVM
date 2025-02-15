@@ -134,6 +134,12 @@ const zh_tw = {
       input: '請輸入 MAC 位址',
       ok: '確定'
     },
+    download: {
+      title: '下载映像',
+      input: '請輸入映像檔的下載URL',
+      ok: '確定',
+      disabled: '/data 為唯讀目錄，無法下載映像檔'
+    },
     power: {
       title: '電源',
       reset: '重新啟動',
@@ -182,6 +188,10 @@ const zh_tw = {
           description: '設定 Wi-Fi',
           setBtn: '設定'
         },
+        ssh: {
+          description: '啟用SSH',
+          tip: '啟用前請務必設定強密碼（帳號 - 更改密碼）'
+        },
         disk: '虛擬隨身碟',
         diskDesc: '在遠端主機上連接虛擬隨身碟',
         network: '虛擬網卡',
@@ -219,6 +229,7 @@ const zh_tw = {
         account: '帳號',
         logout: '登出',
         logout2: '確認登出?',
+        uninstall: '移除 Tailscale',
         okBtn: '確認',
         cancelBtn: '取消'
       },
