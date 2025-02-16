@@ -71,7 +71,7 @@ func CompareAccount(username string, password string) bool {
 		return false
 	}
 
-	if username != account.Username {
+	if strings.ToLower(username) != strings.ToLower(account.Username) {
 		return false
 	}
 
