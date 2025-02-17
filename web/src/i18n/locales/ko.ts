@@ -14,7 +14,8 @@ const ko = {
       placeholderPassword2: '비밀번호를 다시 입력하세요.',
       noEmptyUsername: '사용자 이름은 비어있을 수 없습니다.',
       noEmptyPassword: '비밀번호는 비어있을 수 없습니다.',
-      noAccount: '사용자 정보를 불러오는 데 실패했습니다. 페이지를 새로고침하거나 비밀번호를 초기화하세요.',
+      noAccount:
+        '사용자 정보를 불러오는 데 실패했습니다. 페이지를 새로고침하거나 비밀번호를 초기화하세요.',
       invalidUser: '사용자 이름이나 비밀번호가 틀렸습니다.',
       error: '알 수 없는 오류',
       changePassword: '비밀번호 변경',
@@ -27,8 +28,7 @@ const ko = {
       cancel: '취소',
       loginButtonText: '로그인',
       tips: {
-        reset1:
-          '비밀번호를 재설정하려면 NanoKVM의 BOOT 버튼을 10초 동안 누르고 계세요.',
+        reset1: '비밀번호를 재설정하려면 NanoKVM의 BOOT 버튼을 10초 동안 누르고 계세요.',
         reset2: '자세한 절차는 이 문서를 참조하세요:',
         reset3: '웹 기본 계정:',
         reset4: 'SSH 기본 계정:',
@@ -222,8 +222,7 @@ const ko = {
         upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
         upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
         refresh: '현재 페이지 새로고침',
-        notLogin:
-          '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+        notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
         urlPeriod: '이 주소는 10분간 유효합니다.',
         login: '로그인',
         loginSuccess: '로그인 성공',
@@ -233,7 +232,7 @@ const ko = {
         account: '계정',
         logout: '로그아웃',
         logout2: '정말로 로그아웃 합니까?',
-        uninstall: 'Tailscale 제거'
+        uninstall: 'Tailscale 제거',
         okBtn: '예',
         cancelBtn: '아니오'
       },

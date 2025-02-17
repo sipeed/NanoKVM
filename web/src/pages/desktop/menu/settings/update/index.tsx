@@ -68,7 +68,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
           setErrMsg('');
 
           window.location.reload();
-        }, 6000);
+        }, 10000);
       });
   }
 
