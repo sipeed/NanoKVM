@@ -2,9 +2,8 @@
 #define SYSTEM_INIT_H_
 #include "config.h"
 
-void new_app_init(uint8_t safe_update);
-void update_resolv_conf(void);
 void init_upadte(void);
-void first_start(void);
+void new_img_init(void);
+void new_app_init(void);
 
 #endif // SYSTEM_INIT_H_
