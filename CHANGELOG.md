@@ -1,3 +1,15 @@
+## 2.2.0 [0dbf8c0](https://github.com/sipeed/NanoKVM/commit/0dbf8c007f2d0183d0f0601c3da6d3c3fccd8b31) (2025-02-17)
+
+NanoKVM [Image v1.4.0](https://github.com/sipeed/NanoKVM/releases/tag/v1.4.0) has been released!
+
+> Please refer to the [wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/system/introduction.html) for more details about the image and application.
+
+* fix: improve password update notification logic (thanks to [@li20034](https://github.com/li20034))
+* perf: increase update wait time to 10s (from 6s)
+* perf: update Korean translation (thanks to [@forumi0721](https://github.com/forumi0721))
+* perf: update Traditional Chinese translation (thanks to [@protonchang](https://github.com/protonchang))
+* refactor: update `libkvm.so` and `libkvm_mmf.so` libraries
+
 ## 2.1.6 [6eb4a4e](https://github.com/sipeed/NanoKVM/commit/6eb4a4ea6254f465a47f9881d13934c686649061) (2025-02-14)
 
 * feat: support downloading image from online URL (thanks to [@Itxaka](https://github.com/Itxaka))

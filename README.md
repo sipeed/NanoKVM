@@ -89,8 +89,8 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 **Enhancements:**
 
 - [x] Refactor the HDMI module and remove the libmaixcam_lib.so dependency
-- [ ] Disable SSH by default ~~and add an enable/disable toggle in the web UI~~
-- [ ] Disable Tailscale by default ~~and add an enable/disable toggle in the web UI~~
+- [x] Disable SSH by default and add an enable/disable toggle in the web UI
+- [x] Disable Tailscale by default and add an enable/disable toggle in the web UI
 - [x] Add JWT configuration options to the configuration file
 - [x] Secure password storage with bcrypt
 
