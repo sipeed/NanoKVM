@@ -112,7 +112,7 @@ func (s *Service) RunScript(c *gin.Context) {
 	}
 
 	if err != nil {
-		log.Errorf("run script %s faile: %s", req.Name, err)
+		log.Errorf("run script %s failed: %s", req.Name, err.Error())
 		rsp.ErrRsp(c, -2, "run script failed")
 		return
 	}
