@@ -15,7 +15,7 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 
 </div>
 
-> Your NanoKVM Power by RISC-V !
+> Your NanoKVM is powered by [RISC-V](https://en.wikipedia.org/wiki/RISC-V)!
 > If you have any issues or suggestions, creating issue here, or tell us with [MaixHub Discussion](https://maixhub.com/discussion/nanokvm).
 
 ## Opensource & Contribution 
@@ -29,8 +29,8 @@ GitHub, as an open and transparent platform, provides a space for discussing so-
 
 ### Update 2024.10.18
 
-We have opensourced the backend code in 10.8, and thank you for Civil PR it immediately, we will give you newest NanoKVM-PCIe as a reward！   
-The mid-Oct batch is starting testing and packaging, most order before 10.1 will ship out next and next next week.   
+We have open-sourced the backend code in 10.8, and thank you for civil PR it immediately, we will give you newest NanoKVM-PCIe as a reward！   
+The mid-Oct batch is starting testing and packaging, most orders before 10.1 will ship out next and next next week.   
 The aliexpress shipping date is change to Dec since 10.1, it is a conservative delivery time. the order in Oct. should send out during 11.15~12.15.   
 
 ## Introduction
@@ -40,33 +40,33 @@ The Lichee NanoKVM is available in two versions:
 NanoKVM Lite is a basic configuration that is suitable for individual users with certain DIY capabilities and enterprise users with bulk requirements.
 The NanoKVM Full is a full version with a sophisticated case and complete accessories, as well as a built-in system mirror card that is ready to use at boot, and is recommended for individual users.
 
-![](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+![NanoKVM Disassembled](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
 
 ## Tech Specs
 
-| Products | NanoKVM (Lite) | NanoKVM (Full) | PiKVM V4 |
-| --- | --- | --- | --- |
-| Compute Units   | LicheeRV Nano(RISCV) | LicheeRV Nano(RISCV) | CM4 (ARM) |
-| Resolution       | 1080P @ 60fps | 1080P @ 60fps | 1080P @ 60fps |
-| Video encoding  | MJPEG, H264 | MJPEG, H264 | MJPEG, H264 |
-| Video delay     | 90～230ms | 90～230ms | 100～230ms |
-| UEFI/BIOS               | ✓ | ✓ | ✓ |
-| Virtual HID | ✓ | ✓ | ✓ |
-| Virtual CD-ROM | ✓ | ✓ | ✓ |
-| IPMI      | ✓ | ✓ | ✓ |
-| Wake-on-LAN | ✓ | ✓ | ✓ |
-| ETH | 100M/10M | 100M/10M | 1000M/100M/10M |
-| ATX power control | None，Users can connect by their own | USB interface IO control board | RJ-45 interface IO control board |
-| OLED | None，Users can connect by their own | 128x64 0.96" white | 128x32 0.91" white |
-| UART | 2 | 2 | 1 |
-| TF Card | None | ✓ | ✓ |
-| Expansion | None | PoE | WiFi/LTE |
-| Power consumption | 0.2A@5V | 0.2A@5V | Peak 2.6A@5V |
-| Power input | PC USB can be powered | PC USB or auxiliary power supply | DC 5V 3A power supply is required |
-| Cooling | Silent fanless | Silent fanless | Fan cooling |
-| Size | 23x37x15mm <br> ～1/30 PiKVM V4 size | 40x36x36mm <br/> ～1/7 PiKVM V4 size | 120x68x44mm |
+| Products          	| NanoKVM (Lite)                       	| NanoKVM (Full)                   	| PiKVM V4                          	|
+|-------------------	|--------------------------------------	|----------------------------------	|-----------------------------------	|
+| Compute Units     	| LicheeRV Nano(RISCV)                 	| LicheeRV Nano(RISCV)             	| CM4 (ARM)                         	|
+| Resolution        	| 1080P @ 60fps                        	| 1080P @ 60fps                    	| 1080P @ 60fps                     	|
+| Video encoding    	| MJPEG, H264                          	| MJPEG, H264                      	| MJPEG, H264                       	|
+| Video delay       	| 90～230ms                            	| 90～230ms                        	| 100～230ms                        	|
+| UEFI/BIOS         	| ✓                                    	| ✓                                	| ✓                                 	|
+| Virtual HID       	| ✓                                    	| ✓                                	| ✓                                 	|
+| Virtual CD-ROM    	| ✓                                    	| ✓                                	| ✓                                 	|
+| IPMI              	| ✓                                    	| ✓                                	| ✓                                 	|
+| Wake-on-LAN       	| ✓                                    	| ✓                                	| ✓                                 	|
+| ETH               	| 100M/10M                             	| 100M/10M                         	| 1000M/100M/10M                    	|
+| ATX power control 	| None，Users can connect by their own 	| USB interface IO control board   	| RJ-45 interface IO control board  	|
+| OLED              	| None，Users can connect by their own 	| 128x64 0.96" white               	| 128x32 0.91" white                	|
+| UART              	| 2                                    	| 2                                	| 1                                 	|
+| TF Card           	| None                                 	| ✓                                	| ✓                                 	|
+| Expansion         	| None                                 	| PoE                              	| WiFi/LTE                          	|
+| Power consumption 	| 0.2A@5V                              	| 0.2A@5V                          	| Peak 2.6A@5V                      	|
+| Power input       	| PC USB can be powered                	| PC USB or auxiliary power supply 	| DC 5V 3A power supply is required 	|
+| Cooling           	| Silent fanless                       	| Silent fanless                   	| Fan cooling                       	|
+| Size              	| 23x37x15mm   ～1/30 PiKVM V4 size    	| 40x36x36mm   ～1/7 PiKVM V4 size 	| 120x68x44mm                       	|
 
-![](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_2.jpg)
+![NanoKVM PCB Pinout](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_2.jpg)
 
 ## Hardware platform NanoKVM
 
@@ -76,7 +76,7 @@ The NanoKVM Lite is constructed by the LicheeRV Nano and HDMItoCSI board, and th
 
 The NanoKVM image is built on LicheeRV Nano SDK and MaixCDK, and is compatible with materials that use the LicheeRV Nano, opposite the KVM software cannot be used with the LicheeRV Nano or other SG2002 products. If you would like to build an HDMI input application on LicheeRV Nano or MaixCam, please contact us for technical support.
 
-Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the multimedia subsystem, which NanoKVM will use for video image acquisition and processing
+Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the multimedia subsystem, which NanoKVM will use for video image acquisition and processing.
 
 + [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 + [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
