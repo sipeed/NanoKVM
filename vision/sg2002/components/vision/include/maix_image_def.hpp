@@ -171,7 +171,7 @@ namespace maix::image
           * @param index 0 for width, 1 for height
           * @return int& width or height
           * @maixpy maix.image.Size.__getitem__
-          * @maixcdk maix.image.Size.[]
+          * @maixcdk maix.image.Size.operator[]
           */
         int &operator[](int index)
         {
