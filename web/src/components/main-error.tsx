@@ -1,4 +1,5 @@
 import { Button } from 'antd';
+import { t } from 'i18next';
 
 export const MainError = () => {
   return (
@@ -7,10 +8,10 @@ export const MainError = () => {
       role="alert"
     >
       <h2 className="text-lg font-semibold text-red-500">
-        Sorry, there seems to be some problems :(
+        {t('error.title')}
       </h2>
       <Button type="primary" danger onClick={() => window.location.assign(window.location.origin)}>
-        Refresh
+        {t('error.refresh')}
       </Button>
     </div>
   );
