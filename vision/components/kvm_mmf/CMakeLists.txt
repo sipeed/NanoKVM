@@ -42,66 +42,27 @@ else()
 endif()
 if(CONFIG_SOPHGO_MIDDLEWARE_C_LIBRARY STREQUAL "musl")
     if(${middleware_version_str} VERSION_EQUAL "0.0.4")
-        set(middleware_dynamic_lib_file     ${mmf_lib_dir}/libcvi_ive.so
-                                            ${mmf_lib_dir}/libcvi_bin.so
-                                            ${mmf_lib_dir}/libaaccomm2.so
-                                            ${mmf_lib_dir}/libaacdec2.so
-                                            ${mmf_lib_dir}/libaacenc2.so
-                                            ${mmf_lib_dir}/libaacsbrdec2.so
-                                            ${mmf_lib_dir}/libaacsbrenc2.so
+        set(middleware_dynamic_lib_file     ${mmf_lib_dir}/libcvi_bin.so
                                             ${mmf_lib_dir}/libae.so
                                             ${mmf_lib_dir}/libaf.so
                                             ${mmf_lib_dir}/libawb.so
-                                            ${mmf_lib_dir}/libcvi_audio.so
                                             ${mmf_lib_dir}/libcvi_bin_isp.so
-                                            ${mmf_lib_dir}/libcvi_bin.so
-                                            ${mmf_lib_dir}/libcvi_ispd2.so
-                                            ${mmf_lib_dir}/libcvi_RES1.so
-                                            ${mmf_lib_dir}/libcvi_ssp.so
-                                            ${mmf_lib_dir}/libcvi_VoiceEngine.so
-                                            ${mmf_lib_dir}/libcvi_vqe.so
-                                            ${mmf_lib_dir}/libdnvqe.so
                                             ${mmf_lib_dir}/libisp_algo.so
                                             ${mmf_lib_dir}/libisp.so
-                                            ${mmf_lib_dir}/libmipi_tx.so
-                                            ${mmf_lib_dir}/libmisc.so
-                                            ${mmf_lib_dir}/libosdc.so
-                                            ${mmf_lib_dir}/libraw_dump.so
                                             ${mmf_lib_dir}/libsys.so
                                             ${mmf_lib_dir}/libvdec.so
                                             ${mmf_lib_dir}/libvenc.so
                                             ${mmf_lib_dir}/libvpu.so
-                                            ${mmf_lib_dir}/libjson-c.so.5
-                                            ${mmf_lib_dir}/libtinyalsa.so
-                                            ${mmf_lib_dir}/3rd/libcli.so
                                             ${mmf_lib_dir}/3rd/libini.so)
     else()
-        set(middleware_dynamic_lib_file     ${mmf_lib_dir}/libcvi_ive.so
-                                            ${mmf_lib_dir}/libcvi_bin.so
-                                            ${mmf_lib_dir}/libaaccomm2.so
-                                            ${mmf_lib_dir}/libaacdec2.so
-                                            ${mmf_lib_dir}/libaacenc2.so
-                                            ${mmf_lib_dir}/libaacsbrdec2.so
-                                            ${mmf_lib_dir}/libaacsbrenc2.so
+        set(middleware_dynamic_lib_file     ${mmf_lib_dir}/libcvi_bin.so
                                             ${mmf_lib_dir}/libae.so
                                             ${mmf_lib_dir}/libaf.so
                                             ${mmf_lib_dir}/libawb.so
                                             ${mmf_lib_dir}/libcipher.so
-                                            ${mmf_lib_dir}/libcvi_audio.so
                                             ${mmf_lib_dir}/libcvi_bin_isp.so
-                                            ${mmf_lib_dir}/libcvi_bin.so
-                                            ${mmf_lib_dir}/libcvi_ispd2.so
-                                            ${mmf_lib_dir}/libcvi_RES1.so
-                                            ${mmf_lib_dir}/libcvi_ssp.so
-                                            ${mmf_lib_dir}/libcvi_VoiceEngine.so
-                                            ${mmf_lib_dir}/libcvi_vqe.so
-                                            ${mmf_lib_dir}/libdnvqe.so
                                             ${mmf_lib_dir}/libisp_algo.so
                                             ${mmf_lib_dir}/libisp.so
-                                            ${mmf_lib_dir}/libmipi_tx.so
-                                            ${mmf_lib_dir}/libmisc.so
-                                            ${mmf_lib_dir}/libosdc.so
-                                            ${mmf_lib_dir}/libraw_dump.so
                                             # ${mmf_lib_dir}/libraw_replay.so
                                             # ${mmf_lib_dir}/libsns_full.so
                                             # ${mmf_lib_dir}/libsns_gc4653.so
@@ -110,10 +71,7 @@ if(CONFIG_SOPHGO_MIDDLEWARE_C_LIBRARY STREQUAL "musl")
                                             ${mmf_lib_dir}/libvenc.so
                                             ${mmf_lib_dir}/libvpu.so
                                             ${mmf_lib_dir}/libz.so
-                                            ${mmf_lib_dir}/libtinyalsa.so
-                                            ${mmf_lib_dir}/3rd/libcli.so
-                                            ${mmf_lib_dir}/3rd/libini.so
-                                            ${mmf_lib_dir}/3rd/libjson-c.so.5)
+                                            ${mmf_lib_dir}/3rd/libini.so)
     endif()
 elseif(CONFIG_SOPHGO_MIDDLEWARE_C_LIBRARY STREQUAL "glibc")
     set(middleware_dynamic_lib_file     ${mmf_lib_dir}/libcvi_vb.so
