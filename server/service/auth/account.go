@@ -15,7 +15,7 @@ const AccountFile = "/etc/kvm/pwd"
 
 type Account struct {
 	Username string `json:"username"`
-	Password string `json:"password"`
+	Password string `json:"password"`	// should be named HashedPassword for clarity
 }
 
 func GetAccount() (*Account, error) {
@@ -40,10 +40,10 @@ func GetAccount() (*Account, error) {
 	return &account, nil
 }
 
-func SetAccount(username string, password string) error {
+func SetAccount(username string, hashedPassword string) error {
 	account, err := json.Marshal(&Account{
 		Username: username,
-		Password: password,
+		Password: hashedPassword,
 	})
 	if err != nil {
 		log.Errorf("failed to marshal account information to json: %s", err)
@@ -65,7 +65,7 @@ func SetAccount(username string, password string) error {
 	return nil
 }
 
-func CompareAccount(username string, password string) bool {
+func CompareAccount(username string, plainPassword string) bool {
 	account, err := GetAccount()
 	if err != nil {
 		return false
@@ -75,16 +75,16 @@ func CompareAccount(username string, password string) bool {
 		return false
 	}
 
-	decryptedPassword, err := utils.DecodeDecrypt(password)
-	if err != nil || decryptedPassword == "" {
+	hashedPassword, err := utils.DecodeDecrypt(plainPassword)
+	if err != nil || hashedPassword == "" {
 		return false
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(decryptedPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte(hashedPassword))
 	if err != nil {
 		// Compatible with old versions
-		accountDecryptedPassword, _ := utils.DecodeDecrypt(account.Password)
-		if accountDecryptedPassword == decryptedPassword {
+		accountHashedPassword, _ := utils.DecodeDecrypt(account.Password)
+		if accountHashedPassword == hashedPassword {
 			return true
 		}
 
@@ -104,10 +104,10 @@ func DelAccount() error {
 }
 
 func getDefaultAccount() *Account {
-	password, _ := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
 
 	return &Account{
 		Username: "admin",
-		Password: string(password),
+		Password: string(hashedPassword),
 	}
 }

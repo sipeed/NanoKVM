@@ -3,6 +3,7 @@ package auth
 import (
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/utils"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -70,7 +71,9 @@ func (s *Service) IsPasswordUpdated(c *gin.Context) {
 	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte("admin"))
 
 	rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
-		IsUpdated: err == nil,
+		// If the hash is not valid, still assume it's not updated
+		// The error we want to see is password and hash not matching
+		IsUpdated: errors.Is(err, bcrypt.ErrMismatchedHashAndPassword),
 	})
 }
 

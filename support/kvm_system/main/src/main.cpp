@@ -186,9 +186,17 @@ int main(int argc, char* argv[])
 	pthread_t display_thread;
 	pthread_t key_thread;
 
-	// first_start();
+	// Execute only when it's a new image
+	if(access("/kvmapp/kvm_new_img", F_OK) == 0){
+		new_img_init();
+	}
 
-	init_upadte();
+	// Execute only when it's a new app
+	if(access("/kvmapp/kvm_new_app", F_OK) == 0){
+		new_app_init();
+	}
+
+	system("sync");
 
 	OLED_state = oled_exist();
 	if(OLED_state){

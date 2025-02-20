@@ -137,18 +137,18 @@ const ko = {
       input: 'MAC주소를 입력하세요.',
       ok: '확인'
     },
+    download: {
+      title: '이미지 다운로드',
+      input: '원격 이미지 URL을 입력하세요.',
+      ok: '확인',
+      disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.'
+    },
     power: {
       title: '전원',
       reset: '리셋',
       power: '전원',
       powerShort: '전원 (짧게 누르기)',
       powerLong: '전원 (길게 누르기)'
-    },
-    download: {
-      download: '이미지 다운로드',
-      input: '원격 이미지 URL을 입력하세요.',
-      ok: '확인',
-      disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.'
     },
     settings: {
       title: '설정',
@@ -191,6 +191,10 @@ const ko = {
           description: 'Wi-Fi 설정',
           setBtn: '설정'
         },
+        ssh: {
+          description: 'SSH 원격 접속 활성화',
+          tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
+        },
         disk: '가상 디스크',
         diskDesc: '원격 호스트에서 가상 U-디스크를 마운트합니다.',
         network: '가상 네트워크',
@@ -228,6 +232,7 @@ const ko = {
         account: '계정',
         logout: '로그아웃',
         logout2: '정말로 로그아웃 합니까?',
+        uninstall: 'Tailscale 제거',
         okBtn: '예',
         cancelBtn: '아니오'
       },
