@@ -30,23 +30,23 @@ const fr = {
       loginButtonText: 'Connexion',
       tips: {
         reset1:
-          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
-        reset2: 'For detailed steps, please consult this document:',
-        reset3: 'Web default account:',
-        reset4: 'SSH default account:',
-        change1: 'Please note that this action will change the following passwords:',
-        change2: 'Web login password',
-        change3: 'System root password (SSH login password)',
-        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+          'Pour réinitialiser les mots de passe, appuyez et maintenez enfoncé le bouton BOOT sur le NanoKVM pendant 10 secondes.',
+        reset2: 'Pour les étapes détaillées, veuillez consulter ce document :',
+        reset3: 'Compte Web par défaut :',
+        reset4: 'Compte SSH par défaut :',
+        change1: 'Veuillez noter que cette action modifiera les mots de passe suivants :',
+        change2: 'Mot de passe de connexion Web',
+        change3: 'Mot de passe racine du système (mot de passe de connexion SSH)',
+        change4: 'Pour réinitialiser les mots de passe, appuyez et maintenez enfoncé le bouton BOOT sur le NanoKVM.'
       }
     },
     wifi: {
       title: 'Wi-Fi',
-      description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
-      failed: 'Operation failed, please try again.',
+      description: 'Configurez le Wi-Fi pour le NanoKVM',
+      success: 'Veuillez vérifier le statut du réseau du NanoKVM et visitez la nouvelle adresse IP.',
+      failed: 'L\'opération a échoué, veuillez réessayer.',
       confirmBtn: 'Ok',
-      finishBtn: 'Finished'
+      finishBtn: 'Terminé'
     },
     screen: {
       video: 'Mode vidéo',
@@ -61,10 +61,10 @@ const fr = {
       qualityHigh: 'Élevé',
       qualityMedium: 'Moyen',
       qualityLow: 'Bas',
-      frameDetect: 'Frame Detect',
+      frameDetect: 'Détection de trame',
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Réinitialiser le HDMI'
     },
     keyboard: {
       paste: 'Coller',
@@ -85,7 +85,7 @@ const fr = {
       absolute: 'Mode absolu',
       relative: 'Mode relatif',
       requestPointer:
-        'Utilisation du mode relatif. Veuillez cliquer sur le bureau pour obtenir le pointeur de la souris.',
+        'Pour utiliser le mode relatif, cliquez sur le bureau pour capturer le pointeur de la souris.',
       resetHid: 'Réinitialiser le périphérique HID'
     },
     image: {
@@ -101,7 +101,7 @@ const fr = {
         usb2: 'Assurez-vous que le disque virtuel est monté (Paramètres - Disque virtuel).',
         usb3: 'Ouvrez le disque virtuel sur votre ordinateur et copiez le fichier image dans le répertoire racine du disque virtuel.',
         scp1: 'Assurez-vous que le NanoKVM et votre ordinateur sont sur le même réseau local.',
-        scp2: 'Ouvrez un terminal sur votre ordinateur et utilisez la commande SCP pour télécharger le fichier image dans le répertoire /data du NanoKVM.',
+        scp2: 'Ouvrez un terminal sur votre ordinateur et utilisez la commande SCP pour copier le fichier image dans le répertoire /data du NanoKVM.',
         scp3: 'Exemple : scp chemin-de-votre-image root@ip-de-votre-nanokvm:/data',
         tfCard: 'Carte TF',
         tf1: 'Cette méthode est adaptée aux systèmes Linux.',
@@ -114,11 +114,11 @@ const fr = {
     script: {
       title: 'Script',
       upload: 'Téléverser',
-      run: 'Executer',
-      runBackground: 'Executer en arrière-plan',
+      run: 'Exécuter',
+      runBackground: 'Exécuter en arrière-plan',
       runFailed: "Échec de l'exécution",
       attention: 'Attention',
-      delDesc: 'Etes-vous sûr de vouloir supprimer ce fichier?',
+      delDesc: 'Êtes-vous sûr de vouloir supprimer ce fichier ?',
       confirm: 'Oui',
       cancel: 'Non',
       delete: 'Supprimer',
@@ -142,38 +142,38 @@ const fr = {
     },
     power: {
       title: 'Power',
-      reset: 'Reset',
+      reset: 'Réinitialiser',
       power: 'Power',
       powerShort: 'Power (appui court)',
       powerLong: 'Power (appui long)'
     },
     settings: {
-      title: 'Settings',
+      title: 'Paramètres',
       about: {
         title: 'A propos de NanoKVM',
         information: 'Informations',
         ip: 'IP',
         mdns: 'mDNS',
         application: "Version de l'application",
-        applicationTip: 'NanoKVM web application version',
+        applicationTip: 'Version de l\'application Web NanoKVM',
         image: "Version de l'image",
-        imageTip: 'NanoKVM system image version',
+        imageTip: 'Version de l\'image système NanoKVM',
         deviceKey: "Clé de l'appareil",
         community: 'Communauté'
       },
       appearance: {
-        title: 'Appearance',
-        display: 'Display',
-        language: 'Language',
-        menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        title: 'Apparence',
+        display: 'Affichage',
+        language: 'Langue',
+        menuBar: 'Barre de menus',
+        menuBarDesc: 'Afficher les icônes dans la barre de menus'
       },
       device: {
-        title: 'Device',
+        title: 'Appareil',
         oled: {
           title: 'OLED',
-          description: 'OLED screen automatically sleep',
-          0: 'Never',
+          description: 'Écran OLED s\'éteint automatiquement',
+          0: 'Jamais',
           15: '15 sec',
           30: '30 sec',
           60: '1 min',
@@ -181,36 +181,36 @@ const fr = {
           300: '5 min',
           600: '10 min',
           1800: '30 min',
-          3600: '1 hour'
+          3600: '1 heure'
         },
         wifi: {
           title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          description: 'Configurez le Wi-Fi',
+          setBtn: 'Configurer'
         },
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host'
+        disk: 'Disque virtuel',
+        diskDesc: 'Monter le disque virtuel U sur l\'hôte distant',
+        network: 'Réseau virtuel',
+        networkDesc: 'Monter la carte réseau virtuelle sur l\'hôte distant'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          title: 'Optimisation de la mémoire',
+          tip: "Lorsque l'utilisation de la mémoire dépasse la limite, la collecte des ordures est effectuée plus agressivement pour essayer de libérer de la mémoire. Il est recommandé de définir à 50MB si vous utilisez Tailscale. Un redémarrage de Tailscale est nécessaire pour que le changement prenne effet.",
+          disable: 'Désactiver'
         },
-        restart: 'Are you sure to restart Tailscale?',
-        stop: 'Are you sure to stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        restart: 'Êtes-vous sûr de vouloir redémarrer Tailscale ?',
+        stop: 'Êtes-vous sûr de vouloir arrêter Tailscale ?',
+        stopDesc: 'Arrêtez Tailscale et désactivez son démarrage automatique.',
         loading: 'Chargement...',
-        notInstall: "Tailscale non trouvé! Veuillez l'installer.",
+        notInstall: "Tailscale non trouvé ! Veuillez l'installer.",
         install: 'Installer',
         installing: 'Installation',
         failed: 'Installation échouée',
         retry: "Veuillez rafraîchir et réessayer. Ou essayez d'installer manuellement",
         download: 'Télécharger le',
-        package: 'installation package',
+        package: 'paquet d\'installation',
         unzip: 'et décompressez-le',
         upTailscale: 'Téléverser tailscale dans le répertoire NanoKVM /usr/sbin/',
         upTailscaled: 'Téléverser tailscaled dans le répertoire NanoKVM /usr/sbin/',
@@ -225,13 +225,13 @@ const fr = {
         account: 'Compte',
         logout: 'Déconnexion',
         logout2: 'Voulez-vous vous déconnecter?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        okBtn: 'Oui',
+        cancelBtn: 'Non'
       },
       update: {
         title: 'Vérifier les mises à jour',
         queryFailed: 'Impossible de vérifier les mises à jour. Veuillez réessayer.',
-        updateFailed: 'Mis à jour échouée. Veuillez réessayer.',
+        updateFailed: 'Mise à jour échouée. Veuillez réessayer.',
         isLatest: 'Vous avez déjà la dernière version.',
         available: 'Une mise à jour est disponible. Voulez-vous vraiment mettre à jour?',
         updating: 'Mise à jour en cours. Veuillez patienter...',
@@ -239,11 +239,11 @@ const fr = {
         cancel: 'Annuler'
       },
       account: {
-        title: 'Account',
-        webAccount: 'Web Account Name',
-        password: 'Password',
-        updateBtn: 'Update',
-        logoutBtn: 'Logout'
+        title: 'Compte',
+        webAccount: 'Nom du compte Web',
+        password: 'Mot de passe',
+        updateBtn: 'Mettre à jour',
+        logoutBtn: 'Déconnexion'
       }
     }
   }
