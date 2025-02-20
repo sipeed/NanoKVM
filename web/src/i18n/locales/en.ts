@@ -28,7 +28,7 @@ const en = {
       loginButtonText: 'Login',
       tips: {
         reset1:
-          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
+          'To reset the passwords, press and hold the BOOT button on the NanoKVM for 10 seconds.',
         reset2: 'For detailed steps, please consult this document:',
         reset3: 'Web default account:',
         reset4: 'SSH default account:',
@@ -115,7 +115,7 @@ const en = {
       runBackground: 'Run Background',
       runFailed: 'Run failed',
       attention: 'Attention',
-      delDesc: 'Are you sure to delete this file?',
+      delDesc: 'Are you sure you want to delete this file?',
       confirm: 'Yes',
       cancel: 'No',
       delete: 'Delete',
@@ -175,7 +175,7 @@ const en = {
         title: 'Device',
         oled: {
           title: 'OLED',
-          description: 'OLED screen automatically sleep',
+          description: 'Turn off OLED screen after',
           0: 'Never',
           15: '15 sec',
           30: '30 sec',
@@ -204,11 +204,11 @@ const en = {
         title: 'Tailscale',
         memory: {
           title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. It's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
           disable: 'Disable'
         },
-        restart: 'Are you sure to restart Tailscale?',
-        stop: 'Are you sure to stop Tailscale?',
+        restart: 'Restart Tailscale?',
+        stop: 'Stop Tailscale?',
         stopDesc: 'Log out Tailscale and disable automatic startup on boot.',
         loading: 'Loading...',
         notInstall: 'Tailscale not found! Please install.',
@@ -232,7 +232,7 @@ const en = {
         deviceIP: 'Device IP',
         account: 'Account',
         logout: 'Logout',
-        logout2: 'Sure to logout?',
+        logout2: 'Confirm logout',
         uninstall: 'Uninstall Tailscale',
         okBtn: 'Yes',
         cancelBtn: 'No'
@@ -242,7 +242,7 @@ const en = {
         queryFailed: 'Get version failed',
         updateFailed: 'Update failed. Please retry.',
         isLatest: 'You already have the latest version.',
-        available: 'An update is available. Are you sure to update?',
+        available: 'An update is available. Are you sure you want to update now?',
         updating: 'Update started. Please wait...',
         confirm: 'Confirm',
         cancel: 'Cancel'
