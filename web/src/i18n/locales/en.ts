@@ -254,6 +254,10 @@ const en = {
         updateBtn: 'Change',
         logoutBtn: 'Logout'
       }
+    },
+    error: {
+      title: 'We\'ve ran into an issue',
+      refresh: 'Refresh',
     }
   }
 };
