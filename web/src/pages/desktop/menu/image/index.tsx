@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider, Popover } from 'antd';
+import { Divider, Popover, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { DiscIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,9 @@ export const Image = () => {
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  const tooltip = t('image.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   useEffect(() => {
     getMountedImage().then((rsp) => {
@@ -44,16 +47,21 @@ export const Image = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={setIsPopoverOpen}
+      onOpenChange={(visible) => {
+        setIsPopoverOpen(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div
-        className={clsx(
-          'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
-          isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
-        )}
-      >
-        <DiscIcon size={18} />
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div
+          className={clsx(
+            'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
+            isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
+          )}
+        >
+          <DiscIcon size={18} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };
