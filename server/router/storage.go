@@ -14,4 +14,5 @@ func storageRouter(r *gin.Engine) {
 	api.GET("/storage/image", service.GetImages)               // get image list
 	api.GET("/storage/image/mounted", service.GetMountedImage) // get mounted image
 	api.POST("/storage/image/mount", service.MountImage)       // mount image
+	api.GET("/storage/cdrom", service.GetCdRom)                // get CD-ROM flag
 }

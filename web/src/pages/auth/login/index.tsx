@@ -14,6 +14,8 @@ import { Tips } from './tips.tsx';
 export const Login = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  const [isLoading, setIsloading] = useState(false);
   const [msg, setMsg] = useState('');
 
   useEffect(() => {
@@ -29,6 +31,9 @@ export const Login = () => {
   }, [msg]);
 
   function login(values: any) {
+    if (isLoading) return;
+    setIsloading(true);
+
     const username = values.username;
     const password = encrypt(values.password);
 
@@ -48,6 +53,9 @@ export const Login = () => {
       })
       .catch(() => {
         setMsg(t('auth.error'));
+      })
+      .finally(() => {
+        setIsloading(false);
       });
   }
 
@@ -84,7 +92,7 @@ export const Login = () => {
           <div className="text-red-500">{msg}</div>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button type="primary" htmlType="submit" className="w-full" loading={isLoading}>
               {t('auth.loginButtonText')}
             </Button>
           </Form.Item>
