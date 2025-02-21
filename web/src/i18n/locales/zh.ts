@@ -87,6 +87,7 @@ const zh = {
       title: '镜像',
       loading: '加载中',
       empty: '无镜像文件',
+      cdrom: '以 CD-ROM 模式挂载镜像',
       mountFailed: '挂载失败',
       mountDesc: '在某些系统中，需要在远程主机中弹出虚拟硬盘后再挂载镜像。',
       tips: {

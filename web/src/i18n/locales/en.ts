@@ -89,6 +89,7 @@ const en = {
       title: 'Image',
       loading: 'Loading...',
       empty: 'Nothing Found',
+      cdrom: 'Mount the image in CD-ROM mode',
       mountFailed: 'Mount Failed',
       mountDesc:
         "In some systems, it's necessary to eject the virtual disk on the remote host before mounting the image.",
@@ -256,8 +257,8 @@ const en = {
       }
     },
     error: {
-      title: 'We\'ve ran into an issue',
-      refresh: 'Refresh',
+      title: "We've ran into an issue",
+      refresh: 'Refresh'
     }
   }
 };

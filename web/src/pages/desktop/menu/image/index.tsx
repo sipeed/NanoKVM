@@ -38,7 +38,7 @@ export const Image = () => {
           <Tips />
         </div>
 
-        <Tooltip title="是否以 CD-ROM 模式挂载镜像" placement="bottom">
+        <Tooltip title={t('image.cdrom')} placement="bottom">
           <div className="flex items-center space-x-2">
             <span className="text-xs text-neutral-400">CD-ROM</span>
 
