@@ -1,11 +1,12 @@
 package storage
 
 import (
-	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -18,9 +19,7 @@ const (
 	imageNone      = "/dev/mmcblk0p3"
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
-	removableFlag  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/removable"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
-	roDisk         = "/boot/usb.disk0.ro"
 )
 
 func (s *Service) GetImages(c *gin.Context) {
@@ -61,55 +60,43 @@ func (s *Service) MountImage(c *gin.Context) {
 		return
 	}
 
+	// cdrom and ro flag
+	// set to 0 when unmount image
+	// set to 1 when mount image and the CD-ROM is enabled
+	if req.File == "" || req.Cdrom {
+		flag := "0"
+		if req.File != "" && req.Cdrom {
+			flag = "1"
+		}
+
+		// unmount
+		if err := os.WriteFile(mountDevice, []byte("\n"), 0o666); err != nil {
+			log.Errorf("unmount file failed: %s", err)
+			rsp.ErrRsp(c, -2, "unmount image failed")
+			return
+		}
+
+		// ro flag
+		if err := os.WriteFile(roFlag, []byte(flag), 0o666); err != nil {
+			log.Errorf("set ro flag failed: %s", err)
+			rsp.ErrRsp(c, -2, "set ro flag failed")
+			return
+		}
+
+		// cdrom flag
+		if err := os.WriteFile(cdromFlag, []byte(flag), 0o666); err != nil {
+			log.Errorf("set cdrom flag failed: %s", err)
+			rsp.ErrRsp(c, -2, "set cdrom flag failed")
+			return
+		}
+	}
+
+	// mount
 	image := req.File
 	if image == "" {
 		image = imageNone
 	}
 
-	imageRemovable := "1"
-
-	imageRo := "0"
-	isImageRo, _ := isFlagExist(roDisk)
-	if isImageRo {
-		imageRo = "1"
-	}
-
-	imageLow := strings.ToLower(image)
-	imageCdrom := "0"
-	if strings.HasSuffix(imageLow, ".iso") {
-		imageRo = "1"
-		imageCdrom = "1"
-	}
-
-	// unmount
-	if err := os.WriteFile(mountDevice, []byte("\n"), 0o666); err != nil {
-		log.Errorf("unmount file failed: %s", err)
-		rsp.ErrRsp(c, -2, "unmount image failed")
-		return
-	}
-
-	// removable flag
-	if err := os.WriteFile(removableFlag, []byte(imageRemovable), 0o666); err != nil {
-		log.Errorf("set removable flag failed: %s", err)
-		rsp.ErrRsp(c, -2, "set removable flag failed")
-		return
-	}
-
-	// ro flag
-	if err := os.WriteFile(roFlag, []byte(imageRo), 0o666); err != nil {
-		log.Errorf("set ro flag failed: %s", err)
-		rsp.ErrRsp(c, -2, "set ro flag failed")
-		return
-	}
-
-	// cdrom flag
-	if err := os.WriteFile(cdromFlag, []byte(imageCdrom), 0o666); err != nil {
-		log.Errorf("set cdrom flag failed: %s", err)
-		rsp.ErrRsp(c, -2, "set cdrom flag failed")
-		return
-	}
-
-	// mount
 	if err := os.WriteFile(mountDevice, []byte(image), 0o666); err != nil {
 		log.Errorf("mount file %s failed: %s", image, err)
 		rsp.ErrRsp(c, -2, "mount image failed")
@@ -128,6 +115,7 @@ func (s *Service) MountImage(c *gin.Context) {
 			rsp.ErrRsp(c, -2, "execute command failed")
 			return
 		}
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	rsp.OkRsp(c)
@@ -155,17 +143,25 @@ func (s *Service) GetMountedImage(c *gin.Context) {
 	rsp.OkRspWithData(c, data)
 }
 
-func isFlagExist(flag string) (bool, error) {
-	_, err := os.Stat(flag)
+func (s *Service) GetCdRom(c *gin.Context) {
+	var rsp proto.Response
 
-	if err == nil {
-		return true, nil
+	content, err := os.ReadFile(cdromFlag)
+	if err != nil {
+		rsp.ErrRsp(c, -1, "read failed")
+		return
 	}
 
-	if errors.Is(err, os.ErrNotExist) {
-		return false, nil
+	flag := strings.ReplaceAll(string(content), "\n", "")
+	flatInt, err := strconv.ParseInt(flag, 10, 64)
+	if err != nil {
+		rsp.ErrRsp(c, -2, "parse failed")
+		return
 	}
 
-	log.Errorf("check file %s err: %s", flag, err)
-	return false, err
+	data := &proto.GetCdRomRsp{
+		Cdrom: flatInt,
+	}
+
+	rsp.OkRspWithData(c, data)
 }
