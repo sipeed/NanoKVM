@@ -46,12 +46,12 @@ const zh_tw = {
       finishBtn: '完成'
     },
     screen: {
-      video: '影片模式',
+      video: '編碼格式',
       resolution: '解析度',
       auto: '自動',
       autoTips:
         '在特定解析度下可能會出現畫面撕裂或滑鼠偏移的情況。考慮調整遠端主機的解析度或停用自動模式。',
-      fps: '影格速率',
+      fps: '更新頻率',
       customizeFps: '自定義',
       quality: '品質',
       qualityLossless: '無損',
@@ -87,6 +87,7 @@ const zh_tw = {
       title: '映像',
       loading: '載入中...',
       empty: '未找到任何內容',
+      cdrom: '以CD-ROM模式掛載',
       mountFailed: '掛載失敗',
       mountDesc: '在某些系統中，在掛載映像之前需要中斷遠端主機上的虛擬磁碟。',
       tips: {
@@ -250,6 +251,10 @@ const zh_tw = {
         updateBtn: '修改',
         logoutBtn: '登出'
       }
+    },
+    error: {
+      title: "我們遇到了一些問題",
+      refresh: ' 重新整理'
     }
   }
 };
