@@ -14,8 +14,7 @@ const ko = {
       placeholderPassword2: '비밀번호를 다시 입력하세요.',
       noEmptyUsername: '사용자 이름은 비어있을 수 없습니다.',
       noEmptyPassword: '비밀번호는 비어있을 수 없습니다.',
-      noAccount:
-        '사용자 정보를 불러오는 데 실패했습니다. 페이지를 새로고침하거나 비밀번호를 초기화하세요.',
+      noAccount: '사용자 정보를 불러오는 데 실패했습니다. 페이지를 새로고침하거나 비밀번호를 초기화하세요.',
       invalidUser: '사용자 이름이나 비밀번호가 틀렸습니다.',
       error: '알 수 없는 오류',
       changePassword: '비밀번호 변경',
@@ -28,7 +27,8 @@ const ko = {
       cancel: '취소',
       loginButtonText: '로그인',
       tips: {
-        reset1: '비밀번호를 재설정하려면 NanoKVM의 BOOT 버튼을 10초 동안 누르고 계세요.',
+        reset1:
+          '비밀번호를 재설정하려면 NanoKVM의 BOOT 버튼을 10초 동안 누르고 계세요.',
         reset2: '자세한 절차는 이 문서를 참조하세요:',
         reset3: '웹 기본 계정:',
         reset4: 'SSH 기본 계정:',
@@ -89,6 +89,7 @@ const ko = {
       title: '이미지',
       loading: '불러오는 중...',
       empty: '아무것도 없습니다.',
+      cdrom: 'CD-ROM 모드로 이미지 마운트',
       mountFailed: '이미지 마운트 실패',
       mountDesc:
         '일부 시스템에서는 이미지를 마운트하기 전에 원격 호스트에서 가상 디스크를 제거해야 합니다.',
@@ -99,7 +100,7 @@ const ko = {
         usb3: '컴퓨터에서 가상 디스크를 열고 이미지 파일을 가상 디스크의 루트 디렉토리로 복사하세요.',
         scp1: 'NanoKVM과 컴퓨터가 동일한 로컬 네트워크에 있는지 확인하세요.',
         scp2: '컴퓨터에서 터미널을 열고 SCP 명령을 사용하여 이미지 파일을 NanoKVM의 /data 디렉터리에 업로드하세요.',
-        scp3: '예: scp [이미지 파일 경로] root@[NanoKVM IP 주소]:/data',
+        scp3: '예시: scp [이미지 파일 경로] root@[NanoKVM IP 주소]:/data',
         tfCard: 'TF 카드',
         tf1: '이 방법은 Linux 시스템에서 지원됩니다',
         tf2: 'NanoKVM에서 TF 카드를 가져옵니다(전체 버전의 경우 먼저 케이스를 분해하세요).',
@@ -116,7 +117,7 @@ const ko = {
       runFailed: '실행 실패',
       attention: '주의',
       delDesc: '이 파일을 정말로 삭제합니까?',
-      confirm: '예',
+      confirm: '네',
       cancel: '아니오',
       delete: '삭제',
       close: '닫기'
@@ -222,7 +223,8 @@ const ko = {
         upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
         upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
         refresh: '현재 페이지 새로고침',
-        notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+        notLogin:
+          '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
         urlPeriod: '이 주소는 10분간 유효합니다.',
         login: '로그인',
         loginSuccess: '로그인 성공',
@@ -233,7 +235,7 @@ const ko = {
         logout: '로그아웃',
         logout2: '정말로 로그아웃 합니까?',
         uninstall: 'Tailscale 제거',
-        okBtn: '예',
+        okBtn: '네',
         cancelBtn: '아니오'
       },
       update: {
@@ -253,6 +255,10 @@ const ko = {
         updateBtn: '업데이트',
         logoutBtn: '로그아웃'
       }
+    },
+    error: {
+      title: '문제가 발생했습니다.',
+      refresh: '새로고침'
     }
   }
 };
