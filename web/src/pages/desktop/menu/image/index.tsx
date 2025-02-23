@@ -64,7 +64,7 @@ export const Image = () => {
       <Divider style={{ margin: '10px 0 15px 0' }} />
 
       {isPopoverOpen && (
-        <Images cdrom={cdrom} setIsMounted={setIsMounted} onRefresh={(func) => (getImagesRef.current = func)} />
+        <Images cdrom={cdrom} setIsMounted={setIsMounted} onRefresh={(callback) => (getImagesRef.current = callback)} />
       )}
     </div>
   );

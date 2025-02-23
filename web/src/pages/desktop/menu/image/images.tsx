@@ -16,7 +16,7 @@ import { client } from '@/lib/websocket.ts';
 type ImagesProps = {
   cdrom: boolean;
   setIsMounted: (isMounted: boolean) => void;
-  onRefresh?: () => void;
+  onRefresh?: (callback: () => void) => void;
 };
 
 export const Images = ({ cdrom, setIsMounted, onRefresh }: ImagesProps) => {
