@@ -93,6 +93,7 @@ const ko = {
       mountFailed: '이미지 마운트 실패',
       mountDesc:
         '일부 시스템에서는 이미지를 마운트하기 전에 원격 호스트에서 가상 디스크를 제거해야 합니다.',
+      refresh: '이미지 목록 새로고침',
       tips: {
         title: '업로드 방법',
         usb1: 'USB를 통해 NanoKVM을 컴퓨터에 연결하세요.',

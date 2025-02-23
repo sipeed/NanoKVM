@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Divider, Popover, Switch, Tooltip } from 'antd';
+import { useEffect, useRef, useState } from 'react';
+import { Button, Divider, Popover, Switch, Tooltip } from 'antd';
 import clsx from 'clsx';
-import { DiscIcon } from 'lucide-react';
+import { DiscIcon, RefreshCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 
@@ -18,6 +18,8 @@ export const Image = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [cdrom, setCdrom] = useState(false);
 
+  const getImagesRef = useRef<() => void>(() => {});
+
   useEffect(() => {
     getMountedImage().then((rsp) => {
       if (rsp.code !== 0) return;
@@ -30,6 +32,12 @@ export const Image = () => {
     });
   }, []);
 
+  const refreshImages = () => {
+    if (getImagesRef.current) {
+      getImagesRef.current();
+    }
+  };
+
   const content = (
     <div className="min-w-[300px]">
       <div className="flex items-center justify-between px-1">
@@ -38,18 +46,26 @@ export const Image = () => {
           <Tips />
         </div>
 
-        <Tooltip title={t('image.cdrom')} placement="bottom">
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-neutral-400">CD-ROM</span>
+        <div className="flex items-center space-x-2">
+          <Tooltip title={t('image.cdrom')} placement="bottom">
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-neutral-400">CD-ROM</span>
 
-            <Switch size="small" checked={cdrom} onChange={(checked) => setCdrom(checked)}></Switch>
-          </div>
-        </Tooltip>
+              <Switch size="small" checked={cdrom} onChange={(checked) => setCdrom(checked)}></Switch>
+            </div>
+          </Tooltip>
+
+          <Tooltip title={t('image.refresh')} placement="bottom">
+            <Button type="default" icon={<RefreshCwIcon size={16} />} onClick={refreshImages} />
+          </Tooltip>
+        </div>
       </div>
 
       <Divider style={{ margin: '10px 0 15px 0' }} />
 
-      {isPopoverOpen && <Images cdrom={cdrom} setIsMounted={setIsMounted} />}
+      {isPopoverOpen && (
+        <Images cdrom={cdrom} setIsMounted={setIsMounted} onRefresh={(func) => (getImagesRef.current = func)} />
+      )}
     </div>
   );
 

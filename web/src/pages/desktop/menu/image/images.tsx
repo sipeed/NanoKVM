@@ -16,9 +16,10 @@ import { client } from '@/lib/websocket.ts';
 type ImagesProps = {
   cdrom: boolean;
   setIsMounted: (isMounted: boolean) => void;
+  onRefresh?: () => void;
 };
 
-export const Images = ({ cdrom, setIsMounted }: ImagesProps) => {
+export const Images = ({ cdrom, setIsMounted, onRefresh }: ImagesProps) => {
   const { t } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
 
@@ -30,6 +31,12 @@ export const Images = ({ cdrom, setIsMounted }: ImagesProps) => {
   useEffect(() => {
     getImages();
   }, []);
+
+  useEffect(() => {
+    if (onRefresh) {
+      onRefresh(getImages);
+    }
+  }, [onRefresh]);
 
   function getImages() {
     if (isLoading) return;
