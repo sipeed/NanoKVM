@@ -92,7 +92,3 @@ export const Menu = () => {
     </div>
   );
 };
-function msg(arg0: string): any {
-  throw new Error('Function not implemented.');
-}
-
