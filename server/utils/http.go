@@ -41,8 +41,8 @@ func Download(req *http.Request, target string) error {
 	}
 
 	contentType := resp.Header.Get("Content-Type")
-	if contentType != "application/octet-stream" && contentType != "application/zip" {
-		log.Debugf("unexpected content-type, it should be either octet-stream or zip, but got: %s", contentType)
+	if contentType != "application/octet-stream" && contentType != "application/zip" && contentType != "application/gzip" {
+		log.Debugf("unexpected content-type, it should be either octet-stream or (g)zip, but got: %s", contentType)
 		return errors.New("unsupported content type")
 	}
 

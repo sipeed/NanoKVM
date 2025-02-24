@@ -1,0 +1,32 @@
+# sophgo middleware version major minor patch
+menu "sophgo middleware version"
+config SOPHGO_MIDDLEWARE_CHIP
+    string "sophgo chip"
+    default "cv181x"
+    help
+      sophgo chip. cv180x or cv181x
+
+config SOPHGO_MIDDLEWARE_C_LIBRARY
+    string "sophgo c standard library"
+    default "musl"
+    help
+      sophgo c standard library. glibc or musl
+
+config SOPHGO_MIDDLEWARE_VERSION_MAJOR
+    int "sophgo middleware package major version"
+    default 0
+    help
+      sophgo middleware package major version, 0 means auto select according to board
+
+config SOPHGO_MIDDLEWARE_VERSION_MINOR
+    int "sophgo middleware package minor version"
+    default 0
+    help
+      sophgo middleware package minor version
+
+config SOPHGO_MIDDLEWARE_VERSION_PATCH
+    int "sophgo middleware package patch version"
+    default 4
+    help
+      sophgo middleware package patch version
+endmenu

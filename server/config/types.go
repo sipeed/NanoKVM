@@ -6,7 +6,7 @@ type Config struct {
 	Cert           Cert   `yaml:"cert"`
 	Logger         Logger `yaml:"logger"`
 	Authentication string `yaml:"authentication"`
-	SecretKey      string `yaml:"secretKey"`
+	JWT            JWT    `yaml:"jwt"`
 	Stun           string `yaml:"stun"`
 	Turn           Turn   `yaml:"turn"`
 
@@ -26,6 +26,12 @@ type Port struct {
 type Cert struct {
 	Crt string `yaml:"crt"`
 	Key string `yaml:"key"`
+}
+
+type JWT struct {
+	SecretKey            string `yaml:"secretKey"`
+	RefreshTokenDuration uint64 `yaml:"refreshTokenDuration"`
+	RevokeTokensOnLogout bool   `yaml:"revokeTokensOnLogout"`
 }
 
 type Turn struct {

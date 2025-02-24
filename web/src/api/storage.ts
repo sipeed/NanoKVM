@@ -11,9 +11,15 @@ export function getMountedImage() {
 }
 
 // mount/unmount image
-export function mountImage(file?: string) {
+export function mountImage(file?: string, cdrom?: boolean) {
   const data = {
-    file: file ? file : ''
+    file: file ? file : '',
+    cdrom: cdrom
   };
   return http.post('/api/storage/image/mount', data);
+}
+
+// get CD-ROM flag
+export function getCdRom() {
+  return http.get('/api/storage/cdrom');
 }

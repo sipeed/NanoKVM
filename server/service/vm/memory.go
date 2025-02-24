@@ -30,7 +30,7 @@ func (s *Service) SetMemoryLimit(c *gin.Context) {
 	}
 
 	rsp.OkRsp(c)
-	log.Debug("set memory limit successful, enabled: %t, limit: %s", req.Enabled, req.Limit)
+	log.Debugf("set memory limit successful, enabled: %t, limit: %d", req.Enabled, req.Limit)
 }
 
 func (s *Service) GetMemoryLimit(c *gin.Context) {

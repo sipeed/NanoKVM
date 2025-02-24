@@ -19,8 +19,7 @@ const ru = {
       invalidUser: 'Неверное имя пользователя или пароль',
       error: 'Непредвиденная ошибка',
       changePassword: 'Изменить пароль',
-      changePasswordDesc:
-        'Для безопасности вашего устройства измените, пожалуйста, пароль веб-входа.',
+      changePasswordDesc: 'Для безопасности вашего устройства, пожалуйста поменяйте пароль!',
       differentPassword: 'Пароли не совпадают',
       illegalUsername: 'Имя пользователя содержит недопустимые символы',
       illegalPassword: 'Пароль содержит недопустимые символы',
@@ -30,23 +29,23 @@ const ru = {
       loginButtonText: 'Войти',
       tips: {
         reset1:
-          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
-        reset2: 'For detailed steps, please consult this document:',
-        reset3: 'Web default account:',
-        reset4: 'SSH default account:',
-        change1: 'Please note that this action will change the following passwords:',
-        change2: 'Web login password',
-        change3: 'System root password (SSH login password)',
-        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+          'Чтобы сбросить пароли, нажмите и удерживайте кнопку BOOT на NanoKVM в течении 10 секунд.',
+        reset2: 'Подробные шаги описаны в этом документе:',
+        reset3: 'Аккаунт веб-интерфейса по умолчанию:',
+        reset4: 'Аккаунт SSH по умолчанию:',
+        change1: 'Пожалуйста учтите, что это действие изменит следующие пароли:',
+        change2: 'Пароль для входа в веб-интерфейс',
+        change3: 'Пароль системного пользователя "root" (пароль для входа по SSH)',
+        change4: 'Чтобы сбросить пароли, нажмите и удерживайте кнопку BOOT на NanoKVM.'
       }
     },
     wifi: {
       title: 'Wi-Fi',
-      description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
-      failed: 'Operation failed, please try again.',
-      confirmBtn: 'Ok',
-      finishBtn: 'Finished'
+      description: 'Настройка Wi-Fi для NanoKVM',
+      success: 'Пожалуйста, проверьте сетевой статус NanoKVM и откройте в браузере новый IP адрес.',
+      failed: 'Операция не удалась, пожалуйста попробуйте снова.',
+      confirmBtn: 'OK',
+      finishBtn: 'Готово'
     },
     screen: {
       video: 'Видеорежим',
@@ -64,13 +63,13 @@ const ru = {
       frameDetect: 'Экономия трафика',
       frameDetectTip:
         'Вычисляет разницу между кадрами и прекращает передачу видеопотока, если на экране удаленного узла не обнаружено никаких изменений.',
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Перезагрузить HDMI подсистему'
     },
     keyboard: {
-      paste: 'вставить',
-      tips: 'Только стандартные буквы и символы клавиатуры поддерживаются',
-      placeholder: 'Пожалуйста, введите',
-      submit: 'подтверждать',
+      paste: 'Вставка текста',
+      tips: 'Поддерживаются только стандартные буквы и символы клавиатуры',
+      placeholder: 'Текст для ввода',
+      submit: 'Вставить',
       virtual: 'Клавиатура',
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
@@ -139,6 +138,12 @@ const ru = {
       input: 'Введите MAC-адрес',
       ok: 'ОК'
     },
+    download: {
+      title: 'Скачать образ',
+      input: 'Введите адрес удаленного образа',
+      ok: 'OK',
+      disabled: 'Невозможно скачать образ, раздел /data находится в режиме только для чтения'
+    },
     power: {
       title: 'Питание',
       reset: 'Экстренная перезагрузка',
@@ -147,61 +152,65 @@ const ru = {
       powerLong: 'Питание (длинное нажатие)'
     },
     settings: {
-      title: 'Settings',
+      title: 'Настройки',
       about: {
         title: 'О системе NanoKVM',
         information: 'Информация',
         ip: 'IP-адрес',
         mdns: 'Доменное имя mDNS',
         application: 'Версия ПО',
-        applicationTip: 'NanoKVM web application version',
+        applicationTip: 'Версия веб-программы NanoKVM',
         image: 'Версия прошивки',
-        imageTip: 'NanoKVM system image version',
+        imageTip: 'Версия системного образа NanoKVM',
         deviceKey: 'Ключ устройства',
         community: 'Сообщество'
       },
       appearance: {
-        title: 'Appearance',
-        display: 'Display',
-        language: 'Language',
-        menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        title: 'Внешний вид',
+        display: 'Отображение',
+        language: 'Язык',
+        menuBar: 'Панель меню',
+        menuBarDesc: 'Иконки для отображения в панели меню'
       },
       device: {
-        title: 'Device',
+        title: 'Устройство',
         oled: {
-          title: 'OLED',
-          description: 'OLED screen automatically sleep',
-          0: 'Never',
-          15: '15 sec',
-          30: '30 sec',
-          60: '1 min',
-          180: '3 min',
-          300: '5 min',
-          600: '10 min',
-          1800: '30 min',
-          3600: '1 hour'
+          title: 'OLED экран',
+          description: 'Автоматическое отключение OLED экрана',
+          0: 'Никогда',
+          15: '15 сек',
+          30: '30 сек',
+          60: '1 мин',
+          180: '3 мин',
+          300: '5 мин',
+          600: '10 мин',
+          1800: '30 мин',
+          3600: '1 час'
         },
         wifi: {
           title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          description: 'Настройка Wi-Fi',
+          setBtn: 'Конфигурация'
         },
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host'
+        ssh: {
+          description: 'Включить удаленный доступ по SSH',
+          tip: 'Задайте сильный пароль перед включением (Аккаунт - Пароль - Обновить)'
+        },
+        disk: 'Виртуальный диск',
+        diskDesc: 'Смонтировать виртуальный USB диск на удаленном хосте',
+        network: 'Виртуальная сеть',
+        networkDesc: 'Смонтировать виртуальное сетевое устройство на удаленном хосте'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          title: 'Оптимизация памяти',
+          tip: "Когда использование ОЗУ выходит за пределы, очистка мусора происходит более агрессивно, дабы попытаться освободить память. Рекомендуется задать на 50MB при использовании Tailscale. Перезагрузка Tailscale рекомендуется для вступления данной настройки в силу.",
+          disable: 'Отключить'
         },
-        restart: 'Are you sure to restart Tailscale?',
-        stop: 'Are you sure to stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        restart: 'Вы уверены что хотите перезагрузить Tailscale?',
+        stop: 'Вы уверены что хотите остановить Tailscale?',
+        stopDesc: 'Выйти из Tailscale и отключить его автоматический запуск при включении.',
         loading: 'Загрузка...',
         notInstall: 'Tailscale не найден! Пожалуйста, установите.',
         install: 'Установить',
@@ -221,28 +230,29 @@ const ru = {
         enable: 'Включить Tailscale',
         deviceName: 'Имя устройства',
         deviceIP: 'IP адрес устройства',
-        account: 'аккаунт',
+        account: 'Аккаунт',
         logout: 'Выход',
         logout2: 'Вы действительно хотите выйти?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        uninstall: 'Удалить Tailscale',
+        okBtn: 'Да',
+        cancelBtn: 'Нет'
       },
       update: {
         title: 'Проверить обновления',
         queryFailed: 'Получить версию не удалось',
         updateFailed: 'Обновление не удалось. Пожалуйста, попробуйте еще раз.',
-        isLatest: 'У вас уже есть последняя версия.',
+        isLatest: 'У вас уже последняя версия.',
         available: 'Доступно обновление. Вы уверены, что хотите обновить?',
         updating: 'Начато обновление. Пожалуйста, подождите...',
         confirm: 'Подтвердить',
         cancel: 'Отмена'
       },
       account: {
-        title: 'Account',
-        webAccount: 'Web Account Name',
-        password: 'Password',
-        updateBtn: 'Update',
-        logoutBtn: 'Logout'
+        title: 'Аккаунт',
+        webAccount: 'Имя веб-аккаунта',
+        password: 'Пароль',
+        updateBtn: 'Обновить',
+        logoutBtn: 'Выйти'
       }
     }
   }

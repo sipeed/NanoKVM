@@ -18,15 +18,5 @@ func networkRouter(r *gin.Engine) {
 	api.GET("/network/wol/mac", service.GetMac)       // get mac list
 	api.DELETE("/network/wol/mac", service.DeleteMac) // delete mac
 
-	api.POST("/network/tailscale/install", service.TsInstall)     // install tailscale
-	api.POST("/network/tailscale/uninstall", service.TsUninstall) // uninstall tailscale
-	api.GET("/network/tailscale/status", service.GetTsStatus)     // get tailscale status
-	api.POST("/network/tailscale/up", service.TsUp)               // run tailscale up
-	api.POST("/network/tailscale/down", service.TsDown)           // run tailscale down
-	api.POST("/network/tailscale/login", service.TsLogin)         // tailscale login
-	api.POST("/network/tailscale/logout", service.TsLogout)       // tailscale logout
-	api.POST("/network/tailscale/stop", service.TsStop)           // tailscale stop
-	api.POST("/network/tailscale/restart", service.TsRestart)     // tailscale restart
-
 	api.GET("/network/wifi", service.GetWifi) // get Wi-Fi information
 }

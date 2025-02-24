@@ -3,7 +3,6 @@ package mjpeg
 import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
-	"fmt"
 	"sync"
 	"time"
 
@@ -18,7 +17,7 @@ var (
 )
 
 func Connect(c *gin.Context) {
-	c.Header("Content-Type", fmt.Sprintf("multipart/x-mixed-replace; boundary=frame"))
+	c.Header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
 	c.Header("Cache-Control", "no-cache")
 	c.Header("Connection", "keep-alive")
 	c.Header("Pragma", "no-cache")

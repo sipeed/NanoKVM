@@ -14,9 +14,9 @@ func (s *Service) ResetHdmi(c *gin.Context) {
 
 	vision := common.GetKvmVision()
 
-	vision.EnableHdmi(false)
+	vision.SetHDMI(false)
 	time.Sleep(1 * time.Second)
-	vision.EnableHdmi(true)
+	vision.SetHDMI(true)
 
 	rsp.OkRsp(c)
 	log.Debug("reset hdmi")

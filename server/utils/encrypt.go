@@ -7,30 +7,24 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const EncryptSecretKey = "nanokvm-sipeed-2024"
+// SecretKey is only used to prevent the data from being transmitted in plaintext.
+const SecretKey = "nanokvm-sipeed-2024"
 
 func Decrypt(ciphertext string) (string, error) {
-	defer func() {
-		if err := recover(); err != nil {
-			log.Errorf("decrypt failed: %s", err)
-		}
-	}()
-
 	if ciphertext == "" {
 		return "", nil
 	}
 
-	decrypt := aes256.Decrypt(ciphertext, EncryptSecretKey)
-
+	decrypt := aes256.Decrypt(ciphertext, SecretKey)
 	return decrypt, nil
 }
 
-func DecodeDecrypt(ciphertext string) (string, error) {
-	decode, err := url.QueryUnescape(ciphertext)
+func DecodeDecrypt(data string) (string, error) {
+	ciphertext, err := url.QueryUnescape(data)
 	if err != nil {
 		log.Errorf("decode ciphertext failed: %s", err)
 		return "", err
 	}
 
-	return Decrypt(decode)
+	return Decrypt(ciphertext)
 }

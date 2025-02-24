@@ -21,51 +21,6 @@ export function deleteWolMac(mac: string) {
   });
 }
 
-// install tailscale
-export function installTailscale() {
-  return http.post('/api/network/tailscale/install');
-}
-
-// uninstall tailscale
-export function uninstallTailscale() {
-  return http.post('/api/network/tailscale/uninstall');
-}
-
-// get tailscale status
-export function getTailscaleStatus() {
-  return http.get('/api/network/tailscale/status');
-}
-
-// run tailscale up
-export function upTailscale() {
-  return http.post('/api/network/tailscale/up');
-}
-
-// run tailscale down
-export function downTailscale() {
-  return http.post('/api/network/tailscale/down');
-}
-
-// login tailscale
-export function loginTailscale() {
-  return http.post('/api/network/tailscale/login');
-}
-
-// logout tailscale
-export function logoutTailscale() {
-  return http.post('/api/network/tailscale/logout');
-}
-
-// stop tailscale
-export function stopTailscale() {
-  return http.post('/api/network/tailscale/stop');
-}
-
-// restart tailscale
-export function restartTailscale() {
-  return http.post('/api/network/tailscale/restart');
-}
-
 // get wifi information
 export function getWiFi() {
   return http.get('/api/network/wifi');

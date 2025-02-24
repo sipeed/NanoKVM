@@ -68,7 +68,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
           setErrMsg('');
 
           window.location.reload();
-        }, 6000);
+        }, 12000);
       });
   }
 
@@ -114,6 +114,17 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       )}
 
       {status === 'failed' && <Result subTitle={errMsg} />}
+
+      <div className="flex justify-center">
+        <Button
+          type="link"
+          size="small"
+          href="https://github.com/sipeed/NanoKVM/blob/main/CHANGELOG.md"
+          target="_blank"
+        >
+          CHANGELOG
+        </Button>
+      </div>
     </>
   );
 };

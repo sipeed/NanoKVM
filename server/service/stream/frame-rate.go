@@ -42,7 +42,7 @@ func GetFrameRateCounter() *FrameRateCounter {
 				data := fmt.Sprintf("%d", counter.fps)
 				err := os.WriteFile("/kvmapp/kvm/now_fps", []byte(data), 0o666)
 				if err != nil {
-					log.Errorf("failed to wirte fps: %s", err)
+					log.Errorf("failed to write fps: %s", err)
 				}
 			}
 		}()

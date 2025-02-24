@@ -93,11 +93,11 @@ func StopFrameDetect(c *gin.Context) {
 	go func() {
 		time.Sleep(20 * time.Second)
 		_ = os.Rename(frameDetectTmp, frameDetect)
-		log.Debugf("frame detect started")
+		log.Debug("frame detect started")
 	}()
 
 	rsp.OkRsp(c)
-	log.Debugf("frame detect stoped")
+	log.Debug("frame detect stopped")
 }
 
 func isFrameDetectEnabled() (bool, error) {

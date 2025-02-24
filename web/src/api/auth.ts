@@ -8,6 +8,10 @@ export function login(username: string, password: string) {
   return http.post('/api/auth/login', data);
 }
 
+export function logout() {
+  return http.post('/api/auth/logout');
+}
+
 export function getAccount() {
   return http.get('/api/auth/account');
 }

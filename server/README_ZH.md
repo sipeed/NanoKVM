@@ -42,9 +42,13 @@ logger:
 # 注意：生产环境中请勿使用 disable。
 authentication: enable
 
-# JWT 密钥
-# 如果不设置，则每次服务启动时使用随机生成的密钥。
-secretKey: ""
+jwt:
+   # jwt 密钥。设置为空则使用随机生成的64位密钥
+   secretKey: ""
+   # jwt token 过期时间（单位：秒），默认为2678400（31天）
+   refreshTokenDuration: 2678400
+   # 在帐号登出时是否使所有 jwt token 失效。默认为 true
+   revokeTokensOnLogout: true
 
 stun: stun.l.google.com:19302
 
@@ -75,6 +79,15 @@ turn:
    3. 执行 `patchelf --add-rpath \$ORIGIN/dl_lib NanoKVM-Server` 修改可执行文件的 RPATH 属性。
 
 4. 部署
-   1. 部署前，请先在浏览器中将应用[更新](https://wiki.sipeed.com/hardware/zh/kvm/NanoKVM/system/updating.html)到最新版本；
-   2. 使用编译生成的 `NanoKVM-Server` 文件，替换 NanoKVM 中 `/kvmapp/server/` 目录下的原始文件；
+   1. 上传文件需要启用 SSH 功能。请在 Web `设置 - SSH` 中检查 SSH 是否已经启用； 
+   2. 使用编译生成的 `NanoKVM-Server` 文件，替换 NanoKVM 中 `/kvmapp/server/` 目录下的原始文件； 
    3. 在 NanoKVM 中执行 `/etc/init.d/S95nanokvm restart` 重启服务。
+
+## 手动更新
+
+> 请确保已经在 Web 界面的 `设置 - SSH` 中启用了 SSH 功能，以便上传文件。
+
+1. 从 [GitHub](https://github.com/sipeed/NanoKVM/releases) 下载最新的应用安装包；
+2. 解压缩下载的安装包，并将解压后的文件夹重命名为 `kvmapp`；
+3. 备份 NanoKVM 系统中的 `/kvmapp` 目录，然后用解压后的 `kvmapp` 文件夹替换现有目录。
+4. 在 NanoKVM 中执行 `/etc/init.d/S95nanokvm restart` 重启服务。

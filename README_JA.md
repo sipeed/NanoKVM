@@ -41,7 +41,7 @@ NanoKVM Fullは完全版で、洗練されたケースと完全なアクセサ�
 | --- | --- | --- | --- |
 | 計算ユニット | LicheeRV Nano(RISCV) | LicheeRV Nano(RISCV) | CM4 (ARM) |
 | 解像度 | 1080P @ 60fps | 1080P @ 60fps | 1080P @ 60fps |
-| ビデオエンコーディング | MJPEG, H264(開発中) | MJPEG, H264(開発中) | MJPEG, H264 |
+| ビデオエンコーディング | MJPEG, H264 | MJPEG, H264 | MJPEG, H264 |
 | ビデオ遅延 | 90～230ms | 90～230ms | 100～230ms |
 | UEFI/BIOS | ✓ | ✓ | ✓ |
 | 仮想HID | ✓ | ✓ | ✓ |

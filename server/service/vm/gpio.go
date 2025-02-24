@@ -46,7 +46,7 @@ func (s *Service) SetGpio(c *gin.Context) {
 		return
 	}
 
-	log.Debugf("gpio %s set sucessfully", device)
+	log.Debugf("gpio %s set successfully", device)
 	rsp.OkRsp(c)
 }
 

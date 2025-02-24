@@ -14,10 +14,11 @@ import * as api from '@/api/storage.ts';
 import { client } from '@/lib/websocket.ts';
 
 type ImagesProps = {
+  cdrom: boolean;
   setIsMounted: (isMounted: boolean) => void;
 };
 
-export const Images = ({ setIsMounted }: ImagesProps) => {
+export const Images = ({ cdrom, setIsMounted }: ImagesProps) => {
   const { t } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
 
@@ -77,7 +78,7 @@ export const Images = ({ setIsMounted }: ImagesProps) => {
     const filename = mountedImage === image ? '' : image;
 
     api
-      .mountImage(filename)
+      .mountImage(filename, cdrom)
       .then((rsp) => {
         if (rsp.code !== 0) {
           openNotification();

@@ -69,11 +69,13 @@ func (c *Cli) Stop() error {
 		return err
 	}
 
+	_ = os.Remove(ConfigPath)
+
 	return os.Remove(ScriptPath)
 }
 
 func (c *Cli) Up() error {
-	command := "tailscale up"
+	command := "tailscale up --accept-dns=false"
 	return exec.Command("sh", "-c", command).Run()
 }
 
@@ -111,7 +113,7 @@ func (c *Cli) Status() (*TsStatus, error) {
 }
 
 func (c *Cli) Login() (string, error) {
-	command := "tailscale login --timeout=10m"
+	command := "tailscale login --accept-dns=false --timeout=10m"
 	cmd := exec.Command("sh", "-c", command)
 
 	stderr, err := cmd.StderrPipe()

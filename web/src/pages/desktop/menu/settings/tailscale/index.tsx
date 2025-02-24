@@ -3,14 +3,13 @@ import { Divider } from 'antd';
 import { LoaderCircleIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/network.ts';
+import * as api from '@/api/extensions/tailscale.ts';
 
 import { Device } from './device.tsx';
 import { Header } from './header.tsx';
 import { Install } from './install.tsx';
 import { Login } from './login.tsx';
-import { Memory } from './memory.tsx';
-import { Status } from './types.ts';
+import type { Status } from './types.ts';
 
 type TailscaleProps = {
   setIsLocked: (isLocked: boolean) => void;
@@ -32,7 +31,7 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
     setIsLoading(true);
 
     api
-      .getTailscaleStatus()
+      .getStatus()
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -48,10 +47,7 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
 
   return (
     <>
-      <Header status={status} onSuccess={getStatus} />
-      <Divider />
-
-      <Memory />
+      <Header state={status?.state} onSuccess={getStatus} />
       <Divider />
 
       {isLoading ? (

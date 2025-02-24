@@ -22,6 +22,8 @@ src
 
 ## Local Development
 
+> Development requires SSH. You can enable it in the Web Settings: `Settings > SSH`.
+
 Due to CORS restrictions, authentication needs to be disabled during local development.
 
 To develop authentication features, you need to build the project and test in NanoKVM.
@@ -55,4 +57,7 @@ pnpm build
 3. Upload `web` to `/kvmapp/server/` in NanoKVM.
 4. Restart the service by executing `/etc/init.d/S95nanokvm restart` in NanoKVM.
 
-Additionally, browser may have old version cache. If you can't open the page, try a force refresh or clear the cache.
+Tips:
+
+1. File uploads requires SSH. You can enable it in the Web Settings: `Settings > SSH`.
+2. Browser may have old version cache. If you can't open the page, try a force refresh or clear the cache.

@@ -7,6 +7,7 @@ import { MenuIcon, XIcon } from 'lucide-react';
 import { getMenuDisabledItems } from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 
+import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
 import { Image } from './image';
 import { Keyboard } from './keyboard';
@@ -16,7 +17,6 @@ import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
-import { DownloadImage } from './download.tsx';
 import { Wol } from './wol';
 
 export const Menu = () => {
@@ -48,12 +48,12 @@ export const Menu = () => {
           <Divider type="vertical" />
 
           {!menuDisabledItems.includes('image') && <Image />}
+          {!menuDisabledItems.includes('download') && <DownloadImage />}
           {!menuDisabledItems.includes('script') && <Script />}
           {!menuDisabledItems.includes('terminal') && <Terminal />}
           {!menuDisabledItems.includes('wol') && <Wol />}
-          <DownloadImage />
 
-          {['image', 'script', 'terminal', 'wol'].some(
+          {['image', 'script', 'terminal', 'wol', 'download'].some(
             (key) => !menuDisabledItems.includes(key)
           ) && <Divider type="vertical" />}
 

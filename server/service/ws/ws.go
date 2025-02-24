@@ -71,12 +71,12 @@ func (c *WsClient) Read() error {
 			return err
 		}
 
-		log.Debugf("receive message: %s", message)
+		log.Debugf("received message: %s", message)
 
 		var event []int
 		err = json.Unmarshal(message, &event)
 		if err != nil {
-			log.Debugf("receive invalid message: %s", message)
+			log.Debugf("received invalid message: %s", message)
 			continue
 		}
 

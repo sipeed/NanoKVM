@@ -17,4 +17,5 @@ func authRouter(r *gin.Engine) {
 	api.GET("/auth/password", service.IsPasswordUpdated) // is password updated
 	api.GET("/auth/account", service.GetAccount)         // get account
 	api.POST("/auth/password", service.ChangePassword)   // change password
+	api.POST("/auth/logout", service.Logout)             // logout
 }

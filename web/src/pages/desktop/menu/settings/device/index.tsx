@@ -2,6 +2,7 @@ import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { Oled } from './oled.tsx';
+import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
 
@@ -16,6 +17,7 @@ export const Device = () => {
       <div className="flex flex-col space-y-6">
         <Oled />
         <Wifi />
+        <Ssh />
         <VirtualDevices />
       </div>
     </>

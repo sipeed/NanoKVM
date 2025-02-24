@@ -61,3 +61,18 @@ export function setOLED(sleep: number) {
 export function resetHdmi() {
   return http.post('/api/vm/hdmi/reset');
 }
+
+// get SSH state
+export function getSSHState() {
+  return http.get('/api/vm/ssh');
+}
+
+// enable SSH
+export function enableSSH() {
+  return http.post('/api/vm/ssh/enable');
+}
+
+// disable SSH
+export function disableSSH() {
+  return http.post('/api/vm/ssh/disable');
+}

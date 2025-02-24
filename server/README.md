@@ -44,9 +44,13 @@ logger:
 # Note: Only disable authentication in development environment
 authentication: enable
 
-# JWT secret key configuration
-# If left empty, a random key will be generated on each server start
-secretKey: ""
+jwt:
+   # JWT secret key. If left empty, a random 64-byte key will be generated automatically.
+   secretKey: ""
+   # JWT token expiration time in seconds. Default: 2678400 (31 days)
+   refreshTokenDuration: 2678400
+   # Invalidate all JWT tokens when the user logs out. Default: true
+   revokeTokensOnLogout: true
 
 # Address for custom STUN server
 stun: stun.l.google.com:19302
@@ -80,6 +84,15 @@ Note: Use Linux operating system (x86-64). This build process is not compatible 
     3. Run `patchelf --add-rpath \$ORIGIN/dl_lib NanoKVM-Server` to modify the RPATH of the executable file.
 
 4. Deploy the Application
-    1. Before deploying, update the application to the latest version in your browser. Follow the instructions [here](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/system/updating.html).
+    1. File uploads requires SSH. Please enable it in the Web Settings: `Settings > SSH`;
     2. Replace the original file in the NanoKVM `/kvmapp/server/` directory with the newly compiled `NanoKVM-Server`.
     3. Restart the service on NanoKVM by executing `/etc/init.d/S95nanokvm restart`.
+
+## Manually Update
+
+> File uploads requires SSH. Please enable it in the Web Settings: `Settings > SSH`;
+
+1. Download the latest application from [GitHub](https://github.com/sipeed/NanoKVM/releases);
+2. Unzip the downloaded file and rename the unzipped folder to `kvmapp`;
+3. Back up the existing `/kvmapp` directory on your NanoKVM, then replace it with the new `kvmapp` folder;
+4. Run `/etc/init.d/S95nanokvm restart` on your NanoKVM to restart the service.
