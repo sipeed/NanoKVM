@@ -127,12 +127,13 @@ int qrencode(char *string)
 		printf("error %s", qrGetErrorInfo(p));
 		return -1;
 	}
-	ofstream f("/etc/kvm/wifi_config.bmp");
-	if (f.fail()) {
-		return -1;
-	}
-	f.write((const char *)buffer, size);
-	f.close();
+	// output qrcode to file
+	// ofstream f("/etc/kvm/wifi_config.bmp");
+	// if (f.fail()) {
+	// 	return -1;
+	// }
+	// f.write((const char *)buffer, size);
+	// f.close();
 	return 0;
 }
 
