@@ -144,6 +144,7 @@ void* thread_key_handle(void * arg)
 
 void* thread_sys_handle(void * arg)
 {
+	get_ping_allow_state();
     while(kvm_sys_state.sys_thread_running)
     {
 		// printf("[kvmsys]main while start!\n");

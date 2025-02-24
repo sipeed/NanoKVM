@@ -16,10 +16,11 @@ enum ip_addr_t
 // net_port
 int get_ip_addr(ip_addr_t ip_type);
 int chack_net_state(ip_addr_t use_ip_type);
+int get_ping_allow_state(void);
 void patch_eth_wifi(void);
-int kvm_wifi_exist();
-void kvm_update_usb_state();
-void kvm_update_hdmi_state();
+int kvm_wifi_exist(void);
+void kvm_update_usb_state(void);
+void kvm_update_hdmi_state(void);
 void kvm_update_stream_fps(void);
 void kvm_update_stream_type(void);
 void kvm_update_stream_qlty(void);

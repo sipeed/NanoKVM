@@ -36,6 +36,15 @@ int get_nic_state(const char* interface_name)
 	return ret;
 }
 
+int get_ping_allow_state()
+{
+	if(access("/etc/kvm/stop_ping", F_OK) == 0) {
+		kvm_sys_state.ping_allow = 0;
+	} else {
+		kvm_sys_state.ping_allow = 1;
+	}
+}
+
 // net_port
 int get_ip_addr(ip_addr_t ip_type)
 {
@@ -354,16 +363,21 @@ void kvm_update_eth_state(void)
 				return;
 			}
 		}
-		// ping route
-		if(kvm_sys_state.eth_route[0] == 0){
-			get_ip_addr(ETH_ROUTE);
-		} else {
-			if(chack_net_state(ETH_ROUTE)){
-				// 网络通
-				kvm_sys_state.eth_state = 3;
+		if(kvm_sys_state.ping_allow){
+			// ping route
+			if(kvm_sys_state.eth_route[0] == 0){
+				get_ip_addr(ETH_ROUTE);
 			} else {
-				kvm_sys_state.eth_state = 2;
+				if(chack_net_state(ETH_ROUTE)){
+					// Ping successful
+					kvm_sys_state.eth_state = 3;
+				} else {
+					kvm_sys_state.eth_state = 2;
+				}
 			}
+		} else {
+			// Consider the network to be connected
+			kvm_sys_state.eth_state = 3;
 		}
 
 	} else {
@@ -374,40 +388,47 @@ void kvm_update_eth_state(void)
 
 void kvm_update_wifi_state(void)
 {	
-	// 无wifi模块(检测存在?)->有模块&未联网(检测是否联网)->
+	// No WiFi module (check for existence?) -> Module exists & not connected (check if connected) ->
 	if(kvm_sys_state.wifi_state == -2) return;
 	switch (kvm_sys_state.wifi_state){
 		case -1:
-		// 初始缺省值
+		// Initial default value.
 			if (kvm_wifi_exist()) {
 				kvm_sys_state.wifi_state = 0;
 				system("touch /etc/kvm/wifi_exist");
 			}
 			else {
-				kvm_sys_state.wifi_state = -2; // 不存在wifi模块,直接跳出
+				kvm_sys_state.wifi_state = -2; // WiFi module does not exist, exiting directly.
 				system("rm /etc/kvm/wifi_exist");
 				return;
 			}
-			// break;	// 直接开始检测联网
+			// break;	// Start checking the connection directly.
 		case 0:
-		// 存在WiFi&未联网
+		// WiFi is available but not connected.
 			system("echo 0 > /kvmapp/kvm/wifi_state");
 			if (get_ip_addr(WiFi_IP) && get_ip_addr(WiFi_ROUTE)){
-				// 已获取ip+route
-				if (chack_net_state(WiFi_ROUTE)){
-					// ping 通
+				// IP+Route has been acquired
+				if(kvm_sys_state.ping_allow){
+					if (chack_net_state(WiFi_ROUTE)){
+						// Ping successful
+						kvm_sys_state.wifi_state = 1;
+					}
+				} else {
+					// Consider the network to be connected
 					kvm_sys_state.wifi_state = 1;
 				}
 			}
 			break;
 		case 1:
-		// 已联网&持续检测是否能ping通
+		// Connected to the network & continuously checking if it can ping successfully.
 			system("echo 1 > /kvmapp/kvm/wifi_state");
 			get_ip_addr(WiFi_IP);
-			if (kvm_sys_state.wifi_route[0] != 0){
-				if (chack_net_state(WiFi_ROUTE) == 0){
-					// ping 通
-					kvm_sys_state.wifi_state = 0;
+			if(kvm_sys_state.ping_allow){
+				if (kvm_sys_state.wifi_route[0] != 0){
+					if (chack_net_state(WiFi_ROUTE) == 0){
+						// Ping successful
+						kvm_sys_state.wifi_state = 0;
+					}
 				}
 			}
 		// default:
