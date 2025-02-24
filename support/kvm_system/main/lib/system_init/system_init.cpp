@@ -1,6 +1,5 @@
 #include "config.h"
 #include "system_init.h"
-#include "system_state.h"
 
 using namespace maix;
 using namespace maix::sys;

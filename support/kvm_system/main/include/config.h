@@ -46,13 +46,13 @@ typedef struct {
 	uint8_t wifi_addr[16] = {0};	// WiFi ip
 	uint8_t tail_addr[16] = {0};	// Tailscale ip
 	uint8_t rndis_addr[16] = {0};	// RNDIS ip
-	int8_t  eth_state = NIC_STATE_UNKNOWN;			// cat /sys/class/net/eth0/carrier
-	int8_t  wifi_state = NIC_STATE_UNKNOWN;		// cat /sys/class/net/wlan0/carrier
-	int8_t  tail_state = NIC_STATE_UNKNOWN;		// ifconfig tailscale0 | grep 'inet addr' | awk '{print $2}'
+	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
+	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
+	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep 'inet addr' | awk '{print $2}'
 	int8_t  hdmi_state = -1;		// cat /proc/cvitek/vi_dbg | grep VIFPS | awk '{print $3}' (1s)
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
-	int8_t  rndis_state = NIC_STATE_UNKNOWN;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
+	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
 	int8_t  udisk_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0
 	int8_t  host_pwr_state = -1;	// cat /sys/class/gpio/gpio504/value
 	int16_t hdmi_width = 0;			// cat /kvmapp/kvm/width
@@ -78,13 +78,13 @@ typedef struct {
 	uint8_t wifi_addr[16] = {0};	// WiFi ip
 	uint8_t tail_addr[16] = {0};	// Tailscale ip
 	uint8_t rndis_addr[16] = {0};	// RNDIS ip
-	int8_t  eth_state = NIC_STATE_UNKNOWN;			// cat /sys/class/net/eth0/carrier
-	int8_t  wifi_state = NIC_STATE_UNKNOWN;		// cat /sys/class/net/wlan0/carrier
-	int8_t  tail_state = NIC_STATE_UNKNOWN;		// ifconfig tailscale0 | grep inet\ addr | awk '{print $2}'
+	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
+	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
+	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep inet\ addr | awk '{print $2}'
 	int8_t  hdmi_state = -1;		// cat /proc/cvitek/vi_dbg | grep VIFPS | awk '{print $3}' (1s)
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
-	int8_t  rndis_state = NIC_STATE_UNKNOWN;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
+	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
 	int8_t  udisk_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0
 	int8_t  host_pwr_state = -1;	// cat /sys/class/gpio/gpio504/value
 	int16_t hdmi_width = -1;		// cat /kvmapp/kvm/width

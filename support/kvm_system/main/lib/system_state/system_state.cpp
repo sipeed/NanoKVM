@@ -10,6 +10,32 @@ using namespace maix::sys;
 extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
 
+int get_nic_state(const char* interface_name)
+{
+	int sock;
+	struct ifreq ifr;
+	int ret = NIC_STATE_NO_EXIST;
+	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		return ret;
+	}
+	strcpy(ifr.ifr_name, interface_name);
+	if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0) {
+		close(sock);
+		return ret;
+	}
+	if (ifr.ifr_flags & IFF_UP) {
+		if (ifr.ifr_flags & IFF_RUNNING) {
+			ret = NIC_STATE_RUNNING;
+		} else {
+			ret = NIC_STATE_UP;
+		}
+	} else {
+		ret = NIC_STATE_DOWN;
+	}
+	close(sock);
+	return ret;
+}
+
 // net_port
 int get_ip_addr(ip_addr_t ip_type)
 {
@@ -146,17 +172,29 @@ int get_ip_addr(ip_addr_t ip_type)
 	return 0;
 }
 
+int chack_net_state(ip_addr_t use_ip_type)
+{
+	char Cmd[100]={0};
+	if		(use_ip_type == ETH_ROUTE)  sprintf( Cmd,"ping -I eth0 -w 1 %s > /dev/null", kvm_sys_state.eth_route);
+	else if	(use_ip_type == WiFi_ROUTE) sprintf( Cmd,"ping -I wlan0 -w 1 %s > /dev/null", kvm_sys_state.wifi_route);
+	else return -1;	// 不支持的端口
+	if(system(Cmd) == 0){	// 256：不通； = 0：通
+		return 1;
+	}
+	return 0;
+}
+
+void patch_eth_wifi(void)
+{
+	// system("ip link set eth0 down");
+	// system("ip link set eth0 up");
+	// system("udhcpc -i eth0 &");
+}
+
 int kvm_wifi_exist()
 {
-	// if(access("/sys/bus/sdio/devices/mmc1*", F_OK) == 0) return 1;
-	// else return 0;
-	uint8_t RW_Data[10];	
-	FILE *fp;
-	fp = popen("ifconfig | grep wlan", "r");
-	fgets((char*)RW_Data, 2, fp);
-	pclose(fp);
-	if(RW_Data[0] == 'w') return 1;
-	else return 0;
+	if (get_nic_state("wlan0") == NIC_STATE_NO_EXIST) return 0;
+	else return 1;
 }
 
 void kvm_update_usb_state()
@@ -301,85 +339,104 @@ void kvm_update_hdmi_res(void)
 	kvm_sys_state.hdmi_height = atoi((char*)RW_Data);
 }
 
-int get_nic_state(const char* interface_name)
-{
-	int sock;
-	struct ifreq ifr;
-	int ret = NIC_STATE_NO_EXIST;
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		return ret;
-	}
-	strcpy(ifr.ifr_name, interface_name);
-	if (ioctl(sock, SIOCGIFFLAGS, &ifr) < 0) {
-		close(sock);
-		return ret;
-	}
-	if (ifr.ifr_flags & IFF_UP) {
-		if (ifr.ifr_flags & IFF_RUNNING) {
-			ret = NIC_STATE_RUNNING;
-		} else {
-			ret = NIC_STATE_UP;
-		}
-	} else {
-		ret = NIC_STATE_DOWN;
-	}
-	close(sock);
-	return ret;
-}
-
 void kvm_update_eth_state(void)
-{
-	kvm_sys_state.eth_state = get_nic_state("eth0");
+{	
+	static uint8_t nic_state = 0;
+	nic_state = get_nic_state("eth0");
 
-	if(kvm_sys_state.eth_state != NIC_STATE_DOWN){
+	if(nic_state == NIC_STATE_RUNNING){
+		// Get IP
 		if(strcmp(ip_address()["eth0"].c_str(), (char*)kvm_sys_state.eth_addr) != 0){
-			get_ip_addr(ETH_IP);
+			if(get_ip_addr(ETH_IP)){
+				kvm_sys_state.eth_state = 2;
+			} else {
+				kvm_sys_state.eth_state = 1;
+				return;
+			}
 		}
-
+		// ping route
 		if(kvm_sys_state.eth_route[0] == 0){
 			get_ip_addr(ETH_ROUTE);
+		} else {
+			if(chack_net_state(ETH_ROUTE)){
+				// 网络通
+				kvm_sys_state.eth_state = 3;
+			} else {
+				kvm_sys_state.eth_state = 2;
+			}
 		}
+
+	} else {
+		kvm_sys_state.eth_state = 0;
+		patch_eth_wifi();
 	}
 }
 
 void kvm_update_wifi_state(void)
-{
+{	
+	// 无wifi模块(检测存在?)->有模块&未联网(检测是否联网)->
 	if(kvm_sys_state.wifi_state == -2) return;
-	kvm_sys_state.wifi_state = get_nic_state("wlan0");
-
-	switch (kvm_sys_state.wifi_state) {
-		case -2:
-			system("rm /etc/kvm/wifi_exist");
-			break;
-
+	switch (kvm_sys_state.wifi_state){
+		case -1:
+		// 初始缺省值
+			if (kvm_wifi_exist()) {
+				kvm_sys_state.wifi_state = 0;
+				system("touch /etc/kvm/wifi_exist");
+			}
+			else {
+				kvm_sys_state.wifi_state = -2; // 不存在wifi模块,直接跳出
+				system("rm /etc/kvm/wifi_exist");
+				return;
+			}
+			// break;	// 直接开始检测联网
 		case 0:
-			system("touch /etc/kvm/wifi_exist");
+		// 存在WiFi&未联网
 			system("echo 0 > /kvmapp/kvm/wifi_state");
+			if (get_ip_addr(WiFi_IP) && get_ip_addr(WiFi_ROUTE)){
+				// 已获取ip+route
+				if (chack_net_state(WiFi_ROUTE)){
+					// ping 通
+					kvm_sys_state.wifi_state = 1;
+				}
+			}
 			break;
-
 		case 1:
+		// 已联网&持续检测是否能ping通
 			system("echo 1 > /kvmapp/kvm/wifi_state");
 			get_ip_addr(WiFi_IP);
-			break;
+			if (kvm_sys_state.wifi_route[0] != 0){
+				if (chack_net_state(WiFi_ROUTE) == 0){
+					// ping 通
+					kvm_sys_state.wifi_state = 0;
+				}
+			}
+		// default:
+		// 	kvm_sys_state.wifi_state = -1;
 	}
 }
 
 void kvm_update_rndis_state(void)
 {
-	kvm_sys_state.rndis_state = get_nic_state("usb0");
-
-	if(kvm_sys_state.rndis_state != NIC_STATE_UP){
-		get_ip_addr(RNDIS_IP);
+	if (get_nic_state("usb0") == NIC_STATE_RUNNING) {
+		if(kvm_sys_state.rndis_state != 1) {
+			if (get_ip_addr(RNDIS_IP)) {
+				kvm_sys_state.rndis_state = 1;
+			}
+		}
 	}
+	else kvm_sys_state.rndis_state = 0;
 }
 
 void kvm_update_tailscale_state(void)
 {
-	kvm_sys_state.tail_state = get_nic_state("tailscale0");
-
-	if(kvm_sys_state.tail_state != NIC_STATE_UP){
-		get_ip_addr(Tailscale_IP);
+	if (get_nic_state("tailscale0") == NIC_STATE_RUNNING) {
+		if(kvm_sys_state.tail_state != 1){
+			if (get_ip_addr(Tailscale_IP)) {
+				kvm_sys_state.tail_state = 1;
+			}
+		}
 	}
+	else kvm_sys_state.tail_state = 0;
 }
 
 //============================================================================
