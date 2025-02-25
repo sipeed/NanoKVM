@@ -19,6 +19,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 
 // #include "kvm_mmf.hpp"
 
@@ -46,6 +47,7 @@ void set_venc_auto_recyc(uint8_t _enable);
  * @param	_pp_kvm_data		@output: 	Encode data
  * @param	_p_kvmv_data_size	@output: 	Encode data size
  * @return
+        -5: Retrieving image, please wait
         -4: Modifying image resolution, please wait
         -3: img buffer full
         -2: VENC Error
