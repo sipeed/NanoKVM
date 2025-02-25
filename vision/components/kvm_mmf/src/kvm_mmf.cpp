@@ -663,12 +663,12 @@ static CVI_S32 _mmf_sys_init(SIZE_S stSize)
 
 	// vi
 	u32BlkSize = COMMON_GetPicBufferSize(stSize.u32Width, stSize.u32Height, PIXEL_FORMAT_UYVY,
-		DATA_BITWIDTH_12, enCompressMode, DEFAULT_ALIGN);
+		DATA_BITWIDTH_8, enCompressMode, DEFAULT_ALIGN);
 	u32BlkRotSize = COMMON_GetPicBufferSize(stSize.u32Height, stSize.u32Width, PIXEL_FORMAT_UYVY,
-		DATA_BITWIDTH_12, enCompressMode, DEFAULT_ALIGN);
+		DATA_BITWIDTH_8, enCompressMode, DEFAULT_ALIGN);
 	u32BlkSize = MAX(u32BlkSize, u32BlkRotSize);
 	stVbConf.astCommPool[MMF_VB_VI_ID].u32BlkSize	= u32BlkSize;
-	stVbConf.astCommPool[MMF_VB_VI_ID].u32BlkCnt	= 4;
+	stVbConf.astCommPool[MMF_VB_VI_ID].u32BlkCnt	= 3;
 	stVbConf.astCommPool[MMF_VB_VI_ID].enRemapMode	= VB_REMAP_MODE_CACHED;
 	stVbConf.u32MaxPoolCnt = 1;
 

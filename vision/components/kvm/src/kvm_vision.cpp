@@ -1432,6 +1432,13 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
 
         // img exist
         // Encode
+        if(kvmv_cfg.venc_type == VENC_MJPEG && kvmv_cfg.venc_type != _type){
+            mmf_enc_jpg_deinit(0);
+        }
+        if(kvmv_cfg.venc_type == VENC_H264 && kvmv_cfg.venc_type != _type){
+            mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
+            kvm_venc.enc_h264_init = 0;
+        }
         if(_type == VENC_H264 && kvmv_cfg.venc_type != _type){
             kvm_venc.enc_h264_init = 1;
             // debug("[kvmv] change to h264\n");
