@@ -79,6 +79,7 @@ typedef struct {
     uint8_t hdmi_reading_flag = 0;
     uint8_t hdmi_mode = 0;
     uint8_t vi_detect_state = 0;
+    uint8_t venc_auto_recyc = 0;
 } kvmv_cfg_t;
 
 typedef struct {
@@ -1349,6 +1350,11 @@ uint8_t check_kvmv(uint8_t _try_num)
     return 1;
 }
 
+void set_venc_auto_recyc(uint8_t _enable)
+{
+    if(_enable) kvmv_cfg.venc_auto_recyc = 1;
+    else kvmv_cfg.venc_auto_recyc = 0;
+}
 
 /**********************************************************************************
  * @name    kvmv_read_img
@@ -1376,6 +1382,8 @@ uint8_t check_kvmv(uint8_t _try_num)
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
 {
 	// uint64_t __attribute__((unused)) start_time = time::time_ms();
+    debug("[kvmv]kvmv_read_img type = %d...\n", _type);
+
     if (kvmv_cfg.vi_detect_state == 1){
         return -4;
     }
@@ -1427,22 +1435,25 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
 			delete img;
             debug("[kvmv]can`t get img...\n");
             continue;
+            // return IMG_NOT_EXIST;
         }
         // debug("[kvmv]cheak img null?: %d \r\n", (int)(time::time_ms() - start_time));
 
         // img exist
         // Encode
         if(kvmv_cfg.venc_type == VENC_MJPEG && kvmv_cfg.venc_type != _type){
-            mmf_enc_jpg_deinit(0);
+            if(kvmv_cfg.venc_auto_recyc == 1){
+                mmf_enc_jpg_deinit(0);
+            }
+            kvm_venc.enc_h264_init = 1;
         }
         if(kvmv_cfg.venc_type == VENC_H264 && kvmv_cfg.venc_type != _type){
-            mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
+            if(kvmv_cfg.venc_auto_recyc == 1){
+                mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
+            }
             kvm_venc.enc_h264_init = 0;
         }
-        if(_type == VENC_H264 && kvmv_cfg.venc_type != _type){
-            kvm_venc.enc_h264_init = 1;
-            // debug("[kvmv] change to h264\n");
-        }
+
         kvmv_cfg.venc_type = _type;
 
         if(kvmv_cfg.venc_type == VENC_MJPEG){

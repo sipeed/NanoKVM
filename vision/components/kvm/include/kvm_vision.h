@@ -32,6 +32,7 @@ extern "C" {
 #define IMG_H264_TYPE_PF		4
 
 void kvmv_init(uint8_t _debug_info_en = 0);
+void set_venc_auto_recyc(uint8_t _enable);
 /**********************************************************************************
  * @name    kvmv_read_img
  * @author  Sipeed BuGu
