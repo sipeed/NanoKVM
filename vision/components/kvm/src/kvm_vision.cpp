@@ -19,6 +19,8 @@
 #define KVMV_MAX_TRY_NUM	   	2
 #define vi_min_width            32
 #define vi_min_height           3
+#define vi_max_width            1920
+#define vi_max_height           1080
 
 #define default_vi_width        1920
 #define default_vi_height       1080
@@ -295,6 +297,19 @@ int get_manual_resolution(void)
         tmp_height = vi_min_height;
 	    char Cmd[100]={0};
         sprintf(Cmd, "echo %d > %s", vi_min_height, vi_height_path);
+	    system(Cmd);
+    }
+    // res max limit
+    if(tmp_width > vi_max_width){
+        tmp_width = vi_max_width;
+	    char Cmd[100]={0};
+        sprintf(Cmd, "echo %d > %s", vi_max_width, vi_width_path);
+	    system(Cmd);
+    }
+    if(tmp_height > vi_max_height){
+        tmp_height = vi_max_height;
+	    char Cmd[100]={0};
+        sprintf(Cmd, "echo %d > %s", vi_max_height, vi_height_path);
 	    system(Cmd);
     }
 
