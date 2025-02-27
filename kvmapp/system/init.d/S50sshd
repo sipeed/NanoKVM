@@ -15,10 +15,10 @@ startssh() {
     # Generate SSH keys if they do not exist
     [ ! -f /etc/ssh/ssh_host_rsa_key ] && /usr/bin/ssh-keygen -A
 
-    printf "Starting sshd: "
-    /usr/sbin/sshd
-    touch /var/lock/sshd
-    echo "OK"
+            printf "Starting sshd: "
+            /usr/sbin/sshd
+            touch /var/lock/sshd
+            echo "OK"
 }
 
 start() {
@@ -36,15 +36,15 @@ start() {
 }
 
 stop() {
-    printf "Stopping sshd: "
-    killall sshd 2>/dev/null
-    rm -f /var/lock/sshd
-    echo "OK"
+            printf "Stopping sshd: "
+            killall sshd 2>/dev/null
+            rm -f /var/lock/sshd
+            echo "OK"
 }
 
 restart() {
-    stop
-    start
+            stop
+            start
 }
 
 case "$1" in
