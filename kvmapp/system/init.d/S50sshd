@@ -12,18 +12,11 @@ PIDFILE="/var/run/sshd.pid"
 umask 077
 
 startssh() {
-    # Generate keys if missing
+    # Generate SSH keys if they do not exist
     [ ! -f /etc/ssh/ssh_host_rsa_key ] && /usr/bin/ssh-keygen -A
-
-    # Prevent multiple instances using PID check
-    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
-        echo "sshd already running"
-        exit 0
-    fi
 
     printf "Starting sshd: "
     /usr/sbin/sshd
-    echo $! > "$PIDFILE"  # Store the PID of sshd
     touch /var/lock/sshd
     echo "OK"
 }
@@ -44,9 +37,7 @@ start() {
 
 stop() {
     printf "Stopping sshd: "
-    if [ -f "$PIDFILE" ]; then
-        kill "$(cat "$PIDFILE")" 2>/dev/null && rm -f "$PIDFILE"
-    fi
+    killall sshd 2>/dev/null
     rm -f /var/lock/sshd
     echo "OK"
 }
@@ -67,12 +58,10 @@ case "$1" in
         restart
         ;;
     permanent_on)
-        [ ! -e /etc/kvm/ssh_stop ] && { echo "SSH is already enabled"; exit 0; }
         rm -f /etc/kvm/ssh_stop
         start
         ;;
     permanent_off)
-        [ -e /etc/kvm/ssh_stop ] && { echo "SSH is already disabled"; exit 0; }
         touch /etc/kvm/ssh_stop
         stop
         ;;
