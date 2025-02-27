@@ -1,0 +1,49 @@
+#!/bin/sh
+
+DAEMON=ssdpd
+PIDFILE=/var/run/$DAEMON.pid
+CFGFILE=/etc/default/$DAEMON
+
+DAEMON_ARGS=""
+
+# Read configuration variable file if it is present
+# shellcheck source=/dev/null
+[ -r "$CFGFILE" ] && . "$CFGFILE"
+
+# shellcheck disable=SC2086
+start() {
+        printf 'Starting %s: ' "$DAEMON"
+        if start-stop-daemon -S -q -p "$PIDFILE" -x "$DAEMON" -- $DAEMON_ARGS; then
+                echo "OK"
+        else
+                echo "FAIL"
+        fi
+}
+
+stop() {
+        printf 'Stopping %s: ' "$DAEMON"
+        if start-stop-daemon -K -q -p "$PIDFILE" -x "$DAEMON"; then
+                echo "OK"
+        else
+                echo "FAIL"
+        fi
+}
+
+restart() {
+        stop
+        start
+}
+
+case "$1" in
+        start|stop|restart)
+                "$1"
+                ;;
+        reload)
+                restart
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart|reload}"
+                exit 1
+esac
+
+exit $?
