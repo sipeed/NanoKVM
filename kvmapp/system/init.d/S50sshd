@@ -3,67 +3,82 @@
 # sshd        Starts sshd.
 #
 
-# Make sure the ssh-keygen progam exists
-[ -f /usr/bin/ssh-keygen ] || exit 0
+# Ensure required binaries exist
+[ -x /usr/bin/ssh-keygen ] || exit 0
+[ -x /usr/sbin/sshd ] || exit 1
+
+PIDFILE="/var/run/sshd.pid"
 
 umask 077
 
 startssh() {
-	/usr/bin/ssh-keygen -A
+    # Generate keys if missing
+    [ ! -f /etc/ssh/ssh_host_rsa_key ] && /usr/bin/ssh-keygen -A
 
-	printf "Starting sshd: "
-	/usr/sbin/sshd
-	touch /var/lock/sshd
-	echo "OK"
+    # Prevent multiple instances using PID check
+    if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+        echo "sshd already running"
+        exit 0
+    fi
+
+    printf "Starting sshd: "
+    /usr/sbin/sshd
+    echo $! > "$PIDFILE"  # Store the PID of sshd
+    touch /var/lock/sshd
+    echo "OK"
 }
+
 start() {
-	# Create any missing keys
-    if [ -e /etc/kvm/ssh_stop ]
-	then
-		if [ -e /boot/start_ssh_once ]
-		then
-			rm /boot/start_ssh_once
-			startssh
-		else
-			echo "SSH does not start"
-		fi
-	else
-		startssh
-	fi
+    if [ -e /etc/kvm/ssh_stop ]; then
+        if [ -e /boot/start_ssh_once ]; then
+            rm -f /boot/start_ssh_once
+            startssh
+        else
+            echo "SSH does not start"
+            exit 0
+        fi
+    else
+        startssh
+    fi
 }
+
 stop() {
-	printf "Stopping sshd: "
-	killall sshd
-	rm -f /var/lock/sshd
-	echo "OK"
+    printf "Stopping sshd: "
+    if [ -f "$PIDFILE" ]; then
+        kill "$(cat "$PIDFILE")" 2>/dev/null && rm -f "$PIDFILE"
+    fi
+    rm -f /var/lock/sshd
+    echo "OK"
 }
+
 restart() {
-	stop
-	start
+    stop
+    start
 }
 
 case "$1" in
-  start)
-	start
-	;;
-  stop)
-	stop
-	;;
-  restart|reload)
-	restart
-	;;
-  permanent_on)
-    rm /etc/kvm/ssh_stop
-	start
-    ;;
-  permanent_off)
-    touch /etc/kvm/ssh_stop
-	stop
-    ;;
-  *)
-	echo "Usage: $0 {start|stop|restart|permanent_on|permanent_off}"
-	exit 1
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart|reload)
+        restart
+        ;;
+    permanent_on)
+        [ ! -e /etc/kvm/ssh_stop ] && { echo "SSH is already enabled"; exit 0; }
+        rm -f /etc/kvm/ssh_stop
+        start
+        ;;
+    permanent_off)
+        [ -e /etc/kvm/ssh_stop ] && { echo "SSH is already disabled"; exit 0; }
+        touch /etc/kvm/ssh_stop
+        stop
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|permanent_on|permanent_off}"
+        exit 1
 esac
 
-exit $?
-
+exit 0
