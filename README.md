@@ -20,6 +20,34 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 
 ## Opensource & Contribution 
 
+### Update 2025.02.27
+
++ Update directory structure
+
+```shell
+├── kvmapp          # APP update package
+│   ├── jpg_stream  # Compatible with direct updates from very old versions
+│   ├── kvm_new_app # Triggers necessary components for kvm_system update
+│   ├── kvm_system  # kvm_system application
+│   ├── server      # NanoKVM frontend and backend applications
+│   └── system      # Necessary system components
+├── server          # NanoKVM backend
+├── support         # Auxiliary functions (system status, system updates, screen, keys)
+│   ├── sg2002      # NanoKVM-Lite/Full/PCIe
+│   └── h618        # NanoKVM-Pro
+├── vision          # Image acquisition (for Go to compile image acquisition SO components)
+│   ├── sg2002      # NanoKVM-Lite/Full/PCIe
+│   └── h618        # NanoKVM-Pro
+├── web             # NanoKVM frontend
+├── LICENSE
+├── README_JA.md
+├── README.md
+├── README_ZH.md
+└── CHANGELOG.md
+```
+
++ Add NanoKVM app installation package `kvmapp`
+
 ### Update 2025.02.19
 All components of NanoKVM were open-sourced, including the [front-end](https://github.com/sipeed/NanoKVM/tree/main/web), [back-end](https://github.com/sipeed/NanoKVM/tree/main/server), [kvm_vision](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm), [kvm_mmf](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm_mmf), [kvm_system](https://github.com/sipeed/NanoKVM/tree/main/support), the [kvmapp update package](https://github.com/sipeed/NanoKVM-System/tree/main/kvmapp), [system sdk](https://github.com/sipeed/LicheeRV-Nano-Build/tree/NanoKVM), and [packaging methods](https://github.com/sipeed/LicheeRV-Nano-Build/blob/NanoKVM/kvm/NanoKVM_img.sh).
 

@@ -6,8 +6,9 @@ NanoKVM
 ![](https://wiki.sipeed.com/hardware/assets/NanoKVM/introduce/NanoKVM_3.png)
 
 <h3>
-    <a href="https://wiki.sipeed.com/hardware/zh/lichee/RV_Nano/1_intro.html"> 快速开始 </a> |
-    <a href="https://cn.dl.sipeed.com/shareURL/KVM/nanoKVM"> 硬件资料 </a>
+    <a href="https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/introduction.html"> Quick Start </a>
+    |
+    <a href="https://cn.dl.sipeed.com/shareURL/KVM/nanoKVM"> Hardware </a>
 </h3>
 
 [English](./README.md) | 中文 | [日本語](./README_JA.md)
@@ -17,6 +18,49 @@ NanoKVM
 > Your NanoKVM Power by RISC-V !
 > 如果您在使用过程中有任何问题或建议，请在这里提交 issue， 或在 [MaixHub Discussion](https://maixhub.com/discussion/nanokvm)告诉我们.
 
+## 开源与贡献
+
+### 2025.02.27 更新内容
++ 更新目录结构
+
+``` shell
+├── kvmapp          # APP更新包
+│   ├── jpg_stream  # 兼容从非常老的版本中直接更新
+│   ├── kvm_new_app # 触发 kvm_system 更新必要组件
+│   ├── kvm_system  # kvm_system 应用
+│   ├── server      # NanoKVM 前后端应用
+│   └── system      # 必要系统组件
+├── server          # NanoKVM 后端
+├── support         # 辅助功能(系统状态、系统更新、屏幕、按键)
+│   ├── sg2002      # NanoKVM-Lite/Full/PCIe
+│   └── h618        # NanoKVM-Pro
+├── vision          # 图像采集（为go编译图像获取so组件）
+│   ├── sg2002      # NanoKVM-Lite/Full/PCIe
+│   └── h618        # NanoKVM-Pro
+├── web             # NanoKVM 前端
+├── LICENSE
+├── README_JA.md
+├── README.md
+├── README_ZH.md
+└── CHANGELOG.md
+```
+
++ 添加 NanoKVM app安装包`kvmapp`
+
+### 2025.02.19 更新内容
+所有 NanoKVM 组件已开源，包括 
+[前端](https://github.com/sipeed/NanoKVM/tree/main/web)、[后端](https://github.com/sipeed/NanoKVM/tree/main/server)、[kvm_vision](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm)、[kvm_mmf](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm_mmf)、[kvm_system](https://github.com/sipeed/NanoKVM/tree/main/support)、[kvmapp 更新包](https://github.com/sipeed/NanoKVM-System/tree/main/kvmapp)、[系统 SDK](https://github.com/sipeed/LicheeRV-Nano-Build/tree/NanoKVM) 和 [固件打包方法](https://github.com/sipeed/LicheeRV-Nano-Build/blob/NanoKVM/kvm/NanoKVM_img.sh)。
+
+### 2025.02.14 更新内容
+最新的 APP v2.1.6 添加了大多数安全增强和 bug 修复，建议普通用户升级到此版本或更新版本。
+
+### 2025.02.05 更新内容
+对于关注安全的用户，可以阅读此问题：https://github.com/sipeed/NanoKVM/issues/301，您会找到有关所有安全问题的解释。GitHub 作为一个开放和透明的平台，为讨论所谓的“后门”担忧提供了空间。开源使产品更加安全！
+
+### 2024.10.18 更新内容
+我们在 10.8 中开源了后端代码，感谢您立即提交的文明 PR，我们将赠送您最新的 NanoKVM-PCIe 作为奖励！   
+十月中旬的批次正在开始测试和打包，大多数在 10.1 之前的订单将在下周和下下周发货。   
+自 10.1 起，AliExpress 的发货日期已更改为 12 月，这是一个保守的交货时间。十月的订单应在 11.15~12.15 期间发出。
 
 ## 简介
 
