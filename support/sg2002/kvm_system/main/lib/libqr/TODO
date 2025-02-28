@@ -1,0 +1,8 @@
+TODO:
+- test on Win32
+- test on Cygwin (if I could)
+- write tests
+- write manpage of qr(1), qrs(1) and libqr(3)
+- localization support by ICU4C
+- pkg-config (.pc file) support
+- rcfile support for command line tool
