@@ -43,6 +43,8 @@ int get_ping_allow_state()
 	} else {
 		kvm_sys_state.ping_allow = 1;
 	}
+
+	return kvm_sys_state.ping_allow;
 }
 
 // net_port
@@ -465,4 +467,6 @@ void kvm_update_tailscale_state(void)
 uint8_t ion_free_space(void)
 {
 	//cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep "usage rate:" | awk '{print $2}'
+
+	return 0;
 }
