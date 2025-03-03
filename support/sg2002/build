@@ -1,0 +1,59 @@
+#!/bin/bash
+
+export MAIXCDK_PATH=~/Git_Project/MaixCDK
+export NanoKVM_PATH=~/NanoKVM
+
+kvm_system_PATH="$NanoKVM_PATH/support/sg2002/kvm_system"
+
+maixcdk_build_from_zero(){
+  maixcdk build <<EOF
+2
+EOF
+}
+
+maixcdk_build(){
+  maixcdk build
+}
+
+maixcdk_clean(){
+  maixcdk distclean
+  maixcdk clean
+}
+
+case "$1" in
+  kvm_system)
+    echo "Start using MaixCDK to compile kvm_system..." 
+    cd $kvm_system_PATH
+    if [ -f "$kvm_system_PATH/build/config/project_vars.json" ]
+    then
+      if grep -q "\"PLATFORM\": \"maixcam\"" "$kvm_system_PATH/build/config/project_vars.json"; then
+        maixcdk_build
+      else
+        maixcdk_clean
+        maixcdk_build_from_zero
+      fi
+    else
+      maixcdk_build_from_zero
+    fi
+    echo -e "\e[36m[build] \e[32mbuild completed! Use \e[34m./build add_to_kvmapp\e[32m to add components to kvmapp.\e[0m"
+  ;;
+  clean)
+    cd $kvm_system_PATH
+    maixcdk_clean
+    echo -e "\e[36m[build] \e[32mkvm_system cleanup completed!\e[0m"
+  ;;
+  add_to_kvmapp)
+    source_PATH="$kvm_system_PATH/dist/kvm_system_release/kvm_system"
+    target_PATH="$NanoKVM_PATH/kvmapp/kvm_system/kvm_system"
+    if [ -f $source_PATH ]
+    then
+      cp -f $source_PATH $target_PATH
+      echo -e "\e[36m[build] \e[32mkvm_system has been moved to kvmapp.\e[0m"
+    else
+      echo -e "\e[36m[build] \e[31mThe source file does not exist. Please compile using \e[34m./build kvm_system \e[31mfirst.\e[0m"
+    fi
+  ;;
+  *)
+    echo -e "\e[36m[build] \e[33mUsage: $0 {kvm_system|clean|add_to_kvmapp}"
+    exit 1
+esac
