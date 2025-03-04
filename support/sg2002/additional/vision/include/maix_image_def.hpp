@@ -18,7 +18,7 @@ namespace maix::image
 
     /**
      * Image formats
-     * @attention for developers, update this enum will also need to update the fmt_size in maix_image.cpp
+     * @attention for MaixPy firmware developers, update this enum will also need to update the fmt_size and fmt_names too !!!
      * @maixpy maix.image.Format
      */
     enum Format
@@ -36,6 +36,22 @@ namespace maix::image
         FMT_YVU420P,  // YYY...VVV...UUU
         FMT_YUV420P,  // YYY...UUU...VVV
         FMT_GRAYSCALE,
+        FMT_BGGR6,      // 6-bit Bayer format with a BGGR pattern.
+        FMT_GBRG6,      // 6-bit Bayer format with a GBRG pattern.
+        FMT_GRBG6,      // 6-bit Bayer format with a GRBG pattern.
+        FMT_RGGB6,      // 6-bit Bayer format with a RGGB pattern.
+        FMT_BGGR8,      // 8-bit Bayer format with a BGGR pattern.
+        FMT_GBRG8,      // 8-bit Bayer format with a GBRG pattern.
+        FMT_GRBG8,      // 8-bit Bayer format with a GRBG pattern.
+        FMT_RGGB8,      // 8-bit Bayer format with a RGGB pattern.
+        FMT_BGGR10,     // 10-bit Bayer format with a BGGR pattern.
+        FMT_GBRG10,     // 10-bit Bayer format with a GBRG pattern.
+        FMT_GRBG10,     // 10-bit Bayer format with a GRBG pattern.
+        FMT_RGGB10,     // 10-bit Bayer format with a RGGB pattern.
+        FMT_BGGR12,     // 12-bit Bayer format with a BGGR pattern.
+        FMT_GBRG12,     // 12-bit Bayer format with a GBRG pattern.
+        FMT_GRBG12,     // 12-bit Bayer format with a GRBG pattern.
+        FMT_RGGB12,     // 12-bit Bayer format with a RGGB pattern.
         FMT_UNCOMPRESSED_MAX,
 
         // compressed format below, not compressed should define upper
@@ -45,32 +61,8 @@ namespace maix::image
         FMT_COMPRESSED_MAX,
 
         FMT_INVALID = 0xFF  // format not valid
-    };
-    // enum Format
-    // {
-    //     FMT_RGB888    = 0,  // RGBRGB...RGB, R at the lowest address
-    //     FMT_BGR888    = 1,  // BGRBGR...BGR, B at the lowest address
-    //     FMT_RGBA8888  = 2,  // RGBARGBA...RGBA, R at the lowest address
-    //     FMT_BGRA8888  = 3,  // BGRABGRA...BGRA, B at the lowest address
-    //     FMT_RGB565    = 4,
-    //     FMT_BGR565    = 5,
-    //     FMT_YUV422SP  = 6,  // YYY...UVUVUV...UVUV
-    //     FMT_YUV422P   = 7,  // YYY...UUU...VVV
-    //     FMT_YVU420SP  = 8,  // YYY...VUVUVU...VUVU, NV21
-    //     FMT_YUV420SP  = 9,  // YYY...UVUVUV...UVUV, NV12
-    //     FMT_YVU420P   = 10, // YYY...VVV...UUU
-    //     FMT_YUV420P   = 11, // YYY...UUU...VVV
-    //     FMT_GRAYSCALE = 12, // YYY...
-    //     FMT_UNCOMPRESSED_MAX,
+    }; // !!!! update this section please update fmt_size and fmt_names too !!!!
 
-    //     // compressed format below, not compressed should define upper
-    //     FMT_COMPRESSED_MIN = 200,
-    //     FMT_JPEG           = 201,
-    //     FMT_PNG            = 202,
-    //     FMT_COMPRESSED_MAX,
-
-    //     FMT_INVALID = 0xFF  // format not valid
-    // };
     /**
      * Image format size in bytes
      * @attention It's a copy of this variable in MaixPy,
@@ -91,12 +83,29 @@ namespace maix::image
         1.5,
         1.5,
         1.5,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0
+        1, // grayscale
+        0.75,   // 6-bit Bayer format
+        0.75,   // 6-bit Bayer format
+        0.75,   // 6-bit Bayer format
+        0.75,   // 6-bit Bayer format
+        1,      // 8-bit Bayer format
+        1,      // 8-bit Bayer format
+        1,      // 8-bit Bayer format
+        1,      // 8-bit Bayer format
+        1.25,   // 10-bit Bayer format
+        1.25,   // 10-bit Bayer format
+        1.25,   // 10-bit Bayer format
+        1.25,   // 10-bit Bayer format
+        1.5,    // 12-bit Bayer format
+        1.5,    // 12-bit Bayer format
+        1.5,    // 12-bit Bayer format
+        1.5,    // 12-bit Bayer format
+        0, // uncompereed_max
+        0, // compressed_min
+        1, // jpeg
+        1, // png
+        0, // compressed_max
+        0  // invalid
         };
 
     /**
@@ -114,10 +123,32 @@ namespace maix::image
         "YUV422P",
         "YVU420SP",
         "YUV420SP",
-        "YVU420P"
+        "YVU420P",
         "YUV420P",
         "GRAYSCALE",
-        "MAX"};
+        "BGGR6",
+        "GBRG6",
+        "GRBG6",
+        "RG6B6",
+        "BGGR8",
+        "GBRG8",
+        "GRBG8",
+        "RG6B8",
+        "BGGR10",
+        "GBRG10",
+        "GRBG10",
+        "RG6B10",
+        "BGGR12",
+        "GBRG12",
+        "GRBG12",
+        "RG6B12",
+        "UNCOMPRESSED_MAX",
+        "COMPRESSED_MIN",
+        "JPEG",
+        "PNG",
+        "COMPRESSED_MAX",
+        "INVALID"
+        };
 
     /**
      * Image size type
@@ -171,7 +202,7 @@ namespace maix::image
           * @param index 0 for width, 1 for height
           * @return int& width or height
           * @maixpy maix.image.Size.__getitem__
-          * @maixcdk maix.image.Size.[]
+          * @maixcdk maix.image.Size.operator[]
           */
         int &operator[](int index)
         {
@@ -267,4 +298,16 @@ namespace maix::image
         EDGE_CANNY,
         EDGE_SIMPLE,
     };
+
+    /**
+     * FlipDir
+     * @maixpy maix.image.FlipDir
+     */
+    enum class FlipDir
+    {
+        X,
+        Y,
+        XY
+    };
+
 }
