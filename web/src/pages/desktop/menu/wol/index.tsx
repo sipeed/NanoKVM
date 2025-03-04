@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Divider, Input, List, Popover } from 'antd';
+import { Button, Divider, Input, List, Popover, Tooltip } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -21,6 +21,9 @@ export const Wol = () => {
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('');
   const [log, setLog] = useState('');
+
+  const tooltip = t('wol.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const [macList, setMacList] = useState<string[]>([]);
 
@@ -153,11 +156,16 @@ export const Wol = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={handleOpenChange}
+      onOpenChange={(visible) => {
+        handleOpenChange(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-        <NetworkIcon size={16} />
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+          <NetworkIcon size={16} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };

@@ -16,7 +16,7 @@ server
 ├── middleware   // サーバーミドルウェアコンポーネント
 ├── proto        // API リクエスト/レスポンス定義
 ├── router       // API ルートハンドラ
-├── service      // コアサービスの実��
+├── service      // コアサービスの実装
 ├── utils        // ユーティリティ関数
 └── main.go
 ```
@@ -39,17 +39,23 @@ cert:
 logger:
     level: info
     file: stdout
-    
+
 # 認証設定 (enable/disable)
 # 注意: 認証を無効にするのは開発環境でのみ行ってください
 authentication: enable
 
-# JWT 秘密鍵の設定
-# 空のままにすると、サーバー起動時にランダムな鍵が生成されます
-secretKey: ""
+jwt:
+   # JWT 秘密鍵の設定。 空のままにすると、サーバー起動時にランダムな 64 バイトの鍵が自動的に生成されます。
+   secretKey: ""
+   # JWT トークンの有効期限（秒単位）。 デフォルト: 2678400 (31 日)
+   refreshTokenDuration: 2678400
+   # ユーザーがログアウトすると、すべての JWT トークンが無効になります。 デフォルト: true
+   revokeTokensOnLogout: true
 
+# カスタム STUN サーバーのアドレス
 stun: stun.l.google.com:19302
 
+# カスタム TURN サーバーのアドレスと認証情報
 turn:
     turnAddr: turn.cloudflare.com:3478
     turnUser: example_user
@@ -80,3 +86,12 @@ turn:
     1. デプロイ前に、ブラウザでアプリケーションを最新バージョンに更新します。手順は[こちら](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/system/updating.html)を参照してください。
     2. コンパイルして生成された `NanoKVM-Server` ファイルを使用して、NanoKVM の `/kvmapp/server/` ディレクトリ内の元のファイルを置き換えます。
     3. NanoKVM で `/etc/init.d/S95nanokvm restart` を実行してサービスを再起動します。
+
+## 手動更新
+
+> ファイルのアップロードには SSH が必要です。Web 設定で有効にしてください: `設定 > SSH`
+
+1. [GitHub](https://github.com/sipeed/NanoKVM/releases) から最新のアプリケーションをダウンロードします。
+2. ダウンロードしたファイルを解凍し、解凍したフォルダーの名前を `kvmapp` に変更します。
+3. NanoKVM 上の既存の `/kvmapp` ディレクトリをバックアップし、新しい `kvmapp` フォルダーに置き換えます。
+4. NanoKVM で `/etc/init.d/S95nanokvm restart` を実行してサービスを再起動します。
