@@ -20,7 +20,7 @@ NanoKVM
 
 ## 开源与贡献
 
-### 2025.02.27 更新内容
+### 2025.03.04 更新内容
 + 更新目录结构
 
 ``` shell
@@ -31,10 +31,7 @@ NanoKVM
 │   ├── server      # NanoKVM 前后端应用
 │   └── system      # 必要系统组件
 ├── server          # NanoKVM 后端
-├── support         # 辅助功能(系统状态、系统更新、屏幕、按键)
-│   ├── sg2002      # NanoKVM-Lite/Full/PCIe
-│   └── h618        # NanoKVM-Pro
-├── vision          # 图像采集（为go编译图像获取so组件）
+├── support         # 辅助功能(图像子系统、系统状态、系统更新、屏幕、按键……)
 │   ├── sg2002      # NanoKVM-Lite/Full/PCIe
 │   └── h618        # NanoKVM-Pro
 ├── web             # NanoKVM 前端
@@ -46,6 +43,7 @@ NanoKVM
 ```
 
 + 添加 NanoKVM app安装包`kvmapp`
++ 添加编译脚本和编译说明
 
 ### 2025.02.19 更新内容
 所有 NanoKVM 组件已开源，包括 
