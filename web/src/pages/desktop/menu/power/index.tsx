@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Popover, Slider } from 'antd';
+import { Popover, Slider, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { CirclePowerIcon, LoaderCircleIcon, PowerIcon, RotateCcwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,9 @@ export const Power = () => {
   const [isPowerOn, setIsPowerOn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [powerDuration, setPowerDuration] = useState(8);
+
+  const tooltip = t('power.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   useEffect(() => {
     getLed();
@@ -95,19 +98,24 @@ export const Power = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={setIsPopoverOpen}
+      onOpenChange={(visible) => {
+        setIsPopoverOpen(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700 hover:text-white">
-        <div
-          className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-500')}
-        >
-          {isLoading ? (
-            <LoaderCircleIcon className="animate-spin" size={18} />
-          ) : (
-            <PowerIcon size={18} />
-          )}
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700 hover:text-white">
+          <div
+            className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-500')}
+          >
+            {isLoading ? (
+              <LoaderCircleIcon className="animate-spin" size={18} />
+            ) : (
+              <PowerIcon size={18} />
+            )}
+          </div>
         </div>
-      </div>
+      </Tooltip>
     </Popover>
   );
 };

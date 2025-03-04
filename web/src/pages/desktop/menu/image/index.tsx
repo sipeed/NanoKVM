@@ -18,6 +18,9 @@ export const Image = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [cdrom, setCdrom] = useState(false);
 
+  const tooltip = t('image.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
+
   useEffect(() => {
     getMountedImage().then((rsp) => {
       if (rsp.code !== 0) return;
@@ -60,16 +63,21 @@ export const Image = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={setIsPopoverOpen}
+      onOpenChange={(visible) => {
+        setIsPopoverOpen(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div
-        className={clsx(
-          'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
-          isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
-        )}
-      >
-        <DiscIcon size={18} />
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div
+          className={clsx(
+            'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
+            isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
+          )}
+        >
+          <DiscIcon size={18} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };
