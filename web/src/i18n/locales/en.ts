@@ -96,6 +96,7 @@ const en = {
       mountFailed: 'Mount Failed',
       mountDesc:
         "In some systems, it's necessary to eject the virtual disk on the remote host before mounting the image.",
+      refresh: 'Refresh the image list',
       tips: {
         title: 'How to upload',
         usb1: 'Connect the NanoKVM to your computer via USB.',
