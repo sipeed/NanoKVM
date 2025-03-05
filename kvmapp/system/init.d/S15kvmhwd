@@ -1,0 +1,209 @@
+#!/bin/sh
+# kvmhwd Rev2.3
+
+Alpha_OLED_RST_Pin=371
+Beta_OLED_RST_Pin=502
+Beta_OLED_SCL=595
+Beta_OLED_SDA=507
+WiFi_EN_Pin=506
+Alpha_PWR_LED_Pin=504
+Alpha_HDD_LED_Pin=505
+Alpha_PWR_KEY_Pin=503
+Alpha_RST_KEY_Pin=507
+Beta_PWR_LED_Pin=504
+Beta_PWR_KEY_Pin=503
+Beta_RST_KEY_Pin=505
+PCIe_HDMI_RST_Pin=451
+
+init_alpha_hw(){
+  devmem 0x030010D0 32 0x2  # I2C1_SCL
+  devmem 0x030010DC 32 0x2  # I2C1_SDA
+  devmem 0x030010D4 32 0x3  # OLED_RST
+  devmem 0x0300103C 32 0x3  # GPIOA15
+  devmem 0x03001050 32 0x3  # GPIOA22
+  devmem 0x0300105C 32 0x3  # GPIOA23
+  devmem 0x03001060 32 0x3  # GPIOA24
+  devmem 0x03001054 32 0x3  # GPIOA25
+  devmem 0x03001058 32 0x3  # GPIOA27
+  
+	devmem 0x03001068 32 0x6  # GPIOA 18 UART1 RX
+	devmem 0x03001064 32 0x6  # GPIOA 19 UART1 TX
+	devmem 0x03001070 32 0x2  # GPIOA 28 UART2 TX
+	devmem 0x03001074 32 0x2  # GPIOA 29 UART2 RX
+
+  echo ${Alpha_OLED_RST_Pin} > /sys/class/gpio/export  # OLED_RST
+  echo out > /sys/class/gpio/gpio${Alpha_OLED_RST_Pin}/direction
+  echo 1 > /sys/class/gpio/gpio${Alpha_OLED_RST_Pin}/value
+
+  echo ${Alpha_PWR_LED_Pin} > /sys/class/gpio/export   # pwr led
+  echo ${Alpha_HDD_LED_Pin} > /sys/class/gpio/export   # hdd led
+  echo ${Alpha_PWR_KEY_Pin} > /sys/class/gpio/export   # pwr key
+  echo ${Alpha_RST_KEY_Pin} > /sys/class/gpio/export   # rst key
+
+  echo in > /sys/class/gpio/gpio${Alpha_PWR_LED_Pin}/direction     # pwr led
+  echo in > /sys/class/gpio/gpio${Alpha_HDD_LED_Pin}/direction     # hdd led
+  echo out > /sys/class/gpio/gpio${Alpha_PWR_KEY_Pin}/direction    # pwr key
+  echo out > /sys/class/gpio/gpio${Alpha_RST_KEY_Pin}/direction    # rst key
+
+  rmmod /mnt/system/ko/i2c-gpio.ko
+  rmmod /mnt/system/ko/i2c-algo-bit.ko
+
+  # rm /etc/init.d/S25wifimod
+  # rm /etc/init.d/S30wifi
+}
+
+init_beta_pcie_hw(){
+  devmem 0x0300103C 32 0x3  # GPIOA15
+  devmem 0x03001050 32 0x3  # GPIOA22
+  devmem 0x0300105C 32 0x3  # GPIOA23
+  devmem 0x03001060 32 0x3  # GPIOA24
+  devmem 0x03001054 32 0x3  # GPIOA25
+  devmem 0x03001058 32 0x3  # GPIOA27
+
+  devmem 0x030010E4 32 0x0  # SDIO CLK
+  devmem 0x030010E0 32 0x0  # SDIO CMD
+  devmem 0x030010DC 32 0x0  # SDIO D0
+  devmem 0x030010D8 32 0x0  # SDIO D1
+  devmem 0x030010D4 32 0x0  # SDIO D2
+  devmem 0x030010D0 32 0x0  # SDIO D3
+
+	devmem 0x03001068 32 0x6  # GPIOA 18 UART1 RX
+	devmem 0x03001064 32 0x6  # GPIOA 19 UART1 TX
+	devmem 0x03001070 32 0x2  # GPIOA 28 UART2 TX
+	devmem 0x03001074 32 0x2  # GPIOA 29 UART2 RX
+
+  echo ${Beta_OLED_RST_Pin} > /sys/class/gpio/export  # Beta OLED_RST
+  echo out > /sys/class/gpio/gpio${Beta_OLED_RST_Pin}/direction
+  echo 1 > /sys/class/gpio/gpio${Beta_OLED_RST_Pin}/value
+
+  echo ${Beta_PWR_LED_Pin} > /sys/class/gpio/export   # pwr led
+  echo ${Beta_PWR_KEY_Pin} > /sys/class/gpio/export   # pwr key
+  echo ${Beta_RST_KEY_Pin} > /sys/class/gpio/export   # rst key
+  echo ${PCIe_HDMI_RST_Pin} > /sys/class/gpio/export   # hdmi rst key
+
+  echo in > /sys/class/gpio/gpio${Beta_PWR_LED_Pin}/direction     # pwr led
+  echo out > /sys/class/gpio/gpio${Beta_PWR_KEY_Pin}/direction    # pwr key
+  echo out > /sys/class/gpio/gpio${Beta_RST_KEY_Pin}/direction    # rst key
+  echo out > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/direction    # rst key
+
+  echo 1 > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/value    # rst key
+
+  rmmod /mnt/system/ko/i2c-gpio.ko
+  rmmod /mnt/system/ko/i2c-algo-bit.ko
+  insmod /mnt/system/ko/i2c-algo-bit.ko
+  insmod /mnt/system/ko/i2c-gpio.ko
+}
+
+kvm_hw_detect(){
+  if [ ! -e /etc/kvm/hdmi_version ]
+  then
+    rm /etc/kvm/hw
+  fi
+  if [ -e /etc/kvm/hw ]
+  then
+    echo "/etc/kvm/hw exist"
+  else
+    echo "/etc/kvm/hw not exist"
+    if [ -d "/etc/kvm/" ]
+    then
+      echo "/etc/kvm/ exist"
+    else
+      mkdir /etc/kvm/
+    fi
+    devmem 0x0300104C 32 0x3  # GPIOA26 / WiFi_EN
+    echo ${WiFi_EN_Pin} > /sys/class/gpio/export  # WiFi_EN
+    echo out > /sys/class/gpio/gpio${WiFi_EN_Pin}/direction
+    echo 0 > /sys/class/gpio/gpio${WiFi_EN_Pin}/value
+
+    devmem 0x0300103C 32 0x3  # GPIOA15
+    devmem 0x03001050 32 0x3  # GPIOA22
+    devmem 0x0300105C 32 0x3  # GPIOA23
+    devmem 0x03001060 32 0x3  # GPIOA24
+    devmem 0x03001054 32 0x3  # GPIOA25
+    devmem 0x03001058 32 0x3  # GPIOA27
+
+    devmem 0x030010D0 32 0x2  # I2C1_SCL
+    devmem 0x030010DC 32 0x2  # I2C1_SDA
+    devmem 0x030010D4 32 0x3  # OLED_RST
+    echo ${Alpha_OLED_RST_Pin} > /sys/class/gpio/export  # OLED_RST
+    echo out > /sys/class/gpio/gpio${Alpha_OLED_RST_Pin}/direction
+    echo 1 > /sys/class/gpio/gpio${Alpha_OLED_RST_Pin}/value
+
+    kvm_tmp=$(i2cdetect -ry 1 0x3d 0x3d | grep 3d)
+    if [ -n "$kvm_tmp" ]
+    then
+      # alpha hw
+      echo "alpha" > /etc/kvm/hw
+    else
+      # beta/pcie hw
+      echo ${Alpha_OLED_RST_Pin} > /sys/class/gpio/unexport  # OLED_RST
+      echo ${Beta_OLED_RST_Pin} > /sys/class/gpio/export  # Beta_OLED_RST_Pin
+      echo out > /sys/class/gpio/gpio${Beta_OLED_RST_Pin}/direction
+      echo 1 > /sys/class/gpio/gpio${Beta_OLED_RST_Pin}/value
+
+      rmmod /mnt/system/ko/i2c-gpio.ko
+      rmmod /mnt/system/ko/i2c-algo-bit.ko
+      insmod /mnt/system/ko/i2c-algo-bit.ko
+      insmod /mnt/system/ko/i2c-gpio.ko
+
+      kvm_tmp=$(i2cdetect -ry 4 0x2c 0x2c | grep 2c)
+      if [ -n "$kvm_tmp" ]
+      then
+        echo "c" > /etc/kvm/hdmi_version
+      else
+        echo "u" > /etc/kvm/hdmi_version
+      fi
+
+      kvm_tmp=$(i2cdetect -ry 5 0x3c 0x3c | grep 3c)
+      if [ -n "$kvm_tmp" ]
+      then
+        echo "pcie" > /etc/kvm/hw
+        sync
+        reboot
+      else
+        echo "beta" > /etc/kvm/hw
+        # rm /etc/init.d/S25wifimod
+        # rm /etc/init.d/S30wifi
+        sync
+      fi
+
+      echo 1 > /sys/class/gpio/gpio${WiFi_EN_Pin}/value
+      echo ${WiFi_EN_Pin} > /sys/class/gpio/unexport  # WiFi_EN
+    fi
+  fi
+  sync
+}
+
+kvm_hw_init(){
+    FIND_FILE="/etc/kvm/hw"
+    if [ `grep -c "alpha" $FIND_FILE` -ne '0' ]
+    then
+        echo "hw = alpha!"
+        init_alpha_hw
+    fi
+    if [ `grep -c "beta" $FIND_FILE` -ne '0' ]
+    then
+        echo "hw = beta!"
+        init_beta_pcie_hw
+    fi
+    if [ `grep -c "pcie" $FIND_FILE` -ne '0' ]
+    then
+        echo "hw = pcie!"
+        init_beta_pcie_hw
+    fi
+}
+
+case "$1" in
+  start)
+    kvm_hw_detect
+    kvm_hw_init
+  ;;
+  re-detect)
+    rm /etc/kvm/hw
+    kvm_hw_detect
+    kvm_hw_init
+  ;;
+  re-init)
+    kvm_hw_init
+  ;;
+esac

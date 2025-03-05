@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Divider, Popover } from 'antd';
+import { Divider, Popover, Tooltip } from 'antd';
 import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,6 +9,9 @@ import { SerialPort } from './serial-port';
 export const Terminal = () => {
   const { t } = useTranslation();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const tooltip = t('terminal.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const content = (
     <div className="min-w-[200px]">
@@ -30,11 +33,16 @@ export const Terminal = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={setIsPopoverOpen}
+      onOpenChange={(visible) => {
+        setIsPopoverOpen(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-        <SquareTerminalIcon size={18} />
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+          <SquareTerminalIcon size={18} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };

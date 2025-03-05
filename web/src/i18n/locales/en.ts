@@ -47,6 +47,7 @@ const en = {
       finishBtn: 'Finished'
     },
     screen: {
+      title: 'Screen',
       video: 'Video Mode',
       resolution: 'Resolution',
       auto: 'Automatic',
@@ -65,6 +66,7 @@ const en = {
       resetHdmi: 'Reset HDMI'
     },
     keyboard: {
+      title: 'Keyboard',
       paste: 'Paste',
       tips: 'Only standard keyboard letters and symbols are supported',
       placeholder: 'Please input',
@@ -73,6 +75,7 @@ const en = {
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
+      title: 'Mouse',
       default: 'Default cursor',
       pointer: 'Pointer cursor',
       cell: 'Cell cursor',
@@ -86,13 +89,14 @@ const en = {
       resetHid: 'Reset HID'
     },
     image: {
-      title: 'Image',
+      title: 'Images',
       loading: 'Loading...',
       empty: 'Nothing Found',
       cdrom: 'Mount the image in CD-ROM mode',
       mountFailed: 'Mount Failed',
       mountDesc:
         "In some systems, it's necessary to eject the virtual disk on the remote host before mounting the image.",
+      refresh: 'Refresh the image list',
       tips: {
         title: 'How to upload',
         usb1: 'Connect the NanoKVM to your computer via USB.',
@@ -110,7 +114,7 @@ const en = {
       }
     },
     script: {
-      title: 'Script',
+      title: 'Scripts',
       upload: 'Upload',
       run: 'Run',
       runBackground: 'Run Background',
@@ -139,7 +143,7 @@ const en = {
       ok: 'Ok'
     },
     download: {
-      title: 'Download Image',
+      title: 'Image Downloader',
       input: 'Please enter a remote image URL',
       ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image'
@@ -257,8 +261,15 @@ const en = {
       }
     },
     error: {
-      title: "We've ran into an issue",
-      refresh: 'Refresh'
+      title: 'We\'ve ran into an issue',
+      refresh: 'Refresh',
+    },
+    fullscreen: {
+      toggle: 'Toggle Fullscreen',
+    },
+    menu: {
+      collapse: 'Collapse Menu',
+      expand: 'Expand Menu',
     }
   }
 };

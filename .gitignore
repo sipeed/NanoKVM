@@ -17,3 +17,8 @@ web/web
 .vscode
 
 NanoKVM-Server
+
+support/sg2002/kvm_system/build
+support/sg2002/kvm_system/dist
+support/sg2002/kvm_system/CMakeLists.txt
+

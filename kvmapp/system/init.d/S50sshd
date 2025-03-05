@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# sshd        Starts sshd.
+#
+
+# Make sure the ssh-keygen progam exists
+[ -f /usr/bin/ssh-keygen ] || exit 0
+
+umask 077
+
+startssh() {
+	/usr/bin/ssh-keygen -A
+
+	printf "Starting sshd: "
+	/usr/sbin/sshd
+	touch /var/lock/sshd
+	echo "OK"
+}
+start() {
+	# Create any missing keys
+    if [ -e /etc/kvm/ssh_stop ]
+	then
+		if [ -e /boot/start_ssh_once ]
+		then
+			rm /boot/start_ssh_once
+			startssh
+		else
+			echo "SSH does not start"
+		fi
+	else
+		startssh
+	fi
+}
+stop() {
+	printf "Stopping sshd: "
+	killall sshd
+	rm -f /var/lock/sshd
+	echo "OK"
+}
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+  start)
+	start
+	;;
+  stop)
+	stop
+	;;
+  restart|reload)
+	restart
+	;;
+  permanent_on)
+    rm /etc/kvm/ssh_stop
+	start
+    ;;
+  permanent_off)
+    touch /etc/kvm/ssh_stop
+	stop
+    ;;
+  *)
+	echo "Usage: $0 {start|stop|restart|permanent_on|permanent_off}"
+	exit 1
+esac
+
+exit $?
+

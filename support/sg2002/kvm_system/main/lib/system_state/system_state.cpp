@@ -43,6 +43,8 @@ int get_ping_allow_state()
 	} else {
 		kvm_sys_state.ping_allow = 1;
 	}
+
+	return kvm_sys_state.ping_allow;
 }
 
 // net_port
@@ -51,7 +53,7 @@ int get_ip_addr(ip_addr_t ip_type)
 	switch (ip_type){
 		case ETH_IP: // eth_addr
 			if(strcmp(ip_address()["eth0"].c_str(), (char*)kvm_sys_state.eth_addr) != 0){
-				if(*(ip_address()["eth0"].c_str()) == NULL){
+				if(*(ip_address()["eth0"].c_str()) == 0){
 					printf("can`t get ip addr\r\n");
 					kvm_sys_state.eth_addr[0] = 0;
 					return 0;
@@ -66,7 +68,7 @@ int get_ip_addr(ip_addr_t ip_type)
 			return 1;
 		case WiFi_IP: // wifi_addr
 			if(strcmp(ip_address()["wlan0"].c_str(), (char*)kvm_sys_state.wifi_addr) != 0){
-				if(*(ip_address()["wlan0"].c_str()) == NULL){
+				if(*(ip_address()["wlan0"].c_str()) == 0){
 					printf("can`t get ip addr\r\n");
 					kvm_sys_state.wifi_addr[0] = 0;
 					return 0;
@@ -80,7 +82,7 @@ int get_ip_addr(ip_addr_t ip_type)
 			}
 			return 1;
 		case Tailscale_IP: // tail_addr
-			if(*(ip_address()["tailscale0"].c_str()) == NULL){
+			if(*(ip_address()["tailscale0"].c_str()) == 0){
 				printf("can`t get ip addr\r\n");
 				kvm_sys_state.tail_addr[0] = 0;
 				return 0;
@@ -93,7 +95,7 @@ int get_ip_addr(ip_addr_t ip_type)
 			printf("\r\n");
 			return 1;
 		case RNDIS_IP: // rndis_addr
-			if(*(ip_address()["usb0"].c_str()) == NULL){
+			if(*(ip_address()["usb0"].c_str()) == 0){
 				printf("can`t get ip addr\r\n");
 				kvm_sys_state.rndis_addr[0] = 0;
 				return 0;
@@ -465,4 +467,6 @@ void kvm_update_tailscale_state(void)
 uint8_t ion_free_space(void)
 {
 	//cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep "usage rate:" | awk '{print $2}'
+
+	return 0;
 }

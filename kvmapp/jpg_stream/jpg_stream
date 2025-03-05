@@ -1,0 +1,5 @@
+rm /etc/init.d/S95webkvm
+cp /kvmapp/jpg_stream/S95nanokvm /etc/init.d/
+cp /kvmapp/jpg_stream/dl_lib/libmaixcam_lib.so /kvmapp/kvm_system/dl_lib
+rm -r /kvmapp/jpg_stream
+/etc/init.d/S95nanokvm restart

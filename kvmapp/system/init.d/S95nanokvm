@@ -1,0 +1,50 @@
+#!/bin/sh
+# nanokvm Rev3.0
+
+case "$1" in
+  start)
+    echo -n kvm > /boot/hostname.prefix
+    cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
+
+    str_value=$(cat /sys/class/cvi-base/base_uid | awk '{print $2}')
+    first_uint=$(echo $str_value | cut -d'_' -f1)
+    second_uint=$(echo $str_value | cut -d'_' -f2)
+    result="$first_uint$second_uint"
+    echo $result > /device_key
+
+    iptables -A INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+    iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
+
+    cp -r /kvmapp/kvm_system /tmp/
+    /tmp/kvm_system/kvm_system &
+    
+    cp -r /kvmapp/server /tmp/
+    /tmp/server/NanoKVM-Server &
+  ;;
+  stop)
+    killall kvm_system
+    killall NanoKVM-Server
+    rm -r /tmp/kvm_system
+    rm -r /tmp/server
+    echo "OK"
+  ;;
+  restart)
+    killall kvm_system
+    killall NanoKVM-Server
+    rm -r /tmp/kvm_system
+    rm -r /tmp/server
+    
+    cp -r /kvmapp/kvm_system /tmp/
+    /tmp/kvm_system/kvm_system &
+
+    cp -r /kvmapp/server /tmp/
+    /tmp/server/NanoKVM-Server &
+
+    sync
+
+    echo "OK"
+  ;;
+esac

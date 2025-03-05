@@ -1,0 +1,115 @@
+#!/bin/sh
+
+. /etc/profile
+
+# /boot/eth.nodhcp for example
+# ipaddr/net        gw[optional]
+# 192.168.0.101/24 192.168.0.1
+# 192.168.3.116/22  
+
+RESERVE_INET="192.168.0.1/24"
+
+start() {
+    printf "start ethernet: "
+    if [ -e /boot/eth.nodhcp ] 
+    then
+        [ -e /boot/eth.nodhcp ] &&
+            cat /boot/eth.nodhcp | while read inet gw
+            do
+                addr=${inet%/*}
+                netid=${inet#*/}
+                [ -z $gw ] &&
+                gw=$( echo $addr| ( IFS='.' read a b c d; echo $((
+                    (((((($a<<8)+$b)<<8)+$c)<<8)+$d)
+                        & (((1<<$netid)-1)<<(32-$netid))
+                    ))
+                )) &&
+                gw=$(($gw>>24&0xff)).$(($gw>>16&0xff)).$(($gw>>8&0xff)).$((1+( $gw>>0&0xff )))
+
+                arping -Dqc2 -Ieth0 $addr || continue
+                ip a add $inet brd + dev eth0
+                ip r add default via $gw dev eth0
+                cat > /etc/resolve.conf << EOF
+nameserver $gw
+nameserver 8.8.8.8
+nameserver 114.114.114.114
+EOF
+                break
+            done &&
+            ip a show dev eth0|grep inet || (
+                udhcpc -i eth0 -t 3 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid &>/dev/null
+                ip a show dev eth0|grep inet
+            ) || (
+                # failed to apply dynamic addr, need a available static addr to visit the LAN 
+                inet=$RESERVE_INET
+                addr=${inet%/*}
+                ip a add $inet brd + dev eth0
+            ) || exit 1
+    else
+        (udhcpc -i eth0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid) &
+    fi
+
+    echo "OK"
+}
+stop() {
+    [[ ! -e "/run/udhcpc.eth0.pid" ]] && echo "udhcpc is not running..." && exit 1
+    kill `cat /run/udhcpc.eth0.pid`
+    rm /run/udhcpc.eth0.pid
+}
+
+case "$1" in
+        start)
+                start
+                ;;
+        stop)
+                stop
+                ;;
+        restart|reload)
+                $0 stop
+                $0 start
+                ;;
+        doc)
+                cat <<EOF
+If you want to set your own static ip address
+    rather then fetch it by dhcp.
+Then you need to create a file \`/boot/eth.nodhcp\`,
+    and edit it following the format below:
+    \`addr/netid        gw[optional]\` in one line
+    for example (support muti definations, checks with arp):
+    1. 192.168.0.101/24 192.168.0.1
+    2. 192.168.3.116/22
+Delete this file if you change to use dhcp default.
+ATTENTION: If all the STATIC address you set in the file is
+    already in use on this LAN checked with arp, then none
+    of them will be yours. And it will trigger dhcp, try to 
+    fetch DYNAMIC one. If it's also failed, your address will 
+    be the REVERSE one, 192.168.0.1/24. Just to be sure that
+    you can visit your NanoKVM device through eth to fix some
+    problems by ssh, unless you must disassemble it and modify
+    or rewrite the TFCard once again.
+EOF
+                echo ""
+                cat <<EOF
+如果您想自行设置静态 ip 地址而不是使用 dhcp 来获取它。
+
+那么您需要新建一个文件 \`/boot/eth.nodhcp\`，然后按照以下格式编辑它：
+    \`addr/netid        gw[optional]\` 在一行内
+示例（支持多个预设，会通过 arp 检查是否占用）：
+    1. 192.168.0.101/24 192.168.0.1
+    2. 192.168.3.116/22
+
+如果您想改回默认 dhcp 获取 ip 地址的方式，删除该文件后即可恢复。
+
+注意：如果您预设的所有静态 ip 地址都被 arp 检测到已占用，则不会成功设置。
+    此时会触发 dhcp 尝试获取 ip 地址，如果仍失败，那么最终会强制设置成
+    192.168.90.1/24。这是为了保证您的 NanoKVM 设备总是能有一个可用的
+    ip 地址，方便您通过局域网 ssh 连接设备进行一些修复，否则您可能需要
+    拆开外壳以手动修改 TF 卡或重新烧卡。
+
+
+EOF
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart}"
+                exit 1
+esac

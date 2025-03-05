@@ -1,0 +1,91 @@
+#!/bin/sh
+# nanokvm Rev2.1
+
+case "$1" in
+  start)
+    echo -n kvm > /boot/hostname.prefix
+    cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
+
+    str_value=$(cat /sys/class/cvi-base/base_uid | awk '{print $2}')
+    first_uint=$(echo $str_value | cut -d'_' -f1)
+    second_uint=$(echo $str_value | cut -d'_' -f2)
+    result="$first_uint$second_uint"
+    echo $result > /device_key
+
+    # if [ ! -e /etc/kvm/hw ]
+    # then
+
+    # fi
+
+    # echo 504 > /sys/class/gpio/export   # pwr led
+    # echo 505 > /sys/class/gpio/export   # hdd led
+    # echo 503 > /sys/class/gpio/export   # pwr key
+    # echo 507 > /sys/class/gpio/export   # rst key
+
+    # echo in > /sys/class/gpio/gpio504/direction     # pwr led
+    # echo in > /sys/class/gpio/gpio505/direction     # hdd led
+    # echo out > /sys/class/gpio/gpio503/direction    # pwr key
+    # echo out > /sys/class/gpio/gpio507/direction    # rst key
+
+    iptables -A INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+    iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+    iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
+
+    cp -r /kvmapp/kvm_system /tmp/
+    /tmp/kvm_system/kvm_system &
+
+    # if [ -e /kvmapp/kvm_stream ]
+    # then
+    #   cp -r /kvmapp/kvm_stream /tmp/
+    #   /tmp/kvm_stream/kvm_stream &
+    # fi
+    
+    cp -r /kvmapp/server /tmp/
+    /tmp/server/NanoKVM-Server &
+  ;;
+  stop)
+    killall kvm_system
+    # killall kvm_stream
+    killall NanoKVM-Server
+    rm -r /tmp/kvm_system
+    # rm -r /tmp/kvm_stream
+    rm -r /tmp/server
+    echo "OK"
+  ;;
+  # restart_stream)
+  #   killall kvm_stream
+  #   rm -r /tmp/kvm_stream
+  #   if [ -e /kvmapp/kvm_stream ]
+  #   then
+  #     cp -r /kvmapp/kvm_stream /tmp/
+  #     /tmp/kvm_stream/kvm_stream &
+  #     echo "OK"
+  #   fi
+  # ;;
+  restart)
+    killall kvm_system
+    # killall kvm_stream
+    killall NanoKVM-Server
+    rm -r /tmp/kvm_system
+    # rm -r /tmp/kvm_stream
+    rm -r /tmp/server
+    
+    cp -r /kvmapp/kvm_system /tmp/
+    /tmp/kvm_system/kvm_system &
+
+    # if [ -e /kvmapp/kvm_stream ]
+    # then
+    #   cp -r /kvmapp/kvm_stream /tmp/
+    #   /tmp/kvm_stream/kvm_stream &
+    # fi
+    
+    cp -r /kvmapp/server /tmp/
+    /tmp/server/NanoKVM-Server &
+
+    sync
+
+    echo "OK"
+  ;;
+esac

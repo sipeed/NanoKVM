@@ -1,6 +1,6 @@
 import { ChangeEvent, useRef, useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Divider, Popconfirm, Popover } from 'antd';
+import { Button, Divider, Popconfirm, Popover, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { ChevronRightIcon, FileJsonIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,9 @@ export const Script = () => {
 
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<any>(null);
+
+  const tooltip = t('script.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   function handleOpenChange(open: boolean) {
     if (open) {
@@ -194,11 +197,16 @@ export const Script = () => {
         trigger="click"
         arrow={false}
         open={isPopoverOpen}
-        onOpenChange={handleOpenChange}
+        onOpenChange={(visible) => {
+          handleOpenChange(visible);
+          setTooltipValue(visible ? '' : tooltip);
+        }}
       >
-        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-          <FileJsonIcon size={18} />
-        </div>
+        <Tooltip title={tooltipValue} placement="bottom">
+          <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+            <FileJsonIcon size={18} />
+          </div>
+        </Tooltip>
       </Popover>
 
       {isRunning && <Run script={currentScript} setIsRunning={setIsRunning} />}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider } from 'antd';
+import { Divider, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { MenuIcon, XIcon } from 'lucide-react';
@@ -19,6 +19,7 @@ import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
+import { t } from 'i18next';
 
 export const Menu = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
@@ -69,6 +70,7 @@ export const Menu = () => {
             <Settings />
             <Fullscreen />
 
+          <Tooltip title={t('menu.collapse')} placement="bottom">
             <div
               className="mr-1 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white"
               onClick={() => setIsMenuOpen((o) => !o)}
@@ -78,6 +80,11 @@ export const Menu = () => {
           </div>
 
           {!isMenuOpen && (
+          </Tooltip>
+        </div>
+
+        {!isMenuOpen && (
+          <Tooltip title={t('menu.expand')} placement="bottom">
             <div
               className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-800 hover:text-white"
               onClick={() => setIsMenuOpen((o) => !o)}
@@ -86,6 +93,8 @@ export const Menu = () => {
             </div>
           )}
         </div>
+          </Tooltip>
+        )}
       </div>
     </Draggable>
   );
