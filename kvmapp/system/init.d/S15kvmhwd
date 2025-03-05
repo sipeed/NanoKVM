@@ -151,7 +151,13 @@ kvm_hw_detect(){
       then
         echo "c" > /etc/kvm/hdmi_version
       else
-        echo "u" > /etc/kvm/hdmi_version
+        kvm_tmp1=$(i2cdetect -ry 4 0x2b 0x2b | grep 2b)
+        if [ -n "$kvm_tmp1" ]
+        then
+          echo "ux" > /etc/kvm/hdmi_version
+        else
+          echo "ue" > /etc/kvm/hdmi_version
+        fi
       fi
 
       kvm_tmp=$(i2cdetect -ry 5 0x3c 0x3c | grep 3c)
