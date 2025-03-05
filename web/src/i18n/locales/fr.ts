@@ -14,13 +14,11 @@ const fr = {
       placeholderPassword2: 'Veuillez entrer votre mot de passe à nouveau',
       noEmptyUsername: "Le nom d'utilisateur ne peut pas être vide",
       noEmptyPassword: 'Le mot de passe ne peut pas être vide',
-      noAccount:
-        "Impossible de récupérer les informations de l'utilisateur, veuillez rafraîchir la page ou réinitialiser le mot de passe",
+      noAccount: "Impossible de récupérer les informations de l'utilisateur, veuillez rafraîchir la page ou réinitialiser le mot de passe",
       invalidUser: "Nom d'utilisateur ou mot de passe invalide",
       error: 'Erreur inattendue',
       changePassword: 'Changer le mot de passe',
-      changePasswordDesc:
-        'Pour la sécurité de votre appareil, veuillez modifier le mot de passe de connexion Web.',
+      changePasswordDesc: 'Pour la sécurité de votre appareil, veuillez modifier le mot de passe de connexion Web.',
       differentPassword: 'Les mots de passe ne correspondent pas',
       illegalUsername: "Le nom d'utilisateur contient des caractères illégaux",
       illegalPassword: 'Le mot de passe contient des caractères illégaux',
@@ -140,6 +138,12 @@ const fr = {
       input: "Veuillez entrer l'adresse MAC",
       ok: 'Ok'
     },
+    download: {
+      title: 'Télécharger l’image',
+      input: 'Veuillez entrer l’URL d’une image distante',
+      ok: 'Ok',
+      disabled: 'La partition /data est en lecture seule, impossible de télécharger l’image'
+    },
     power: {
       title: 'Power',
       reset: 'Réinitialiser',
@@ -244,6 +248,10 @@ const fr = {
         password: 'Mot de passe',
         updateBtn: 'Mettre à jour',
         logoutBtn: 'Déconnexion'
+      },
+      error: {
+        title: "Une erreur est survenue",
+        refresh: 'Rafraîchir'
       }
     }
   }
