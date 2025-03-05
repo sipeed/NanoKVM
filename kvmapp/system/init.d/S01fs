@@ -1,0 +1,42 @@
+#!/bin/sh
+
+if [ "$1" = "start" ]
+then
+                # use all sdcard free space for data
+                parted -s /dev/mmcblk0 "resizepart 2 -0"
+                echo "yes
+                8192MB
+                " | parted ---pretend-input-tty /dev/mmcblk0 "resizepart 2 8192MB"
+                # resize data filesystem
+                (resize2fs /dev/mmcblk0p2) &
+
+
+        . /etc/profile
+        printf "mounting filesystem : "
+        mkdir -p /boot
+        mount -t vfat /dev/mmcblk0p1 /boot
+        mount -t configfs configfs /sys/kernel/config
+        mount -t debugfs debugfs /sys/kernel/debug
+
+        if [ -e /boot/usb.disk0 ]
+        then
+                if [ ! -e /etc/kvm.disk0 ]
+                then
+                        touch /etc/kvm.disk0
+                        # use all sdcard free space for data
+                        parted -s /dev/mmcblk0 "mkpart primary 8193MB 100%"
+                        sleep 1
+                        # resize data filesystem
+                        (mkfs.exfat /dev/mmcblk0p3) &
+                        sleep 1
+                fi
+        fi
+
+        if [ -e /dev/mmcblk0p3 ]
+        then
+                mkdir -p /data
+                mount /dev/mmcblk0p3 /data
+        fi
+
+        echo "OK"
+fi

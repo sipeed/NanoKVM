@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider, Popover } from 'antd';
+import { Divider, Popover, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import {
@@ -26,6 +26,9 @@ export const Mouse = () => {
   const [mouseMode, setMouseMode] = useAtom(mouseModeAtom);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+
+  const tooltip = t('mouse.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const mouseStyles = [
     { name: t('mouse.default'), icon: <MousePointerIcon size={14} />, value: 'cursor-default' },
@@ -154,11 +157,16 @@ export const Mouse = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={setIsPopoverOpen}
+      onOpenChange={(visible) => {
+        setIsPopoverOpen(visible);
+        setTooltipValue(visible ? "" : tooltip);
+      }}
     >
-      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-        <MouseIcon size={18} />
-      </div>
+      <Tooltip title={tooltipValue}>
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+          <MouseIcon size={18} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };

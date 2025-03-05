@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, Popover } from 'antd';
+import { Button, Divider, Input, Popover, Tooltip } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -20,6 +20,9 @@ export const DownloadImage = () => {
   const [log, setLog] = useState('');
   const [diskEnabled, setDiskEnabled] = useState(false);
   const [popoverKey, setPopoverKey] = useState(0);
+
+  const tooltip = t('download.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const inputRef = useRef<InputRef>(null);
 
@@ -165,11 +168,16 @@ export const DownloadImage = () => {
       trigger="click"
       arrow={false}
       open={isPopoverOpen}
-      onOpenChange={handleOpenChange}
+      onOpenChange={(visible) => {
+        handleOpenChange(visible);
+        setTooltipValue(visible ? '' : tooltip);
+      }}
     >
-      <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-        <DownloadIcon size={18} />
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
+          <DownloadIcon size={18} />
+        </div>
+      </Tooltip>
     </Popover>
   );
 };

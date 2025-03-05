@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge, Modal } from 'antd';
+import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
   BadgeInfoIcon,
@@ -31,6 +31,9 @@ export const Settings = () => {
   const [currentTab, setCurrentTab] = useState('about');
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+
+  const tooltip = t('settings.title');
+  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
@@ -92,16 +95,18 @@ export const Settings = () => {
 
   return (
     <>
-      <div
-        className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700"
-        onClick={() => setIsModalOpen(true)}
-      >
-        <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
-          <div className="pt-[3px]">
-            <SettingsIcon size={18} />
-          </div>
-        </Badge>
-      </div>
+      <Tooltip title={tooltipValue} placement="bottom">
+        <div
+          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
+            <div className="pt-[3px]">
+              <SettingsIcon size={18} />
+            </div>
+          </Badge>
+        </div>
+      </Tooltip>
 
       <Modal
         open={isModalOpen}
@@ -110,6 +115,7 @@ export const Settings = () => {
         destroyOnClose={true}
         styles={{ content: { padding: 0 } }}
         onCancel={closeModal}
+        afterOpenChange={(visible) => setTooltipValue(visible ? '' : tooltip)}
       >
         <div className="flex min-h-[500px] rounded-lg outline outline-1 outline-neutral-700">
           <div className="flex flex-col space-y-0.5 rounded-l-lg bg-neutral-800 py-5 sm:w-1/5 sm:px-2">
