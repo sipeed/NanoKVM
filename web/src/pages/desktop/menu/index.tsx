@@ -3,6 +3,7 @@ import { Divider, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { MenuIcon, XIcon } from 'lucide-react';
+import Draggable from 'react-draggable';
 
 import { getMenuDisabledItems } from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
@@ -31,42 +32,43 @@ export const Menu = () => {
   }, []);
 
   return (
-    <div className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
-      <div className="sticky top-[10px]">
-        <div
-          className={clsx(
-            'h-[36px] items-center rounded bg-neutral-800/80',
-            isMenuOpen ? 'flex' : 'hidden'
-          )}
-        >
-          <div className="hidden h-[30px] select-none items-center px-3 sm:flex">
-            <img src="/sipeed.ico" width={18} height={18} alt="sipeed" />
-          </div>
+    <Draggable positionOffset={{ x: '-50%', y: '0%' }}>
+      <div className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
+        <div className="sticky top-[10px]">
+          <div
+            className={clsx(
+              'h-[36px] items-center rounded bg-neutral-800/80',
+              isMenuOpen ? 'flex' : 'hidden'
+            )}
+          >
+            <div className="hidden h-[30px] select-none items-center px-3 sm:flex">
+              <img src="/sipeed.ico" width={18} height={18} alt="sipeed" />
+            </div>
 
-          <Screen />
-          <Keyboard />
-          <Mouse />
-          <Divider type="vertical" />
+            <Screen />
+            <Keyboard />
+            <Mouse />
+            <Divider type="vertical" />
 
-          {!menuDisabledItems.includes('image') && <Image />}
-          {!menuDisabledItems.includes('download') && <DownloadImage />}
-          {!menuDisabledItems.includes('script') && <Script />}
-          {!menuDisabledItems.includes('terminal') && <Terminal />}
-          {!menuDisabledItems.includes('wol') && <Wol />}
+            {!menuDisabledItems.includes('image') && <Image />}
+            {!menuDisabledItems.includes('download') && <DownloadImage />}
+            {!menuDisabledItems.includes('script') && <Script />}
+            {!menuDisabledItems.includes('terminal') && <Terminal />}
+            {!menuDisabledItems.includes('wol') && <Wol />}
 
-          {['image', 'script', 'terminal', 'wol', 'download'].some(
-            (key) => !menuDisabledItems.includes(key)
-          ) && <Divider type="vertical" />}
+            {['image', 'script', 'terminal', 'wol', 'download'].some(
+              (key) => !menuDisabledItems.includes(key)
+            ) && <Divider type="vertical" />}
 
-          {!menuDisabledItems.includes('power') && (
-            <>
-              <Power />
-              <Divider type="vertical" />
-            </>
-          )}
+            {!menuDisabledItems.includes('power') && (
+              <>
+                <Power />
+                <Divider type="vertical" />
+              </>
+            )}
 
-          <Settings />
-          <Fullscreen />
+            <Settings />
+            <Fullscreen />
 
           <Tooltip title={t('menu.collapse')} placement="bottom">
             <div
@@ -75,6 +77,9 @@ export const Menu = () => {
             >
               <XIcon size={20} />
             </div>
+          </div>
+
+          {!isMenuOpen && (
           </Tooltip>
         </div>
 
@@ -86,9 +91,11 @@ export const Menu = () => {
             >
               <MenuIcon />
             </div>
+          )}
+        </div>
           </Tooltip>
         )}
       </div>
-    </div>
+    </Draggable>
   );
 };
