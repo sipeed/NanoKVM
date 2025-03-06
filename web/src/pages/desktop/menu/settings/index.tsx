@@ -32,9 +32,6 @@ export const Settings = () => {
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
 
-  const tooltip = t('settings.title');
-  const [tooltipValue, setTooltipValue] = useState(tooltip);
-
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
@@ -95,9 +92,9 @@ export const Settings = () => {
 
   return (
     <>
-      <Tooltip title={tooltipValue} placement="bottom">
+      <Tooltip title={t('settings.title')} placement="bottom" mouseEnterDelay={0.6}>
         <div
-          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700"
+          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700/80"
           onClick={() => setIsModalOpen(true)}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
@@ -115,7 +112,6 @@ export const Settings = () => {
         destroyOnClose={true}
         styles={{ content: { padding: 0 } }}
         onCancel={closeModal}
-        afterOpenChange={(visible) => setTooltipValue(visible ? '' : tooltip)}
       >
         <div className="flex min-h-[500px] rounded-lg outline outline-1 outline-neutral-700">
           <div className="flex flex-col space-y-0.5 rounded-l-lg bg-neutral-800 py-5 sm:w-1/5 sm:px-2">

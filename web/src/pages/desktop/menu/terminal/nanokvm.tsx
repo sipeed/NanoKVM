@@ -1,15 +1,10 @@
 import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-type NanokvmProps = {
-  setIsPopoverOpen: (open: boolean) => void;
-};
-
-export const Nanokvm = ({ setIsPopoverOpen }: NanokvmProps) => {
+export const Nanokvm = () => {
   const { t } = useTranslation();
 
   function openTerminal() {
-    setIsPopoverOpen(false);
     window.open('/#terminal', '_blank');
   }
 

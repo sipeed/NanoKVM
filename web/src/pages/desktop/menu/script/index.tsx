@@ -1,20 +1,18 @@
 import { ChangeEvent, useRef, useState } from 'react';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Divider, Popconfirm, Popover, Tooltip } from 'antd';
+import { Button, Divider, Popconfirm } from 'antd';
 import clsx from 'clsx';
 import { ChevronRightIcon, FileJsonIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useMediaQuery } from 'react-responsive';
 
 import * as api from '@/api/script.ts';
+import { MenuItem } from '@/components/menu-item.tsx';
 
 import { Run } from './run';
 
 export const Script = () => {
   const { t } = useTranslation();
-  const isBigScreen = useMediaQuery({ minWidth: 640 });
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [scripts, setScripts] = useState<string[]>([]);
   const [currentScript, setCurrentScript] = useState('');
   const [isRunning, setIsRunning] = useState(false);
@@ -22,17 +20,12 @@ export const Script = () => {
   const [isUploading, setIsUploading] = useState(false);
   const inputRef = useRef<any>(null);
 
-  const tooltip = t('script.title');
-  const [tooltipValue, setTooltipValue] = useState(tooltip);
-
   function handleOpenChange(open: boolean) {
     if (open) {
       getScripts();
     } else {
       setCurrentScript('');
     }
-
-    setIsPopoverOpen(open);
   }
 
   function selectFile() {
@@ -83,8 +76,6 @@ export const Script = () => {
         }
       });
     }
-
-    setIsPopoverOpen(false);
   }
 
   function getScripts() {
@@ -191,23 +182,12 @@ export const Script = () => {
 
   return (
     <>
-      <Popover
+      <MenuItem
+        title={t('script.title')}
+        icon={<FileJsonIcon size={18} />}
         content={content}
-        placement={isBigScreen ? 'bottomLeft' : 'bottom'}
-        trigger="click"
-        arrow={false}
-        open={isPopoverOpen}
-        onOpenChange={(visible) => {
-          handleOpenChange(visible);
-          setTooltipValue(visible ? '' : tooltip);
-        }}
-      >
-        <Tooltip title={tooltipValue} placement="bottom">
-          <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-            <FileJsonIcon size={18} />
-          </div>
-        </Tooltip>
-      </Popover>
+        onOpenChange={handleOpenChange}
+      />
 
       {isRunning && <Run script={currentScript} setIsRunning={setIsRunning} />}
     </>

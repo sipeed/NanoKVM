@@ -14,12 +14,12 @@ import * as api from '@/api/storage.ts';
 import { client } from '@/lib/websocket.ts';
 
 type ImagesProps = {
+  isOpen: boolean;
   cdrom: boolean;
   setIsMounted: (isMounted: boolean) => void;
-  onRefresh?: (callback: () => void) => void;
 };
 
-export const Images = ({ cdrom, setIsMounted, onRefresh }: ImagesProps) => {
+export const Images = ({ isOpen, cdrom, setIsMounted }: ImagesProps) => {
   const { t } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
 
@@ -29,14 +29,10 @@ export const Images = ({ cdrom, setIsMounted, onRefresh }: ImagesProps) => {
   const [mountedImage, setMountedImage] = useState('');
 
   useEffect(() => {
-    getImages();
-  }, []);
-
-  useEffect(() => {
-    if (onRefresh) {
-      onRefresh(getImages);
+    if (isOpen) {
+      getImages();
     }
-  }, [onRefresh]);
+  }, [isOpen]);
 
   function getImages() {
     if (isLoading) return;

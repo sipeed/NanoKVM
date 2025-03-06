@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Divider, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { MenuIcon, XIcon } from 'lucide-react';
 import Draggable from 'react-draggable';
+import { useTranslation } from 'react-i18next';
 
 import { getMenuDisabledItems } from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
@@ -19,12 +20,14 @@ import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
-import { t } from 'i18next';
 
 export const Menu = () => {
+  const { t } = useTranslation();
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+
+  const nodeRef = useRef<any>(null);
 
   useEffect(() => {
     const items = getMenuDisabledItems();
@@ -32,18 +35,20 @@ export const Menu = () => {
   }, []);
 
   return (
-    <Draggable positionOffset={{ x: '-50%', y: '0%' }}>
-      <div className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
-        <div className="sticky top-[10px]">
+    <Draggable nodeRef={nodeRef} handle="strong" positionOffset={{ x: '-50%', y: '0%' }}>
+      <div ref={nodeRef} className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
+        <div className="sticky top-[10px] flex w-full justify-center">
           <div
             className={clsx(
               'h-[36px] items-center rounded bg-neutral-800/80',
               isMenuOpen ? 'flex' : 'hidden'
             )}
           >
-            <div className="hidden h-[30px] select-none items-center px-3 sm:flex">
-              <img src="/sipeed.ico" width={18} height={18} alt="sipeed" />
-            </div>
+            <strong>
+              <div className="hidden h-[30px] cursor-move select-none items-center px-3 sm:flex">
+                <img src="/sipeed.ico" width={18} height={18} draggable={false} alt="sipeed" />
+              </div>
+            </strong>
 
             <Screen />
             <Keyboard />
@@ -70,29 +75,25 @@ export const Menu = () => {
             <Settings />
             <Fullscreen />
 
-          <Tooltip title={t('menu.collapse')} placement="bottom">
-            <div
-              className="mr-1 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white"
-              onClick={() => setIsMenuOpen((o) => !o)}
-            >
-              <XIcon size={20} />
-            </div>
+            <Tooltip title={t('menu.collapse')} placement="bottom" mouseEnterDelay={0.6}>
+              <div
+                className="mr-1 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700/80 hover:text-white"
+                onClick={() => setIsMenuOpen((o) => !o)}
+              >
+                <XIcon size={20} />
+              </div>
+            </Tooltip>
           </div>
-
-          {!isMenuOpen && (
-          </Tooltip>
         </div>
 
         {!isMenuOpen && (
-          <Tooltip title={t('menu.expand')} placement="bottom">
+          <Tooltip title={t('menu.expand')} placement="bottom" mouseEnterDelay={0.6}>
             <div
-              className="flex h-[30px] w-[50px] items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-800 hover:text-white"
+              className="flex h-[30px] w-[32px] cursor-pointer items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-700 hover:text-white"
               onClick={() => setIsMenuOpen((o) => !o)}
             >
-              <MenuIcon />
+              <MenuIcon size={20} />
             </div>
-          )}
-        </div>
           </Tooltip>
         )}
       </div>

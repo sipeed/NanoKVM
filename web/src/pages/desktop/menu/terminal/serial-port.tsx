@@ -6,11 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
-type SerialPortProps = {
-  setIsPopoverOpen: (open: boolean) => void;
-};
-
-export const SerialPort = ({ setIsPopoverOpen }: SerialPortProps) => {
+export const SerialPort = () => {
   const { t } = useTranslation();
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
 
@@ -22,7 +18,6 @@ export const SerialPort = ({ setIsPopoverOpen }: SerialPortProps) => {
     setIsKeyboardEnable(false);
 
     setIsModalOpen(true);
-    setIsPopoverOpen(false);
   }
 
   function closeModal() {

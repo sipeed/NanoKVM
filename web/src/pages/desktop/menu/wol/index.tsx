@@ -1,29 +1,23 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Divider, Input, List, Popover, Tooltip } from 'antd';
+import { Button, Divider, Input, List } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { NetworkIcon, SendIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useMediaQuery } from 'react-responsive';
 
 import { deleteWolMac, getWolMacs, wol } from '@/api/network.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { MenuItem } from '@/components/menu-item.tsx';
 
 export const Wol = () => {
   const { t } = useTranslation();
-  const isBigScreen = useMediaQuery({ minWidth: 640 });
 
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('');
   const [log, setLog] = useState('');
-
-  const tooltip = t('wol.title');
-  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const [macList, setMacList] = useState<string[]>([]);
 
@@ -41,8 +35,6 @@ export const Wol = () => {
 
       setIsKeyboardEnable(true);
     }
-
-    setIsPopoverOpen(open);
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -150,22 +142,11 @@ export const Wol = () => {
   );
 
   return (
-    <Popover
+    <MenuItem
+      title={t('wol.title')}
+      icon={<NetworkIcon size={16} />}
       content={content}
-      placement={isBigScreen ? 'bottomLeft' : 'bottom'}
-      trigger="click"
-      arrow={false}
-      open={isPopoverOpen}
-      onOpenChange={(visible) => {
-        handleOpenChange(visible);
-        setTooltipValue(visible ? '' : tooltip);
-      }}
-    >
-      <Tooltip title={tooltipValue} placement="bottom">
-        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-          <NetworkIcon size={16} />
-        </div>
-      </Tooltip>
-    </Popover>
+      onOpenChange={handleOpenChange}
+    />
   );
 };
