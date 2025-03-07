@@ -76,3 +76,18 @@ export function enableSSH() {
 export function disableSSH() {
   return http.post('/api/vm/ssh/disable');
 }
+
+// get mDNS state
+export function getMdnsState() {
+  return http.get('/api/vm/mdns');
+}
+
+// enable mDNS
+export function enableMdns() {
+  return http.post('/api/vm/mdns/enable');
+}
+
+// disable mDNS
+export function disableMdns() {
+  return http.post('/api/vm/mdns/disable');
+}

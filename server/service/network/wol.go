@@ -33,7 +33,7 @@ func (s *Service) WakeOnLAN(c *gin.Context) {
 		return
 	}
 
-	command := fmt.Sprintf("ether-wake %s", mac)
+	command := fmt.Sprintf("ether-wake -b %s", mac)
 	cmd := exec.Command("sh", "-c", command)
 
 	output, err := cmd.CombinedOutput()

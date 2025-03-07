@@ -16,6 +16,8 @@ const (
 	TailscalePath  = "/usr/bin/tailscale"
 	TailscaledPath = "/usr/sbin/tailscaled"
 	ConfigPath     = "etc/sysctl.d/99-tailscale.conf"
+
+	GoMemLimit int64 = 75
 )
 
 var StateMap = map[string]proto.TailscaleState{
@@ -69,7 +71,7 @@ func (s *Service) Start(c *gin.Context) {
 	}
 
 	if !utils.IsGoMemLimitExist() {
-		_ = utils.SetGoMemLimit(50)
+		_ = utils.SetGoMemLimit(GoMemLimit)
 	}
 
 	rsp.OkRsp(c)
@@ -165,7 +167,7 @@ func (s *Service) Login(c *gin.Context) {
 	}
 
 	if !utils.IsGoMemLimitExist() {
-		_ = utils.SetGoMemLimit(50)
+		_ = utils.SetGoMemLimit(GoMemLimit)
 	}
 
 	rsp.OkRspWithData(c, &proto.LoginTailscaleRsp{

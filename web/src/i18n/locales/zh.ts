@@ -193,6 +193,10 @@ const zh = {
           description: '启用 SSH 远程访问',
           tip: '启用前请务必设置强密码（帐号 - 修改密码）'
         },
+        mdns: {
+          description: '启用 mDNS 发现服务',
+          tip: '如果您未使用此功能，建议将其关闭'
+        },
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',

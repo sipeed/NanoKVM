@@ -200,6 +200,10 @@ const en = {
           description: 'Enable SSH remote access',
           tip: 'Set a strong password before enabling (Account - Change Password)'
         },
+        mdns: {
+          description: 'Enable mDNS discovery service',
+          tip: "Turning it off if it's not needed"
+        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
@@ -209,7 +213,7 @@ const en = {
         title: 'Tailscale',
         memory: {
           title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. It's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
+          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. It's recommended to set to 75MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
           disable: 'Disable'
         },
         restart: 'Restart Tailscale?',
@@ -261,15 +265,15 @@ const en = {
       }
     },
     error: {
-      title: 'We\'ve ran into an issue',
-      refresh: 'Refresh',
+      title: "We've ran into an issue",
+      refresh: 'Refresh'
     },
     fullscreen: {
-      toggle: 'Toggle Fullscreen',
+      toggle: 'Toggle Fullscreen'
     },
     menu: {
       collapse: 'Collapse Menu',
-      expand: 'Expand Menu',
+      expand: 'Expand Menu'
     }
   }
 };

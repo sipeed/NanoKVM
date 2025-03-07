@@ -18,7 +18,7 @@ var imageVersionMap = map[string]string{
 	"2024-07-23-20-18-587710.img": "v1.1.0",
 	"2024-08-08-19-44-bef2ca.img": "v1.2.0",
 	"2024-11-13-09-59-9c961a.img": "v1.3.0",
-	"2025-02-17-16-59-3649fe.img": "v1.4.0",
+	"2025-02-17-19-08-3649fe.img": "v1.4.0",
 }
 
 func (s *Service) GetInfo(c *gin.Context) {
@@ -53,6 +53,10 @@ func getIp() string {
 }
 
 func getMdns() string {
+	if pid := getAvahiDaemonPid(); pid == "" {
+		return ""
+	}
+
 	content, err := os.ReadFile("/etc/hostname")
 	if err != nil {
 		return ""
