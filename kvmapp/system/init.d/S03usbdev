@@ -106,7 +106,7 @@ start_usb_dev(){
             fi
     fi
 
-    ls /sys/class/udc/ | cat > UDC
+    ls /sys/class/udc/ > UDC
     echo device > /proc/cviusb/otg_role
 }
 
