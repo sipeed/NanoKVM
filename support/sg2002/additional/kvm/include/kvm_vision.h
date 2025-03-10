@@ -32,6 +32,12 @@ extern "C" {
 #define IMG_H264_TYPE_IF		3
 #define IMG_H264_TYPE_PF		4
 
+#define NORMAL_RES                      0
+#define NEW_RES                         1
+#define UNSUPPORT_RES                   2
+#define UNKNOWN_RES                     3
+#define ERROR_RES                       4
+
 void kvmv_init(uint8_t _debug_info_en = 0);
 void set_venc_auto_recyc(uint8_t _enable);
 /**********************************************************************************
@@ -47,10 +53,12 @@ void set_venc_auto_recyc(uint8_t _enable);
  * @param	_pp_kvm_data		@output: 	Encode data
  * @param	_p_kvmv_data_size	@output: 	Encode data size
  * @return
+        -7: HDMI INPUT RES ERROR
+        -6: Unsupported resolution, please modify it in the host settings.
         -5: Retrieving image, please wait
         -4: Modifying image resolution, please wait
         -3: img buffer full
-        -2: VENC Error
+        -2: VENC Errorl
         -1: No images were acquired
          0: Acquire MJPEG encoded images
          1: Acquire H264 encoded images(SPS)

@@ -37,6 +37,8 @@
 #define vi_height_path          "/kvmapp/kvm/height"
 #define hdmi_mode_path          "/etc/kvm/hdmi_mode"
 #define hdmi_state_path         "/proc/lt_int"
+#define watchdog_mode_path      "/etc/kvm/watchdog"
+#define watchdog_file           "/tmp/nanokvm_wd"
 
 #define LT6911_ADDR 	0x2B
 #define LT6911_READ 	0xFF
@@ -82,6 +84,8 @@ typedef struct {
     uint8_t hdmi_stop_flag = 0;
     uint8_t hdmi_reading_flag = 0;
     uint8_t hdmi_mode = 0;
+    uint8_t hdmi_res_type = 0;
+    uint8_t hdmi_res_err = 0;
     uint8_t vi_detect_state = 0;
     uint8_t venc_auto_recyc = 0;
 } kvmv_cfg_t;
@@ -159,6 +163,44 @@ uint16_t hdmi_res_list[][2] = {
     {800, 600},
 };
 
+uint16_t hdmi_unsupported_res_list[][2] = {
+    {1680, 1050},
+    {1440, 1050},
+    {1400, 1050},
+    {1368, 768},
+    {1366, 768},
+    {720, 576},
+};
+
+/* return 0 : normal res;
+/* return 1 : new res;
+ * return 2 : unsupport res;
+ * return 3 : unknow res;
+ */
+uint8_t check_res(uint16_t _width, uint16_t _height)
+{
+    uint8_t i;
+    uint8_t ret;
+
+    for(i = 0; i < sizeof(hdmi_res_list)/4; i++){
+        if(_width == hdmi_res_list[i][0] && _height == hdmi_res_list[i][1]) return NORMAL_RES;
+    }
+    for(i = 0; i < sizeof(hdmi_unsupported_res_list)/4; i++){
+        if(_width == hdmi_unsupported_res_list[i][0] && _height == hdmi_unsupported_res_list[i][1]) return UNSUPPORT_RES;
+    }
+    return UNKNOWN_RES;
+}
+
+void write_res_to_file(uint16_t _width, uint16_t _height)
+{
+	char Cmd[100]={0};
+    sprintf(Cmd, "echo %d > %s", _width, vi_width_path);
+    system(Cmd);
+    sprintf(Cmd, "echo %d > %s", _height, vi_height_path);
+    system(Cmd);
+    system("sync");
+}
+
 /* return 0 : VI not init;
  * return 1 : HDMI and CSI status are normal;
  * return 2 : HDMI abnormal;
@@ -220,6 +262,19 @@ uint8_t get_vi_state()
     return ret;
 }
 
+int set_hdmi_mode(uint8_t _hdmi_mode)
+{
+    if(_hdmi_mode >= 0 && _hdmi_mode <= 2){
+        char Cmd[100]={0};
+        sprintf(Cmd, "echo %d > %s", _hdmi_mode, hdmi_mode_path);
+        system(Cmd);
+        return 1;
+    } else {
+        debug("[kvmv] Incorrect HDMI mode.\n");
+        return 0;
+    }
+}
+
 int get_hdmi_mode(void)
 {
     if(access(hdmi_mode_path, F_OK) == 0){
@@ -250,6 +305,26 @@ int get_hdmi_mode(void)
     }
     kvmv_cfg.hdmi_mode = 0;
     return 0;
+}
+
+uint8_t watchdog_sf_is_open()
+{
+	if(access(watchdog_mode_path, F_OK) == 0) return 1;
+	else return 0;
+}
+
+int vision_update_watchdog() 
+{
+    FILE *file;
+
+    file = fopen(watchdog_file, "w");
+    if (file == NULL) {
+        debug("[kvmv] watchdog open error\n");
+        return -1;
+    }
+    // fprintf(file, "%s", 'v');
+    fclose(file);
+    return 1;
 }
 
 int get_manual_resolution(void)
@@ -327,6 +402,91 @@ int get_manual_resolution(void)
     return res;
 }
 
+uint8_t auto_try_res()
+{
+    char Cmd[100]={0};
+    uint8_t err_code;
+    uint8_t auto_trying_times = 0;
+
+    for (auto_trying_times = 0; auto_trying_times < sizeof(hdmi_res_list)/4; auto_trying_times++){
+        err_code = get_vi_state();
+        switch(err_code){
+        case 0:
+            // shouldn't be possible to run here
+            cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+            printf("[kvmv] VI not init\n");
+            break;
+        case 1:
+            printf("[kvmv] VI subsystem is normal\n");
+            return 1;
+            break;
+        case 2:
+            // HDMI not detected or resolution not supported; interval checks will continue
+            printf("[kvmv] Cannot obtain HDMI input\n");
+            auto_trying_times--;
+            break;
+        case 3: // width too small
+        case 4: // width too large
+        case 5: // height too small
+        case 6: // height too large
+            // CSI abnormal due to resolution error
+            // The test list is short; sequential testing can be performed
+            printf("[kvmv] Trying %d * %d res ..\n", hdmi_res_list[auto_trying_times][0], hdmi_res_list[auto_trying_times][1]);
+            sprintf(Cmd, "echo %d > %s", hdmi_res_list[auto_trying_times][0], vi_width_path);
+            system(Cmd);
+            sprintf(Cmd, "echo %d > %s", hdmi_res_list[auto_trying_times][1], vi_height_path);
+            system(Cmd);
+
+            kvmv_cfg.vi_width = hdmi_res_list[auto_trying_times][0];
+            kvmv_cfg.vi_height = hdmi_res_list[auto_trying_times][1];
+            printf("[kvmv] restart cam...\n");
+            cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+            time::sleep_ms(50);
+            break;
+        case 7: // Unknown reason
+            printf("[kvmv] CSI abnormal: Unknown reason\n");
+            break;
+        }
+    }
+    if (get_vi_state() == 1) return 1;
+    if (get_vi_state() == 2) return 2;
+    else return 0;
+}
+
+/* return :
+ * 0 : error
+ * 1 : out of mem
+ * 2 : normal
+*/
+uint8_t chack_ion()
+{
+    // cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep "usage rate:" | awk -F '[:%]' '{print $2}'
+	uint8_t RW_Data[10];
+    uint8_t ATOI_Data[3] = {0};
+    uint8_t ion_usage_rate;
+    char Cmd[150]={0};
+    // sprintf( Cmd, "cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep \"usage rate:\" | awk -F '[:%]' '{print $2}'");
+    sprintf( Cmd, "cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep \"usage rate:\" | awk '{print $2}'");
+    FILE* fp = popen( Cmd, "r" );
+    if ( NULL == fp )
+    {
+        pclose(fp);
+        return 0;
+    }
+    fgets((char*)RW_Data, 8, fp);
+    pclose(fp);
+    RW_Data[8] = 0;
+    if (RW_Data[6] == '&') return 1;
+    else {
+        ATOI_Data[0] = RW_Data[5];
+        ATOI_Data[1] = RW_Data[6];
+    }
+    ion_usage_rate = atoi((char*)ATOI_Data);
+
+    if(ion_usage_rate >= 95) return 1;
+    else return 2;
+}
+
 void lt6911_enable()
 {
 	uint8_t buf[2];
@@ -338,7 +498,7 @@ void lt6911_enable()
 	buf[1] = 0x01;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
 
-    if(kvmv_cfg.hdmi_version == 1){
+    if(kvmv_cfg.hdmi_version != 0){
         // disable watchdog
         buf[0] = 0x10;
         buf[1] = 0x00;
@@ -512,15 +672,13 @@ void lt6911_get_hdmi_clk()
 
 uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
 {
-	uint8_t ret = 0;
 	uint8_t buf[2];
 	uint8_t revbuf[4];
+    uint8_t res_type;
 	static uint16_t old_Vactive;
 	static uint16_t old_Hactive;
 	uint16_t Vactive;
 	uint16_t Hactive;
-	char Cmd[100]={0};
-
 
     if(kvmv_cfg.hdmi_version == 0){
         // LT6911C	
@@ -576,31 +734,41 @@ uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
         Vactive = (revbuf[0] << 8)|revbuf[1];
         Hactive = (revbuf[2] << 8)|revbuf[3];
     } else {
-        return ret;
+        return UNKNOWN_RES;
     }
 
-	if(old_Hactive != Hactive || old_Vactive != Vactive){
-		old_Hactive = Hactive;
-		old_Vactive = Vactive;
-		// p_kvm_cfg->width = Hactive;
-		// p_kvm_cfg->height = Vactive;
-		*p_width = Hactive;
-		*p_height = Vactive;
-		ret = 1;
-	}
+    res_type = check_res(Hactive, Vactive);
+    if(res_type == NORMAL_RES)
+    {
+        if(old_Hactive != Hactive || old_Vactive != Vactive){
+            old_Hactive = Hactive;
+            old_Vactive = Vactive;
+            // p_kvm_cfg->width = Hactive;
+            // p_kvm_cfg->height = Vactive;
+            *p_width = Hactive;
+            *p_height = Vactive;
+            res_type = NEW_RES;
+        }
+    }
 
-	debug("[hdmi]CSI res: %d * %d; new res = %d\n", Hactive, Vactive, ret);
-	// setenv("KVM_CSI_HEIGHT", to_string(Hactive).c_str(), 1);
-	// setenv("KVM_CSI_WIDTH",  to_string(Vactive).c_str(), 1);
+    switch (res_type)
+    {
+    case NORMAL_RES:
+        printf("[hdmi] get res : %d * %d\n", Hactive, Vactive);
+        break;
+    case NEW_RES:
+        printf("[hdmi] get new res : %d * %d\n", Hactive, Vactive);
+        write_res_to_file(Hactive, Vactive);
+        break;
+    case UNSUPPORT_RES:
+        printf("[hdmi] get unsupport res : %d * %d\n", Hactive, Vactive);
+        break;
+    case UNKNOWN_RES:
+        printf("[hdmi] get unknown res : %d * %d\n", Hactive, Vactive);
+        break;
+    }
 
-	sprintf(Cmd, "echo %d > %s", Hactive, vi_width_path);
-	system(Cmd);
-	sprintf(Cmd, "echo %d > %s", Vactive, vi_height_path);
-	system(Cmd);
-	system("sync");
-
-
-	return ret;
+	return res_type;
 }
 
 void lt6911_write_reg(uint8_t reg, uint8_t val)
@@ -835,6 +1003,57 @@ void lt6911_read_fw(void)
 
 // ==============================================================
 
+void* watchdog_sf_feed(void * arg)
+{
+    while(true)
+    {
+        if(kvmv_cfg.try_exit_thread == 1)
+            break;
+        time::sleep_ms(500);
+        if (watchdog_sf_is_open()){
+            if (chack_ion() == 1){
+                debug("[kvmv] Ion memory is full reboot now!\n");
+                system("reboot");
+            }
+            debug("[kvmv] watchdog_sf_feed now!\n");
+            vision_update_watchdog();
+        }
+    }
+}
+
+void get_hdmi_version()
+{
+	FILE *fp;
+	uint8_t RW_Data[2];
+    system("/kvmapp/system/init.d/S15kvmhwd get_hdmi_version");
+	if(access("/etc/kvm/hdmi_version", F_OK) == 0){
+        fp = fopen("/etc/kvm/hdmi_version", "r");
+        fread(RW_Data, sizeof(char), 2, fp);
+        fclose(fp);
+        if(RW_Data[0] == 'u'){
+            // 6911uxc
+            if(RW_Data[1] == 'e'){
+                kvmv_cfg.hdmi_version = 2;
+                debug("[hdmi]HDMI-UE exist!\n");
+                set_hdmi_mode(1);
+            } else if(RW_Data[1] == 'x') {
+                kvmv_cfg.hdmi_version = 1;
+                debug("[hdmi]HDMI-UX exist!\n");
+            } else {
+                kvmv_cfg.hdmi_version = 1;
+                debug("[hdmi]Incomplete version number, set to 'ux'\n");
+            }
+        } else {
+            // 6911c
+            kvmv_cfg.hdmi_version = 0;
+            debug("[hdmi]HDMI-C exist!\n");
+        }
+        RW_Data[0] = 0;
+    } else {
+        kvmv_cfg.hdmi_version = 0;
+    }
+}
+
 void* vi_subsystem_detection(void * arg)
 {
 	uint64_t __attribute__((unused)) int_time;
@@ -852,41 +1071,18 @@ void* vi_subsystem_detection(void * arg)
 		debug("[hdmi]/proc/lt_int not ok\n");
 	}
 
-	if(access("/etc/kvm/hdmi_version", F_OK) == 0){
-        fp = fopen("/etc/kvm/hdmi_version", "r");
-        fread(RW_Data, sizeof(char), 1, fp);
-        fclose(fp);
-        if(RW_Data[0] == 'u'){
-            // 6911uxc
-            kvmv_cfg.hdmi_version = 1;
-            debug("[hdmi]HDMI-UXC exist!\n");
-        } else {
-            // 6911c
-            kvmv_cfg.hdmi_version = 0;
-            debug("[hdmi]HDMI-C exist!\n");
-        }
-        RW_Data[0] = 0;
-    } else {
-        kvmv_cfg.hdmi_version = 0;
-    }
+    get_hdmi_version();
 
     // while(!app::need_exit())
-    uint8_t while_count_get_hdmi_mode = 0;
     uint8_t while_count_detect_res = 0;
-    uint8_t auto_trying_times = 0;
     while(true)
     {
-        uint8_t get_new_hdmi_mode = 0;
         if(kvmv_cfg.try_exit_thread == 1)
             break;
         
-        // Low-frequency detection mode change
-        if (while_count_get_hdmi_mode >= 100){
-            while_count_get_hdmi_mode = 0;
-            get_new_hdmi_mode = get_hdmi_mode();
-        } else {
-            while_count_get_hdmi_mode ++;
-        }
+        uint8_t get_new_hdmi_mode = get_hdmi_mode();
+        uint8_t try_res;
+        uint8_t err_code;
 
         switch (kvmv_cfg.hdmi_mode){
         case 0:
@@ -929,7 +1125,19 @@ void* vi_subsystem_detection(void * arg)
                                     // hdmi get res
                                     debug("[hdmi] C HDMI cable insertion!\n");
                                     kvmv_cfg.hdmi_cable_state = 1;
-                                    kvmv_cfg.reopen_cam_flag = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
+                                    else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
+                                        kvmv_cfg.vi_detect_state = 1;
+                                        if(auto_try_res() == 1){
+                                            printf("[hdmi] auto get res\n");
+                                            kvmv_cfg.hdmi_res_err = NORMAL_RES;
+                                        } else {
+                                            // Potential deadlock may occur
+                                            kvmv_cfg.hdmi_res_err = ERROR_RES;
+                                        }
+                                        kvmv_cfg.vi_detect_state = 0;
+                                    }
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] C HDMI cable unplugged!\n");
@@ -947,7 +1155,19 @@ void* vi_subsystem_detection(void * arg)
                                     // hdmi get res
                                     debug("[hdmi] UXC HDMI cable insertion!\n");
                                     kvmv_cfg.hdmi_cable_state = 1;
-                                    kvmv_cfg.reopen_cam_flag = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
+                                    else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
+                                        kvmv_cfg.vi_detect_state = 1;
+                                        if(auto_try_res() == 1){
+                                            printf("[hdmi] auto get res\n");
+                                            kvmv_cfg.hdmi_res_err = NORMAL_RES;
+                                        } else {
+                                            // Potential deadlock may occur
+                                            kvmv_cfg.hdmi_res_err = ERROR_RES;
+                                        }
+                                        kvmv_cfg.vi_detect_state = 0;
+                                    }
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] UXC HDMI cable unplugged!\n");
@@ -955,6 +1175,8 @@ void* vi_subsystem_detection(void * arg)
                                 }
                                 lt6911_disable();
                             }
+                        } else {
+                            debug("[hdmi] Chip not supported for reading \n");
                         }
                         kvmv_cfg.hdmi_reading_flag = 0;
                     }
@@ -970,62 +1192,28 @@ void* vi_subsystem_detection(void * arg)
              * 1: Preparing / Testing in progress
              * 2: Test completed: Suitable resolution found,
              */
+                    
             if(get_new_hdmi_mode == 1){
                 kvmv_cfg.vi_detect_state = 1;
-                auto_trying_times = 0;
             }
             if(kvmv_cfg.vi_detect_state == 1){
-                uint8_t err_code = get_vi_state();
-                debug("[kvmv] get_vi_state() = %d\n", err_code);
-                switch(err_code){
-                case 0:
-                    // shouldn't be possible to run here
-                    printf("[kvmv] VI not init\n");
-                    break;
-                case 1:
-                    printf("[kvmv] VI subsystem is normal\n");
+                
+                try_res = auto_try_res();
+                if (try_res == 1) {
                     kvmv_cfg.vi_detect_state = 2;
-                    break;
-                case 2:
-                    // HDMI not detected or resolution not supported; interval checks will continue
-                    printf("[kvmv] Cannot obtain HDMI input\n");
-                    break;
-                case 3: // width too small
-                case 4: // width too large
-                case 5: // height too small
-                case 6: // height too large
-                    // CSI abnormal due to resolution error
-                    // The test list is short; sequential testing can be performed
-                    if(auto_trying_times < sizeof(hdmi_res_list)/4){
-                        char Cmd[100]={0};
-                        printf("[kvmv] Trying %d * %d res ..\n", hdmi_res_list[auto_trying_times][0], hdmi_res_list[auto_trying_times][1]);
-                        sprintf(Cmd, "echo %d > %s", hdmi_res_list[auto_trying_times][0], vi_width_path);
-                        system(Cmd);
-                        sprintf(Cmd, "echo %d > %s", hdmi_res_list[auto_trying_times][1], vi_height_path);
-                        system(Cmd);
-                        printf("[kvmv] restart cam...\n");
-                        cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
-                        auto_trying_times++;
-                        time::sleep_ms(10);
-                    } else {
-                        printf("[kvmv] Suitable resolution not found, switching to manual input mode automatically\n");
-                        kvmv_cfg.vi_detect_state = 1;
-                        char Cmd[100]={0};
-                        sprintf(Cmd, "echo 2 > %s", hdmi_mode_path);
-                        system(Cmd);
-                        while_count_get_hdmi_mode = 100;    // Take effect immediately
-                    }
-                    break;
-                case 7: // Unknown reason
-                    printf("[kvmv] CSI abnormal: Unknown reason\n");
-                    break;
+                } else if (try_res == 0) {
+                    printf("[kvmv] Suitable resolution not found, switching to manual input mode automatically\n");
+                    kvmv_cfg.vi_detect_state = 1;
+                    set_hdmi_mode(2);
+                } else if (try_res == 2) {
+                    // Cannot obtain HDMI input / No signal on HDMI
                 }
             } else if (kvmv_cfg.vi_detect_state == 2){
                 // Low-frequency detection of HDMI status, no log output
-                uint8_t err_code = get_vi_state();
+            printf("[kvmv] kvmv_cfg.vi_detect_state == 2\n");
+                err_code = get_vi_state();
                 if (err_code != 1) {
                     kvmv_cfg.vi_detect_state = 1;
-                    auto_trying_times = 0;
                 }
                 time::sleep_ms(1000); 
             } else {
@@ -1034,17 +1222,17 @@ void* vi_subsystem_detection(void * arg)
             break;
         case 2:
             // Manually initialize VI.
-            if (while_count_detect_res >= 100){
-                while_count_detect_res = 0;
+            while_count_detect_res = (while_count_detect_res + 1)%100;
+            if(while_count_detect_res == 1){
                 if (kvmv_cfg.vi_detect_state == 1){
                     // detect_res
                     if (get_manual_resolution()) {
-                        printf("[kvmv] restart cam...\n");
+                        debug("[kvmv] restart cam...\n");
                         cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
                     }
 
                     // dbg info
-                    uint8_t err_code = get_vi_state();
+                    err_code = get_vi_state();
                     switch(err_code){
                     case 0:
                         debug("[kvmv] VI not init\n");
@@ -1074,14 +1262,11 @@ void* vi_subsystem_detection(void * arg)
                     }
                 } else if (kvmv_cfg.vi_detect_state == 2){
                     // detection of HDMI status, no log output
-                    uint8_t err_code = get_vi_state();
+                    err_code = get_vi_state();
                     if (err_code != 1) kvmv_cfg.vi_detect_state = 1;
                 } else {
                     kvmv_cfg.vi_detect_state = 1;
                 }
-
-            } else {
-                while_count_detect_res ++;
             }
             break;
         
@@ -1338,7 +1523,12 @@ void kvmv_init(uint8_t _debug_info_en)
         debug("[kvmv]thread is running!\r\n");
     } else {
         if (0 != pthread_create(&thread, NULL, vi_subsystem_detection, NULL)) {
-            debug("[kvmv]create thread failed!\r\n");
+            debug("[kvmv]create vi_subsystem_detection thread failed!\r\n");
+            // return -1;
+        }
+
+        if (0 != pthread_create(&thread, NULL, watchdog_sf_feed, NULL)) {
+            debug("[kvmv]create watchdog_sf_feed thread failed!\r\n");
             // return -1;
         }
     }
@@ -1387,6 +1577,8 @@ void set_venc_auto_recyc(uint8_t _enable)
  * @param	_pp_kvm_data		@output: 	Encode data
  * @param	_p_kvmv_data_size	@output: 	Encode data size
  * @return
+        -7: HDMI INPUT RES ERROR
+        -6: Unsupported resolution, please modify it in the host settings.
         -5: Retrieving image, please wait
         -4: Modifying image resolution, please wait
         -3: img buffer full
@@ -1410,7 +1602,14 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
     if(mutex_res != 0){
         return -5;
     }
-
+    if (kvmv_cfg.hdmi_res_err == ERROR_RES){
+        pthread_mutex_unlock(&vi_mutex);
+        return -7;
+    }
+    if (kvmv_cfg.hdmi_res_type == UNSUPPORT_RES){
+        pthread_mutex_unlock(&vi_mutex);
+        return -6;
+    }
     if (kvmv_cfg.vi_detect_state == 1){
         pthread_mutex_unlock(&vi_mutex);
         return -4;
@@ -1645,3 +1844,24 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     }
     return -1;
 }
+
+
+/* 
+todo list:
+- [x] 添加芯片型号
+- [-] 写一个不支持的分辨率列表，如果不支持就发出错误提醒，不输出/不获取图像
+    - mode0：
+        - 获取到支持的分辨率：直接初始化
+        - 不支持的分辨率：输出对应错误
+        - 不在列表的分辨率：自动进入模式1
+    - mode1：
+        - 根据/proc/cvitek
+- [ ] 写一个文档说明获取USB HDMI ETH WiFi的状态
+- [ ] mode0：添加功能，获取到一个错误的res自动切换为探索模式
+- [ ] add mode3：仅i2c获取模式
+- [ ] 创建守护server进程
+- [ ] mDNS默认配置问题
+- [ ] 关于看门狗：kvm_vision和kvm_system相互在/tmp里狗叫，同时vision中添加检测是否read卡死，system中检测ion是否够用，否则重启
+VI_SDK_IOC_S_CTRL - vi_sdk_enable_chn NG, No buffer space available ion是否够用也放在vision里吧，前面是log
+
+*/
