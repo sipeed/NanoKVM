@@ -36,6 +36,7 @@
 #define WIFI_CONNECTION_DELAY 		5000
 #define OLED_SLEEP_DELAY_MIN 		10
 #define OLED_SLEEP_DELAY_DEFAULT 	30
+#define KVM_WD_COUNT_MAX			10
 
 typedef struct {
 	int8_t page = 0;

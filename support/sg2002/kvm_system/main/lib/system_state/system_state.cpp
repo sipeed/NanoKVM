@@ -36,13 +36,14 @@ int get_nic_state(const char* interface_name)
 	return ret;
 }
 
-int get_ping_allow_state()
+int get_ping_allow_state(void)
 {
 	if(access("/etc/kvm/stop_ping", F_OK) == 0) {
 		kvm_sys_state.ping_allow = 0;
 	} else {
 		kvm_sys_state.ping_allow = 1;
 	}
+	return kvm_sys_state.ping_allow;
 }
 
 // net_port
@@ -465,4 +466,21 @@ void kvm_update_tailscale_state(void)
 uint8_t ion_free_space(void)
 {
 	//cat /sys/kernel/debug/ion/cvi_carveout_heap_dump/summary | grep "usage rate:" | awk '{print $2}'
+}
+
+uint8_t watchdog_sf_is_open()
+{
+	if(access(watchdog_mode_path, F_OK) == 0) return 1;
+	else return 0;
+}
+
+int check_watchdog() 
+{
+	if(access(watchdog_file, F_OK) == 0) {
+		if (remove(watchdog_file) == 0) {
+			return 1;
+		} else {
+			return -1;
+		}
+	} else return 0;
 }

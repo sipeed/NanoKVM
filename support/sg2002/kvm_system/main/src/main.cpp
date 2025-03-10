@@ -147,7 +147,6 @@ void* thread_sys_handle(void * arg)
 	get_ping_allow_state();
     while(kvm_sys_state.sys_thread_running)
     {
-		// printf("[kvmsys]main while start!\n");
 		// net
 		if(kvm_sys_state.page == 0){
 			kvm_update_eth_state();
@@ -161,8 +160,8 @@ void* thread_sys_handle(void * arg)
 			kvm_update_hdmi_res();
 			kvm_update_stream_type();
 			kvm_update_stream_qlty();
-
 			kvm_wifi_web_config_process();
+
 		} else if(kvm_sys_state.page == 1){
 			kvm_wifi_config_process();
 		}
@@ -231,8 +230,24 @@ int main(int argc, char* argv[])
 	}
 
 	// while(!app::need_exit()){
+	uint8_t kvm_wd_count = 0;
+	int kvm_wd_state = 0;
 	while(kvm_sys_state.sys_thread_running){
 		time::sleep_ms(1000);
+		if(watchdog_sf_is_open()){
+			kvm_wd_state = check_watchdog();
+			if(kvm_wd_state == 1) kvm_wd_count = 0;
+			else if(kvm_wd_state == 0) {
+				kvm_wd_count++;
+				printf("Vision service unresponsive : %d\n", kvm_wd_count);
+			}
+			if(kvm_wd_count > KVM_WD_COUNT_MAX){
+				printf("Vision service unresponsive, restart now\n");
+				system("reboot");
+			}
+		} else {
+			kvm_wd_count = 0;
+		}
 	}
 	kvm_sys_state.sys_thread_running = 0;
 	kvm_sys_state.oled_thread_running = 0;
