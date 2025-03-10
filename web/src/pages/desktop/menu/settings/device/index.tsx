@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Mdns } from './mdns.tsx';
 import { Oled } from './oled.tsx';
+import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
@@ -22,6 +23,9 @@ export const Device = () => {
         <Mdns />
         <VirtualDevices />
       </div>
+      <Divider />
+
+      <Reboot />
     </>
   );
 };

@@ -50,10 +50,12 @@ jwt:
    # 在帐号登出时是否使所有 jwt token 失效。默认为 true
    revokeTokensOnLogout: true
 
+# 自定义 STUN 服务器的地址
+# 注意：可以设置为“disable”来禁用 STUN 服务（例如在局域网环境中使用时）
 stun: stun.l.google.com:19302
 
 turn:
-    turnAddr: turn.cloudflare.com:3478
+    turnAddr: example_addr
     turnUser: example_user
     turnCred: example_cred
 ```

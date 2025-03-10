@@ -71,6 +71,7 @@ func (s *Service) DisableMdns(c *gin.Context) {
 	}
 
 	_ = os.Remove(AvahiDaemonPid)
+	_ = os.Remove(AvahiDaemonScript)
 
 	rsp.OkRsp(c)
 	log.Debugf("avahi-daemon stopped")

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { LogoutOutlined } from '@ant-design/icons';
-import { Button, Divider } from 'antd';
+import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import * as api from '@/api/auth.ts';
-import { removeToken } from '@/lib/cookie.ts';
+
+import { Logout } from './logout.tsx';
 
 export const Account = () => {
   const { t } = useTranslation();
@@ -23,18 +23,6 @@ export const Account = () => {
 
   function changePassword() {
     navigate('/auth/password');
-  }
-
-  async function logout() {
-    api.logout().then((rsp) => {
-      if (rsp.code !== 0) {
-        console.log(rsp.msg);
-        return;
-      }
-
-      removeToken();
-      navigate('/auth/login');
-    });
   }
 
   return (
@@ -60,11 +48,7 @@ export const Account = () => {
       </div>
       <Divider />
 
-      <div className="flex justify-center">
-        <Button type="primary" danger icon={<LogoutOutlined />} onClick={logout}>
-          {t('settings.account.logoutBtn')}
-        </Button>
-      </div>
+      <Logout />
     </>
   );
 };

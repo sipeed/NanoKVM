@@ -233,7 +233,7 @@ const zh = {
         deviceIP: '设备地址',
         account: '账号',
         logout: '退出',
-        logout2: '确认退出？',
+        logoutDesc: '确定要退出吗？',
         uninstall: '卸载 Tailscale',
         okBtn: '确认',
         cancelBtn: '取消'
@@ -253,8 +253,22 @@ const zh = {
         webAccount: '网页帐号',
         password: '密码',
         updateBtn: '修改',
-        logoutBtn: '退出'
+        logoutBtn: '退出',
+        logoutDesc: '确定要退出吗？',
+        confirm: '确定',
+        cancel: '取消'
       }
+    },
+    error: {
+      title: '我们遇到了问题',
+      refresh: '刷新'
+    },
+    fullscreen: {
+      toggle: '切换全屏'
+    },
+    menu: {
+      collapse: '收起',
+      expand: '展开'
     }
   }
 };

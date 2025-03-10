@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LogoutOutlined } from '@ant-design/icons';
-import { Button, Switch } from 'antd';
+import { Button, Divider, Popconfirm, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/tailscale.ts';
@@ -17,7 +17,6 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
 
   const [isRunning, setIsRunning] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isConfirmation, setIsConfirmation] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
@@ -82,30 +81,27 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
         <span>{t('settings.tailscale.account')}</span>
         <span>{status.account}</span>
       </div>
+      <Divider />
 
-      <div className="flex justify-center pt-10">
-        {!isConfirmation ? (
-          <Button
-            type="primary"
-            size="large"
-            shape="round"
-            icon={<LogoutOutlined />}
-            onClick={() => setIsConfirmation(true)}
-          >
-            {t('settings.tailscale.logout')}
-          </Button>
-        ) : (
+      <div className="flex justify-center pt-3">
+        <Popconfirm
+          placement="bottom"
+          title={t('settings.tailscale.logoutDesc')}
+          okText={t('settings.tailscale.okBtn')}
+          cancelText={t('settings.tailscale.cancelBtn')}
+          onConfirm={logout}
+        >
           <Button
             danger
             type="primary"
             size="large"
+            shape="round"
             icon={<LogoutOutlined />}
             loading={isLogging}
-            onClick={logout}
           >
-            {t('settings.tailscale.logout2')}
+            {t('settings.tailscale.logout')}
           </Button>
-        )}
+        </Popconfirm>
       </div>
 
       {errMsg && <span className="text-red-500">{errMsg}</span>}

@@ -106,7 +106,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
           title={`${currentVersion} -> ${latestVersion}`}
           subTitle={t('settings.update.available')}
           extra={[
-            <Button type="primary" onClick={update}>
+            <Button key="confirm" type="primary" onClick={update}>
               {t('settings.update.confirm')}
             </Button>
           ]}

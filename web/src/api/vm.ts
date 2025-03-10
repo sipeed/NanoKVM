@@ -91,3 +91,8 @@ export function enableMdns() {
 export function disableMdns() {
   return http.post('/api/vm/mdns/disable');
 }
+
+// reboot
+export function reboot() {
+  return http.post('/api/vm/system/reboot');
+}

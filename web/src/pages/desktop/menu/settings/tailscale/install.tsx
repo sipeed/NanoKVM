@@ -43,7 +43,13 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
           icon={<DownloadOutlined />}
           subTitle={t('settings.tailscale.notInstall')}
           extra={
-            <Button type="primary" size="large" loading={state === 'installing'} onClick={install}>
+            <Button
+              key="install"
+              type="primary"
+              size="large"
+              loading={state === 'installing'}
+              onClick={install}
+            >
               {state === 'installing'
                 ? t('settings.tailscale.installing')
                 : t('settings.tailscale.install')}
@@ -57,7 +63,7 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
           subTitle={t('settings.tailscale.retry')}
           icon={<InfoCircleOutlined />}
           extra={
-            <Card styles={{ body: { padding: 0 } }}>
+            <Card key="tips" styles={{ body: { padding: 0 } }}>
               <ul className="list-decimal text-left font-mono text-sm text-neutral-300">
                 <li>
                   {t('settings.tailscale.download')}

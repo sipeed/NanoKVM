@@ -207,7 +207,11 @@ const en = {
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host'
+        networkDesc: 'Mount virtual network card on the remote host',
+        reboot: 'Reboot',
+        rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       },
       tailscale: {
         title: 'Tailscale',
@@ -241,7 +245,7 @@ const en = {
         deviceIP: 'Device IP',
         account: 'Account',
         logout: 'Logout',
-        logout2: 'Confirm logout',
+        logoutDesc: 'Are you sure you want to logout?',
         uninstall: 'Uninstall Tailscale',
         okBtn: 'Yes',
         cancelBtn: 'No'
@@ -261,7 +265,10 @@ const en = {
         webAccount: 'Web Account Name',
         password: 'Password',
         updateBtn: 'Change',
-        logoutBtn: 'Logout'
+        logoutBtn: 'Logout',
+        logoutDesc: 'Are you sure you want to logout?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
       }
     },
     error: {

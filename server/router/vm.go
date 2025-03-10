@@ -43,4 +43,6 @@ func vmRouter(r *gin.Engine) {
 	api.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state
 	api.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS
 	api.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS
+
+	api.POST("/vm/system/reboot", service.Reboot) // reboot system
 }

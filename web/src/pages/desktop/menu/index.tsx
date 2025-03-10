@@ -26,16 +26,45 @@ export const Menu = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [bounds, setBounds] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
   const nodeRef = useRef<any>(null);
 
   useEffect(() => {
+    // disabled menu items
     const items = getMenuDisabledItems();
     setMenuDisabledItems(items);
+
+    // react-draggable bounds
+    const handleResize = () => {
+      if (!nodeRef.current) return;
+
+      const elementRect = nodeRef.current.getBoundingClientRect();
+      const width = (window.innerWidth - elementRect.width) / 2;
+
+      setBounds({
+        left: -width,
+        top: -10,
+        right: width,
+        bottom: window.innerHeight - elementRect.height - 10
+      });
+    };
+
+    handleResize();
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return (
-    <Draggable nodeRef={nodeRef} handle="strong" positionOffset={{ x: '-50%', y: '0%' }}>
+    <Draggable
+      nodeRef={nodeRef}
+      bounds={bounds}
+      handle="strong"
+      positionOffset={{ x: '-50%', y: '0%' }}
+    >
       <div ref={nodeRef} className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
         <div className="sticky top-[10px] flex w-full justify-center">
           <div

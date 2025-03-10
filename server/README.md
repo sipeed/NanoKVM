@@ -53,15 +53,15 @@ jwt:
    revokeTokensOnLogout: true
 
 # Address for custom STUN server
+# Note: You can disable the STUN service by setting it to 'disable' (e.g., in a LAN environment)
 stun: stun.l.google.com:19302
 
 # Address and authentication for custom TURN server
 turn:
-    turnAddr: turn.cloudflare.com:3478
+    turnAddr: example_addr
     turnUser: example_user
     turnCred: example_cred
 ```
-
 
 ## Compile & Deploy
 
