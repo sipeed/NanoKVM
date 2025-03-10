@@ -14,22 +14,20 @@ start() {
     if [ -e /boot/eth.nodhcp ] 
     then
         [ -e /boot/eth.nodhcp ] &&
-            cat /boot/eth.nodhcp | while read inet gw
-            do
+            while read -r inet gw; do
                 addr=${inet%/*}
                 netid=${inet#*/}
-                [ -z $gw ] &&
-                gw=$( echo $addr| ( IFS='.' read a b c d; echo $((
-                    (((((($a<<8)+$b)<<8)+$c)<<8)+$d)
-                        & (((1<<$netid)-1)<<(32-$netid))
-                    ))
-                )) &&
-                gw=$(($gw>>24&0xff)).$(($gw>>16&0xff)).$(($gw>>8&0xff)).$((1+( $gw>>0&0xff )))
+
+                if [ -z "$gw" ]; then
+                    IFS='.' read -r a b c d <<< "$addr"
+                    gw=$(( (((((($a << 8) + $b) << 8) + $c) << 8) + $d) & (((1 << $netid) - 1) << (32 - $netid)) ))
+                    gw=$(( (gw >> 24) & 0xff )).$(( (gw >> 16) & 0xff )).$(( (gw >> 8) & 0xff )).$(( 1 + (gw & 0xff) ))
+                fi
 
                 arping -Dqc2 -Ieth0 $addr || continue
                 ip a add $inet brd + dev eth0
                 ip r add default via $gw dev eth0
-                cat > /etc/resolve.conf << EOF
+                cat > /etc/resolv.conf << EOF
 nameserver $gw
 nameserver 8.8.8.8
 nameserver 114.114.114.114
@@ -53,7 +51,7 @@ EOF
 }
 stop() {
     [[ ! -e "/run/udhcpc.eth0.pid" ]] && echo "udhcpc is not running..." && exit 1
-    kill `cat /run/udhcpc.eth0.pid`
+    kill "$(cat /run/udhcpc.eth0.pid)"
     rm /run/udhcpc.eth0.pid
 }
 

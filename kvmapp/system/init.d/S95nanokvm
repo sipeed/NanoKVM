@@ -1,42 +1,57 @@
 #!/bin/sh
-# nanokvm Rev3.0
+# nanokvm Rev3.1
 
 case "$1" in
   start)
     echo -n kvm > /boot/hostname.prefix
-    cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
 
-    str_value=$(cat /sys/class/cvi-base/base_uid | awk '{print $2}')
-    first_uint=$(echo $str_value | cut -d'_' -f1)
-    second_uint=$(echo $str_value | cut -d'_' -f2)
-    result="$first_uint$second_uint"
-    echo $result > /device_key
+    # Copy sensor config if the file exists
+    [ -f /mnt/data/sensor_cfg.ini.LT ] && cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
 
+    # Generate unique device key
+    if [ -f /sys/class/cvi-base/base_uid ]; then
+        str_value=$(awk '{print $2}' /sys/class/cvi-base/base_uid)
+        first_uint=$(echo "$str_value" | cut -d'_' -f1)
+        second_uint=$(echo "$str_value" | cut -d'_' -f2)
+        echo "$first_uint$second_uint" > /device_key
+    fi
+
+    # Set iptables rules (skip if already present)
+    iptables -C INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+
+    iptables -C OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
+
+    iptables -C OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+
+    iptables -C INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+
+    iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
+    # Start services
     cp -r /kvmapp/kvm_system /tmp/
     /tmp/kvm_system/kvm_system &
-    
+
     cp -r /kvmapp/server /tmp/
     /tmp/server/NanoKVM-Server &
-  ;;
+   ;;
+
   stop)
     killall kvm_system
     killall NanoKVM-Server
-    rm -r /tmp/kvm_system
-    rm -r /tmp/server
+    rm -r /tmp/kvm_system /tmp/server
     echo "OK"
-  ;;
+   ;;
+
   restart)
     killall kvm_system
     killall NanoKVM-Server
-    rm -r /tmp/kvm_system
-    rm -r /tmp/server
-    
+    rm -r /tmp/kvm_system /tmp/server
+
     cp -r /kvmapp/kvm_system /tmp/
     /tmp/kvm_system/kvm_system &
 
@@ -44,7 +59,11 @@ case "$1" in
     /tmp/server/NanoKVM-Server &
 
     sync
-
     echo "OK"
+   ;;
+    
+  *)
+    echo "Usage: $0 {start|stop|restart}"
+    exit 1
   ;;
 esac
