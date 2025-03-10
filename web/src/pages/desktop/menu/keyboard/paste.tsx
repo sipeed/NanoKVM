@@ -10,11 +10,7 @@ import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
 const { TextArea } = Input;
 
-type PasteProps = {
-  setIsPopoverOpen: (open: boolean) => void;
-};
-
-export const Paste = ({ setIsPopoverOpen }: PasteProps) => {
+export const Paste = () => {
   const { t } = useTranslation();
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
 
@@ -25,12 +21,6 @@ export const Paste = ({ setIsPopoverOpen }: PasteProps) => {
   const [errMsg, setErrMsg] = useState('');
 
   const inputRef = useRef<InputRef>(null);
-
-  function openModal() {
-    setIsPopoverOpen(false);
-
-    setIsModalOpen(true);
-  }
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     const value = e.target.value;
@@ -82,7 +72,7 @@ export const Paste = ({ setIsPopoverOpen }: PasteProps) => {
         className={clsx(
           'flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-700/70'
         )}
-        onClick={openModal}
+        onClick={() => setIsModalOpen(true)}
       >
         <ClipboardIcon size={18} />
         <span>{t('keyboard.paste')}</span>

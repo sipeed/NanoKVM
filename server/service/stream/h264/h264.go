@@ -39,7 +39,7 @@ func Connect(c *gin.Context) {
 
 	var iceServers []webrtc.ICEServer
 
-	if conf.Stun != "" {
+	if conf.Stun != "" && conf.Stun != "disable" {
 		iceServers = append(iceServers, webrtc.ICEServer{
 			URLs: []string{"stun:" + conf.Stun},
 		})
@@ -53,11 +53,9 @@ func Connect(c *gin.Context) {
 		})
 	}
 
-	rtc_config := webrtc.Configuration{
+	peerConn, err := webrtc.NewPeerConnection(webrtc.Configuration{
 		ICEServers: iceServers,
-	}
-
-	peerConn, err := webrtc.NewPeerConnection(rtc_config)
+	})
 	if err != nil {
 		log.Errorf("failed to create PeerConnection: %s", err)
 		return

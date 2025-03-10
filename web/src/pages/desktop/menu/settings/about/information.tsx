@@ -39,10 +39,12 @@ export const Information = () => {
           <span>{information ? information.ip : '-'}</span>
         </div>
 
-        <div className="flex w-full items-center justify-between">
-          <span>{t('settings.about.mdns')}</span>
-          <span>{information ? information.mdns : '-'}</span>
-        </div>
+        {!!information?.mdns && (
+          <div className="flex w-full items-center justify-between">
+            <span>{t('settings.about.mdns')}</span>
+            <span>{information.mdns}</span>
+          </div>
+        )}
 
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center space-x-2">

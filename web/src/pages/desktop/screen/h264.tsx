@@ -18,10 +18,13 @@ export const H264 = () => {
     let heartbeatTimer: any;
     const videoElement = document.getElementById('screen') as HTMLVideoElement;
 
+    const url = `${getBaseUrl('ws')}/api/stream/h264`;
+    const ws = new W3cWebSocket(url);
+
     const pc = new RTCPeerConnection({
       iceServers: [
         {
-          urls: ['stun:stun.l.google.com:19302', 'stun:turn.cloudflare.com:3478']
+          urls: ['stun:stun.l.google.com:19302']
         }
       ]
     });
@@ -33,9 +36,6 @@ export const H264 = () => {
       }
       videoElement.srcObject = event.streams[0];
     };
-
-    const url = `${getBaseUrl('ws')}/api/stream/h264`;
-    const ws = new W3cWebSocket(url);
 
     ws.onopen = () => {
       pc.onicecandidate = (event) => {

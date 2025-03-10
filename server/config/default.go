@@ -21,7 +21,7 @@ var defaultConfig = &Config{
 	},
 	Stun: "stun.l.google.com:19302",
 	Turn: Turn{
-		TurnAddr: "turn.cloudflare.com:3478",
+		TurnAddr: "",
 		TurnUser: "",
 		TurnCred: "",
 	},

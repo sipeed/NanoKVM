@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, Popover, Tooltip } from 'antd';
+import { Button, Divider, Input } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -8,21 +8,17 @@ import { useTranslation } from 'react-i18next';
 
 import { downloadImage, imageEnabled, statusImage } from '@/api/download.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { MenuItem } from '@/components/menu-item.tsx';
 
 export const DownloadImage = () => {
   const { t } = useTranslation();
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
-
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('');
   const [log, setLog] = useState('');
   const [diskEnabled, setDiskEnabled] = useState(false);
   const [popoverKey, setPopoverKey] = useState(0);
-
-  const tooltip = t('download.title');
-  const [tooltipValue, setTooltipValue] = useState(tooltip);
 
   const inputRef = useRef<InputRef>(null);
 
@@ -41,6 +37,7 @@ export const DownloadImage = () => {
         setDiskEnabled(false);
       });
   }
+
   function handleOpenChange(open: boolean) {
     if (open) {
       clearInterval(intervalId.current);
@@ -60,8 +57,6 @@ export const DownloadImage = () => {
       clearInterval(intervalId.current);
       intervalId.current = undefined;
     }
-
-    setIsPopoverOpen(open);
   }
 
   function handleChange(e: ChangeEvent<HTMLInputElement>) {
@@ -116,7 +111,7 @@ export const DownloadImage = () => {
   }
 
   const content = (
-    <div className="min-w-[300px]">
+    <div key={popoverKey} className="min-w-[300px]">
       <div className="flex items-center justify-between px-1">
         <span className="text-base font-bold text-neutral-300">{t('download.title')}</span>
       </div>
@@ -161,23 +156,11 @@ export const DownloadImage = () => {
   );
 
   return (
-    <Popover
-      key={popoverKey}
+    <MenuItem
+      title={t('download.title')}
+      icon={<DownloadIcon size={18} />}
       content={content}
-      placement="bottomLeft"
-      trigger="click"
-      arrow={false}
-      open={isPopoverOpen}
-      onOpenChange={(visible) => {
-        handleOpenChange(visible);
-        setTooltipValue(visible ? '' : tooltip);
-      }}
-    >
-      <Tooltip title={tooltipValue} placement="bottom">
-        <div className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700 hover:text-white">
-          <DownloadIcon size={18} />
-        </div>
-      </Tooltip>
-    </Popover>
+      onOpenChange={handleOpenChange}
+    />
   );
 };

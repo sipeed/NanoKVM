@@ -83,3 +83,7 @@ type GetOLEDRsp struct {
 type GetSSHStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
+
+type GetMdnsStateRsp struct {
+	Enabled bool `json:"enabled"`
+}

@@ -1,6 +1,7 @@
 import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { Mdns } from './mdns.tsx';
 import { Oled } from './oled.tsx';
 import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
@@ -18,6 +19,7 @@ export const Device = () => {
         <Oled />
         <Wifi />
         <Ssh />
+        <Mdns />
         <VirtualDevices />
       </div>
     </>
