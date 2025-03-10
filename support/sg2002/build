@@ -40,6 +40,16 @@ maixcdk_clean(){
 }
 
 case "$1" in
+  update_lib)
+    cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm $MAIXCDK_PATH/components
+    cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm_mmf $MAIXCDK_PATH/components
+    cp -rf $NanoKVM_PATH/support/sg2002/additional/vision $MAIXCDK_PATH/components
+    cp -f $NanoKVM_PATH/support/sg2002/additional/peripheral/port/maixcam/maix_i2c.cpp $MAIXCDK_PATH/components/peripheral/port/maixcam/maix_i2c.cpp
+    cp -f $NanoKVM_PATH/support/sg2002/additional/sophgo-middleware/v2/sample/common/sample_common_sensor.c $MAIXCDK_PATH/components/3rd_party/sophgo-middleware/sophgo-middleware/v2/sample/common/
+
+    echo -e "\e[36m[build] \e[32mupdate_lib ok!\e[0m"
+    exit 1
+  ;;
   kvm_system)
     Project_Name="kvm_system"
     Project_PATH="$NanoKVM_PATH/support/sg2002/kvm_system"
@@ -93,6 +103,7 @@ then
       then
         echo -e "\e[36m[build] \e[32mDetected that the library has not been modified; first, move the library\e[0m"
         
+        mkdir $NanoKVM_PATH/support/sg2002/additional/original
         mv -f $MAIXCDK_PATH/components/vision $NanoKVM_PATH/support/sg2002/additional/original
         # mv $MAIXCDK_PATH/components/maixcam_lib $NanoKVM_PATH/support/sg2002/additional/original
         mv -f $MAIXCDK_PATH/components/peripheral/port/maixcam/maix_i2c.cpp $NanoKVM_PATH/support/sg2002/additional/original
@@ -144,6 +155,10 @@ then
       else
         SOURCE_PATH="$Project_PATH/dist/kvm_vision_test_release/dl_lib"
         TARGET_PATH="$KVMAPP_PATH/server/"
+      fi
+      if [ ! -d $TARGET_PATH ]
+      then
+        mkdir -p $TARGET_PATH
       fi
       if [ -e $SOURCE_PATH ]
       then
