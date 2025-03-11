@@ -1,3 +1,20 @@
+## 2.2.2 [58d5ab2](https://github.com/sipeed/NanoKVM/commit/58d5ab2d37244b1e1a68b925a5c23c324c489ad3) (2025-03-11)
+
+* feat: add watchdog for NanoKVM-Server
+* feat: add support for UE chip
+* feat: support system reboot
+* feat: support enable/disable mDNS
+* fix: resolve UE chip cannot start server
+* perf: refactor automatic resolution detection
+* perf: add output prompt for unsupported resolutions
+* perf: add lock to kvmv_read_img
+* perf: configurable VENC automatic recycling feature
+* perf: add maximum limit for vi
+* perf: add tooltips to menu bar (thanks to [@S33G](https://github.com/S33G))
+* perf: menu bar is now draggable (thanks to [@forumi0721](https://github.com/forumi0721))
+* perf: image list support auto-refresh (thanks to [@forumi0721](https://github.com/forumi0721))
+* perf: update translations
+
 ## 2.2.1 [b5e48a0](https://github.com/sipeed/NanoKVM/commit/b5e48a07e82df3aedd60442342ae50b95684a697) (2025-02-21)
 
 * fix: mounted image were not being detected correctly
