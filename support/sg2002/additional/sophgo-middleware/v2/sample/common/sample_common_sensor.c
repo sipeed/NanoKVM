@@ -272,7 +272,7 @@ CVI_CHAR *SAMPLE_COMM_SNS_GetSnsrTypeName(void)
 	return (CVI_CHAR *)snsr_type_name;
 }
 /******************************************************************************
- * funciton : Get enSize by diffrent sensor
+ * function : Get enSize by different sensor
  * PIC_CIF:    352 * 288
  * PIC_D1_PAL:    720 * 576
  * PIC_D1_NTSC:    720 * 480
@@ -692,7 +692,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		if(access("/kvmapp/kvm/width", F_OK) == 0){
 			fp = fopen("/kvmapp/kvm/width", "r");
 			fseek(fp, 0, SEEK_END);
-			file_size = ftell(fp); 
+			file_size = ftell(fp);
 			fseek(fp, 0, SEEK_SET);
 			fread(RW_Data, sizeof(char), file_size, fp);
 			fclose(fp);
@@ -704,7 +704,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		if(access("/kvmapp/kvm/height", F_OK) == 0){
 			fp = fopen("/kvmapp/kvm/height", "r");
 			fseek(fp, 0, SEEK_END);
-			file_size = ftell(fp); 
+			file_size = ftell(fp);
 			fseek(fp, 0, SEEK_SET);
 			fread(RW_Data, sizeof(char), file_size, fp);
 			fclose(fp);
@@ -722,12 +722,12 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		// 	pstSize->u32Width  = atoi(getenv("KVM_CSI_HEIGHT"));
 		// 	pstSize->u32Height = atoi(getenv("KVM_CSI_WIDTH"));
 		// }
-		
+
 		printf("pstSize->u32Width = %d\n", pstSize->u32Width);
 		printf("pstSize->u32Height = %d\n", pstSize->u32Height);
 		break;
 	}
-		
+
 	default:
 		return CVI_FAILURE;
 	}
@@ -736,7 +736,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 }
 
 /******************************************************************************
- * funciton : Get VI attr info by diffrent sensor
+ * function : Get VI attr info by different sensor
  ******************************************************************************/
 CVI_S32 SAMPLE_COMM_SNS_GetDevAttr(SAMPLE_SNS_TYPE_E enSnsType, VI_DEV_ATTR_S *pstViDevAttr)
 {
@@ -1003,7 +1003,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetYuvBypassSts(SAMPLE_SNS_TYPE_E enSnsType)
 	return s32Ret;
 }
 /******************************************************************************
- * funciton : Get ISP attr info by diffrent sensor
+ * function : Get ISP attr info by different sensor
  ******************************************************************************/
 CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATTR_S *pstPubAttr)
 {
@@ -1188,7 +1188,7 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 }
 
 /******************************************************************************
- * funciton : Get sns_obj callback
+ * function : Get sns_obj callback
  ******************************************************************************/
 CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 {
@@ -1768,7 +1768,7 @@ CVI_VOID *SAMPLE_COMM_SNS_GetSnsObj(SAMPLE_SNS_TYPE_E enSnsType)
 }
 
 /******************************************************************************
- * funciton : Get sns_cfg from sensor_cfg.ini
+ * function : Get sns_cfg from sensor_cfg.ini
  ******************************************************************************/
 
 /*=== Source section parser handler begin === */

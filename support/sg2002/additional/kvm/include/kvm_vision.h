@@ -58,7 +58,7 @@ void set_venc_auto_recyc(uint8_t _enable);
         -5: Retrieving image, please wait
         -4: Modifying image resolution, please wait
         -3: img buffer full
-        -2: VENC Errorl
+        -2: VENC Error
         -1: No images were acquired
          0: Acquire MJPEG encoded images
          1: Acquire H264 encoded images(SPS)

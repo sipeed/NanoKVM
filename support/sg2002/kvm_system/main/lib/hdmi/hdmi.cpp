@@ -11,7 +11,7 @@ void lt6911_enable()
 	buf[0] = 0xff;
 	buf[1] = 0x80;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
-	
+
 	buf[0] = 0xee;
 	buf[1] = 0x01;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
@@ -23,7 +23,7 @@ void lt6911_disable()
 	buf[0] = 0xff;
 	buf[1] = 0x80;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
-	
+
 	buf[0] = 0xee;
 	buf[1] = 0x00;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
@@ -62,7 +62,7 @@ void lt6911_reset()
 	lt6911_start();
 }
 
-void lt6911_get_hdmi_errer()
+void lt6911_get_hdmi_error()
 {
 	uint8_t buf[6];
 
@@ -90,7 +90,7 @@ void lt6911_get_hdmi_errer()
 	}
 	delete dat;
 
-	printf("hdmi_errer_code = %x, %x, %x, %x, %x, %x\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
+	printf("hdmi_error_code = %x, %x, %x, %x, %x, %x\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 }
 
 uint8_t lt6911_get_hdmi_res()

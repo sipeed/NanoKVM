@@ -21,7 +21,7 @@ void lt6911_disable();
 void lt6911_start();
 void lt6911_stop();
 void lt6911_reset();
-void lt6911_get_hdmi_errer();
+void lt6911_get_hdmi_error();
 uint8_t lt6911_get_hdmi_res();
 void lt6911_get_hdmi_clk();
 uint8_t lt6911_get_csi_res();

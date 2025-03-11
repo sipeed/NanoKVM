@@ -35,7 +35,7 @@ void new_app_init(void)
 	system("rm /etc/init.d/S40bluetoothd");
 	system("rm /etc/init.d/S50ssdpd");
 	system("rm /etc/init.d/S99*");
-	
+
 	// Add necessary configuration files for program execution
 	system("mkdir /kvmapp/kvm");
 	system("mkdir /etc/kvm");
@@ -45,7 +45,7 @@ void new_app_init(void)
 	system("echo 720 > /kvmapp/kvm/res");
 	system("echo h264 > /kvmapp/kvm/type");
 	system("echo 0 > /kvmapp/kvm/state");
-	system("touch /etc/kvm/frame_detact");
+	system("touch /etc/kvm/frame_detect");
 
 	// rm jpg_stream & kvm_stream
 	system("rm -r /kvmapp/jpg_stream");
@@ -57,8 +57,8 @@ void new_app_init(void)
 
 	// update ko
 	FILE *fp;
-	uint8_t RW_Data_0[30];	
-	uint8_t RW_Data_1[30];	
+	uint8_t RW_Data_0[30];
+	uint8_t RW_Data_1[30];
 	fp = popen("md5sum /mnt/system/ko/soph_mipi_rx.ko | grep 086ed01749188975afaa40fb569374f8 | awk '{print $2}'", "r");
 	if ( NULL == fp )
 	{
@@ -111,8 +111,8 @@ void new_app_init(void)
 
 	if(access("/root/old/kvm_new_img", F_OK) == 0){
 		system("rm -r /root/old");
-	}	
-	
+	}
+
 	system("sync");
 	system("killall NanoKVM-Server");
 	system("rm -r /tmp/server");

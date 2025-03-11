@@ -100,7 +100,7 @@ void* thread_key_handle(void * arg)
 							kvm_sys_state.page = 1;
 							kvm_sys_state.sub_page = 0;
 							break;
-						case 1:	// wifi coonfig page
+						case 1:	// wifi config page
 							system("/etc/init.d/S30wifi restart");
 							kvm_sys_state.page = 0;
 							kvm_sys_state.sub_page = 0;
@@ -118,7 +118,7 @@ void* thread_key_handle(void * arg)
 							if(kvm_sys_state.sub_page == 0) kvm_sys_state.sub_page = 1;
 							else kvm_sys_state.sub_page = 0;
 							break;
-						case 1:	// wifi coonfig page
+						case 1:	// wifi config page
 							switch(kvm_sys_state.wifi_config_process){
 								case 1:	// QR1<->TEXT2
 									if(kvm_sys_state.sub_page == 1) kvm_sys_state.sub_page = 2;
@@ -174,13 +174,13 @@ void* thread_sys_handle(void * arg)
 int main(int argc, char* argv[])
 {
     // Catch SIGINT signal(e.g. Ctrl + C), and set exit flag to true.
-    signal(SIGINT, [](int sig){ 
+    signal(SIGINT, [](int sig){
 	kvm_sys_state.oled_thread_running = 0;
 	kvm_sys_state.key_thread_running = 0;
 	kvm_sys_state.sys_thread_running = 0;
-	app::set_exit_flag(true); 
+	app::set_exit_flag(true);
 	log::info("[kvms]Prepare to exit\n");
-	});	
+	});
 
 	pthread_t sys_state_thread;
 	pthread_t display_thread;
