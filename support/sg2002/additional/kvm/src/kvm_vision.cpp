@@ -109,8 +109,6 @@ camera::Camera *cam = new camera::Camera(default_vpss_width, default_vpss_height
 kvmv_cfg_t kvmv_cfg;
 
 kvmv_data_t kvmv_data_buffer[kvmv_data_buffer_size];
-kvmv_data_t kvmv_SPS_buffer = {0};
-kvmv_data_t kvmv_PPS_buffer = {0};
 
 uint8_t kvmv_data_buffer_index = 0;
 
@@ -1376,29 +1374,17 @@ int h264_stream_dump(kvmv_data_t* dump_to, mmf_stream_t* dump_from)
     static int8_t I_Frame_index = -1;
     // debug("[kvmv] dump_from->count = %d\n", dump_from->count);
     if (dump_from->count == 3) {
-        // debug("[kvmv] dump I-Frame\r\n");
-        if(kvmv_SPS_buffer.p_img_data != NULL || kvmv_PPS_buffer.p_img_data != NULL)
-            return IMG_BUFFER_FULL;
 
-        kvmv_SPS_buffer.p_img_data  = (uint8_t *)malloc(dump_from->data_size[0]);
-        kvmv_PPS_buffer.p_img_data  = (uint8_t *)malloc(dump_from->data_size[1]);
-        dump_to->p_img_data         = (uint8_t *)malloc(dump_from->data_size[2]);
+        dump_to->p_img_data = (uint8_t *)malloc(dump_from->data_size[0]+dump_from->data_size[1]+dump_from->data_size[2]);
+        dump_to->img_data_size = dump_from->data_size[0]+dump_from->data_size[1]+dump_from->data_size[2];
+        dump_to->img_data_type = IMG_H264_TYPE_IF;
+        memcpy(dump_to->p_img_data, dump_from->data[0], dump_from->data_size[0]);
+        memcpy(dump_to->p_img_data+dump_from->data_size[0], dump_from->data[1], dump_from->data_size[1]);
+        memcpy(dump_to->p_img_data+dump_from->data_size[0]+dump_from->data_size[1], dump_from->data[2], dump_from->data_size[2]);
 
-        kvmv_SPS_buffer.img_data_size   = dump_from->data_size[0];
-        kvmv_PPS_buffer.img_data_size   = dump_from->data_size[1];
-        dump_to->img_data_size          = dump_from->data_size[2];
-
-        kvmv_SPS_buffer.img_data_type   = IMG_H264_TYPE_SPS;
-        kvmv_PPS_buffer.img_data_type   = IMG_H264_TYPE_PPS;
-        dump_to->img_data_type          = IMG_H264_TYPE_IF;
-
-        memcpy(kvmv_SPS_buffer.p_img_data,  dump_from->data[0], dump_from->data_size[0]);
-        memcpy(kvmv_PPS_buffer.p_img_data,  dump_from->data[1], dump_from->data_size[1]);
-        memcpy(dump_to->p_img_data,         dump_from->data[2], dump_from->data_size[2]);
-
-        debug("[kvmv] SPS size = %d\n", kvmv_SPS_buffer.img_data_size);
-        debug("[kvmv] PPS size = %d\n", kvmv_PPS_buffer.img_data_size);
-        debug("[kvmv] I-Frame size = %d\n", dump_to->img_data_size);
+        debug("[kvmv]SPS size = %d\n", dump_from->data_size[0]);
+        debug("[kvmv]PPS size = %d\n", dump_from->data_size[1]);
+        debug("[kvmv]I-Frame size = %d\n", dump_from->data_size[2]);
 
         return IMG_H264_TYPE_IF;
 
@@ -1513,8 +1499,6 @@ void kvmv_init(uint8_t _debug_info_en)
     for(int i = 0; i < kvmv_data_buffer_size; i++){
         kvmv_data_buffer[i].p_img_data = NULL;
     }
-    kvmv_SPS_buffer.p_img_data = NULL;
-    kvmv_PPS_buffer.p_img_data = NULL;
 
     kvmv_cfg.try_exit_thread = 0;
     // debug("[kvmv] kvmv_init - 2\r\n");
@@ -1585,8 +1569,8 @@ void set_venc_auto_recyc(uint8_t _enable)
         -2: VENC Error
         -1: No images were acquired
          0: Acquire MJPEG encoded images
-         1: Acquire H264 encoded images(SPS)
-         2: Acquire H264 encoded images(PPS)
+         1: Acquire H264 encoded images(SPS)[Deprecated]
+         2: Acquire H264 encoded images(PPS)[Deprecated]
          3: Acquire H264 encoded images(I)
          4: Acquire H264 encoded images(P)
  **********************************************************************************/
@@ -1729,30 +1713,6 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
     return IMG_NOT_EXIST;
 }
 
-int kvmv_get_sps_frame(uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
-{
-    if(kvmv_SPS_buffer.p_img_data == NULL){
-        return IMG_NOT_EXIST;
-    } else {
-        *_pp_kvm_data = kvmv_SPS_buffer.p_img_data;
-        *_p_kvmv_data_size = kvmv_SPS_buffer.img_data_size;
-        return IMG_H264_TYPE_SPS;
-    }
-    return IMG_NOT_EXIST;
-}
-
-int kvmv_get_pps_frame(uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
-{
-    if(kvmv_PPS_buffer.p_img_data == NULL){
-        return IMG_NOT_EXIST;
-    } else {
-        *_pp_kvm_data = kvmv_PPS_buffer.p_img_data;
-        *_p_kvmv_data_size = kvmv_PPS_buffer.img_data_size;
-        return IMG_H264_TYPE_PPS;
-    }
-    return IMG_NOT_EXIST;
-}
-
 int free_kvmv_data(uint8_t ** _pp_kvm_data)
 {
         // debug("[kvmv] free_kvmv_data - 1\r\n");
@@ -1765,12 +1725,6 @@ int free_kvmv_data(uint8_t ** _pp_kvm_data)
         // debug("[kvmv] free_kvmv_data - 3\r\n");
                 kvmv_data_buffer[i].p_img_data = NULL;
                 uint8_t _type = kvmv_data_buffer[i].img_data_type;
-                if(_type == IMG_H264_TYPE_IF){
-                    free(kvmv_SPS_buffer.p_img_data);
-                    free(kvmv_PPS_buffer.p_img_data);
-                    kvmv_SPS_buffer.p_img_data = NULL;
-                    kvmv_PPS_buffer.p_img_data = NULL;
-                }
                 return _type;
             } else {
                 return IMG_NOT_EXIST;
@@ -1788,10 +1742,6 @@ void free_all_kvmv_data()
             kvmv_data_buffer[i].p_img_data = NULL;
         }
     }
-    if(kvmv_SPS_buffer.p_img_data != NULL) free(kvmv_SPS_buffer.p_img_data);
-    if(kvmv_PPS_buffer.p_img_data != NULL) free(kvmv_PPS_buffer.p_img_data);
-    kvmv_SPS_buffer.p_img_data = NULL;
-    kvmv_PPS_buffer.p_img_data = NULL;
 }
 
 void kvmv_deinit()

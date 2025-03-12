@@ -50,25 +50,7 @@ int main(int argc, char* argv[])
 		// ret = kvmv_read_img(1920, 1080, 0, 60, &p_kvmv_img_data, &kvmv_img_data_size);
 
 		printf("kvmv_read_img ret = %d\n", ret);
-		if(ret == IMG_H264_TYPE_IF){
-			uint8_t* p_kvmv_sps_data;
-			uint8_t* p_kvmv_pps_data;
-			uint32_t kvmv_sps_data_size;
-			uint32_t kvmv_pps_data_size;
 
-			ret = kvmv_get_sps_frame(&p_kvmv_sps_data, &kvmv_sps_data_size);
-			if(ret == IMG_H264_TYPE_SPS){
-				printf("Get SPS data size = %d\n", kvmv_sps_data_size);
-			} else {
-				printf("Get SPS data error!\n");
-			}
-			ret = kvmv_get_pps_frame(&p_kvmv_pps_data, &kvmv_pps_data_size);
-			if(ret == IMG_H264_TYPE_PPS){
-				printf("Get PPS data size = %d\n", kvmv_pps_data_size);
-			} else {
-				printf("Get PPS data error!\n");
-			}
-		}
 		// send...
 		// if(ret >= 0){
 			free_kvmv_data(&p_kvmv_img_data);
