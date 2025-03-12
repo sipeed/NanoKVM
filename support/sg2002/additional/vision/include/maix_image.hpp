@@ -31,26 +31,26 @@ namespace maix::image
      * @param int w_out target image width
      * @param int h_out target image height
      * @param fit resize method, see maix.image.Fit
-     * @param x original point x, or rectagle left-top point's x
-     * @param y original point y, or rectagle left-top point's y
-     * @param w original rectagle width, can be -1 if not use this arg, default -1.
-     * @param h original rectagle height, can be -1 if not use this arg, default -1.
+     * @param x original point x, or rectangle left-top point's x
+     * @param y original point y, or rectangle left-top point's y
+     * @param w original rectangle width, can be -1 if not use this arg, default -1.
+     * @param h original rectangle height, can be -1 if not use this arg, default -1.
      * @return list type, [x, y] if map point, [x, y, w, h] if resize rectangle.
      * @maixpy maix.image.resize_map_pos
     */
     std::vector<int> resize_map_pos(int w_in, int h_in, int w_out, int h_out, image::Fit fit, int x, int y, int w = -1, int h = -1);
 
     /**
-     * reverse resize_map_pos method, when we call image.resize method resiz image 'a' to image 'b', we want to known the original position on 'a' whith a knew point on 'b'
+     * reverse resize_map_pos method, when we call image.resize method resize image 'a' to image 'b', we want to known the original position on 'a' with a knew point on 'b'
      * @param int w_in original image width
      * @param int h_in original image height
      * @param int w_out image width after resized
      * @param int h_out image height after resized
      * @param fit resize method, see maix.image.Fit
-     * @param x point on resized image x, or rectagle left-top point's x
-     * @param y original point y, or rectagle left-top point's y
-     * @param w original rectagle width, can be -1 if not use this arg, default -1.
-     * @param h original rectagle height, can be -1 if not use this arg, default -1.
+     * @param x point on resized image x, or rectangle left-top point's x
+     * @param y original point y, or rectangle left-top point's y
+     * @param w original rectangle width, can be -1 if not use this arg, default -1.
+     * @param h original rectangle height, can be -1 if not use this arg, default -1.
      * @return list type, [x, y] if map point, [x, y, w, h] if resize rectangle.
      * @maixpy maix.image.resize_map_pos_reverse
     */
@@ -562,7 +562,7 @@ namespace maix::image
         image::Image *midpoint_pool(int x_div, int y_div, double bias = 0.5, bool copy = false);
 
         /**
-         * @brief JPEG compresses the image in place, the same as to_jpeg functioin, it's recommend to use to_jpeg instead.
+         * @brief JPEG compresses the image in place, the same as to_jpeg function, it's recommend to use to_jpeg instead.
          * @param quality The quality of the compressed image. default is 95.
          * @return Returns the compressed JPEG image
          * @maixpy maix.image.Image.compress
@@ -843,7 +843,7 @@ namespace maix::image
         image::Image *div(image::Image *other, bool invert = false, bool mod = false, image::Image *mask = nullptr);
 
         /**
-         * @brief Caculate the minimum of each pixel in the image and the other image.
+         * @brief Calculate the minimum of each pixel in the image and the other image.
          * @param other The other image should be an image and should be the same size as the image being operated on.
          * @param mask Mask is another image to use as a pixel level mask for the operation. The mask should be an image with just black or white pixels and should be the same size as the image being operated on.
          * Only pixels set in the mask are modified. default is None.
@@ -853,7 +853,7 @@ namespace maix::image
         image::Image *min(image::Image *other, image::Image *mask = nullptr);
 
         /**
-         * @brief Caculate the maximum of each pixel in the image and the other image.
+         * @brief Calculate the maximum of each pixel in the image and the other image.
          * @param other The other image should be an image and should be the same size as the image being operated on.
          * @param mask Mask is another image to use as a pixel level mask for the operation. The mask should be an image with just black or white pixels and should be the same size as the image being operated on.
          * Only pixels set in the mask are modified. default is None.
@@ -863,7 +863,7 @@ namespace maix::image
         image::Image *max(image::Image *other, image::Image *mask = nullptr);
 
         /**
-         * @brief Caculate the absolute value of the difference between each pixel in the image and the other image.
+         * @brief Calculate the absolute value of the difference between each pixel in the image and the other image.
          * @param other The other image should be an image and should be the same size as the image being operated on.
          * @param mask Mask is another image to use as a pixel level mask for the operation. The mask should be an image with just black or white pixels and should be the same size as the image being operated on.
          * Only pixels set in the mask are modified. default is None.
@@ -1454,10 +1454,10 @@ namespace maix::image
          * @param int w_out target image width
          * @param int h_out target image height
          * @param fit resize method, see maix.image.Fit
-         * @param x original point x, or rectagle left-top point's x
-         * @param y original point y, or rectagle left-top point's y
-         * @param w original rectagle width, can be -1 if not use this arg, default -1.
-         * @param h original rectagle height, can be -1 if not use this arg, default -1.
+         * @param x original point x, or rectangle left-top point's x
+         * @param y original point y, or rectangle left-top point's y
+         * @param w original rectangle width, can be -1 if not use this arg, default -1.
+         * @param h original rectangle height, can be -1 if not use this arg, default -1.
          * @return list type, [x, y] if map point, [x, y, w, h] if resize rectangle.
          * @maixpy maix.image.resize_map_pos
         */

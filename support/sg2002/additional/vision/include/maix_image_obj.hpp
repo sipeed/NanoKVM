@@ -414,7 +414,7 @@ namespace maix::image
         // /**
         //  * Blob constructor
         //  *
-        //  * @param rect blob rect, type is 
+        //  * @param rect blob rect, type is
         //  * @attention this constructor will be optimized in the future
         //  */
         // Blob(cv::RotatedRect &rect, int merge_cnt = 0)
@@ -1251,10 +1251,10 @@ namespace maix::image
         /**
          * AprilTag constructor
          *
-         * @param rect Inlucdes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
+         * @param rect Includes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
          * @param corners Includes the four corners of the rectangle. format is {{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}, type is std::vector<std::vector<int>>
          * @param id The id of the AprilTag
-         * @param famliy The family of the AprilTag
+         * @param family The family of the AprilTag
          * @param centroid_x The x coordinate of the center of the AprilTag
          * @param centroid_y The y coordinate of the center of the AprilTag
          * @param rotation The rotation of the AprilTag
@@ -1269,7 +1269,7 @@ namespace maix::image
          * @param z_rotation The z_rotation of the AprilTag
          * @maixpy maix.image.AprilTag.__init__
         */
-        AprilTag(std::vector<int> &rect, std::vector<std::vector<int>> &corners, int id, int famliy, float centroid_x, float centroid_y, float rotation, float decision_margin, int hamming, float goodness, float x_translation, float y_translation, float z_translation, float x_rotation, float y_rotation, float z_rotation)
+        AprilTag(std::vector<int> &rect, std::vector<std::vector<int>> &corners, int id, int family, float centroid_x, float centroid_y, float rotation, float decision_margin, int hamming, float goodness, float x_translation, float y_translation, float z_translation, float x_rotation, float y_rotation, float z_rotation)
         {
             _x = rect[0];
             _y = rect[1];
@@ -1277,7 +1277,7 @@ namespace maix::image
             _h = rect[3];
             _corners = corners;
             _id = id;
-            _family = famliy;
+            _family = family;
             _cx = centroid_x;
             _cy = centroid_y;
             _rotation = rotation;
@@ -1571,7 +1571,7 @@ namespace maix::image
         /**
          * DataMatrix constructor
          *
-         * @param rect Inlucdes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
+         * @param rect Includes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
          * @param corners Includes the four corners of the rectangle. format is {{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}, type is std::vector<std::vector<int>>
          * @param payload The payload of the DataMatrix
          * @param rotation The rotation of the DataMatrix
@@ -1622,7 +1622,7 @@ namespace maix::image
             case 2: return _w;
             case 3: return _h;
             case 4: throw err::Exception("Not support this index, try to use payload() method");
-            case 5: throw err::Exception("Not support this index, try to use ratation() method");
+            case 5: throw err::Exception("Not support this index, try to use rotation() method");
             case 6: return _rows;
             case 7: return _columns;
             case 8: return _capacity;
@@ -1759,7 +1759,7 @@ namespace maix::image
         /**
          * BarCode constructor
          *
-         * @param rect Inlucdes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
+         * @param rect Includes the top-left corner and the width and height of the rectangle. format is {x, y, w, h}, type is std::vector<int>
          * @param corners Includes the four corners of the rectangle. format is {{x0, y0}, {x1, y1}, {x2, y2}, {x3, y3}}, type is std::vector<std::vector<int>>
          * @param payload The payload of the BarCode
          * @param type The type of the BarCode
@@ -2110,7 +2110,7 @@ namespace maix::image
         }
 
         /**
-         * @brief get A channea median
+         * @brief get A channel median
          * @return return A channel median, type is int
          * @maixpy maix.image.Statistics.a_median
          */
@@ -2182,7 +2182,7 @@ namespace maix::image
         }
 
         /**
-         * @brief get B channea median
+         * @brief get B channel median
          * @return return B channel median, type is int
          * @maixpy maix.image.Statistics.b_median
          */

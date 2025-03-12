@@ -56,7 +56,7 @@ int get_ip_addr(ip_addr_t ip_type)
 					printf("can`t get ip addr\r\n");
 					kvm_sys_state.eth_addr[0] = 0;
 					return 0;
-				} 
+				}
 				for(int i = 0; i <= 15; i++)
 				{
 					kvm_sys_state.eth_addr[i] = *(ip_address()["eth0"].c_str() + i);
@@ -71,7 +71,7 @@ int get_ip_addr(ip_addr_t ip_type)
 					printf("can`t get ip addr\r\n");
 					kvm_sys_state.wifi_addr[0] = 0;
 					return 0;
-				} 
+				}
 				for(int i = 0; i <= 15; i++)
 				{
 					kvm_sys_state.wifi_addr[i] = *(ip_address()["wlan0"].c_str() + i);
@@ -85,7 +85,7 @@ int get_ip_addr(ip_addr_t ip_type)
 				printf("can`t get ip addr\r\n");
 				kvm_sys_state.tail_addr[0] = 0;
 				return 0;
-			} 
+			}
 			for(int i = 0; i <= 15; i++)
 			{
 				kvm_sys_state.tail_addr[i] = *(ip_address()["tailscale0"].c_str() + i);
@@ -98,7 +98,7 @@ int get_ip_addr(ip_addr_t ip_type)
 				printf("can`t get ip addr\r\n");
 				kvm_sys_state.rndis_addr[0] = 0;
 				return 0;
-			} 
+			}
 			for(int i = 0; i <= 15; i++)
 			{
 				kvm_sys_state.rndis_addr[i] = *(ip_address()["usb0"].c_str() + i);
@@ -142,7 +142,7 @@ int get_ip_addr(ip_addr_t ip_type)
 				int file_size;
 				FILE *fp = fopen("/etc/kvm/gateway", "r");
 				fseek(fp, 0, SEEK_END);
-				file_size = ftell(fp); 
+				file_size = ftell(fp);
 				fseek(fp, 0, SEEK_SET);
 				fread(kvm_sys_state.eth_route, sizeof(char), file_size, fp);
 				fclose(fp);
@@ -182,7 +182,7 @@ int get_ip_addr(ip_addr_t ip_type)
 	return 0;
 }
 
-int chack_net_state(ip_addr_t use_ip_type)
+int check_net_state(ip_addr_t use_ip_type)
 {
 	char Cmd[100]={0};
 	if		(use_ip_type == ETH_ROUTE)  sprintf( Cmd,"ping -I eth0 -w 1 %s > /dev/null", kvm_sys_state.eth_route);
@@ -212,10 +212,10 @@ void kvm_update_usb_state()
 	// usb_state, hid_state, rndis_state, udisk_state
 	FILE *fp;
 	int file_size;
-	uint8_t RW_Data[10];		
+	uint8_t RW_Data[10];
 	fp = fopen("/sys/class/udc/4340000.usb/state", "r");
 	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
+	file_size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -224,9 +224,9 @@ void kvm_update_usb_state()
 	else kvm_sys_state.usb_state = -1;
 	// hid_state & udisk_state (rndis_state单独处理)
 	if(kvm_sys_state.usb_state == 1){
-		if(access("/sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GS*", F_OK) == 0) 
+		if(access("/sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GS*", F_OK) == 0)
 			kvm_sys_state.hid_state = 1;
-		if(access("/sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0", F_OK) == 0) 
+		if(access("/sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0", F_OK) == 0)
 			kvm_sys_state.udisk_state = 1;
 	} else {
 		kvm_sys_state.hid_state = 0;
@@ -267,7 +267,7 @@ void kvm_update_stream_fps(void)
 	// FPS
 	fp = fopen("/kvmapp/kvm/now_fps", "r");
     fseek(fp, 0, SEEK_END);
-    file_size = ftell(fp); 
+    file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -284,7 +284,7 @@ void kvm_update_stream_type(void)
 	// type
 	fp = fopen("/kvmapp/kvm/type", "r");
     fseek(fp, 0, SEEK_END);
-    file_size = ftell(fp); 
+    file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -303,7 +303,7 @@ void kvm_update_stream_qlty(void)
 	// QLTY
 	fp = fopen("/kvmapp/kvm/qlty", "r");
     fseek(fp, 0, SEEK_END);
-    file_size = ftell(fp); 
+    file_size = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -332,7 +332,7 @@ void kvm_update_hdmi_res(void)
 	// HDMI width
 	fp = fopen("/kvmapp/kvm/width", "r");
 	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
+	file_size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -341,7 +341,7 @@ void kvm_update_hdmi_res(void)
 	// HDMI height
 	fp = fopen("/kvmapp/kvm/height", "r");
 	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
+	file_size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
@@ -350,7 +350,7 @@ void kvm_update_hdmi_res(void)
 }
 
 void kvm_update_eth_state(void)
-{	
+{
 	static uint8_t nic_state = 0;
 	nic_state = get_nic_state("eth0");
 
@@ -369,7 +369,7 @@ void kvm_update_eth_state(void)
 			if(kvm_sys_state.eth_route[0] == 0){
 				get_ip_addr(ETH_ROUTE);
 			} else {
-				if(chack_net_state(ETH_ROUTE)){
+				if(check_net_state(ETH_ROUTE)){
 					// Ping successful
 					kvm_sys_state.eth_state = 3;
 				} else {
@@ -388,7 +388,7 @@ void kvm_update_eth_state(void)
 }
 
 void kvm_update_wifi_state(void)
-{	
+{
 	// No WiFi module (check for existence?) -> Module exists & not connected (check if connected) ->
 	if(kvm_sys_state.wifi_state == -2) return;
 	switch (kvm_sys_state.wifi_state){
@@ -410,7 +410,7 @@ void kvm_update_wifi_state(void)
 			if (get_ip_addr(WiFi_IP) && get_ip_addr(WiFi_ROUTE)){
 				// IP+Route has been acquired
 				if(kvm_sys_state.ping_allow){
-					if (chack_net_state(WiFi_ROUTE)){
+					if (check_net_state(WiFi_ROUTE)){
 						// Ping successful
 						kvm_sys_state.wifi_state = 1;
 					}
@@ -426,7 +426,7 @@ void kvm_update_wifi_state(void)
 			get_ip_addr(WiFi_IP);
 			if(kvm_sys_state.ping_allow){
 				if (kvm_sys_state.wifi_route[0] != 0){
-					if (chack_net_state(WiFi_ROUTE) == 0){
+					if (check_net_state(WiFi_ROUTE) == 0){
 						// Ping successful
 						kvm_sys_state.wifi_state = 0;
 					}
@@ -476,7 +476,7 @@ uint8_t watchdog_sf_is_open()
 	else return 0;
 }
 
-int check_watchdog() 
+int check_watchdog()
 {
 	if(access(watchdog_file, F_OK) == 0) {
 		if (remove(watchdog_file) == 0) {

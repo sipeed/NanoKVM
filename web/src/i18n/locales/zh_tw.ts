@@ -60,7 +60,9 @@ const zh_tw = {
       qualityLow: '低',
       frameDetect: '影格檢測',
       frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止傳輸視訊串流。',
-      resetHdmi: '重置 HDMI'
+      resetHdmi: '重置 HDMI',
+      screenshot: '截圖',
+      screenshotTip: '截取遠端主機的畫面。'
     },
     keyboard: {
       paste: '貼上',

@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	frameDetect    = "/etc/kvm/frame_detact"
-	frameDetectTmp = "/etc/kvm/frame_detact_tmp"
+	frameDetect    = "/etc/kvm/frame_detect"
+	frameDetectTmp = "/etc/kvm/frame_detect_tmp"
 )
 
 type UpdateFrameDetectRsp struct {

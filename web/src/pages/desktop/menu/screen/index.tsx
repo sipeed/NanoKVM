@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useAtomValue } from 'jotai';
 import { MonitorIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { updateScreen } from '@/api/vm';
-import * as ls from '@/lib/localstorage';
-import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
+import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
+import * as ls from '@/lib/localstorage';
 
 import { BitRateMap, QualityMap } from './constants.ts';
 import { Fps } from './fps';
@@ -14,6 +14,7 @@ import { FrameDetect } from './frame-detect';
 import { Quality } from './quality';
 import { Reset } from './reset.tsx';
 import { Resolution } from './resolution';
+import { Screenshot } from './screenshot';
 import { VideoMode } from './video-mode.tsx';
 
 export const Screen = () => {
@@ -64,6 +65,7 @@ export const Screen = () => {
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
       {videoMode === 'mjpeg' && <FrameDetect />}
+      <Screenshot />
       <Reset />
     </div>
   );

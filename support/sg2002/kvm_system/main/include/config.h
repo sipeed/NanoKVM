@@ -67,7 +67,7 @@ typedef struct {
 	int8_t wifi_config_process = -1;	// 1:QR;2:Test;3:IP;
 	char wifi_ap_pass[9] = {0};
     uint8_t oled_sleep_state = 0;	// 0:wakeup; 1:sleep;
-	int8_t reconvery_update = 0;	// 0:Undetected; 1:Needs Update; 2:Update finish; -1:not need to update
+	int8_t recovery_update = 0;	// 0:Undetected; 1:Needs Update; 2:Update finish; -1:not need to update
 	uint8_t ping_allow = 1;
 } kvm_sys_state_t;
 
