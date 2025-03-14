@@ -133,6 +133,16 @@ const en = {
       serialPort: 'Serial Port',
       serialPortPlaceholder: 'Please enter the serial port',
       baudrate: 'Baud rate',
+      parity: 'Parity',
+      parityNone: 'None',
+      parityEven: 'Even',
+      parityOdd: 'Odd',
+      flowControl: 'Flow control',
+      flowControlNone: 'None',
+      flowControlSoft: 'Soft',
+      flowControlHard: 'Hard',
+      dataBits: 'Data bits',
+      stopBits: 'Stop bits',
       confirm: 'Ok'
     },
     wol: {

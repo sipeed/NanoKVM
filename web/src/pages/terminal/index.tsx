@@ -48,9 +48,13 @@ export const Terminal = () => {
       const searchParams = new URLSearchParams(urls[1]);
       const port = searchParams.get('port');
       const baud = searchParams.get('baud');
+      const parity = searchParams.get('parity');
+      const flowControl = searchParams.get('flowControl');
+      const dataBits = searchParams.get('dataBits');
+      const stopBits = searchParams.get('stopBits');
       if (!port || !baud) return;
 
-      ws.send(`picocom ${port} -b ${baud}\r`);
+      ws.send(`picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits}\r`);
     };
 
     const resizeScreen = () => {
