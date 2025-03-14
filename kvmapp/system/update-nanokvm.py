@@ -2,41 +2,38 @@ import os
 import shutil
 import time
 import zipfile
-
+import pathlib
 import requests
 
-temporary = "/root/.kvm-cache/"
+temporary: str = "/root/.kvm-cache/"
 
 
-def mkdir():
-    is_exists = os.path.exists(temporary)
-    if is_exists:
+def mkdir() -> None:
+    if pathlib.Path(temporary).exists():
         shutil.rmtree(temporary)
-    os.mkdir(temporary)
-    print(f"create temporary directory {temporary}")
+    pathlib.Path(temporary).mkdir()
+    print(f"Created temporary directory {temporary}")
 
 
-def read(file):
-    with open(file, "r") as f:
-        content = f.read()
-        return content.replace("\n", "")
+def read(file: str) -> str:
+    return pathlib.Path(file).read_text().replace("\n", "")
 
 
-def download_firmware():
-    print("download firmware...")
+def download_firmware() -> None:
+    print("Downloading firmware...")
 
     now = int(time.time())
     url = f"https://cdn.sipeed.com/nanokvm/latest.zip?n={now}"
-    print(f"download from {url}")
+    print(f"Downloading firmware from {url}")
 
     response = requests.get(url)
 
     if response.status_code != 200:
-        raise Exception(f"download firmware failed, status: {response.status_code}")
+        raise Exception(f"Failed to download firmware, status: {response.status_code}")
 
     content_type = response.headers.get("content-type")
     if content_type != "application/zip":
-        raise Exception(f"download firmware failed, content_type: {content_type}")
+        raise Exception(f"Failed to download firmware, content_type: {content_type}")
 
     zip_file = f"{temporary}/latest.zip"
     with open(zip_file, "wb") as f:
@@ -46,7 +43,7 @@ def download_firmware():
     with zipfile.ZipFile(zip_file, "r") as f:
         f.extractall(temporary)
 
-    print("download firmware done")
+    print("Completed downloading firmware.")
 
 
 def download_lib():
@@ -75,20 +72,20 @@ def download_lib():
     print("download lib done")
 
 
-def update():
-    backup_dir = "/root/old"
-    firmware_dir = "/kvmapp"
+def update() -> None:
+    backup_dir   = pathlib.Path("/root/old")
+    firmware_dir = pathlib.Path("/kvmapp")
 
-    if os.path.exists(backup_dir):
-        shutil.rmtree(backup_dir)
+    if backup_dir.exists():
+      shutil.rmtree(backup_dir)
 
-    if os.path.exists(firmware_dir):
-        shutil.move(firmware_dir, backup_dir)
+    if firmware_dir.exists():
+      firmware_dir.rename(backup_dir)
 
-    shutil.move(f"{temporary}/latest", firmware_dir)
+    pathlib.Path(f"{temporary}/latest").rename(firmware_dir)
 
 
-def change_permissions():
+def change_permissions() -> None:
     for root, dirs, files in os.walk("/kvmapp"):
         os.chmod(root, 0o755)
 
@@ -99,12 +96,12 @@ def change_permissions():
     print("change permissions done")
  
 
-def main():
+def main() -> None:
     try:
-        print("stop service...")
+        print("Stopping nanokvm service...")
         os.system("/etc/init.d/S95nanokvm stop")
 
-        print("start update......")
+        print("Staring update...")
 
         mkdir()
         download_firmware()
@@ -113,7 +110,7 @@ def main():
         change_permissions()
 
         version = read("/kvmapp/version")
-        print(f"update to {version} success.")
+        print(f"Successfully updated to version: {version}")
         print("restart service\nthe nanokvm will reboot")
     except Exception as e:
         print(f"update failed\n{e}")
