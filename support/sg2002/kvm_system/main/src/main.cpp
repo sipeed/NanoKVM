@@ -7,13 +7,6 @@ using namespace maix::peripheral;
 kvm_sys_state_t kvm_sys_state;
 kvm_oled_state_t kvm_oled_state;
 
-/*
-init.d:
-/etc/init.d/S00kmod
-/etc/init.d/S01fs
-
-*/
-
 void build_recovery(void)
 {
 	uint8_t need_recovery = 0;
@@ -33,6 +26,13 @@ void* thread_oled_handle(void * arg)
 	OLED_ColorTurn(0);		//0正常显示 1 反色显示
 	OLED_DisplayTurn(0);	//0正常显示 1 屏幕翻转显示
 	OLED_Clear();
+	if(kvm_oled_state.ue_patch_state == 1){
+		kvm_show_UE();
+		while(kvm_sys_state.oled_thread_running){
+			time::sleep_ms(100);
+		}
+		OLED_Clear();
+	}
 
     while(kvm_sys_state.oled_thread_running)
     {
@@ -195,6 +195,8 @@ int main(int argc, char* argv[])
 	if(access("/kvmapp/kvm_new_app", F_OK) == 0){
 		new_app_init();
 	}
+
+	test_ue_detecte();
 
 	system("sync");
 

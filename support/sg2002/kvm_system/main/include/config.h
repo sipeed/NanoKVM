@@ -97,6 +97,7 @@ typedef struct {
     uint8_t oled_sleep_param = 0;
     uint8_t oled_sleep_state = 0;	// 0:wakeup; 1:sleep;
 	uint64_t oled_sleep_start = 0;
+	uint64_t ue_patch_state = 0;
 } kvm_oled_state_t;
 
 #endif // CONFIG_H_

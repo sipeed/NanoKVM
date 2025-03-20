@@ -505,3 +505,15 @@ void oled_auto_sleep(void)
 		}
 	}
 }
+
+void kvm_show_UE(void)
+{
+	if(kvm_hw_ver != 2){
+		OLED_ShowString(0, 0, "HDMI: UE", 16);
+	} else {
+		OLED_Revolve();
+		OLED_ShowString(0, 0, "HDMI: UE", 16);
+		// OLED_ShowString_AlignRight(AlignRightEND_P, 3, "  FPS", 4);
+		// kvm_init_pcie_ui();
+	}
+}
