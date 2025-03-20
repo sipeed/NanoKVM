@@ -34,6 +34,7 @@
 #define default_h264_gop        30
 
 #define kvmv_data_buffer_size   4
+#define Try_rounds_HDMI_err_res 5
 
 #define vi_width_path           "/kvmapp/kvm/width"
 #define vi_height_path          "/kvmapp/kvm/height"
@@ -88,6 +89,7 @@ typedef struct {
     uint8_t hdmi_mode = 0;
     uint8_t hdmi_res_type = 0;
     uint8_t hdmi_res_err = 0;
+    uint8_t hdmi_try_rounds = 0;
     uint8_t vi_detect_state = 0;
     uint8_t venc_auto_recyc = 0;
 } kvmv_cfg_t;
@@ -1065,6 +1067,7 @@ void* vi_subsystem_detection(void * arg)
     uint8_t rising_times = 0;
     uint8_t falling_times = 0;
 	uint8_t cam_need_restart = 0;
+    uint8_t auto_change_mode = 0;
     kvmv_cfg.thread_is_running = 1;
 	if(access("/proc/lt_int", F_OK) != 0){
 		time::sleep_ms(10);
@@ -1128,15 +1131,10 @@ void* vi_subsystem_detection(void * arg)
                                     kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
-                                        kvmv_cfg.vi_detect_state = 1;
-                                        if(auto_try_res() == 1){
-                                            printf("[hdmi] auto get res\n");
-                                            kvmv_cfg.hdmi_res_err = NORMAL_RES;
-                                        } else {
-                                            // Potential deadlock may occur
-                                            kvmv_cfg.hdmi_res_err = ERROR_RES;
-                                        }
-                                        kvmv_cfg.vi_detect_state = 0;
+                                        /* Move HDMI resolution modification directly 
+                                            to mode1 to solve deadlock problem */
+                                        auto_change_mode = 1;
+                                        set_hdmi_mode(1);
                                     }
                                 } else {
                                     // HDMI res = 0*0/x*0
@@ -1158,15 +1156,10 @@ void* vi_subsystem_detection(void * arg)
                                     kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
-                                        kvmv_cfg.vi_detect_state = 1;
-                                        if(auto_try_res() == 1){
-                                            printf("[hdmi] auto get res\n");
-                                            kvmv_cfg.hdmi_res_err = NORMAL_RES;
-                                        } else {
-                                            // Potential deadlock may occur
-                                            kvmv_cfg.hdmi_res_err = ERROR_RES;
-                                        }
-                                        kvmv_cfg.vi_detect_state = 0;
+                                        /* Move HDMI resolution modification directly 
+                                            to mode1 to solve deadlock problem */
+                                        auto_change_mode = 1;
+                                        set_hdmi_mode(1);
                                     }
                                 } else {
                                     // HDMI res = 0*0/x*0
@@ -1197,20 +1190,35 @@ void* vi_subsystem_detection(void * arg)
                 kvmv_cfg.vi_detect_state = 1;
             }
             if(kvmv_cfg.vi_detect_state == 1){
-                
                 try_res = auto_try_res();
                 if (try_res == 1) {
+                    kvmv_cfg.hdmi_res_err = NORMAL_RES;
+                    kvmv_cfg.hdmi_try_rounds = 0;
                     kvmv_cfg.vi_detect_state = 2;
                 } else if (try_res == 0) {
-                    printf("[kvmv] Suitable resolution not found, switching to manual input mode automatically\n");
-                    kvmv_cfg.vi_detect_state = 1;
-                    set_hdmi_mode(2);
+                    /*  There may be a situation where the correct resolution cannot be recognized 
+                        after one round of detection. By default, Try_rounds_HDMI_err_res rounds will be detected, 
+                        and if it cannot be detected, jump to the next mode */ 
+                    kvmv_cfg.hdmi_res_err = ERROR_RES;
+                    kvmv_cfg.hdmi_try_rounds++;
+                    if(kvmv_cfg.hdmi_try_rounds >= Try_rounds_HDMI_err_res){
+                        kvmv_cfg.hdmi_try_rounds = 0;
+                        kvmv_cfg.vi_detect_state = 1;
+                        // printf("[kvmv] Suitable resolution not found, switching to manual input mode automatically\n");
+                        if(auto_change_mode == 1){
+                            auto_change_mode = 0;
+                            set_hdmi_mode(0);
+                        } else {
+                            set_hdmi_mode(2);
+                        }
+                    }
                 } else if (try_res == 2) {
+                    kvmv_cfg.hdmi_try_rounds = 0;
                     // Cannot obtain HDMI input / No signal on HDMI
                 }
             } else if (kvmv_cfg.vi_detect_state == 2){
                 // Low-frequency detection of HDMI status, no log output
-            printf("[kvmv] kvmv_cfg.vi_detect_state == 2\n");
+                printf("[kvmv] kvmv_cfg.vi_detect_state == 2\n");
                 err_code = get_vi_state();
                 if (err_code != 1) {
                     kvmv_cfg.vi_detect_state = 1;
