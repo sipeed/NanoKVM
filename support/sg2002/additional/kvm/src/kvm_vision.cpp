@@ -22,6 +22,8 @@
 #define vi_max_width            1920
 #define vi_max_height           1080
 
+#define Farame_sample_size      76800   // 320*240
+
 #define default_vi_width        1920
 #define default_vi_height       1080
 #define default_vpss_width      1920
@@ -71,7 +73,7 @@ typedef struct {
 	uint16_t qlty;
 	uint8_t cam_state = 0;
 	uint8_t stream_stop;
-	uint8_t frame_detact;
+	uint8_t frame_detact = 0;
 	uint8_t display;
     uint8_t reinit_flag = 1;
     uint8_t reopen_cam_flag = 0;
@@ -1330,6 +1332,31 @@ int sync_vi_res()
     return res;
 }
 
+uint8_t frame_changed(image::Image *raw)
+{
+    static int raw_size = 0;
+    static uint8_t Farame_sample[Farame_sample_size] = {0};
+    uint8_t ret = 0;
+    uint8_t sample_byte;
+    if(raw->data_size() != raw_size){
+        raw_size = raw->data_size();
+        ret = 1;
+    }
+    int Detection_Pixel_Interval = raw_size/(Farame_sample_size*1.5);
+    for(int i = 0; i < Farame_sample_size; i ++){
+        // printf("[kvmv] i = %d\n", i);
+        if(i >= raw_size){
+            ret = 0;
+        }
+        sample_byte = *(uint8_t*)(raw->data()+(i*Detection_Pixel_Interval));
+        if(sample_byte != Farame_sample[i]){
+            Farame_sample[i] = sample_byte;
+            ret = 1;
+        }
+    }
+    return ret;
+}
+
 void jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
 {
     dump_to->p_img_data = (uint8_t *)malloc(raw->data_size());
@@ -1405,18 +1432,17 @@ int h264_stream_dump(kvmv_data_t* dump_to, mmf_stream_t* dump_from)
 void set_h264_gop(uint8_t _gop)
 {
     kvm_venc.enc_h264_init = 0; // call
-    kvmvenc_gop = maxmin_data(100, 10, (int)_gop);
+    kvmvenc_gop = maxmin_data(100, 1, (int)_gop);
+    debug("[kvmv] set_h264_gop = %d\n", kvmvenc_gop);
 }
 
-// uint8_t get_h264_gop(void)
-// {
-//     return kvm_venc.kvm_venc_cfg.gop;
-// }
-
-// uint8_t get_hdmi_width(void)
-// {
-//     return kvm_venc.kvm_venc_cfg.gop;
-// }
+void set_frame_detact(uint8_t _frame_detact)
+{
+    uint8_t frame_detact = maxmin_data(100, 0, (int)_frame_detact);
+    kvmv_cfg.frame_detact = frame_detact;
+    debug("[kvmv] set_frame_detact = %d\n", kvmv_cfg.frame_detact);
+    kvmv_cfg.stream_stop = 0;
+}
 
 int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
 {
@@ -1573,9 +1599,11 @@ void set_venc_auto_recyc(uint8_t _enable)
          2: Acquire H264 encoded images(PPS)[Deprecated]
          3: Acquire H264 encoded images(I)
          4: Acquire H264 encoded images(P)
+         5: IMG not changed
  **********************************************************************************/
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
 {
+    static uint8_t frame_undetact_count = 0;
 	// uint64_t __attribute__((unused)) start_time = time::time_ms();
     debug("[kvmv]kvmv_read_img type = %d...\n", _type);
     struct timespec ts;
@@ -1632,6 +1660,27 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         // debug("[kvmv]befor read img: %d \r\n", (int)(time::time_ms() - start_time));
         image::Image *img = cam->read();
         // debug("[kvmv]read img: %d \r\n", (int)(time::time_ms() - start_time));
+        if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
+            if(kvmv_cfg.stream_stop == 0){
+                frame_undetact_count++;
+            } else {
+                frame_undetact_count = kvmv_cfg.frame_detact;
+            }
+            
+            if(frame_undetact_count == kvmv_cfg.frame_detact){
+                frame_undetact_count = 0;
+                if(frame_changed(img) == 0){
+                    debug("[kvmv]frame not changed...\n");
+                    kvmv_cfg.stream_stop = 1;
+                    delete img;
+                    pthread_mutex_unlock(&vi_mutex);
+                    return 5;
+                } else {
+                    kvmv_cfg.stream_stop = 0;
+                }
+            }
+        } 
+        
         if(img != NULL){
 			if(kvmv_cfg.cam_state == 0) {
 				kvmv_cfg.cam_state = 1;
@@ -1794,24 +1843,3 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     }
     return -1;
 }
-
-
-/* 
-todo list:
-- [x] 添加芯片型号
-- [-] 写一个不支持的分辨率列表，如果不支持就发出错误提醒，不输出/不获取图像
-    - mode0：
-        - 获取到支持的分辨率：直接初始化
-        - 不支持的分辨率：输出对应错误
-        - 不在列表的分辨率：自动进入模式1
-    - mode1：
-        - 根据/proc/cvitek
-- [ ] 写一个文档说明获取USB HDMI ETH WiFi的状态
-- [ ] mode0：添加功能，获取到一个错误的res自动切换为探索模式
-- [ ] add mode3：仅i2c获取模式
-- [ ] 创建守护server进程
-- [ ] mDNS默认配置问题
-- [ ] 关于看门狗：kvm_vision和kvm_system相互在/tmp里狗叫，同时vision中添加检测是否read卡死，system中检测ion是否够用，否则重启
-VI_SDK_IOC_S_CTRL - vi_sdk_enable_chn NG, No buffer space available ion是否够用也放在vision里吧，前面是log
-
-*/
