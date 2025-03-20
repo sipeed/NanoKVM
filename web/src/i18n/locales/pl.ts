@@ -122,6 +122,16 @@ const pl = {
       serialPort: 'Port szeregowy',
       serialPortPlaceholder: 'Wprowadź port szeregowy',
       baudrate: 'Szybkość transmisji',
+      parity: 'Kontrola parzystości',
+      parityNone: 'Brak kontroli',
+      parityEven: 'Parzystość',
+      parityOdd: 'Nieparzystość',
+      flowControl: 'Kontrola przepływu',
+      flowControlNone: 'Brak kontroli',
+      flowControlSoft: 'Miękka',
+      flowControlHard: 'Twarda',
+      dataBits: 'Bity danych',
+      stopBits: 'Bity stopu',
       confirm: 'Ok'
     },
     wol: {
