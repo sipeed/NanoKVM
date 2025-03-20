@@ -196,7 +196,11 @@ int main(int argc, char* argv[])
 		new_app_init();
 	}
 
-	test_ue_detecte();
+	// only for production testing
+	if (access("/tmp/S49kvmtest", F_OK) == 0){
+		printf("Production testing patch\n");
+		Production_testing_patch();
+	}
 
 	system("sync");
 

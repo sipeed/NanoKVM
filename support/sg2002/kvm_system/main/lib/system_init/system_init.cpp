@@ -34,18 +34,20 @@ uint8_t get_hdmi_version()
     }
 }
 
-void test_ue_detecte()
+void Production_testing_patch(void)
 {	
-	if (access("/tmp/S49kvmtest", F_OK) == 0){
-		printf("ue patch test\n");
-		if(get_hdmi_version() == 2){
-			printf("ue_patch_state = 1;\n");
-			kvm_oled_state.ue_patch_state = 1;
-		} else {
-			printf("ue_patch_state = 0;\n");
-			kvm_oled_state.ue_patch_state = 0;
-		}
+	// Product UE version detecte
+	if(get_hdmi_version() == 2){
+		printf("ue_patch_state = 1;\n");
+		kvm_oled_state.ue_patch_state = 1;
+	} else {
+		printf("ue_patch_state = 0;\n");
+		kvm_oled_state.ue_patch_state = 0;
 	}
+
+	// New products default to disabling mDNS functionality
+	system("rm -f /etc/init.d/S50ssdpd");
+	system("sync");
 }
 
 void new_app_init(void)
