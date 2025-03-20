@@ -46,32 +46,6 @@ def download_firmware() -> None:
     print("Completed downloading firmware.")
 
 
-def download_lib():
-    print("download lib...")
-
-    device_key = read("/device_key")
-
-    url = f"https://maixvision.sipeed.com/api/v1/nanokvm/encryption?uid={device_key}"
-    headers = {"token": "MaixVision2024"}
-    response = requests.get(url, headers=headers, stream=True)
-
-    if response.status_code != 200:
-        raise Exception(f"download lib failed, status: {response.status_code}")
-
-    content_type = response.headers.get("content-type")
-    if content_type != "application/octet-stream":
-        raise Exception(f"download lib failed, content_type: {content_type}")
-
-    lib_file = f"{temporary}/libmaixcam_lib.so"
-    with open(lib_file, "wb") as f:
-        f.write(response.content)
-
-    lib_dir = f"{temporary}/latest/kvm_system/dl_lib/"
-    shutil.copy(lib_file, lib_dir)
-
-    print("download lib done")
-
-
 def update() -> None:
     backup_dir   = pathlib.Path("/root/old")
     firmware_dir = pathlib.Path("/kvmapp")
@@ -94,7 +68,7 @@ def change_permissions() -> None:
             os.chmod(file_path, 0o755)
 
     print("change permissions done")
- 
+
 
 def main() -> None:
     try:
@@ -105,7 +79,6 @@ def main() -> None:
 
         mkdir()
         download_firmware()
-        # download_lib()
         update()
         change_permissions()
 

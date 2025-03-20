@@ -1,9 +1,9 @@
 package proto
 
-type GetFrameDetectRsp struct {
-	Enabled bool `json:"enabled"`
+type UpdateFrameDetectReq struct {
+	Enabled bool `validate:"omitempty"`
 }
 
-type UpdateFrameDetectRsp struct {
-	Enabled bool `json:"enabled"`
+type StopFrameDetectReq struct {
+	Duration int `validate:"omitempty"`
 }

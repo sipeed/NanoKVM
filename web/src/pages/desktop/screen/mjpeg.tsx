@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai';
 
 import MonitorXIcon from '@/assets/images/monitor-x.svg';
 import { stopFrameDetect } from '@/api/stream.ts';
+import { getFrameDetect } from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
@@ -15,7 +16,10 @@ export const Mjpeg = () => {
 
   useEffect(() => {
     // stop frame detect for a while
-    stopFrameDetect();
+    const enabled = getFrameDetect();
+    if (enabled) {
+      stopFrameDetect(10);
+    }
   }, [resolution]);
 
   return (

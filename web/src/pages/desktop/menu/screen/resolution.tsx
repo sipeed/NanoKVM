@@ -55,9 +55,9 @@ export const Resolution = () => {
             </div>
           ) : (
             <>
-              <span className="flex w-[32px]">{res.width}</span>
-              <span>x</span>
-              <span className="w-[36px]">{res.height}</span>
+              <span>{res.width}</span>
+              <span className="px-1">x</span>
+              <span>{res.height}</span>
             </>
           )}
         </div>
