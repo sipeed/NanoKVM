@@ -161,6 +161,7 @@ void new_app_init(void)
 	system("rm -r /tmp/server");
 	system("cp -r /kvmapp/server /tmp/");
 	system("/tmp/server/NanoKVM-Server &");
+	system("/etc/init.d/S03usbdev stop_start");
 }
 
 void build_complete_resolv(void)
