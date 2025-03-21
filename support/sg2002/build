@@ -151,7 +151,6 @@ then
         SOURCE_PATH="$Project_PATH/dist/kvm_system_release/kvm_system"
         TARGET_PATH="$KVMAPP_PATH/kvm_system"
         chmod +x $SOURCE_PATH
-        rm -f $TARGET_PATH
       else
         SOURCE_PATH="$Project_PATH/dist/kvm_vision_test_release/dl_lib"
         TARGET_PATH="$KVMAPP_PATH/server/"
