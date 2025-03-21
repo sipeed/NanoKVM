@@ -4,6 +4,7 @@ import (
 	"NanoKVM-Server/config"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -18,9 +19,7 @@ var (
 		},
 	}
 	trackMap  = make(map[*websocket.Conn]*webrtc.TrackLocalStaticSample)
-	mutex     = sync.RWMutex{}
 	isSending = false
-	exitSig   = make(chan bool, 1)
 )
 
 func Connect(c *gin.Context) {
@@ -34,6 +33,9 @@ func Connect(c *gin.Context) {
 		_ = wsConn.Close()
 		log.Debugf("h264 websocket disconnected")
 	}()
+
+	var zeroTime time.Time
+	_ = wsConn.SetReadDeadline(zeroTime)
 
 	conf := config.GetInstance()
 
@@ -67,8 +69,9 @@ func Connect(c *gin.Context) {
 	}()
 
 	client := &Client{
-		ws: wsConn,
-		pc: peerConn,
+		ws:    wsConn,
+		pc:    peerConn,
+		mutex: sync.Mutex{},
 	}
 
 	client.addTrack()

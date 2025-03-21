@@ -50,20 +50,20 @@ void set_venc_auto_recyc(uint8_t _enable);
         -5: Retrieving image, please wait
         -4: Modifying image resolution, please wait
         -3: img buffer full
-        -2: VENC Errorl
+        -2: VENC Error
         -1: No images were acquired
          0: Acquire MJPEG encoded images
-         1: Acquire H264 encoded images(SPS)
-         2: Acquire H264 encoded images(PPS)
+         1: Acquire H264 encoded images(SPS)[Deprecated]
+         2: Acquire H264 encoded images(PPS)[Deprecated]
          3: Acquire H264 encoded images(I)
          4: Acquire H264 encoded images(P)
+         5: IMG not changed
  **********************************************************************************/
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size);
-int kvmv_get_sps_frame(uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size);
-int kvmv_get_pps_frame(uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size);
 int free_kvmv_data(uint8_t ** _pp_kvm_data);
 void free_all_kvmv_data();
 void set_h264_gop(uint8_t _gop);
+void set_frame_detact(uint8_t _frame_detact);
 void kvmv_deinit();
 uint8_t kvmv_hdmi_control(uint8_t _en);
 

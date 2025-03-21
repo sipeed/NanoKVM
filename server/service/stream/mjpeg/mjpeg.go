@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	chanMap = make(map[*gin.Context]chan struct{})
-	mutex   = sync.RWMutex{}
+	chanMap = make(map[*gin.Context]bool)
+	mutex   = sync.Mutex{}
 	exitSig = make(chan bool, 1)
 )
 
@@ -23,13 +23,13 @@ func Connect(c *gin.Context) {
 	c.Header("Pragma", "no-cache")
 
 	mutex.Lock()
-	chanMap[c] = make(chan struct{}, 1)
+	chanMap[c] = true
 	if len(chanMap) == 1 {
 		go send()
 	}
 	mutex.Unlock()
 
-	<-chanMap[c]
+	<-c.Request.Context().Done()
 
 	mutex.Lock()
 	delete(chanMap, c)
@@ -63,14 +63,13 @@ func send() {
 			}
 
 			data, result := vision.ReadMjpeg(width, height, quality)
-			if result < 0 {
+			if result < 0 || result == 5 {
 				continue
 			}
 
-			for c, ch := range chanMap {
+			for c := range chanMap {
 				if err := write(c, data); err != nil {
 					log.Debugf("failed to write mjpeg data: %s", err)
-					close(ch)
 				}
 			}
 			log.Debugf("send mjpeg data: %d", len(data))

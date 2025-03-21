@@ -4,6 +4,7 @@ import (
 	"NanoKVM-Server/common"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -22,30 +23,34 @@ func (s *Service) SetScreen(c *gin.Context) {
 	var req proto.SetScreenReq
 	var rsp proto.Response
 
-	if err := proto.ParseFormRequest(c, &req); err != nil {
+	err := proto.ParseFormRequest(c, &req)
+	if err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
 
-	file, ok := screenFileMap[req.Type]
-	if !ok {
-		rsp.ErrRsp(c, -2, "invalid arguments")
-		return
-	}
-
-	data := fmt.Sprintf("%d", req.Value)
-	if req.Type == "type" {
+	switch req.Type {
+	case "type":
+		data := "h264"
 		if req.Value == 0 {
 			data = "mjpeg"
-		} else {
-			data = "h264"
 		}
+		err = writeScreen("type", data)
+
+	case "gop":
+		gop := 30
+		if req.Value >= 1 && req.Value <= 100 {
+			gop = req.Value
+		}
+		common.GetKvmVision().SetGop(uint8(gop))
+
+	default:
+		data := strconv.Itoa(req.Value)
+		err = writeScreen(req.Type, data)
 	}
 
-	err := os.WriteFile(file, []byte(data), 0o666)
 	if err != nil {
-		log.Errorf("write kvm %s failed: %s", file, err)
-		rsp.ErrRsp(c, -3, "update screen failed")
+		rsp.ErrRsp(c, -2, "update screen failed")
 		return
 	}
 
@@ -53,4 +58,19 @@ func (s *Service) SetScreen(c *gin.Context) {
 
 	log.Debugf("update screen: %+v", req)
 	rsp.OkRsp(c)
+}
+
+func writeScreen(key string, value string) error {
+	file, ok := screenFileMap[key]
+	if !ok {
+		return fmt.Errorf("invalid argument %s", key)
+	}
+
+	err := os.WriteFile(file, []byte(value), 0o666)
+	if err != nil {
+		log.Errorf("write kvm %s failed: %s", file, err)
+		return err
+	}
+
+	return nil
 }

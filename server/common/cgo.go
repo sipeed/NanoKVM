@@ -20,9 +20,7 @@ var (
 	kvmVisionOnce sync.Once
 )
 
-type KvmVision struct {
-	mutex sync.Mutex
-}
+type KvmVision struct{}
 
 func GetKvmVision() *KvmVision {
 	kvmVisionOnce.Do(func() {
@@ -44,9 +42,6 @@ func GetKvmVision() *KvmVision {
 }
 
 func (k *KvmVision) ReadMjpeg(width uint16, height uint16, quality uint16) (data []byte, result int) {
-	k.mutex.Lock()
-	defer k.mutex.Unlock()
-
 	var (
 		kvmData  *C.uint8_t
 		dataSize C.uint32_t
@@ -72,10 +67,7 @@ func (k *KvmVision) ReadMjpeg(width uint16, height uint16, quality uint16) (data
 	return
 }
 
-func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data []byte, sps []byte, pps []byte, result int) {
-	k.mutex.Lock()
-	defer k.mutex.Unlock()
-
+func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data []byte, result int) {
 	var (
 		kvmData  *C.uint8_t
 		dataSize C.uint32_t
@@ -97,46 +89,8 @@ func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data 
 
 	data = C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
 
-	if result == 3 {
-		sps, _ = k.ReadH264SPS()
-		pps, _ = k.ReadH264PPS()
-	}
-
 	log.Debugf("read kvm image: %v", result)
 	return
-}
-
-func (k *KvmVision) ReadH264SPS() ([]byte, int) {
-	var (
-		kvmData  *C.uint8_t
-		dataSize C.uint32_t
-	)
-
-	result := int(C.kvmv_get_sps_frame(&kvmData, &dataSize))
-	if result < 0 {
-		log.Errorf("failed to read sps: %v", result)
-		return nil, result
-	}
-
-	data := C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
-
-	return data, result
-}
-
-func (k *KvmVision) ReadH264PPS() ([]byte, int) {
-	var (
-		kvmData  *C.uint8_t
-		dataSize C.uint32_t
-	)
-
-	result := int(C.kvmv_get_pps_frame(&kvmData, &dataSize))
-	if result < 0 {
-		log.Errorf("failed to read pps: %v", result)
-		return nil, result
-	}
-
-	data := C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
-	return data, result
 }
 
 func (k *KvmVision) SetHDMI(enable bool) int {
@@ -154,10 +108,17 @@ func (k *KvmVision) SetHDMI(enable bool) int {
 	return result
 }
 
-func (k *KvmVision) Close() {
-	k.mutex.Lock()
-	defer k.mutex.Unlock()
+func (k *KvmVision) SetGop(gop uint8) {
+	_gop := C.uint8_t(gop)
+	C.set_h264_gop(_gop)
+}
 
+func (k *KvmVision) SetFrameDetect(frame uint8) {
+	_frame := C.uint8_t(frame)
+	C.set_frame_detact(_frame)
+}
+
+func (k *KvmVision) Close() {
 	C.kvmv_deinit()
 	log.Debugf("stop kvm vision...")
 }

@@ -2,6 +2,7 @@ package h264
 
 import (
 	"encoding/json"
+	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v4"
@@ -9,8 +10,9 @@ import (
 )
 
 type Client struct {
-	ws *websocket.Conn
-	pc *webrtc.PeerConnection
+	ws    *websocket.Conn
+	pc    *webrtc.PeerConnection
+	mutex sync.Mutex
 }
 
 type Message struct {
@@ -36,9 +38,7 @@ func (c *Client) addTrack() {
 		return
 	}
 
-	mutex.Lock()
 	trackMap[c.ws] = videoTrack
-	mutex.Unlock()
 }
 
 // register callback events
@@ -61,13 +61,9 @@ func (c *Client) register() {
 	// ICE connection state has changed
 	c.pc.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
 		if state == webrtc.ICEConnectionStateConnected && !isSending {
-			mutex.Lock()
-			if !isSending {
-				// start sending h264 data
-				go send()
-				isSending = true
-			}
-			mutex.Unlock()
+			// start sending h264 data
+			go send()
+			isSending = true
 		}
 
 		log.Debugf("ice connection state has changed to %s", state.String())
@@ -81,13 +77,11 @@ func (c *Client) readMessage() {
 	for {
 		_, raw, err := c.ws.ReadMessage()
 		if err != nil {
-			mutex.Lock()
 			delete(trackMap, c.ws)
-			if len(trackMap) == 0 && isSending {
+			if isSending && len(trackMap) == 0 {
 				// stop sending when all websocket connections are closed
-				exitSig <- true
+				isSending = false
 			}
-			mutex.Unlock()
 
 			log.Debugf("failed to read message: %s", err)
 			return
@@ -144,9 +138,6 @@ func (c *Client) readMessage() {
 				return
 			}
 
-		case "heartbeat":
-			_ = c.sendMessage("heartbeat", "")
-
 		default:
 			log.Debugf("unhandled message event: %s", message.Event)
 		}
@@ -155,8 +146,8 @@ func (c *Client) readMessage() {
 
 // send websocket message
 func (c *Client) sendMessage(event string, data string) error {
-	mutex.RLock()
-	defer mutex.RUnlock()
+	c.mutex.Lock()
+	defer c.mutex.Unlock()
 
 	message := &Message{
 		Event: event,

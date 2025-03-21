@@ -5,6 +5,8 @@ const VIDEO_MODE_KEY = 'nano-kvm-vide-mode';
 const WEB_RESOLUTION_KEY = 'nano-kvm-web-resolution';
 const FPS_KEY = 'nano-kvm-fps';
 const QUALITY_KEY = 'nano-kvm-quality';
+const GOP_KEY = 'nano-kvm-gop';
+const FRAME_DETECT_KEY = 'nano-kvm-frame-detect';
 const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
@@ -90,6 +92,24 @@ export function getQuality() {
 
 export function setQuality(quality: number) {
   localStorage.setItem(QUALITY_KEY, String(quality));
+}
+
+export function getGop() {
+  const gop = localStorage.getItem(GOP_KEY);
+  return gop ? Number(gop) : null;
+}
+
+export function setGop(gop: number) {
+  localStorage.setItem(GOP_KEY, String(gop));
+}
+
+export function getFrameDetect(): boolean {
+  const enabled = localStorage.getItem(FRAME_DETECT_KEY);
+  return enabled ? Boolean(enabled) : true;
+}
+
+export function setFrameDetect(enabled: boolean) {
+  localStorage.setItem(FRAME_DETECT_KEY, String(enabled));
 }
 
 export function getMouseStyle() {

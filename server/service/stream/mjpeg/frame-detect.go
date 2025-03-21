@@ -1,132 +1,55 @@
 package mjpeg
 
 import (
-	"errors"
-	"os"
+	"NanoKVM-Server/common"
+	"NanoKVM-Server/proto"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-
-	"NanoKVM-Server/proto"
 )
 
-const (
-	frameDetect    = "/etc/kvm/frame_detact"
-	frameDetectTmp = "/etc/kvm/frame_detact_tmp"
-)
-
-type UpdateFrameDetectRsp struct {
-	Enabled bool `json:"enabled"`
-}
-
-func GetFrameDetect(c *gin.Context) {
-	var rsp proto.Response
-
-	isEnabled, err := isFrameDetectEnabled()
-	if err != nil {
-		rsp.ErrRsp(c, -1, "unknown frame detect status")
-		return
-	}
-
-	rsp.OkRspWithData(c, &proto.GetFrameDetectRsp{
-		Enabled: isEnabled,
-	})
-	log.Debugf("get frame detect success, enabled: %t", isEnabled)
-}
+const FrameDetectInterval uint8 = 60
 
 func UpdateFrameDetect(c *gin.Context) {
+	var req proto.UpdateFrameDetectReq
 	var rsp proto.Response
 
-	isEnabled, err := isFrameDetectEnabled()
-	if err != nil {
-		rsp.ErrRsp(c, -1, "unknown frame status")
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid parameters")
 		return
 	}
 
-	if isEnabled {
-		_ = os.Remove(frameDetect)
-		_ = os.Remove(frameDetectTmp)
-	} else {
-		file, err2 := os.OpenFile(frameDetect, os.O_CREATE|os.O_TRUNC, 0o644)
-		if err2 != nil {
-			rsp.ErrRsp(c, -3, "enable frame detect failed")
-			return
-		}
-		defer func() {
-			_ = file.Close()
-		}()
+	var frame uint8 = 0
+	if req.Enabled {
+		frame = FrameDetectInterval
 	}
 
-	isEnabled, err = isFrameDetectEnabled()
-	if err != nil {
-		rsp.ErrRsp(c, -4, "unknown frame status")
-		return
-	}
+	common.GetKvmVision().SetFrameDetect(frame)
 
-	rsp.OkRspWithData(c, &UpdateFrameDetectRsp{
-		Enabled: isEnabled,
-	})
-	log.Debugf("update frame detect success, enabled: %t", isEnabled)
+	rsp.OkRsp(c)
+	log.Debugf("update frame detect: %t", req.Enabled)
 }
 
 func StopFrameDetect(c *gin.Context) {
+	var req proto.StopFrameDetectReq
 	var rsp proto.Response
 
-	exist, err := isFileExist(frameDetect)
-	if err != nil {
-		rsp.ErrRsp(c, -1, "unknown frame status")
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid parameters")
 		return
 	}
 
-	if !exist {
-		rsp.OkRsp(c)
-		return
+	duration := 10 * time.Second
+	if req.Duration > 0 {
+		duration = time.Duration(req.Duration) * time.Second
 	}
 
-	err = os.Rename(frameDetect, frameDetectTmp)
-	if err != nil {
-		rsp.ErrRsp(c, -2, "stop operation failed")
-		return
-	}
+	vision := common.GetKvmVision()
 
-	go func() {
-		time.Sleep(20 * time.Second)
-		_ = os.Rename(frameDetectTmp, frameDetect)
-		log.Debug("frame detect started")
-	}()
+	vision.SetFrameDetect(0)
+	time.Sleep(duration)
+	vision.SetFrameDetect(FrameDetectInterval)
 
 	rsp.OkRsp(c)
-	log.Debug("frame detect stopped")
-}
-
-func isFrameDetectEnabled() (bool, error) {
-	exist, err := isFileExist(frameDetect)
-	if err != nil {
-		return false, err
-	}
-
-	if exist {
-		return true, nil
-	}
-
-	exist, err = isFileExist(frameDetectTmp)
-	if err != nil {
-		return false, err
-	}
-
-	return exist, nil
-}
-
-func isFileExist(name string) (bool, error) {
-	_, err := os.Stat(name)
-	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
-			return false, nil
-		}
-
-		return false, nil
-	}
-
-	return true, nil
 }

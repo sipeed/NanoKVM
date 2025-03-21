@@ -1,31 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Tooltip } from 'antd';
+import clsx from 'clsx';
 import { LoaderCircleIcon, Tally4Icon, Tally5Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { getFrameDetect, updateFrameDetect } from '@/api/stream.ts';
+import * as api from '@/api/stream.ts';
+import * as ls from '@/lib/localstorage.ts';
 
 export const FrameDetect = () => {
   const { t } = useTranslation();
-  const [isEnabled, setIsEnabled] = useState(false);
+
   const [isLoading, setIsLoading] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(false);
 
   useEffect(() => {
-    getFrameDetect().then((rsp) => {
-      if (rsp.code === 0) {
-        setIsEnabled(rsp.data.enabled);
-      }
-    });
+    const enabled = ls.getFrameDetect();
+    if (enabled) {
+      setIsEnabled(true);
+    } else {
+      api.updateFrameDetect(false);
+    }
   }, []);
 
   function update() {
     if (isLoading) return;
     setIsLoading(true);
 
-    updateFrameDetect()
+    const enabled = !isEnabled;
+
+    api
+      .updateFrameDetect(enabled)
       .then((rsp) => {
         if (rsp.code === 0) {
-          setIsEnabled(rsp.data.enabled);
+          setIsEnabled(enabled);
+          ls.setFrameDetect(enabled);
         }
       })
       .finally(() => {
@@ -41,18 +49,20 @@ export const FrameDetect = () => {
       >
         {isLoading ? (
           <LoaderCircleIcon className="animate-spin" size={18} />
-        ) : isEnabled ? (
-          <div>
-            <Tally4Icon color="#22c55e" size={18} className="block group-hover:hidden" />
-            <Tally5Icon color="#ef4444" size={18} className="hidden group-hover:block" />
-          </div>
         ) : (
-          <div>
-            <Tally5Icon size={18} className="block group-hover:hidden" />
-            <Tally4Icon color="#22c55e" size={18} className="hidden group-hover:block" />
-          </div>
+          <>
+            {isEnabled ? <Tally4Icon color="#22c55e" size={18} /> : <Tally5Icon size={18} />}
+
+            <span
+              className={clsx(
+                'select-none text-sm',
+                isEnabled ? 'group-hover:text-red-500' : 'group-hover:text-green-500'
+              )}
+            >
+              {t('screen.frameDetect')}
+            </span>
+          </>
         )}
-        <span className="select-none text-sm">{t('screen.frameDetect')}</span>
       </div>
     </Tooltip>
   );

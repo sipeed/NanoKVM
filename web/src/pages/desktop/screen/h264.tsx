@@ -15,7 +15,6 @@ export const H264 = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let heartbeatTimer: any;
     const videoElement = document.getElementById('screen') as HTMLVideoElement;
 
     const url = `${getBaseUrl('ws')}/api/stream/h264`;
@@ -52,10 +51,6 @@ export const H264 = () => {
           ws.send(JSON.stringify({ event: 'offer', data: JSON.stringify(offer) }));
         })
         .catch(console.log);
-
-      heartbeatTimer = setInterval(() => {
-        ws.send(JSON.stringify({ event: 'heartbeat', data: '' }));
-      }, 60 * 1000);
     };
 
     ws.onmessage = (event) => {
@@ -75,9 +70,6 @@ export const H264 = () => {
             pc.addIceCandidate(data).catch(console.log);
             break;
 
-          case 'heartbeat':
-            break;
-
           default:
             console.log('unhandled event: ', msg.event);
         }
@@ -91,9 +83,6 @@ export const H264 = () => {
     }, 15 * 1000);
 
     return () => {
-      if (heartbeatTimer) {
-        clearInterval(heartbeatTimer);
-      }
       ws.close();
       pc.close();
     };
