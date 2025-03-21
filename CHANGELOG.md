@@ -1,3 +1,22 @@
+## 2.2.4 [1bf986d](https://github.com/sipeed/NanoKVM/commit/1bf986d41b34d568c1ffee5df90ce61b6b08456b) (2025-03-21)
+
+* fix: resolve USB initialization issue
+* fix: correct abnormal updates in certain models
+* perf: add version restrictions for production testing
+
+## 2.2.3 [6ef83cb](https://github.com/sipeed/NanoKVM/commit/6ef83cb22fcd77f721d32c97c85d12f2bfc3035a) (2025-03-21)
+
+* feat: add support for setting H.264 GOP
+* fix: resolve deadlock caused by HDMI resolution errors
+* perf: merge H.264 SPS and PPS into I-frame
+* perf: refactor MJPEG frame detection
+* perf: added more configuration options to the serial port terminal (thanks to [@mekaris](https://github.com/mekaris))
+* perf: improve the `update-nanokvm.py` script (thanks to [@reishoku](https://github.com/reishoku))
+* perf: disable mDNS by default in new products
+* perf: update log timestamp to millisecond precision
+* chore: bump Go to 1.23
+* chore: bump `golang.org/x/net` to v0.37.0
+
 ## 2.2.2 [58d5ab2](https://github.com/sipeed/NanoKVM/commit/58d5ab2d37244b1e1a68b925a5c23c324c489ad3) (2025-03-11)
 
 * feat: add watchdog for NanoKVM-Server
@@ -47,9 +66,9 @@ NanoKVM [Image v1.4.0](https://github.com/sipeed/NanoKVM/releases/tag/v1.4.0) ha
 * perf: download Tailscale installation package from the official source
 * perf: automatic enable/disable GOMEMLIMIT on tailscale start/stop
 * perf: add JWT configuration
-    * secretKey: customize secret key. If empty, generated a random 64-byte secret key by default
-    * refreshTokenDuration: customize token expiration time
-    * revokeTokensOnLogout: invalidate all JWT tokens on logout
+  * secretKey: customize secret key. If empty, generated a random 64-byte secret key by default
+  * refreshTokenDuration: customize token expiration time
+  * revokeTokensOnLogout: invalidate all JWT tokens on logout
 * perf: implement secure password storage using bcrypt hashing
 * perf: implement integrity checks for online updates
 * refactor: refactor HDMI module and remove the dependency `libmaixcam_lib.so`
