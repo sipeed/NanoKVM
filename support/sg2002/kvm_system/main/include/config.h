@@ -37,6 +37,7 @@
 #define OLED_SLEEP_DELAY_MIN 		10
 #define OLED_SLEEP_DELAY_DEFAULT 	30
 #define KVM_WD_COUNT_MAX			10
+#define RM_Watchdog_times			60
 
 typedef struct {
 	int8_t page = 0;

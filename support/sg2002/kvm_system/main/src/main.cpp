@@ -167,6 +167,7 @@ void* thread_sys_handle(void * arg)
 		}
 
 		time::sleep_ms(STATE_DELAY);
+		auto_remove_temp_watchdog();
     }
 	kvm_sys_state.sys_thread_running = 0;
 }

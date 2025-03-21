@@ -470,9 +470,43 @@ uint8_t ion_free_space(void)
 	return 0;
 }
 
-uint8_t watchdog_sf_is_open()
+int create_temp_watchdog(void) 
+{
+    FILE *file;
+
+    file = fopen(watchdog_temp_path, "w");
+    if (file == NULL) {
+        printf("[kvmv] Temp watchdog create error\n");
+        return -1;
+    }
+    // fprintf(file, "%s", 'v');
+    fclose(file);
+    return 1;
+}
+
+void rm_temp_watchdog(void)
+{
+	if(access(watchdog_temp_path, F_OK) == 0) {
+		remove(watchdog_temp_path);
+	}
+}
+
+void auto_remove_temp_watchdog(void)
+{
+	static uint8_t run_times = 0;
+	static uint8_t temp_watchdog_removed = 0;
+	if(temp_watchdog_removed) return;
+	if(run_times++ >= RM_Watchdog_times){
+		run_times = 0;
+		temp_watchdog_removed = 1;
+		rm_temp_watchdog();
+	}
+}
+
+uint8_t watchdog_sf_is_open(void)
 {
 	if(access(watchdog_mode_path, F_OK) == 0) return 1;
+	if(access(watchdog_temp_path, F_OK) == 0) return 1;
 	else return 0;
 }
 

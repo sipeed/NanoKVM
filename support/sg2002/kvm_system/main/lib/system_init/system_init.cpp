@@ -130,6 +130,9 @@ void new_app_init(void)
 		else if(RW_Data[0] == 'u') hdmi_ver = 2;
 	}
 
+	system("/etc/init.d/S03usbdev stop_start");
+	create_temp_watchdog();
+
 	if(hdmi_ver == 2){
 		if(RW_Data_1[0] != '/'){
 			system("cp /kvmapp/system/ko/soph_mipi_rx.ko /mnt/system/ko/soph_mipi_rx.ko");
@@ -161,7 +164,6 @@ void new_app_init(void)
 	system("rm -r /tmp/server");
 	system("cp -r /kvmapp/server /tmp/");
 	system("/tmp/server/NanoKVM-Server &");
-	system("/etc/init.d/S03usbdev stop_start");
 }
 
 void build_complete_resolv(void)

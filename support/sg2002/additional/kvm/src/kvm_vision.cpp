@@ -41,6 +41,7 @@
 #define hdmi_mode_path          "/etc/kvm/hdmi_mode"
 #define hdmi_state_path         "/proc/lt_int"
 #define watchdog_mode_path      "/etc/kvm/watchdog"
+#define watchdog_temp_path      "/tmp/watchdog"
 #define watchdog_file           "/tmp/nanokvm_wd"
 
 #define LT6911_ADDR 	0x2B
@@ -309,9 +310,10 @@ int get_hdmi_mode(void)
     return 0;
 }
 
-uint8_t watchdog_sf_is_open()
+uint8_t watchdog_sf_is_open(void)
 {
 	if(access(watchdog_mode_path, F_OK) == 0) return 1;
+    else if(access(watchdog_temp_path, F_OK) == 0) return 1;
 	else return 0;
 }
 
@@ -1017,7 +1019,7 @@ void* watchdog_sf_feed(void * arg)
                 debug("[kvmv] Ion memory is full reboot now!\n");
                 system("reboot");
             }
-            debug("[kvmv] watchdog_sf_feed now!\n");
+            // debug("[kvmv] watchdog_sf_feed now!\n");
             vision_update_watchdog();
         }
     }

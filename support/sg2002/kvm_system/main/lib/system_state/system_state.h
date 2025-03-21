@@ -14,6 +14,7 @@ enum ip_addr_t
 #define NIC_STATE_NO_EXIST			-2
 
 #define watchdog_mode_path      "/etc/kvm/watchdog"
+#define watchdog_temp_path      "/tmp/watchdog"
 #define watchdog_file           "/tmp/nanokvm_wd"
 
 // net_port
@@ -34,7 +35,10 @@ void kvm_update_rndis_state(void);
 void kvm_update_tailscale_state(void);
 uint8_t ion_free_space(void);
 int get_nic_state(const char* interface_name);
-uint8_t watchdog_sf_is_open();
+int create_temp_watchdog(void);
+void rm_temp_watchdog(void);
+void auto_remove_temp_watchdog(void);
+uint8_t watchdog_sf_is_open(void);
 int check_watchdog();
 
 #endif // SYSTEM_STATE_H_
