@@ -1670,28 +1670,33 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         // debug("[kvmv]befor read img: %d \r\n", (int)(time::time_ms() - start_time));
         image::Image *img = cam->read();
         // debug("[kvmv]read img: %d \r\n", (int)(time::time_ms() - start_time));
-        if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
-            if(kvmv_cfg.stream_stop == 0){
-                frame_undetact_count++;
-            } else {
-                frame_undetact_count = kvmv_cfg.frame_detact;
-            }
-            
-            if(frame_undetact_count == kvmv_cfg.frame_detact){
-                frame_undetact_count = 0;
-                if(frame_changed(img) == 0){
-                    debug("[kvmv]frame not changed...\n");
-                    kvmv_cfg.stream_stop = 1;
-                    delete img;
-                    pthread_mutex_unlock(&vi_mutex);
-                    return 5;
-                } else {
-                    kvmv_cfg.stream_stop = 0;
-                }
-            }
-        } 
         
         if(img != NULL){
+            // frame detect
+            if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
+                debug("[kvmv] read - 4...\n");
+                if(kvmv_cfg.stream_stop == 0){
+                    frame_undetact_count++;
+                } else {
+                    frame_undetact_count = kvmv_cfg.frame_detact;
+                }
+                
+                debug("[kvmv] read - 5...\n");
+                if(frame_undetact_count == kvmv_cfg.frame_detact){
+                    frame_undetact_count = 0;
+    
+                    debug("[kvmv] read - 6...\n");
+                    if(frame_changed(img) == 0){
+                        debug("[kvmv]frame not changed...\n");
+                        kvmv_cfg.stream_stop = 1;
+                        delete img;
+                        pthread_mutex_unlock(&vi_mutex);
+                        return 5;
+                    } else {
+                        kvmv_cfg.stream_stop = 0;
+                    }
+                }
+            } 
 			if(kvmv_cfg.cam_state == 0) {
 				kvmv_cfg.cam_state = 1;
                 kvmv_cfg.hdmi_cable_state = 1;
