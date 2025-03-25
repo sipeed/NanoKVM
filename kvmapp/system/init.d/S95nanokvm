@@ -23,11 +23,11 @@ case "$1" in
     iptables -C OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
 
-    iptables -C OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
+    iptables -C INPUT -i eth0 -p tcp --sport 22 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
+    iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
 
-    iptables -C INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state ESTABLISHED -j ACCEPT
+    iptables -C OUTPUT -o eth0 -p tcp --dport 22 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
+    iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state ESTABLISHED -j ACCEPT
 
     iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
