@@ -1,3 +1,10 @@
+## 2.2.5 [3286cc2](https://github.com/sipeed/NanoKVM/commit/3286cc2f85a14133d65935cb476c833dcf151459) (2025-03-26)
+
+fix: server crash caused by MJPEG frame detection error
+feat: add HID-Only mode
+feat: support preview updates
+perf: improve image reading performance by optimizing screen parameters
+
 ## 2.2.4 [1bf986d](https://github.com/sipeed/NanoKVM/commit/1bf986d41b34d568c1ffee5df90ce61b6b08456b) (2025-03-21)
 
 * fix: resolve USB initialization issue
