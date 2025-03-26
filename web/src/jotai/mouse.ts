@@ -5,3 +5,6 @@ export const mouseStyleAtom = atom('cursor-default');
 
 // mouse mode: absolute or relative
 export const mouseModeAtom = atom('absolute');
+
+// hid mode: normal or hid-only
+export const hidModeAtom = atom<'normal' | 'hid-only'>('normal');

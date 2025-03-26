@@ -71,7 +71,9 @@ const zh = {
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
-      default: '默认指针',
+      title: '鼠标',
+      cursor: '光标样式',
+      default: '默认光标',
       pointer: '悬浮指针',
       cell: '单元指针',
       text: '文本指针',
@@ -81,7 +83,16 @@ const zh = {
       absolute: '绝对模式',
       relative: '相对模式',
       requestPointer: '正在使用鼠标相对模式，请点击桌面获取鼠标指针。',
-      resetHid: '重置 HID'
+      resetHid: '重置 HID',
+      hidOnly: {
+        title: 'HID-Only 模式',
+        desc: '若使用过程中遇到鼠标键盘无响应，且重置 HID 无效，可能是 NanoKVM 与您的设备存在兼容性问题。建议尝试启用 HID-Only 模式以提升兼容性。',
+        tip1: '启用该模式会禁用虚拟U盘和虚拟网卡',
+        tip2: '该模式下无法使用镜像挂载功能',
+        tip3: '切换模式后将自动重启 NanoKVM',
+        enable: '启用 HID-Only 模式',
+        disable: '关闭 HID-Only 模式'
+      }
     },
     image: {
       title: '镜像',
@@ -197,6 +208,7 @@ const zh = {
           description: '启用 mDNS 发现服务',
           tip: '如果您未使用此功能，建议将其关闭'
         },
+        hidOnly: 'HID-Only 模式',
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
@@ -246,7 +258,10 @@ const zh = {
         available: '有新的可用版本，确定要更新吗？',
         updating: '更新中，请稍候...',
         confirm: '确定',
-        cancel: '取消'
+        cancel: '取消',
+        preview: '预览更新',
+        previewDesc: '率先体验即将推出的新功能和优化',
+        previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！'
       },
       account: {
         title: '帐号',

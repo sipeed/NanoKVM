@@ -3,13 +3,11 @@ package application
 import (
 	"crypto/sha512"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,39 +20,6 @@ import (
 const (
 	maxTries = 3
 )
-
-type Latest struct {
-	Version string `json:"version"`
-	Name    string `json:"name"`
-	Sha512  string `json:"sha512"`
-	Size    uint   `json:"size"`
-}
-
-func (s *Service) GetVersion(c *gin.Context) {
-	var rsp proto.Response
-
-	// current version
-	currentVersion := "1.0.0"
-
-	versionFile := fmt.Sprintf("%s/version", AppDir)
-	if version, err := os.ReadFile(versionFile); err == nil {
-		currentVersion = strings.ReplaceAll(string(version), "\n", "")
-	}
-
-	log.Debugf("current version: %s", currentVersion)
-
-	// latest version
-	latest, err := getLatest()
-	if err != nil {
-		rsp.ErrRsp(c, -1, "get latest version failed")
-		return
-	}
-
-	rsp.OkRspWithData(c, &proto.GetVersionRsp{
-		Current: currentVersion,
-		Latest:  latest.Version,
-	})
-}
 
 func (s *Service) Update(c *gin.Context) {
 	var rsp proto.Response
@@ -87,10 +52,9 @@ func update() error {
 	}
 
 	// download
-	url := fmt.Sprintf("%s/%s", BaseURL, latest.Name)
 	target := fmt.Sprintf("%s/%s", CacheDir, latest.Name)
 
-	if err := download(url, target); err != nil {
+	if err := download(latest.Url, target); err != nil {
 		log.Errorf("download app failed: %s", err)
 		return err
 	}
@@ -133,39 +97,6 @@ func update() error {
 	}
 
 	return nil
-}
-
-func getLatest() (*Latest, error) {
-	url := fmt.Sprintf("%s/latest.json?now=%d", BaseURL, time.Now().Unix())
-
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Debugf("failed to request version: %v", err)
-		return nil, err
-	}
-	defer func() {
-		_ = resp.Body.Close()
-	}()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		log.Errorf("failed to read response: %v", err)
-		return nil, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Errorf("server responded with status code: %d", resp.StatusCode)
-		return nil, err
-	}
-
-	var latest Latest
-	if err := json.Unmarshal(body, &latest); err != nil {
-		log.Errorf("failed to unmarshal response: %s", err)
-		return nil, err
-	}
-
-	log.Debugf("get application latest version: %s", latest.Version)
-	return &latest, nil
 }
 
 func download(url string, target string) (err error) {

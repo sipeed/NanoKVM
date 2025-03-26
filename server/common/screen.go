@@ -78,6 +78,21 @@ func SetScreen(key string, value int) {
 	}
 }
 
+func CheckScreen() {
+	if _, ok := ResolutionMap[screen.Height]; !ok {
+		screen.Width = 1920
+		screen.Height = 1080
+	}
+
+	if _, ok := QualityMap[screen.Quality]; !ok {
+		screen.Quality = 80
+	}
+
+	if _, ok := BitRateMap[screen.BitRate]; !ok {
+		screen.BitRate = 3000
+	}
+}
+
 func validateFPS(fps int) int {
 	if fps > 60 {
 		return 60

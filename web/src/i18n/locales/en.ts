@@ -76,6 +76,7 @@ const en = {
     },
     mouse: {
       title: 'Mouse',
+      cursor: 'Cursor style',
       default: 'Default cursor',
       pointer: 'Pointer cursor',
       cell: 'Cell cursor',
@@ -86,7 +87,16 @@ const en = {
       absolute: 'Absolute mode',
       relative: 'Relative mode',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
-      resetHid: 'Reset HID'
+      resetHid: 'Reset HID',
+      hidOnly: {
+        title: 'HID-Only mode',
+        desc: "If your mouse and keyboard stop responding and resetting HID doesn't help, it could be a compatibility issue between the NanoKVM and the device. Try to enable HID-Only mode for better compatibility.",
+        tip1: 'Enabling HID-Only mode will unmount the virtual U-disk and virtual network',
+        tip2: 'In HID-Only mode, image mounting is disabled',
+        tip3: 'NanoKVM will automatically reboot after switching modes',
+        enable: 'Enable HID-Only mode',
+        disable: 'Disable HID-Only mode'
+      }
     },
     image: {
       title: 'Images',
@@ -214,6 +224,7 @@ const en = {
           description: 'Enable mDNS discovery service',
           tip: "Turning it off if it's not needed"
         },
+        hidOnly: 'HID-Only Mode',
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
@@ -268,7 +279,11 @@ const en = {
         available: 'An update is available. Are you sure you want to update now?',
         updating: 'Update started. Please wait...',
         confirm: 'Confirm',
-        cancel: 'Cancel'
+        cancel: 'Cancel',
+        preview: 'Preview Updates',
+        previewDesc: 'Get early access to new features and improvements',
+        previewTip:
+          'Please be aware that preview releases may contain bugs or incomplete functionality!'
       },
       account: {
         title: 'Account',
