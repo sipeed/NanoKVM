@@ -130,7 +130,7 @@ void new_app_init(void)
 		else if(RW_Data[0] == 'u') hdmi_ver = 2;
 	}
 
-	system("/etc/init.d/S03usbdev stop_start");
+	// system("/etc/init.d/S03usbdev stop_start");
 	create_temp_watchdog();
 
 	if(hdmi_ver == 2){
