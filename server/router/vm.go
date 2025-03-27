@@ -40,6 +40,10 @@ func vmRouter(r *gin.Engine) {
 	api.POST("/vm/ssh/enable", service.EnableSSH)   // enable SSH
 	api.POST("/vm/ssh/disable", service.DisableSSH) // disable SSH
 
+	api.GET("/vm/swap", service.GetSwapState)         // get Swap state
+	api.POST("/vm/swap/enable", service.EnableSwap)   // enable Swap
+	api.POST("/vm/swap/disable", service.DisableSwap) // disable Swap
+
 	api.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state
 	api.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS
 	api.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS

@@ -220,6 +220,10 @@ const en = {
           description: 'Enable SSH remote access',
           tip: 'Set a strong password before enabling (Account - Change Password)'
         },
+        swap: {
+          description: 'Enable the swap partition',
+          tip: 'Enable the default swap partition(128M)'
+        },
         mdns: {
           description: 'Enable mDNS discovery service',
           tip: "Turning it off if it's not needed"
