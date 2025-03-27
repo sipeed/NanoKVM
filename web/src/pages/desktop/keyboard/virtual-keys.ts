@@ -18,6 +18,14 @@ export const keyboardOptions = {
       '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon Quote {enter}',
       '{shiftleft} KeyZ KeyX KeyC KeyV KeyB KeyN KeyM Comma Period Slash {shiftright}',
       '{controlleft} {altleft} {metaleft} {space} {metaright} {altright}'
+    ],
+    rus: [
+      '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
+      'Backquote Digit1 Digit2 Digit3 Digit4 Digit5 Digit6 Digit7 Digit8 Digit9 Digit0 Minus Equal {backspace}',
+      '{tab} RusQ RusW RusE RusR RusT RusY RusU RusI RusO RusP RusBracketLeft RusBracketRight RusBackslash',
+      '{capslock} RusA RusS RusD RusF RusG RusH RusJ RusK RusL RusSemicolon RusQuote {enter}',
+      '{shiftleft} RusZ RusX RusC RusV RusB RusN RusM RusComma RusPeriod RusSlash {shiftright}',
+      '{controlleft} {winleft} {altleft} {space} {altright} {winright} {menu} {controlright}'
     ]
   },
   display: {
@@ -88,7 +96,44 @@ export const keyboardOptions = {
     '{winright}': 'Win',
     '{altright}': 'Alt',
     '{menu}': 'Menu',
-    '{controlright}': 'Ctrl'
+    '{controlright}': 'Ctrl',
+
+    RusQ: 'Й',
+    RusW: 'Ц',
+    RusE: 'У',
+    RusR: 'К',
+    RusT: 'Е',
+    RusY: 'Н',
+    RusU: 'Г',
+    RusI: 'Ш',
+    RusO: 'Щ',
+    RusP: 'З',
+    RusBracketLeft: 'Х',
+    RusBracketRight: 'Ъ',
+    RusBackslash: '/<br>\\',
+  
+    RusA: 'Ф',
+    RusS: 'Ы',
+    RusD: 'В',
+    RusF: 'А',
+    RusG: 'П',
+    RusH: 'Р',
+    RusJ: 'О',
+    RusK: 'Л',
+    RusL: 'Д',
+    RusSemicolon: 'Ж',
+    RusQuote: 'Э',
+
+    RusZ: 'Я',
+    RusX: 'Ч',
+    RusC: 'С',
+    RusV: 'М',
+    RusB: 'И',
+    RusN: 'Т',
+    RusM: 'Ь',
+    RusComma: 'Б',
+    RusPeriod: 'Ю',
+    RusSlash: ',<br/>.',
   }
 };
 

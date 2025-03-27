@@ -38,7 +38,7 @@ export const VirtualKeyboard = () => {
 
   useEffect(() => {
     const keyboardLayout = getKeyboardLayout();
-    if (keyboardLayout && ['default', 'mac'].includes(keyboardLayout)) {
+    if (keyboardLayout && ['default', 'mac', 'rus'].includes(keyboardLayout)) {
       setLayout(keyboardLayout);
     }
   }, []);
@@ -157,7 +157,8 @@ export const VirtualKeyboard = () => {
                 <Segmented
                   options={[
                     { label: 'Win', value: 'default', icon: <WindowsOutlined /> },
-                    { label: 'Mac', value: 'mac', icon: <AppleOutlined /> }
+                    { label: 'Mac', value: 'mac', icon: <AppleOutlined /> },
+                    { label: 'Rus', value: 'rus', icon: <WindowsOutlined /> },
                   ]}
                   value={layout}
                   onChange={selectLayout}
