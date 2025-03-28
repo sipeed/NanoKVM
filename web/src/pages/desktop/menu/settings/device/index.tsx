@@ -13,6 +13,7 @@ import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
+import { Swap } from './swap.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -37,6 +38,7 @@ export const Device = () => {
         <Wifi />
         <Ssh />
         <Mdns />
+        <Swap />
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
       </div>
       <Divider />

@@ -204,6 +204,10 @@ const zh = {
           description: '启用 SSH 远程访问',
           tip: '启用前请务必设置强密码（帐号 - 修改密码）'
         },
+        swap: {
+          description: '启用交换分区',
+          tip: '启用默认的交换分区（128M）'
+        },  
         mdns: {
           description: '启用 mDNS 发现服务',
           tip: '如果您未使用此功能，建议将其关闭'
