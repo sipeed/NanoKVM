@@ -46,7 +46,7 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 + Add compilation scripts and compilation instructions
 
 ### Update 2025.02.19
-All components of NanoKVM were open-sourced, including the [front-end](https://github.com/sipeed/NanoKVM/tree/main/web), [back-end](https://github.com/sipeed/NanoKVM/tree/main/server), [kvm_vision](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm), [kvm_mmf](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm_mmf), [kvm_system](https://github.com/sipeed/NanoKVM/tree/main/support), the [kvmapp update package](https://github.com/sipeed/NanoKVM-System/tree/main/kvmapp), [system sdk](https://github.com/sipeed/LicheeRV-Nano-Build/tree/NanoKVM), and [packaging methods](https://github.com/sipeed/LicheeRV-Nano-Build/blob/NanoKVM/kvm/NanoKVM_img.sh).
+All components of NanoKVM were open-sourced, including the [front-end](https://github.com/sipeed/NanoKVM/tree/main/web), [back-end](https://github.com/sipeed/NanoKVM/tree/main/server), [kvm_mmf](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm_mmf), [kvm_system](https://github.com/sipeed/NanoKVM/tree/main/support), the [kvmapp update package](https://github.com/sipeed/NanoKVM-System/tree/main/kvmapp), [system sdk](https://github.com/sipeed/LicheeRV-Nano-Build/tree/NanoKVM), and [packaging methods](https://github.com/sipeed/LicheeRV-Nano-Build/blob/NanoKVM/kvm/NanoKVM_img.sh).
 
 ### Update 2025.02.14
 Newest APP v2.1.6 add most security enhancements&bug fix, recommend regular users upgrade to this version or newer.
