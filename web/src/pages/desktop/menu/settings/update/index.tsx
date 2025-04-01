@@ -6,6 +6,8 @@ import semver from 'semver';
 
 import * as api from '@/api/application.ts';
 
+import { Preview } from './preview.tsx';
+
 type UpdateProps = {
   setIsLocked: (isClosable: boolean) => void;
 };
@@ -77,6 +79,9 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <div className="text-base font-bold">{t('settings.update.title')}</div>
       <Divider />
 
+      <Preview />
+      <Divider />
+
       {status === 'loading' && (
         <div className="flex justify-center pt-24">
           <Spin indicator={<LoadingOutlined spin />} size="large" />
@@ -84,7 +89,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       )}
 
       {status === 'updating' && (
-        <div className="flex flex-col items-center justify-center space-y-10 pt-24">
+        <div className="flex flex-col items-center justify-center space-y-10 pb-10 pt-24">
           <Spin size="large" />
           <span className="text-blue-600">{t('settings.update.updating')}</span>
         </div>

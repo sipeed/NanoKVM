@@ -77,6 +77,21 @@ export function disableSSH() {
   return http.post('/api/vm/ssh/disable');
 }
 
+// get Swap state
+export function getSwapState() {
+  return http.get('/api/vm/swap');
+}
+
+// enable Swap
+export function enableSwap() {
+  return http.post('/api/vm/swap/enable');
+}
+
+// disable Swap
+export function disableSwap() {
+  return http.post('/api/vm/swap/disable');
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');

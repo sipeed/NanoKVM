@@ -13,3 +13,16 @@ export function update() {
     timeout: 15 * 60 * 1000
   });
 }
+
+// enable/disable preview updates
+export function setPreviewUpdates(enable: boolean) {
+  const data = {
+    enable
+  };
+  return http.post('/api/application/preview', data);
+}
+
+// get preview updates state
+export function getPreviewUpdates() {
+  return http.get('/api/application/preview');
+}

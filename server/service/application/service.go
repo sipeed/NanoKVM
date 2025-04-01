@@ -1,7 +1,8 @@
 package application
 
 const (
-	BaseURL = "https://cdn.sipeed.com/nanokvm"
+	StableURL  = "https://cdn.sipeed.com/nanokvm"
+	PreviewURL = "https://cdn.sipeed.com/nanokvm/preview"
 
 	AppDir    = "/kvmapp"
 	BackupDir = "/root/old"

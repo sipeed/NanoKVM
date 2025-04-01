@@ -41,6 +41,8 @@ func Connect(c *gin.Context) {
 
 func send() {
 	screen := common.GetScreen()
+	common.CheckScreen()
+
 	fps := screen.FPS
 
 	ticker := time.NewTicker(time.Second / time.Duration(fps))
@@ -50,19 +52,7 @@ func send() {
 	for {
 		select {
 		case <-ticker.C:
-			height := screen.Height
-			width, ok := common.ResolutionMap[height]
-			if !ok {
-				width = 0
-				height = 0
-			}
-
-			quality := screen.Quality
-			if _, ok := common.QualityMap[quality]; !ok {
-				quality = 80
-			}
-
-			data, result := vision.ReadMjpeg(width, height, quality)
+			data, result := vision.ReadMjpeg(screen.Width, screen.Height, screen.Quality)
 			if result < 0 || result == 5 {
 				continue
 			}

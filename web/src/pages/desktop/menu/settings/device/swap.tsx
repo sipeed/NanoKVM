@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
 
-export const Mdns = () => {
+export const Swap = () => {
   const { t } = useTranslation();
 
   const [isEnabled, setIsEnabled] = useState(false);
@@ -15,7 +15,7 @@ export const Mdns = () => {
     setIsLoading(true);
 
     api
-      .getMdnsState()
+      .getSwapState()
       .then((rsp) => {
         if (rsp.data?.enabled) {
           setIsEnabled(true);
@@ -30,7 +30,7 @@ export const Mdns = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-    const rsp = isEnabled ? await api.disableMdns() : await api.enableMdns();
+      const rsp = isEnabled ? await api.disableSwap() : await api.enableSwap();
     setIsLoading(false);
 
     if (rsp.code !== 0) {
@@ -45,10 +45,10 @@ export const Mdns = () => {
     <div className="flex items-center justify-between">
       <div className="flex flex-col">
         <div className="flex items-center space-x-2">
-          <span>mDNS</span>
+          <span>Swap</span>
 
           <Tooltip
-            title={t('settings.device.mdns.tip')}
+            title={t('settings.device.swap.tip')}
             className="cursor-pointer"
             placement="bottom"
             overlayStyle={{ maxWidth: '300px' }}
@@ -56,8 +56,7 @@ export const Mdns = () => {
             <CircleAlertIcon size={15} />
           </Tooltip>
         </div>
-
-        <span className="text-xs text-neutral-500">{t('settings.device.mdns.description')}</span>
+            <span className="text-xs text-neutral-500">{t('settings.device.swap.description')}</span>
       </div>
 
       <Switch checked={isEnabled} loading={isLoading} onChange={update} />

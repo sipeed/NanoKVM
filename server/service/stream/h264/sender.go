@@ -10,6 +10,8 @@ import (
 
 func send() {
 	screen := common.GetScreen()
+	common.CheckScreen()
+
 	fps := screen.FPS
 	duration := time.Second / time.Duration(fps)
 
@@ -22,19 +24,7 @@ func send() {
 			return
 		}
 
-		height := screen.Height
-		width, ok := common.ResolutionMap[height]
-		if !ok {
-			width = 0
-			height = 0
-		}
-
-		bitRate := screen.BitRate
-		if _, ok := common.BitRateMap[bitRate]; !ok {
-			bitRate = 3000
-		}
-
-		data, result := vision.ReadH264(width, height, bitRate)
+		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
 		if result < 0 {
 			continue
 		}
