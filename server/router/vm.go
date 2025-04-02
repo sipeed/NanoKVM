@@ -44,6 +44,10 @@ func vmRouter(r *gin.Engine) {
 	api.POST("/vm/swap/enable", service.EnableSwap)   // enable Swap
 	api.POST("/vm/swap/disable", service.DisableSwap) // disable Swap
 
+	api.GET("/vm/mouseJiggler", service.GetMouseJigglerState)         // get MouseJiggler state
+	api.POST("/vm/mouseJiggler/enable", service.EnableMouseJiggler)   // enable MouseJiggler
+	api.POST("/vm/mouseJiggler/disable", service.DisableMouseJiggler) // disable MouseJiggler
+
 	api.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state
 	api.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS
 	api.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS

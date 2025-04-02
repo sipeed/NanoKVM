@@ -88,6 +88,10 @@ type GetSwapStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
+type GetMouseJigglerStateRsp struct {
+	Enabled bool `json:"enabled"`
+}
+
 type GetMdnsStateRsp struct {
 	Enabled bool `json:"enabled"`
 }

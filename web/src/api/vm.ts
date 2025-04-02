@@ -92,6 +92,21 @@ export function disableSwap() {
   return http.post('/api/vm/swap/disable');
 }
 
+// get MouseJiggler state
+export function getMouseJigglerState() {
+  return http.get('/api/vm/mouseJiggler');
+}
+
+// enable MouseJiggler
+export function enableMouseJiggler() {
+  return http.post('/api/vm/mouseJiggler/enable');
+}
+
+// disable MouseJiggler
+export function disableMouseJiggler() {
+  return http.post('/api/vm/mouseJiggler/disable');
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');

@@ -1,3 +1,5 @@
+import { t } from "i18next";
+
 const zh = {
   translation: {
     head: {
@@ -208,6 +210,11 @@ const zh = {
           description: '启用交换分区',
           tip: '启用默认的交换分区（128M）'
         },  
+        mouseJiggler:{
+          title: '鼠标抖动',
+          description: '启用鼠标抖动',
+          tip: '在鼠标离开60s未操作时自动进行抖动以防止系统睡眠'
+        },
         mdns: {
           description: '启用 mDNS 发现服务',
           tip: '如果您未使用此功能，建议将其关闭'
