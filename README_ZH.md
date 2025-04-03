@@ -22,14 +22,21 @@ NanoKVM
 
 Lichee NanoKVM 是基于 LicheeRV Nano 的 IP-KVM 产品，继承了 LicheeRV Nano的极致体积 和 强大功能。
 
-Lichee NanoKVM分为两个版本：
+Lichee NanoKVM 目前有三个版本：
 
-* NanoKVM Lite 为基础版配置，适合 具有一定DIY能力的个人用户 和 有批量需求的企业用户。
-* NanoKVM Full 为完整版配置，带精致外壳和完整配件，内置开机即用的系统镜像卡，推荐个人用户购买。
+* NanoKVM-Cube Lite 为基础版配置，适合 具有一定DIY能力的个人用户 和 有批量需求的企业用户。
+* NanoKVM-Cube Full 为完整版配置，带精致外壳和完整配件，内置开机即用的系统镜像卡，推荐个人用户购买。
+* NanoKVM-PCle 为全新形态，内置 PCle 挡板，可固定在机箱内部。NanoKVM-PCle 在 NanoKVM-Cube 基础上增加了可选的 WiFi 和 PoE 功能；拥有自家的 PCle 插槽，可从主板 PCle 插槽取电；另外有线连接（ETH）也更加稳定，满足更多专业需求。
 
-对于关注安全的用户，可以阅读此问题 [#301](https://github.com/sipeed/NanoKVM/issues/301)，您会找到有关所有安全问题的解释。GitHub 作为一个开放和透明的平台，为讨论所谓的“后门”担忧提供了空间。开源使产品更加安全！
+<div align="center">
 
-![](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+![NanoKVM-Cube](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+
+![NanoKVM-PCIe](https://wiki.sipeed.com/hardware/assets/NanoKVM/introduce/NanoKVM-PCIe.png)
+
+</div>
+
+> 对于关注安全的用户，可以阅读此问题 [#301](https://github.com/sipeed/NanoKVM/issues/301)，您会找到有关所有安全问题的解释。GitHub 作为一个开放和透明的平台，为讨论所谓的“后门”担忧提供了空间。开源使产品更加安全！
 
 ## 项目结构
 

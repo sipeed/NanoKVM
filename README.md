@@ -22,16 +22,24 @@ English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
 
 Lichee NanoKVM is an IP-KVM product based on LicheeRV Nano, inheriting the extreme size and powerful features of LicheeRV Nano.
 
-The Lichee NanoKVM is available in two versions:
+The Lichee NanoKVM is now available in three versions:
 
-* NanoKVM Lite is a basic configuration that is suitable for individual users with certain DIY capabilities and enterprise users with bulk requirements.
+* NanoKVM-Cube Lite is a basic configuration that is suitable for individual users with certain DIY capabilities and enterprise users with bulk requirements.
 
-* The NanoKVM Full is a full version with a sophisticated case and complete accessories, as well as a built-in system mirror card that is ready to use at boot, and is recommended for individual users.
+* NanoKVM-Cube Full is a full version with a sophisticated case and complete accessories, as well as a built-in system mirror card that is ready to use at boot, and is recommended for individual users.
 
-For users concerned about security, you can read this issue: [#301](https://github.com/sipeed/NanoKVM/issues/301). You will find explanations addressing all security concerns.
-GitHub, as an open and transparent platform, provides a space for discussing so-called "backdoor" concerns. Open-source makes products more secure!
+* NanoKVM-PCle is a new form with a built-in PCle baffle that can be fixed inside the chassis. NanoKVM-PCle adds optional WiFi and PoE functions based on NanoKVM-Cube; it has its own PCle slot and can draw power from the motherboard PCle slot; in addition, the wired connection (ETH) is also more stable, meeting more professional needs.
 
-![NanoKVM Disassembled](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+<div align="center">
+
+![NanoKVM-Cube](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+
+![NanoKVM-PCIe](https://wiki.sipeed.com/hardware/assets/NanoKVM/introduce/NanoKVM-PCIe.png)
+
+</div>
+
+> For users concerned about security, you can read this issue: [#301](https://github.com/sipeed/NanoKVM/issues/301). You will find explanations addressing all security concerns.
+> GitHub, as an open and transparent platform, provides a space for discussing so-called "backdoor" concerns. Open-source makes products more secure!
 
 ## Project Structure
 
