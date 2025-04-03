@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Tooltip } from 'antd';
+import { Tag, Tooltip } from 'antd';
 import { CircleHelpIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
 
+type IP = {
+  name: string;
+  addr: string;
+  version: string;
+  type: string;
+};
+
 type Info = {
-  ip: string;
+  ips: IP[];
   mdns: string;
   image: string;
   application: string;
@@ -34,11 +41,24 @@ export const Information = () => {
       <div className="pb-5 text-neutral-400">{t('settings.about.information')}</div>
 
       <div className="flex w-full flex-col space-y-4">
-        <div className="flex w-full items-center justify-between">
+        {/* IP list */}
+        <div className="flex w-full items-start justify-between">
           <span>{t('settings.about.ip')}</span>
-          <span>{information ? information.ip : '-'}</span>
+          {information?.ips && information.ips.length > 0 ? (
+              <div className="flex flex-col space-y-1">
+                {information.ips.map((ip) => (
+                  <div className="flex items-center space-x-1">
+                    <span>{ip.addr}</span>
+                    <Tag>{ip.type}</Tag>
+                  </div>
+                ))}
+              </div>
+          ) : (
+            <span>-</span>
+          )}
         </div>
 
+        {/* mDNS */}
         {!!information?.mdns && (
           <div className="flex w-full items-center justify-between">
             <span>{t('settings.about.mdns')}</span>
@@ -46,6 +66,7 @@ export const Information = () => {
           </div>
         )}
 
+        {/* image version */}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center space-x-2">
             <span>{t('settings.about.image')}</span>
@@ -61,6 +82,7 @@ export const Information = () => {
           <span>{information ? information.image : '-'}</span>
         </div>
 
+        {/* application version */}
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center space-x-2">
             <span>{t('settings.about.application')}</span>
@@ -76,6 +98,7 @@ export const Information = () => {
           <span>{information ? information.application : '-'}</span>
         </div>
 
+        {/* device key */}
         <div className="flex w-full items-center justify-between">
           <span>{t('settings.about.deviceKey')}</span>
           <span>{information ? information.deviceKey : '-'}</span>

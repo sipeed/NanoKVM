@@ -3,7 +3,6 @@ package vm
 import (
 	"NanoKVM-Server/config"
 	"fmt"
-	"net"
 	"os"
 	"strings"
 
@@ -25,7 +24,7 @@ func (s *Service) GetInfo(c *gin.Context) {
 	var rsp proto.Response
 
 	data := &proto.GetInfoRsp{
-		Ip:          getIp(),
+		IPs:         getIPs(),
 		Mdns:        getMdns(),
 		Image:       getImageVersion(),
 		Application: getApplicationVersion(),
@@ -36,20 +35,24 @@ func (s *Service) GetInfo(c *gin.Context) {
 	log.Debug("get vm information success")
 }
 
-func getIp() string {
-	addressList, err := net.InterfaceAddrs()
+func getIPs() (ips []proto.IP) {
+	interfaces, err := GetInterfaceInfos()
 	if err != nil {
-		return ""
+		return
 	}
 
-	for _, address := range addressList {
-		if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
-			ip := ipnet.IP.String()
-			return ip
+	for _, iface := range interfaces {
+		if iface.IP.To4() != nil {
+			ips = append(ips, proto.IP{
+				Name:    iface.Name,
+				Addr:    iface.IP.String(),
+				Version: "IPv4",
+				Type:    iface.Type,
+			})
 		}
 	}
 
-	return ""
+	return
 }
 
 func getMdns() string {
