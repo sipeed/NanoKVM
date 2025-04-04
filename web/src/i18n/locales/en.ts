@@ -224,6 +224,11 @@ const en = {
           description: 'Enable the swap partition',
           tip: 'Enable the default swap partition(128M)'
         },
+        mouseJiggler: {
+          title: "Mouse Jiggler",
+          description: 'Enable the mouse jiggler',
+          tip: "Automatically jiggles the mouse when inactive for 60 seconds to prevent system sleep"
+        },
         mdns: {
           description: 'Enable mDNS discovery service',
           tip: "Turning it off if it's not needed"

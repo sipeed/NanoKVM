@@ -14,6 +14,7 @@ import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
 import { Swap } from './swap.tsx';
+import { MouseJiggler } from './mouse-jiggler.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -39,6 +40,7 @@ export const Device = () => {
         <Ssh />
         <Mdns />
         <Swap />
+        <MouseJiggler />
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
       </div>
       <Divider />
