@@ -31,13 +31,13 @@ port:
 cert:
     crt: server.crt
     key: server.key
-    
+
 # 日志级别（debug/info/warn/error）
 # 注意：在生产环境中使用 info 或 error。debug 模式仅在开发环境中使用。
 logger:
     level: info
     file: stdout
-    
+
 # 鉴权设置（enable/disable）
 # 注意：生产环境中请勿使用 disable。
 authentication: enable
@@ -72,8 +72,9 @@ turn:
 2. 编译
    1. 在项目根目录下执行 `cd server` 进入 server 目录；
    2. 执行 `go mod tidy` 安装 Go 依赖包；
-   3. 执行 `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` 进行编译；
-   4. 编译完成后，会生成可执行文件 `NanoKVM-Server`。
+   3. （可选）如果您手动编译了 `libkvm.so`，则需要通过 `patchelf --add-rpath \$ORIGIN ./dl_lib/libkvm.so` 修改其 RPATH 属性。
+   4. 执行 `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` 进行编译；
+   5. 编译完成后，会生成可执行文件 `NanoKVM-Server`。
 
 3. 修改 RPATH
    1. 执行 `sudo apt install patchelf` 或 `pip install patchelf` 安装 patchelf；
@@ -81,8 +82,8 @@ turn:
    3. 执行 `patchelf --add-rpath \$ORIGIN/dl_lib NanoKVM-Server` 修改可执行文件的 RPATH 属性。
 
 4. 部署
-   1. 上传文件需要启用 SSH 功能。请在 Web `设置 - SSH` 中检查 SSH 是否已经启用； 
-   2. 使用编译生成的 `NanoKVM-Server` 文件，替换 NanoKVM 中 `/kvmapp/server/` 目录下的原始文件； 
+   1. 上传文件需要启用 SSH 功能。请在 Web `设置 - SSH` 中检查 SSH 是否已经启用；
+   2. 使用编译生成的 `NanoKVM-Server` 文件，替换 NanoKVM 中 `/kvmapp/server/` 目录下的原始文件；
    3. 在 NanoKVM 中执行 `/etc/init.d/S95nanokvm restart` 重启服务。
 
 ## 手动更新

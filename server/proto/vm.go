@@ -1,7 +1,14 @@
 package proto
 
+type IP struct {
+	Name    string `json:"name"`
+	Addr    string `json:"addr"`
+	Version string `json:"version"`
+	Type    string `json:"type"`
+}
+
 type GetInfoRsp struct {
-	Ip          string `json:"ip"`
+	IPs         []IP   `json:"ips"`
 	Mdns        string `json:"mdns"`
 	Image       string `json:"image"`
 	Application string `json:"application"`

@@ -13,7 +13,7 @@ server
 ├── dl_lib       // Shared object libraries
 ├── include      // Header files for shared objects
 ├── logger       // Logging system
-├── middleware   // Server middleware components 
+├── middleware   // Server middleware components
 ├── proto        // API request/response definitions
 ├── router       // API route handlers
 ├── service      // Core service implementations
@@ -39,7 +39,7 @@ cert:
 logger:
     level: info
     file: stdout
-    
+
 # Authentication setting (enable/disable)
 # Note: Only disable authentication in development environment
 authentication: enable
@@ -75,8 +75,9 @@ Note: Use Linux operating system (x86-64). This build process is not compatible 
 2. Compile the Project
     1. Run `cd server` from the project root directory.
     2. Run `go mod tidy` to install Go dependencies.
-    3. Run `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` to compile the project.
-    4. After compilation, an executable file named `NanoKVM-Server` will be generated.
+    3. (Optional) If you compiled `libkvm.so` yourself, you need to modify its RPATH by `patchelf --add-rpath \$ORIGIN ./dl_lib/libkvm.so`.
+    4. Run `CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build` to compile the project.
+    5. After compilation, an executable file named `NanoKVM-Server` will be generated.
 
 3. Modify RPATH
     1. Run `sudo apt install patchelf` or `pip install patchelf` to install patchelf.

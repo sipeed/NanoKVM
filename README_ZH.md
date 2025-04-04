@@ -18,10 +18,27 @@ NanoKVM
 > Your NanoKVM Power by RISC-V !
 > 如果您在使用过程中有任何问题或建议，请在这里提交 issue， 或在 [MaixHub Discussion](https://maixhub.com/discussion/nanokvm)告诉我们.
 
-## 开源与贡献
+## 简介
 
-### 2025.03.04 更新内容
-+ 更新目录结构
+Lichee NanoKVM 是基于 LicheeRV Nano 的 IP-KVM 产品，继承了 LicheeRV Nano的极致体积 和 强大功能。
+
+Lichee NanoKVM 目前有三个版本：
+
+* NanoKVM-Cube Lite 为基础版配置，适合 具有一定DIY能力的个人用户 和 有批量需求的企业用户。
+* NanoKVM-Cube Full 为完整版配置，带精致外壳和完整配件，内置开机即用的系统镜像卡，推荐个人用户购买。
+* NanoKVM-PCle 为全新形态，内置 PCle 挡板，可固定在机箱内部。NanoKVM-PCle 在 NanoKVM-Cube 基础上增加了可选的 WiFi 和 PoE 功能；拥有自家的 PCle 插槽，可从主板 PCle 插槽取电；另外有线连接（ETH）也更加稳定，满足更多专业需求。
+
+<div align="center">
+
+![NanoKVM-Cube](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
+
+![NanoKVM-PCIe](https://wiki.sipeed.com/hardware/assets/NanoKVM/introduce/NanoKVM-PCIe.png)
+
+</div>
+
+> 对于关注安全的用户，可以阅读此问题 [#301](https://github.com/sipeed/NanoKVM/issues/301)，您会找到有关所有安全问题的解释。GitHub 作为一个开放和透明的平台，为讨论所谓的“后门”担忧提供了空间。开源使产品更加安全！
+
+## 项目结构
 
 ``` shell
 ├── kvmapp          # APP更新包
@@ -41,33 +58,6 @@ NanoKVM
 ├── README_ZH.md
 └── CHANGELOG.md
 ```
-
-+ 添加 NanoKVM app安装包`kvmapp`
-+ 添加编译脚本和编译说明
-
-### 2025.02.19 更新内容
-所有 NanoKVM 组件已开源，包括 
-[前端](https://github.com/sipeed/NanoKVM/tree/main/web)、[后端](https://github.com/sipeed/NanoKVM/tree/main/server)、[kvm_vision](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm)、[kvm_mmf](https://github.com/sipeed/NanoKVM/tree/main/vision/components/kvm_mmf)、[kvm_system](https://github.com/sipeed/NanoKVM/tree/main/support)、[kvmapp 更新包](https://github.com/sipeed/NanoKVM-System/tree/main/kvmapp)、[系统 SDK](https://github.com/sipeed/LicheeRV-Nano-Build/tree/NanoKVM) 和 [固件打包方法](https://github.com/sipeed/LicheeRV-Nano-Build/blob/NanoKVM/kvm/NanoKVM_img.sh)。
-
-### 2025.02.14 更新内容
-最新的 APP v2.1.6 添加了大多数安全增强和 bug 修复，建议普通用户升级到此版本或更新版本。
-
-### 2025.02.05 更新内容
-对于关注安全的用户，可以阅读此问题：https://github.com/sipeed/NanoKVM/issues/301，您会找到有关所有安全问题的解释。GitHub 作为一个开放和透明的平台，为讨论所谓的“后门”担忧提供了空间。开源使产品更加安全！
-
-### 2024.10.18 更新内容
-我们在 10.8 中开源了后端代码，感谢您立即提交的文明 PR，我们将赠送您最新的 NanoKVM-PCIe 作为奖励！   
-十月中旬的批次正在开始测试和打包，大多数在 10.1 之前的订单将在下周和下下周发货。   
-自 10.1 起，AliExpress 的发货日期已更改为 12 月，这是一个保守的交货时间。十月的订单应在 11.15~12.15 期间发出。
-
-## 简介
-
-Lichee NanoKVM 是基于 LicheeRV Nano 的 IP-KVM 产品，继承了 LicheeRV Nano的极致体积 和 强大功能。
-Lichee NanoKVM分为两个版本：
-NanoKVM Lite 为基础版配置，适合 具有一定DIY能力的个人用户 和 有批量需求的企业用户。
-NanoKVM Full 为完整版配置，带精致外壳和完整配件，内置开机即用的系统镜像卡，推荐个人用户购买。
-
-![](https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_1.jpg)
 
 ## 参数
 
@@ -105,10 +95,9 @@ NanoKVM 镜像在LicheeRV Nano SDK 和 MaixCDK 基础上构建，可以兼容使
 
 注: SG2002的256MB内存中, 目前划分105MB用于多媒体子系统, NanoKVM会在视频图像采集和处理中使用这部分内存.
 
-+ [NanoKVM-A 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
-+ [NanoKVM-B 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
-+ [NanoKVM 镜像下载](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
-
+* [NanoKVM-A 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
+* [NanoKVM-B 原理图](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_HDMI_MIPI_31011.pdf)
+* [NanoKVM 镜像下载](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
 ## 购买渠道
 
