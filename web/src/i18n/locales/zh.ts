@@ -1,5 +1,3 @@
-import { t } from "i18next";
-
 const zh = {
   translation: {
     head: {

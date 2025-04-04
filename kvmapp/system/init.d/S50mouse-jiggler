@@ -12,10 +12,10 @@ start() {
         status=true
         while true;do
             if [ "$status" = true ];then
-                echo -ne \\x00\\x1\\x00\\x00 > /dev/hidg1            
+                echo -ne \\x00\\x10\\x00\\x00 > /dev/hidg1            
                 status=false
             else
-                echo -ne \\x1\\x00\\x00\\x00 > /dev/hidg1            
+                echo -ne \\x10\\x00\\x00\\x00 > /dev/hidg1            
                 status=true
             fi
             sleep 60
@@ -23,7 +23,8 @@ start() {
         ) >/dev/null 2>&1 &
         echo $! > "$PIDFILE"
     else
-        echo "Mouse Jiggler already started"
+        stop
+        start
     fi
 }
 

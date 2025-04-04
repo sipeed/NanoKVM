@@ -33,6 +33,7 @@ func (s *Service) EnableMouseJiggler(c *gin.Context) {
 	commands := []string{
 		fmt.Sprintf("cp -f %s %s", MouseJigglerBackupScript, MouseJigglerScript),
 		fmt.Sprintf("chmod +x %s", MouseJigglerScript),
+		fmt.Sprintf("dos2unix %s", MouseJigglerScript),
 		fmt.Sprintf("%s start", MouseJigglerScript),
 	}
 
