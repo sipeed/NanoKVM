@@ -12,7 +12,7 @@ import '@/assets/styles/keyboard.css';
 
 import { useMediaQuery } from 'react-responsive';
 
-import { getKeyboardLayout, setKeyboardLayout } from '@/lib/localstorage.ts';
+import { getKeyboardLayout, setKeyboardLayout, getLanguage } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
@@ -158,7 +158,7 @@ export const VirtualKeyboard = () => {
                   options={[
                     { label: 'Win', value: 'default', icon: <WindowsOutlined /> },
                     { label: 'Mac', value: 'mac', icon: <AppleOutlined /> },
-                    { label: 'Rus', value: 'rus', icon: <WindowsOutlined /> },
+                    ...(getLanguage() === 'ru' ? [{ label: 'Rus', value: 'rus', icon: <WindowsOutlined /> }] : [])
                   ]}
                   value={layout}
                   onChange={selectLayout}
