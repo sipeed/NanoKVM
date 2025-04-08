@@ -173,7 +173,8 @@ const en = {
       reset: 'Reset',
       power: 'Power',
       powerShort: 'Power (short click)',
-      powerLong: 'Power (long click)'
+      powerLong: 'Power (long click)',
+      powerConfirm: 'Are you sure you want to perform this operation?'
     },
     settings: {
       title: 'Settings',
@@ -225,9 +226,14 @@ const en = {
           tip: 'Enable the default swap partition(128M)'
         },
         mouseJiggler: {
-          title: "Mouse Jiggler",
+          title: 'Mouse Jiggler',
           description: 'Enable the mouse jiggler',
-          tip: "Automatically jiggles the mouse when inactive for 60 seconds to prevent system sleep"
+          tip: 'Automatically jiggles the mouse when inactive for 60 seconds to prevent system sleep'
+        },
+        powerConfirm: {
+          title: 'Power Operation Reconfirmation',
+          description: 'Enable power operation reconfirmation',
+          tip: 'When operating the power, a double confirmation dialog will pop up to prevent accidental touches'
         },
         mdns: {
           description: 'Enable mDNS discovery service',

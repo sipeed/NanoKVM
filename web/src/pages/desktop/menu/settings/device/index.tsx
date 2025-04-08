@@ -15,6 +15,7 @@ import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
 import { Swap } from './swap.tsx';
 import { MouseJiggler } from './mouse-jiggler.tsx';
+import { PowerConfirm } from './PowerConfirm.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -42,6 +43,7 @@ export const Device = () => {
         <Swap />
         <MouseJiggler />
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
+        <PowerConfirm />
       </div>
       <Divider />
 

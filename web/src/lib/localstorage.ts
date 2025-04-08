@@ -13,6 +13,7 @@ const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
 const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
+const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
 
 type ItemWithExpiry = {
   value: string;
@@ -164,4 +165,13 @@ export function setMenuDisabledItems(items: string[]) {
 export function getMenuDisabledItems(): string[] {
   const value = localStorage.getItem(MENU_DISABLED_ITEMS_KEY);
   return value ? JSON.parse(value) : [];
+}
+
+export function getPowerConfirm(): string | null {
+  return getWithExpiry(POWER_CONFIRM_KEY);
+}
+
+export function setPowerConfirm(value: boolean) {
+  const expiry = 365 * 24 * 60 * 60 * 1000;
+  setWithExpiry(POWER_CONFIRM_KEY, String(value), expiry);
 }
