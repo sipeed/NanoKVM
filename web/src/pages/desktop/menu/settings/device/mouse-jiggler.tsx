@@ -30,7 +30,7 @@ export const MouseJiggler = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-      const rsp = isEnabled ? await api.disableMouseJiggler() : await api.enableMouseJiggler();
+    const rsp = isEnabled ? await api.disableMouseJiggler() : await api.enableMouseJiggler();
     setIsLoading(false);
 
     if (rsp.code !== 0) {
