@@ -36,7 +36,7 @@ export const Hostname = () => {
         setIsLoading(true);
 
         const rsp = await api.setHostname(hostname);
-
+        
         if (rsp.code !== 0) {
             console.log(rsp.msg);
             messageApi.error(t('settings.device.hostname.error') + ":" + rsp.msg);
@@ -44,6 +44,7 @@ export const Hostname = () => {
         }else{
             messageApi.success(t('settings.device.hostname.success'));
         }
+
         setIsLoading(false);
     }
 
@@ -65,7 +66,7 @@ export const Hostname = () => {
               <span className="text-xs text-neutral-500">{t('settings.device.hostname.description')}</span>
       </div>
       {!isLoading ? <Input onFocus={() => setIsKeyboardEnable(false)} onBlur={() => setIsKeyboardEnable(true)} style={{ width: 150 }} value={hostname} onChange={(e) => setHostname(e.target.value)} onPressEnter={update} /> : <LoadingOutlined />}
-          {contextHolder}
+      {contextHolder}
     </div>
 
   );

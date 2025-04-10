@@ -117,6 +117,16 @@ export function setHostname(hostname: string) {
   return http.post('/api/vm/hostname', { hostname });
 }
 
+// get WebTitle
+export function getWebTitle() {
+  return http.get('/api/vm/webTitle');
+}
+
+// set WebTitle
+export function setWebTitle(webTitle: string) {
+  return http.post('/api/vm/webTitle', { webTitle });
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');

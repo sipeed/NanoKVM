@@ -181,7 +181,13 @@ const zh = {
         display: '显示',
         language: '语言',
         menuBar: '菜单栏',
-        menuBarDesc: '是否在菜单栏中显示图标'
+        menuBarDesc: '是否在菜单栏中显示图标',
+        webTitle: {
+          title: '网站标题',
+          description: 'NanoKVM 网站标题',
+          success: '网站标题修改成功',
+          error: '网站标题修改失败'
+        },
       },
       device: {
         title: '设备',

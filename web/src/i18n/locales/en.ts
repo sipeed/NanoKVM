@@ -195,7 +195,13 @@ const en = {
         display: 'Display',
         language: 'Language',
         menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        menuBarDesc: 'Display icons in the menu bar',
+        webTitle: {
+          title: 'Web Title',
+          description: 'NanoKVM Web Title',
+          success: 'Web Title changed successfully',
+          error: 'Web Title change failed'
+        },
       },
       device: {
         title: 'Device',

@@ -110,3 +110,11 @@ type SetHostnameReq struct {
 type GetHostnameRsp struct {
 	Hostname string `json:"hostname"`
 }
+
+type SetWebTitleReq struct {
+	WebTitle string `json:"webTitle"`
+}
+
+type GetWebTitleRsp struct {
+	WebTitle string `json:"webTitle"`
+}
