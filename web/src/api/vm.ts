@@ -107,6 +107,16 @@ export function disableMouseJiggler() {
   return http.post('/api/vm/mouseJiggler/disable');
 }
 
+// get Hostname
+export function getHostname() {
+  return http.get('/api/vm/hostname');
+}
+
+// set Hostname
+export function setHostname(hostname: string) {
+  return http.post('/api/vm/hostname', { hostname });
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');

@@ -102,3 +102,11 @@ type GetMouseJigglerStateRsp struct {
 type GetMdnsStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
+
+type SetHostnameReq struct {
+	Hostname string `json:"hostname"`
+}
+
+type GetHostnameRsp struct {
+	Hostname string `json:"hostname"`
+}

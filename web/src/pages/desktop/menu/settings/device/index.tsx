@@ -16,6 +16,7 @@ import { Wifi } from './wifi.tsx';
 import { Swap } from './swap.tsx';
 import { MouseJiggler } from './mouse-jiggler.tsx';
 import { PowerConfirm } from './PowerConfirm.tsx';
+import { Hostname } from './hostname.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -37,6 +38,7 @@ export const Device = () => {
 
       <div className="flex flex-col space-y-6">
         <Oled />
+        <Hostname />
         <Wifi />
         <Ssh />
         <Mdns />

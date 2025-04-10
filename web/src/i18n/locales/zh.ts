@@ -216,6 +216,13 @@ const zh = {
           description: '启用鼠标抖动',
           tip: '在鼠标离开60s未操作时自动进行抖动以防止系统睡眠'
         },
+        hostname: {
+          title: 'Hostname',
+          description: 'NanoKVM 主机名',
+          tip: '修改后需要重启生效',
+          success: '主机名修改成功',
+          error: '主机名修改失败'
+        },
         powerConfirm:{
           title: '电源操作确认',
           description: '启用电源操作二次确认',

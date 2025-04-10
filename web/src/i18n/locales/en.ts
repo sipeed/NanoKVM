@@ -225,6 +225,13 @@ const en = {
           description: 'Enable the swap partition',
           tip: 'Enable the default swap partition(128M)'
         },
+        hostname: {
+          title: 'Hostname',
+          description: 'NanoKVM Hostname',
+          tip: 'Need reboot to apply the change',
+          success: 'Hostname changed successfully',
+          error: 'Hostname change failed'
+        },
         mouseJiggler: {
           title: 'Mouse Jiggler',
           description: 'Enable the mouse jiggler',
