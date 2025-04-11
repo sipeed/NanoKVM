@@ -92,6 +92,41 @@ export function disableSwap() {
   return http.post('/api/vm/swap/disable');
 }
 
+// get MouseJiggler state
+export function getMouseJigglerState() {
+  return http.get('/api/vm/mouseJiggler');
+}
+
+// enable MouseJiggler
+export function enableMouseJiggler() {
+  return http.post('/api/vm/mouseJiggler/enable');
+}
+
+// disable MouseJiggler
+export function disableMouseJiggler() {
+  return http.post('/api/vm/mouseJiggler/disable');
+}
+
+// get Hostname
+export function getHostname() {
+  return http.get('/api/vm/hostname');
+}
+
+// set Hostname
+export function setHostname(hostname: string) {
+  return http.post('/api/vm/hostname', { hostname });
+}
+
+// get WebTitle
+export function getWebTitle() {
+  return http.get('/api/vm/webTitle');
+}
+
+// set WebTitle
+export function setWebTitle(webTitle: string) {
+  return http.post('/api/vm/webTitle', { webTitle });
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');

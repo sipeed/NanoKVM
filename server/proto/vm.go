@@ -95,6 +95,26 @@ type GetSwapStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
+type GetMouseJigglerStateRsp struct {
+	Enabled bool `json:"enabled"`
+}
+
 type GetMdnsStateRsp struct {
 	Enabled bool `json:"enabled"`
+}
+
+type SetHostnameReq struct {
+	Hostname string `json:"hostname"`
+}
+
+type GetHostnameRsp struct {
+	Hostname string `json:"hostname"`
+}
+
+type SetWebTitleReq struct {
+	WebTitle string `json:"webTitle"`
+}
+
+type GetWebTitleRsp struct {
+	WebTitle string `json:"webTitle"`
 }

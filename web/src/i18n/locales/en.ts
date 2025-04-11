@@ -173,7 +173,8 @@ const en = {
       reset: 'Reset',
       power: 'Power',
       powerShort: 'Power (short click)',
-      powerLong: 'Power (long click)'
+      powerLong: 'Power (long click)',
+      powerConfirm: 'Are you sure you want to perform this operation?'
     },
     settings: {
       title: 'Settings',
@@ -194,7 +195,13 @@ const en = {
         display: 'Display',
         language: 'Language',
         menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        menuBarDesc: 'Display icons in the menu bar',
+        webTitle: {
+          title: 'Web Title',
+          description: 'NanoKVM Web Title',
+          success: 'Web Title changed successfully',
+          error: 'Web Title change failed'
+        },
       },
       device: {
         title: 'Device',
@@ -223,6 +230,23 @@ const en = {
         swap: {
           description: 'Enable the swap partition',
           tip: 'Enable the default swap partition(128M)'
+        },
+        hostname: {
+          title: 'Hostname',
+          description: 'NanoKVM Hostname',
+          tip: 'Need reboot to apply the change',
+          success: 'Hostname changed successfully',
+          error: 'Hostname change failed'
+        },
+        mouseJiggler: {
+          title: 'Mouse Jiggler',
+          description: 'Enable the mouse jiggler',
+          tip: 'Automatically jiggles the mouse when inactive for 60 seconds to prevent system sleep'
+        },
+        powerConfirm: {
+          title: 'Power Operation Reconfirmation',
+          description: 'Enable power operation reconfirmation',
+          tip: 'When operating the power, a double confirmation dialog will pop up to prevent accidental touches'
         },
         mdns: {
           description: 'Enable mDNS discovery service',

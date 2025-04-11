@@ -23,6 +23,8 @@ const zh = {
       illegalUsername: '用户名中包含非法字符',
       illegalPassword: '密码中包含非法字符',
       forgetPassword: '忘记密码',
+      reboot: '重启',
+      rebootDesc: '你确定要重启NanoKVM吗？',
       ok: '确定',
       cancel: '取消',
       loginButtonText: '登录',
@@ -157,7 +159,8 @@ const zh = {
       reset: '重启',
       power: '电源',
       powerShort: '电源（短按）',
-      powerLong: '电源（长按）'
+      powerLong: '电源（长按）',
+      powerConfirm: '你确定要执行此操作吗？'
     },
     settings: {
       title: '设置',
@@ -178,7 +181,13 @@ const zh = {
         display: '显示',
         language: '语言',
         menuBar: '菜单栏',
-        menuBarDesc: '是否在菜单栏中显示图标'
+        menuBarDesc: '是否在菜单栏中显示图标',
+        webTitle: {
+          title: '网站标题',
+          description: 'NanoKVM 网站标题',
+          success: '网站标题修改成功',
+          error: '网站标题修改失败'
+        },
       },
       device: {
         title: '设备',
@@ -208,6 +217,23 @@ const zh = {
           description: '启用交换分区',
           tip: '启用默认的交换分区（128M）'
         },  
+        mouseJiggler:{
+          title: '鼠标抖动',
+          description: '启用鼠标抖动',
+          tip: '在鼠标离开60s未操作时自动进行抖动以防止系统睡眠'
+        },
+        hostname: {
+          title: 'Hostname',
+          description: 'NanoKVM 主机名',
+          tip: '修改后需要重启生效',
+          success: '主机名修改成功',
+          error: '主机名修改失败'
+        },
+        powerConfirm:{
+          title: '电源操作确认',
+          description: '启用电源操作二次确认',
+          tip: '在操作电源时弹出二次确认框以防误触'
+        },
         mdns: {
           description: '启用 mDNS 发现服务',
           tip: '如果您未使用此功能，建议将其关闭'
@@ -216,7 +242,9 @@ const zh = {
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
-        networkDesc: '在远程主机中挂载虚拟网卡'
+        networkDesc: '在远程主机中挂载虚拟网卡',
+        okBtn: '是',
+        cancelBtn: '否'
       },
       tailscale: {
         title: 'Tailscale',

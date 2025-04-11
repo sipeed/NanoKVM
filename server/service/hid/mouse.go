@@ -4,9 +4,15 @@ import (
 	"encoding/binary"
 	"errors"
 	"os"
+	"sync"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	LastHIDTime time.Time
+	HidMutex    sync.Mutex
 )
 
 const (
@@ -43,6 +49,7 @@ func (h *Hid) Mouse(queue <-chan []int) {
 		}
 
 		h.mouseMutex.Unlock()
+		UpdateLastHIDTime()
 	}
 }
 
@@ -108,4 +115,10 @@ func (h *Hid) writeWithTimeout(file *os.File, data []byte) {
 	}
 
 	log.Debugf("write to hid: %+v", data)
+}
+
+func UpdateLastHIDTime() {
+	HidMutex.Lock()
+	defer HidMutex.Unlock()
+	LastHIDTime = time.Now()
 }
