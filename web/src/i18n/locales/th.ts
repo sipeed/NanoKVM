@@ -1,4 +1,4 @@
-const en = {
+const th = {
     translation: {
       head: {
         desktop: 'Remote Desktop',
@@ -83,7 +83,16 @@ const en = {
         absolute: 'โหมดสัมบูรณ์',
         relative: 'โหมดสัมพัทธ์',
         requestPointer: 'กำลังใช้โหมดสัมพัทธ์ กรุณาคลิกที่เดสก์ท็อปเพื่อรับตัวชี้เมาส์',
-        resetHid: 'รีเซ็ต HID'
+        resetHid: 'รีเซ็ต HID',
+        hidOnly: {
+          title: 'โหมด HID-Only',
+          desc: 'หากเมาส์และคีย์บอร์ดของคุณหยุดตอบสนองและการรีเซ็ต HID ไม่ช่วย อาจเป็นปัญหาความเข้ากันได้ระหว่าง NanoKVM และอุปกรณ์ ลองเปิดโหมด HID-Only เพื่อความเข้ากันได้ที่ดีขึ้น',
+          tip1: 'การเปิดโหมด HID-Only จะปิดการทำงานดิสก์จำลองและ NIC จำลอง',
+          tip2: 'ในโหมด HID-Only ดิสก์จะลองจะถูกปิดใช้งาน',
+          tip3: 'NanoKVM จะรีบูตอัตโนมัติหลังจากเปลี่ยนโหมด',
+          enable: 'เปิดใช้งานโหมด HID-Only',
+          disable: 'ปิดใช้งานโหมด HID-Only'
+        }
       },
       image: {
         title: 'ดิสก์จำลอง',
@@ -128,7 +137,17 @@ const en = {
         serialPort: 'Serial Port',
         serialPortPlaceholder: 'กรุณาเลือก serial port',
         baudrate: 'Baud rate',
-        confirm: 'ยืนยัน'
+        confirm: 'ยืนยัน',
+        parity: 'Parity',
+        parityNone: 'ไม่มี',
+        parityEven: 'คู่',
+        parityOdd: 'คี่',
+        flowControl: 'การควบคุมการไหล',
+        flowControlNone: 'ไม่มี',
+        flowControlSoft: 'ซอฟต์',
+        flowControlHard: 'ฮาร์ด',
+        dataBits: 'บิตข้อมูล',
+        stopBits: 'บิตหยุด'
       },
       wol: {
         title: 'Wake-on-LAN',
@@ -244,18 +263,34 @@ const en = {
             available: 'มีการอัปเดตใหม่ คุณแน่ใจที่จะอัปเดตหรือไม่?',
             updating: 'กำลังเริ่มอัปเดต กรุณารอสักครู่...',
             confirm: 'ยืนยัน',
-            cancel: 'ยกเลิก'
+            cancel: 'ยกเลิก',
+            preview: 'ดูตัวอย่างการอัปเดต',
+            previewDesc: 'เข้าถึงฟีเจอร์และการปรับปรุงใหม่ก่อนใคร',
+            previewTip: 'โปรดทราบว่าการเผยแพร่ตัวอย่างอาจมีข้อบกพร่องหรือฟังก์ชันการทำงานที่ไม่สมบูรณ์!'
         },
         account: {
           title: 'บัญชี',
           webAccount: 'ชื่อผู้ใช้',
           password: 'รหัสผ่าน',
           updateBtn: 'ยืนยัน',
-          logoutBtn: 'ออกจากระบบ'
+          logoutBtn: 'ออกจากระบบ',
+          logoutDesc: 'คุณแน่ใจที่จะออกจากระบบหรือไม่?',
+          okBtn: 'ใช่',
+          cancelBtn: 'ไม่ใช่'
         }
+      },
+      error: {
+        title: 'เราเจอปัญหา',
+        refresh: 'รีเฟรช'
+      },
+      fullscreen: {
+        toggle: 'โหมดเต็มหน้าจอ'
+      },
+      menu: {
+        collapse: 'ย่อเมนู',
+        expand: 'ขยายเมนู'
       }
     }
   };
   
-  export default en;
-  
+  export default th;
