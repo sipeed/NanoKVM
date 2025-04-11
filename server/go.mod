@@ -9,7 +9,7 @@ require (
 	github.com/gin-gonic/contrib v0.0.0-20240508051311-c1c6bf0061b0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/websocket v1.5.3
 	github.com/mervick/aes-everywhere/go/aes256 v0.0.0-20240803013625-6759956693c0
 	github.com/pion/webrtc/v4 v4.0.1
