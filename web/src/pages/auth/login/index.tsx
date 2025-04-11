@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ReactElement } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import { Head } from '@/components/head.tsx';
 
 import { Tips } from './tips.tsx';
 
-export const Login = () => {
+export const Login = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -69,8 +69,19 @@ export const Login = () => {
           initialValues={{ remember: true }}
           onFinish={login}
         >
-          <h2 className="text-center text-xl font-semibold text-neutral-100">{t('auth.login')}</h2>
-
+          <div className="flex flex-col items-center justify-center pb-4">
+            <img
+              id="logo"
+              src="/sipeed.ico"
+              alt="Sipeed"
+              onClick={(evt) => {
+                evt.preventDefault();
+                (evt.target as HTMLImageElement).classList.add('animate-spin');
+                setTimeout(() => {
+                  (evt.target as HTMLImageElement).classList.remove('animate-spin');
+                }, 1000);
+              }} />
+          </div>
           <Form.Item
             name="username"
             rules={[{ required: true, message: t('auth.noEmptyUsername'), min: 1 }]}
