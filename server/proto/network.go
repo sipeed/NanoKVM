@@ -12,6 +12,11 @@ type DeleteMacReq struct {
 	Mac string `form:"mac" validate:"required"`
 }
 
+type SetMacNameReq struct {
+	Mac  string `form:"mac" validate:"required"`
+	Name string `form:"name" validate:"required"`
+}
+
 type TailscaleState string
 
 const (

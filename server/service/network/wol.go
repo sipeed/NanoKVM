@@ -65,6 +65,54 @@ func (s *Service) GetMac(c *gin.Context) {
 	rsp.OkRspWithData(c, data)
 }
 
+func (s *Service) SetMacName(c *gin.Context) {
+	var req proto.SetMacNameReq // Mac:string Name:string
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	content, err := os.ReadFile(WolMacFile)
+	if err != nil {
+		log.Errorf("failed to open %s: %s", WolMacFile, err)
+		rsp.ErrRsp(c, -2, "read failed")
+		return
+	}
+
+	macs := strings.Split(string(content), "\n")
+	var newLines []string
+	macFound := false
+
+	for _, line := range macs {
+		parts := strings.Split(line, " ")
+		if req.Mac != parts[0] {
+			newLines = append(newLines, line)
+			continue
+		}
+		newLines = append(newLines, parts[0]+" "+req.Name)
+		macFound = true
+	}
+
+	if !macFound {
+		log.Errorf("failed to found mac %s: %s", req.Mac, err)
+		rsp.ErrRsp(c, -3, "write failed")
+		return
+	}
+
+	data := strings.Join(newLines, "\n")
+	err = os.WriteFile(WolMacFile, []byte(data), 0o644)
+	if err != nil {
+		log.Errorf("failed to write %s: %s", WolMacFile, err)
+		rsp.ErrRsp(c, -3, "write failed")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("set wol mac name: %s %s", req.Mac, req.Name)
+}
+
 func (s *Service) DeleteMac(c *gin.Context) {
 	var req proto.DeleteMacReq
 	var rsp proto.Response
@@ -85,7 +133,8 @@ func (s *Service) DeleteMac(c *gin.Context) {
 	var newMacs []string
 
 	for _, mac := range macs {
-		if req.Mac != mac {
+		parts := strings.Split(mac, " ")
+		if req.Mac != parts[0] {
 			newMacs = append(newMacs, mac)
 		}
 	}
@@ -164,7 +213,8 @@ func isMacExist(mac string) bool {
 
 	macs := strings.Split(string(content), "\n")
 	for _, item := range macs {
-		if mac == item {
+		parts := strings.Split(item, " ")
+		if mac == parts[0] {
 			return true
 		}
 	}
