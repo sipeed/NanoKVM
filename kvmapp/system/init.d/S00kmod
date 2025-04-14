@@ -1,0 +1,32 @@
+#!/bin/sh
+
+if [ "$1" = "start" ]
+then
+	. /etc/profile
+	printf "load kernel module: "
+	cd /mnt/system/ko/
+	insmod soph_sys.ko
+	insmod soph_base.ko
+	insmod soph_rtos_cmdqu.ko
+	insmod soph_fast_image.ko
+	insmod soph_mipi_rx.ko
+	insmod soph_snsr_i2c.ko
+	insmod soph_vi.ko
+	insmod soph_vpss.ko
+	insmod soph_dwa.ko
+	insmod soph_vo.ko
+	insmod soph_rgn.ko
+	insmod soph_wdt.ko
+	insmod soph_clock_cooling.ko
+	insmod soph_tpu.ko
+	insmod soph_vcodec.ko
+	insmod soph_jpeg.ko
+	insmod soph_vc_driver.ko MaxVencChnNum=9 MaxVdecChnNum=9
+	insmod soph_rtc.ko
+	insmod soph_ive.ko
+	insmod soph_mon.ko
+	insmod soph_pwm.ko
+	insmod soph_wiegand.ko
+	echo "OK"
+	exit 0
+fi

@@ -54,30 +54,35 @@ void new_app_init(void)
 {
 	// Update the necessary scripts
 	system("cp -f /kvmapp/system/update-nanokvm.py /etc/kvm/");
-	system("rm /etc/init.d/S02udisk");
-	system("cp /kvmapp/system/init.d/S01fs /etc/init.d/");
-	system("cp /kvmapp/system/init.d/S03usbdev /etc/init.d/");
-	system("cp /kvmapp/system/init.d/S15kvmhwd /etc/init.d/");
-	system("cp /kvmapp/system/init.d/S30eth /etc/init.d/");
-	system("cp /kvmapp/system/init.d/S50sshd /etc/init.d/");
+	system("rm -f /etc/init.d/S02udisk");
+	system("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S01fs /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S03usbdev /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S30eth /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S50sshd /etc/init.d/");
 	if(kvm_wifi_exist()) {
-		system("cp /kvmapp/system/init.d/S30wifi /etc/init.d/");
+		system("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/");
 	} else {
-		system("rm /etc/init.d/S30wifi");
+		system("rm -f /etc/init.d/S30wifi");
 	}
+
+	// rmmod soph_saradc
+	system("rmmod soph_saradc");
+	system("rm -f /mnt/system/ko/soph_saradc.ko");
 
 	// PCIe Patch
 	// system("cp /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
 	if(access("/kvmapp/jpg_stream/dl_lib/libmaixcam_lib.so", F_OK) != 0){
-		system("cp /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
+		system("cp -f /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
 	}
 
 	// Remove unnecessary components to speed up boot time
-	system("rm /etc/init.d/S04backlight");
-	system("rm /etc/init.d/S05tp");
-	system("rm /etc/init.d/S40bluetoothd");
-	system("rm /etc/init.d/S50ssdpd");
-	system("rm /etc/init.d/S99*");
+	system("rm -f /etc/init.d/S04backlight");
+	system("rm -f /etc/init.d/S05tp");
+	system("rm -f /etc/init.d/S40bluetoothd");
+	system("rm -f /etc/init.d/S50ssdpd");
+	system("rm -f /etc/init.d/S99*");
 	
 	// Add necessary configuration files for program execution
 	system("mkdir /kvmapp/kvm");
@@ -91,10 +96,10 @@ void new_app_init(void)
 	system("touch /etc/kvm/frame_detact");
 
 	// rm jpg_stream & kvm_stream
-	system("rm -r /kvmapp/jpg_stream");
-	system("rm /kvmapp/kvm_system/kvm_stream");	// Cannot delete temporarily; the old production test script uses this file to determine if the download is complete
+	system("rm -rf /kvmapp/jpg_stream");
+	system("rm -f /kvmapp/kvm_system/kvm_stream");	// Cannot delete temporarily; the old production test script uses this file to determine if the download is complete
 
-	system("rm /kvmapp/kvm_new_app");
+	system("rm -f /kvmapp/kvm_new_app");
 	system("sync");
 	// system("/etc/init.d/S95nanokvm restart");
 
