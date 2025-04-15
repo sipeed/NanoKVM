@@ -140,6 +140,8 @@ int qrencode(char *string)
 ip_addr_t show_which_ip(void)
 {
 	if(kvm_sys_state.wifi_state == -2) return ETH_IP;
+	if(kvm_oled_state.eth_state == 3 && kvm_oled_state.wifi_state != 1) return ETH_IP;
+	if(kvm_oled_state.eth_state != 3 && kvm_oled_state.wifi_state == 1) return WiFi_IP;
 	static uint8_t run_count = 0;
 	static ip_addr_t ip_type = ETH_IP; 
 	run_count++;
