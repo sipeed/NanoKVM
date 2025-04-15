@@ -182,6 +182,22 @@ uint8_t ip_changed(ip_addr_t ip_type)
 	return ret;
 }
 
+uint8_t kvm_state_is_changed()
+{
+	if(	(kvm_sys_state.eth_state 	!= kvm_oled_state.eth_state) 	|| 
+		(kvm_sys_state.wifi_state 	!= kvm_oled_state.wifi_state) 	|| 
+		(kvm_sys_state.usb_state 	!= kvm_oled_state.usb_state) 	|| 
+		(kvm_sys_state.hdmi_state 	!= kvm_oled_state.hdmi_state) 	|| 
+	/*	(kvm_sys_state.now_fps 		!= kvm_oled_state.now_fps) 		|| */
+		(kvm_sys_state.hdmi_width 	!= kvm_oled_state.hdmi_width) 	|| 
+		(kvm_sys_state.hdmi_height 	!= kvm_oled_state.hdmi_height) 	|| 
+		(kvm_sys_state.type 		!= kvm_oled_state.type) 		|| 
+		(kvm_sys_state.qlty 		!= kvm_oled_state.qlty) )
+		return 1;
+	else
+		return 0;
+}
+
 void kvm_eth_state_disp(ip_addr_t _ip_type, uint8_t first_disp)
 {
 	static ip_addr_t _ip_type_old = NULL_IP;
@@ -337,6 +353,11 @@ void kvm_main_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
 	ip_addr_t now_ip_type;
 	// if(kvm_oled_state.sub_page == 0)
 	// if(kvm_oled_state.oled_sleep_state == 1){
+
+	// Any operation will update the OLED sleep time
+	if (kvm_state_is_changed())
+		oled_auto_sleep_time_update();
+
 	if(kvm_oled_state.sub_page == 1){
 		// main page (oled sleep)
 		kvm_oled_clear(first_disp || subpage_changed);
