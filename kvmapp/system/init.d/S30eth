@@ -29,10 +29,14 @@ start() {
                 arping -Dqc2 -Ieth0 $addr || continue
                 ip a add $inet brd + dev eth0
                 ip r add default via $gw dev eth0
+                cp -f /etc/resolv.conf /etc/resolv.conf.old
                 cat > /etc/resolv.conf << EOF
 nameserver $gw
+nameserver 8.8.4.4
 nameserver 8.8.8.8
 nameserver 114.114.114.114
+nameserver 119.29.29.29
+nameserver 223.5.5.5
 EOF
                 break
             done &&
