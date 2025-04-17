@@ -1,3 +1,23 @@
+## 2.2.6 [c83dc55](https://github.com/sipeed/NanoKVM/commit/c83dc5565c9dbed22336661a8832edbd93a06d11) (2025-04-17)
+
+* feat: add mouse jiggler to prevent system sleep
+* feat: add support for swap memory
+* feat: add support for customizing the device hostname
+* feat: add support for customizing the web page title
+* feat: add support for assigning custom names to Wake-on-LAN MAC addresses
+* feat: add confirmation prompts for power operations
+* feat: add logo to the login page (thanks to [S33G](https://github.com/S33G))
+* fix: fix iptables rule that could interfere with SSH connections (thanks to [scpcom](https://github.com/scpcom))
+* fix: fix the static IP gateway configuration might not apply correctly (thanks to [xitation](https://github.com/xitation))
+* perf: optimized OLED display handling and sleep logic
+* perf: improve H.264 streaming reliability by adding a heartbeat mechanism
+* perf: set the minimum screen size to 640x480
+* perf: add display of both wired and wireless IPv4 addresses in the settings page
+* perf: update the Thai language translations (thanks to [ChokunPlayZ](https://github.com/ChokunPlayZ))
+* chore: bump axios to 1.8.4
+* chore: bump golang.org/x/net to v0.39.0
+* chore: bump github.com/golang-jwt/jwt/v5 to to v5.2.2
+
 ## 2.2.5 [3286cc2](https://github.com/sipeed/NanoKVM/commit/3286cc2f85a14133d65935cb476c833dcf151459) (2025-03-26)
 
 * fix: server crash caused by MJPEG frame detection error
