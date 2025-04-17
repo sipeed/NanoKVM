@@ -57,7 +57,7 @@ export const Swap = () => {
     <div className="flex items-center justify-between">
       <div className="flex flex-col">
         <div className="flex items-center space-x-2">
-          <span>Swap</span>
+          <span>{t('settings.device.swap.title')}</span>
 
           <Tooltip
             title={t('settings.device.swap.tip')}

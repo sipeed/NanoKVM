@@ -237,6 +237,7 @@ const en = {
         },
         advanced: 'Advanced Settings',
         swap: {
+          title: 'Swap',
           disable: 'Disable',
           description: 'Set the swap file size',
           tip: "Enabling this feature could shorten your SD card's usable life!"
