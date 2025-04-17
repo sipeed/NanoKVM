@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react';
+import { useAtomValue } from 'jotai';
+import { hidStateAtom } from '@/jotai/mouse.ts';
 
 import { client } from '@/lib/websocket.ts';
 
@@ -6,6 +8,7 @@ import { KeyboardCodes, ModifierCodes } from './mappings.ts';
 
 export const Keyboard = () => {
   const lastCodeRef = useRef('');
+  const hidEnable = useAtomValue(hidStateAtom);
   const modifierRef = useRef({
     ctrl: 0,
     shift: 0,
@@ -15,6 +18,8 @@ export const Keyboard = () => {
 
   // listen keyboard events
   useEffect(() => {
+    if (!hidEnable) return;
+    
     const modifiers = ['Control', 'Shift', 'Alt', 'Meta'];
 
     window.addEventListener('keydown', handleKeyDown);
@@ -60,7 +65,7 @@ export const Keyboard = () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, []);
+  }, [hidEnable]);
 
   function setModifier(key: string, code: number) {
     switch (key) {
