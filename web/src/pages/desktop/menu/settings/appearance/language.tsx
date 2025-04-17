@@ -21,22 +21,18 @@ export const Language = () => {
   }
 
   return (
-    <>
-      <div className="pb-5 text-neutral-400">{t('settings.appearance.display')}</div>
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-1">
-          <LanguagesIcon size={16} />
-          <span>{t('settings.appearance.language')}</span>
-        </div>
-
-        <Select
-          defaultValue={i18n.language}
-          style={{ width: 180 }}
-          options={options}
-          onSelect={changeLanguage}
-        />
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-1">
+        <LanguagesIcon size={16} />
+        <span>{t('settings.appearance.language')}</span>
       </div>
-    </>
+
+      <Select
+        defaultValue={i18n.language}
+        style={{ width: 180 }}
+        options={options}
+        onSelect={changeLanguage}
+      />
+    </div>
   );
 };

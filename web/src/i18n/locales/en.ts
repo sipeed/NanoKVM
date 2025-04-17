@@ -170,11 +170,16 @@ const en = {
     },
     power: {
       title: 'Power',
+      showConfirm: 'Confirmation',
+      showConfirmTip: 'Power operations require an extra confirmation',
       reset: 'Reset',
       power: 'Power',
       powerShort: 'Power (short click)',
       powerLong: 'Power (long click)',
-      powerConfirm: 'Are you sure you want to perform this operation?'
+      resetConfirm: 'Proceed reset operation?',
+      powerConfirm: 'Proceed power operation?',
+      okBtn: 'Yes',
+      cancelBtn: 'No'
     },
     settings: {
       title: 'Settings',
@@ -188,7 +193,9 @@ const en = {
         image: 'Image Version',
         imageTip: 'NanoKVM system image version',
         deviceKey: 'Device Key',
-        community: 'Community'
+        community: 'Community',
+        hostname: 'Hostname',
+        hostnameUpdated: 'Hostname updated. Reboot to apply.'
       },
       appearance: {
         title: 'Appearance',
@@ -196,12 +203,8 @@ const en = {
         language: 'Language',
         menuBar: 'Menu Bar',
         menuBarDesc: 'Display icons in the menu bar',
-        webTitle: {
-          title: 'Web Title',
-          description: 'NanoKVM Web Title',
-          success: 'Web Title changed successfully',
-          error: 'Web Title change failed'
-        },
+        webTitle: 'Web Title',
+        webTitleDesc: 'Customize the web page title'
       },
       device: {
         title: 'Device',
@@ -227,26 +230,18 @@ const en = {
           description: 'Enable SSH remote access',
           tip: 'Set a strong password before enabling (Account - Change Password)'
         },
+        advanced: 'Advanced Settings',
         swap: {
-          description: 'Enable the swap partition',
-          tip: 'Enable the default swap partition(128M)'
-        },
-        hostname: {
-          title: 'Hostname',
-          description: 'NanoKVM Hostname',
-          tip: 'Need reboot to apply the change',
-          success: 'Hostname changed successfully',
-          error: 'Hostname change failed'
+          disable: 'Disable',
+          description: 'Set the swap file size',
+          tip: "Enabling this feature could shorten your SD card's usable life!"
         },
         mouseJiggler: {
           title: 'Mouse Jiggler',
-          description: 'Enable the mouse jiggler',
-          tip: 'Automatically jiggles the mouse when inactive for 60 seconds to prevent system sleep'
-        },
-        powerConfirm: {
-          title: 'Power Operation Reconfirmation',
-          description: 'Enable power operation reconfirmation',
-          tip: 'When operating the power, a double confirmation dialog will pop up to prevent accidental touches'
+          description: 'Prevent the remote host from sleeping',
+          disable: 'Disable',
+          absolute: 'Absolute Mode',
+          relative: 'Relative Mode'
         },
         mdns: {
           description: 'Enable mDNS discovery service',

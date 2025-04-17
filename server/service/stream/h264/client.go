@@ -138,6 +138,9 @@ func (c *Client) readMessage() {
 				return
 			}
 
+		case "heartbeat":
+			_ = c.sendMessage("heartbeat", "")
+
 		default:
 			log.Debugf("unhandled message event: %s", message.Event)
 		}

@@ -45,14 +45,14 @@ export const Information = () => {
         <div className="flex w-full items-start justify-between">
           <span>{t('settings.about.ip')}</span>
           {information?.ips && information.ips.length > 0 ? (
-              <div className="flex flex-col space-y-1">
-                {information.ips.map((ip) => (
-                  <div className="flex items-center space-x-1">
-                    <span>{ip.addr}</span>
-                    <Tag>{ip.type}</Tag>
-                  </div>
-                ))}
-              </div>
+            <div className="flex flex-col space-y-1">
+              {information.ips.map((ip) => (
+                <div key={ip.addr} className="flex items-center">
+                  <Tag>{ip.type}</Tag>
+                  <span>{ip.addr}</span>
+                </div>
+              ))}
+            </div>
           ) : (
             <span>-</span>
           )}
@@ -99,10 +99,10 @@ export const Information = () => {
         </div>
 
         {/* device key */}
-        <div className="flex w-full items-center justify-between">
-          <span>{t('settings.about.deviceKey')}</span>
-          <span>{information ? information.deviceKey : '-'}</span>
-        </div>
+        {/*<div className="flex w-full items-center justify-between">*/}
+        {/*  <span>{t('settings.about.deviceKey')}</span>*/}
+        {/*  <span>{information ? information.deviceKey : '-'}</span>*/}
+        {/*</div>*/}
       </div>
     </>
   );

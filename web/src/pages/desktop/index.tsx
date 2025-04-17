@@ -1,12 +1,14 @@
 import { useEffect } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 
+import { getWebTitle } from '@/api/vm.ts';
 import { getResolution, getVideoMode } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
+import { webTitleAtom } from '@/jotai/settings.ts';
 import { Head } from '@/components/head.tsx';
 
 import { Keyboard } from './keyboard';
@@ -23,6 +25,7 @@ export const Desktop = () => {
   const [videoMode, setVideoMode] = useAtom(videoModeAtom);
   const [resolution, setResolution] = useAtom(resolutionAtom);
   const isKeyboardEnable = useAtomValue(isKeyboardEnableAtom);
+  const setWebTitle = useSetAtom(webTitleAtom);
 
   useEffect(() => {
     const cookieVideoMode = getVideoMode();
@@ -30,6 +33,12 @@ export const Desktop = () => {
 
     const cookieResolution = getResolution();
     setResolution(cookieResolution ? cookieResolution : { width: 0, height: 0 });
+
+    getWebTitle().then((rsp) => {
+      if (rsp.data?.title) {
+        setWebTitle(rsp.data.title);
+      }
+    });
 
     const timer = setInterval(() => {
       client.send([0]);

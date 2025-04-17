@@ -1,17 +1,19 @@
 package vm
 
 import (
-	"NanoKVM-Server/proto"
 	"fmt"
 	"os"
 	"strings"
+
+	"NanoKVM-Server/proto"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	HostnameFile = "/etc/hostname"
+	BootHostnameFile = "/boot/hostname"
+	EtcHostname      = "/etc/hostname"
 )
 
 func (s *Service) SetHostname(c *gin.Context) {
@@ -25,9 +27,13 @@ func (s *Service) SetHostname(c *gin.Context) {
 
 	data := []byte(fmt.Sprintf("%s", req.Hostname))
 
-	err := os.WriteFile(HostnameFile, data, 0o644)
-	if err != nil {
+	if err := os.WriteFile(BootHostnameFile, data, 0o644); err != nil {
 		rsp.ErrRsp(c, -2, "failed to write data")
+		return
+	}
+
+	if err := os.WriteFile(EtcHostname, data, 0o644); err != nil {
+		rsp.ErrRsp(c, -3, "failed to write data")
 		return
 	}
 
@@ -38,7 +44,7 @@ func (s *Service) SetHostname(c *gin.Context) {
 func (s *Service) GetHostname(c *gin.Context) {
 	var rsp proto.Response
 
-	data, err := os.ReadFile(HostnameFile)
+	data, err := os.ReadFile(EtcHostname)
 	if err != nil {
 		rsp.ErrRsp(c, -1, "read Hostname failed")
 		return

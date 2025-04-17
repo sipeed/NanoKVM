@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useAtomValue } from 'jotai';
 import { Helmet, HelmetData } from 'react-helmet-async';
-import * as api from '@/api/vm.ts';
 
+import { webTitleAtom } from '@/jotai/settings.ts';
 
 type HeadProps = {
   title?: string;
@@ -11,27 +11,12 @@ type HeadProps = {
 const helmetData = new HelmetData({});
 
 export const Head = ({ title = '', description = '' }: HeadProps = {}) => {
-  const [webTitle, setWebTitle] = useState("");
-
-  useEffect(() => {
-    api
-      .getWebTitle()
-      .then((rsp) => {
-        if (rsp.data?.webTitle) {
-          setWebTitle(rsp.data?.webTitle.toString());
-        } else {
-          setWebTitle("NanoKVM");
-        }
-      })
-      
-  }, []);
-
-
+  const webTitle = useAtomValue(webTitleAtom);
 
   return (
     <Helmet
       helmetData={helmetData}
-      title={title ? `${title} - ${webTitle}` : undefined}
+      title={webTitle ? webTitle : title ? `${title} - NanoKVM` : undefined}
       defaultTitle={webTitle}
     >
       <meta name="description" content={description} />

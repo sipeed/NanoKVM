@@ -9,6 +9,7 @@ import (
 
 func vmRouter(r *gin.Engine) {
 	service := vm.NewService()
+
 	api := r.Group("/api").Use(middleware.CheckToken())
 
 	api.GET("/vm/info", service.GetInfo)         // get device information
@@ -40,19 +41,17 @@ func vmRouter(r *gin.Engine) {
 	api.POST("/vm/ssh/enable", service.EnableSSH)   // enable SSH
 	api.POST("/vm/ssh/disable", service.DisableSSH) // disable SSH
 
-	api.GET("/vm/swap", service.GetSwapState)         // get Swap state
-	api.POST("/vm/swap/enable", service.EnableSwap)   // enable Swap
-	api.POST("/vm/swap/disable", service.DisableSwap) // disable Swap
+	api.GET("/vm/swap", service.GetSwap)  // get swap file size
+	api.POST("/vm/swap", service.SetSwap) // set swap file size
 
-	api.GET("/vm/mouseJiggler", service.GetMouseJigglerState)         // get MouseJiggler state
-	api.POST("/vm/mouseJiggler/enable", service.EnableMouseJiggler)   // enable MouseJiggler
-	api.POST("/vm/mouseJiggler/disable", service.DisableMouseJiggler) // disable MouseJiggler
+	api.GET("/vm/mouse-jiggler", service.GetMouseJiggler)   // get mouse jiggler
+	api.POST("/vm/mouse-jiggler/", service.SetMouseJiggler) // set mouse jiggler
 
 	api.GET("/vm/hostname", service.GetHostname)  // Get Hostname
 	api.POST("/vm/hostname", service.SetHostname) // Set Hostname
 
-	api.GET("/vm/webTitle", service.GetWebTitle)  // Get WebTitle
-	api.POST("/vm/webTitle", service.SetWebTitle) // Set WebTitle
+	api.GET("/vm/web-title", service.GetWebTitle)  // Get web title
+	api.POST("/vm/web-title", service.SetWebTitle) // Set web title
 
 	api.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state
 	api.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS

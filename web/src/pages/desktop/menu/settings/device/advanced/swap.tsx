@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Switch, Tooltip } from 'antd';
+import { Select, Tooltip } from 'antd';
 import { CircleAlertIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -8,17 +8,25 @@ import * as api from '@/api/vm.ts';
 export const Swap = () => {
   const { t } = useTranslation();
 
-  const [isEnabled, setIsEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [size, setSize] = useState('0');
+
+  const options = [
+    { value: '0', label: t('settings.device.swap.disable') },
+    { value: '64', label: '64 MB' },
+    { value: '128', label: '128 MB' },
+    { value: '256', label: '256 MB' },
+    { value: '512', label: '512 MB' }
+  ];
 
   useEffect(() => {
     setIsLoading(true);
 
     api
-      .getSwapState()
+      .getSwap()
       .then((rsp) => {
-        if (rsp.data?.enabled) {
-          setIsEnabled(true);
+        if (rsp.data?.size) {
+          setSize(rsp.data.size.toString());
         }
       })
       .finally(() => {
@@ -26,19 +34,23 @@ export const Swap = () => {
       });
   }, []);
 
-  async function update() {
+  async function update(value: string) {
     if (isLoading) return;
     setIsLoading(true);
 
-      const rsp = isEnabled ? await api.disableSwap() : await api.enableSwap();
-    setIsLoading(false);
+    api
+      .setSwap(parseInt(value))
+      .then((rsp) => {
+        if (rsp.code !== 0) {
+          console.log(rsp.msg);
+          return;
+        }
 
-    if (rsp.code !== 0) {
-      console.log(rsp.msg);
-      return;
-    }
-
-    setIsEnabled(!isEnabled);
+        setSize(value);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   return (
@@ -56,10 +68,16 @@ export const Swap = () => {
             <CircleAlertIcon size={15} />
           </Tooltip>
         </div>
-            <span className="text-xs text-neutral-500">{t('settings.device.swap.description')}</span>
+        <span className="text-xs text-neutral-500">{t('settings.device.swap.description')}</span>
       </div>
 
-      <Switch checked={isEnabled} loading={isLoading} onChange={update} />
+      <Select
+        style={{ width: 150 }}
+        value={size}
+        options={options}
+        loading={isLoading}
+        onChange={update}
+      />
     </div>
   );
 };

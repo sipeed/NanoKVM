@@ -167,11 +167,11 @@ export function getMenuDisabledItems(): string[] {
   return value ? JSON.parse(value) : [];
 }
 
-export function getPowerConfirm(): string | null {
-  return getWithExpiry(POWER_CONFIRM_KEY);
+export function getPowerConfirm() {
+  const enabled = localStorage.getItem(POWER_CONFIRM_KEY);
+  return enabled ? Boolean(enabled) : false;
 }
 
-export function setPowerConfirm(value: boolean) {
-  const expiry = 365 * 24 * 60 * 60 * 1000;
-  setWithExpiry(POWER_CONFIRM_KEY, String(value), expiry);
+export function setPowerConfirm(enabled: boolean) {
+  localStorage.setItem(POWER_CONFIRM_KEY, String(enabled));
 }

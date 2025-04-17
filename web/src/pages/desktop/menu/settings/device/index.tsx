@@ -6,17 +6,15 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/hid.ts';
 import { hidModeAtom } from '@/jotai/mouse.ts';
 
+import { Advanced } from './advanced';
 import { HidMode } from './hid-mode.tsx';
 import { Mdns } from './mdns.tsx';
+import { MouseJiggler } from './mouse-jiggler.tsx';
 import { Oled } from './oled.tsx';
 import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
-import { Swap } from './swap.tsx';
-import { MouseJiggler } from './mouse-jiggler.tsx';
-import { PowerConfirm } from './PowerConfirm.tsx';
-import { Hostname } from './hostname.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -38,15 +36,15 @@ export const Device = () => {
 
       <div className="flex flex-col space-y-6">
         <Oled />
-        <Hostname />
         <Wifi />
         <Ssh />
         <Mdns />
-        <Swap />
-        <MouseJiggler />
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
-        <PowerConfirm />
+        <MouseJiggler />
       </div>
+      <Divider />
+
+      <Advanced />
       <Divider />
 
       <Reboot />

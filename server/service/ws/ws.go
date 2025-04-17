@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/vm/jiggler"
 )
 
 const (
@@ -85,6 +86,9 @@ func (c *WsClient) Read() error {
 		} else if event[0] == MouseEvent {
 			c.mouse <- event[1:]
 		}
+
+		// update latest HID operation time
+		jiggler.GetJiggler().Update()
 	}
 }
 

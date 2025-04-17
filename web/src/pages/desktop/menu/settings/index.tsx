@@ -107,7 +107,7 @@ export const Settings = () => {
 
       <Modal
         open={isModalOpen}
-        width={890}
+        width={900}
         footer={null}
         destroyOnClose={true}
         styles={{ content: { padding: 0 } }}
@@ -145,7 +145,7 @@ export const Settings = () => {
           </div>
 
           <div className="flex max-h-[700px] w-full flex-col items-center overflow-y-auto rounded-r-lg bg-neutral-900 px-3 sm:w-4/5">
-            <div className="w-full max-w-[500px] py-10">
+            <div className="w-full max-w-[550px] py-10">
               <>{tabs.find((tab) => tab.id === currentTab)?.component}</>
             </div>
           </div>

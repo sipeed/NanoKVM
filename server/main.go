@@ -1,18 +1,19 @@
 package main
 
 import (
-	"NanoKVM-Server/common"
-	"NanoKVM-Server/config"
-	"NanoKVM-Server/logger"
-	"NanoKVM-Server/middleware"
-	"NanoKVM-Server/router"
-	"NanoKVM-Server/utils"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"NanoKVM-Server/common"
+	"NanoKVM-Server/config"
+	"NanoKVM-Server/logger"
+	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/router"
+	"NanoKVM-Server/service/vm/jiggler"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -37,7 +38,8 @@ func initialize() {
 	time.Sleep(10 * time.Millisecond)
 	vision.SetHDMI(true)
 
-	utils.InitGoMemLimit()
+	// run mouse jiggler
+	jiggler.GetJiggler().Run()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

@@ -77,34 +77,24 @@ export function disableSSH() {
   return http.post('/api/vm/ssh/disable');
 }
 
-// get Swap state
-export function getSwapState() {
+// get swap file size
+export function getSwap() {
   return http.get('/api/vm/swap');
 }
 
-// enable Swap
-export function enableSwap() {
-  return http.post('/api/vm/swap/enable');
+// set swap file size
+export function setSwap(size: number) {
+  return http.post('/api/vm/swap', { size });
 }
 
-// disable Swap
-export function disableSwap() {
-  return http.post('/api/vm/swap/disable');
+// get mouse jiggler
+export function getMouseJiggler() {
+  return http.get('/api/vm/mouse-jiggler');
 }
 
-// get MouseJiggler state
-export function getMouseJigglerState() {
-  return http.get('/api/vm/mouseJiggler');
-}
-
-// enable MouseJiggler
-export function enableMouseJiggler() {
-  return http.post('/api/vm/mouseJiggler/enable');
-}
-
-// disable MouseJiggler
-export function disableMouseJiggler() {
-  return http.post('/api/vm/mouseJiggler/disable');
+// set mouse jiggler
+export function setMouseJiggler(enabled: boolean, mode: string) {
+  return http.post('/api/vm/mouse-jiggler', { enabled, mode });
 }
 
 // get Hostname
@@ -119,12 +109,12 @@ export function setHostname(hostname: string) {
 
 // get WebTitle
 export function getWebTitle() {
-  return http.get('/api/vm/webTitle');
+  return http.get('/api/vm/web-title');
 }
 
 // set WebTitle
-export function setWebTitle(webTitle: string) {
-  return http.post('/api/vm/webTitle', { webTitle });
+export function setWebTitle(title: string) {
+  return http.post('/api/vm/web-title', { title });
 }
 
 // get mDNS state

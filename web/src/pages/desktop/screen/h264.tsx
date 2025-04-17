@@ -56,7 +56,7 @@ export const H264 = () => {
     ws.onmessage = (event) => {
       try {
         const msg = JSON.parse(event.data as string);
-        if (!msg) return;
+        if (!msg?.data) return;
 
         const data = JSON.parse(msg.data);
         if (!data) return;
@@ -78,6 +78,14 @@ export const H264 = () => {
       }
     };
 
+    const heartbeatTimer = setInterval(() => {
+      try {
+        ws.send(JSON.stringify({ event: 'heartbeat', data: '' }));
+      } catch (err) {
+        console.log(err);
+      }
+    }, 60 * 1000);
+
     setTimeout(() => {
       setIsLoading(false);
     }, 15 * 1000);
@@ -85,6 +93,9 @@ export const H264 = () => {
     return () => {
       ws.close();
       pc.close();
+      if (heartbeatTimer) {
+        clearInterval(heartbeatTimer);
+      }
     };
   }, []);
 
@@ -93,7 +104,7 @@ export const H264 = () => {
       <div className={clsx('flex h-screen w-screen items-start justify-center xl:items-center')}>
         <video
           id="screen"
-          className={clsx('block min-h-[240px] min-w-[380px] select-none', mouseStyle)}
+          className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
           style={
             resolution?.width
               ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }

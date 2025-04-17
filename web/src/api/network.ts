@@ -22,8 +22,8 @@ export function deleteWolMac(mac: string) {
 }
 
 // set Mac name
-export function setWolMacName(mac: string,name: string) {
-  return http.post('/api/network/wol/mac/setName', { mac, name });
+export function setWolMacName(mac: string, name: string) {
+  return http.post('/api/network/wol/mac/name', { mac, name });
 }
 
 // get wifi information

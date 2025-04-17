@@ -12,6 +12,16 @@ import './i18n';
 import './assets/styles/index.css';
 
 const renderApp = () => {
+  const themeConfig = {
+    algorithm: theme.darkAlgorithm,
+    components: {
+      Collapse: {
+        headerPadding: 0,
+        contentPadding: 0
+      }
+    }
+  };
+
   return ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Suspense
@@ -23,7 +33,7 @@ const renderApp = () => {
       >
         <ErrorBoundary FallbackComponent={MainError}>
           <HelmetProvider>
-            <ConfigProvider theme={{ algorithm: theme.darkAlgorithm }}>
+            <ConfigProvider theme={themeConfig}>
               <RouterProvider router={router} />
             </ConfigProvider>
           </HelmetProvider>
@@ -34,7 +44,7 @@ const renderApp = () => {
 };
 
 if (import.meta.env.MODE === 'mocked') {
-  const { worker } = await import('./mocks/browser')
+  const { worker } = await import('./mocks/browser');
   worker.start().then(() => {
     return renderApp();
   });

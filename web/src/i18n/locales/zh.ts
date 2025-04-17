@@ -23,8 +23,6 @@ const zh = {
       illegalUsername: '用户名中包含非法字符',
       illegalPassword: '密码中包含非法字符',
       forgetPassword: '忘记密码',
-      reboot: '重启',
-      rebootDesc: '你确定要重启NanoKVM吗？',
       ok: '确定',
       cancel: '取消',
       loginButtonText: '登录',
@@ -156,11 +154,16 @@ const zh = {
     },
     power: {
       title: '电源',
+      showConfirm: '显示确认框',
+      showConfirmTip: '电源操作需要二次确认',
       reset: '重启',
       power: '电源',
       powerShort: '电源（短按）',
       powerLong: '电源（长按）',
-      powerConfirm: '你确定要执行此操作吗？'
+      resetConfirm: '确认执行重启操作吗？',
+      powerConfirm: '确认执行电源操作吗？',
+      okBtn: '确认',
+      cancelBtn: '取消'
     },
     settings: {
       title: '设置',
@@ -174,7 +177,9 @@ const zh = {
         image: '镜像版本',
         imageTip: 'NanoKVM 系统镜像版本',
         deviceKey: '设备码',
-        community: '社区'
+        community: '社区',
+        hostname: '主机名',
+        hostnameUpdated: '主机名修改成功，重启后生效'
       },
       appearance: {
         title: '外观',
@@ -182,12 +187,8 @@ const zh = {
         language: '语言',
         menuBar: '菜单栏',
         menuBarDesc: '是否在菜单栏中显示图标',
-        webTitle: {
-          title: '网站标题',
-          description: 'NanoKVM 网站标题',
-          success: '网站标题修改成功',
-          error: '网站标题修改失败'
-        },
+        webTitle: '网站标题',
+        webTitleDesc: '自定义网站页面标题'
       },
       device: {
         title: '设备',
@@ -213,26 +214,18 @@ const zh = {
           description: '启用 SSH 远程访问',
           tip: '启用前请务必设置强密码（帐号 - 修改密码）'
         },
+        advanced: '高级设置',
         swap: {
-          description: '启用交换分区',
-          tip: '启用默认的交换分区（128M）'
-        },  
-        mouseJiggler:{
+          disable: '禁用',
+          description: '设置交换文件大小',
+          tip: '启用该功能可能会减少SD卡使用寿命！'
+        },
+        mouseJiggler: {
           title: '鼠标抖动',
-          description: '启用鼠标抖动',
-          tip: '在鼠标离开60s未操作时自动进行抖动以防止系统睡眠'
-        },
-        hostname: {
-          title: 'Hostname',
-          description: 'NanoKVM 主机名',
-          tip: '修改后需要重启生效',
-          success: '主机名修改成功',
-          error: '主机名修改失败'
-        },
-        powerConfirm:{
-          title: '电源操作确认',
-          description: '启用电源操作二次确认',
-          tip: '在操作电源时弹出二次确认框以防误触'
+          description: '防止远程主机休眠',
+          disable: '关闭',
+          absolute: '绝对模式',
+          relative: '相对模式'
         },
         mdns: {
           description: '启用 mDNS 发现服务',

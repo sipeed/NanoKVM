@@ -69,8 +69,8 @@ type UpdateVirtualDeviceRsp struct {
 }
 
 type SetMemoryLimitReq struct {
-	Enabled bool  `json:"enabled"`
-	Limit   int64 `json:"limit"`
+	Enabled bool  `validate:"omitempty"`
+	Limit   int64 `validate:"omitempty"`
 }
 
 type GetMemoryLimitRsp struct {
@@ -79,7 +79,7 @@ type GetMemoryLimitRsp struct {
 }
 
 type SetOledReq struct {
-	Sleep int `json:"sleep"`
+	Sleep int `validate:"omitempty"`
 }
 
 type GetOLEDRsp struct {
@@ -91,12 +91,22 @@ type GetSSHStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
-type GetSwapStateRsp struct {
-	Enabled bool `json:"enabled"`
+type GetSwapRsp struct {
+	Size int64 `json:"size"` // unit: MB
 }
 
-type GetMouseJigglerStateRsp struct {
-	Enabled bool `json:"enabled"`
+type SetSwapReq struct {
+	Size int64 `validate:"omitempty"` // unit: MB
+}
+
+type GetMouseJigglerRsp struct {
+	Enabled bool   `json:"enabled"`
+	Mode    string `json:"mode"`
+}
+
+type SetMouseJigglerReq struct {
+	Enabled bool   `validate:"omitempty"`
+	Mode    string `validate:"omitempty"`
 }
 
 type GetMdnsStateRsp struct {
@@ -104,7 +114,7 @@ type GetMdnsStateRsp struct {
 }
 
 type SetHostnameReq struct {
-	Hostname string `json:"hostname"`
+	Hostname string `validate:"required"`
 }
 
 type GetHostnameRsp struct {
@@ -112,9 +122,9 @@ type GetHostnameRsp struct {
 }
 
 type SetWebTitleReq struct {
-	WebTitle string `json:"webTitle"`
+	Title string `validate:"omitempty"`
 }
 
 type GetWebTitleRsp struct {
-	WebTitle string `json:"webTitle"`
+	Title string `json:"title"`
 }
