@@ -195,7 +195,12 @@ const en = {
         deviceKey: 'Device Key',
         community: 'Community',
         hostname: 'Hostname',
-        hostnameUpdated: 'Hostname updated. Reboot to apply.'
+        hostnameUpdated: 'Hostname updated. Reboot to apply.',
+        ipType: {
+          'Wired': 'Wired',
+          'Wireless': 'Wireless',
+          'Other': 'Other'
+        }
       },
       appearance: {
         title: 'Appearance',

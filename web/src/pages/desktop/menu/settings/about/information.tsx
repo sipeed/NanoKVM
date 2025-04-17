@@ -48,7 +48,7 @@ export const Information = () => {
             <div className="flex flex-col space-y-1">
               {information.ips.map((ip) => (
                 <div key={ip.addr} className="flex items-center">
-                  <Tag>{ip.type}</Tag>
+                  <Tag>{t('settings.about.ipType.' + ip.type)}</Tag>
                   <span>{ip.addr}</span>
                 </div>
               ))}

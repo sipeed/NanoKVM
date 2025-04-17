@@ -196,7 +196,12 @@ const ru = {
         deviceKey: 'Ключ устройства',
         community: 'Сообщество',
         hostname: 'Имя хоста',
-        hostnameUpdated: 'Имя хоста изменено. Перезагрузите NanoKVM, чтобы настройки вступили в силу.'
+        hostnameUpdated: 'Имя хоста изменено. Перезагрузите NanoKVM, чтобы настройки вступили в силу.',
+        ipType: {
+          'Wired': 'Проводное',
+          'Wireless': 'Беспроводное',
+          'Other': 'Другое'
+        }
       },
       appearance: {
         title: 'Внешний вид',
