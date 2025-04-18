@@ -84,8 +84,6 @@ const zh = {
       relative: '相对模式',
       requestPointer: '正在使用鼠标相对模式，请点击桌面获取鼠标指针。',
       resetHid: '重置 HID',
-      enableHid: '启用 HID',
-      disableHid: '禁用 HID',
       hidOnly: {
         title: 'HID-Only 模式',
         desc: '若使用过程中遇到鼠标键盘无响应，且重置 HID 无效，可能是 NanoKVM 与您的设备存在兼容性问题。建议尝试启用 HID-Only 模式以提升兼容性。',
@@ -238,8 +236,6 @@ const zh = {
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
         networkDesc: '在远程主机中挂载虚拟网卡',
-        reboot: '重启',
-        rebootDesc: '你确定要重启 NanoKVM 吗？',
         okBtn: '是',
         cancelBtn: '否'
       },

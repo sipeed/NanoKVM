@@ -5,16 +5,12 @@ import { client } from '@/lib/websocket.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseButton, MouseEvent } from './constants';
-import { hidStateAtom } from '@/jotai/mouse';
 
 export const Absolute = () => {
   const resolution = useAtomValue(resolutionAtom);
-  const hidEnable = useAtomValue(hidStateAtom);
 
   // listen mouse events
   useEffect(() => {
-    if (!hidEnable) return;
-
     const canvas = document.getElementById('screen');
     if (!canvas) return;
 
@@ -89,7 +85,7 @@ export const Absolute = () => {
       canvas.removeEventListener('click', disableEvent);
       canvas.removeEventListener('contextmenu', disableEvent);
     };
-  }, [resolution, hidEnable]);
+  }, [resolution]);
 
   // disable default events
   function disableEvent(event: any) {

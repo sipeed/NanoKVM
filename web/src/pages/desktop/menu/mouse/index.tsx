@@ -12,7 +12,6 @@ import { Cursor } from './cursor.tsx';
 import { HidMode } from './hid-mode.tsx';
 import { MouseMode } from './mouse-mode.tsx';
 import { ResetHid } from './reset-hid.tsx';
-import { SwitchHid } from './switch-hid.tsx';
 
 export const Mouse = () => {
   const { t } = useTranslation();
@@ -36,10 +35,9 @@ export const Mouse = () => {
       <Cursor />
       <MouseMode />
       <Divider style={{ margin: '10px 0' }} />
-      
+
       <HidMode />
       <ResetHid />
-      <SwitchHid/>
     </div>
   );
 

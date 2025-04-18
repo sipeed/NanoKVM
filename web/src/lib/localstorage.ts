@@ -14,7 +14,6 @@ const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
-const HID_STATE_KEY = 'nano-kvm-hid-state';
 
 type ItemWithExpiry = {
   value: string;
@@ -132,7 +131,7 @@ export function setMouseMode(mouse: string) {
 
 export function getSkipUpdate() {
   const skip = getWithExpiry(SKIP_UPDATE_KEY);
-  return skip === 'true';
+  return skip ? Boolean(skip) : false;
 }
 
 export function setSkipUpdate(skip: boolean) {
@@ -155,7 +154,7 @@ export function setSkipModifyPassword(skip: boolean) {
 
 export function getSkipModifyPassword() {
   const skip = getWithExpiry(SKIP_MODIFY_PASSWORD_KEY);
-  return skip === 'true';
+  return skip ? Boolean(skip) : false;
 }
 
 export function setMenuDisabledItems(items: string[]) {
@@ -170,18 +169,9 @@ export function getMenuDisabledItems(): string[] {
 
 export function getPowerConfirm() {
   const enabled = localStorage.getItem(POWER_CONFIRM_KEY);
-  return enabled === 'true';
+  return enabled ? Boolean(enabled) : false;
 }
 
 export function setPowerConfirm(enabled: boolean) {
   localStorage.setItem(POWER_CONFIRM_KEY, String(enabled));
-}
-
-export function getHidState() {
-  const enabled = localStorage.getItem(HID_STATE_KEY);
-  return enabled === 'true'; 
-}
-
-export function setHidState(enabled: boolean) {
-  localStorage.setItem(HID_STATE_KEY, String(enabled));
 }
