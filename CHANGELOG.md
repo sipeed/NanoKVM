@@ -7,6 +7,7 @@
 * feat: add support for assigning custom names to Wake-on-LAN MAC addresses
 * feat: add confirmation prompts for power operations
 * feat: add logo to the login page (thanks to [S33G](https://github.com/S33G))
+* fix: fix possible privacy issues with MIC drivers. [Repair Record](https://github.com/sipeed/NanoKVM/commit/f9244b36df090a05cd59ba11ea4fd01e9b638995)
 * fix: fix iptables rule that could interfere with SSH connections (thanks to [scpcom](https://github.com/scpcom))
 * fix: fix the static IP gateway configuration might not apply correctly (thanks to [xitation](https://github.com/xitation))
 * perf: optimized OLED display handling and sleep logic
