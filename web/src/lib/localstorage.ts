@@ -106,7 +106,7 @@ export function setGop(gop: number) {
 
 export function getFrameDetect(): boolean {
   const enabled = localStorage.getItem(FRAME_DETECT_KEY);
-  return enabled ? Boolean(enabled) : true;
+  return enabled === 'true';
 }
 
 export function setFrameDetect(enabled: boolean) {
@@ -131,7 +131,7 @@ export function setMouseMode(mouse: string) {
 
 export function getSkipUpdate() {
   const skip = getWithExpiry(SKIP_UPDATE_KEY);
-  return skip ? Boolean(skip) : false;
+  return skip === 'true';
 }
 
 export function setSkipUpdate(skip: boolean) {
@@ -154,7 +154,7 @@ export function setSkipModifyPassword(skip: boolean) {
 
 export function getSkipModifyPassword() {
   const skip = getWithExpiry(SKIP_MODIFY_PASSWORD_KEY);
-  return skip ? Boolean(skip) : false;
+  return skip === 'true';
 }
 
 export function setMenuDisabledItems(items: string[]) {
@@ -169,7 +169,7 @@ export function getMenuDisabledItems(): string[] {
 
 export function getPowerConfirm() {
   const enabled = localStorage.getItem(POWER_CONFIRM_KEY);
-  return enabled ? Boolean(enabled) : false;
+  return enabled === 'true';
 }
 
 export function setPowerConfirm(enabled: boolean) {
