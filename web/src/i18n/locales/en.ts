@@ -195,7 +195,12 @@ const en = {
         deviceKey: 'Device Key',
         community: 'Community',
         hostname: 'Hostname',
-        hostnameUpdated: 'Hostname updated. Reboot to apply.'
+        hostnameUpdated: 'Hostname updated. Reboot to apply.',
+        ipType: {
+          'Wired': 'Wired',
+          'Wireless': 'Wireless',
+          'Other': 'Other'
+        }
       },
       appearance: {
         title: 'Appearance',
@@ -232,6 +237,7 @@ const en = {
         },
         advanced: 'Advanced Settings',
         swap: {
+          title: 'Swap',
           disable: 'Disable',
           description: 'Set the swap file size',
           tip: "Enabling this feature could shorten your SD card's usable life!"
