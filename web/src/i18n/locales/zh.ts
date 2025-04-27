@@ -63,6 +63,7 @@ const zh = {
       resetHdmi: '重置 HDMI'
     },
     keyboard: {
+      title: '键盘',
       paste: '粘贴',
       tips: '仅支持标准键盘的字母和符号',
       placeholder: '请输入内容',
@@ -272,6 +273,8 @@ const zh = {
         logout: '退出',
         logoutDesc: '确定要退出吗？',
         uninstall: '卸载 Tailscale',
+        reboot: '重启',
+        rebootDesc: '你确定要重启 NanoKVM 吗？',
         okBtn: '确认',
         cancelBtn: '取消'
       },

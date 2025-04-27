@@ -15,6 +15,7 @@ export const ResetHid = () => {
     if (isResetting) return;
     setIsResetting(true);
 
+    client.send([1, 0, 0, 0, 0, 0]);
     client.close();
 
     api.reset().finally(() => {
