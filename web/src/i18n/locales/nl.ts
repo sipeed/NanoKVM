@@ -5,7 +5,7 @@ const nl = {
       login: 'Inloggen',
       changePassword: 'Wachtwoord wijzigen',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wifi'
     },
     auth: {
       login: 'Inloggen',
@@ -29,24 +29,23 @@ const nl = {
       cancel: 'Annuleren',
       loginButtonText: 'Inloggen',
       tips: {
-        reset1:
-          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
-        reset2: 'For detailed steps, please consult this document:',
-        reset3: 'Web default account:',
-        reset4: 'SSH default account:',
-        change1: 'Please note that this action will change the following passwords:',
-        change2: 'Web login password',
-        change3: 'System root password (SSH login password)',
-        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+        reset1: 'Om de wachtwoorden opnieuw in te stellen, houdt u de BOOT-knop op de NanoKVM 10 seconden lang ingedrukt.',
+        reset2: 'Voor gedetailleerde stappen kunt u dit document raadplegen:',
+        reset3: 'Standaard webaccount:',
+        reset4: 'Standaard SSH-account:',
+        change1: 'Houd er rekening mee dat deze actie de volgende wachtwoorden zal wijzigen:',
+        change2: 'Web login wachtwoord',
+        change3: 'Systeem root-wachtwoord (SSH-inlogwachtwoord)',
+        change4: 'Om de wachtwoorden opnieuw in te stellen, houdt u de BOOT-knop op de NanoKVM ingedrukt.'
       }
     },
     wifi: {
-      title: 'Wi-Fi',
-      description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
-      failed: 'Operation failed, please try again.',
+      title: 'Wifi',
+      description: 'Wifi configureren voor NanoKVM',
+      success: 'Controleer de netwerkstatus van NanoKVM en bezoek het nieuwe IP-adres.',
+      failed: 'De bewerking is mislukt. Probeer het opnieuw.',
       confirmBtn: 'Ok',
-      finishBtn: 'Finished'
+      finishBtn: 'Gereed'
     },
     screen: {
       video: 'Videomodus',
@@ -162,18 +161,18 @@ const nl = {
         community: 'Community'
       },
       appearance: {
-        title: 'Appearance',
-        display: 'Display',
-        language: 'Language',
-        menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        title: 'Uiterlijk',
+        display: 'Beeldscherm',
+        language: 'Taal',
+        menuBar: 'Menubalk',
+        menuBarDesc: 'Toon iconen in de menubalk'
       },
       device: {
-        title: 'Device',
+        title: 'Apparaat',
         oled: {
           title: 'OLED',
-          description: 'OLED screen automatically sleep',
-          0: 'Never',
+          description: 'OLED scherm automatisch slapen',
+          0: 'Nooit',
           15: '15 sec',
           30: '30 sec',
           60: '1 min',
@@ -181,32 +180,32 @@ const nl = {
           300: '5 min',
           600: '10 min',
           1800: '30 min',
-          3600: '1 hour'
+          3600: '1 uur'
         },
         wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
+          title: 'Wifi',
+          description: 'Configureer wifi',
           setBtn: 'Config'
         },
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host'
+        disk: 'Virtuele schijf',
+        diskDesc: 'Koppel virtuele U-schijf aan de externe host',
+        network: 'Virtueel Netwerk',
+        networkDesc: 'Koppel virtueel netwerk kaart aan de externe host'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          title: 'Geheugen optimalisatie',
+          tip: "Wanneer geheugen gebruik de limiet overschreid, garbage collection wordt agressiever uitgevoerd om geheugen vrij te maken. geadviseerd om 50MB te kiezen als Tailscale wordt gebruikt. Tailscale moet worden herstart om de wijziging door te voeren.",
+          disable: 'Uitschakelen'
         },
-        restart: 'Are you sure to restart Tailscale?',
-        stop: 'Are you sure to stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        restart: 'Weet u zeker dat u Tailscale opnieuw wilt opstarten?',
+        stop: 'Weet u zeker dat u Tailscale wilt stoppen?',
+        stopDesc: 'Meld Tailscale af en schakel het automatisch opstarten bij het opstarten uit.',
         loading: 'Laden...',
         notInstall: 'Tailscale niet gevonden! Installeer a.u.b.',
         install: 'Installeren',
-        installing: 'Installeren',
+        installing: 'Installeren bezig',
         failed: 'Installatie mislukt',
         retry: 'Vernieuw en probeer opnieuw. Of probeer handmatig te installeren',
         download: 'Download het',
@@ -226,8 +225,8 @@ const nl = {
         account: 'Account',
         logout: 'Uitloggen',
         logout2: 'Weet u zeker dat u wilt uitloggen?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        okBtn: 'Ja',
+        cancelBtn: 'Nee'
       },
       update: {
         title: 'Controleren op updates',
@@ -241,10 +240,10 @@ const nl = {
       },
       account: {
         title: 'Account',
-        webAccount: 'Web Account Name',
-        password: 'Password',
+        webAccount: 'Web Account Naam',
+        password: 'Wachtwoord',
         updateBtn: 'Update',
-        logoutBtn: 'Logout'
+        logoutBtn: 'Afmelden'
       }
     }
   }
