@@ -10,45 +10,46 @@ const uk = {
     auth: {
       login: 'Вхід',
       placeholderUsername: "Введіть ім'я користувача",
-      placeholderPassword: 'введіть пароль',
-      placeholderPassword2: 'введіть пароль ще раз',
-      noEmptyUsername: "ім'я користувача не може бути порожнім",
-      noEmptyPassword: 'пароль не може бути порожнім',
+      placeholderPassword: 'Введіть пароль',
+      placeholderPassword2: 'Введіть пароль ще раз',
+      noEmptyUsername: "Ім'я користувача не може бути порожнім",
+      noEmptyPassword: 'Пароль не може бути порожнім',
       noAccount:
         'Не вдалося отримати інформацію про користувача, оновіть веб-сторінку або скиньте пароль',
-      invalidUser: "недійсне ім'я користувача або пароль",
-      error: 'якась халепа! непередбачена помилка :(',
+      invalidUser: "Недійсне ім'я користувача або пароль",
+      error: 'Якась халепа! Непередбачена помилка :(',
       changePassword: 'Змінити пароль',
       changePasswordDesc:
         'Для безпеки вашого пристрою, будь ласка, змініть пароль для входу в веб-інтерфейс.',
-      differentPassword: 'паролі не збігаються',
-      illegalUsername: "ім'я користувача містить недопустимі символи",
-      illegalPassword: 'пароль містить недопустимі символи',
+      differentPassword: 'Паролі не збігаються',
+      illegalUsername: "Ім'я користувача містить недопустимі символи",
+      illegalPassword: 'Пароль містить недопустимі символи',
       forgetPassword: 'Забули пароль',
       ok: 'Ок',
       cancel: 'Скасувати',
       loginButtonText: 'Увійти',
       tips: {
         reset1:
-          'To reset the passwords, pressing and holding the BOOT button on the NanoKVM for 10 seconds.',
-        reset2: 'For detailed steps, please consult this document:',
-        reset3: 'Web default account:',
-        reset4: 'SSH default account:',
-        change1: 'Please note that this action will change the following passwords:',
-        change2: 'Web login password',
-        change3: 'System root password (SSH login password)',
-        change4: 'To reset the passwords, press and hold the BOOT button on the NanoKVM.'
+          'Щоб скинути паролі, натискаючи та тримаючи кнопку завантаження на Nanokvm протягом 10 секунд.',
+        reset2: 'Щоб отримати детальні кроки, зверніться до цього документа:',
+        reset3: 'Обліковий запис вебінтерфейс за замовчуванням:',
+        reset4: 'Обліковий запис SSH за замовчуванням:',
+        change1: 'Зверніть увагу, що ця дія змінить наступні паролі:',
+        change2: 'Пароль для входу у веб-інтерфейс',
+        change3: 'Системний root пароль (пароль для входу в систему по SSH)',
+        change4: 'Щоб скинути паролі, натисніть та утримуйте кнопку "Завантаження" на Nanokvm.'
       }
     },
     wifi: {
       title: 'Wi-Fi',
-      description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
-      failed: 'Operation failed, please try again.',
-      confirmBtn: 'Ok',
-      finishBtn: 'Finished'
+      description: 'Налаштування Wi-Fi для Nanokvm',
+      success: 'Будь ласка, перевірте статус мережі NANOKVM та відвідайте нову IP -адресу.',
+      failed: 'Операція не вдалася, спробуйте ще раз.',
+      confirmBtn: 'Так',
+      finishBtn: 'Готово'
     },
     screen: {
+      title: 'Екран',
       video: 'Відеорежим',
       resolution: 'Роздільна здатність',
       auto: 'Автоматично',
@@ -64,9 +65,10 @@ const uk = {
       frameDetect: 'Виявлення кадрів',
       frameDetectTip:
         'Обчислює різницю між кадрами. Зупиняє передачу відеопотоку, коли на екрані віддаленого хоста не виявлено змін.',
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Перезавантажити HDMI підсистему'
     },
     keyboard: {
+      title: 'Клавіатура',
       paste: 'Вставити',
       tips: 'Підтримуються лише стандартні літери та символи клавіатури',
       placeholder: 'Будь ласка, введіть',
@@ -75,6 +77,8 @@ const uk = {
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
+      title: 'Миша',
+      cursor: 'Стиль курсору',
       default: 'Курсор за замовчуванням',
       pointer: 'Курсор-стрілка',
       cell: 'Курсор-таблиця',
@@ -86,15 +90,25 @@ const uk = {
       relative: 'Відносний режим',
       requestPointer:
         'Використовується відносний режим. Будь ласка, натисніть на робочий стіл, щоб отримати курсор миші.',
-      resetHid: 'Скинути HID'
+      resetHid: 'Скинути HID',
+      hidOnly: {
+        title: 'Режим лише HID',
+        desc: 'Якщо ваша миша та клавіатура перестають відповідати та скинути HID, це не допомагає, це може бути проблемою сумісності між NanoKVM та пристроєм. Спробуйте ввімкнути режим "лише HID" лише для кращої сумісності.',
+        tip1: 'Увімкнення режиму "лише HID" демонтує віртуальний U-диск і віртуальну мережу',
+        tip2: 'У режимі "лише HID" монтування іміджей буде вимкнено',
+        tip3: 'NANOKVM автоматично перезавантажиться після перемикання режимів',
+        enable: 'Увімкнути режим "лише HID"',
+        disable: 'Ввимкнути режим "лише HID"'
+      }
     },
     image: {
-      title: 'Зображення',
+      title: 'Іміджи',
       loading: 'Завантаження...',
       empty: 'Нічого не знайдено',
-      mountFailed: 'Не вдалося змонтувати',
+      mountFailed: 'Не вдалося змонтувати імідж у режимі CD-ROM',
       mountDesc:
         'У деяких системах необхідно витягнути віртуальний диск на віддаленому хості перед монтуванням файлу образа.',
+      refresh: 'Оновіть список іміджей',
       tips: {
         title: 'Як завантажити',
         usb1: "Під'єднайте NanoKVM до вашого комп'ютера через USB.",
@@ -112,7 +126,7 @@ const uk = {
       }
     },
     script: {
-      title: 'Скрипт',
+      title: 'Скрипти',
       upload: 'Завантажити',
       run: 'Запустити',
       runBackground: 'Запустити у фоновому режимі',
@@ -131,6 +145,16 @@ const uk = {
       serialPort: 'Послідовний порт',
       serialPortPlaceholder: 'Будь ласка, введіть послідовний порт',
       baudrate: 'Швидкість передачі',
+      parity: 'Парність',
+      parityNone: 'Без парності',
+      parityEven: 'Парний',
+      parityOdd: 'Непарний',
+      flowControl: 'Керування потоком',
+      flowControlNone: 'Без керування',
+      flowControlSoft: "М'яке керування",
+      flowControlHard: 'Жорстке керування',
+      dataBits: 'Біти даних',
+      stopBits: 'Стопові біти',
       confirm: 'Ок'
     },
     wol: {
@@ -140,71 +164,113 @@ const uk = {
       input: 'Будь ласка, введіть MAC',
       ok: 'Ок'
     },
+    download: {
+      title: 'Завантажувач іміджей',
+      input: 'Введіть URL-адресу віддаленого іміджа',
+      ok: 'Так',
+      disabled: 'розділ даних /data у режіме RO, тому ми не можемо завантажити імідж'
+    },
     power: {
       title: 'Живлення',
+      showConfirm: 'Confirmation',
+      showConfirmTip: 'Power operations require an extra confirmation',
       reset: 'Скидання',
       power: 'Живлення',
       powerShort: 'Живлення (коротке натискання)',
-      powerLong: 'Живлення (довге натискання)'
+      powerLong: 'Живлення (довге натискання)',
+      resetConfirm: 'Продовжити роботу зі скиданням?',
+      powerConfirm: 'Продовжувати роботу живлення?',
+      okBtn: 'Так',
+      cancelBtn: 'Ні'
     },
     settings: {
-      title: 'Settings',
+      title: 'Налаштування',
       about: {
         title: 'Про NanoKVM',
         information: 'Інформація',
         ip: 'IP',
         mdns: 'mDNS',
-        application: 'Версія додатку',
-        applicationTip: 'NanoKVM web application version',
+        application: 'Версія додатка',
+        applicationTip: 'Версія веб-додатка NANOKVM',
         image: 'Версія образу',
-        imageTip: 'NanoKVM system image version',
+        imageTip: 'Версія системного іміджу Nanokvm',
         deviceKey: 'Ключ пристрою',
-        community: 'Спільнота'
+        community: 'Спільнота',
+        hostname: "Ім'я вузла",
+        hostnameUpdated: "Ім'я вузла оновлено. Перезавантажте систему, щоб застосувати зміни."
       },
       appearance: {
-        title: 'Appearance',
-        display: 'Display',
-        language: 'Language',
+        title: 'Зовнішній вигляд',
+        display: 'Відображення',
+        language: 'Мова',
         menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar'
+        menuBarDesc: 'Піктограми відображення в панелі меню',
+        webTitle: 'Веб-назва',
+        webTitleDesc: 'Налаштуйте назву веб-сторінки'
       },
       device: {
-        title: 'Device',
+        title: 'Пристрій',
         oled: {
-          title: 'OLED',
-          description: 'OLED screen automatically sleep',
-          0: 'Never',
-          15: '15 sec',
-          30: '30 sec',
-          60: '1 min',
-          180: '3 min',
-          300: '5 min',
-          600: '10 min',
-          1800: '30 min',
-          3600: '1 hour'
+          title: 'OLED-екран',
+          description: 'Автоматичне відключення OLED-екрана',
+          0: 'Ніколи',
+          15: '15 сек',
+          30: '30 сек',
+          60: '1 хв',
+          180: '3 хв',
+          300: '5 хв',
+          600: '10 хв',
+          1800: '30 хв',
+          3600: '1 година'
         },
         wifi: {
           title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          description: 'Налаштування Wi-Fi',
+          setBtn: 'Конфігурація'
         },
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host'
+        ssh: {
+          description: 'Увімкніть віддалений доступ по SSH',
+          tip: 'Перед ввімкненням встановіть надійний пароль (Обліковий запис - Зміна пароля)'
+        },
+        advanced: 'Розширені налаштування',
+        swap: {
+          disable: 'Відключено',
+          description: 'Встановіть розмір файлу свопу',
+          tip: "Увімкнення цієї функції може скоротити корисне життя вашої SD-карти!"
+        },
+        mouseJiggler: {
+          title: 'Налаштування пацюка',
+          description: 'Не дозволяйте віддаленому хосту спати',
+          disable: 'Відключено',
+          absolute: 'Абсолютний режим',
+          relative: 'Відносний режим'
+        },
+        mdns: {
+          description: 'Увімкнути службу MDNS Discovery',
+          tip: "Вимкнути, якщо це не потрібно"
+        },
+        hidOnly: 'Режим лише HID',
+        disk: 'Віртуальний диск',
+        diskDesc: 'Монтувати віртуальний U-диск на віддаленому хості',
+        network: 'Віртуальна мережа',
+        networkDesc: 'Встановити віртуальну мережеву карту на віддаленому хості',
+        reboot: 'Перезавантажити',
+        rebootDesc: 'Ви впевнені, що хочете перезавантажити Nanokvm?',
+        okBtn: 'Так',
+        cancelBtn: 'Ні'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          title: "Оптимізація пам'яті",
+          tip: "Коли використання пам’яті перевищує обмеження, збирання сміття проводиться більш агресивно, щоб спробувати звільнити пам’ять. Рекомендується встановити 50 Мб, якщо використовувати Tailscale. Після зміни налаштувань потрібно перезавантажити Tailscale.",
+          disable: 'Відключено'
         },
-        restart: 'Are you sure to restart Tailscale?',
-        stop: 'Are you sure to stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        restart: 'Ви впевнені, що бажаєте перезавантажити Tailscale?',
+        stop: 'Ви впевнені, що бажаєте зупинити Tailscale?',
+        stopDesc: 'Вийдіть з Tailscale і вимкніть автоматичний запуск при завантаженні.',
         loading: 'Завантаження...',
-        notInstall: 'Tailscale не знайдено! Будь ласка, встановіть клієнт Tailscale.',
+        notInstall: 'Tailscale не знайдено! Будь ласка, встановіть його.',
         install: 'Встановити',
         installing: 'Встановлення',
         failed: 'Не вдалося встановити',
@@ -212,8 +278,8 @@ const uk = {
         download: 'Завантажте',
         package: 'пакет встановлення',
         unzip: 'та розпакуйте його',
-        upTailscale: 'Завантажте tailscale до каталогу /usr/bin/ на NanoKVM',
-        upTailscaled: 'Завантажте tailscaled до каталогу /usr/sbin/ на NanoKVM',
+        upTailscale: 'Завантажте Tailscale до каталогу /usr/bin/ на NanoKVM',
+        upTailscaled: 'Завантажте Tailscaled до каталогу /usr/sbin/ на NanoKVM',
         refresh: 'Оновіть поточну сторінку',
         notLogin:
           "Пристрій ще не прив'язаний. Будь ласка, увійдіть і прив'яжіть цей пристрій до вашого облікового запису.",
@@ -225,9 +291,10 @@ const uk = {
         deviceIP: 'IP пристрою',
         account: 'Обліковий запис',
         logout: 'Вийти',
-        logout2: 'Ви впевнені, що хочете вийти?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        logoutDesc: 'Ви впевнені, що хочете вийти?',
+        uninstall: 'Видалити Tailscale',
+        okBtn: 'Так',
+        cancelBtn: 'Ні'
       },
       update: {
         title: 'Перевірити оновлення',
@@ -237,15 +304,33 @@ const uk = {
         available: 'Доступне оновлення. Ви впевнені, що хочете оновити?',
         updating: 'Оновлення розпочато. Будь ласка, зачекайте...',
         confirm: 'Підтвердити',
-        cancel: 'Скасувати'
+        cancel: 'Скасувати',
+        preview: 'О бета релізах',
+        previewDesc: 'Отримайте ранній доступ до нових функцій та вдосконалень',
+        previewTip:
+          'Будь ласка, майте на увазі, що випуски бета релізів можуть містити помилки або неповну функціональність!'
       },
       account: {
-        title: 'Account',
-        webAccount: 'Web Account Name',
-        password: 'Password',
-        updateBtn: 'Update',
-        logoutBtn: 'Logout'
+        title: 'Обліковий запис',
+        webAccount: "Ім'я облыкового запису у веб-інтерфейсі",
+        password: 'Пароль',
+        updateBtn: 'Зміна',
+        logoutBtn: 'Вийти',
+        logoutDesc: 'Ви впевнені, що хочете вийти?',
+        okBtn: 'Так',
+        cancelBtn: 'Ні'
       }
+    },
+    error: {
+      title: "Ми зіткнулися з проблемою",
+      refresh: 'Оновити'
+    },
+    fullscreen: {
+      toggle: 'Перемикатися на повному екрані'
+    },
+    menu: {
+      collapse: 'Згорнути меню',
+      expand: 'Розгорнути меню'
     }
   }
 };
