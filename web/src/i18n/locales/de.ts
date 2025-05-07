@@ -62,8 +62,8 @@ const de = {
       qualityLow: 'Niedrig',
       frameDetect: 'Bilderkennung',
       frameDetectTip:
-        "Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.",
-      resetHdmi: 'Reset HDMI'
+        'Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.',
+      resetHdmi: 'HDMI zurücksetzen'
     },
     keyboard: {
       title: 'Tastatur',
@@ -84,8 +84,8 @@ const de = {
       grab: 'Greif Cursor',
       hide: 'Versteck Cursor',
       mode: 'Maus Modus',
-      absolute: 'Absolut Modus',
-      relative: 'Relativ Modus',
+      absolute: 'Absoluter Modus',
+      relative: 'Relativer Modus',
       requestPointer: 'Nutze relativer Modus. Um den Mauszeiger zu sehen, klicken Sie auf den Desktop.',
       resetHid: 'HID zurücksetzen',
       hidOnly: {
