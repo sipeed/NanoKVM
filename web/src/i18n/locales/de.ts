@@ -82,11 +82,11 @@ const de = {
       cell: 'Zellen Cursor',
       text: 'Text Cursor',
       grab: 'Greif Cursor',
-      hide: 'Versteck Cursor',
+      hide: 'Versteckter Cursor',
       mode: 'Maus Modus',
       absolute: 'Absoluter Modus',
       relative: 'Relativer Modus',
-      requestPointer: 'Nutze relativer Modus. Um den Mauszeiger zu sehen, klicken Sie auf den Desktop.',
+      requestPointer: 'Relativer Modus aktiv. Klicken Sie auf den Desktop um den Mauszeiger zu sehen.',
       resetHid: 'HID zurücksetzen',
       hidOnly: {
         title: 'HID-Only Modus',
