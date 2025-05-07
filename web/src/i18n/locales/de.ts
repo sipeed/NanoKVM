@@ -1,4 +1,4 @@
-const en = {
+const de = {
   translation: {
     head: {
       desktop: 'Entfernter Desktop',
@@ -14,7 +14,7 @@ const en = {
       placeholderPassword2: 'Bitte Passwort erneut eingeben',
       noEmptyUsername: 'Benutzername benötigt',
       noEmptyPassword: 'Passwort benötigt',
-      noAccount: 'Abfragen der Benutzerdaten fehlgeschalgen, bitte die Seite neu laden oder Passwort zurücksetzen',
+      noAccount: 'Abfragen der Benutzerdaten fehlgeschlagen, bitte die Seite neu laden oder Passwort zurücksetzen',
       invalidUser: 'Falscher Benutzername oder falsches Passwort',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
@@ -52,7 +52,7 @@ const en = {
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
-        "Bildverzerrungen oder ein versetzter Mauszeiger kann bei bestimmten Auflösungen auftreten. Versuchen Sie, die Auflösung des entfernten Hosts anzupassen oder den automatischen Modus zu deaktivieren.",
+        "Bildverzerrungen oder ein versetzter Mauszeiger können bei bestimmten Auflösungen auftreten. Versuchen Sie, die Auflösung des entfernten Hosts anzupassen oder den automatischen Modus zu deaktivieren.",
       fps: 'FPS',
       customizeFps: 'Anpassen',
       quality: 'Qualität',
@@ -86,13 +86,13 @@ const en = {
       mode: 'Maus Modus',
       absolute: 'Absolut Modus',
       relative: 'Relativ Modus',
-      requestPointer: 'Nutze relativer Modus. Um Mauszeiger zu sehen, klicken Sie auf den Desktop.',
-      resetHid: 'Reset HID',
+      requestPointer: 'Nutze relativer Modus. Um den Mauszeiger zu sehen, klicken Sie auf den Desktop.',
+      resetHid: 'HID zurücksetzen',
       hidOnly: {
         title: 'HID-Only Modus',
-        desc: 'Wenn Ihre Maus und Tastatur nicht mehr reagieren und das Zurücksetzen der HID-Verbindung nicht hilft, könnte es sich um ein Kompatibilitätsproblem zwischen dem NanoKVM und dem Gerät handeln. Versuchen Sie, den HID-Only-Modus zu aktivieren, um die Kompatibilität zu verbessern.',
-        tip1: 'Die Aktivierung des HID-Only-Modus entfernt das virtuelle U-Laufwerk und das virtuelle Netzwerk.',
-        tip2: 'Im HID-Only Modus ist das Einbinden von Images deaktiviert.',
+        desc: 'Wenn Ihre Maus und Tastatur nicht mehr reagieren und das Zurücksetzen der HID-Verbindung nicht hilft, könnte es sich um ein Kompatibilitätsproblem zwischen dem NanoKVM und dem Gerät handeln. Versuchen Sie, den HID-Only Modus zu aktivieren, um die Kompatibilität zu verbessern.',
+        tip1: 'Die Aktivierung des HID-Only Modus entfernt das virtuelle U-Laufwerk und das virtuelle Netzwerk.',
+        tip2: 'Im HID-Only Modus ist das Einbinden von Systemabbilder deaktiviert.',
         tip3: 'NanoKVM wird nach dem Wechsel in den neuen Modus automatisch neu gestartet.',
         enable: 'HID-Only Modus aktivieren',
         disable: 'HID-Only Modus deaktivieren'
@@ -142,201 +142,201 @@ const en = {
       serial: 'Serieller Anschluss Terminal',
       serialPort: 'Serieller Anschluss',
       serialPortPlaceholder: 'Bitte seriellen Anschluss angeben',
-      baudrate: 'Baud rate',
-      parity: 'Parity',
-      parityNone: 'None',
-      parityEven: 'Even',
-      parityOdd: 'Odd',
-      flowControl: 'Flow control',
-      flowControlNone: 'None',
-      flowControlSoft: 'Soft',
-      flowControlHard: 'Hard',
-      dataBits: 'Data bits',
-      stopBits: 'Stop bits',
+      baudrate: 'Baudrate',
+      parity: 'Parität',
+      parityNone: 'Keine',
+      parityEven: 'Gerade',
+      parityOdd: 'Ungerade',
+      flowControl: 'Fluss-Kontrolle',
+      flowControlNone: 'Keine',
+      flowControlSoft: 'Wenig',
+      flowControlHard: 'Viel',
+      dataBits: 'Daten bits',
+      stopBits: 'Stopp bits',
       confirm: 'Ok'
     },
     wol: {
       title: 'Wake-on-LAN',
-      sending: 'Sending command...',
-      sent: 'Command sent',
-      input: 'Please enter the MAC',
+      sending: 'Sende Befehl...',
+      sent: 'Befehl gesendet',
+      input: 'Bitte MAC Adresse eingeben',
       ok: 'Ok'
     },
     download: {
-      title: 'Image Downloader',
-      input: 'Please enter a remote image URL',
+      title: 'Systemabbild Downloader',
+      input: 'Bitte geben Sie die URL für das Remote-Systemabbild ein',
       ok: 'Ok',
-      disabled: '/data partition is RO, so we cannot download the image'
+      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden'
     },
     power: {
       title: 'Power',
-      showConfirm: 'Confirmation',
-      showConfirmTip: 'Power operations require an extra confirmation',
-      reset: 'Reset',
+      showConfirm: 'Bestätigung',
+      showConfirmTip: 'Diese Aktionen benötigen eine zusätzliche Bestätigung',
+      reset: 'Zurücksetzen',
       power: 'Power',
-      powerShort: 'Power (short click)',
-      powerLong: 'Power (long click)',
-      resetConfirm: 'Proceed reset operation?',
-      powerConfirm: 'Proceed power operation?',
-      okBtn: 'Yes',
-      cancelBtn: 'No'
+      powerShort: 'Power (Kurzer Klick)',
+      powerLong: 'Power (Langer Klick)',
+      resetConfirm: 'Reset-Aktion durchführen?',
+      powerConfirm: 'Power-Aktion durchführen?',
+      okBtn: 'Ja',
+      cancelBtn: 'Nein'
     },
     settings: {
-      title: 'Settings',
+      title: 'Einstellungen',
       about: {
-        title: 'About NanoKVM',
-        information: 'Information',
+        title: 'Über NanoKVM',
+        information: 'Informationen',
         ip: 'IP',
         mdns: 'mDNS',
-        application: 'Application Version',
-        applicationTip: 'NanoKVM web application version',
-        image: 'Image Version',
-        imageTip: 'NanoKVM system image version',
-        deviceKey: 'Device Key',
+        application: 'Applikations-Version',
+        applicationTip: 'NanoKVM Web Applikations-Version',
+        image: 'Systemabbild-Version',
+        imageTip: 'NanoKVM Systemabbild-Version',
+        deviceKey: 'Geräte Schlüssel',
         community: 'Community',
         hostname: 'Hostname',
-        hostnameUpdated: 'Hostname updated. Reboot to apply.',
+        hostnameUpdated: 'Hostname aktualisiert. Neustarten um zu übernehmen.',
         ipType: {
-          'Wired': 'Wired',
-          'Wireless': 'Wireless',
-          'Other': 'Other'
+          'Wired': 'Kabel',
+          'Wireless': 'Drahtlos',
+          'Other': 'Andere'
         }
       },
       appearance: {
-        title: 'Appearance',
-        display: 'Display',
-        language: 'Language',
-        menuBar: 'Menu Bar',
-        menuBarDesc: 'Display icons in the menu bar',
-        webTitle: 'Web Title',
-        webTitleDesc: 'Customize the web page title'
+        title: 'Erscheinungsbild',
+        display: 'Bildschirm',
+        language: 'Sprache',
+        menuBar: 'Menu-Leiste',
+        menuBarDesc: 'Symbole in der Menu-Leiste anzeigen',
+        webTitle: 'Web Titel',
+        webTitleDesc: 'Passen Sie den Web-Seite Titel an'
       },
       device: {
-        title: 'Device',
+        title: 'Gerät',
         oled: {
           title: 'OLED',
-          description: 'Turn off OLED screen after',
-          0: 'Never',
-          15: '15 sec',
-          30: '30 sec',
-          60: '1 min',
-          180: '3 min',
-          300: '5 min',
-          600: '10 min',
-          1800: '30 min',
-          3600: '1 hour'
+          description: 'Schalte OLED Bildschirm aus nach',
+          0: 'Nie',
+          15: '15 Sek',
+          30: '30 Sek',
+          60: '1 Min',
+          180: '3 Min',
+          300: '5 Min',
+          600: '10 Min',
+          1800: '30 Min',
+          3600: '1 Stunde'
         },
         wifi: {
           title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          description: 'Wi-Fi konfigurieren',
+          setBtn: 'Konfigurieren'
         },
         ssh: {
-          description: 'Enable SSH remote access',
-          tip: 'Set a strong password before enabling (Account - Change Password)'
+          description: 'Aktiviere entfernten SSH-Zugang',
+          tip: 'Setzten Sie ein starkes Passwort vor dem aktivieren (Konto - Passwort ändern)'
         },
-        advanced: 'Advanced Settings',
+        advanced: 'Erweiterte Einstellungen',
         swap: {
           title: 'Swap',
-          disable: 'Disable',
-          description: 'Set the swap file size',
-          tip: "Enabling this feature could shorten your SD card's usable life!"
+          disable: 'Deaktivieren',
+          description: 'Grösse der Swap-Datei festlegen',
+          tip: "Das Aktivieren dieser Funktion kann die Lebensdauer Ihrer SD-Karte verkürzen!"
         },
         mouseJiggler: {
-          title: 'Mouse Jiggler',
-          description: 'Prevent the remote host from sleeping',
-          disable: 'Disable',
-          absolute: 'Absolute Mode',
-          relative: 'Relative Mode'
+          title: 'Mausaktivitäts-Simulator',
+          description: 'Verhindert, dass der remote Host in den Energiesparmodus wechselt',
+          disable: 'Deaktivieren',
+          absolute: 'Absoluter Modus',
+          relative: 'Relativer Modus'
         },
         mdns: {
-          description: 'Enable mDNS discovery service',
-          tip: "Turning it off if it's not needed"
+          description: 'mDNS-Erkennungsdienst aktivieren',
+          tip: "Deaktivieren Sie den Dienst, wenn Sie ihn nicht benötigen"
         },
         hidOnly: 'HID-Only Mode',
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
-        reboot: 'Reboot',
-        rebootDesc: 'Are you sure you want to reboot NanoKVM?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        disk: 'Virtuelle Festplatte',
+        diskDesc: 'Binde das virtuelle U-Laufwerk an den entfernten Host',
+        network: 'Virtuelles Netzwerk',
+        networkDesc: 'Binde die virtuelle Netzwerkkarte an den entfernten Host',
+        reboot: 'Neustarten',
+        rebootDesc: 'Sind Sie sicher dass Sie NanoKVM neustarten möchten?',
+        okBtn: 'Ja',
+        cancelBtn: 'Nein'
       },
       tailscale: {
         title: 'Tailscale',
         memory: {
-          title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. It's recommended to set to 75MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          title: 'Speicher Optimierung',
+          tip: "Wenn die Speichernutzung das Limit überschreitet, wird die Speicherbereinigung aggressiver durchgeführt, um Speicher freizugeben. Es wird empfohlen, den Wert auf 75 MB zu setzen, wenn Tailscale verwendet wird. Ein Neustart von Tailscale ist erforderlich, damit die Änderung wirksam wird.",
+          disable: 'Deaktivieren'
         },
-        restart: 'Restart Tailscale?',
-        stop: 'Stop Tailscale?',
-        stopDesc: 'Log out Tailscale and disable automatic startup on boot.',
-        loading: 'Loading...',
-        notInstall: 'Tailscale not found! Please install.',
-        install: 'Install',
-        installing: 'Installing',
-        failed: 'Install failed',
-        retry: 'Please refresh and try again. Or try to install manually',
-        download: 'Download the',
-        package: 'installation package',
-        unzip: 'and unzip it',
-        upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
-        upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
-        refresh: 'Refresh current page',
+        restart: 'Tailscale neu starten?',
+        stop: 'Tailscale stoppen?',
+        stopDesc: 'Von Tailscale abmelden und automatischen Start beim Booten deaktivieren.',
+        loading: 'Lädt...',
+        notInstall: 'Tailscale nicht gefunden! Bitte installieren.',
+        install: 'Installieren',
+        installing: 'Installiere',
+        failed: 'Installation fehlgeschlagen',
+        retry: 'Bitte Seite neu laden und erneut versuchen oder manuelle Installation versuchen.',
+        download: 'Laden Sie das',
+        package: 'Installations-Paket herunter',
+        unzip: 'und entpacken Sie es',
+        upTailscale: 'Tailscale nach /usr/bin/ auf NanoKVM hochladen',
+        upTailscaled: 'Tailscaled nach /usr/bin/ auf NanoKVM hochladen',
+        refresh: 'Aktuelle Seite neu laden',
         notLogin:
-          'The device has not been bound yet. Please login and bind this device to your account.',
-        urlPeriod: 'This url is valid for 10 minutes',
-        login: 'Login',
-        loginSuccess: 'Login Success',
-        enable: 'Enable Tailscale',
-        deviceName: 'Device Name',
-        deviceIP: 'Device IP',
-        account: 'Account',
-        logout: 'Logout',
-        logoutDesc: 'Are you sure you want to logout?',
-        uninstall: 'Uninstall Tailscale',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+          'Das Gerät konnte noch nicht gefunden werden. Bitte melden Sie sich an und verknüpfen Sie dieses Gerät mit Ihrem Konto.',
+        urlPeriod: 'Diese URL ist für 10 Minuten gültig',
+        login: 'Anmelden',
+        loginSuccess: 'Anmeldung erfolgreich',
+        enable: 'Tailscale einschalten',
+        deviceName: 'Geräte Name',
+        deviceIP: 'Geräte IP',
+        account: 'Konto',
+        logout: 'Abmelden',
+        logoutDesc: 'Möchten Sie sich wirklich abmelden?',
+        uninstall: 'Tailscale deinstallieren',
+        okBtn: 'Ja',
+        cancelBtn: 'Nein'
       },
       update: {
-        title: 'Check for Updates',
-        queryFailed: 'Get version failed',
-        updateFailed: 'Update failed. Please retry.',
-        isLatest: 'You already have the latest version.',
-        available: 'An update is available. Are you sure you want to update now?',
-        updating: 'Update started. Please wait...',
-        confirm: 'Confirm',
-        cancel: 'Cancel',
-        preview: 'Preview Updates',
-        previewDesc: 'Get early access to new features and improvements',
+        title: 'Nach Aktualisierungen suchen',
+        queryFailed: 'Version konnte nicht abgefragt werden',
+        updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+        isLatest: 'Sie haben bereits die aktuellste Version.',
+        available: 'Eine Aktualisierung ist verfügbar. Möchten sie diese jetzt durchführen?',
+        updating: 'Aktualisierung gestartet. Bitte warten...',
+        confirm: 'Bestätigen',
+        cancel: 'Abbrechen',
+        preview: 'Vorab-Versionen',
+        previewDesc: 'Erhalten Sie vorab Zugriff auf neue Funktionen und Verbesserungen',
         previewTip:
-          'Please be aware that preview releases may contain bugs or incomplete functionality!'
+          'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!'
       },
       account: {
-        title: 'Account',
-        webAccount: 'Web Account Name',
-        password: 'Password',
-        updateBtn: 'Change',
-        logoutBtn: 'Logout',
-        logoutDesc: 'Are you sure you want to logout?',
-        okBtn: 'Yes',
-        cancelBtn: 'No'
+        title: 'Konto',
+        webAccount: 'Web Konto Name',
+        password: 'Passwort',
+        updateBtn: 'Ändern',
+        logoutBtn: 'Abmelden',
+        logoutDesc: 'Möchten Sie sich wirklich abmelden?',
+        okBtn: 'Ja',
+        cancelBtn: 'Nein'
       }
     },
     error: {
-      title: "We've ran into an issue",
-      refresh: 'Refresh'
+      title: "Wir sind auf ein Problem gestossen",
+      refresh: 'Neuladen'
     },
     fullscreen: {
-      toggle: 'Toggle Fullscreen'
+      toggle: 'Vollbild ein/aus'
     },
     menu: {
-      collapse: 'Collapse Menu',
-      expand: 'Expand Menu'
+      collapse: 'Menu einblenden',
+      expand: 'Menu verbergen'
     }
   }
 };
 
-export default en;
+export default de;
