@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -58,7 +60,6 @@ func run() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
-
 	if conf.Authentication == "disable" {
 		r.Use(cors.AllowAll())
 	}
@@ -67,24 +68,41 @@ func run() {
 
 	httpAddr := fmt.Sprintf(":%d", conf.Port.Http)
 	httpsAddr := fmt.Sprintf(":%d", conf.Port.Https)
-	log.Printf("proto: %s, port: %d %d\n", conf.Proto, conf.Port.Http, conf.Port.Https)
 
 	if conf.Proto == "https" {
-		r.Use(middleware.Tls())
-
 		go func() {
-			if err := r.Run(httpAddr); err != nil {
-				panic("start http server failed")
+			r.Use(middleware.Tls())
+			err := r.RunTLS(httpsAddr, conf.Cert.Crt, conf.Cert.Key)
+			if err != nil {
+				panic("start https server failed")
 			}
 		}()
 
-		if err := r.RunTLS(httpsAddr, conf.Cert.Crt, conf.Cert.Key); err != nil {
-			panic("start https server failed")
-		}
+		runRedirect(httpAddr, httpsAddr)
 	} else {
 		if err := r.Run(httpAddr); err != nil {
 			panic("start http server failed")
 		}
+	}
+}
+
+func runRedirect(httpPort string, httpsPort string) {
+	err := http.ListenAndServe(httpPort, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		host := req.Host
+		if strings.Contains(host, httpPort) {
+			host = strings.Split(host, httpPort)[0]
+		}
+
+		targetURL := "https://" + host + req.URL.String()
+		if httpsPort != ":443" {
+			targetURL = "https://" + host + httpsPort + req.URL.String()
+		}
+
+		http.Redirect(w, req, targetURL, http.StatusTemporaryRedirect)
+	}))
+
+	if err != nil {
+		panic("start http server failed")
 	}
 }
 

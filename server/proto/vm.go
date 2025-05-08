@@ -128,3 +128,7 @@ type SetWebTitleReq struct {
 type GetWebTitleRsp struct {
 	Title string `json:"title"`
 }
+
+type SetTlsReq struct {
+	Enabled bool `validate:"omitempty"`
+}

@@ -74,8 +74,7 @@ export const Screen = () => {
       <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
-      {videoMode === 'h264' && <Gop gop={gop} setGop={setGop} />}
-      {videoMode === 'mjpeg' && <FrameDetect />}
+      {videoMode === 'mjpeg' ? <FrameDetect /> : <Gop gop={gop} setGop={setGop} />}
       <Reset />
     </div>
   );

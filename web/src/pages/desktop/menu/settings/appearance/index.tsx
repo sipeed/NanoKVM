@@ -13,13 +13,13 @@ export const Appearance = () => {
       <div className="text-base font-bold">{t('settings.appearance.title')}</div>
       <Divider />
 
-      <Language />
+      <div className="flex flex-col space-y-6">
+        <Language />
+        <WebTitle />
+      </div>
       <Divider />
 
       <MenuBar />
-      <Divider />
-
-      <WebTitle />
     </>
   );
 };

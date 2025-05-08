@@ -132,6 +132,11 @@ export function disableMdns() {
   return http.post('/api/vm/mdns/disable');
 }
 
+// enable / disable TLS
+export function setTLS(enabled: boolean) {
+  return http.post('/api/vm/tls', { enabled });
+}
+
 // reboot
 export function reboot() {
   return http.post('/api/vm/system/reboot');

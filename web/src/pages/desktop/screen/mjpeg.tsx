@@ -23,7 +23,7 @@ export const Mjpeg = () => {
   }, [resolution]);
 
   return (
-    <div className={clsx('flex h-screen w-screen items-start justify-center xl:items-center')}>
+    <div className="flex h-screen w-screen items-start justify-center xl:items-center">
       <Image
         id="screen"
         className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}

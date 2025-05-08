@@ -49,6 +49,7 @@ const en = {
     screen: {
       title: 'Screen',
       video: 'Video Mode',
+      videoDirectTips: 'Enable HTTPS in "Settings > Device" to use this mode',
       resolution: 'Resolution',
       auto: 'Automatic',
       autoTips:
@@ -197,9 +198,9 @@ const en = {
         hostname: 'Hostname',
         hostnameUpdated: 'Hostname updated. Reboot to apply.',
         ipType: {
-          'Wired': 'Wired',
-          'Wireless': 'Wireless',
-          'Other': 'Other'
+          Wired: 'Wired',
+          Wireless: 'Wireless',
+          Other: 'Other'
         }
       },
       appearance: {
@@ -234,6 +235,10 @@ const en = {
         ssh: {
           description: 'Enable SSH remote access',
           tip: 'Set a strong password before enabling (Account - Change Password)'
+        },
+        tls: {
+          description: 'Enable HTTPS protocol',
+          tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
         },
         advanced: 'Advanced Settings',
         swap: {

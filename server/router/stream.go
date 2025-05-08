@@ -2,6 +2,7 @@ package router
 
 import (
 	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/service/stream/direct"
 	"NanoKVM-Server/service/stream/h264"
 	"NanoKVM-Server/service/stream/mjpeg"
 
@@ -15,5 +16,6 @@ func streamRouter(r *gin.Engine) {
 	api.POST("/stream/mjpeg/detect", mjpeg.UpdateFrameDetect)    // update frame detect
 	api.POST("/stream/mjpeg/detect/stop", mjpeg.StopFrameDetect) // temporary stop frame detect
 
-	api.GET("/stream/h264", h264.Connect) // h264 stream
+	api.GET("/stream/h264", h264.Connect)          // h264 stream (webrtc)
+	api.GET("/stream/h264/direct", direct.Connect) // h264 stream (http)
 }

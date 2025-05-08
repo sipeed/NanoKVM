@@ -13,6 +13,7 @@ import { MouseJiggler } from './mouse-jiggler.tsx';
 import { Oled } from './oled.tsx';
 import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
+import { Tls } from './tls.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
 
@@ -35,11 +36,17 @@ export const Device = () => {
       <Divider />
 
       <div className="flex flex-col space-y-6">
-        <Oled />
-        <Wifi />
+        <Tls />
         <Ssh />
         <Mdns />
+
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
+      </div>
+      <Divider />
+
+      <div className="flex flex-col space-y-6">
+        <Oled />
+        <Wifi />
         <MouseJiggler />
       </div>
       <Divider />

@@ -31,12 +31,15 @@ export const Power = () => {
     };
   }, []);
 
-  function getLed() {
-    api.getGpio().then((rsp: any) => {
+  async function getLed() {
+    try {
+      const rsp = await api.getGpio();
       if (rsp.code === 0) {
         setIsPowerOn(rsp.data.pwr);
       }
-    });
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   function updateShowConfirm(value: boolean) {

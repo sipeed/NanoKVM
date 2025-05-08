@@ -46,7 +46,9 @@ const zh = {
       finishBtn: '完成'
     },
     screen: {
+      title: '屏幕',
       video: '视频模式',
+      videoDirectTips: '该模式需启用 HTTPS，请前往「设置 - 设备」中开启',
       resolution: '分辨率',
       auto: '自动',
       autoTips:
@@ -214,6 +216,10 @@ const zh = {
         ssh: {
           description: '启用 SSH 远程访问',
           tip: '启用前请务必设置强密码（帐号 - 修改密码）'
+        },
+        tls: {
+          description: '启用 HTTPS 协议',
+          tip: '注意：使用 HTTPS 可能导致延迟增加，特别是在 MJPEG 视频模式下。'
         },
         advanced: '高级设置',
         swap: {

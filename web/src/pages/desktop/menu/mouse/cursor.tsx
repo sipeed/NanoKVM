@@ -44,7 +44,7 @@ export const Cursor = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={true} trigger="hover">
+    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <MousePointerIcon size={18} />
         <span>{t('mouse.cursor')}</span>

@@ -50,8 +50,9 @@ export const Fps = ({ fps, setFps }: FpsProps) => {
 
     setFps(value);
     setCookie(value);
-
-    isCustomize && setIsCustomize(false);
+    if (isCustomize) {
+      setIsCustomize(false);
+    }
   }
 
   const content = (
@@ -82,7 +83,7 @@ export const Fps = ({ fps, setFps }: FpsProps) => {
           </>
         ) : (
           <>
-            <div className="flex h-[14px] w-[20px] items-end text-blue-500 ">
+            <div className="flex h-[14px] w-[20px] items-end text-blue-500">
               <CheckIcon size={14} />
             </div>
             <span>Customize</span>
@@ -106,7 +107,7 @@ export const Fps = ({ fps, setFps }: FpsProps) => {
   );
 
   return (
-    <Popover content={content} placement="rightTop">
+    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <ScanBarcodeIcon size={18} />
         <span className="select-none text-sm">{t('screen.fps')}</span>

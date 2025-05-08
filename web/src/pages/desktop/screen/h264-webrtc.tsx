@@ -8,7 +8,7 @@ import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
-export const H264 = () => {
+export const H264Webrtc = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
 
@@ -88,7 +88,7 @@ export const H264 = () => {
 
     setTimeout(() => {
       setIsLoading(false);
-    }, 15 * 1000);
+    }, 5 * 1000);
 
     return () => {
       ws.close();
@@ -101,7 +101,7 @@ export const H264 = () => {
 
   return (
     <Spin size="large" tip="Loading" spinning={isLoading}>
-      <div className={clsx('flex h-screen w-screen items-start justify-center xl:items-center')}>
+      <div className="flex h-screen w-screen items-start justify-center xl:items-center">
         <video
           id="screen"
           className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
