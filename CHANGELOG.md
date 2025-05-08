@@ -1,3 +1,13 @@
+## 2.2.7 [e18ec22](https://github.com/sipeed/NanoKVM/commit/e18ec2219d22886529575d1fdaad5c320e05f5b2) (2025-05-08)
+
+* feat: add HTTPS support
+* feat: support direct H.264 streaming over HTTP
+* Localization
+  * update Russian translation (thanks to [polyzium](https://github.com/polyzium))
+  * update Dutch translation (thanks to [LeonStraathof](https://github.com/LeonStraathof))
+  * update Ukrainian translation (thanks to [click0](https://github.com/click0))
+  * update German translation (thanks to [3limin4tor](https://github.com/3limin4tor))
+
 ## 2.2.6 [c83dc55](https://github.com/sipeed/NanoKVM/commit/c83dc5565c9dbed22336661a8832edbd93a06d11) (2025-04-17)
 
 * feat: add mouse jiggler to prevent system sleep
