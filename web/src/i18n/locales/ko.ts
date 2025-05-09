@@ -40,9 +40,9 @@ const ko = {
     },
     wifi: {
       title: 'Wi-Fi',
-      description: 'Wi-Fi 설정 for NanoKVM',
+      description: 'NanoKVM Wi-Fi 설정',
       success: 'NanoKVM의 네트워크 상태를 확인하고 새 IP 주소로 접속하세요.',
-      failed: '작업이 실패했습니다. 다시 시도하세요.',
+      failed: '작업에 실패했습니다. 다시 시도하세요.',
       confirmBtn: '확인',
       finishBtn: '완료'
     },
