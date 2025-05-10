@@ -64,7 +64,9 @@ const en = {
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Reset HDMI',
+      enableHdmi: 'Enable HDMI',
+      disableHdmi: 'Disable HDMI',
     },
     keyboard: {
       title: 'Keyboard',

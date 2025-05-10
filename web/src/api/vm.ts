@@ -62,6 +62,29 @@ export function resetHdmi() {
   return http.post('/api/vm/hdmi/reset');
 }
 
+// get HDMI state
+export function getHdmiState() {
+  return http.get('/api/vm/hdmi');
+}
+
+// enable HDMI
+export function enableHdmi() {
+  return http.post('/api/vm/hdmi/enable');
+}
+
+// disable HDMI
+export function disableHdmi() {
+  return http.post('/api/vm/hdmi/disable');
+}
+
+// set HDMI state
+export function setHdmiState(state: string) {
+  if (state === 'enabled') {
+    return enableHdmi();
+  }
+  return disableHdmi();
+}
+
 // get SSH state
 export function getSSHState() {
   return http.get('/api/vm/ssh');
