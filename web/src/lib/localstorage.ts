@@ -143,8 +143,13 @@ export function setKeyboardLayout(layout: string) {
   localStorage.setItem(KEYBOARD_LAYOUT_KEY, layout);
 }
 
-export function getKeyboardLayout() {
-  return localStorage.getItem(KEYBOARD_LAYOUT_KEY);
+export function getKeyboardLayout(): string {
+  // Return 'azerty' or 'qwerty' (or 'qwerty' if not defined)
+  const layout = localStorage.getItem(KEYBOARD_LAYOUT_KEY);
+  if (layout === 'azerty' || layout === 'mac' || layout === 'rus') {
+    return layout;
+  }
+  return 'default';
 }
 
 export function setSkipModifyPassword(skip: boolean) {

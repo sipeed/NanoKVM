@@ -73,7 +73,8 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      layout: 'Keyboard Layout'
     },
     mouse: {
       title: 'Mouse',
@@ -210,7 +211,8 @@ const en = {
         menuBar: 'Menu Bar',
         menuBarDesc: 'Display icons in the menu bar',
         webTitle: 'Web Title',
-        webTitleDesc: 'Customize the web page title'
+        webTitleDesc: 'Customize the web page title',
+        keyboardLayout: 'Keyboard Layout'
       },
       device: {
         title: 'Device',

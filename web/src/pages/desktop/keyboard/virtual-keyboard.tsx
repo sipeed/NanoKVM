@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { AppleOutlined, WindowsOutlined } from '@ant-design/icons';
-import { ConfigProvider, Segmented, theme } from 'antd';
+import { XIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
-import { XIcon } from 'lucide-react';
 import Keyboard, { KeyboardButtonTheme } from 'react-simple-keyboard';
 import { Drawer } from 'vaul';
 
@@ -12,7 +10,7 @@ import '@/assets/styles/keyboard.css';
 
 import { useMediaQuery } from 'react-responsive';
 
-import { getKeyboardLayout, setKeyboardLayout, getLanguage } from '@/lib/localstorage.ts';
+import { getKeyboardLayout } from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
@@ -26,22 +24,50 @@ import {
   specialKeyMap
 } from './virtual-keys.ts';
 
+// Helper function to map keys per active layout
+function getKeyCode(key: string, layout: string) {
+  // AZERTY: map < > key (next to left-shift) to OEM_102 usage (100)
+  if (layout === 'azerty' && key === 'Backquote_azerty') {
+    return KeyboardCodes.get('Backquote_azerty');
+  }
+
+  // AZERTY: swap A↔Q and Z↔W on French physical positions
+  if (layout === 'azerty' && key.endsWith('_azerty')) {
+    const base = key.replace('_azerty', '');
+    if (base === 'KeyA')   return KeyboardCodes.get('KeyQ');
+    if (base === 'KeyQ')   return KeyboardCodes.get('KeyA');
+    if (base === 'KeyZ')   return KeyboardCodes.get('KeyW');
+    if (base === 'KeyW')   return KeyboardCodes.get('KeyZ');
+    // all other labels use their own code
+    return KeyboardCodes.get(base);
+  }
+
+  // default (QWERTY / Mac / Rus)
+  return KeyboardCodes.get(key);
+}
+
 export const VirtualKeyboard = () => {
   const isBigScreen = useMediaQuery({ minWidth: 850 });
-
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
-
-  const [layout, setLayout] = useState('default');
+  const [layout, setLayout] = useState(getKeyboardLayout() || 'default');
   const [activeModifierKeys, setActiveModifierKeys] = useState<string[]>([]);
-
   const keyboardRef = useRef<any>(null);
 
+  // Update the layout when it changes in settings
   useEffect(() => {
-    const keyboardLayout = getKeyboardLayout();
-    if (keyboardLayout && ['default', 'mac', 'rus'].includes(keyboardLayout)) {
-      setLayout(keyboardLayout);
+    // Function to check if the layout has changed
+    const checkLayout = () => {
+      const currentLayout = getKeyboardLayout() || 'default';
+      if (currentLayout !== layout) {
+        setLayout(currentLayout);
+      }
+    };
+
+    // Check for layout changes every time the keyboard is opened
+    if (isKeyboardOpen) {
+      checkLayout();
     }
-  }, []);
+  }, [isKeyboardOpen, layout]);
 
   function onKeyPress(key: string) {
     if (modifierKeys.includes(key)) {
@@ -67,7 +93,8 @@ export const VirtualKeyboard = () => {
 
   function sendKeydown(key: string) {
     const specialKey = specialKeyMap.get(key);
-    const code = KeyboardCodes.get(specialKey ? specialKey : key);
+    const code = getKeyCode(specialKey ? specialKey : key, layout);
+
     if (!code) {
       console.log('unknown code: ', key);
       return;
@@ -132,11 +159,6 @@ export const VirtualKeyboard = () => {
     return theme;
   }
 
-  function selectLayout(value: string) {
-    setKeyboardLayout(value);
-    setLayout(value);
-  }
-
   return (
     <Drawer.Root open={isKeyboardOpen} onOpenChange={setIsKeyboardOpen} modal={false}>
       <Drawer.Portal>
@@ -148,22 +170,14 @@ export const VirtualKeyboard = () => {
         >
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
-            <div className="flex flex-row">
-              <ConfigProvider
-                theme={{
-                  algorithm: theme.defaultAlgorithm
-                }}
-              >
-                <Segmented
-                  options={[
-                    { label: 'Win', value: 'default', icon: <WindowsOutlined /> },
-                    { label: 'Mac', value: 'mac', icon: <AppleOutlined /> },
-                    ...(getLanguage() === 'ru' ? [{ label: 'Rus', value: 'rus', icon: <WindowsOutlined /> }] : [])
-                  ]}
-                  value={layout}
-                  onChange={selectLayout}
-                />
-              </ConfigProvider>
+            <div className="keyboard-header text-sm font-medium px-2">
+              {layout === 'default'
+                ? 'QWERTY (Win)'
+                : layout === 'mac'
+                ? 'QWERTY (Mac)'
+                : layout === 'azerty'
+                ? 'AZERTY (Win)'
+                : 'Russian'}
             </div>
 
             <div className="flex w-[100px] items-center justify-end">
