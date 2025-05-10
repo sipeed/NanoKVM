@@ -26,6 +26,14 @@ export const keyboardOptions = {
       '{capslock} RusA RusS RusD RusF RusG RusH RusJ RusK RusL RusSemicolon RusQuote {enter}',
       '{shiftleft} RusZ RusX RusC RusV RusB RusN RusM RusComma RusPeriod RusSlash {shiftright}',
       '{controlleft} {winleft} {altleft} {space} {altright} {winright} {menu} {controlright}'
+    ],
+    azerty: [
+      '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
+      'Backquote_azerty Digit1_azerty Digit2_azerty Digit3_azerty Digit4_azerty Digit5_azerty Digit6_azerty Digit7_azerty Digit8_azerty Digit9_azerty Digit0_azerty Minus_azerty Equal_azerty {backspace}',
+      '{tab} KeyA_azerty KeyZ_azerty KeyE_azerty KeyR_azerty KeyT_azerty KeyY_azerty KeyU_azerty KeyI_azerty KeyO_azerty KeyP_azerty BracketLeft_azerty BracketRight_azerty Backslash_azerty',
+      '{capslock} KeyQ_azerty KeyS_azerty KeyD_azerty KeyF_azerty KeyG_azerty KeyH_azerty KeyJ_azerty KeyK_azerty KeyL_azerty Semicolon_azerty Quote_azerty {enter}',
+      '{shiftleft} KeyW_azerty KeyX_azerty KeyC_azerty KeyV_azerty KeyB_azerty KeyN_azerty KeyM_azerty Comma_azerty Period_azerty Slash_azerty {shiftright}',
+      '{controlleft} {winleft} {altleft} {space} {altright} {winright} {menu} {controlright}'
     ]
   },
   display: {
@@ -134,7 +142,71 @@ export const keyboardOptions = {
     RusComma: 'Б',
     RusPeriod: 'Ю',
     RusSlash: ',<br/>.',
-  }
+
+    // AZERTY specific display keys
+    // Row 1
+    'Backquote_azerty': '&#60;<br/>&#62;',
+    'Digit1_azerty': '&<br/>1',
+    'Digit2_azerty': 'é<br/>2',
+    'Digit3_azerty': '"<br/>#',
+    'Digit4_azerty': '\'<br/>{',
+    'Digit5_azerty': '(<br/>[',
+    'Digit6_azerty': '-<br/>|',
+    'Digit7_azerty': 'è<br/>`',
+    'Digit8_azerty': '_<br/>\\',
+    'Digit9_azerty': 'ç<br/>^',
+    'Digit0_azerty': 'à<br/>@',
+    'Minus_azerty': ')<br/>]',
+    'Equal_azerty': '=<br/>}',
+
+    // Row 2
+    'KeyA_azerty': 'A',
+    'KeyZ_azerty': 'Z',
+    'KeyE_azerty': 'E<br/>€',
+    'KeyR_azerty': 'R',
+    'KeyT_azerty': 'T',
+    'KeyY_azerty': 'Y',
+    'KeyU_azerty': 'U',
+    'KeyI_azerty': 'I',
+    'KeyO_azerty': 'O',
+    'KeyP_azerty': 'P',
+    'BracketLeft_azerty': '¨<br/>^',
+    'BracketRight_azerty': '£<br/>$',
+    'Backslash_azerty': 'µ<br/>*',
+
+    // Row 3
+    'KeyQ_azerty': 'Q',
+    'KeyS_azerty': 'S',
+    'KeyD_azerty': 'D',
+    'KeyF_azerty': 'F',
+    'KeyG_azerty': 'G',
+    'KeyH_azerty': 'H',
+    'KeyJ_azerty': 'J',
+    'KeyK_azerty': 'K',
+    'KeyL_azerty': 'L',
+    'Semicolon_azerty': 'M',
+    'Quote_azerty': '%<br/>ù',
+
+    // Row 4
+    'KeyW_azerty': 'W',
+    'KeyX_azerty': 'X',
+    'KeyC_azerty': 'C',
+    'KeyV_azerty': 'V',
+    'KeyB_azerty': 'B',
+    'KeyN_azerty': 'N',
+    'KeyM_azerty': '?<br/>,',
+    'Comma_azerty': '.<br/>;',
+    'Period_azerty': '/<br/>:',
+    'Slash_azerty': '§<br/>!',
+  },
+  // Enable layout-specific display
+  mergeDisplay: true,
+  layoutCandidates: {
+    default: 'default',
+    shift: 'shift',
+    azerty: 'azerty'
+  },
+  // ...remaining options...
 };
 
 // control keys

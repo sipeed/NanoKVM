@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Language } from './language.tsx';
 import { MenuBar } from './menu-bar.tsx';
 import { WebTitle } from './web-title.tsx';
+import { KeyboardLayout } from './keyboard-layout.tsx';
 
 export const Appearance = () => {
   const { t } = useTranslation();
@@ -16,6 +17,7 @@ export const Appearance = () => {
       <div className="flex flex-col space-y-6">
         <Language />
         <WebTitle />
+        <KeyboardLayout />
       </div>
       <Divider />
 
