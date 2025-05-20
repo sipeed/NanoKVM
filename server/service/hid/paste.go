@@ -21,152 +21,94 @@ type PasteReq struct {
 func (s *Service) Paste(c *gin.Context) {
 	var req PasteReq
 	var rsp proto.Response
-
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
-
 	if len(req.Content) > 1024 {
-		rsp.ErrRsp(c, -2, "")
+		rsp.ErrRsp(c, -2, "content too long")
 		return
 	}
-
 	s.hid.kbMutex.Lock()
+	defer s.hid.kbMutex.Unlock()
+	keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+
 	for _, char := range req.Content {
 		key, ok := charMap[char]
 		if !ok {
-			log.Debugf("unknown key %c", char)
+			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
 		}
-
 		keyDown := []byte{byte(key.Modifiers), 0x00, byte(key.Code), 0x00, 0x00, 0x00, 0x00, 0x00}
-		keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-
-		// only handle shift. Need to handle all modifiers?
-		if key.Modifiers > 0 {
-			keyShift := []byte{0x00, 0x00, byte(225), 0x00, 0x00, 0x00, 0x00, 0x00}
-			s.hid.Write(s.hid.g0, keyShift)
-		}
-
 		s.hid.Write(s.hid.g0, keyDown)
 		s.hid.Write(s.hid.g0, keyUp)
-
-		if key.Modifiers > 0 {
-			s.hid.Write(s.hid.g0, keyUp)
-		}
-
 		time.Sleep(50 * time.Millisecond)
 	}
-	s.hid.kbMutex.Unlock()
 
 	rsp.OkRsp(c)
-	log.Debugf("hid paste success, total %d", len(req.Content))
+	log.Debugf("hid paste success, total %d characters processed", len(req.Content))
 }
-
 var charMap = map[rune]Char{
-	97:  {0, 4},  // a
-	98:  {0, 5},  // b
-	99:  {0, 6},  // c
-	100: {0, 7},  // d
-	101: {0, 8},  // e
-	102: {0, 9},  // f
-	103: {0, 10}, // g
-	104: {0, 11}, // h
-	105: {0, 12}, // i
-	106: {0, 13}, // j
-	107: {0, 14}, // k
-	108: {0, 15}, // l
-	109: {0, 16}, // m
-	110: {0, 17}, // n
-	111: {0, 18}, // o
-	112: {0, 19}, // p
-	113: {0, 20}, // q
-	114: {0, 21}, // r
-	115: {0, 22}, // s
-	116: {0, 23}, // t
-	117: {0, 24}, // u
-	118: {0, 25}, // v
-	119: {0, 26}, // w
-	120: {0, 27}, // x
-	121: {0, 28}, // y
-	122: {0, 29}, // z
+	// Lowercase letters
+	'a': {0, 4}, 'b': {0, 5}, 'c': {0, 6}, 'd': {0, 7}, 'e': {0, 8},
+	'f': {0, 9}, 'g': {0, 10}, 'h': {0, 11}, 'i': {0, 12}, 'j': {0, 13},
+	'k': {0, 14}, 'l': {0, 15}, 'm': {0, 16}, 'n': {0, 17}, 'o': {0, 18},
+	'p': {0, 19}, 'q': {0, 20}, 'r': {0, 21}, 's': {0, 22}, 't': {0, 23},
+	'u': {0, 24}, 'v': {0, 25}, 'w': {0, 26}, 'x': {0, 27}, 'y': {0, 28},
+	'z': {0, 29},
 
-	49: {0, 30}, // 1
-	50: {0, 31}, // 2
-	51: {0, 32}, // 3
-	52: {0, 33}, // 4
-	53: {0, 34}, // 5
-	54: {0, 35}, // 6
-	55: {0, 36}, // 7
-	56: {0, 37}, // 8
-	57: {0, 38}, // 9
-	48: {0, 39}, // 0
+	// Uppercase letters (Modifier 2 typically means Left Shift)
+	'A': {2, 4}, 'B': {2, 5}, 'C': {2, 6}, 'D': {2, 7}, 'E': {2, 8},
+	'F': {2, 9}, 'G': {2, 10}, 'H': {2, 11}, 'I': {2, 12}, 'J': {2, 13},
+	'K': {2, 14}, 'L': {2, 15}, 'M': {2, 16}, 'N': {2, 17}, 'O': {2, 18},
+	'P': {2, 19}, 'Q': {2, 20}, 'R': {2, 21}, 'S': {2, 22}, 'T': {2, 23},
+	'U': {2, 24}, 'V': {2, 25}, 'W': {2, 26}, 'X': {2, 27}, 'Y': {2, 28},
+	'Z': {2, 29},
 
-	10: {0, 40}, // Enter
-	9:  {0, 43}, // Tab
-	32: {0, 44}, // Space
-	45: {0, 45}, // -
-	61: {0, 46}, // =
-	91: {0, 47}, // [
-	93: {0, 48}, // ]
-	92: {0, 49}, // \
+	// Numbers
+	'1': {0, 30}, '2': {0, 31}, '3': {0, 32}, '4': {0, 33}, '5': {0, 34},
+	'6': {0, 35}, '7': {0, 36}, '8': {0, 37}, '9': {0, 38}, '0': {0, 39},
 
-	59: {0, 51}, // ;
-	39: {0, 52}, // '
-	96: {0, 53}, // `
-	44: {0, 54}, // ,
-	46: {0, 55}, // .
-	47: {0, 56}, // /
+	// Shifted numbers / Symbols
+	'!': {2, 30}, // Shift + 1
+	'@': {2, 31}, // Shift + 2
+	'#': {2, 32}, // Shift + 3
+	'$': {2, 33}, // Shift + 4
+	'%': {2, 34}, // Shift + 5
+	'^': {2, 35}, // Shift + 6
+	'&': {2, 36}, // Shift + 7
+	'*': {2, 37}, // Shift + 8
+	'(': {2, 38}, // Shift + 9
+	')': {2, 39}, // Shift + 0
 
-	65: {2, 4},  // A
-	66: {2, 5},  // B
-	67: {2, 6},  // C
-	68: {2, 7},  // D
-	69: {2, 8},  // E
-	70: {2, 9},  // F
-	71: {2, 10}, // G
-	72: {2, 11}, // H
-	73: {2, 12}, // I
-	74: {2, 13}, // J
-	75: {2, 14}, // K
-	76: {2, 15}, // L
-	77: {2, 16}, // M
-	78: {2, 17}, // N
-	79: {2, 18}, // O
-	80: {2, 19}, // P
-	81: {2, 20}, // Q
-	82: {2, 21}, // R
-	83: {2, 22}, // S
-	84: {2, 23}, // T
-	85: {2, 24}, // U
-	86: {2, 25}, // V
-	87: {2, 26}, // W
-	88: {2, 27}, // X
-	89: {2, 28}, // Y
-	90: {2, 29}, // Z
+	// Other common characters
+	'\n': {0, 40}, // Enter (Return)
+	'\t': {0, 43}, // Tab
+	' ':  {0, 44}, // Space
+	'-':  {0, 45}, // Hyphen / Minus
+	'=':  {0, 46}, // Equals
+	'[':  {0, 47}, // Left Square Bracket
+	']':  {0, 48}, // Right Square Bracket
+	'\\': {0, 49}, // Backslash
 
-	33: {2, 30}, // !
-	64: {2, 31}, // @
-	35: {2, 32}, // #
-	36: {2, 33}, // $
-	37: {2, 34}, // %
-	94: {2, 35}, // ^
-	38: {2, 36}, // &
-	42: {2, 37}, // *
-	40: {2, 38}, // (
-	41: {2, 39}, // )
+	';':  {0, 51}, // Semicolon
+	'\'': {0, 52}, // Apostrophe / Single Quote
+	'`':  {0, 53}, // Grave Accent / Backtick
+	',':  {0, 54}, // Comma
+	'.':  {0, 55}, // Period / Dot
+	'/':  {0, 56}, // Slash
 
-	95:  {2, 45}, // _
-	43:  {2, 46}, // +
-	123: {2, 47}, // {
-	125: {2, 48}, // }
-	124: {2, 49}, // |
+	// Shifted symbols
+	'_':  {2, 45}, // Underscore (Shift + Hyphen)
+	'+':  {2, 46}, // Plus (Shift + Equals)
+	'{':  {2, 47}, // Left Curly Brace (Shift + Left Square Bracket)
+	'}':  {2, 48}, // Right Curly Brace (Shift + Right Square Bracket)
+	'|':  {2, 49}, // Pipe (Shift + Backslash)
 
-	58:  {2, 51}, // :
-	34:  {2, 52}, // "
-	126: {2, 53}, // ~
-	60:  {2, 54}, // <
-	62:  {2, 55}, // >
-	63:  {2, 56}, // ?
+	':':  {2, 51}, // Colon (Shift + Semicolon)
+	'"':  {2, 52}, // Double Quote (Shift + Apostrophe)
+	'~':  {2, 53}, // Tilde (Shift + Grave Accent)
+	'<':  {2, 54}, // Less Than (Shift + Comma)
+	'>':  {2, 55}, // Greater Than (Shift + Period)
+	'?':  {2, 56}, // Question Mark (Shift + Slash)
 }
