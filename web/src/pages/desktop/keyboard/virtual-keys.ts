@@ -1,3 +1,5 @@
+// TODO: refactor it
+
 // main keys
 export const keyboardOptions = {
   theme: 'simple-keyboard hg-theme-default',
@@ -119,7 +121,7 @@ export const keyboardOptions = {
     RusBracketLeft: 'Х',
     RusBracketRight: 'Ъ',
     RusBackslash: '/<br>\\',
-  
+
     RusA: 'Ф',
     RusS: 'Ы',
     RusD: 'В',
@@ -145,59 +147,59 @@ export const keyboardOptions = {
 
     // AZERTY specific display keys
     // Row 1
-    'Backquote_azerty': '&#60;<br/>&#62;',
-    'Digit1_azerty': '&<br/>1',
-    'Digit2_azerty': 'é<br/>2',
-    'Digit3_azerty': '"<br/>#',
-    'Digit4_azerty': '\'<br/>{',
-    'Digit5_azerty': '(<br/>[',
-    'Digit6_azerty': '-<br/>|',
-    'Digit7_azerty': 'è<br/>`',
-    'Digit8_azerty': '_<br/>\\',
-    'Digit9_azerty': 'ç<br/>^',
-    'Digit0_azerty': 'à<br/>@',
-    'Minus_azerty': ')<br/>]',
-    'Equal_azerty': '=<br/>}',
+    Backquote_azerty: '&#60;<br/>&#62;',
+    Digit1_azerty: '&<br/>1',
+    Digit2_azerty: 'é<br/>2',
+    Digit3_azerty: '"<br/>#',
+    Digit4_azerty: "'<br/>{",
+    Digit5_azerty: '(<br/>[',
+    Digit6_azerty: '-<br/>|',
+    Digit7_azerty: 'è<br/>`',
+    Digit8_azerty: '_<br/>\\',
+    Digit9_azerty: 'ç<br/>^',
+    Digit0_azerty: 'à<br/>@',
+    Minus_azerty: ')<br/>]',
+    Equal_azerty: '=<br/>}',
 
     // Row 2
-    'KeyA_azerty': 'A',
-    'KeyZ_azerty': 'Z',
-    'KeyE_azerty': 'E<br/>€',
-    'KeyR_azerty': 'R',
-    'KeyT_azerty': 'T',
-    'KeyY_azerty': 'Y',
-    'KeyU_azerty': 'U',
-    'KeyI_azerty': 'I',
-    'KeyO_azerty': 'O',
-    'KeyP_azerty': 'P',
-    'BracketLeft_azerty': '¨<br/>^',
-    'BracketRight_azerty': '£<br/>$',
-    'Backslash_azerty': 'µ<br/>*',
+    KeyA_azerty: 'A',
+    KeyZ_azerty: 'Z',
+    KeyE_azerty: 'E<br/>€',
+    KeyR_azerty: 'R',
+    KeyT_azerty: 'T',
+    KeyY_azerty: 'Y',
+    KeyU_azerty: 'U',
+    KeyI_azerty: 'I',
+    KeyO_azerty: 'O',
+    KeyP_azerty: 'P',
+    BracketLeft_azerty: '¨<br/>^',
+    BracketRight_azerty: '£<br/>$',
+    Backslash_azerty: 'µ<br/>*',
 
     // Row 3
-    'KeyQ_azerty': 'Q',
-    'KeyS_azerty': 'S',
-    'KeyD_azerty': 'D',
-    'KeyF_azerty': 'F',
-    'KeyG_azerty': 'G',
-    'KeyH_azerty': 'H',
-    'KeyJ_azerty': 'J',
-    'KeyK_azerty': 'K',
-    'KeyL_azerty': 'L',
-    'Semicolon_azerty': 'M',
-    'Quote_azerty': '%<br/>ù',
+    KeyQ_azerty: 'Q',
+    KeyS_azerty: 'S',
+    KeyD_azerty: 'D',
+    KeyF_azerty: 'F',
+    KeyG_azerty: 'G',
+    KeyH_azerty: 'H',
+    KeyJ_azerty: 'J',
+    KeyK_azerty: 'K',
+    KeyL_azerty: 'L',
+    Semicolon_azerty: 'M',
+    Quote_azerty: '%<br/>ù',
 
     // Row 4
-    'KeyW_azerty': 'W',
-    'KeyX_azerty': 'X',
-    'KeyC_azerty': 'C',
-    'KeyV_azerty': 'V',
-    'KeyB_azerty': 'B',
-    'KeyN_azerty': 'N',
-    'KeyM_azerty': '?<br/>,',
-    'Comma_azerty': '.<br/>;',
-    'Period_azerty': '/<br/>:',
-    'Slash_azerty': '§<br/>!',
+    KeyW_azerty: 'W',
+    KeyX_azerty: 'X',
+    KeyC_azerty: 'C',
+    KeyV_azerty: 'V',
+    KeyB_azerty: 'B',
+    KeyN_azerty: 'N',
+    KeyM_azerty: '?<br/>,',
+    Comma_azerty: '.<br/>;',
+    Period_azerty: '/<br/>:',
+    Slash_azerty: '§<br/>!'
   },
   // Enable layout-specific display
   mergeDisplay: true,
@@ -205,7 +207,7 @@ export const keyboardOptions = {
     default: 'default',
     shift: 'shift',
     azerty: 'azerty'
-  },
+  }
   // ...remaining options...
 };
 

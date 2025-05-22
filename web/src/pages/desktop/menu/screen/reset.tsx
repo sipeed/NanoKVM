@@ -32,7 +32,7 @@ export const Reset = () => {
 
   return (
     <>
-      {isPcie ? (
+      {isPcie && (
         <div
           className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70"
           onClick={reset}
@@ -43,8 +43,6 @@ export const Reset = () => {
           />
           <span className="select-none text-sm">{t('screen.resetHdmi')}</span>
         </div>
-      ) : (
-        <></>
       )}
     </>
   );

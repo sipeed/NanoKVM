@@ -85,6 +85,9 @@ const zh = {
       mode: '鼠标模式',
       absolute: '绝对模式',
       relative: '相对模式',
+      speed: '滚轮速度',
+      fast: '快',
+      slow: '慢',
       requestPointer: '正在使用鼠标相对模式，请点击桌面获取鼠标指针。',
       resetHid: '重置 HID',
       hidOnly: {
@@ -237,6 +240,9 @@ const zh = {
         mdns: {
           description: '启用 mDNS 发现服务',
           tip: '如果您未使用此功能，建议将其关闭'
+        },
+        hdmi: {
+          description: '启用 HDMI/显示器 输出功能'
         },
         hidOnly: 'HID-Only 模式',
         disk: '虚拟U盘',

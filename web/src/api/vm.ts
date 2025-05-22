@@ -78,8 +78,8 @@ export function disableHdmi() {
 }
 
 // set HDMI state
-export function setHdmiState(state: string) {
-  if (state === 'enabled') {
+export function setHdmiState(enabled: boolean) {
+  if (enabled) {
     return enableHdmi();
   }
   return disableHdmi();

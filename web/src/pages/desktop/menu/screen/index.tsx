@@ -16,7 +16,6 @@ import { Quality } from './quality';
 import { Reset } from './reset.tsx';
 import { Resolution } from './resolution';
 import { VideoMode } from './video-mode.tsx';
-import { HdmiState } from './hdmi-state.tsx';
 
 export const Screen = () => {
   const { t } = useTranslation();
@@ -77,7 +76,6 @@ export const Screen = () => {
       <Fps fps={fps} setFps={setFps} />
       {videoMode === 'mjpeg' ? <FrameDetect /> : <Gop gop={gop} setGop={setGop} />}
       <Reset />
-      <HdmiState />
     </div>
   );
 

@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { XIcon } from 'lucide-react';
+import { AppleOutlined, WindowsOutlined } from '@ant-design/icons';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
+import { XIcon } from 'lucide-react';
 import Keyboard, { KeyboardButtonTheme } from 'react-simple-keyboard';
 import { Drawer } from 'vaul';
 
 import 'react-simple-keyboard/build/css/index.css';
 import '@/assets/styles/keyboard.css';
 
+import { ConfigProvider, Segmented, Select, theme } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 
-import { getKeyboardLayout } from '@/lib/localstorage.ts';
+import * as storage from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
@@ -24,50 +26,60 @@ import {
   specialKeyMap
 } from './virtual-keys.ts';
 
-// Helper function to map keys per active layout
-function getKeyCode(key: string, layout: string) {
-  // AZERTY: map < > key (next to left-shift) to OEM_102 usage (100)
-  if (layout === 'azerty' && key === 'Backquote_azerty') {
-    return KeyboardCodes.get('Backquote_azerty');
-  }
-
-  // AZERTY: swap A↔Q and Z↔W on French physical positions
-  if (layout === 'azerty' && key.endsWith('_azerty')) {
-    const base = key.replace('_azerty', '');
-    if (base === 'KeyA')   return KeyboardCodes.get('KeyQ');
-    if (base === 'KeyQ')   return KeyboardCodes.get('KeyA');
-    if (base === 'KeyZ')   return KeyboardCodes.get('KeyW');
-    if (base === 'KeyW')   return KeyboardCodes.get('KeyZ');
-    // all other labels use their own code
-    return KeyboardCodes.get(base);
-  }
-
-  // default (QWERTY / Mac / Rus)
-  return KeyboardCodes.get(key);
-}
-
 export const VirtualKeyboard = () => {
   const isBigScreen = useMediaQuery({ minWidth: 850 });
+
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
-  const [layout, setLayout] = useState(getKeyboardLayout() || 'default');
+
+  const [keyboardLayout, setKeyboardLayout] = useState('default');
+  const [keyboardSystem, setKeyboardSystem] = useState('win');
+  const [keyboardLanguage, setKeyboardLanguage] = useState('en');
   const [activeModifierKeys, setActiveModifierKeys] = useState<string[]>([]);
+
   const keyboardRef = useRef<any>(null);
 
-  // Update the layout when it changes in settings
-  useEffect(() => {
-    // Function to check if the layout has changed
-    const checkLayout = () => {
-      const currentLayout = getKeyboardLayout() || 'default';
-      if (currentLayout !== layout) {
-        setLayout(currentLayout);
-      }
-    };
+  const systems = [
+    { value: 'win', icon: <WindowsOutlined /> },
+    { value: 'mac', icon: <AppleOutlined /> }
+  ];
 
-    // Check for layout changes every time the keyboard is opened
-    if (isKeyboardOpen) {
-      checkLayout();
+  const languages = [
+    { value: 'en', label: 'English' },
+    { value: 'fr', label: 'French' },
+    { value: 'ru', label: 'Russian' }
+  ];
+
+  useEffect(() => {
+    const system = storage.getKeyboardSystem();
+    if (system && ['win', 'mac'].includes(system)) {
+      setKeyboardSystem(system);
     }
-  }, [isKeyboardOpen, layout]);
+
+    const language = storage.getKeyboardLanguage();
+    if (language && languages.some((lng) => lng.value === language)) {
+      setKeyboardLanguage(language);
+    }
+  }, []);
+
+  useEffect(() => {
+    const layoutMap = new Map([
+      ['en', 'default'],
+      ['ru', 'rus'],
+      ['fr', 'azerty']
+    ]);
+
+    if (keyboardLanguage === 'en' && keyboardSystem === 'mac') {
+      setKeyboardLayout('mac');
+      return;
+    }
+
+    if (layoutMap.has(keyboardLanguage)) {
+      setKeyboardLayout(layoutMap.get(keyboardLanguage)!);
+      return;
+    }
+
+    setKeyboardLayout('default');
+  }, [keyboardSystem, keyboardLanguage]);
 
   function onKeyPress(key: string) {
     if (modifierKeys.includes(key)) {
@@ -92,9 +104,7 @@ export const VirtualKeyboard = () => {
   }
 
   function sendKeydown(key: string) {
-    const specialKey = specialKeyMap.get(key);
-    const code = getKeyCode(specialKey ? specialKey : key, layout);
-
+    const code = getKeyCode(key);
     if (!code) {
       console.log('unknown code: ', key);
       return;
@@ -103,6 +113,26 @@ export const VirtualKeyboard = () => {
     const modifiers = sendModifierKeyDown();
 
     client.send([1, code, ...modifiers]);
+  }
+
+  function getKeyCode(key: string) {
+    // AZERTY: swap A↔Q and Z↔W on French physical positions
+    if (keyboardLanguage === 'fr' && key.endsWith('_azerty')) {
+      const base = key.replace('_azerty', '');
+      if (base === 'KeyA') return KeyboardCodes.get('KeyQ');
+      if (base === 'KeyQ') return KeyboardCodes.get('KeyA');
+      if (base === 'KeyZ') return KeyboardCodes.get('KeyW');
+      if (base === 'KeyW') return KeyboardCodes.get('KeyZ');
+      // all other labels use their own code
+      return KeyboardCodes.get(base);
+    }
+
+    const specialKey = specialKeyMap.get(key);
+    if (specialKey) {
+      return KeyboardCodes.get(specialKey);
+    }
+
+    return KeyboardCodes.get(key);
   }
 
   function sendKeyup() {
@@ -148,6 +178,16 @@ export const VirtualKeyboard = () => {
     setActiveModifierKeys([]);
   }
 
+  function selectSystem(system: string) {
+    setKeyboardSystem(system);
+    storage.setKeyboardSystem(system);
+  }
+
+  function selectLanguage(language: string) {
+    setKeyboardLanguage(language);
+    storage.setKeyboardLanguage(language);
+  }
+
   function getButtonTheme(): KeyboardButtonTheme[] {
     const theme = [{ class: 'hg-double', buttons: doubleKeys.join(' ') }];
 
@@ -170,15 +210,30 @@ export const VirtualKeyboard = () => {
         >
           {/* header */}
           <div className="flex items-center justify-between px-3 py-1">
-            <div className="keyboard-header text-sm font-medium px-2">
-              {layout === 'default'
-                ? 'QWERTY (Win)'
-                : layout === 'mac'
-                ? 'QWERTY (Mac)'
-                : layout === 'azerty'
-                ? 'AZERTY (Win)'
-                : 'Russian'}
-            </div>
+            <ConfigProvider
+              theme={{
+                algorithm: theme.defaultAlgorithm
+              }}
+            >
+              <div className="flex items-center space-x-5">
+                <Select
+                  size="small"
+                  style={{ minWidth: 90 }}
+                  defaultValue={keyboardLanguage}
+                  options={languages}
+                  onChange={selectLanguage}
+                />
+
+                {keyboardLanguage === 'en' && (
+                  <Segmented
+                    size="small"
+                    options={systems}
+                    value={keyboardSystem}
+                    onChange={selectSystem}
+                  />
+                )}
+              </div>
+            </ConfigProvider>
 
             <div className="flex w-[100px] items-center justify-end">
               <div
@@ -199,7 +254,7 @@ export const VirtualKeyboard = () => {
               keyboardRef={(r) => (keyboardRef.current = r)}
               onKeyPress={onKeyPress}
               onKeyReleased={onKeyReleased}
-              layoutName={layout}
+              layoutName={keyboardLayout}
               {...keyboardOptions}
             />
 

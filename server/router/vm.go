@@ -35,8 +35,9 @@ func vmRouter(r *gin.Engine) {
 	api.GET("/vm/oled", service.GetOLED)  // get OLED configuration
 	api.POST("/vm/oled", service.SetOLED) // set OLED configuration
 
+	// Only supported by PCIe version
 	api.GET("/vm/hdmi", service.GetHdmiState)         // get HDMI state
-	api.POST("/vm/hdmi/reset", service.ResetHdmi)     // reset hdmi (pcie only)
+	api.POST("/vm/hdmi/reset", service.ResetHdmi)     // reset hdmi
 	api.POST("/vm/hdmi/enable", service.EnableHdmi)   // enable hdmi
 	api.POST("/vm/hdmi/disable", service.DisableHdmi) // disable hdmi
 

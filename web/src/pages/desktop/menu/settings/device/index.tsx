@@ -7,6 +7,7 @@ import * as api from '@/api/hid.ts';
 import { hidModeAtom } from '@/jotai/mouse.ts';
 
 import { Advanced } from './advanced';
+import { Hdmi } from './hdmi.tsx';
 import { HidMode } from './hid-mode.tsx';
 import { Mdns } from './mdns.tsx';
 import { MouseJiggler } from './mouse-jiggler.tsx';
@@ -39,6 +40,7 @@ export const Device = () => {
         <Tls />
         <Ssh />
         <Mdns />
+        <Hdmi />
 
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
       </div>

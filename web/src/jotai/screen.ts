@@ -2,6 +2,8 @@ import { atom } from 'jotai';
 
 import { Resolution } from '@/types';
 
+export const isHdmiEnabledAtom = atom(true);
+
 // video mode
 // direct: stream H.264 over HTTP
 // h264: stream H.264 over WebRTC

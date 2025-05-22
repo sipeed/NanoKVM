@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
+import Queue from 'yocto-queue';
 
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse';
@@ -11,11 +12,13 @@ export const H264Direct = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
 
-  const canvasRef = useRef<any>(null);
-  const decoderRef = useRef<any>(null);
-  const frameQueueRef = useRef<VideoFrame[]>([]);
+  const canvasRef = useRef<any>();
   const renderingRef = useRef(false);
+  const decoderRef = useRef<VideoDecoder | null>(null);
 
+  const frameQueue = new Queue<VideoFrame>();
+
+  // init websocket
   useEffect(() => {
     if (!window.VideoDecoder) {
       console.log('Error: WebCodecs API not supported.');
@@ -42,11 +45,9 @@ export const H264Direct = () => {
       }
     };
 
-    ws.onerror = (err) => {
-      console.log(err);
+    ws.onerror = () => {
       resetDecoder();
     };
-
     ws.onclose = () => {
       resetDecoder();
     };
@@ -59,6 +60,7 @@ export const H264Direct = () => {
     };
   }, []);
 
+  // init video decoder
   function initializeDecoder() {
     if (!window.VideoDecoder) {
       return;
@@ -69,7 +71,11 @@ export const H264Direct = () => {
 
     const init = {
       output: (frame: VideoFrame) => {
-        frameQueueRef.current.push(frame);
+        frameQueue.enqueue(frame);
+        if (frameQueue.size >= 10) {
+          frameQueue.dequeue()?.close();
+        }
+
         if (!renderingRef.current) {
           requestAnimationFrame(processFrameQueue);
         }
@@ -94,6 +100,7 @@ export const H264Direct = () => {
     }
   }
 
+  // decode video chunk
   function decode(message: any) {
     const byteString = atob(message.data);
     const byteArray = new Uint8Array(byteString.length);
@@ -108,7 +115,7 @@ export const H264Direct = () => {
     });
 
     try {
-      decoderRef.current.decode(chunk);
+      decoderRef.current?.decode(chunk);
     } catch (err: any) {
       if (err.name === 'TypeError' || err.message.includes('configured')) {
         resetDecoder();
@@ -116,22 +123,18 @@ export const H264Direct = () => {
     }
   }
 
-  const processFrameQueue = () => {
+  function processFrameQueue() {
     renderingRef.current = true;
-    const frame = frameQueueRef.current.shift();
+
+    const frame = frameQueue.dequeue();
     if (frame) {
       renderFrame(frame);
     }
 
-    if (frameQueueRef.current.length === 0) {
-      renderingRef.current = false;
-      return;
-    }
-
     requestAnimationFrame(processFrameQueue);
-  };
+  }
 
-  const renderFrame = (frame: any) => {
+  function renderFrame(frame: VideoFrame) {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) {
@@ -146,9 +149,10 @@ export const H264Direct = () => {
 
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
     frame.close();
-  };
+  }
 
-  const resetDecoder = () => {
+  // reset video decoder
+  function resetDecoder() {
     if (decoderRef.current && decoderRef.current.state !== 'closed') {
       try {
         decoderRef.current.close();
@@ -160,9 +164,8 @@ export const H264Direct = () => {
     decoderRef.current = null;
     renderingRef.current = false;
 
-    frameQueueRef.current.forEach((frame) => frame.close());
-    frameQueueRef.current = [];
-  };
+    Array.from(frameQueue.drain()).forEach((frame) => frame.close());
+  }
 
   return (
     <div className="flex h-screen w-screen items-start justify-center xl:items-center">

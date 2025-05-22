@@ -1,15 +1,15 @@
 package vm
 
 import (
+	"time"
+
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/proto"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
 
-// ideally read state from the device
 var hdmiEnabled = true
 
 func (s *Service) ResetHdmi(c *gin.Context) {
@@ -53,15 +53,9 @@ func (s *Service) DisableHdmi(c *gin.Context) {
 func (s *Service) GetHdmiState(c *gin.Context) {
 	var rsp proto.Response
 
-	if hdmiEnabled {
-		rsp.OkRspWithData(c, &map[string]string{
-			"state": "enabled",
-		})
-	} else {
-		rsp.OkRspWithData(c, &map[string]string{
-			"state": "disabled",
-		})
-	}
+	rsp.OkRspWithData(c, &proto.GetGetHdmiStateRsp{
+		Enabled: hdmiEnabled,
+	})
 
 	log.Debug("get hdmi state")
 }

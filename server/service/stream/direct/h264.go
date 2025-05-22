@@ -21,9 +21,10 @@ type Frame struct {
 }
 
 var (
-	mutex    = sync.Mutex{}
-	wsMap    = make(map[*websocket.Conn]bool)
-	upgrader = websocket.Upgrader{
+	mutex     = sync.Mutex{}
+	wsMap     = make(map[*websocket.Conn]bool)
+	isSending = false
+	upgrader  = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -47,7 +48,7 @@ func Connect(c *gin.Context) {
 
 	mutex.Lock()
 	wsMap[ws] = true
-	if len(wsMap) == 1 {
+	if len(wsMap) == 1 && !isSending {
 		go send()
 	}
 	mutex.Unlock()
@@ -62,6 +63,7 @@ func Connect(c *gin.Context) {
 }
 
 func send() {
+	isSending = true
 	screen := common.GetScreen()
 	common.CheckScreen()
 
@@ -76,6 +78,7 @@ func send() {
 
 	for range ticker.C {
 		if len(wsMap) == 0 {
+			isSending = false
 			return
 		}
 

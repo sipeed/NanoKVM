@@ -87,6 +87,10 @@ type GetOLEDRsp struct {
 	Sleep int  `json:"sleep"`
 }
 
+type GetGetHdmiStateRsp struct {
+	Enabled bool `json:"enabled"`
+}
+
 type GetSSHStateRsp struct {
 	Enabled bool `json:"enabled"`
 }

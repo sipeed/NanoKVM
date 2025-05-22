@@ -64,9 +64,7 @@ const en = {
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
-      resetHdmi: 'Reset HDMI',
-      enableHdmi: 'Enable HDMI',
-      disableHdmi: 'Disable HDMI',
+      resetHdmi: 'Reset HDMI'
     },
     keyboard: {
       title: 'Keyboard',
@@ -75,8 +73,7 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del',
-      layout: 'Keyboard Layout'
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       title: 'Mouse',
@@ -90,6 +87,9 @@ const en = {
       mode: 'Mouse mode',
       absolute: 'Absolute mode',
       relative: 'Relative mode',
+      speed: 'Wheel speed',
+      fast: 'Fast',
+      slow: 'Slow',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
       resetHid: 'Reset HID',
       hidOnly: {
@@ -213,8 +213,7 @@ const en = {
         menuBar: 'Menu Bar',
         menuBarDesc: 'Display icons in the menu bar',
         webTitle: 'Web Title',
-        webTitleDesc: 'Customize the web page title',
-        keyboardLayout: 'Keyboard Layout'
+        webTitleDesc: 'Customize the web page title'
       },
       device: {
         title: 'Device',
@@ -261,6 +260,9 @@ const en = {
         mdns: {
           description: 'Enable mDNS discovery service',
           tip: "Turning it off if it's not needed"
+        },
+        hdmi: {
+          description: 'Enable HDMI/monitor output'
         },
         hidOnly: 'HID-Only Mode',
         disk: 'Virtual Disk',

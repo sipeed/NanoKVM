@@ -9,8 +9,10 @@ const GOP_KEY = 'nano-kvm-gop';
 const FRAME_DETECT_KEY = 'nano-kvm-frame-detect';
 const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
+const MOUSE_SCROLL_INTERVAL_KEY = 'nanokvm-kvm-mouse-scroll-interval';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
-const KEYBOARD_LAYOUT_KEY = 'nano-kvm-keyboard-layout';
+const KEYBOARD_SYSTEM_KEY = 'nano-kvm-keyboard-system';
+const KEYBOARD_LANGUAGE_KEY = 'nano-kvm-keyboard-language';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
@@ -129,6 +131,15 @@ export function setMouseMode(mouse: string) {
   localStorage.setItem(MOUSE_MODE_KEY, mouse);
 }
 
+export function getMouseScrollInterval() {
+  const interval = localStorage.getItem(MOUSE_SCROLL_INTERVAL_KEY);
+  return interval ? Number(interval) : null;
+}
+
+export function setMouseScrollInterval(interval: number): void {
+  localStorage.setItem(MOUSE_SCROLL_INTERVAL_KEY, String(interval));
+}
+
 export function getSkipUpdate() {
   const skip = getWithExpiry(SKIP_UPDATE_KEY);
   return skip === 'true';
@@ -139,17 +150,20 @@ export function setSkipUpdate(skip: boolean) {
   setWithExpiry(SKIP_UPDATE_KEY, String(skip), expiry);
 }
 
-export function setKeyboardLayout(layout: string) {
-  localStorage.setItem(KEYBOARD_LAYOUT_KEY, layout);
+export function setKeyboardSystem(system: string) {
+  localStorage.setItem(KEYBOARD_SYSTEM_KEY, system);
 }
 
-export function getKeyboardLayout(): string {
-  // Return 'azerty' or 'qwerty' (or 'qwerty' if not defined)
-  const layout = localStorage.getItem(KEYBOARD_LAYOUT_KEY);
-  if (layout === 'azerty' || layout === 'mac' || layout === 'rus') {
-    return layout;
-  }
-  return 'default';
+export function getKeyboardSystem() {
+  return localStorage.getItem(KEYBOARD_SYSTEM_KEY);
+}
+
+export function setKeyboardLanguage(language: string) {
+  localStorage.setItem(KEYBOARD_LANGUAGE_KEY, language);
+}
+
+export function getKeyboardLanguage() {
+  return localStorage.getItem(KEYBOARD_LANGUAGE_KEY);
 }
 
 export function setSkipModifyPassword(skip: boolean) {
