@@ -1,3 +1,15 @@
+## 2.2.8 [01e28f1](https://github.com/sipeed/NanoKVM/commit/01e28f10ae8b581d484bb6077ddfe7bbe4e57919) (2025-05-22)
+
+* feat: add AZERTY virtual keyboard Layout (thanks to [@felix068](https://github.com/felix068))
+* feat: add support for enabling/disabling HDMI output (PCIe version only) (thanks to [@tpretz](https://github.com/tpretz))
+* feat: add support for custom mouse wheel speed
+* fix: prevent direct H.264 stream buffer overflow and replay issues
+* perf: improve keyboard paste performance (thanks to [@ethanperrine](https://github.com/ethanperrine))
+* Localization
+  * update Korean translation (thanks to [@kmw0410](https://github.com/kmw0410))
+  * update Ukrainian translation (thanks to [@arbdevml](https://github.com/arbdevml))
+  * update Russian translation (thanks to [@arbdevml](https://github.com/arbdevml))
+
 ## 2.2.7 [e18ec22](https://github.com/sipeed/NanoKVM/commit/e18ec2219d22886529575d1fdaad5c320e05f5b2) (2025-05-08)
 
 * feat: add HTTPS support
