@@ -55,7 +55,7 @@ const ko = {
       autoTips:
         '일부 해상도에서는 화면이 왜곡되거나 마우스 동작이 비정상적으로 나타날 수 있습니다. 원격 컴퓨터의 해상도를 변경하거나 자동 설정 대신 수동 설정을 사용해 보세요.',
       fps: 'FPS',
-      customizeFps: 'FPS 설정',
+      customizeFps: '사용자 지정',
       quality: '품질',
       qualityLossless: '무손실',
       qualityHigh: '높음',
@@ -153,8 +153,8 @@ const ko = {
       parityOdd: '홀수',
       flowControl: '흐름 제어',
       flowControlNone: '없음',
-      flowControlSoft: '소프트',
-      flowControlHard: '하드',
+      flowControlSoft: '소프트웨어',
+      flowControlHard: '하드웨어',
       dataBits: '데이터 비트',
       stopBits: '정지 비트',
       confirm: '확인'
