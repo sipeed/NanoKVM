@@ -49,13 +49,13 @@ const ko = {
     screen: {
       title: '화면',
       video: '비디오 모드',
-      videoDirectTips: '이 모드를 사용하려면 "설정 > 장치"에서 HTTPS를 활성화하세요.',
+      videoDirectTips: '이 모드를 사용하려면 "설정 > 장치"에서 HTTPS를 활성화하세요',
       resolution: '해상도',
-      auto: '자동',
+      auto: '자동 설정',
       autoTips:
         '일부 해상도에서는 화면이 왜곡되거나 마우스 동작이 비정상적으로 나타날 수 있습니다. 원격 컴퓨터의 해상도를 변경하거나 자동 설정 대신 수동 설정을 사용해 보세요.',
       fps: 'FPS',
-      customizeFps: '사용자 지정',
+      customizeFps: 'FPS 설정',
       quality: '품질',
       qualityLossless: '무손실',
       qualityHigh: '높음',
@@ -87,8 +87,20 @@ const ko = {
       mode: '마우스 모드',
       absolute: '절대값 모드',
       relative: '상대값 모드',
+      speed: '휠 속도',
+      fast: '빠름',
+      slow: '느림',
       requestPointer: '상대값 모드를 사용 중입니다. 커서를 찾으려면 데스크톱을 클릭하세요.',
-      resetHid: 'HID 초기화'
+      resetHid: 'HID 초기화',
+      hidOnly: {
+        title: 'HID 전용 모드',
+        desc: '마우스와 키보드가 응답하지 않고 HID 초기화도 도움이 되지 않는다면, NanoKVM과 장치 간의 호환성 문제일 수 있습니다. 더 나은 호환성을 위해 HID 전용 모드를 활성화해 보세요.',
+        tip1: 'HID 전용 모드를 활성화하면 가상 USB와 가상 네트워크가 언마운트됩니다',
+        tip2: 'HID 전용 모드에서는 이미지 마운트가 비활성화됩니다',
+        tip3: '모드 전환 후 NanoKVM이 자동으로 재부팅됩니다',
+        enable: 'HID 전용 모드 활성화',
+        disable: 'HID 전용 모드 비활성화'
+      }
     },
     image: {
       title: '이미지',
@@ -122,7 +134,7 @@ const ko = {
       runBackground: '백그라운드에서 실행',
       runFailed: '실행 실패',
       attention: '주의',
-      delDesc: '이 파일을 정말로 삭제할까요?',
+      delDesc: '이 파일을 정말로 삭제합니까?',
       confirm: '네',
       cancel: '아니오',
       delete: '삭제',
@@ -141,8 +153,8 @@ const ko = {
       parityOdd: '홀수',
       flowControl: '흐름 제어',
       flowControlNone: '없음',
-      flowControlSoft: '소프트웨어',
-      flowControlHard: '하드웨어',
+      flowControlSoft: '소프트',
+      flowControlHard: '하드',
       dataBits: '데이터 비트',
       stopBits: '정지 비트',
       confirm: '확인'
@@ -151,32 +163,32 @@ const ko = {
       title: 'Wake-on-LAN',
       sending: '패킷 전송 중...',
       sent: '패킷 전송 완료',
-      input: 'MAC주소를 입력하세요',
+      input: 'MAC주소를 입력하세요.',
       ok: '확인'
     },
     download: {
-      title: '이미지 다운로더',
+      title: '이미지 다운로드',
       input: '원격 이미지 URL을 입력하세요.',
       ok: '확인',
-      disabled: '/data 파티션이 읽기 전용 상태이므로 이미지를 다운로드할 수 없습니다.'
+      disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.'
     },
     power: {
       title: '전원',
       showConfirm: '확인',
-      showConfirmTip: '전원 작업은 추가 확인이 필요합니다',
+      showConfirmTip: '전원 작업에는 추가 확인이 필요합니다',
       reset: '리셋',
       power: '전원',
       powerShort: '전원 (짧게 누르기)',
       powerLong: '전원 (길게 누르기)',
-      resetConfirm: '리셋 작업을 진행할까요?',
-      powerConfirm: '전원 작업을 진행할까요?',
+      resetConfirm: '리셋 작업을 진행하시겠습니까?',
+      powerConfirm: '전원 작업을 진행하시겠습니까?',
       okBtn: '네',
-      cacnelBtn: '아니오',
+      cancelBtn: '아니오'
     },
     settings: {
       title: '설정',
       about: {
-        title: 'NanoKVM에 대하여',
+        title: 'NanoKVM 정보',
         information: '정보',
         ip: 'IP',
         mdns: 'mDNS',
@@ -187,7 +199,7 @@ const ko = {
         deviceKey: '장치 키',
         community: '커뮤니티',
         hostname: '호스트 이름',
-        hostnameUpdated: '호스트 이름이 업데이트되었습니다. 재부팅하여 적용하세요.',
+        hostnameUpdated: '호스트 이름이 업데이트되었습니다. 적용하려면 재부팅하세요.',
         ipType: {
           Wired: '유선',
           Wireless: '무선',
@@ -199,7 +211,9 @@ const ko = {
         display: '표시',
         language: '언어',
         menuBar: '메뉴 바',
-        menuBarDesc: '메뉴 바에 아이콘을 표시'
+        menuBarDesc: '메뉴 바에 아이콘을 표시',
+        webTitle: '웹 제목',
+        webTitleDesc: '웹 페이지 제목 사용자 지정'
       },
       device: {
         title: '장치',
@@ -216,123 +230,123 @@ const ko = {
           1800: '30분',
           3600: '1시간'
         },
-      wifi: {
-        title: 'Wi-Fi',
-        description: 'Wi-Fi 설정',
-        setBtn: '설정'
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi 설정',
+          setBtn: '설정'
+        },
+        ssh: {
+          description: 'SSH 원격 접속 활성화',
+          tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
+        },
+        tls: {
+          description: 'HTTPS 프로토콜 활성화',
+          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
+        },
+        advanced: '고급 설정',
+        swap: {
+          title: '스왑',
+          disable: '비활성화',
+          description: '스왑 파일 크기 설정',
+          tip: '이 기능을 활성화하면 SD 카드의 수명이 단축될 수 있습니다!'
+        },
+        mouseJiggler: {
+          title: '마우스 흔들기',
+          description: '원격 호스트가 절전 모드로 진입하는 것을 방지',
+          disable: '비활성화',
+          absolute: '절대값 모드',
+          relative: '상대값 모드'
+        },
+        mdns: {
+          description: 'mDNS 검색 서비스 활성화',
+          tip: '사용하지 않는 경우 끄는 것이 좋습니다'
+        },
+        hdmi: {
+          description: 'HDMI/모니터 출력 활성화'
+        },
+        hidOnly: 'HID 전용 모드',
+        disk: '가상 디스크',
+        diskDesc: '원격 호스트에서 가상 USB를 마운트합니다.',
+        network: '가상 네트워크',
+        networkDesc: '원격 호스트에서 가상 네트워크 카드를 마운트합니다.',
+        reboot: '재부팅',
+        rebootDesc: 'NanoKVM을 재부팅하시겠습니까?',
+        okBtn: '네',
+        cancelBtn: '아니오'
       },
-      ssh: {
-        description: 'SSH 원격 접속 활성화',
-        tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
+      tailscale: {
+        title: 'Tailscale',
+        memory: {
+          title: '메모리 최적화',
+          tip: '메모리 사용량이 제한을 초과하면 가비지 컬렉션이 더 적극적으로 실행되어 메모리를 확보하려고 시도합니다. Tailscale을 사용할 경우 50MB로 설정하는 것이 좋습니다. 변경 사항을 적용하려면 Tailscale을 다시 시작해야 합니다.',
+          disable: '비활성화'
+        },
+        restart: '정말로 Tailscale을 다시 시작하시겠습니까?',
+        stop: '정말로 Tailscale을 중지하시겠습니까?',
+        stopDesc: 'Tailscale에서 로그아웃하고 자동 시작을 비활성화합니다.',
+        loading: '불러오는 중...',
+        notInstall: 'Tailscale이 없습니다. 설치해주세요.',
+        install: '설치',
+        installing: '설치중',
+        failed: '설치 실패',
+        retry: '새로고침하고 다시 시도하거나, 수동으로 설치하세요',
+        download: '다운로드 중 :',
+        package: '패키지 설치',
+        unzip: '압축 해제',
+        upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
+        upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
+        refresh: '현재 페이지 새로고침',
+        notLogin:
+          '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+        urlPeriod: '이 주소는 10분간 유효합니다.',
+        login: '로그인',
+        loginSuccess: '로그인 성공',
+        enable: 'Tailscale 활성화',
+        deviceName: '장치 이름',
+        deviceIP: '장치 IP',
+        account: '계정',
+        logout: '로그아웃',
+        logoutDesc: '정말로 로그아웃 하시겠습니까?',
+        logout2: '정말로 로그아웃 합니까?',
+        uninstall: 'Tailscale 제거',
+        okBtn: '네',
+        cancelBtn: '아니오'
       },
-      tls: {
-        description: 'HTTPS 프로트콜 활성화',
-        tip: '주의: HTTPS를 사용하면 지연 시간이 늘어날 수 있으며, 특히 MJPEG 비디오 모드에서 그 영향이 클 수 있습니다.'
+      update: {
+        title: '업데이트 확인',
+        queryFailed: '버전 확인 실패',
+        updateFailed: '업데이트 실패, 재시도하세요.',
+        isLatest: '이미 최신 버전입니다.',
+        available: '업데이트가 가능합니다. 정말로 업데이트 할까요?',
+        updating: '업데이트 시작. 잠시 기다려주세요...',
+        confirm: '확인',
+        cancel: '취소',
+        preview: '미리보기 업데이트',
+        previewDesc: '새로운 기능과 개선 사항에 미리 접근하세요',
+        previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!'
       },
-      advanced: '고급 설정',
-      swap: {
-        title: '스왑',
-        disable: '비활성화',
-        description: '스왑 파일의 사이즈를 설정하세요',
-        tip: "이 기능을 활성화하면 SD카드의 수명이 단축될 수 있습니다!"
-      },
-      mouseJiggler: {
-        title: '마우스 흔들기',
-        description: '원격 호스트가 절전 모드로 전환되는 것을 방지합니다',
-        disable: '비활성화',
-        absolute: '절대값 모드',
-        relative: '상대값 모드'
-      },
-      mdns: {
-        description: 'mDNS 탐색 서비스 활성화',
-        tip: '필요하지 않은 경우 비활성화하세요.'
-      },
-      hdmi: {
-        description: 'HDMI/모니터 출력 활성화'
-      },
-      hidOnly: 'HID 전용 모드',
-      disk: '가상 디스크',
-      diskDesc: '원격 호스트에서 가상 USB를 마운트합니다.', 
-      network: '가상 네트워크',
-      networkDesc: '원격 호스트에서 가상 네트워크 카드를 마운트합니다.',
-      reboot: '재부팅',
-      rebootDesc: 'NanoKVM을 재부팅 할까요?',
-      okBtn: '네',
-      cancelBtn: '아니오'
+      account: {
+        title: '계정',
+        webAccount: '웹 계정',
+        password: '비밀번호',
+        updateBtn: '업데이트',
+        logoutBtn: '로그아웃',
+        logoutDesc: '정말로 로그아웃 하시겠습니까?',
+        okBtn: '네',
+        cancelBtn: '아니오'
+      }
     },
-    tailscale: {
-      title: 'Tailscale',
-      memory: {
-        title: '메모리 최적화',
-        tip: '메모리 사용량이 제한을 초과하면 가비지 컬렉션이 더 적극적으로 실행되어 메모리를 확보하려고 시도합니다. Tailscale을 사용할 경우 50MB로 설정하는 것이 좋습니다. 변경 사항을 적용하려면 Tailscale을 다시 시작해야 합니다.',
-        disable: '비활성화'
-      },
-      restart: '정말로 Tailscale을 다시 시작하시겠습니까?',
-      stop: '정말로 Tailscale을 중지하시겠습니까?',
-      stopDesc: 'Tailscale에서 로그아웃하고 자동 시작을 비활성화합니다.',
-      loading: '불러오는 중...',
-      notInstall: 'Tailscale이 없습니다. 설치해주세요.',
-      install: '설치',
-      installing: '설치중',
-      failed: '설치 실패',
-      retry: '새로고침하고 다시 시도하거나, 수동으로 설치하세요',
-      download: '다운로드 중 :',
-      package: '패키지 설치',
-      unzip: '압축 해제',
-      upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
-      upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
-      refresh: '현재 페이지 새로고침',
-      notLogin:
-        '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
-      urlPeriod: '이 주소는 10분간 유효합니다.',
-      login: '로그인',
-      loginSuccess: '로그인 성공',
-      enable: 'Tailscale 활성화',
-      deviceName: '장치 이름',
-      deviceIP: '장치 IP',
-      account: '계정',
-      logout: '로그아웃',
-      logout2: '정말로 로그아웃 할까요?',
-      uninstall: 'Tailscale 제거',
-      okBtn: '네',
-      cancelBtn: '아니오'
+    error: {
+      title: '문제가 발생했습니다.',
+      refresh: '새로고침'
     },
-    update: {
-      title: '업데이트 확인',
-      queryFailed: '버전 확인 실패',
-      updateFailed: '업데이트 실패, 재시도하세요.',
-      isLatest: '이미 최신 버전입니다.',
-      available: '업데이트가 가능합니다. 정말로 업데이트 할까요?',
-      updating: '업데이트 시작. 잠시 기다려주세요...',
-      confirm: '확인',
-      cancel: '취소',
-      preview: '미리보기 업데이트',
-      preveiwDesc: '새 기능과 개선 사항을 미리 사용해 보세요',
-      previewTip:
-        '미리보기 버전에는 버그나 불완전한 기능이 포함되어 있을 수 있습니다!'
+    fullscreen: {
+      toggle: '전체 화면 전환'
     },
-    account: {
-      title: '계정',
-      webAccount: '웹 계정 이름',
-      password: '비밀번호',
-      updateBtn: '변경',
-      logoutBtn: '로그아웃',
-      logoutDesc: '정말로 로그아웃 할까요?',
-      okBtn: '네',
-      cancelBtn: '아니오'
+    menu: {
+      collapse: '메뉴 접기',
+      expand: '메뉴 펼치기'
     }
-  },
-  error: {
-    title: '문제가 발생했습니다.',
-    refresh: '새로고침'
-  },
-  fullscreen: {
-    toggle: '전체 화면 전환'
-  },
-  menu: {
-    collapse: '메뉴 축소',
-    expand: '메뉴 확장'
-  }
   }
 };
 
