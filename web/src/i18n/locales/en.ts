@@ -286,6 +286,8 @@ const en = {
         networkDesc: 'Mount virtual network card on the remote host',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+        usb: 'USB Interface',
+        usbDesc: 'Enable USB to host interface',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
