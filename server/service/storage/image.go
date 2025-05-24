@@ -16,7 +16,7 @@ import (
 
 const (
 	imageDirectory = "/data"
-	imageNone      = "/dev/mmcblk0p3"
+	imageNone      = ""
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
@@ -105,8 +105,9 @@ func (s *Service) MountImage(c *gin.Context) {
 
 	// reset usb
 	commands := []string{
-		"echo > /sys/kernel/config/usb_gadget/g0/UDC",
-		"ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC",
+		// this should not be required for media change, reset of the full gadget can break hid on some devices
+		//"echo > /sys/kernel/config/usb_gadget/g0/UDC",
+		//"ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC",
 	}
 
 	for _, command := range commands {
