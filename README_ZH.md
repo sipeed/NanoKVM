@@ -11,7 +11,7 @@ NanoKVM
     <a href="https://cn.dl.sipeed.com/shareURL/KVM/nanoKVM"> Hardware </a>
 </h3>
 
-[English](./README.md) | 中文 | [日本語](./README_JA.md)
+[English](./README.md) | 中文 | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 </div>
 
