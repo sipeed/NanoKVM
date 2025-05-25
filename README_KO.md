@@ -77,8 +77,8 @@ Lichee NanoKVM은 세 가지 버전으로 제공됩니다:
 | UART               | 2                                     | 2                                 | 1                                  |
 | TF 카드            | 없음                                  | ✓                                 | ✓                                  |
 | 확장          | 없음                                  | PoE                               | WiFi/LTE                           |
-| 전력 소모  | 0.2A@5V                               | 0.2A@5V                           | Peak 2.6A@5V                       |
-| 전원 입력        | PC USB can be powered                 | PC USB 또는 보조 전원 공급 장치  | DC 5V 3A 전원 공급 장치  |
+| 전력 소모  | 0.2A@5V                               | 0.2A@5V                           | 최대 2.6A@5V                       |
+| 전원 입력        | PC USB 전원 공급 가능                 | PC USB 또는 보조 전원 공급 장치  | DC 5V 3A 전원 공급 장치  |
 | 냉각            | 무소음 팬리스                        | 무소음 팬리스                    | 팬 냉각                        |
 | 크기               | 23x37x15mm   ～1/30 PiKVM V4 크기     | 40x36x36mm   ～1/7 PiKVM V4 크기  | 120x68x44mm                        |
 
