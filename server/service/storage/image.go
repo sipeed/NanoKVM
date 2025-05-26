@@ -2,9 +2,11 @@ package storage
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -17,6 +19,7 @@ const (
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
+	usbNoRstMarker = "/boot/usb.norst"
 )
 
 func (s *Service) GetImages(c *gin.Context) {
@@ -95,6 +98,29 @@ func (s *Service) MountImage(c *gin.Context) {
 			log.Errorf("mount file %s failed: %s", image, err)
 			rsp.ErrRsp(c, -2, "mount image failed")
 			return
+		}
+	}
+
+	// check to see if usb gadget reset is disabled
+	resetUsb := true
+	if _, err := os.Stat(usbNoRstMarker); err == nil {
+		resetUsb = false
+	}
+
+	// reset usb
+	if resetUsb {
+		commands := []string{
+			"echo > /sys/kernel/config/usb_gadget/g0/UDC",
+			"ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC",
+		}
+
+		for _, command := range commands {
+			err := exec.Command("sh", "-c", command).Run()
+			if err != nil {
+				rsp.ErrRsp(c, -2, "execute command failed")
+				return
+			}
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
