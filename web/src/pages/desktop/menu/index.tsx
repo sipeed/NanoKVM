@@ -6,7 +6,7 @@ import { MenuIcon, XIcon } from 'lucide-react';
 import Draggable from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 
-import { getMenuDisabledItems } from '@/lib/localstorage.ts';
+import { getMenuDisabledItems, loadIsAdmin } from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 
 import { DownloadImage } from './download.tsx';
@@ -26,6 +26,7 @@ export const Menu = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const isAdmin = loadIsAdmin();
   const [bounds, setBounds] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
   const nodeRef = useRef<any>(null);
@@ -87,7 +88,7 @@ export const Menu = () => {
             {!menuDisabledItems.includes('image') && <Image />}
             {!menuDisabledItems.includes('download') && <DownloadImage />}
             {!menuDisabledItems.includes('script') && <Script />}
-            {!menuDisabledItems.includes('terminal') && <Terminal />}
+            {isAdmin && !menuDisabledItems.includes('terminal') && <Terminal />}
             {!menuDisabledItems.includes('wol') && <Wol />}
 
             {['image', 'script', 'terminal', 'wol', 'download'].some(

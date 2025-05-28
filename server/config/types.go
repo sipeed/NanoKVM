@@ -1,5 +1,7 @@
 package config
 
+import "time"
+
 type Config struct {
 	Proto          string `yaml:"proto"`
 	Port           Port   `yaml:"port"`
@@ -10,7 +12,8 @@ type Config struct {
 	Stun           string `yaml:"stun"`
 	Turn           Turn   `yaml:"turn"`
 
-	Hardware Hardware `yaml:"-"`
+	Hardware Hardware         `yaml:"-"`
+	Tokens   map[string]*User `yaml:"-"`
 }
 
 type Logger struct {
@@ -46,4 +49,10 @@ type Hardware struct {
 	GPIOPower    string    `yaml:"-"`
 	GPIOPowerLED string    `yaml:"-"`
 	GPIOHDDLed   string    `yaml:"-"`
+}
+
+type User struct {
+	Username  string    `yaml:"-"`
+	Group     string    `yaml:"-"`
+	ExpiresAt time.Time `yaml:"-"`
 }
