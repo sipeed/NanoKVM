@@ -10,6 +10,7 @@ import { encrypt } from '@/lib/encrypt.ts';
 import { Head } from '@/components/head.tsx';
 
 import { Tips } from './tips.tsx';
+import { saveIsAdmin, saveUsername } from '../../../lib/localstorage.js';
 
 export const Login = (): ReactElement => {
   const navigate = useNavigate();
@@ -47,6 +48,8 @@ export const Login = (): ReactElement => {
 
         setMsg('');
         setToken(rsp.data.token);
+        saveIsAdmin(rsp.data.is_admin);
+        saveUsername(username);
 
         navigate('/', { replace: true });
         window.location.reload();

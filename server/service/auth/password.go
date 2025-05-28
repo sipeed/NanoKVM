@@ -35,17 +35,28 @@ func (s *Service) ChangePassword(c *gin.Context) {
 		return
 	}
 
-	if err = SetAccount(req.Username, string(hashedPassword)); err != nil {
-		rsp.ErrRsp(c, -4, "failed to save password")
-		return
-	}
+	user := GetUserByCookie(c)
+	if user != nil {
+		// change user password
+		userName := user.Username
+		if user.Group == "admin" {
+			userName = req.Username
+		}
 
-	// change root password
-	err = changeRootPassword(password)
-	if err != nil {
-		_ = DelAccount()
-		rsp.ErrRsp(c, -5, "failed to change password")
-		return
+		if err = SetAccount(userName, string(hashedPassword)); err != nil {
+			rsp.ErrRsp(c, -4, "failed to save password")
+			return
+		}
+
+		// change root password
+		if user.Username == "admin" {
+			err = changeRootPassword(password)
+			if err != nil {
+				_ = DelAccount()
+				rsp.ErrRsp(c, -5, "failed to change password")
+				return
+			}
+		}
 	}
 
 	rsp.OkRsp(c)

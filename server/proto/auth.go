@@ -6,7 +6,8 @@ type LoginReq struct {
 }
 
 type LoginRsp struct {
-	Token string `json:"token"`
+	Token   string `json:"token"`
+	IsAdmin bool   `json:"is_admin"`
 }
 
 type GetAccountRsp struct {

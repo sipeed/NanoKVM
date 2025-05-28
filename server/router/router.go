@@ -32,6 +32,7 @@ func server(r *gin.Engine) {
 	authRouter(r)
 	applicationRouter(r)
 	vmRouter(r)
+	vmAdminRouter(r)
 	streamRouter(r)
 	storageRouter(r)
 	networkRouter(r)

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { saveUsername } from '../../../../../lib/localstorage';
 
 import * as api from '@/api/auth.ts';
 
@@ -17,6 +18,7 @@ export const Account = () => {
     api.getAccount().then((rsp) => {
       if (rsp.code === 0) {
         setUsername(rsp.data.username);
+        saveUsername(rsp.data.username);
       }
     });
   }, []);

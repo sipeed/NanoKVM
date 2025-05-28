@@ -8,10 +8,13 @@ import * as api from '@/api/auth.ts';
 import { removeToken } from '@/lib/cookie.ts';
 import { encrypt } from '@/lib/encrypt.ts';
 import { Head } from '@/components/head.tsx';
+import { loadIsAdmin, loadUsername } from '../../../lib/localstorage';
 
 export const Password = () => {
   const { t } = useTranslation();
   const [msg, setMsg] = useState('');
+  const isAdmin = loadIsAdmin();
+  const Username = loadUsername();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export const Password = () => {
       return;
     }
 
-    const username = values.username;
+    const username = isAdmin ? values.username : Username;
     const password = encrypt(values.password);
 
     api
@@ -74,12 +77,12 @@ export const Password = () => {
           initialValues={{ remember: true }}
           onFinish={changePassword}
         >
-          <Form.Item
+          {isAdmin && <Form.Item
             name="username"
             rules={[{ required: true, message: t('auth.noEmptyUsername'), min: 1 }]}
           >
-            <Input prefix={<UserOutlined />} placeholder={t('auth.placeholderUsername')} />
-          </Form.Item>
+            <Input prefix={<UserOutlined />} value={Username} placeholder={t('auth.placeholderUsername')} />
+          </Form.Item>}
 
           <Form.Item
             name="password"
@@ -121,9 +124,9 @@ export const Password = () => {
             <div>{t('auth.tips.change1')}</div>
             <ul className="list-outside list-decimal">
               <li>{t('auth.tips.change2')}</li>
-              <li>{t('auth.tips.change3')}</li>
+              {isAdmin && <li>{t('auth.tips.change3')}</li>}
             </ul>
-            <div className="text-red-500">{t('auth.tips.change4')}</div>
+            {isAdmin && <div className="text-red-500">{t('auth.tips.change4')}</div>}
           </div>
         </Card>
       </div>
