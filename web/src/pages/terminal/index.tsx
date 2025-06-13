@@ -9,6 +9,8 @@ import '@xterm/xterm/css/xterm.css';
 import { getBaseUrl } from '@/lib/service.ts';
 import { Head } from '@/components/head.tsx';
 
+import { validatePicocomParameters } from './validater.ts';
+
 export const Terminal = () => {
   const { t } = useTranslation();
 
@@ -54,7 +56,13 @@ export const Terminal = () => {
       const stopBits = searchParams.get('stopBits');
       if (!port || !baud) return;
 
-      ws.send(`picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits}\r`);
+      if (!validatePicocomParameters({ port, baud, parity, flowControl, dataBits, stopBits })) {
+        return;
+      }
+
+      ws.send(
+        `picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits}\r`
+      );
     };
 
     const resizeScreen = () => {
