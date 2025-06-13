@@ -22,9 +22,11 @@ import { Appearance } from './appearance';
 import { Device } from './device';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
+import { loadIsAdmin } from '../../../../lib/localstorage';
 
 export const Settings = () => {
   const { t } = useTranslation();
+  const isAdmin = loadIsAdmin();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -32,7 +34,7 @@ export const Settings = () => {
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
 
-  const tabs = [
+  const tabs = isAdmin ? [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
     { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
@@ -46,6 +48,10 @@ export const Settings = () => {
       icon: <CircleArrowUpIcon size={16} />,
       component: <Update setIsLocked={setIsLocked} />
     },
+    { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
+  ] : [
+    { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
+    { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
     { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
   ];
 
