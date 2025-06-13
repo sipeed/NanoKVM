@@ -1,4 +1,4 @@
-const en = {
+const pt_br = {
   translation: {
     head: {
       desktop: 'Área de Trabalho Remota',
@@ -343,3 +343,5 @@ const en = {
     }
   }
 }
+
+export default pt_br;
