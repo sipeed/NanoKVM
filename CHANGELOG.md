@@ -1,3 +1,7 @@
+## 2.2.9 [c77981c](https://github.com/sipeed/NanoKVM/commit/c77981cc0ceebd8f6705b6c5d8c3cf4edf4f6717) (2025-06-13)
+
+* fix(security): resolve parameter injection in serial port terminal
+
 ## 2.2.8 [01e28f1](https://github.com/sipeed/NanoKVM/commit/01e28f10ae8b581d484bb6077ddfe7bbe4e57919) (2025-05-22)
 
 * feat: add AZERTY virtual keyboard Layout (thanks to [@felix068](https://github.com/felix068))
