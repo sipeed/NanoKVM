@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Divider } from 'antd';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/hid.ts';
@@ -17,10 +17,11 @@ import { Ssh } from './ssh.tsx';
 import { Tls } from './tls.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 import { Wifi } from './wifi.tsx';
+import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 
 export const Device = () => {
   const { t } = useTranslation();
-
+  const disableMenus = useAtomValue(menuDisabledItemsAtom)
   const [hidMode, setHidMode] = useAtom(hidModeAtom);
 
   useEffect(() => {
@@ -37,23 +38,25 @@ export const Device = () => {
       <Divider />
 
       <div className="flex flex-col space-y-6">
-        <Tls />
-        <Ssh />
-        <Mdns />
-        <Hdmi />
+        {!disableMenus.includes('device:tls') && <Tls />}
+        {!disableMenus.includes('device:ssh') && <Ssh />}
+        {!disableMenus.includes('device:mdns') && <Mdns />}
+        {!disableMenus.includes('device:hdmi') && <Hdmi />}
+
 
         {hidMode === 'normal' ? <VirtualDevices /> : <HidMode />}
       </div>
       <Divider />
 
       <div className="flex flex-col space-y-6">
-        <Oled />
-        <Wifi />
-        <MouseJiggler />
+        {!disableMenus.includes('device:oled') && <Oled />}
+        {!disableMenus.includes('device:wifi') && <Wifi />}
+        {!disableMenus.includes('device:mouse') && <MouseJiggler />}
+
       </div>
       <Divider />
 
-      <Advanced />
+      <Advanced disable={disableMenus.includes("device:advance")} />
       <Divider />
 
       <Reboot />

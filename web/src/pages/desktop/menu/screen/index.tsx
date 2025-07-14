@@ -16,13 +16,14 @@ import { Quality } from './quality';
 import { Reset } from './reset.tsx';
 import { Resolution } from './resolution';
 import { VideoMode } from './video-mode.tsx';
+import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 
 export const Screen = () => {
   const { t } = useTranslation();
 
   const videoMode = useAtomValue(videoModeAtom);
   const resolution = useAtomValue(resolutionAtom);
-
+  const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
   const [fps, setFps] = useState(30);
   const [quality, setQuality] = useState(2);
   const [gop, setGop] = useState(30);
@@ -71,9 +72,9 @@ export const Screen = () => {
   const content = (
     <div className="flex flex-col space-y-1">
       <VideoMode />
-      <Resolution />
-      <Quality quality={quality} setQuality={setQuality} />
-      <Fps fps={fps} setFps={setFps} />
+      {!menuDisabledItems.includes('screen:resolution') && <Resolution  />}
+      {!menuDisabledItems.includes('screen:quality') && <Quality quality={quality} setQuality={setQuality} />}
+      {!menuDisabledItems.includes('screen:fps') && <Fps fps={fps} setFps={setFps} />}
       {videoMode === 'mjpeg' ? <FrameDetect /> : <Gop gop={gop} setGop={setGop} />}
       <Reset />
     </div>

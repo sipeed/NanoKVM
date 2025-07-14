@@ -11,8 +11,10 @@ type HWVersion int
 
 const (
 	HWVersionAlpha HWVersion = iota
+	HWVersionPro
 	HWVersionBeta
 	HWVersionPcie
+	HWVersionATX
 
 	HWVersionFile = "/etc/kvm/hw"
 )
@@ -41,6 +43,14 @@ var HWPcie = Hardware{
 	GPIOHDDLed:   "",
 }
 
+var HWPro = Hardware{
+	Version:      HWVersionPro,
+	GPIOReset:    "/sys/class/gpio/gpio35/value",
+	GPIOPower:    "/sys/class/gpio/gpio7/value",
+	GPIOPowerLED: "/sys/class/gpio/gpio75/value",
+	GPIOHDDLed:   "/sys/class/gpio/gpio74/value",
+}
+
 func (h HWVersion) String() string {
 	switch h {
 	case HWVersionAlpha:
@@ -49,29 +59,38 @@ func (h HWVersion) String() string {
 		return "Beta"
 	case HWVersionPcie:
 		return "PCIE"
+	case HWVersionPro:
+		return "Pro"
 	default:
 		return "Unknown"
 	}
 }
 
-func getHwVersion() HWVersion {
+func GetHwVersion() HWVersion {
 	content, err := os.ReadFile(HWVersionFile)
 	if err != nil {
 		return HWVersionAlpha
 	}
 
 	version := strings.ReplaceAll(string(content), "\n", "")
-	if version == "beta" {
+	switch version {
+	case "alpha":
+		return HWVersionAlpha
+	case "beta":
 		return HWVersionBeta
-	} else if version == "pcie" {
+	case "pcie":
 		return HWVersionPcie
+	case "atx":
+		return HWVersionATX
+	case "pro":
+		return HWVersionPro
+	default:
+		return HWVersionAlpha
 	}
-
-	return HWVersionAlpha
 }
 
 func getHardware() (h Hardware) {
-	version := getHwVersion()
+	version := GetHwVersion()
 
 	switch version {
 	case HWVersionAlpha:
@@ -83,10 +102,12 @@ func getHardware() (h Hardware) {
 	case HWVersionPcie:
 		h = HWPcie
 
+	case HWVersionPro:
+		h = HWPro
+
 	default:
 		h = HWAlpha
 		log.Errorf("Unsupported hardware version: %s", version)
 	}
-
-	return
+	return h
 }
