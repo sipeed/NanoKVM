@@ -49,6 +49,8 @@ func initialize() {
 		log.Println("NOTICE: Authentication is disabled! Please ensure your service is secure!")
 	}
 
+	instance.Tokens = make(map[string]*User, 10)
+
 	log.Println("config loaded successfully")
 }
 
