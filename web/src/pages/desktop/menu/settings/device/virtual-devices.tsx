@@ -8,8 +8,9 @@ export const VirtualDevices = () => {
   const { t } = useTranslation();
 
   const [isNetworkOn, setIsNetworkOn] = useState(false);
+  const [isMediaOn, setIsMediaOn] = useState(false);
   const [isDiskOn, setIsDiskOn] = useState(false);
-  const [loading, setLoading] = useState(''); // '' | 'network' | 'disk'
+  const [loading, setLoading] = useState(''); // '' | 'network' | 'media' | 'disk'
 
   useEffect(() => {
     api.getVirtualDevice().then((rsp) => {
@@ -18,11 +19,12 @@ export const VirtualDevices = () => {
       }
 
       setIsNetworkOn(rsp.data.network);
+      setIsMediaOn(rsp.data.media);
       setIsDiskOn(rsp.data.disk);
     });
   }, []);
 
-  function update(device: 'network' | 'disk') {
+  function update(device: 'network' | 'media' | 'disk') {
     if (loading) return;
     setLoading(device);
 
@@ -33,10 +35,16 @@ export const VirtualDevices = () => {
           return;
         }
 
-        if (device === 'network') {
-          setIsNetworkOn(rsp.data.on);
-        } else {
-          setIsDiskOn(rsp.data.on);
+        switch (device) {
+          case 'network':
+            setIsNetworkOn(rsp.data.on);
+            break;
+          case 'media':
+            setIsMediaOn(rsp.data.on);
+            break;
+          case 'disk':
+            setIsDiskOn(rsp.data.on);
+            break;
         }
       })
       .finally(() => {
@@ -46,6 +54,15 @@ export const VirtualDevices = () => {
 
   return (
     <>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <span>{t('settings.device.media')}</span>
+          <span className="text-xs text-neutral-500">{t('settings.device.mediaDesc')}</span>
+        </div>
+
+        <Switch checked={isMediaOn} loading={loading === 'media'} onChange={() => update('media')} />
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <span>{t('settings.device.disk')}</span>
