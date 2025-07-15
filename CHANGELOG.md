@@ -1,3 +1,8 @@
+## 2.3.0 [a82aa79](https://github.com/sipeed/NanoKVM/commit/a82aa792d87337268ab644b37fcbacdae4f0ce33) (2025-07-15)     
+
+* feat: support server side disable menu
+* Add PT-BR translation (thanks to [@chiconws](https://github.com/chiconws))
+
 ## 2.2.9 [c77981c](https://github.com/sipeed/NanoKVM/commit/c77981cc0ceebd8f6705b6c5d8c3cf4edf4f6717) (2025-06-13)
 
 * fix(security): resolve parameter injection in serial port terminal
