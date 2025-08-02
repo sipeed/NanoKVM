@@ -63,7 +63,10 @@ func (h *Hid) Write(file *os.File, data []byte) {
 			log.Debugf("hid already closed, reopen it...")
 			h.OpenNoLock()
 		} else {
-			log.Errorf("write to hid failed: %s", err)
+			log.Errorf("write to hid failed: %s, reseting...", err)
+			if err := h.service.resetHID(); err != nil {
+				log.Errorf("reset hid failed: %s", err)
+			}
 		}
 
 		return
