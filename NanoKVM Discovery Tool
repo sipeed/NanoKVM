@@ -1,0 +1,137 @@
+// Compile with: gcc siSpeedKVM.c -o siSpeedKVM.exe -lws2_32 -liphlpapi
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <winsock2.h>      // Must be first!
+#include <windows.h>
+#include <iphlpapi.h>
+#pragma comment(lib, "iphlpapi.lib")
+#pragma comment(lib, "ws2_32.lib")
+
+#define START_IP 1
+#define END_IP 254
+#define MAX_THREADS 64
+
+typedef struct {
+    char subnet[32];
+    int ip;
+} ThreadData;
+
+// Find local subnet using Windows API (no ipconfig)
+int get_local_subnet(char *subnet, size_t size) {
+    ULONG outBufLen = 15000;
+    IP_ADAPTER_ADDRESSES *addresses = (IP_ADAPTER_ADDRESSES *)malloc(outBufLen);
+    if (!addresses) return 0;
+
+    DWORD dwRetVal = GetAdaptersAddresses(AF_INET, GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER, NULL, addresses, &outBufLen);
+    if (dwRetVal != NO_ERROR) {
+        free(addresses);
+        return 0;
+    }
+
+    IP_ADAPTER_ADDRESSES *curr = addresses;
+    while (curr) {
+        if (curr->OperStatus == IfOperStatusUp && !(curr->IfType == IF_TYPE_SOFTWARE_LOOPBACK)) {
+            IP_ADAPTER_UNICAST_ADDRESS *unicast = curr->FirstUnicastAddress;
+            while (unicast) {
+                SOCKADDR_IN *sa_in = (SOCKADDR_IN *)unicast->Address.lpSockaddr;
+                unsigned char *bytes = (unsigned char *)&sa_in->sin_addr.S_un.S_addr;
+                // Skip 169.254.x.x (link-local) and 127.x.x.x (loopback)
+                if (bytes[0] != 169 && bytes[0] != 127) {
+                    snprintf(subnet, size, "%d.%d.%d.", bytes[0], bytes[1], bytes[2]);
+                    free(addresses);
+                    return 1;
+                }
+                unicast = unicast->Next;
+            }
+        }
+        curr = curr->Next;
+    }
+    free(addresses);
+    return 0;
+}
+
+// Thread: ping an IP to populate ARP table
+DWORD WINAPI ping_ip(LPVOID param) {
+    ThreadData *data = (ThreadData *)param;
+    char cmd[128], ip[64];
+    snprintf(ip, sizeof(ip), "%s%d", data->subnet, data->ip);
+    snprintf(cmd, sizeof(cmd), "ping -n 1 -w 100 %s >nul", ip);
+    system(cmd);
+    free(data);
+    return 0;
+}
+
+int main() {
+    char subnet[32];
+    if (!get_local_subnet(subnet, sizeof(subnet))) {
+        printf("Could not detect local subnet.\n");
+        return 1;
+    }
+
+    DWORD start_time = GetTickCount64();
+
+    printf("Pinging subnet %s0/24 to populate ARP table...\n", subnet);
+    HANDLE threads[MAX_THREADS];
+    int thread_count = 0;
+
+    for (int i = START_IP; i <= END_IP; i++) {
+        ThreadData *data = malloc(sizeof(ThreadData));
+        strcpy(data->subnet, subnet);
+        data->ip = i;
+
+        threads[thread_count] = CreateThread(NULL, 0, ping_ip, data, 0, NULL);
+        thread_count++;
+
+        if (thread_count == MAX_THREADS) {
+            WaitForMultipleObjects(thread_count, threads, TRUE, INFINITE);
+            for (int j = 0; j < thread_count; j++) {
+                CloseHandle(threads[j]);
+            }
+            thread_count = 0;
+        }
+    }
+    // Wait for any remaining threads
+    if (thread_count > 0) {
+        WaitForMultipleObjects(thread_count, threads, TRUE, INFINITE);
+        for (int j = 0; j < thread_count; j++) {
+            CloseHandle(threads[j]);
+        }
+    }
+
+    printf("Scanning ARP table for MAC addresses starting with 48:DA:35...\n\n");
+    FILE *fp = _popen("arp -a", "r");
+    if (!fp) {
+        printf("Failed to run arp -a\n");
+        return 1;
+    }
+
+    char line[256];
+    int found = 0;
+    while (fgets(line, sizeof(line), fp)) {
+        if (strstr(line, "48-da-35") || strstr(line, "48-DA-35")) {
+            char ip[64], mac[64];
+            if (sscanf(line, " %63s %63s", ip, mac) == 2) {
+                printf("\nsiSpeed MAC 48-DA-35 found!\n");
+                printf("FOUND: IP: %s  MAC: %s\n", ip, mac);
+                found = 1;
+            } else {
+                printf("%s", line);
+                found = 1;
+            }
+        }
+    }
+    _pclose(fp);
+
+    if (!found) {
+        printf("No device with MAC 48:DA:35 found on this subnet.\n");
+    }
+
+    DWORD end_time = GetTickCount64();
+    printf("Scan complete. Total time: %.2f seconds\n\n\n", (end_time - start_time) / 1000.0);
+
+        printf("Press any key to exit...\n");
+    getchar();
+    return 0;
+}
+ 
