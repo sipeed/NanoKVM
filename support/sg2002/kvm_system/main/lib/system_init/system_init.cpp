@@ -56,6 +56,7 @@ void new_app_init(void)
 	system("cp -f /kvmapp/system/update-nanokvm.py /etc/kvm/");
 	system("rm -f /etc/init.d/S02udisk");
 	system("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S00nic-mac /etc/init.d/");
 	system("cp -f /kvmapp/system/init.d/S01fs /etc/init.d/");
 	system("cp -f /kvmapp/system/init.d/S03usbdev /etc/init.d/");
 	system("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/");

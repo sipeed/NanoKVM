@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+
+
+generate_mac() {
+    local input="$1"
+    local hash=$(echo -n "$input" | md5sum | awk '{print $1}')
+    local mac="${hash:0:2}:${hash:2:2}:${hash:4:2}:${hash:6:2}:${hash:8:2}:${hash:10:2}"
+    local first_byte=$(printf "%02x" $(( 0x${hash:0:2} & 0xfe | 0x02 )))
+    mac="${first_byte}:${hash:2:2}:${hash:4:2}:${hash:6:2}:${hash:8:2}:${hash:10:2}"
+
+    echo "$mac"
+}
+
+
+if [ "$1" != "start" ];then
+    return 0
+fi;
+
+if [ ! -f /sys/class/cvi-base/base_uid ];then
+    insmod /mnt/system/ko/soph_sys.ko
+    insmod /mnt/system/ko/soph_base.ko
+fi;
+
+mac=$(generate_mac `cat /sys/class/cvi-base/base_uid` | awk '{print $2}')
+macchanger --mac=$mac eth0
+return 0
+
