@@ -16,6 +16,8 @@ const KEYBOARD_LANGUAGE_KEY = 'nano-kvm-keyboard-language';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
+const IS_ADMIN_KEY = 'nano-kvm-is-admin';
+const USERNAME_KEY = 'nano-kvm-username';
 
 type ItemWithExpiry = {
   value: string;
@@ -193,4 +195,24 @@ export function getPowerConfirm() {
 
 export function setPowerConfirm(enabled: boolean) {
   localStorage.setItem(POWER_CONFIRM_KEY, String(enabled));
+}
+
+export function saveIsAdmin(isAdmin: boolean) {
+  const value = JSON.stringify(isAdmin);
+  localStorage.setItem(IS_ADMIN_KEY, value);
+}
+
+export function loadIsAdmin() {
+  const value = localStorage.getItem(IS_ADMIN_KEY);
+  return value ? JSON.parse(value) : false;
+}
+
+export function saveUsername(username: boolean) {
+  const value = JSON.stringify(username);
+  localStorage.setItem(USERNAME_KEY, value);
+}
+
+export function loadUsername() {
+  const value = localStorage.getItem(USERNAME_KEY);
+  return value ? JSON.parse(value) : "";
 }
