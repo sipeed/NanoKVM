@@ -46,7 +46,9 @@ const zh_tw = {
       finishBtn: '完成'
     },
     screen: {
+      title: '螢幕',
       video: '編碼格式',
+      videoDirectTips: '本模式需先啟用HTTPS，請前往「設定 -> 設備」中開啟',
       resolution: '解析度',
       auto: '自動',
       autoTips:
@@ -63,6 +65,7 @@ const zh_tw = {
       resetHdmi: '重置 HDMI'
     },
     keyboard: {
+      title: 'Keyboard',
       paste: '貼上',
       tips: '僅支援標準鍵盤字母和符號',
       placeholder: '請輸入內容',
@@ -71,6 +74,8 @@ const zh_tw = {
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
+      title: '滑鼠',
+      cursor: '游標樣式',
       default: '預設游標',
       pointer: '懸浮游標',
       cell: '儲存格游標',
@@ -80,8 +85,20 @@ const zh_tw = {
       mode: '滑鼠模式',
       absolute: '絕對模式',
       relative: '相對模式',
+      speed: '滾輪速度',
+      fast: '快',
+      slow: '慢',
       requestPointer: '使用相對模式。請按一下桌面以取得滑鼠游標。',
-      resetHid: '重設 HID'
+      resetHid: '重設 HID',
+      hidOnly: {
+        title: 'HID-Only 模式',
+        desc: "如果您的滑鼠和鍵盤停止回應，且重設 HID 無效，可能是 NanoKVM 與裝置間的相容性問題。請嘗試啟用 HID-Only 模式以獲得更好的相容性。",
+        tip1: '啟用 HID-Only 模式將會卸載虛擬隨身碟和虛擬網卡',
+        tip2: '在 HID-Only 模式下，映像掛載功能將被停用',
+        tip3: 'NanoKVM 將在切換模式後自動重新啟動',
+        enable: '啟用 HID-Only 模式',
+        disable: '停用 HID-Only 模式'
+      }
     },
     image: {
       title: '映像',
@@ -90,6 +107,7 @@ const zh_tw = {
       cdrom: '以CD-ROM模式掛載',
       mountFailed: '掛載失敗',
       mountDesc: '在某些系統中，在掛載映像之前需要中斷遠端主機上的虛擬磁碟。',
+      refresh: 'Refresh the image list',
       tips: {
         title: '如何上傳',
         usb1: '透過 USB 將 NanoKVM 連接到您的電腦。',
@@ -126,6 +144,16 @@ const zh_tw = {
       serialPort: 'Serial Port',
       serialPortPlaceholder: '請輸入 Serial Port',
       baudrate: 'Baud rate',
+      parity: 'Parity',
+      parityNone: 'None',
+      parityEven: 'Even',
+      parityOdd: 'Odd',
+      flowControl: 'Flow control',
+      flowControlNone: 'None',
+      flowControlSoft: 'Soft',
+      flowControlHard: 'Hard',
+      dataBits: 'Data bits',
+      stopBits: 'Stop bits',
       confirm: '確定'
     },
     wol: {
@@ -143,10 +171,16 @@ const zh_tw = {
     },
     power: {
       title: '電源',
+      showConfirm: 'Confirmation',
+      showConfirmTip: 'Power operations require an extra confirmation',
       reset: '重新啟動',
       power: '電源',
       powerShort: '電源 (短按)',
-      powerLong: '電源 (長按)'
+      powerLong: '電源 (長按)',
+      resetConfirm: '執行重新啟動按鍵操作?',
+      powerConfirm: '執行電源按鍵操作?',
+      okBtn: '是',
+      cancelBtn: '取消'
     },
     settings: {
       title: '設定',
@@ -160,14 +194,23 @@ const zh_tw = {
         image: '映像版本',
         imageTip: 'NanoKVM 系统镜像版本',
         deviceKey: '設備序號',
-        community: '社群'
+        community: '社群',
+        hostname: '主機名稱',
+        hostnameUpdated: '已更新主機名稱. 請重新啟動以生效',
+        ipType: {
+          Wired: '有線',
+          Wireless: '無線',
+          Other: '其他'
+        }
       },
       appearance: {
         title: '外觀',
         display: '顯示',
         language: '語言',
         menuBar: '選單列',
-        menuBarDesc: '是否在選單列中顯示圖案'
+        menuBarDesc: '是否在選單列中顯示圖案',
+        webTitle: '網頁標題',
+        webTitleDesc: '自訂網頁標題'
       },
       device: {
         title: '設備',
@@ -193,10 +236,40 @@ const zh_tw = {
           description: '啟用SSH',
           tip: '啟用前請務必設定強密碼（帳號 - 更改密碼）'
         },
+        tls: {
+          description: '啟用 HTTPS',
+          tip: '啟用 HTTPS 可以提高安全性，但可能會增加延遲，特別是使用 MJPEG 編碼格式時。'
+        },
+        advanced: '進階設定',
+        swap: {
+          title: 'Swap',
+          disable: '停用',
+          description: '設定Swap檔大小',
+          tip: "啟用此功能可能會減少SD卡的使用壽命！"
+        },
+        mouseJiggler: {
+          title: 'Mouse Jiggler',
+          description: '避免遠端主機進入休眠狀態',
+          disable: '停用',
+          absolute: '絕對模式',
+          relative: '相對模式'
+        },
+        mdns: {
+          description: '啟用mDNS服務',
+          tip: "若無需求，建議關閉此功能"
+        },
+        hdmi: {
+          description: '啟用 HDMI/螢幕 輸出'
+        },
+        hidOnly: 'HID-Only 模式',
         disk: '虛擬隨身碟',
         diskDesc: '在遠端主機上連接虛擬隨身碟',
         network: '虛擬網卡',
-        networkDesc: '在遠端主機上新增虛擬網卡'
+        networkDesc: '在遠端主機上新增虛擬網卡',
+        reboot: '重新啟動',
+        rebootDesc: '你確定要重新啟動 NanoKVM?',
+        okBtn: '是',
+        cancelBtn: '取消'
       },
       tailscale: {
         title: 'Tailscale',
@@ -229,7 +302,7 @@ const zh_tw = {
         deviceIP: '裝置 IP',
         account: '帳號',
         logout: '登出',
-        logout2: '確認登出?',
+        logoutDesc: '確認登出?',
         uninstall: '移除 Tailscale',
         okBtn: '確認',
         cancelBtn: '取消'
@@ -242,26 +315,33 @@ const zh_tw = {
         available: '有可用更新。確定要更新嗎？',
         updating: '正在更新。請稍等...',
         confirm: '確定',
-        cancel: '取消'
+        cancel: '取消',
+        preview: '預覽更新',
+        previewDesc: '搶先體驗新功能和改進',
+        previewTip:
+          '請注意，預覽版本可能包含錯誤或功能不完整！'
       },
       account: {
         title: '帳號',
         webAccount: '網頁帳號',
         password: '密碼',
         updateBtn: '修改',
-        logoutBtn: '登出'
+        logoutBtn: '登出',
+        logoutDesc: '你確定要登出嗎?',
+        okBtn: '是',
+        cancelBtn: '取消'
       }
     },
     error: {
       title: '我們遇到了一些問題',
-      refresh: '重新整理',
+      refresh: '重新整理'
     },
     fullscreen: {
-      toggle: '進入全螢幕模式',
+      toggle: '進入全螢幕模式'
     },
     menu: {
       collapse: '收起選單',
-      expand: '展開選單',
+      expand: '展開選單'
     }
   }
 };
