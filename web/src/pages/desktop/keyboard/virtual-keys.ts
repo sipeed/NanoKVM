@@ -31,11 +31,11 @@ export const keyboardOptions = {
     ],
     qwertz: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
-      'DEBackquote DEDigit1 DEDigit2 DEDigit3 DEDigit4 DEDigit5 DEDigit6 DEDigit7 DEDigit8 DEDigit9 DEDigit0 DEDigit00 DEDigit000 {backspace}',
-      '{tab} DEKeyQ KeyW DEKeyE KeyR KeyT KeyZ KeyU KeyI KeyO KeyP DEKeyUE DEPlus',
-      '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL DEKeyOE DEKeyAE DEHashtag {enter}',
-      '{shiftleft} DEaufrechtstrich KeyY KeyX KeyC KeyV KeyB KeyN KeyM DEComma DEPunkt DEMinus {shiftright}',
-      '{DEcontrolleft} {winleft} {altleft} {space} {DEaltright} {winright} {menu} {DEcontrolright}'
+      'Backquote_qwertz Digit1_qwertz Digit2_qwertz Digit3_qwertz Digit4_qwertz Digit5_qwertz Digit6_qwertz Digit7_qwertz Digit8_qwertz Digit9_qwertz Digit0_qwertz Digit00_qwertz Digit000_qwertz {backspace}',
+      '{tab} KeyQ_qwertz KeyW KeyE_qwertz KeyR KeyT KeyZ KeyU KeyI KeyO KeyP KeyUE_qwertz Plus_qwertz',
+      '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL KeyOE_qwertz KeyAE_qwertz Hashtag_qwertz {enter}',
+      '{shiftleft} aufrechtstrich_qwertz KeyY KeyX KeyC KeyV KeyB KeyN KeyM Comma_qwertz Punkt_qwertz Minus_qwertz {shiftright}',
+      '{controlleft_qwertz} {winleft} {altleft} {space} {altright_qwertz} {winright} {menu} {controlright_qwertz}'
     ],
     azerty: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
@@ -63,35 +63,35 @@ export const keyboardOptions = {
     Equal: '+<br/>=',
     '{backspace}': 'Backspace',
 
-    DEBackquote: '^<br/>°',
-    DEDigit1: '1 !',
-    DEDigit2: '2 "',
-    DEDigit3: '3 §',
-    DEDigit4: '4 $',
-    DEDigit5: '5 %',
-    DEDigit6: '6 &',
-    DEDigit7: '7{/',
-    DEDigit8: '8[(',
-    DEDigit9: '9])',
-    DEDigit0: '0}=',
-    DEDigit00: 'ß\\?',
-    DEDigit000: '´ `',
+    Backquote_qwertz: '^<br/>°',
+    Digit1_qwertz: '1 !',
+    Digit2_qwertz: '2 "',
+    Digit3_qwertz: '3 §',
+    Digit4_qwertz: '4 $',
+    Digit5_qwertz: '5 %',
+    Digit6_qwertz: '6 &',
+    Digit7_qwertz: '7{/',
+    Digit8_qwertz: '8[(',
+    Digit9_qwertz: '9])',
+    Digit0_qwertz: '0}=',
+    Digit00_qwertz: 'ß\\?',
+    Digit000_qwertz: '´ `',
 
-    DEKeyQ: 'Q @',
-    DEKeyE: 'E €',
-    DEPlus: '+~*',
-    DEHashtag: '# \'',
-    DEaufrechtstrich: '<|>',
-    DEComma: ', ;',
-    DEPunkt: '. :',
-    DEMinus: '- _',
-    '{DEcontrolleft}': 'STRG',
-    '{DEaltright}': 'ALT GR',
-    '{DEcontrolright}': 'STRG',
+    KeyQ_qwertz: 'Q @',
+    KeyE_qwertz: 'E €',
+    Plus_qwertz: '+~*',
+    Hashtag_qwertz: '# \'',
+    aufrechtstrich_qwertz: '<|>',
+    Comma_qwertz: ', ;',
+    Punkt_qwertz: '. :',
+    Minus_qwertz: '- _',
+    '{controlleft_qwertz}': 'STRG',
+    '{altright_qwertz}': 'ALT GR',
+    '{controlright_qwertz}': 'STRG',
     
-    DEKeyUE: 'Ü',
-    DEKeyOE: 'Ö',
-    DEKeyAE: 'Ä',
+    KeyUE_qwertz: 'Ü',
+    KeyOE_qwertz: 'Ö',
+    KeyAE_qwertz: 'Ä',
     
     '{tab}': 'Tab',
     KeyQ: 'Q',
@@ -316,9 +316,9 @@ export const specialKeyMap = new Map([
   ['{arrowup}', 'ArrowUp'],
 
   //DE
-  ['{DEcontrolleft}', 'ControlLeft'],
-  ['{DEcontrolright}', 'ControlRight'],
-  ['{DEaltright}', 'AltRight']
+  ['{controlleft_qwertz}', 'ControlLeft'],
+  ['{controlright_qwertz}', 'ControlRight'],
+  ['{altright_qwertz}', 'AltRight']
 ]);
 
 // modifier keys
@@ -335,9 +335,9 @@ export const modifierKeys = [
   '{winright}',
   
   // DE-spezifische Modifier-Tokens (für qwertz-Layout)
-  '{DEcontrolleft}',
-  '{DEcontrolright}',
-  '{DEaltright}'
+  '{controlleft_qwertz}',
+  '{controlright_qwertz}',
+  '{altright_qwertz}'
 ];
 
 // double line display buttons
