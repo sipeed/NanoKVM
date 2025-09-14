@@ -327,7 +327,12 @@ export const modifierKeys = [
   '{controlright}',
   '{altright}',
   '{metaright}',
-  '{winright}'
+  '{winright}',
+  
+  // DE-spezifische Modifier-Tokens (für qwertz-Layout)
+  '{DEcontrolleft}',
+  '{DEcontrolright}',
+  '{DEaltright}'
 ];
 
 // double line display buttons
