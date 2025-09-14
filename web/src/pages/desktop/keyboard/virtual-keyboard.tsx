@@ -136,6 +136,7 @@ export const VirtualKeyboard = () => {
       // Y ↔ Z Tausch
       if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
       if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
+      if (base === 'KeyUE') return KeyboardCodes.get('KeyBracketLeft');
       
       // all other labels use their own code
       return KeyboardCodes.get(base);
