@@ -46,6 +46,7 @@ export const VirtualKeyboard = () => {
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'fr', label: 'French' },
+    { value: 'de', label: 'Deutsch' },
     { value: 'ru', label: 'Russian' }
   ];
 
