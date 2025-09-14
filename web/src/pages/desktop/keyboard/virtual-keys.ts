@@ -32,9 +32,9 @@ export const keyboardOptions = {
     qwertz: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
       'Backquote_qwertz Digit1_qwertz Digit2_qwertz Digit3_qwertz Digit4_qwertz Digit5_qwertz Digit6_qwertz Digit7_qwertz Digit8_qwertz Digit9_qwertz Digit0_qwertz Digit00_qwertz Digit000_qwertz {backspace}',
-      '{tab} KeyQ_qwertz KeyW KeyE_qwertz KeyR KeyT KeyZ KeyU KeyI KeyO KeyP KeyUE_qwertz Plus_qwertz',
+      '{tab} KeyQ_qwertz KeyW KeyE_qwertz KeyR KeyT KeyZ_qwertz KeyU KeyI KeyO KeyP KeyUE_qwertz Plus_qwertz',
       '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL KeyOE_qwertz KeyAE_qwertz Hashtag_qwertz {enter}',
-      '{shiftleft} aufrechtstrich_qwertz KeyY KeyX KeyC KeyV KeyB KeyN KeyM Comma_qwertz Punkt_qwertz Minus_qwertz {shiftright}',
+      '{shiftleft} aufrechtstrich_qwertz KeyY_qwertz KeyX KeyC KeyV KeyB KeyN KeyM Comma_qwertz Punkt_qwertz Minus_qwertz {shiftright}',
       '{controlleft_qwertz} {winleft} {altleft} {space} {altright_qwertz} {winright} {menu} {controlright_qwertz}'
     ],
     azerty: [
@@ -77,6 +77,9 @@ export const keyboardOptions = {
     Digit00_qwertz: 'ß\\?',
     Digit000_qwertz: '´ `',
 
+    KeyY_qwertz: 'Y',
+    KeyZ_qwertz: 'Z',
+    
     KeyQ_qwertz: 'Q @',
     KeyE_qwertz: 'E €',
     Plus_qwertz: '+~*',
