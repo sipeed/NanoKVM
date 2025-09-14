@@ -313,7 +313,12 @@ export const specialKeyMap = new Map([
   ['{arrowright}', 'ArrowRight'],
   ['{arrowleft}', 'ArrowLeft'],
   ['{arrowdown}', 'ArrowDown'],
-  ['{arrowup}', 'ArrowUp']
+  ['{arrowup}', 'ArrowUp'],
+
+  //DE
+  ['{DEcontrolleft}', 'ControlLeft'],
+  ['{DEcontrolright}', 'ControlRight'],
+  ['{DEaltright}', 'AltRight']
 ]);
 
 // modifier keys
