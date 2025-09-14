@@ -133,10 +133,9 @@ export const VirtualKeyboard = () => {
     }
     if (keyboardLanguage === 'de' && key.endsWith('_qwertz')) {
       const base = key.replace('_qwertz', '');
-      // Y ↔ Z Tausch
+      // Tausch
       if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
       if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
-      if (base === 'KeyUE') return KeyboardCodes.get('KeyBracketLeft');
       
       // all other labels use their own code
       return KeyboardCodes.get(base);
