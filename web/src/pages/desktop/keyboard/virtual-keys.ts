@@ -31,7 +31,7 @@ export const keyboardOptions = {
     ],
     qwertz: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
-      'Backquote_qwertz Digit1_qwertz Digit2_qwertz Digit3_qwertz Digit4_qwertz Digit5_qwertz Digit6_qwertz Digit7_qwertz Digit8_qwertz Digit9_qwertz Digit0_qwertz Digit00_qwertz Digit000_qwertz {backspace}',
+      'Backquote_qwertz Digit1_qwertz Digit2_qwertz Digit3_qwertz Digit4_qwertz Digit5_qwertz Digit6_qwertz Digit7_qwertz Digit8_qwertz Digit9_qwertz Digit0_qwertz Minus_qwertz Equal_qwertz {backspace}',
       '{tab} KeyQ_qwertz KeyW KeyE_qwertz KeyR KeyT KeyZ_qwertz KeyU KeyI KeyO KeyP BracketLeft_qwertz BracketRight_qwertz',
       '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon_qwertz Quote_qwertz Backslash_qwertz {enter}',
       '{shiftleft} IntlBackslash_qwertz KeyY_qwertz KeyX KeyC KeyV KeyB KeyN KeyM Comma_qwertz Period_qwertz Slash_qwertz {shiftright}',
@@ -74,8 +74,8 @@ export const keyboardOptions = {
     Digit8_qwertz: '8[(',
     Digit9_qwertz: '9])',
     Digit0_qwertz: '0}=',
-    Digit00_qwertz: 'ß\\?',
-    Digit000_qwertz: '´ `',
+    Minus_qwertz: 'ß\\?',
+    Equal_qwertz: '´ `',
 
     KeyY_qwertz: 'Y',
     KeyZ_qwertz: 'Z',
