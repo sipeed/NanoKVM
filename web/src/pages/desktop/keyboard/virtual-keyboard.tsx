@@ -66,6 +66,7 @@ export const VirtualKeyboard = () => {
     const layoutMap = new Map([
       ['en', 'default'],
       ['ru', 'rus'],
+      ['de', 'qwertz'],
       ['fr', 'azerty']
     ]);
 
