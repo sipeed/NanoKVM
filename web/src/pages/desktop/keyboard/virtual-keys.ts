@@ -63,6 +63,10 @@ export const keyboardOptions = {
     Equal: '+<br/>=',
     '{backspace}': 'Backspace',
 
+    KeyUE: 'Ü',
+    KeyOE: 'Ö',
+    KeyAE: 'Ä',
+    
     '{tab}': 'Tab',
     KeyQ: 'Q',
     KeyW: 'W',
