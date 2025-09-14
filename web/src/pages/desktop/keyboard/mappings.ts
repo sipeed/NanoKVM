@@ -152,7 +152,7 @@ export const KeyboardCodes: Map<string, number> = new Map([
   ['ControlRight', 228],
   ['ShiftRight', 229],
   ['AltRight', 230],
-  ['MetaRight', 231]
+  ['MetaRight', 231],
   
   // DE-spezifische Tokens (wichtig für qwertz-Layout)
   ['{DEcontrolleft}', 'ControlLeft'], // wird in display als 'STRG' gezeigt
