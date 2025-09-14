@@ -127,6 +127,13 @@ export const VirtualKeyboard = () => {
       // all other labels use their own code
       return KeyboardCodes.get(base);
     }
+    if (keyboardLanguage === 'de' && key.endsWith('_qwertz')) {
+      const base = key.replace('_qwertz', '');
+      if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
+      if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
+      // all other labels use their own code
+      return KeyboardCodes.get(base);
+    }
 
     const specialKey = specialKeyMap.get(key);
     if (specialKey) {
