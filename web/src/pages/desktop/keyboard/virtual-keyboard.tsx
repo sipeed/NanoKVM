@@ -118,6 +118,9 @@ export const VirtualKeyboard = () => {
   }
 
   function getKeyCode(key: string) {
+    console.log('Key: ', key);
+    console.log('KeyboardLanguage: ', keyboardLanguage);
+    
     // AZERTY: swap A↔Q and Z↔W on French physical positions
     if (keyboardLanguage === 'fr' && key.endsWith('_azerty')) {
       const base = key.replace('_azerty', '');
