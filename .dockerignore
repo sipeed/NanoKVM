@@ -1,0 +1,13 @@
+Dockerfile
+!server/go.mod
+server/go.sum
+server/NanoKVM-Server
+web
+
+support/sg2002/kvm_system/build
+support/sg2002/kvm_system/dist
+support/sg2002/kvm_system/CMakeLists.txt
+
+support/sg2002/kvm_vision_test/build
+support/sg2002/kvm_vision_test/dist
+support/sg2002/kvm_vision_test/CMakeLists.txt
