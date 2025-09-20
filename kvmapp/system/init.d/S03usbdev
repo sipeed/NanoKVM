@@ -9,8 +9,20 @@ start_usb_dev(){
     mkdir g0
     cd g0
 
-    echo 0x3346 > idVendor
-    echo 0x1009 > idProduct
+    # echo 0x3346 > idVendor
+    # echo 0x1009 > idProduct
+    if [ -e /boot/usb.vid ]
+    then
+        cat /boot/usb.vid > idVendor
+    else
+        echo 0x3346 > idVendor
+    fi
+    if [ -e /boot/usb.pid ]
+    then
+        cat /boot/usb.pid > idProduct
+    else
+        echo 0x1009 > idProduct
+    fi
     mkdir strings/0x409
     echo '0123456789ABCDEF' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer
