@@ -16,11 +16,41 @@ type Char struct {
 
 type PasteReq struct {
 	Content string `form:"content" validate:"required"`
+	Langue string `form:"langue"`
+}
+
+func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
+	// wenn kein lang angegeben → Standardmap zurück
+	if lang == "" {
+		return base
+	}
+
+	// immer Kopie erstellen
+	m := copyMap(base)
+
+	switch lang {
+	case "de":
+		// Z/Y tauschen
+		m['z'], m['y'] = m['y'], m['z']
+		m['Z'], m['Y'] = m['Y'], m['Z']
+
+		// deutsche Sonderzeichen hinzufügen oder remappen
+		m['ä'] = Char{0, 52} // auf US-Taste ' (Apostroph)
+		m['Ä'] = Char{2, 52}
+		m['ö'] = Char{0, 51} // auf US-Taste ;
+		m['Ö'] = Char{2, 51}
+		m['ü'] = Char{0, 47} // auf US-Taste [
+		m['Ü'] = Char{2, 47}
+		m['ß'] = Char{0, 45} // auf US-Taste -
+		// usw.
+	}
+	return m
 }
 
 func (s *Service) Paste(c *gin.Context) {
 	var req PasteReq
 	var rsp proto.Response
+	charMapLocal := LangueSwitch(charMap, req.Langue)
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
@@ -34,7 +64,7 @@ func (s *Service) Paste(c *gin.Context) {
 	keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 	for _, char := range req.Content {
-		key, ok := charMap[char]
+		key, ok := charMapLocal[char]
 		if !ok {
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
@@ -48,6 +78,15 @@ func (s *Service) Paste(c *gin.Context) {
 	rsp.OkRsp(c)
 	log.Debugf("hid paste success, total %d characters processed", len(req.Content))
 }
+
+func copyMap(src map[rune]Char) map[rune]Char {
+	dst := make(map[rune]Char, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
+}
+
 var charMap = map[rune]Char{
 	// Lowercase letters
 	'a': {0, 4}, 'b': {0, 5}, 'c': {0, 6}, 'd': {0, 7}, 'e': {0, 8},
