@@ -30,19 +30,29 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 
 	switch lang {
 	case "de":
-		// Z/Y tauschen
-		m['z'], m['y'] = m['y'], m['z']
-		m['Z'], m['Y'] = m['Y'], m['Z']
+		// Y tauschen
+		m['y'] = Char{0, 29}
+		m['Y'] = Char{2, 29}
+
+		// Z tauschen
+		m['z'] = Char{0, 28}
+		m['Z'] = Char{2, 28}
 
 		// deutsche Sonderzeichen hinzufügen oder remappen
-		m['ä'] = Char{0, 52} // auf US-Taste ' (Apostroph)
-		m['Ä'] = Char{2, 52}
-		m['ö'] = Char{0, 51} // auf US-Taste ;
-		m['Ö'] = Char{2, 51}
-		m['ü'] = Char{0, 47} // auf US-Taste [
-		m['Ü'] = Char{2, 47}
-		m['ß'] = Char{0, 45} // auf US-Taste -
-		// usw.
+		m['\u00E4'] = Char{0, 52} // ä
+		m['\u00C4'] = Char{2, 52} // Ä
+		m['\u00F6'] = Char{0, 51} // ö
+		m['\u00D6'] = Char{2, 51} // Ö
+		m['\u00FC'] = Char{0, 47} // ü
+		m['\u00DC'] = Char{2, 47} // Ü
+		m['\u00DF'] = Char{0, 45} // ß
+
+		//Tauschen
+		m['^'] = Char{0, 53}
+
+		//neu
+		m['\u1FFD'] = Char{0, 53}
+		
 	}
 	return m
 }
@@ -50,11 +60,11 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 func (s *Service) Paste(c *gin.Context) {
 	var req PasteReq
 	var rsp proto.Response
-	charMapLocal := LangueSwitch(charMap, req.Langue)
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
+	charMapLocal := LangueSwitch(charMap, req.Langue)
 	if len(req.Content) > 1024 {
 		rsp.ErrRsp(c, -2, "content too long")
 		return
@@ -66,6 +76,7 @@ func (s *Service) Paste(c *gin.Context) {
 	for _, char := range req.Content {
 		key, ok := charMapLocal[char]
 		if !ok {
+    		rsp.ErrRsp(c, -1, "unknown character: "+string(char))
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
 		}
