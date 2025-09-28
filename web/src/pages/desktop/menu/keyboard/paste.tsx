@@ -8,6 +8,9 @@ import { useTranslation } from 'react-i18next';
 import { paste } from '@/api/hid';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
+import { Button, Input, Modal, Select, type InputRef } from 'antd';
+const { Option } = Select;
+
 const { TextArea } = Input;
 
 export const Paste = () => {
@@ -19,6 +22,7 @@ export const Paste = () => {
   const [status, setStatus] = useState<'' | 'error'>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const [langue, setLangue] = useState('de');
 
   const inputRef = useRef<InputRef>(null);
 
@@ -88,6 +92,15 @@ export const Paste = () => {
       >
         <div className="pb-3 text-xs text-neutral-500">{t('keyboard.tips')}</div>
 
+        <Select
+          value={langue}
+          onChange={(value) => setLangue(value)}
+          style={{ width: '100%', marginBottom: '12px' }} >
+          <Option value="de">Deutsch</Option>
+          <Option value="en">Englisch</Option>
+          <Option value="us">US</Option>
+        </Select>
+        
         <TextArea
           ref={inputRef}
           value={inputValue}
