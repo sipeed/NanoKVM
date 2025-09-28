@@ -48,10 +48,40 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['\u00DF'] = Char{0, 45} // ß
 
 		//Tauschen
-		m['^'] = Char{0, 53}
+		m['^'] = Char{0, 53} // muss doppelt sein
+		m['/'] = Char{2, 36} // Shift + 7
+		m['('] = Char{2, 37} // Shift + 8
+		m['&'] = Char{2, 35} // Shift + 6
+		m[')'] = Char{2, 38} // Shift + 9
+		m['`'] = Char{2, 46} // Grave Accent / Backtick
+		m['"'] = Char{2, 31} // Shift + 2
+		m['?'] = Char{2, 45} // Shift + ß
+		m['{'] = Char{0x40, 36} // ALt Gr + 7
+		m['['] = Char{0x40, 37} // ALt Gr + 8
+		m[']'] = Char{0x40, 38} // ALt Gr + 6
+		m['}'] = Char{0x40, 39} // ALt Gr + 0
+		m['\\'] = Char{0x40, 45} // ALt Gr + ß
+		m['@'] = Char{0x40, 20} // ALt Gr + q
+		m['+'] = Char{0, 48} // Shift + +
+		m['*'] = Char{2, 48} // Shift + +
+		m['~'] = Char{0x40, 48} // Shift + +
+		m['#'] = Char{0, 49} // Shift + #
+		m['\''] = Char{2, 49} // Shift + #
+		m['<'] = Char{0, 100} // Shift + <
+		m['>'] = Char{2, 100} // Shift + <
+		m['|'] = Char{0x40, 100} // ALt Gr + <
+		m[';'] = Char{2, 54} // Shift + ,
+		m[':'] = Char{2, 55} // Shift + .
+		m['-'] = Char{0, 56} // Shift + -
+		m['_'] = Char{2, 56} // Shift + -
 
 		//neu
-		m['\u1FFD'] = Char{0, 53}
+		m['\u00B4'] = Char{0, 46} // ´
+		m['\u00B0'] = Char{2, 53} // °
+		m['\u00A7'] = Char{2, 32} // §
+		m['\u20AC'] = Char{0x40, 8} // €
+		m['\u00B2'] = Char{0x40, 31} // ²
+		m['\u00B3'] = Char{0x40, 32} // ³
 		
 	}
 	return m
@@ -76,7 +106,26 @@ func (s *Service) Paste(c *gin.Context) {
 	for _, char := range req.Content {
 		key, ok := charMapLocal[char]
 		if !ok {
-    		rsp.ErrRsp(c, -1, "unknown character: "+string(char))
+
+			hex := string(char)
+
+			code := int(char)
+
+			for i := 12; i >= 0; i -= 4 {
+				digit := (code >> i) & 0xF
+				var c byte
+				if digit < 10 {
+					c = byte('0' + digit)
+				} else {
+					c = byte('A' + (digit - 10))
+				}
+				hex += string(c)
+			}
+
+
+
+
+    		rsp.ErrRsp(c, -1, "unknown character: "+hex)
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
 		}
