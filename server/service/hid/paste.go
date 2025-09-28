@@ -106,26 +106,6 @@ func (s *Service) Paste(c *gin.Context) {
 	for _, char := range req.Content {
 		key, ok := charMapLocal[char]
 		if !ok {
-
-			hex := string(char)
-
-			code := int(char)
-
-			for i := 12; i >= 0; i -= 4 {
-				digit := (code >> i) & 0xF
-				var c byte
-				if digit < 10 {
-					c = byte('0' + digit)
-				} else {
-					c = byte('A' + (digit - 10))
-				}
-				hex += string(c)
-			}
-
-
-
-
-    		rsp.ErrRsp(c, -1, "unknown character: "+hex)
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
 		}
