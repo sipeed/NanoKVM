@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Input, Modal, type InputRef } from 'antd';
+import { Button, Input, Modal, Select, type InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { ClipboardIcon } from 'lucide-react';
@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { paste } from '@/api/hid';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
-import { Button, Input, Modal, Select, type InputRef } from 'antd';
 const { Option } = Select;
 
 const { TextArea } = Input;
