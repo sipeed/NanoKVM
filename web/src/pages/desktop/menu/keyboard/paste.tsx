@@ -35,7 +35,7 @@ export const Paste = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-    paste(inputValue)
+    paste(inputValue, langue)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
