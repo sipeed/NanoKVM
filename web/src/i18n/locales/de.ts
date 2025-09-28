@@ -68,7 +68,7 @@ const de = {
     keyboard: {
       title: 'Tastatur',
       paste: 'Einfügen',
-      tips: 'Nur Standard-Tastaturbuchstaben und Symbole werden unterstützt',
+      tips: 'Tastaturbelegung',
       placeholder: 'Bitte eingeben',
       submit: 'Senden',
       virtual: 'Tastatur',
