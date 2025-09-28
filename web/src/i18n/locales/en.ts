@@ -73,7 +73,9 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      dropdownEnglish: 'English',
+      dropdownGerman: 'German'
     },
     mouse: {
       title: 'Mouse',
