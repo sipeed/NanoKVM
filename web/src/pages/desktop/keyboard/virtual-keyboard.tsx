@@ -134,6 +134,8 @@ export const VirtualKeyboard = () => {
       if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
       if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
       
+      if (base === 'IntlBackslash') return KeyboardCodes.get('IntlBackslash_qwertz');
+      
       // all other labels use their own code
       return KeyboardCodes.get(base);
     }
