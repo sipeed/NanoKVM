@@ -95,8 +95,8 @@ export const Paste = () => {
           value={langue}
           onChange={(value) => setLangue(value)}
           style={{ width: '100%', marginBottom: '12px' }} >
+          <Option value="en">{t('keyboard.dropdownEnglish')}</Option>
           <Option value="de">{t('keyboard.dropdownGerman')}</Option>
-          <Option value="en">{t('keyboard.dropdownStandard')}</Option>
         </Select>
         
         <TextArea
