@@ -21,7 +21,7 @@ export const Paste = () => {
   const [status, setStatus] = useState<'' | 'error'>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
-  const [langue, setLangue] = useState('de');
+  const [langue, setLangue] = useState('en');
 
   const inputRef = useRef<InputRef>(null);
 
@@ -95,9 +95,8 @@ export const Paste = () => {
           value={langue}
           onChange={(value) => setLangue(value)}
           style={{ width: '100%', marginBottom: '12px' }} >
-          <Option value="de">Deutsch</Option>
-          <Option value="en">Englisch</Option>
-          <Option value="us">US</Option>
+          <Option value="de">{t('keyboard.dropdownGerman')}</Option>
+          <Option value="en">{t('keyboard.dropdownStandard')}</Option>
         </Select>
         
         <TextArea
