@@ -68,7 +68,7 @@ const de = {
     keyboard: {
       title: 'Tastatur',
       paste: 'Einfügen',
-      tips: 'Tastaturbelegung',
+      tips: 'Server Tastaturbelegung',
       placeholder: 'Bitte eingeben',
       submit: 'Senden',
       virtual: 'Tastatur',
