@@ -9,5 +9,8 @@ export const mouseModeAtom = atom('absolute');
 // mouse scroll interval (unit: ms)
 export const scrollIntervalAtom = atom(0);
 
+// hid bios mode: normal or bios
+export const biosModeAtom = atom<'normal' | 'bios'>('normal');
+
 // hid mode: normal or hid-only
 export const hidModeAtom = atom<'normal' | 'hid-only'>('normal');

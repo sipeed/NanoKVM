@@ -14,6 +14,9 @@ func hidRouter(r *gin.Engine) {
 	api.POST("/hid/reset", service.Reset) // reset hid
 	api.POST("/hid/paste", service.Paste) // paste
 
+	api.GET("/hid/bios", service.GetBiosMode)  // get hid bios mode
+	api.POST("/hid/bios", service.SetBiosMode) // set hid bios mode
+
 	api.GET("/hid/mode", service.GetHidMode)  // get hid mode
 	api.POST("/hid/mode", service.SetHidMode) // set hid mode
 }
