@@ -10,6 +10,19 @@ export function reset() {
   return http.post('/api/hid/reset');
 }
 
+// get bios mode
+export function getBiosMode() {
+  return http.get('/api/hid/bios');
+}
+
+// set bios mode
+export function setBiosMode(mode: string) {
+  const data = {
+    mode
+  };
+  return http.post('/api/hid/bios', data);
+}
+
 // get hid mode
 export function getHidMode() {
   return http.get('/api/hid/mode');
