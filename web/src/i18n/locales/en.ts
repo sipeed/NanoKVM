@@ -142,6 +142,7 @@ const en = {
       slow: 'Slow',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
       resetHid: 'Reset HID',
+      biosHid: 'HID BIOS mode',
       hidOnly: {
         title: 'HID-Only mode',
         desc: "If your mouse and keyboard stop responding and resetting HID doesn't help, it could be a compatibility issue between the NanoKVM and the device. Try to enable HID-Only mode for better compatibility.",
@@ -354,6 +355,7 @@ const en = {
           scriptContent: 'Autostart Script Content',
           settings: 'Settings'
         },
+        hidBIOS: 'HID BIOS Mode',
         hidOnly: 'HID-Only Mode',
         hidOnlyDesc: 'Stop emulating virtual devices, retaining only basic HID control',
         disk: 'Virtual Disk',
