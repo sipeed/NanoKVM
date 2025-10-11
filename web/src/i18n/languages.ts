@@ -9,6 +9,7 @@ const languages = [
   { key: 'it', name: 'Italian' },
   { key: 'pl', name: 'Polski' },
   { key: 'ru', name: 'Русский' },
+  { key: 'tr', name: 'Türkçe'},
   { key: 'ko', name: '한국어' },
   { key: 'zh', name: '简体中文' },
   { key: 'zh_tw', name: '繁體中文' },
