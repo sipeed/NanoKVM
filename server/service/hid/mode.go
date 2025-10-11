@@ -3,11 +3,10 @@ package hid
 import (
 	"NanoKVM-Server/proto"
 	"errors"
+	"fmt"
 	"io"
 	"os"
-	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -16,7 +15,14 @@ import (
 const (
 	ModeNormal  = "normal"
 	ModeHidOnly = "hid-only"
+	ModeKbdOnly = "kbd-only"
 
+	ModeNonBios = "normal"
+	ModeHidBios = "bios"
+
+	HidGadgetPath     = "/sys/kernel/config/usb_gadget/g0"
+	HidConfPath       = "/sys/kernel/config/usb_gadget/g0/configs/c.1"
+	HidFuncPath       = "/sys/kernel/config/usb_gadget/g0/functions"
 	ModeFlag          = "/sys/kernel/config/usb_gadget/g0/bcdDevice"
 	NormalModeScript  = "/kvmapp/system/init.d/S03usbdev"
 	HidOnlyModeScript = "/kvmapp/system/init.d/S03usbhid"
@@ -26,6 +32,12 @@ const (
 var modeMap = map[string]string{
 	"0x0510": ModeNormal,
 	"0x0623": ModeHidOnly,
+	"0x0102": ModeKbdOnly,
+}
+
+var biosMap = map[string]string{
+	"0": ModeNonBios,
+	"1": ModeHidBios,
 }
 
 func (s *Service) GetHidMode(c *gin.Context) {
@@ -71,11 +83,15 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	rsp.OkRsp(c)
+	biosmode, _ := getBiosMode();
 
-	log.Println("reboot system...")
-	time.Sleep(500 * time.Millisecond)
-	_ = exec.Command("reboot").Run()
+	msg, err := setHidMode(req.Mode, biosmode)
+	if err != nil {
+		rsp.ErrRsp(c, -4, msg)
+		return
+	}
+
+	rsp.OkRsp(c)
 }
 
 func copyModeFile(srcScript string) error {
@@ -155,4 +171,201 @@ func getHidMode() (string, error) {
 	}
 
 	return mode, nil
+}
+
+func setHidMode(hidmode, biosmode string) (string, error) {
+	h := GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
+
+	if err := disable(); err != nil {
+		log.Errorf("disable hid failed: %s", err)
+		return "disable hid failed", err
+	}
+
+	flag := "0"
+	if biosmode == ModeHidBios {
+		flag = "1"
+	}
+
+	for _, hidfunc := range []string{"hid.GS0", "hid.GS1", "hid.GS2"} {
+		hidFunction := fmt.Sprintf("%s/%s", HidFuncPath, hidfunc)
+		hidSymLink := fmt.Sprintf("%s/%s", HidConfPath, hidfunc)
+		hidBiosFlag := fmt.Sprintf("%s/subclass", hidFunction)
+
+		if err := os.Remove(hidSymLink); err != nil {
+			log.Fatalf("Could not remove symlink: %v", err)
+			return "unlink hid failed", err
+		}
+
+		// bios mode
+		if err := os.WriteFile(hidBiosFlag, []byte(flag), 0o666); err != nil {
+			log.Errorf("set bios mode failed: %s", err)
+			return "set bios mode failed", err
+		}
+
+		if err := os.Symlink(hidFunction, hidSymLink); err != nil {
+			log.Errorf("Could not create symlink: %v", err)
+			return "symlink hid failed", err
+		}
+	}
+
+	usbFlag := "0x0200"
+	devFlag := "0x0510"
+	idVen := "0x3346"
+	idPrd := "0x1009"
+	maxPkt := "0x40"
+	strVen := "sipeed"
+	strPrd := "NanoKVM"
+	if hidmode == ModeHidOnly {
+		usbFlag = "0x0101"
+		devFlag = "0x0623"
+	} else if hidmode == ModeKbdOnly {
+		usbFlag = "0x0001"
+		devFlag = "0x0102"
+		idVen = "0x05ac"
+		idPrd = "0x0202"
+		maxPkt = "0x08"
+		strVen = "Alps Electric"
+		strPrd = "Apple USB Keyboard"
+        }
+
+	hidBcdUsb := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdUSB")
+	hidBcdDev := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdDevice")
+	hidIdVen := fmt.Sprintf("%s/%s", HidGadgetPath, "idVendor")
+	hidIdPrd := fmt.Sprintf("%s/%s", HidGadgetPath, "idProduct")
+	hidMaxPkt := fmt.Sprintf("%s/%s", HidGadgetPath, "bMaxPacketSize0")
+	hidStrVen := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409/manufacturer")
+	hidStrPrd := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409/product")
+
+	if err := os.WriteFile(hidBcdUsb, []byte(usbFlag), 0o666); err != nil {
+		log.Errorf("set bcdUSB failed: %s", err)
+		return "set bcdUSB failed", err
+	}
+
+	if err := os.WriteFile(hidBcdDev, []byte(devFlag), 0o666); err != nil {
+		log.Errorf("set bcdDevice failed: %s", err)
+		return "set bcdDevice failed", err
+	}
+
+	if err := os.WriteFile(hidIdVen, []byte(idVen), 0o666); err != nil {
+		log.Errorf("set idVendor failed: %s", err)
+		return "set idVendor failed", err
+	}
+
+	if err := os.WriteFile(hidIdPrd, []byte(idPrd), 0o666); err != nil {
+		log.Errorf("set idProduct failed: %s", err)
+		return "set idProduct failed", err
+	}
+
+	if err := os.WriteFile(hidMaxPkt, []byte(maxPkt), 0o666); err != nil {
+		log.Errorf("set bMaxPacketSize0 failed: %s", err)
+		return "set bMaxPacketSize0 failed", err
+	}
+
+	if err := os.WriteFile(hidStrVen, []byte(strVen), 0o666); err != nil {
+		log.Errorf("set strings/0x409/manufacturer failed: %s", err)
+		return "set strings/0x409/manufacturer failed", err
+	}
+
+	if err := os.WriteFile(hidStrPrd, []byte(strPrd), 0o666); err != nil {
+		log.Errorf("set strings/0x409/product failed: %s", err)
+		return "set strings/0x409/product failed", err
+	}
+
+	bmAttr := "0xE0"
+	maxPwr := "120"
+	strCnf := "NanoKVM"
+	if hidmode == ModeHidOnly {
+		bmAttr = "0xA0"
+		maxPwr = "200"
+	} else if hidmode == ModeKbdOnly {
+		bmAttr = "0xA0"
+		maxPwr = "50"
+		strCnf = ""
+	}
+
+	hidBmAttr := fmt.Sprintf("%s/%s", HidConfPath, "bmAttributes")
+	hidMaxPwr := fmt.Sprintf("%s/%s", HidConfPath, "MaxPower")
+	hidStrCnf := fmt.Sprintf("%s/%s", HidConfPath, "strings/0x409/configuration")
+
+	if err := os.WriteFile(hidBmAttr, []byte(bmAttr), 0o666); err != nil {
+		log.Errorf("set bmAttributes failed: %s", err)
+		return "set bmAttributes failed", err
+	}
+
+	if err := os.WriteFile(hidMaxPwr, []byte(maxPwr), 0o666); err != nil {
+		log.Errorf("set MaxPower failed: %s", err)
+		return "set MaxPower failed", err
+	}
+
+	if err := os.WriteFile(hidStrCnf, []byte(strCnf), 0o666); err != nil {
+		log.Errorf("set strings/0x409/configuration failed: %s", err)
+		return "set strings/0x409/configuration failed", err
+	}
+
+	for _, hidfunc := range []string{"mass_storage.disk0", "ncm.usb0", "rndis.usb0"} {
+		hidFunction := fmt.Sprintf("%s/%s", HidFuncPath, hidfunc)
+		hidSymLink := fmt.Sprintf("%s/%s", HidConfPath, hidfunc)
+		hidFuncOn, _ := isFuncExist(hidFunction)
+		hidConfOn, _ := isFuncExist(hidSymLink)
+
+		if hidFuncOn && hidConfOn && hidmode != ModeNormal {
+			if err := os.Remove(hidSymLink); err != nil {
+				log.Fatalf("Could not remove symlink: %v", err)
+				return "unlink hid failed", err
+			}
+		} else if hidFuncOn && !hidConfOn && hidmode == ModeNormal {
+			if err := os.Symlink(hidFunction, hidSymLink); err != nil {
+				log.Errorf("Could not create symlink: %v", err)
+				return "symlink hid failed", err
+			}
+		}
+	}
+
+	if err := enable(); err != nil {
+		log.Errorf("enable hid failed: %s", err)
+		return "enable hid failed", err
+	}
+
+	return "", nil
+}
+
+func getBiosMode() (string, error) {
+	hidFunction := fmt.Sprintf("%s/%s", HidConfPath, "hid.GS0")
+	hidBiosFlag := fmt.Sprintf("%s/subclass", hidFunction)
+
+	data, err := os.ReadFile(hidBiosFlag)
+	if err != nil {
+		log.Errorf("failed to read %s: %s", hidBiosFlag, err)
+		return "", err
+	}
+
+	key := strings.TrimSpace(string(data))
+	mode, ok := biosMap[key]
+	if !ok {
+		log.Errorf("invalid bios flag: %s", key)
+		return "", errors.New("invalid bios flag")
+	}
+
+	return mode, nil
+}
+
+func isFuncExist(device string) (bool, error) {
+	_, err := os.Stat(device)
+
+	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+
+	log.Errorf("check file %s err: %s", device, err)
+	return false, err
 }
