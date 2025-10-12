@@ -43,6 +43,12 @@ var biosMap = map[string]string{
 	"1": ModeHidBios,
 }
 
+var funcMap = map[string]string{
+	"mass_storage.disk0": "/boot/usb.disk0",
+	"ncm.usb0": "/boot/usb.ncm",
+	"rndis.usb0": "/boot/usb.rndis0",
+}
+
 func (s *Service) GetHidMode(c *gin.Context) {
 	var rsp proto.Response
 
@@ -403,21 +409,42 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		return "set strings/0x409/configuration failed", err
 	}
 
-	for _, hidfunc := range []string{"mass_storage.disk0", "ncm.usb0", "rndis.usb0"} {
-		hidFunction := fmt.Sprintf("%s/%s", HidFuncPath, hidfunc)
-		hidSymLink := fmt.Sprintf("%s/%s", HidConfPath, hidfunc)
-		hidFuncOn, _ := isFuncExist(hidFunction)
-		hidConfOn, _ := isFuncExist(hidSymLink)
+	// configure non-hid functions
+	for _, othfunc := range []string{"mass_storage.disk0", "ncm.usb0", "rndis.usb0"} {
+		othFunction := fmt.Sprintf("%s/%s", HidFuncPath, othfunc)
+		othSymLink := fmt.Sprintf("%s/%s", HidConfPath, othfunc)
+		othFuncOn, _ := isFuncExist(othFunction)
+		othConfOn, _ := isFuncExist(othSymLink)
 
-		if hidFuncOn && hidConfOn && hidmode != ModeNormal {
-			if err := os.Remove(hidSymLink); err != nil {
-				log.Fatalf("Could not remove symlink: %v", err)
-				return "unlink hid failed", err
+		bootFile, othFuncEn := funcMap[othfunc]
+		if othFuncEn {
+			othFuncEn, _ = isFuncExist(bootFile)
+		}
+		if othFuncEn && !othFuncOn && hidmode == ModeNormal {
+			if err := os.Mkdir(othFunction, 0o755); err != nil {
+				log.Fatalf("Could create function: %v", err)
+                                return "create function failed", err
 			}
-		} else if hidFuncOn && !hidConfOn && hidmode == ModeNormal {
-			if err := os.Symlink(hidFunction, hidSymLink); err != nil {
+			othFuncOn, _ = isFuncExist(othFunction)
+		}
+		if othFuncOn && othfunc == "mass_storage.disk0" {
+			removableFlag := fmt.Sprintf("%s/%s", othFunction, "lun.0/removable")
+
+			if err := os.WriteFile(removableFlag, []byte("1"), 0o666); err != nil {
+				log.Errorf("set removable failed: %s", err)
+				return "set removable failed", err
+			}
+		}
+
+		if othFuncOn && othConfOn && hidmode != ModeNormal {
+			if err := os.Remove(othSymLink); err != nil {
+				log.Fatalf("Could not remove symlink: %v", err)
+				return "unlink function failed", err
+			}
+		} else if othFuncOn && !othConfOn && hidmode == ModeNormal {
+			if err := os.Symlink(othFunction, othSymLink); err != nil {
 				log.Errorf("Could not create symlink: %v", err)
-				return "symlink hid failed", err
+				return "symlink function failed", err
 			}
 		}
 	}
