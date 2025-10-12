@@ -285,10 +285,14 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		hidFunction := fmt.Sprintf("%s/%s", HidFuncPath, hidfunc)
 		hidSymLink := fmt.Sprintf("%s/%s", HidConfPath, hidfunc)
 		hidBiosFlag := fmt.Sprintf("%s/subclass", hidFunction)
+		hidFuncOn, _ := isFuncExist(hidFunction)
+		hidConfOn, _ := isFuncExist(hidSymLink)
 
-		if err := os.Remove(hidSymLink); err != nil {
-			log.Fatalf("Could not remove symlink: %v", err)
-			return "unlink hid failed", err
+		if hidConfOn {
+			if err := os.Remove(hidSymLink); err != nil {
+				log.Fatalf("Could not remove symlink: %v", err)
+				return "unlink hid failed", err
+			}
 		}
 
 		// bios mode
@@ -297,9 +301,11 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 			return "set bios mode failed", err
 		}
 
-		if err := os.Symlink(hidFunction, hidSymLink); err != nil {
-			log.Errorf("Could not create symlink: %v", err)
-			return "symlink hid failed", err
+		if hidFuncOn {
+			if err := os.Symlink(hidFunction, hidSymLink); err != nil {
+				log.Errorf("Could not create symlink: %v", err)
+				return "symlink hid failed", err
+			}
 		}
 	}
 
