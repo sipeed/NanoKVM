@@ -244,7 +244,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		maxPkt = "0x08"
 		strVen = "Alps Electric"
 		strPrd = "Apple USB Keyboard"
-        }
+	}
 
 	hidBcdUsb := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdUSB")
 	hidBcdDev := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdDevice")
@@ -334,7 +334,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		if othFuncEn && !othFuncOn && hidmode == ModeNormal {
 			if err := os.Mkdir(othFunction, 0o755); err != nil {
 				log.Fatalf("Could create function: %v", err)
-                                return "create function failed", err
+				return "create function failed", err
 			}
 			othFuncOn, _ = isFuncExist(othFunction)
 		}
