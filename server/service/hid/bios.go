@@ -8,10 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	BiosFile = "/boot/BIOS"
-)
-
 func (s *Service) GetBiosMode(c *gin.Context) {
 	var rsp proto.Response
 
