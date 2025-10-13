@@ -28,9 +28,17 @@ const (
 
 	ModeNormalScript  = "/kvmapp/system/init.d/S03usbdev"
 	ModeHidOnlyScript = "/kvmapp/system/init.d/S03usbhid"
+	ModeKbdOnlyScript = "/kvmapp/system/init.d/S03usbkeyboard"
 
 	USBDevScript = "/etc/init.d/S03usbdev"
+	NoWowFile         = "/boot/usb.notwakeup"
 )
+
+type hidConf struct {
+	Protocol []byte
+	ReportLength []byte
+	ReportDesc []byte
+}
 
 var modeMap = map[string]string{
 	"0x0510": ModeNormal,
@@ -41,6 +49,15 @@ var modeMap = map[string]string{
 var biosMap = map[string]string{
 	"0": ModeNonBios,
 	"1": ModeHidBios,
+}
+
+var confMap = map[string]hidConf{
+	// keyboard
+	"hid.GS0": { []byte("1"), []byte("8"), []byte( "\x05\x01\x09\x06\xa1\x01\x05\x07\x19\xe0\x29\xe7\x15\x00\x25\x01\x75\x01\x95\x08\x81\x02\x95\x01\x75\x08\x81\x03\x95\x05\x75\x01\x05\x08\x19\x01\x29\x05\x91\x02\x95\x01\x75\x03\x91\x03\x95\x06\x75\x08\x15\x00\x25\x65\x05\x07\x19\x00\x29\x65\x81\x00\xc0" ) },
+	// mouse
+	"hid.GS1": { []byte("2"), []byte("4"), []byte( "\x05\x01\x09\x02\xa1\x01\x09\x01\xa1\x00\x05\x09\x19\x01\x29\x03\x15\x00\x25\x01\x95\x03\x75\x01\x81\x02\x95\x01\x75\x05\x81\x03\x05\x01\x09\x30\x09\x31\x09\x38\x15\x81\x25\x7f\x75\x08\x95\x03\x81\x06\xc0\xc0" ) },
+	// touch
+	"hid.GS2": { []byte("2"), []byte("6"), []byte( "\x05\x01\x09\x02\xa1\x01\x09\x01\xa1\x00\x05\x09\x19\x01\x29\x03\x15\x00\x25\x01\x95\x03\x75\x01\x81\x02\x95\x01\x75\x05\x81\x01\x05\x01\x09\x30\x09\x31\x15\x00\x26\xff\x7f\x35\x00\x46\xff\x7f\x75\x10\x95\x02\x81\x02\x05\x01\x09\x38\x15\x81\x25\x7f\x35\x00\x45\x00\x75\x08\x95\x01\x81\x06\xc0\xc0" ) },
 }
 
 var funcMap = map[string]string{
@@ -72,7 +89,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
-	if req.Mode != ModeNormal && req.Mode != ModeHidOnly {
+	if req.Mode != ModeNormal && req.Mode != ModeHidOnly && req.Mode != ModeKbdOnly {
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
 	}
@@ -85,6 +102,8 @@ func (s *Service) SetHidMode(c *gin.Context) {
 	srcScript := ModeNormalScript
 	if req.Mode == ModeHidOnly {
 		srcScript = ModeHidOnlyScript
+	} else if req.Mode == ModeKbdOnly {
+		srcScript = ModeKbdOnlyScript
 	}
 
 	if err := copyModeFile(srcScript); err != nil {
@@ -282,17 +301,63 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		return "disable hid failed", err
 	}
 
+	hidGadgetOn, _ := isFuncExist(HidGadgetPath)
+	if !hidGadgetOn {
+		if err := os.Mkdir(HidGadgetPath, 0o755); err != nil {
+			log.Fatalf("Could not create gadget: %v", err)
+			return "create gadget failed", err
+		}
+		//hidGadgetOn, _ = isFuncExist(HidGadgetPath)
+	}
+	hidGadgStrPath := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409")
+	hidGadgetStringsOn, _ := isFuncExist(hidGadgStrPath)
+	if !hidGadgetStringsOn {
+		if err := os.Mkdir(hidGadgStrPath, 0o755); err != nil {
+			log.Fatalf("Could not create config: %v", err)
+			return "create config failed", err
+		}
+		//hidGadgetStringsOn, _ = isFuncExist(hidGadgStrPath)
+	}
+
+	hidConfigOn, _ := isFuncExist(HidConfPath)
+	if !hidConfigOn {
+		if err := os.Mkdir(HidConfPath, 0o755); err != nil {
+			log.Fatalf("Could not create config: %v", err)
+			return "create config failed", err
+		}
+		//hidConfigOn, _ = isFuncExist(HidConfPath)
+	}
+	hidConfStrPath := fmt.Sprintf("%s/%s", HidConfPath, "strings/0x409")
+	hidConfigStringsOn, _ := isFuncExist(hidConfStrPath)
+	if !hidConfigStringsOn {
+		if err := os.Mkdir(hidConfStrPath, 0o755); err != nil {
+			log.Fatalf("Could not create config: %v", err)
+			return "create config failed", err
+		}
+		//hidConfigStringsOn, _ = isFuncExist(hidConfStrPath)
+	}
+
 	flag := "0"
 	if biosmode == ModeHidBios {
 		flag = "1"
+	}
+	wowFlag := "1"
+	wowDisabled, _ := isFuncExist(NoWowFile)
+	if wowDisabled {
+		wowFlag = "0"
 	}
 
 	for _, hidfunc := range []string{"hid.GS0", "hid.GS1", "hid.GS2"} {
 		hidFunction := fmt.Sprintf("%s/%s", HidFuncPath, hidfunc)
 		hidSymLink := fmt.Sprintf("%s/%s", HidConfPath, hidfunc)
+		hidProtocol := fmt.Sprintf("%s/protocol", hidFunction)
+		hidLength   := fmt.Sprintf("%s/report_length", hidFunction)
+		hidReport   := fmt.Sprintf("%s/report_desc", hidFunction)
 		hidBiosFlag := fmt.Sprintf("%s/subclass", hidFunction)
+		hidWakeOnWr := fmt.Sprintf("%s/wakeup_on_write", hidFunction)
 		hidFuncOn, _ := isFuncExist(hidFunction)
 		hidConfOn, _ := isFuncExist(hidSymLink)
+		hidConfig, _ := confMap[hidfunc]
 
 		if hidConfOn {
 			if err := os.Remove(hidSymLink); err != nil {
@@ -301,10 +366,40 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 			}
 		}
 
+		if  hidfunc != "hid.GS0" && hidmode == ModeKbdOnly {
+			continue
+		}
+
+		if !hidFuncOn {
+			if err := os.Mkdir(hidFunction, 0o755); err != nil {
+				log.Fatalf("Could not create function: %v", err)
+				return "create function failed", err
+			}
+			hidFuncOn, _ = isFuncExist(hidFunction)
+		}
+
+		if err := os.WriteFile(hidProtocol, hidConfig.Protocol, 0o666); err != nil {
+			log.Errorf("set protocol failed: %s", err)
+			return "set protocol failed", err
+		}
+		if err := os.WriteFile(hidLength, hidConfig.ReportLength, 0o666); err != nil {
+			log.Errorf("set report length failed: %s", err)
+			return "set report length failed", err
+		}
+		if err := os.WriteFile(hidReport, hidConfig.ReportDesc, 0o666); err != nil {
+			log.Errorf("set report desc failed: %s", err)
+			return "set report desc failed", err
+		}
+
 		// bios mode
 		if err := os.WriteFile(hidBiosFlag, []byte(flag), 0o666); err != nil {
 			log.Errorf("set bios mode failed: %s", err)
 			return "set bios mode failed", err
+		}
+		// wakeup on write
+		if err := os.WriteFile(hidWakeOnWr, []byte(wowFlag), 0o666); err != nil {
+			log.Errorf("set wakeup on write failed: %s", err)
+			return "set wakeup on write failed", err
 		}
 
 		if hidFuncOn {
@@ -322,9 +417,11 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 	maxPkt := "0x40"
 	strVen := "sipeed"
 	strPrd := "NanoKVM"
+	strSNr := "0123456789ABCDEF"
 	if hidmode == ModeHidOnly {
 		usbFlag = "0x0101"
 		devFlag = "0x0623"
+		strSNr = ""
 	} else if hidmode == ModeKbdOnly {
 		usbFlag = "0x0001"
 		devFlag = "0x0102"
@@ -333,6 +430,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		maxPkt = "0x08"
 		strVen = "Alps Electric"
 		strPrd = "Apple USB Keyboard"
+		strSNr = ""
 	}
 
 	hidBcdUsb := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdUSB")
@@ -342,6 +440,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 	hidMaxPkt := fmt.Sprintf("%s/%s", HidGadgetPath, "bMaxPacketSize0")
 	hidStrVen := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409/manufacturer")
 	hidStrPrd := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409/product")
+	hidStrSNr := fmt.Sprintf("%s/%s", HidGadgetPath, "strings/0x409/serialnumber")
 
 	if err := os.WriteFile(hidBcdUsb, []byte(usbFlag), 0o666); err != nil {
 		log.Errorf("set bcdUSB failed: %s", err)
@@ -376,6 +475,11 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 	if err := os.WriteFile(hidStrPrd, []byte(strPrd), 0o666); err != nil {
 		log.Errorf("set strings/0x409/product failed: %s", err)
 		return "set strings/0x409/product failed", err
+	}
+
+	if err := os.WriteFile(hidStrSNr, []byte(strSNr), 0o666); err != nil {
+		log.Errorf("set strings/0x409/serialnumber failed: %s", err)
+		return "set strings/0x409/serialnumber failed", err
 	}
 
 	bmAttr := "0xE0"
@@ -422,7 +526,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		}
 		if othFuncEn && !othFuncOn && hidmode == ModeNormal {
 			if err := os.Mkdir(othFunction, 0o755); err != nil {
-				log.Fatalf("Could create function: %v", err)
+				log.Fatalf("Could not create function: %v", err)
 				return "create function failed", err
 			}
 			othFuncOn, _ = isFuncExist(othFunction)
