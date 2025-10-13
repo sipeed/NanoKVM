@@ -28,7 +28,12 @@ const (
 	HidOnlyModeScript = "/kvmapp/system/init.d/S03usbhid"
 	KbdOnlyModeScript = "/kvmapp/system/init.d/S03usbkeyboard"
 	TargetModeScript  = "/etc/init.d/S03usbdev"
+
+	BiosFile          = "/boot/BIOS"
+	NoHidFile         = "/boot/disable_hid"
 	NoWowFile         = "/boot/usb.notwakeup"
+	UsbIdVenFile      = "/boot/usb.vid"
+	UsbIdPrdFile      = "/boot/usb.pid"
 )
 
 type hidConf struct {
@@ -108,6 +113,15 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
+	bootHidOff, _ := isFuncExist(NoHidFile)
+	if bootHidOff {
+		if err := os.Remove(NoHidFile); err != nil {
+			log.Errorf("remove disable hid file failed: %s", err)
+			rsp.ErrRsp(c, -2, "remove disable hid file failed")
+			return
+		}
+	}
+
 	biosmode, _ := getBiosMode();
 
 	msg, err := setHidMode(req.Mode, biosmode)
@@ -182,6 +196,13 @@ func copyModeFile(srcScript string) error {
 }
 
 func getHidMode() (string, error) {
+	hidGadgetOn, _ := isFuncExist(HidGadgetPath)
+
+	// gadget is disabled
+	if (!hidGadgetOn) {
+		return modeMap["0x0510"], nil
+	}
+
 	data, err := os.ReadFile(ModeFlag)
 	if err != nil {
 		log.Errorf("failed to read %s: %s", ModeFlag, err)
@@ -344,6 +365,26 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		strSNr = ""
 	}
 
+	bootIdVen, _ := isFuncExist(UsbIdVenFile)
+	bootIdPrd, _ := isFuncExist(UsbIdPrdFile)
+	if bootIdVen && bootIdPrd {
+		data, err := os.ReadFile(UsbIdVenFile)
+		if err != nil {
+			log.Errorf("failed to read %s: %s", UsbIdVenFile, err)
+			return "", err
+		}
+
+		idVen = strings.TrimSpace(string(data))
+
+		data, err = os.ReadFile(UsbIdPrdFile)
+		if err != nil {
+			log.Errorf("failed to read %s: %s", UsbIdPrdFile, err)
+			return "", err
+		}
+
+		idPrd = strings.TrimSpace(string(data))
+	}
+
 	hidBcdUsb := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdUSB")
 	hidBcdDev := fmt.Sprintf("%s/%s", HidGadgetPath, "bcdDevice")
 	hidIdVen := fmt.Sprintf("%s/%s", HidGadgetPath, "idVendor")
@@ -475,6 +516,17 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 func getBiosMode() (string, error) {
 	hidFunction := fmt.Sprintf("%s/%s", HidConfPath, "hid.GS0")
 	hidBiosFlag := fmt.Sprintf("%s/subclass", hidFunction)
+	hidFuncOn, _ := isFuncExist(hidFunction)
+	biosboot, _ := isFuncExist(BiosFile)
+
+	// hid is disabled
+	if (!hidFuncOn) {
+		if biosboot {
+			return biosMap["1"], nil
+		} else {
+			return biosMap["0"], nil
+		}
+	}
 
 	data, err := os.ReadFile(hidBiosFlag)
 	if err != nil {

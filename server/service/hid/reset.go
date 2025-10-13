@@ -38,6 +38,13 @@ func (s *Service) Reset(c *gin.Context) {
 }
 
 func disable() (error) {
+	hidGadgetOn, _ := isFuncExist(HidGadgetPath)
+
+	// gadget already disabled
+	if (!hidGadgetOn) {
+		return nil
+	}
+
 	// reset USB
 	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
 	if err != nil {
