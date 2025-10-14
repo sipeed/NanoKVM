@@ -138,6 +138,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 }
 
 func disable() (error) {
+	hidGadgetUDC := fmt.Sprintf("%s/%s", HidGadgetPath, "UDC")
 	hidGadgetOn, _ := isFuncExist(HidGadgetPath)
 
 	// gadget already disabled
@@ -146,15 +147,15 @@ func disable() (error) {
 	}
 
 	// reset USB
-	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
+	f, err := os.OpenFile(hidGadgetUDC, os.O_WRONLY, 0644)
 	if err != nil {
-		log.Errorf("open /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
+		log.Errorf("open %s failed: %s", hidGadgetUDC, err)
 		return err
 	}
 	err = f.Truncate(0)
 	if err != nil {
 		_ = f.Close()
-		log.Errorf("truncate /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
+		log.Errorf("truncate %s failed: %s", hidGadgetUDC, err)
 		return err
 	}
 	_, err = f.Seek(0, 0)
@@ -166,7 +167,7 @@ func disable() (error) {
 	_, err = f.WriteString("\n")
 	if err != nil {
 		_ = f.Close()
-		log.Errorf("write to /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
+		log.Errorf("write to %s failed: %s", hidGadgetUDC, err)
 		return err
 	}
 	_ = f.Close()
@@ -177,22 +178,24 @@ func disable() (error) {
 }
 
 func enable() (error) {
+	hidGadgetUDC := fmt.Sprintf("%s/%s", HidGadgetPath, "UDC")
+
 	devices, err := os.ReadDir("/sys/class/udc/")
 	if err != nil {
 		log.Errorf("read udc directory failed: %s", err)
 		return err
 	}
 
-	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
+	f, err := os.OpenFile(hidGadgetUDC, os.O_WRONLY, 0644)
 	if err != nil {
-		log.Errorf("open /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
+		log.Errorf("open %s failed: %s", hidGadgetUDC, err)
 		return err
 	}
 	for _, device := range devices {
 		_, err = f.WriteString(device.Name() + "\n")
 		if err != nil {
 			_ = f.Close()
-			log.Errorf("write to /sys/kernel/config/usb_gadget/g0/UDC failed: %s", err)
+			log.Errorf("write to %s failed: %s", hidGadgetUDC, err)
 			return err
 		}
 	}
