@@ -17,6 +17,7 @@ const (
 	ModeNormal  = "normal"
 	ModeHidOnly = "hid-only"
 	ModeKbdOnly = "kbd-only"
+	ModeNoHid   = "no-hid"
 
 	ModeNonBios = "normal"
 	ModeHidBios = "bios"
@@ -50,6 +51,7 @@ var modeMap = map[string]string{
 	"0x0510": ModeNormal,
 	"0x0623": ModeHidOnly,
 	"0x0102": ModeKbdOnly,
+	"0x0000": ModeNoHid,
 }
 
 var biosMap = map[string]string{
@@ -95,7 +97,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
-	if req.Mode != ModeNormal && req.Mode != ModeHidOnly && req.Mode != ModeKbdOnly {
+	if req.Mode != ModeNormal && req.Mode != ModeHidOnly && req.Mode != ModeKbdOnly && req.Mode != ModeNoHid {
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
 	}
@@ -118,7 +120,13 @@ func (s *Service) SetHidMode(c *gin.Context) {
 	}
 
 	bootHidOff, _ := isFuncExist(NoHidFile)
-	if bootHidOff {
+	if !bootHidOff && req.Mode == ModeNoHid {
+		if err := os.WriteFile(NoHidFile, []byte("\n"), 0o666); err != nil {
+			log.Errorf("write disable hid file failed: %s", err)
+			rsp.ErrRsp(c, -2, "write disable hid file failed")
+			return
+		}
+	} else 	if bootHidOff && req.Mode != ModeNoHid {
 		if err := os.Remove(NoHidFile); err != nil {
 			log.Errorf("remove disable hid file failed: %s", err)
 			rsp.ErrRsp(c, -2, "remove disable hid file failed")
@@ -296,11 +304,13 @@ func copyModeFile(srcScript string) error {
 }
 
 func getHidMode() (string, error) {
+	hidFunction := fmt.Sprintf("%s/%s", HidConfPath, "hid.GS0")
+	hidFuncOn, _ := isFuncExist(hidFunction)
 	hidGadgetOn, _ := isFuncExist(HidGadgetPath)
 
-	// gadget is disabled
-	if (!hidGadgetOn) {
-		return modeMap["0x0510"], nil
+	// gadget or hid function is disabled
+	if !hidGadgetOn || !hidFuncOn {
+		return modeMap["0x0000"], nil
 	}
 
 	data, err := os.ReadFile(ModeFlag)
@@ -398,7 +408,10 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 			}
 		}
 
-		if  hidfunc != "hid.GS0" && hidmode == ModeKbdOnly {
+		if hidmode == ModeNoHid {
+			continue
+		}
+		if hidfunc != "hid.GS0" && hidmode == ModeKbdOnly {
 			continue
 		}
 
@@ -571,12 +584,13 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		othSymLink := fmt.Sprintf("%s/%s", HidConfPath, othfunc)
 		othFuncOn, _ := isFuncExist(othFunction)
 		othConfOn, _ := isFuncExist(othSymLink)
+		othModeOn := hidmode == ModeNormal || hidmode == ModeNoHid
 
 		bootFile, othFuncEn := funcMap[othfunc]
 		if othFuncEn {
 			othFuncEn, _ = isFuncExist(bootFile)
 		}
-		if othFuncEn && !othFuncOn && hidmode == ModeNormal {
+		if othFuncEn && !othFuncOn && othModeOn {
 			if err := os.Mkdir(othFunction, 0o755); err != nil {
 				log.Fatalf("Could not create function: %v", err)
 				return "create function failed", err
@@ -592,12 +606,12 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 			}
 		}
 
-		if othFuncOn && othConfOn && hidmode != ModeNormal {
+		if othFuncOn && othConfOn && !othModeOn {
 			if err := os.Remove(othSymLink); err != nil {
 				log.Fatalf("Could not remove symlink: %v", err)
 				return "unlink function failed", err
 			}
-		} else if othFuncOn && !othConfOn && hidmode == ModeNormal {
+		} else if othFuncOn && !othConfOn && othModeOn {
 			if err := os.Symlink(othFunction, othSymLink); err != nil {
 				log.Errorf("Could not create symlink: %v", err)
 				return "symlink function failed", err
