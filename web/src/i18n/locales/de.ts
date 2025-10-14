@@ -96,14 +96,18 @@ const de = {
         'Relativer Modus aktiv. Klicken Sie auf den Desktop um den Mauszeiger zu sehen.',
       resetHid: 'HID zurücksetzen',
       biosHid: 'HID BIOS-Modus',
-      hidOnly: {
-        title: 'HID-Only Modus',
+      hidMode: {
+        title: 'HID Modus',
         desc: 'Wenn Ihre Maus und Tastatur nicht mehr reagieren und das Zurücksetzen der HID-Verbindung nicht hilft, könnte es sich um ein Kompatibilitätsproblem zwischen dem NanoKVM und dem Gerät handeln. Versuchen Sie, den HID-Only Modus zu aktivieren, um die Kompatibilität zu verbessern.',
         tip1: 'Die Aktivierung des HID-Only Modus entfernt das virtuelle U-Laufwerk und das virtuelle Netzwerk.',
         tip2: 'Im HID-Only Modus ist das Einbinden von Systemabbilder deaktiviert.',
         tip3: 'NanoKVM wird nach dem Wechsel in den neuen Modus HID zurücksetzen.',
-        enable: 'HID-Only Modus aktivieren',
-        disable: 'HID-Only Modus deaktivieren'
+        normal: 'Normal',
+        hidonly: 'HID-Only',
+        kbdonly: 'Keyboard-Only',
+        nohid: 'Kein HID',
+        enable: 'Aktivieren',
+        close: 'Schließen'
       }
     },
     image: {
