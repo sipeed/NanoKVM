@@ -21,6 +21,7 @@ const (
 	ModeNonBios = "normal"
 	ModeHidBios = "bios"
 
+	CviUsbOtgRole     = "/proc/cviusb/otg_role"
 	HidGadgetPath     = "/sys/kernel/config/usb_gadget/g0"
 	HidConfPath       = "/sys/kernel/config/usb_gadget/g0/configs/c.1"
 	HidFuncPath       = "/sys/kernel/config/usb_gadget/g0/functions"
@@ -606,6 +607,10 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		return "enable hid failed", err
 	}
 
+	if msg, err := setOtgRole(true); err != nil {
+		return msg, err
+	}
+
 	return "", nil
 }
 
@@ -638,6 +643,27 @@ func getBiosMode() (string, error) {
 	}
 
 	return mode, nil
+}
+
+func setOtgRole(devicemode bool) (string, error) {
+	isCviUsb, _ := isFuncExist(CviUsbOtgRole)
+
+	// do not fail on non-cvi hardware
+	if !isCviUsb {
+		return "", nil;
+	}
+
+	otgRole := "device"
+	if !devicemode {
+		otgRole = "host"
+	}
+
+	if err := os.WriteFile(CviUsbOtgRole, []byte(otgRole), 0o666); err != nil {
+		log.Errorf("set otg role failed: %s", err)
+		return "set otg role failed", err
+	}
+
+	return "", nil;
 }
 
 func isFuncExist(device string) (bool, error) {
