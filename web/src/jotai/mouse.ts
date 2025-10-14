@@ -12,5 +12,5 @@ export const scrollIntervalAtom = atom(0);
 // hid bios mode: normal or bios
 export const biosModeAtom = atom<'normal' | 'bios'>('normal');
 
-// hid mode: normal or hid-only
-export const hidModeAtom = atom<'normal' | 'hid-only'>('normal');
+// hid mode: normal, hid-only, kbd-only or no-hid
+export const hidModeAtom = atom<'normal' | 'hid-only' | 'kbd-only' | 'no-hid'>('normal');
