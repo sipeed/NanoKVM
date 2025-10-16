@@ -2,7 +2,6 @@ package hid
 
 import (
 	"NanoKVM-Server/proto"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -41,27 +40,18 @@ func (s *Service) SetBiosMode(c *gin.Context) {
 		return
 	}
 
-	biosboot, _ := isFuncExist(BiosFile)
-	if !biosboot && req.Mode == ModeHidBios {
-		if err := os.WriteFile(BiosFile, []byte("\n"), 0o666); err != nil {
-			log.Errorf("write bios file failed: %s", err)
-			rsp.ErrRsp(c, -2, "write bios file failed")
-			return
-		}
-	} else if biosboot && req.Mode != ModeHidBios {
-		if err := os.Remove(BiosFile); err != nil {
-			log.Errorf("remove bios file failed: %s", err)
-			rsp.ErrRsp(c, -2, "remove bios file failed")
-			return
-		}
-	}
-
 	hidmode, _ := getHidMode()
 	wowmode, _ := getWoWMode();
 
 	msg, err := setHidMode(hidmode, req.Mode, wowmode)
 	if err != nil {
 		rsp.ErrRsp(c, -2, msg)
+		return
+	}
+
+	msg, err = setBootBios(req.Mode)
+	if err != nil {
+		rsp.ErrRsp(c, -4, msg)
 		return
 	}
 
