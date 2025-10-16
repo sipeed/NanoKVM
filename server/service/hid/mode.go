@@ -125,25 +125,28 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	bootHidOff, _ := isFuncExist(NoHidFile)
-	if !bootHidOff && req.Mode == ModeNoHid {
-		if err := os.WriteFile(NoHidFile, []byte("\n"), 0o666); err != nil {
-			log.Errorf("write disable hid file failed: %s", err)
-			rsp.ErrRsp(c, -2, "write disable hid file failed")
-			return
-		}
-	} else 	if bootHidOff && req.Mode != ModeNoHid {
-		if err := os.Remove(NoHidFile); err != nil {
-			log.Errorf("remove disable hid file failed: %s", err)
-			rsp.ErrRsp(c, -2, "remove disable hid file failed")
-			return
-		}
-	}
-
 	biosmode, _ := getBiosMode();
 	wowmode, _ := getBiosMode();
 
 	msg, err := setHidMode(req.Mode, biosmode, wowmode)
+	if err != nil {
+		rsp.ErrRsp(c, -4, msg)
+		return
+	}
+
+	msg, err = setBootNoHid(req.Mode)
+	if err != nil {
+		rsp.ErrRsp(c, -4, msg)
+		return
+	}
+
+	msg, err = setBootBios(biosmode)
+	if err != nil {
+		rsp.ErrRsp(c, -4, msg)
+		return
+	}
+
+	msg, err = setBootWoW(wowmode)
 	if err != nil {
 		rsp.ErrRsp(c, -4, msg)
 		return
@@ -238,6 +241,23 @@ func getHidMode() (string, error) {
 	}
 
 	return mode, nil
+}
+
+func setBootNoHid(mode string) (string, error) {
+	bootHidOff, _ := isFuncExist(NoHidFile)
+	if !bootHidOff && mode == ModeNoHid {
+		if err := os.WriteFile(NoHidFile, []byte("\n"), 0o666); err != nil {
+			log.Errorf("write disable hid file failed: %s", err)
+			return "write disable hid file failed", err
+		}
+	} else 	if bootHidOff && mode != ModeNoHid {
+		if err := os.Remove(NoHidFile); err != nil {
+			log.Errorf("remove disable hid file failed: %s", err)
+			return "remove disable hid file failed", err
+		}
+	}
+
+	return "", nil
 }
 
 func setHidMode(hidmode, biosmode, wowmode string) (string, error) {
@@ -572,6 +592,23 @@ func getBiosMode() (string, error) {
 	return mode, nil
 }
 
+func setBootBios(biosmode string) (string, error) {
+	biosboot, _ := isFuncExist(BiosFile)
+	if !biosboot && biosmode == ModeHidBios {
+		if err := os.WriteFile(BiosFile, []byte("\n"), 0o666); err != nil {
+			log.Errorf("write bios file failed: %s", err)
+			return "write bios file failed", err
+		}
+	} else if biosboot && biosmode != ModeHidBios {
+		if err := os.Remove(BiosFile); err != nil {
+			log.Errorf("remove bios file failed: %s", err)
+			return "remove bios file failed", err
+		}
+	}
+
+	return "", nil
+}
+
 func getWoWMode() (string, error) {
 	hidFunction := fmt.Sprintf("%s/%s", HidConfPath, "hid.GS0")
 	hidWakeOnWr := fmt.Sprintf("%s/wakeup_on_write", hidFunction)
@@ -601,6 +638,23 @@ func getWoWMode() (string, error) {
 	}
 
 	return mode, nil
+}
+
+func setBootWoW(wowmode string) (string, error) {
+	nowowboot, _ := isFuncExist(NoWowFile)
+	if !nowowboot && wowmode != ModeHidWoW {
+		if err := os.WriteFile(NoWowFile, []byte("\n"), 0o666); err != nil {
+			log.Errorf("write wow file failed: %s", err)
+			return "write wow file failed", err
+		}
+	} else if nowowboot && wowmode == ModeHidWoW {
+		if err := os.Remove(NoWowFile); err != nil {
+			log.Errorf("remove wow file failed: %s", err)
+			return "remove wow file failed", err
+		}
+	}
+
+	return "", nil
 }
 
 func setOtgRole(devicemode bool) (string, error) {

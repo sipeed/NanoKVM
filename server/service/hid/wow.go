@@ -2,7 +2,6 @@ package hid
 
 import (
 	"NanoKVM-Server/proto"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -41,27 +40,18 @@ func (s *Service) SetWoWMode(c *gin.Context) {
 		return
 	}
 
-	nowowboot, _ := isFuncExist(NoWowFile)
-	if !nowowboot && req.Mode != ModeHidWoW {
-		if err := os.WriteFile(NoWowFile, []byte("\n"), 0o666); err != nil {
-			log.Errorf("write wow file failed: %s", err)
-			rsp.ErrRsp(c, -2, "write wow file failed")
-			return
-		}
-	} else if nowowboot && req.Mode == ModeHidWoW {
-		if err := os.Remove(NoWowFile); err != nil {
-			log.Errorf("remove wow file failed: %s", err)
-			rsp.ErrRsp(c, -2, "remove wow file failed")
-			return
-		}
-	}
-
 	hidmode, _ := getHidMode()
 	biosmode, _ := getBiosMode();
 
 	msg, err := setHidMode(hidmode, biosmode, req.Mode)
 	if err != nil {
 		rsp.ErrRsp(c, -2, msg)
+		return
+	}
+
+	msg, err = setBootWoW(req.Mode)
+	if err != nil {
+		rsp.ErrRsp(c, -3, msg)
 		return
 	}
 
