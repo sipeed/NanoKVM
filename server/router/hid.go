@@ -23,6 +23,9 @@ func hidRouter(r *gin.Engine) {
 	api.GET("/hid/bios", service.GetBiosMode)  // get hid bios mode
 	api.POST("/hid/bios", service.SetBiosMode) // set hid bios mode
 
+	api.GET("/hid/wow", service.GetWoWMode)  // get hid wake on write mode
+	api.POST("/hid/wow", service.SetWoWMode) // set hid wake on write mode
+
 	api.GET("/hid/mode", service.GetHidMode)  // get hid mode
 	api.POST("/hid/mode", service.SetHidMode) // set hid mode
 	api.POST("/hid/reset", service.ResetHid)  // reset hid

@@ -22,6 +22,9 @@ const (
 	ModeNonBios = "normal"
 	ModeHidBios = "bios"
 
+	ModeNoWoW  = "no-wow"
+	ModeHidWoW  = "wow"
+
 	CviUsbOtgRole     = "/proc/cviusb/otg_role"
 	HidGadgetPath     = "/sys/kernel/config/usb_gadget/g0"
 	HidConfPath       = "/sys/kernel/config/usb_gadget/g0/configs/c.1"
@@ -57,6 +60,11 @@ var modeMap = map[string]string{
 var biosMap = map[string]string{
 	"0": ModeNonBios,
 	"1": ModeHidBios,
+}
+
+var wowMap = map[string]string{
+	"0": ModeNoWoW,
+	"1": ModeHidWoW,
 }
 
 var confMap = map[string]hidConf{
@@ -135,8 +143,9 @@ func (s *Service) SetHidMode(c *gin.Context) {
 	}
 
 	biosmode, _ := getBiosMode();
+	wowmode, _ := getBiosMode();
 
-	msg, err := setHidMode(req.Mode, biosmode)
+	msg, err := setHidMode(req.Mode, biosmode, wowmode)
 	if err != nil {
 		rsp.ErrRsp(c, -4, msg)
 		return
@@ -329,7 +338,7 @@ func getHidMode() (string, error) {
 	return mode, nil
 }
 
-func setHidMode(hidmode, biosmode string) (string, error) {
+func setHidMode(hidmode, biosmode, wowmode string) (string, error) {
 	h := GetHid()
 	h.Lock()
 	h.CloseNoLock()
@@ -384,8 +393,7 @@ func setHidMode(hidmode, biosmode string) (string, error) {
 		flag = "1"
 	}
 	wowFlag := "1"
-	wowDisabled, _ := isFuncExist(NoWowFile)
-	if wowDisabled {
+	if wowmode == ModeNoWoW {
 		wowFlag = "0"
 	}
 
@@ -657,6 +665,37 @@ func getBiosMode() (string, error) {
 	if !ok {
 		log.Errorf("invalid bios flag: %s", key)
 		return "", errors.New("invalid bios flag")
+	}
+
+	return mode, nil
+}
+
+func getWoWMode() (string, error) {
+	hidFunction := fmt.Sprintf("%s/%s", HidConfPath, "hid.GS0")
+	hidWakeOnWr := fmt.Sprintf("%s/wakeup_on_write", hidFunction)
+	hidFuncOn, _ := isFuncExist(hidFunction)
+	nowowboot, _ := isFuncExist(NoWowFile)
+
+	// hid is disabled
+	if (!hidFuncOn) {
+		if !nowowboot {
+			return wowMap["1"], nil
+		} else {
+			return wowMap["0"], nil
+		}
+	}
+
+	data, err := os.ReadFile(hidWakeOnWr)
+	if err != nil {
+		log.Errorf("failed to read %s: %s", hidWakeOnWr, err)
+		return "", err
+	}
+
+	key := strings.TrimSpace(string(data))
+	mode, ok := wowMap[key]
+	if !ok {
+		log.Errorf("invalid wow flag: %s", key)
+		return "", errors.New("invalid wow flag")
 	}
 
 	return mode, nil
