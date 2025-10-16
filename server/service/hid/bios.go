@@ -57,8 +57,9 @@ func (s *Service) SetBiosMode(c *gin.Context) {
 	}
 
 	hidmode, _ := getHidMode()
+	wowmode, _ := getWoWMode();
 
-	msg, err := setHidMode(hidmode, req.Mode)
+	msg, err := setHidMode(hidmode, req.Mode, wowmode)
 	if err != nil {
 		rsp.ErrRsp(c, -2, msg)
 		return

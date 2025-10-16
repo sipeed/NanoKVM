@@ -1,0 +1,69 @@
+package hid
+
+import (
+	"NanoKVM-Server/proto"
+	"os"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+)
+
+func (s *Service) GetWoWMode(c *gin.Context) {
+	var rsp proto.Response
+
+	mode, err := getWoWMode()
+	if err != nil {
+		rsp.ErrRsp(c, -1, "get HID Wake on Write mode failed")
+		return
+	}
+
+	rsp.OkRspWithData(c, &proto.GetWoWModeRsp{
+		Mode: mode,
+	})
+	log.Debugf("get hid wow mode: %s", mode)
+}
+
+func (s *Service) SetWoWMode(c *gin.Context) {
+	var req proto.SetWoWModeReq
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+	if req.Mode != ModeNoWoW && req.Mode != ModeHidWoW {
+		rsp.ErrRsp(c, -2, "invalid arguments")
+		return
+	}
+
+	if mode, _ := getWoWMode(); req.Mode == mode {
+		rsp.OkRsp(c)
+		return
+	}
+
+	nowowboot, _ := isFuncExist(NoWowFile)
+	if !nowowboot && req.Mode != ModeHidWoW {
+		if err := os.WriteFile(NoWowFile, []byte("\n"), 0o666); err != nil {
+			log.Errorf("write wow file failed: %s", err)
+			rsp.ErrRsp(c, -2, "write wow file failed")
+			return
+		}
+	} else if nowowboot && req.Mode == ModeHidWoW {
+		if err := os.Remove(NoWowFile); err != nil {
+			log.Errorf("remove wow file failed: %s", err)
+			rsp.ErrRsp(c, -2, "remove wow file failed")
+			return
+		}
+	}
+
+	hidmode, _ := getHidMode()
+	biosmode, _ := getBiosMode();
+
+	msg, err := setHidMode(hidmode, biosmode, req.Mode)
+	if err != nil {
+		rsp.ErrRsp(c, -2, msg)
+		return
+	}
+
+	rsp.OkRsp(c)
+}
