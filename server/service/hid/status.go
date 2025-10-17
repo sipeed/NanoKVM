@@ -110,7 +110,20 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	if mode, _ := getHidMode(); req.Mode == mode {
+	mode, _ := getHidMode();
+	biosmode, _ := getBiosMode();
+	wowmode, _ := getBiosMode();
+
+	newBios := biosmode
+	if req.Bios == ModeNonBios || req.Bios == ModeHidBios {
+		newBios = req.Bios
+	}
+	newWow := wowmode
+	if req.Wow == ModeHidWoW || req.Wow == ModeNoWoW {
+		newWow = req.Wow
+	}
+
+	if req.Mode == mode && newBios == biosmode && newWow == wowmode {
 		rsp.OkRsp(c)
 		return
 	}
@@ -127,10 +140,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	biosmode, _ := getBiosMode();
-	wowmode, _ := getBiosMode();
-
-	msg, err := setHidMode(req.Mode, biosmode, wowmode)
+	msg, err := setHidMode(req.Mode, newBios, newWow)
 	if err != nil {
 		rsp.ErrRsp(c, -4, msg)
 		return
@@ -142,13 +152,13 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	msg, err = setBootBios(biosmode)
+	msg, err = setBootBios(newBios)
 	if err != nil {
 		rsp.ErrRsp(c, -4, msg)
 		return
 	}
 
-	msg, err = setBootWoW(wowmode)
+	msg, err = setBootWoW(newWow)
 	if err != nil {
 		rsp.ErrRsp(c, -4, msg)
 		return
