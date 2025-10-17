@@ -153,6 +153,8 @@ const en = {
         hidonly: 'HID-Only',
         kbdonly: 'Keyboard-Only',
         nohid: 'No HID',
+        bios: 'BIOS',
+        wow: 'Wake on Write',
         enable: 'Enable',
         close: 'Close'
       }
