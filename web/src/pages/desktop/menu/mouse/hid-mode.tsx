@@ -59,7 +59,7 @@ export const HidMode = () => {
 
     const timeoutId = setTimeout(() => {
       window.location.reload();
-    }, 30000);
+    }, 5000);
 
     const mode = toggleMode;
 
