@@ -137,6 +137,7 @@ export const HidMode = () => {
     if (modal) {
       setToggleBIOS(biosBool());
       setToggleWoW(wowBool());
+      setIsLoading(false);
     }
     setIsModalOpen(modal);
   }
