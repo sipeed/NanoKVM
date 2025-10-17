@@ -22,4 +22,6 @@ type GetHidModeRsp struct {
 
 type SetHidModeReq struct {
 	Mode string `validate:"required"` // normal or hid-only
+	Bios string `validate:"required"` // normal or bios
+	Wow string `validate:"required"` // no-wow or wow
 }
