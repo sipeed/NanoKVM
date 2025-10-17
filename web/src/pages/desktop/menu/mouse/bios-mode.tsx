@@ -38,7 +38,7 @@ export const BiosMode = () => {
 
     const timeoutId = setTimeout(() => {
       window.location.reload();
-    }, 30000);
+    }, 5000);
 
     const mode = biosMode === 'normal' ? 'bios' : 'normal';
 
