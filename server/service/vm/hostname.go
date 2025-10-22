@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"NanoKVM-Server/proto"
@@ -63,6 +64,8 @@ func (s *Service) SetHostname(c *gin.Context) {
 
 	rsp.OkRsp(c)
 	log.Debugf("set Hostname: %s", req.Hostname)
+
+	_ = exec.Command("hostname", "-F", EtcHostname).Run()
 }
 
 func (s *Service) GetHostname(c *gin.Context) {
