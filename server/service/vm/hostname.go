@@ -14,6 +14,7 @@ import (
 const (
 	BootHostnameFile = "/boot/hostname"
 	EtcHostname      = "/etc/hostname"
+	EtcHosts         = "/etc/hosts"
 )
 
 func (s *Service) SetHostname(c *gin.Context) {
@@ -23,6 +24,29 @@ func (s *Service) SetHostname(c *gin.Context) {
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
+	}
+
+	dataRead, err := os.ReadFile(EtcHostname)
+	if err != nil {
+		rsp.ErrRsp(c, -1, "read Hostname failed")
+		return
+	}
+
+	oldHostname := strings.Replace(string(dataRead), "\n", "", -1)
+
+	if (oldHostname != req.Hostname) {
+		dataRead, err = os.ReadFile(EtcHosts)
+		if err != nil {
+			rsp.ErrRsp(c, -1, "read Hosts failed")
+			return
+		}
+
+		data := []byte(strings.Replace(string(dataRead), oldHostname, req.Hostname, -1))
+
+		if err := os.WriteFile(EtcHosts, data, 0o644); err != nil {
+			rsp.ErrRsp(c, -2, "failed to write data")
+			return
+		}
 	}
 
 	data := []byte(fmt.Sprintf("%s", req.Hostname))
