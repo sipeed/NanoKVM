@@ -1,4 +1,4 @@
-import { ChangeEvent, useRef, useState } from 'react';
+﻿import { ChangeEvent, useRef, useState } from 'react';
 import { Button, Input, Modal, type InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -24,15 +24,55 @@ export const Paste = () => {
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     const value = e.target.value;
-    setStatus(isASCII(value) ? '' : 'error');
+    setStatus(isAsciiOrRU(value) ? '' : 'error');
     setInputValue(value);
+  }
+
+  // Extended RU → EN translation including punctuation (applies only if Cyrillic is present)
+  function translateRuToEnWithPunctuation(value: string): string {
+    const hasCyrillic = /[А-Яа-яЁё]/.test(value);
+
+    const letterMap: Record<string, string> = {
+      'ё': '`',
+      'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u', 'ш': 'i',
+      'щ': 'o', 'з': 'p', 'х': '[', 'ъ': ']',
+      'ф': 'a', 'ы': 's', 'в': 'd', 'а': 'f', 'п': 'g', 'р': 'h', 'о': 'j', 'л': 'k',
+      'д': 'l', 'ж': ';', 'э': '\'',
+      'я': 'z', 'ч': 'x', 'с': 'c', 'м': 'v', 'и': 'b', 'т': 'n', 'ь': 'm', 'б': ',', 'ю': '.',
+    };
+
+    const punctuationMap: Record<string, string> = {
+      '"': '@',
+      '№': '#',
+      ';': '$',
+      ':': '^',
+      '?': '&',
+      'Ё': '~',
+      '/': '|',
+      '.': '/',
+      ',': '?',
+    };
+
+    return Array.from(value).map((ch) => {
+      const lower = ch.toLowerCase();
+      if (letterMap[lower]) {
+        const translated = letterMap[lower];
+        return ch === lower ? translated : translated.toUpperCase();
+      }
+      if (hasCyrillic && punctuationMap[ch]) {
+        return punctuationMap[ch];
+      }
+      return ch;
+    }).join('');
   }
 
   function submit() {
     if (isLoading) return;
     setIsLoading(true);
 
-    paste(inputValue)
+    const translated = translateRuToEnWithPunctuation(inputValue);
+
+    paste(translated)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -57,11 +97,20 @@ export const Paste = () => {
     setIsKeyboardEnable(!open);
   }
 
-  function isASCII(value: string) {
-    for (let i = 0; i < value.length; i++) {
-      if (value.charCodeAt(i) > 127) {
-        return false;
+  function isAsciiOrRU(value: string) {
+    // Allow ASCII and Russian Cyrillic letters
+    for (const ch of value) {
+      const code = ch.codePointAt(0) ?? 0;
+      if (code <= 0x7F) continue; // ASCII
+      if (
+        (code >= 0x0410 && code <= 0x042F) || // (А-Я)
+        (code >= 0x0430 && code <= 0x044F) || // (а-я)
+        code === 0x0401 || // (Ё)
+        code === 0x0451    // (ё)
+      ) {
+        continue;
       }
+      return false;
     }
     return true;
   }
