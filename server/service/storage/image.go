@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -19,6 +20,7 @@ const (
 	imageNone      = "/dev/mmcblk0p3"
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
 )
 
@@ -89,6 +91,20 @@ func (s *Service) MountImage(c *gin.Context) {
 			rsp.ErrRsp(c, -2, "set cdrom flag failed")
 			return
 		}
+	}
+
+	inquiryVen := "NanoKVM"
+	inquiryPrd := "USB Mass Storage"
+	inquiryVer := 0x0520
+	if req.Cdrom {
+		inquiryPrd = "USB CD/DVD-ROM"
+	}
+	inquiryData := fmt.Sprintf("%-8s%-16s%04x", inquiryVen, inquiryPrd, inquiryVer)
+
+	if err := os.WriteFile(inquiryString, []byte(inquiryData), 0o666); err != nil {
+		log.Errorf("set inquiry %s failed: %s", inquiryData, err)
+		rsp.ErrRsp(c, -2, "set inquiry failed")
+		return
 	}
 
 	// mount
