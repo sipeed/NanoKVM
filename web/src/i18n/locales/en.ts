@@ -73,7 +73,17 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: 'Read from Clipboard',
+      clipboardHint: 'Click to paste from your browser clipboard',
+      clipboardNotSupported: 'Clipboard API is not supported in this browser',
+      clipboardEmpty: 'Clipboard is empty',
+      clipboardRead: 'Clipboard content loaded',
+      clipboardPermissionDenied:
+        'Clipboard permission denied. Please allow clipboard access in your browser.',
+      clipboardReadError: 'Failed to read clipboard',
+      clipboardTooLong: 'Clipboard content exceeds 1024 characters',
+      nonAsciiError: 'Only ASCII characters are supported'
     },
     mouse: {
       title: 'Mouse',
