@@ -16,6 +16,7 @@ import (
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
 	"NanoKVM-Server/service/vm/jiggler"
+	"NanoKVM-Server/utils"
 
 	"github.com/gin-gonic/gin"
 	cors "github.com/rs/cors/wrapper/gin"
@@ -38,7 +39,9 @@ func initialize() {
 	vision := common.GetKvmVision()
 	vision.SetHDMI(false)
 	time.Sleep(10 * time.Millisecond)
-	vision.SetHDMI(true)
+	if !utils.IsHdmiDisabled() {
+		vision.SetHDMI(true)
+	}
 
 	// run mouse jiggler
 	jiggler.GetJiggler().Run()
