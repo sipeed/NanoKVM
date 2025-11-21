@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Input, Modal, message, type InputRef } from 'antd';
+import { Button, Input, Modal, Select, message, type InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { ClipboardIcon, ClipboardPasteIcon } from 'lucide-react';
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 
 import { paste } from '@/api/hid';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+
+const { Option } = Select;
 
 const { TextArea } = Input;
 
@@ -20,6 +22,7 @@ export const Paste = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
   const [isReadingClipboard, setIsReadingClipboard] = useState(false);
+  const [langue, setLangue] = useState('en');
 
   const inputRef = useRef<InputRef>(null);
 
@@ -87,7 +90,7 @@ export const Paste = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-    paste(inputValue)
+    paste(inputValue, langue)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -144,6 +147,13 @@ export const Paste = () => {
         <div className="pb-3 text-xs text-neutral-500">{t('keyboard.tips')}</div>
 
         <div className="space-y-2">
+          <Select
+            value={langue}
+            onChange={(value) => setLangue(value)}
+            style={{ width: '100%', marginBottom: '12px' }} >
+            <Option value="en">{t('keyboard.dropdownEnglish')}</Option>
+            <Option value="de">{t('keyboard.dropdownGerman')}</Option>
+          </Select>
           <div className="flex items-center gap-2">
             <Button
               icon={<ClipboardPasteIcon size={16} />}

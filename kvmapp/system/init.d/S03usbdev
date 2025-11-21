@@ -104,6 +104,7 @@ start_usb_dev(){
                     echo 1 > functions/mass_storage.disk0/lun.0/ro
                     echo 0 > functions/mass_storage.disk0/lun.0/cdrom
             fi
+            echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
             disk=$(cat /boot/usb.disk0)
             if [ -z "${disk}" ]
             then

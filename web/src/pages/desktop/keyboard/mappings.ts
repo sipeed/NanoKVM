@@ -85,6 +85,7 @@ export const KeyboardCodes: Map<string, number> = new Map([
   ['Backslash', 49],
   ['IntlBackslash', 49],
   ['Backquote_azerty', 100],
+  ['IntlBackslash_qwertz', 100],
 
   ['Semicolon', 51],
   ['Quote', 52],

@@ -69,7 +69,7 @@ const en = {
     keyboard: {
       title: 'Keyboard',
       paste: 'Paste',
-      tips: 'Only standard keyboard letters and symbols are supported',
+      tips: 'Server keyboard layout',
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
@@ -84,6 +84,8 @@ const en = {
       clipboardReadError: 'Failed to read clipboard',
       clipboardTooLong: 'Clipboard content exceeds 1024 characters',
       nonAsciiError: 'Only ASCII characters are supported'
+      dropdownEnglish: 'English',
+      dropdownGerman: 'German'
     },
     mouse: {
       title: 'Mouse',
