@@ -36,7 +36,6 @@ EOF
 
 case "$1" in
         start)
-                tailscale set --accept-dns=false
                 if [ -f /etc/kvm/GOMEMLIMIT ]; then
                      value=$(cat /etc/kvm/GOMEMLIMIT)
                      export GOMEMLIMIT="${value}MiB"
@@ -51,7 +50,14 @@ case "$1" in
                     --socket=/var/run/tailscale/tailscaled.sock \
                     --port=${PORT} \
                     $FLAGS
-                [ $? = 0 ] && echo "OK" || echo "FAIL"
+                if [ $? = 0 ]; then
+        		    echo "OK"
+        		    tailscale set --accept-dns=false
+        		    # example to make your nanoKVM an exit node
+        		    # tailscale set --advertise-exit-node --advertise-routes=192.168.0.0/16
+	            else
+		            echo "FAIL"
+	            fi
                 ;;
         stop)
                 printf "Stopping $DAEMON: "
