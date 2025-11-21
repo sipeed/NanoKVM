@@ -16,6 +16,75 @@ type Char struct {
 
 type PasteReq struct {
 	Content string `form:"content" validate:"required"`
+	Langue string `form:"langue"`
+}
+
+func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
+	// wenn kein lang angegeben → Standardmap zurück
+	if lang == "" {
+		return base
+	}
+
+	// immer Kopie erstellen
+	m := copyMap(base)
+
+	switch lang {
+	case "de":
+		// Y tauschen
+		m['y'] = Char{0, 29}
+		m['Y'] = Char{2, 29}
+
+		// Z tauschen
+		m['z'] = Char{0, 28}
+		m['Z'] = Char{2, 28}
+
+		// deutsche Sonderzeichen hinzufügen oder remappen
+		m['\u00E4'] = Char{0, 52} // ä
+		m['\u00C4'] = Char{2, 52} // Ä
+		m['\u00F6'] = Char{0, 51} // ö
+		m['\u00D6'] = Char{2, 51} // Ö
+		m['\u00FC'] = Char{0, 47} // ü
+		m['\u00DC'] = Char{2, 47} // Ü
+		m['\u00DF'] = Char{0, 45} // ß
+
+		//Tauschen
+		m['^'] = Char{0, 53} // muss doppelt sein
+		m['/'] = Char{2, 36} // Shift + 7
+		m['('] = Char{2, 37} // Shift + 8
+		m['&'] = Char{2, 35} // Shift + 6
+		m[')'] = Char{2, 38} // Shift + 9
+		m['`'] = Char{2, 46} // Grave Accent / Backtick
+		m['"'] = Char{2, 31} // Shift + 2
+		m['?'] = Char{2, 45} // Shift + ß
+		m['{'] = Char{0x40, 36} // ALt Gr + 7
+		m['['] = Char{0x40, 37} // ALt Gr + 8
+		m[']'] = Char{0x40, 38} // ALt Gr + 6
+		m['}'] = Char{0x40, 39} // ALt Gr + 0
+		m['\\'] = Char{0x40, 45} // ALt Gr + ß
+		m['@'] = Char{0x40, 20} // ALt Gr + q
+		m['+'] = Char{0, 48} // Shift + +
+		m['*'] = Char{2, 48} // Shift + +
+		m['~'] = Char{0x40, 48} // Shift + +
+		m['#'] = Char{0, 49} // Shift + #
+		m['\''] = Char{2, 49} // Shift + #
+		m['<'] = Char{0, 100} // Shift + <
+		m['>'] = Char{2, 100} // Shift + <
+		m['|'] = Char{0x40, 100} // ALt Gr + <
+		m[';'] = Char{2, 54} // Shift + ,
+		m[':'] = Char{2, 55} // Shift + .
+		m['-'] = Char{0, 56} // Shift + -
+		m['_'] = Char{2, 56} // Shift + -
+
+		//neu
+		m['\u00B4'] = Char{0, 46} // ´
+		m['\u00B0'] = Char{2, 53} // °
+		m['\u00A7'] = Char{2, 32} // §
+		m['\u20AC'] = Char{0x40, 8} // €
+		m['\u00B2'] = Char{0x40, 31} // ²
+		m['\u00B3'] = Char{0x40, 32} // ³
+		
+	}
+	return m
 }
 
 func (s *Service) Paste(c *gin.Context) {
@@ -25,6 +94,7 @@ func (s *Service) Paste(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
+	charMapLocal := LangueSwitch(charMap, req.Langue)
 	if len(req.Content) > 1024 {
 		rsp.ErrRsp(c, -2, "content too long")
 		return
@@ -34,7 +104,7 @@ func (s *Service) Paste(c *gin.Context) {
 	keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 	for _, char := range req.Content {
-		key, ok := charMap[char]
+		key, ok := charMapLocal[char]
 		if !ok {
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
@@ -48,6 +118,15 @@ func (s *Service) Paste(c *gin.Context) {
 	rsp.OkRsp(c)
 	log.Debugf("hid paste success, total %d characters processed", len(req.Content))
 }
+
+func copyMap(src map[rune]Char) map[rune]Char {
+	dst := make(map[rune]Char, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
+}
+
 var charMap = map[rune]Char{
 	// Lowercase letters
 	'a': {0, 4}, 'b': {0, 5}, 'c': {0, 6}, 'd': {0, 7}, 'e': {0, 8},

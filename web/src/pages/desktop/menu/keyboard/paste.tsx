@@ -1,5 +1,5 @@
 import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Input, Modal, type InputRef } from 'antd';
+import { Button, Input, Modal, Select, type InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { ClipboardIcon } from 'lucide-react';
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 
 import { paste } from '@/api/hid';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+
+const { Option } = Select;
 
 const { TextArea } = Input;
 
@@ -19,6 +21,7 @@ export const Paste = () => {
   const [status, setStatus] = useState<'' | 'error'>('');
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const [langue, setLangue] = useState('en');
 
   const inputRef = useRef<InputRef>(null);
 
@@ -32,7 +35,7 @@ export const Paste = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-    paste(inputValue)
+    paste(inputValue, langue)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -88,6 +91,14 @@ export const Paste = () => {
       >
         <div className="pb-3 text-xs text-neutral-500">{t('keyboard.tips')}</div>
 
+        <Select
+          value={langue}
+          onChange={(value) => setLangue(value)}
+          style={{ width: '100%', marginBottom: '12px' }} >
+          <Option value="en">{t('keyboard.dropdownEnglish')}</Option>
+          <Option value="de">{t('keyboard.dropdownGerman')}</Option>
+        </Select>
+        
         <TextArea
           ref={inputRef}
           value={inputValue}
