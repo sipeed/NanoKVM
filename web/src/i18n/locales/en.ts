@@ -83,7 +83,7 @@ const en = {
         'Clipboard permission denied. Please allow clipboard access in your browser.',
       clipboardReadError: 'Failed to read clipboard',
       clipboardTooLong: 'Clipboard content exceeds 1024 characters',
-      nonAsciiError: 'Only ASCII characters are supported'
+      nonAsciiError: 'Only ASCII characters are supported',
       dropdownEnglish: 'English',
       dropdownGerman: 'German'
     },
