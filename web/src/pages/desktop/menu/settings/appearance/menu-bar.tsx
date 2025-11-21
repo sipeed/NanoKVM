@@ -12,19 +12,27 @@ import { useTranslation } from 'react-i18next';
 
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
+import { loadIsAdmin } from '../../../../../lib/localstorage';
 
 export const MenuBar = () => {
   const { t } = useTranslation();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
-
-  const items = [
+  const isAdmin = loadIsAdmin();
+  const items = isAdmin ? [
     { key: 'image', icon: <DiscIcon size={16} /> },
     { key: 'download', icon: <DownloadIcon size={16} /> },
     { key: 'script', icon: <FileJsonIcon size={15} /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
     { key: 'wol', icon: <NetworkIcon size={16} /> },
     { key: 'power', icon: <PowerIcon size={16} /> }
+    ] :
+    [
+      { key: 'image', icon: <DiscIcon size={16} /> },
+      { key: 'download', icon: <DownloadIcon size={16} /> },
+      { key: 'script', icon: <FileJsonIcon size={15} /> },
+      { key: 'wol', icon: <NetworkIcon size={16} /> },
+      { key: 'power', icon: <PowerIcon size={16} /> }
   ];
 
   function updateItems(key: string) {

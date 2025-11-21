@@ -48,6 +48,7 @@ export const Tips = () => {
               <li>
                 {t('auth.tips.reset3')}
                 <Text code={true}>admin/admin</Text>
+                <Text code={true}>web/web</Text>
               </li>
               <li>
                 {t('auth.tips.reset4')}

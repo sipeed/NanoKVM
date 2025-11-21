@@ -39,6 +39,36 @@ func CheckToken() gin.HandlerFunc {
 	}
 }
 
+func CheckAdminToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		conf := config.GetInstance()
+
+		if conf.Authentication == "disable" {
+			c.Next()
+			return
+		}
+
+		cookie, err := c.Cookie("nano-kvm-token")
+		if err == nil {
+			_, err = ParseJWT(cookie)
+			if err == nil {
+				user, ok := config.GetInstance().Tokens[cookie]
+				if ok && user.Group != "admin" {
+					c.JSON(http.StatusForbidden, "unauthorized")
+					c.Abort()
+					return
+				}
+
+				c.Next()
+				return
+			}
+		}
+
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		c.Abort()
+	}
+}
+
 func GenerateJWT(username string) (string, error) {
 	conf := config.GetInstance()
 

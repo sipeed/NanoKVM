@@ -15,6 +15,7 @@ import (
 	"NanoKVM-Server/logger"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
+	"NanoKVM-Server/service/auth"
 	"NanoKVM-Server/service/vm/jiggler"
 	"NanoKVM-Server/utils"
 
@@ -31,6 +32,8 @@ func main() {
 
 func initialize() {
 	logger.Init()
+
+	auth.CheckAccountsFile()
 
 	// init screen parameters
 	_ = common.GetScreen()
