@@ -12,6 +12,14 @@ import (
 func (s *Service) Reset(c *gin.Context) {
 	var rsp proto.Response
 
+	h := GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
+
 	// reset USB
 	f, err := os.OpenFile("/sys/kernel/config/usb_gadget/g0/UDC", os.O_WRONLY, 0644)
 	if err != nil {
