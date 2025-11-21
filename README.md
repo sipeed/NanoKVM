@@ -13,7 +13,7 @@ NanoKVM
     <a href="https://github.com/sipeed/NanoKVM/releases/latest">💾 Firmware Releases</a>
 </h3>
 
-English | [中文](./README_ZH.md) | [日本語](./README_JA.md)
+English | [中文](./README_ZH.md) | [日本語](./README_JA.md) | [한국어](./README_KO.md)
 
 </div>
 
