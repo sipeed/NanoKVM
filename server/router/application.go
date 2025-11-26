@@ -16,8 +16,4 @@ func applicationRouter(r *gin.Engine) {
 
 	api.GET("/application/preview", service.GetPreview)  // get preview updates state
 	api.POST("/application/preview", service.SetPreview) // set preview updates state
-
-	api.GET("/application/settings/disabled-items", service.GetDisableItems) // get disable items list
-	api.GET("/application/menu/disabled-items", service.GetDisableMenus)
-
 }

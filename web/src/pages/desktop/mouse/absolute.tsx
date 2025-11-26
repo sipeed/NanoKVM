@@ -13,9 +13,14 @@ export const Absolute = () => {
 
   const lastScrollTimeRef = useRef(0);
 
+  const mouseButtonMapping = (button: number) => {
+    const mappings = [MouseButton.Left, MouseButton.Wheel, MouseButton.Right];
+    return mappings[button] || MouseButton.None;
+  };
+
   // listen mouse events
   useEffect(() => {
-    const canvas = document.getElementById('screen');
+    const canvas = document.getElementById('screen') as HTMLVideoElement;
     if (!canvas) return;
 
     canvas.addEventListener('mousedown', handleMouseDown);
@@ -29,21 +34,8 @@ export const Absolute = () => {
     function handleMouseDown(event: any) {
       disableEvent(event);
 
-      let button: MouseButton;
-      switch (event.button) {
-        case 0:
-          button = MouseButton.Left;
-          break;
-        case 1:
-          button = MouseButton.Wheel;
-          break;
-        case 2:
-          button = MouseButton.Right;
-          break;
-        default:
-          console.log(`unknown button ${event.button}`);
-          return;
-      }
+      const button: MouseButton = mouseButtonMapping(event.button);
+      if (button === MouseButton.None) return;
 
       const data = [2, MouseEvent.Down, button, 0, 0];
       client.send(data);
@@ -61,13 +53,8 @@ export const Absolute = () => {
     function handleMouseMove(event: any) {
       disableEvent(event);
 
-      const rect = canvas!.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width;
-      const y = (event.clientY - rect.top) / rect.height;
-      const hexX = x < 0 ? 0x0001 : Math.floor(0x7fff * x) + 0x0001;
-      const hexY = y < 0 ? 0x0001 : Math.floor(0x7fff * y) + 0x0001;
-
-      const data = [2, MouseEvent.MoveAbsolute, MouseButton.None, hexX, hexY];
+      const { x, y } = getCoordinate(event);
+      const data = [2, MouseEvent.MoveAbsolute, MouseButton.None, x, y];
       client.send(data);
     }
 
@@ -86,6 +73,53 @@ export const Absolute = () => {
 
       const data = [2, MouseEvent.Scroll, 0, 0, delta];
       client.send(data);
+    }
+
+    function getCorrectedCoords(clientX: number, clientY: number) {
+      if (!canvas) {
+        return { x: 0, y: 0 };
+      }
+
+      const rect = canvas.getBoundingClientRect();
+
+      if (!canvas.videoWidth || !canvas.videoHeight) {
+        const x = (clientX - rect.left) / rect.width;
+        const y = (clientY - rect.top) / rect.height;
+        return { x, y };
+      }
+
+      const videoRatio = canvas.videoWidth / canvas.videoHeight;
+      const elementRatio = rect.width / rect.height;
+
+      let renderedWidth = rect.width;
+      let renderedHeight = rect.height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (videoRatio > elementRatio) {
+        renderedHeight = rect.width / videoRatio;
+        offsetY = (rect.height - renderedHeight) / 2;
+      } else {
+        renderedWidth = rect.height * videoRatio;
+        offsetX = (rect.width - renderedWidth) / 2;
+      }
+
+      const x = (clientX - rect.left - offsetX) / renderedWidth;
+      const y = (clientY - rect.top - offsetY) / renderedHeight;
+
+      return { x, y };
+    }
+
+    function getCoordinate(event: any): { x: number; y: number } {
+      const { x, y } = getCorrectedCoords(event.clientX, event.clientY);
+
+      const finalX = Math.max(0, Math.min(1, x));
+      const finalY = Math.max(0, Math.min(1, y));
+
+      const hexX = Math.floor(0x7fff * finalX) + 0x0001;
+      const hexY = Math.floor(0x7fff * finalY) + 0x0001;
+
+      return { x: hexX, y: hexY };
     }
 
     return () => {

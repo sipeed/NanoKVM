@@ -190,3 +190,31 @@ func (s *Service) GetCdRom(c *gin.Context) {
 
 	rsp.OkRspWithData(c, data)
 }
+
+func (s *Service) DeleteImage(c *gin.Context) {
+	var req proto.DeleteImageReq
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	filename := strings.ToLower(req.File)
+	validPrefix := strings.HasPrefix(filename, imageDirectory)
+	validSuffix := strings.HasSuffix(filename, ".iso") || strings.HasSuffix(filename, ".img")
+
+	if !validPrefix || !validSuffix {
+		rsp.ErrRsp(c, -2, "invalid arguments")
+		return
+	}
+
+	if err := os.Remove(req.File); err != nil {
+		rsp.ErrRsp(c, -3, "remove file failed")
+		log.Errorf("failed to remove file %s: %s", req.File, err)
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("delete image %s success", req.File)
+}

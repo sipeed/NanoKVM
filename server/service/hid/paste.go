@@ -16,7 +16,7 @@ type Char struct {
 
 type PasteReq struct {
 	Content string `form:"content" validate:"required"`
-	Langue string `form:"langue"`
+	Langue  string `form:"langue"`
 }
 
 func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
@@ -48,41 +48,41 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['\u00DF'] = Char{0, 45} // ß
 
 		//Tauschen
-		m['^'] = Char{0, 53} // muss doppelt sein
-		m['/'] = Char{2, 36} // Shift + 7
-		m['('] = Char{2, 37} // Shift + 8
-		m['&'] = Char{2, 35} // Shift + 6
-		m[')'] = Char{2, 38} // Shift + 9
-		m['`'] = Char{2, 46} // Grave Accent / Backtick
-		m['"'] = Char{2, 31} // Shift + 2
-		m['?'] = Char{2, 45} // Shift + ß
-		m['{'] = Char{0x40, 36} // ALt Gr + 7
-		m['['] = Char{0x40, 37} // ALt Gr + 8
-		m[']'] = Char{0x40, 38} // ALt Gr + 6
-		m['}'] = Char{0x40, 39} // ALt Gr + 0
+		m['^'] = Char{0, 53}     // muss doppelt sein
+		m['/'] = Char{2, 36}     // Shift + 7
+		m['('] = Char{2, 37}     // Shift + 8
+		m['&'] = Char{2, 35}     // Shift + 6
+		m[')'] = Char{2, 38}     // Shift + 9
+		m['`'] = Char{2, 46}     // Grave Accent / Backtick
+		m['"'] = Char{2, 31}     // Shift + 2
+		m['?'] = Char{2, 45}     // Shift + ß
+		m['{'] = Char{0x40, 36}  // ALt Gr + 7
+		m['['] = Char{0x40, 37}  // ALt Gr + 8
+		m[']'] = Char{0x40, 38}  // ALt Gr + 6
+		m['}'] = Char{0x40, 39}  // ALt Gr + 0
 		m['\\'] = Char{0x40, 45} // ALt Gr + ß
-		m['@'] = Char{0x40, 20} // ALt Gr + q
-		m['+'] = Char{0, 48} // Shift + +
-		m['*'] = Char{2, 48} // Shift + +
-		m['~'] = Char{0x40, 48} // Shift + +
-		m['#'] = Char{0, 49} // Shift + #
-		m['\''] = Char{2, 49} // Shift + #
-		m['<'] = Char{0, 100} // Shift + <
-		m['>'] = Char{2, 100} // Shift + <
+		m['@'] = Char{0x40, 20}  // ALt Gr + q
+		m['+'] = Char{0, 48}     // Shift + +
+		m['*'] = Char{2, 48}     // Shift + +
+		m['~'] = Char{0x40, 48}  // Shift + +
+		m['#'] = Char{0, 49}     // Shift + #
+		m['\''] = Char{2, 49}    // Shift + #
+		m['<'] = Char{0, 100}    // Shift + <
+		m['>'] = Char{2, 100}    // Shift + <
 		m['|'] = Char{0x40, 100} // ALt Gr + <
-		m[';'] = Char{2, 54} // Shift + ,
-		m[':'] = Char{2, 55} // Shift + .
-		m['-'] = Char{0, 56} // Shift + -
-		m['_'] = Char{2, 56} // Shift + -
+		m[';'] = Char{2, 54}     // Shift + ,
+		m[':'] = Char{2, 55}     // Shift + .
+		m['-'] = Char{0, 56}     // Shift + -
+		m['_'] = Char{2, 56}     // Shift + -
 
 		//neu
-		m['\u00B4'] = Char{0, 46} // ´
-		m['\u00B0'] = Char{2, 53} // °
-		m['\u00A7'] = Char{2, 32} // §
-		m['\u20AC'] = Char{0x40, 8} // €
+		m['\u00B4'] = Char{0, 46}    // ´
+		m['\u00B0'] = Char{2, 53}    // °
+		m['\u00A7'] = Char{2, 32}    // §
+		m['\u20AC'] = Char{0x40, 8}  // €
 		m['\u00B2'] = Char{0x40, 31} // ²
 		m['\u00B3'] = Char{0x40, 32} // ³
-		
+
 	}
 	return m
 }
@@ -90,17 +90,19 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 func (s *Service) Paste(c *gin.Context) {
 	var req PasteReq
 	var rsp proto.Response
+
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
-	charMapLocal := LangueSwitch(charMap, req.Langue)
+
 	if len(req.Content) > 1024 {
 		rsp.ErrRsp(c, -2, "content too long")
 		return
 	}
-	s.hid.kbMutex.Lock()
-	defer s.hid.kbMutex.Unlock()
+
+	charMapLocal := LangueSwitch(charMap, req.Langue)
+
 	keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
 
 	for _, char := range req.Content {
@@ -109,10 +111,12 @@ func (s *Service) Paste(c *gin.Context) {
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
 			continue
 		}
+
 		keyDown := []byte{byte(key.Modifiers), 0x00, byte(key.Code), 0x00, 0x00, 0x00, 0x00, 0x00}
-		s.hid.Write(s.hid.g0, keyDown)
-		s.hid.Write(s.hid.g0, keyUp)
-		time.Sleep(50 * time.Millisecond)
+
+		hid.WriteHid0(keyDown)
+		hid.WriteHid0(keyUp)
+		time.Sleep(30 * time.Millisecond)
 	}
 
 	rsp.OkRsp(c)
@@ -178,16 +182,16 @@ var charMap = map[rune]Char{
 	'/':  {0, 56}, // Slash
 
 	// Shifted symbols
-	'_':  {2, 45}, // Underscore (Shift + Hyphen)
-	'+':  {2, 46}, // Plus (Shift + Equals)
-	'{':  {2, 47}, // Left Curly Brace (Shift + Left Square Bracket)
-	'}':  {2, 48}, // Right Curly Brace (Shift + Right Square Bracket)
-	'|':  {2, 49}, // Pipe (Shift + Backslash)
+	'_': {2, 45}, // Underscore (Shift + Hyphen)
+	'+': {2, 46}, // Plus (Shift + Equals)
+	'{': {2, 47}, // Left Curly Brace (Shift + Left Square Bracket)
+	'}': {2, 48}, // Right Curly Brace (Shift + Right Square Bracket)
+	'|': {2, 49}, // Pipe (Shift + Backslash)
 
-	':':  {2, 51}, // Colon (Shift + Semicolon)
-	'"':  {2, 52}, // Double Quote (Shift + Apostrophe)
-	'~':  {2, 53}, // Tilde (Shift + Grave Accent)
-	'<':  {2, 54}, // Less Than (Shift + Comma)
-	'>':  {2, 55}, // Greater Than (Shift + Period)
-	'?':  {2, 56}, // Question Mark (Shift + Slash)
+	':': {2, 51}, // Colon (Shift + Semicolon)
+	'"': {2, 52}, // Double Quote (Shift + Apostrophe)
+	'~': {2, 53}, // Tilde (Shift + Grave Accent)
+	'<': {2, 54}, // Less Than (Shift + Comma)
+	'>': {2, 55}, // Greater Than (Shift + Period)
+	'?': {2, 56}, // Question Mark (Shift + Slash)
 }

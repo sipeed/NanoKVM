@@ -12,12 +12,12 @@ type UpdateProps = {
   setIsLocked: (isClosable: boolean) => void;
 };
 
-type Status = 'loading' | 'updating' | 'outdated' | 'latest' | 'failed';
+type Status = '' | 'loading' | 'updating' | 'outdated' | 'latest' | 'failed';
 
 export const Update = ({ setIsLocked }: UpdateProps) => {
   const { t } = useTranslation();
 
-  const [status, setStatus] = useState<Status>('loading');
+  const [status, setStatus] = useState<Status>('');
   const [currentVersion, setCurrentVersion] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -27,12 +27,13 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
   }, []);
 
   function checkForUpdates() {
+    if (status === 'loading') return;
     setStatus('loading');
 
     api
       .getVersion()
       .then((rsp: any) => {
-        if (rsp.code !== 0) {
+        if (rsp.code !== 0 || !rsp.data) {
           setStatus('failed');
           setErrMsg(t('settings.update.queryFailed'));
           return;
@@ -80,47 +81,53 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <Divider />
 
       <Preview />
-      <Divider />
 
-      {status === 'loading' && (
-        <div className="flex justify-center pt-24">
-          <Spin indicator={<LoadingOutlined spin />} size="large" />
-        </div>
-      )}
+      <div className="my-[40px] h-px bg-neutral-500/10" />
 
-      {status === 'updating' && (
-        <div className="flex flex-col items-center justify-center space-y-10 pb-10 pt-24">
-          <Spin size="large" />
-          <span className="text-blue-600">{t('settings.update.updating')}</span>
-        </div>
-      )}
+      <div className="flex min-h-[400px] flex-col justify-between">
+        {status === 'loading' && (
+          <div className="flex justify-center pt-24">
+            <Spin indicator={<LoadingOutlined spin />} size="large" />
+          </div>
+        )}
 
-      {status === 'latest' && (
-        <Result
-          status="success"
-          icon={<SmileOutlined />}
-          title={currentVersion}
-          subTitle={t('settings.update.isLatest')}
-        />
-      )}
+        {status === 'updating' && (
+          <div className="flex flex-col items-center justify-center space-y-10 pb-10 pt-24">
+            <Spin size="large" />
+            <span className="text-blue-600">{t('settings.update.updating')}</span>
+          </div>
+        )}
 
-      {status === 'outdated' && (
-        <Result
-          status="warning"
-          icon={<RocketOutlined />}
-          title={`${currentVersion} -> ${latestVersion}`}
-          subTitle={t('settings.update.available')}
-          extra={[
-            <Button key="confirm" type="primary" onClick={update}>
-              {t('settings.update.confirm')}
-            </Button>
-          ]}
-        />
-      )}
+        {status === 'latest' && (
+          <Result
+            status="success"
+            icon={<SmileOutlined />}
+            title={currentVersion}
+            subTitle={t('settings.update.isLatest')}
+            extra={[
+              <Button key="confirm" onClick={checkForUpdates}>
+                {t('settings.update.title')}
+              </Button>
+            ]}
+          />
+        )}
 
-      {status === 'failed' && <Result subTitle={errMsg} />}
+        {status === 'outdated' && (
+          <Result
+            status="warning"
+            icon={<RocketOutlined />}
+            title={`${currentVersion} -> ${latestVersion}`}
+            subTitle={t('settings.update.available')}
+            extra={[
+              <Button key="confirm" type="primary" onClick={update}>
+                {t('settings.update.confirm')}
+              </Button>
+            ]}
+          />
+        )}
 
-      {status !== 'loading' && (
+        {status === 'failed' && <Result subTitle={errMsg} />}
+
         <div className="flex justify-center">
           <Button
             type="link"
@@ -131,7 +138,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
             CHANGELOG
           </Button>
         </div>
-      )}
+      </div>
     </>
   );
 };

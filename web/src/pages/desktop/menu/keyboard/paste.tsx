@@ -1,5 +1,6 @@
-import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Input, Modal, Select, message, type InputRef } from 'antd';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { Button, Divider, Input, Modal, Select } from 'antd';
+import type { InputRef } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { ClipboardIcon, ClipboardPasteIcon } from 'lucide-react';
@@ -8,9 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { paste } from '@/api/hid';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
-const { Option } = Select;
-
-const { TextArea } = Input;
+type InputStatus = '' | 'error';
 
 export const Paste = () => {
   const { t } = useTranslation();
@@ -18,13 +17,23 @@ export const Paste = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [status, setStatus] = useState<'' | 'error'>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [errMsg, setErrMsg] = useState('');
+  const [isClipboardSupported, setIsClipboardSupported] = useState(false);
   const [isReadingClipboard, setIsReadingClipboard] = useState(false);
   const [langue, setLangue] = useState('en');
+  const [status, setStatus] = useState<InputStatus>('');
+  const [errMsg, setErrMsg] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const inputRef = useRef<InputRef>(null);
+
+  const languages = [
+    { value: 'en', label: t('keyboard.dropdownEnglish') },
+    { value: 'de', label: t('keyboard.dropdownGerman') }
+  ];
+
+  useEffect(() => {
+    setIsClipboardSupported('clipboard' in navigator);
+  }, []);
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     const value = e.target.value;
@@ -34,60 +43,27 @@ export const Paste = () => {
 
   async function readFromClipboard() {
     if (isReadingClipboard) return;
-
     setIsReadingClipboard(true);
+
     try {
-      // Check if clipboard API is available
-      if (!navigator.clipboard || !navigator.clipboard.readText) {
-        message.error(t('keyboard.clipboardNotSupported') || 'Clipboard API is not supported in this browser');
-        return;
-      }
-
-      // Read text from clipboard
       const text = await navigator.clipboard.readText();
-
       if (!text) {
-        message.warning(t('keyboard.clipboardEmpty') || 'Clipboard is empty');
         return;
       }
-
-      // Validate ASCII
-      if (!isASCII(text)) {
-        setStatus('error');
-        setInputValue(text);
-        message.error(t('keyboard.nonAsciiError') || 'Only ASCII characters are supported');
-        return;
-      }
-
-      // Check length
-      if (text.length > 1024) {
-        message.warning(t('keyboard.clipboardTooLong') || 'Clipboard content exceeds 1024 characters');
-        setInputValue(text.substring(0, 1024));
-        setStatus('');
-        return;
-      }
-
-      setInputValue(text);
-      setStatus('');
-      message.success(t('keyboard.clipboardRead') || 'Clipboard content loaded');
+      setInputValue((value) => value + text);
     } catch (error) {
-      console.error('Failed to read clipboard:', error);
-      if (error instanceof Error) {
-        if (error.name === 'NotAllowedError') {
-          message.error(t('keyboard.clipboardPermissionDenied') || 'Clipboard permission denied. Please allow clipboard access in your browser.');
-        } else {
-          message.error(t('keyboard.clipboardReadError') || `Failed to read clipboard: ${error.message}`);
-        }
-      } else {
-        message.error(t('keyboard.clipboardReadError') || 'Failed to read clipboard');
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        setErrMsg(t('keyboard.clipboardPermissionDenied'));
+        return;
       }
+      setErrMsg(t('keyboard.clipboardReadError'));
     } finally {
       setIsReadingClipboard(false);
     }
   }
 
   function submit() {
-    if (isLoading) return;
+    if (isLoading || !inputValue) return;
     setIsLoading(true);
 
     paste(inputValue, langue)
@@ -139,23 +115,27 @@ export const Paste = () => {
       <Modal
         open={isModalOpen}
         centered={false}
-        title={t('keyboard.paste')}
         footer={null}
         onCancel={() => setIsModalOpen(false)}
         afterOpenChange={afterOpenChange}
       >
-        <div className="pb-3 text-xs text-neutral-500">{t('keyboard.tips')}</div>
+        <div className="flex flex-col">
+          <span className="text-xl">{t('keyboard.paste')}</span>
+          <span className="text-sm text-neutral-600">{t('keyboard.tips')}</span>
+        </div>
 
-        <div className="space-y-2">
-          <Select
-            value={langue}
-            onChange={(value) => setLangue(value)}
-            style={{ width: '100%', marginBottom: '12px' }} >
-            <Option value="en">{t('keyboard.dropdownEnglish')}</Option>
-            <Option value="de">{t('keyboard.dropdownGerman')}</Option>
-          </Select>
-          <div className="flex items-center gap-2">
+        <Divider style={{ margin: '14px 0' }} />
+
+        <div
+          className={clsx(
+            'flex w-full items-center space-x-3 pb-2',
+            isClipboardSupported ? 'justify-start' : 'justify-end'
+          )}
+        >
+          {isClipboardSupported && (
             <Button
+              color="default"
+              variant="filled"
               icon={<ClipboardPasteIcon size={16} />}
               loading={isReadingClipboard}
               onClick={readFromClipboard}
@@ -163,27 +143,38 @@ export const Paste = () => {
             >
               {t('keyboard.readClipboard') || 'Read from Clipboard'}
             </Button>
-            <span className="text-xs text-neutral-500">
-              {t('keyboard.clipboardHint') || 'Click to paste from your browser clipboard'}
-            </span>
-          </div>
+          )}
 
-          <TextArea
-            ref={inputRef}
-            value={inputValue}
-            status={status}
-            showCount
-            maxLength={1024}
-            autoSize={{ minRows: 5, maxRows: 12 }}
-            placeholder={t('keyboard.placeholder')}
-            onChange={onChange}
-          />
+          <Select
+            value={langue}
+            variant="filled"
+            onChange={(value) => setLangue(value)}
+            options={languages}
+          ></Select>
         </div>
+
+        <Input.TextArea
+          ref={inputRef}
+          value={inputValue}
+          status={status}
+          showCount
+          maxLength={1024}
+          autoSize={{ minRows: 6, maxRows: 12 }}
+          placeholder={t('keyboard.placeholder')}
+          onFocus={() => setErrMsg('')}
+          onChange={onChange}
+        />
 
         {errMsg && <div className="pt-1 text-sm text-red-500">{errMsg}</div>}
 
-        <div className="flex justify-center py-3">
-          <Button type="primary" loading={isLoading} htmlType="submit" onClick={submit}>
+        <div className="flex justify-center py-5">
+          <Button
+            type="primary"
+            loading={isLoading}
+            htmlType="submit"
+            style={{ width: '300px' }}
+            onClick={submit}
+          >
             {t('keyboard.submit')}
           </Button>
         </div>

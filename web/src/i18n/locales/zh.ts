@@ -104,9 +104,16 @@ const zh = {
       title: '镜像',
       loading: '加载中',
       empty: '无镜像文件',
-      cdrom: '以 CD-ROM 模式挂载镜像',
+      mountMode: '挂载模式',
       mountFailed: '挂载失败',
       mountDesc: '在某些系统中，需要在远程主机中弹出虚拟硬盘后再挂载镜像。',
+      unmountFailed: '卸载失败',
+      unmountDesc: '在某些系统中，需要在远程主机中手动弹出后再卸载镜像。',
+      refresh: '刷新镜像列表',
+      attention: '注意',
+      deleteConfirm: '确定要删除该镜像吗？',
+      okBtn: '确定',
+      cancelBtn: '取消',
       tips: {
         title: '如何上传',
         usb1: '将 NanoKVM 通过 USB 连接到你的电脑；',
@@ -256,8 +263,11 @@ const zh = {
         title: 'Tailscale',
         memory: {
           title: '内存优化',
-          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存。如果使用 Tailscale 推荐设置为 50MB，需重启 Tailscale 后生效。',
-          disable: '关闭'
+          tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存。需重启 Tailscale 后生效。'
+        },
+        swap: {
+          title: '交换内存',
+          tip: '如果启用内存优化后依然存在问题，可以尝试开启交换内存。启用后会将交换文件设置为256MB，可以在「设置 - 设备」中修改该选项。'
         },
         restart: '取定要重启 Tailscale 吗？',
         stop: '确定要停止 Tailscale 吗？',
@@ -274,6 +284,8 @@ const zh = {
         upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
         upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
         refresh: '刷新页面',
+        notRunning: 'Tailscale 尚未运行，请先执行启动操作',
+        run: '启动',
         notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
         urlPeriod: '该链接10分钟内有效',
         login: '登录',
@@ -285,6 +297,7 @@ const zh = {
         logout: '退出',
         logoutDesc: '确定要退出吗？',
         uninstall: '卸载 Tailscale',
+        uninstallDesc: '确定要卸载 Tailscale 吗？',
         reboot: '重启',
         rebootDesc: '你确定要重启 NanoKVM 吗？',
         okBtn: '确认',

@@ -69,8 +69,6 @@ func (c *Cli) Stop() error {
 		return err
 	}
 
-	_ = os.Remove(ConfigPath)
-
 	return os.Remove(ScriptPath)
 }
 

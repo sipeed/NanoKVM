@@ -1,6 +1,7 @@
 package jiggler
 
 import (
+	"NanoKVM-Server/service/hid"
 	"os"
 	"strings"
 	"sync"
@@ -116,4 +117,18 @@ func (j *Jiggler) IsEnabled() bool {
 
 func (j *Jiggler) GetMode() string {
 	return j.mode
+}
+
+func move(mode string) {
+	h := hid.GetHid()
+
+	if mode == "absolute" {
+		h.WriteHid2([]byte{0x00, 0x00, 0x3f, 0x00, 0x3f, 0x00})
+		time.Sleep(100 * time.Millisecond)
+		h.WriteHid2([]byte{0x00, 0xff, 0x3f, 0xff, 0x3f, 0x00})
+	} else {
+		h.WriteHid1([]byte{0x00, 0xa, 0xa, 0x00})
+		time.Sleep(100 * time.Millisecond)
+		h.WriteHid1([]byte{0x00, 0xf6, 0xf6, 0x00})
+	}
 }
