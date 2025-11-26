@@ -1,7 +1,50 @@
-## 2.3.0 [a82aa79](https://github.com/sipeed/NanoKVM/commit/a82aa792d87337268ab644b37fcbacdae4f0ce33) (2025-07-15)     
+## 2.3.0 [0e30a26](https://github.com/sipeed/NanoKVM/commit/0e30a26db42cbc08416662b49a88a5d16ad93424) (2025-11-26)
 
-* feat: support server side disable menu
-* Add PT-BR translation (thanks to [@chiconws](https://github.com/chiconws))
+### Features
+
+* Added an EDID editor in the terminal with a built-in 1080P EDID template
+* Added German virtual keyboard and German clipboard support (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
+* Resetting the HID also resets the USB hardware
+* Added support for deleting ISO images
+
+### Refactoring & Improvements
+
+* Video (H.264 WebRTC): Refactored the module to significantly reduce video latency
+* Video (H.264 Direct): Refactored to optimize data transmission and support data parsing even when the page is in the background
+* Video (MJPEG): Refactored and ensure correct data length transmission
+* Added locking before resetting USB to prevent HID deadlock (thanks to [@scpcom](https://github.com/scpcom))
+* Optimized HID writing logic
+* Made HDMI toggle state persist across reboots (thanks to [@tpretz](https://github.com/tpretz))
+* Enhanced the paste feature with browser clipboard API integration (thanks to [@patrickpilon](https://github.com/patrickpilon))
+* Set the inquiry string for the virtual storage device (thanks to [@scpcom](https://github.com/scpcom))
+* Hostname now updates `/etc/hosts` simultaneously and takes effect immediately (thanks to [@scpcom](https://github.com/scpcom))
+* Improved compatibility for static IP configuration on Windows
+* Optimized the web page title update logic
+* Added a confirmation dialog when uninstalling Tailscale
+* Improved UI for Clipboard, Image Mounting, and settings pages
+
+### Bug Fixes
+
+* Tailscale: Fixed an issue where Tailscale would turn the device into a router
+* Tailscale: Fixed an issue where Tailscale would disable IPv6
+* Tailscale: Added a swap memory option to prevent Tailscale Out-Of-Memory errors
+* Tailscale: Fixed Tailscale accept-dns configuration (thanks to [@lazydba247](https://github.com/lazydba247))
+* Fixed an issue where certain modifier keys were not recognized
+* Fixed vertical mouse drift when the page is zoomed in or out
+
+### Localization
+
+* Update Korean translation (thanks to [@xenix4845](https://github.com/xenix4845))
+* Update Traditional Chinese translation (thanks to [@protonchang](https://github.com/protonchang))
+* Add Brazilian Portuguese translation (thanks to [@chiconws](https://github.com/chiconws) and [@Luccas-LF](https://github.com/Luccas-LF))
+* Add Swedish translation (thanks to [@acidflash](https://github.com/acidflash))
+* Add Catalan translation (thanks to [@Zagur](https://github.com/Zagur))
+* Add Turkish translation (thanks to [@Keylem](https://github.com/Keylem))
+
+### Security
+
+* Implemented a delay after failed login attempts to mitigate brute-force attacks
+* Upgraded dependencies to fix known security vulnerabilities
 
 ## 2.2.9 [c77981c](https://github.com/sipeed/NanoKVM/commit/c77981cc0ceebd8f6705b6c5d8c3cf4edf4f6717) (2025-06-13)
 
