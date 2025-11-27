@@ -21,18 +21,25 @@ PKG_URL_LATEST="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
     exit 1
 VERSION=$(/usr/sbin/$DAEMON --version|sed -n '1p'|xargs echo -n)
 
-[ -x /usr/bin/tailscale ] || echo "/usr/bin/tailscale not found, your installation of tailscale may be broken"
+[ -x /usr/bin/tailscale ] ||
+    (echo "/usr/bin/tailscale not found, your installation of tailscale may be broken" && exit 1)
 
-# just for those need forwarding
-[ ! -f /etc/sysctl.d/99-tailscale.conf ] &&
-    mkdir -p /etc/sysctl.d/ &&
-    echo "missing /etc/sysctl.d/99-tailscale.conf, try make it below:" &&
-    (tee /etc/sysctl.d/99-tailscale.conf <<EOF
-net.ipv4.ip_forward = 1
-net.ipv6.conf.all.forwarding = 1
-EOF
-    ) &&
-    echo "if this message repeats showing, please look at $0 if you need forwarding"
+# Clean up old forwarding configuration if it exists
+if [ -f /etc/sysctl.d/99-tailscale.conf ]; then
+    echo "Found old forwarding configuration, cleaning up..."
+    rm -f /etc/sysctl.d/99-tailscale.conf
+    sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1
+    sysctl -w net.ipv6.conf.all.forwarding=0 >/dev/null 2>&1
+    echo "Cleanup completed. IPv4/IPv6 forwarding disabled."
+
+    # Trigger IPv6 address renewal on all interfaces
+    for iface in $(ls /sys/class/net/ | grep -v lo); do
+        echo 0 > /proc/sys/net/ipv6/conf/$iface/forwarding 2>/dev/null
+        sysctl -w net.ipv6.conf.$iface.accept_ra=2 >/dev/null 2>&1
+    done
+
+    echo "If you need exit node features, please configure manually."
+fi
 
 case "$1" in
         start)
@@ -40,10 +47,14 @@ case "$1" in
                      value=$(cat /etc/kvm/GOMEMLIMIT)
                      export GOMEMLIMIT="${value}MiB"
                 else
-                     export GOMEMLIMIT=1024MiB
+                     export GOMEMLIMIT=512MiB
                 fi
-                
+
                 echo "GOMEMLIMIT set to ${GOMEMLIMIT}"
+
+                # Ensure directories exist
+                mkdir -p /var/lib/tailscale /var/run/tailscale
+
                 printf "Starting $DAEMON[$VERSION]: "
                 start-stop-daemon -S -bmq -p "$PIDFILE" -x "/usr/sbin/$DAEMON" -- \
                     --state=/var/lib/tailscale/tailscaled.state \
@@ -51,66 +62,24 @@ case "$1" in
                     --port=${PORT} \
                     $FLAGS
                 if [ $? = 0 ]; then
-        		    echo "OK"
-        		    tailscale set --accept-dns=false
-        		    # example to make your nanoKVM an exit node
-        		    # tailscale set --advertise-exit-node --advertise-routes=192.168.0.0/16
-	            else
-		            echo "FAIL"
-	            fi
+                    sleep 5
+                    echo "OK"
+                    tailscale set --accept-dns=false
+                else
+                    echo "FAIL"
+                fi
                 ;;
         stop)
                 printf "Stopping $DAEMON: "
                 start-stop-daemon -K -p "$PIDFILE"
                 [ $? = 0 ]  && (echo "OK"; rm -f "$PIDFILE") || echo "FAIL"
                 printf "cleaning tailscaled: "
-                /usr/sbin/$DAEMON --cleanup &>/dev/null
+                /usr/sbin/$DAEMON --cleanup >/dev/null 2>&1
                 [ $? = 0 ] && echo "OK" || echo "FAIL"
                 ;;
         restart|reload)
                 $0 stop
                 $0 start
-                ;;
-        doc)
-                cat <<EOF
-To use tailscale, you need to meet these conditions below:
-  1. Both tailscale and tailscaled were installed.
-  2. At least one tailscale's account were registered.
-     (https://login.tailscale.com/start)
-  3. Your NanoKVM device must keep online.
-
-Then, follow the steps below:
-  1. Login in https://login.tailscale.com on your PC
-     to enter into yout admin console.
-  2. Run 'tailscale login' on your device, and copy the link showed
-     to open on your PC, and confirm the auth.
-  3. Congratulations, your NanoKVM device is now on the tailnet, try to
-     visit it from all your device which on the same tailnet.
-  4. run 'tailscale set --webclient' and manage your device
-     on the web interface from localnet and tailenet.
-
-Added: no more action to be repeat after your device reboot.
-EOF
-                echo ""
-                cat <<EOF
-为了正常使用 tailscale, 你需要满足以下几个条件：
-  1. tailscale 和 tailscaled 这两个静态链接的二进制程序
-     都已经正确安装在系统上。
-  2. 至少注册一个 tailscale 的帐号才能使用其服务。
-     (https://login.tailscale.com/start)
-  3. 你的 NanoKVM 设备必须保持在线。
-
-然后，跟着以下步骤操作：
-  1. 在你的电脑上登录 https://login.tailscale.com 以进入控制台。
-  2. 在你的 NanoKVM ssh 终端上执行 'tailscale login', 然后复制
-     出现的链接到浏览器上，登录并通过验证。
-  3. 祝贺，你的 NanoKVM 现在已经加入了 tailnet 然后你可以从任意
-     同样已加入同一 tailnet 的设备去访问你的 NanoKVM。
-  4. 执行 'tailscale set --webclient' 然后你就可以从 '局域网' 和
-     'tailnet' 来访问特定网页，用来管理你的设备。
-
-补充: 不需要重复上面的操作，哪怕你的设备重启过。
-EOF
                 ;;
         *)
                 echo "Usage: $0 {start|stop|restart}"
