@@ -9,6 +9,7 @@ import { mouseModeAtom, mouseStyleAtom, scrollIntervalAtom } from '@/jotai/mouse
 import { MenuItem } from '@/components/menu-item.tsx';
 
 import { Cursor } from './cursor.tsx';
+import { BiosMode } from './bios-mode.tsx';
 import { HidMode } from './hid-mode.tsx';
 import { MouseMode } from './mouse-mode.tsx';
 import { ResetHid } from './reset-hid.tsx';
@@ -45,6 +46,7 @@ export const Mouse = () => {
       <Speed />
       <Divider style={{ margin: '10px 0' }} />
 
+      <BiosMode />
       <HidMode />
       <ResetHid />
     </div>
