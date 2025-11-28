@@ -251,6 +251,17 @@ const zh = {
         hdmi: {
           description: '启用 HDMI/显示器 输出功能'
         },
+        autostart: {
+          title: '自动启动脚本设置',
+          description: '管理能够在 NanoKVM 启动时自动运行的脚本文件',
+          new: '创建新脚本',
+          deleteConfirm: '确定要删除该文件吗？',
+          yes: '是',
+          no: '否',
+          scriptName: '自动启动脚本名称',
+          scriptContent: '自动启动脚本内容',
+          settings: '设置'
+        },
         hidOnly: 'HID-Only 模式',
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
