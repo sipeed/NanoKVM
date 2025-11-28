@@ -72,7 +72,9 @@ start_usb_dev(){
     echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x03\\x15\\x00\\x25\\x01\\x95\\x03\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x05\\x81\\x01\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x00\\x26\\xff\\x7f\\x35\\x00\\x46\\xff\\x7f\\x75\\x10\\x95\\x02\\x81\\x02\\x05\\x01\\x09\\x38\\x15\\x81\\x25\\x7f\\x35\\x00\\x45\\x00\\x75\\x08\\x95\\x01\\x81\\x06\\xc0\\xc0 > functions/hid.GS2/report_desc
     ln -s functions/hid.GS2 configs/c.1
 
-    ls /sys/class/udc/ | cat > UDC
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > UDC
+    fi
     echo device > /proc/cviusb/otg_role
 }
 
@@ -84,7 +86,9 @@ start_usb_host(){
 restart_usb_dev(){
     echo > /sys/kernel/config/usb_gadget/g0/UDC
     sleep 1
-    ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    fi
     echo "USB Restart OK!"
 }
 

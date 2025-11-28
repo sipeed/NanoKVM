@@ -119,7 +119,9 @@ start_usb_dev(){
             fi
     fi
 
-    ls /sys/class/udc/ | cat > UDC
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > UDC
+    fi
     echo device > /proc/cviusb/otg_role
 }
 
@@ -131,7 +133,9 @@ start_usb_host(){
 restart_usb_dev(){
     echo > /sys/kernel/config/usb_gadget/g0/UDC
     sleep 1
-    ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    fi
     echo "USB Restart OK!"
 }
 
