@@ -73,7 +73,12 @@ const se = {
       placeholder: 'Ange text',
       submit: 'Skicka',
       virtual: 'Tangentbord',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: 'Läs från Urklipp',
+      clipboardPermissionDenied: 'Behörighet till Urklipp nekad. Vänligen tillåt åtkomst till Urklipp i din webbläsare.',
+      clipboardReadError: 'Misslyckades med att läsa Urklipp',
+      dropdownEnglish: 'Engelska',
+      dropdownGerman: 'Tyska'
     },
     mouse: {
       title: 'Mus',
@@ -106,11 +111,18 @@ const se = {
       title: 'Avbildningar',
       loading: 'Laddar...',
       empty: 'Inget hittades',
+      mountMode: 'Monteringsläge',
       cdrom: 'Montera avbildning i CD-ROM-läge',
       mountFailed: 'Montering misslyckades',
       mountDesc:
         "I vissa system måste den virtuella disken avmonteras på fjärrvärden innan avbildningen monteras.",
       refresh: 'Uppdatera avbildningslistan',
+      unmountFailed: 'Avmontering misslyckades',
+      unmountDesc: 'I vissa system måste du manuellt mata ut från fjärrvärden innan du avmonterar avbildningen.',
+      attention: 'Observera',
+      deleteConfirm: 'Är du säker på att du vill ta bort denna avbildning?',
+      okBtn: 'Ja',
+      cancelBtn: 'Nej',
       tips: {
         title: 'Hur man laddar upp',
         usb1: 'Anslut NanoKVM till din dator via USB.',
