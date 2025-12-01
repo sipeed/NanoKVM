@@ -7,8 +7,6 @@ package common
 */
 import "C"
 import (
-	"NanoKVM-Server/config"
-	"strings"
 	"sync"
 	"unsafe"
 
@@ -26,15 +24,8 @@ func GetKvmVision() *KvmVision {
 	kvmVisionOnce.Do(func() {
 		kvmVision = &KvmVision{}
 
-		conf := config.GetInstance()
-		logLevel := strings.ToLower(conf.Logger.Level)
-
-		logEnable := C.uint8_t(0)
-		if logLevel == "debug" {
-			logEnable = C.uint8_t(1)
-		}
-
-		C.kvmv_init(logEnable)
+		logLevel := C.uint8_t(0)
+		C.kvmv_init(logLevel)
 		log.Debugf("kvm vision initialized")
 	})
 
@@ -62,8 +53,6 @@ func (k *KvmVision) ReadMjpeg(width uint16, height uint16, quality uint16) (data
 	defer C.free_kvmv_data(&kvmData)
 
 	data = C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
-
-	log.Debugf("read kvm image: %v", result)
 	return
 }
 
@@ -88,8 +77,6 @@ func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data 
 	defer C.free_kvmv_data(&kvmData)
 
 	data = C.GoBytes(unsafe.Pointer(kvmData), C.int(dataSize))
-
-	log.Debugf("read kvm image: %v", result)
 	return
 }
 

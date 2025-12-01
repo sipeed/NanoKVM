@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button } from 'antd';
-import clsx from 'clsx';
+import { Modal } from 'antd';
+import { Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/tailscale.ts';
@@ -13,44 +13,49 @@ export const Uninstall = ({ onSuccess }: UninstallProps) => {
   const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isConfirmation, setIsConfirmation] = useState(false);
-
-  function showConfirmation() {
-    if (!isConfirmation) {
-      setIsConfirmation(true);
-    }
-  }
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   function uninstall() {
     if (isLoading) return;
     setIsLoading(true);
 
     api.uninstall().finally(() => {
+      setIsModalOpen(false);
       setIsLoading(false);
       onSuccess();
     });
   }
 
-  return (
-    <div
-      className="flex h-[40px] cursor-pointer items-center justify-between space-x-6 rounded px-3 text-neutral-300 hover:bg-neutral-700/70"
-      onClick={showConfirmation}
-    >
-      <span className={clsx(isConfirmation && 'text-red-500')}>
-        {t('settings.tailscale.uninstall')}
-      </span>
-
-      {isConfirmation && (
-        <div className="flex items-center space-x-2">
-          <Button type="primary" size="small" disabled={isLoading} danger onClick={uninstall}>
-            {t('settings.tailscale.okBtn')}
-          </Button>
-
-          <Button type="primary" size="small" onClick={() => setIsConfirmation(false)}>
-            {t('settings.tailscale.cancelBtn')}
-          </Button>
-        </div>
-      )}
+  const title = (
+    <div className="flex items-center space-x-1 text-red-500">
+      <Trash2Icon size={18} />
+      <span>{t('settings.tailscale.uninstall')}</span>
     </div>
+  );
+
+  return (
+    <>
+      <div
+        className="flex h-[30px] cursor-pointer items-center space-x-1 rounded px-2 py-1 text-neutral-300 hover:bg-neutral-700/70"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <span>{t('settings.tailscale.uninstall')}</span>
+      </div>
+
+      <Modal
+        title={title}
+        open={isModalOpen}
+        okType="danger"
+        okText={t('settings.tailscale.okBtn')}
+        cancelText={t('settings.tailscale.cancelBtn')}
+        onOk={uninstall}
+        onCancel={() => setIsModalOpen(false)}
+        confirmLoading={isLoading}
+      >
+        <div className="py-5">
+          <p className="text-base">{t('settings.tailscale.uninstallDesc')}</p>
+        </div>
+      </Modal>
+    </>
   );
 };

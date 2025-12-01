@@ -9,8 +9,20 @@ start_usb_dev(){
     mkdir g0
     cd g0
 
-    echo 0x3346 > idVendor
-    echo 0x1009 > idProduct
+    # echo 0x3346 > idVendor
+    # echo 0x1009 > idProduct
+    if [ -e /boot/usb.vid ]
+    then
+        cat /boot/usb.vid > idVendor
+    else
+        echo 0x3346 > idVendor
+    fi
+    if [ -e /boot/usb.pid ]
+    then
+        cat /boot/usb.pid > idProduct
+    else
+        echo 0x1009 > idProduct
+    fi
     mkdir strings/0x409
     echo '0123456789ABCDEF' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer
@@ -82,6 +94,7 @@ start_usb_dev(){
         ln -s functions/hid.GS2 configs/c.1
     fi
 
+    # dedicated for media
     if [ -e /boot/usb.disk0 ]
     then
             mkdir functions/mass_storage.disk0
@@ -92,6 +105,7 @@ start_usb_dev(){
                     echo 1 > functions/mass_storage.disk0/lun.0/ro
                     echo 0 > functions/mass_storage.disk0/lun.0/cdrom
             fi
+            echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
             disk=$(cat /boot/usb.disk0)
             if [ -z "${disk}" ]
             then

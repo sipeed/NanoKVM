@@ -20,7 +20,6 @@ import { Wifi } from './wifi.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
-
   const [hidMode, setHidMode] = useAtom(hidModeAtom);
 
   useEffect(() => {

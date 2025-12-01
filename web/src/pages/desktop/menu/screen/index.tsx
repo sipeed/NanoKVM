@@ -22,7 +22,6 @@ export const Screen = () => {
 
   const videoMode = useAtomValue(videoModeAtom);
   const resolution = useAtomValue(resolutionAtom);
-
   const [fps, setFps] = useState(30);
   const [quality, setQuality] = useState(2);
   const [gop, setGop] = useState(30);
@@ -74,7 +73,8 @@ export const Screen = () => {
       <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
-      {videoMode === 'mjpeg' ? <FrameDetect /> : <Gop gop={gop} setGop={setGop} />}
+      {videoMode !== 'mjpeg' && <Gop gop={gop} setGop={setGop} />}
+      {videoMode === 'mjpeg' && <FrameDetect />}
       <Reset />
     </div>
   );

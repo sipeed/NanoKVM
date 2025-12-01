@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Divider, Switch, Tooltip } from 'antd';
+import { Divider, Modal, Segmented } from 'antd';
 import clsx from 'clsx';
-import { DiscIcon } from 'lucide-react';
+import { DiscIcon, HardDriveIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { getCdRom, getMountedImage } from '@/api/storage.ts';
-import { MenuItem } from '@/components/menu-item.tsx';
+import * as api from '@/api/storage.ts';
 
 import { Images } from './images.tsx';
 import { Tips } from './tips.tsx';
@@ -13,64 +12,76 @@ import { Tips } from './tips.tsx';
 export const Image = () => {
   const { t } = useTranslation();
 
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-  const [cdrom, setCdrom] = useState(false);
+  const [mode, setMode] = useState('mass-storage');
+
+  const modes = [
+    {
+      value: 'mass-storage',
+      label: (
+        <div className="flex items-center space-x-1">
+          <HardDriveIcon size={16} />
+          <span>Mass Storage</span>
+        </div>
+      )
+    },
+    {
+      value: 'cd-rom',
+      label: (
+        <div className="flex items-center space-x-1">
+          <DiscIcon size={16} />
+          <span>CD ROM</span>
+        </div>
+      )
+    }
+  ];
 
   useEffect(() => {
-    getMountedImage().then((rsp) => {
+    api.getMountedImage().then((rsp) => {
       if (rsp.code === 0) {
         setIsMounted(!!rsp.data?.file);
       }
     });
 
-    getCdRom().then((rsp) => {
+    api.getCdRom().then((rsp) => {
       if (rsp.code === 0) {
-        setCdrom(rsp.data?.cdrom === 1);
+        setMode(rsp.data?.cdrom === 1 ? 'cd-rom' : 'mass-storage');
       }
     });
   }, []);
 
-  const content = (
-    <div className="min-w-[300px]">
-      <div className="flex items-center justify-between px-1">
+  return (
+    <>
+      <div
+        className={clsx(
+          'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
+          isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
+        )}
+        onClick={() => setIsModalOpen(true)}
+      >
+        <DiscIcon size={18} />
+      </div>
+
+      <Modal open={isModalOpen} footer={null} onCancel={() => setIsModalOpen(false)}>
         <div className="flex items-center space-x-1">
-          <span className="text-base font-bold text-neutral-300">{t('image.title')}</span>
+          <span className="text-xl font-bold">{t('image.title')}</span>
           <Tips />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Tooltip title={t('image.cdrom')} placement="bottom">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-neutral-400">CD-ROM</span>
+        <Divider style={{ margin: '24px 0' }} />
 
-              <Switch
-                size="small"
-                checked={cdrom}
-                onChange={(checked) => setCdrom(checked)}
-              ></Switch>
-            </div>
-          </Tooltip>
+        <div className="flex flex-col space-y-6">
+          <div className="flex items-center justify-between">
+            <span>{t('image.mountMode')}</span>
+            <Segmented value={mode} options={modes} disabled={isMounted} onChange={setMode} />
+          </div>
+
+          <Divider style={{ margin: '24px 0 0 0' }} />
+
+          <Images isOpen={isModalOpen} cdrom={mode === 'cd-rom'} setIsMounted={setIsMounted} />
         </div>
-      </div>
-
-      <Divider style={{ margin: '10px 0 15px 0' }} />
-
-      <Images isOpen={isPopoverOpen} cdrom={cdrom} setIsMounted={setIsMounted} />
-    </div>
-  );
-
-  return (
-    <MenuItem
-      title={t('image.title')}
-      icon={<DiscIcon size={17} />}
-      content={content}
-      className={clsx(
-        'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
-        isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
-      )}
-      fresh={true}
-      onOpenChange={setIsPopoverOpen}
-    />
+      </Modal>
+    </>
   );
 };

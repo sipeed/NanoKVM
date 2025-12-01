@@ -14,7 +14,8 @@ import (
 
 const (
 	virtualNetwork = "/boot/usb.rndis0"
-	virtualDisk    = "/boot/usb.disk0"
+	virtualMedia   = "/boot/usb.disk0"
+	virtualDisk    = "/boot/usb.disk1"
 )
 
 var (
@@ -31,16 +32,29 @@ var (
 		"/etc/init.d/S03usbdev start",
 	}
 
-	mountDiskCommands = []string{
+	mountMediaCommands = []string{
 		"touch /boot/usb.disk0",
+		"/etc/init.d/S03usbdev stop",
+		"/etc/init.d/S03usbdev start",
+	}
+
+	unmountMediaCommands = []string{
+		"/etc/init.d/S03usbdev stop",
+		"rm -rf /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0",
+		"rm /boot/usb.disk0",
+		"/etc/init.d/S03usbdev start",
+	}
+
+	mountDiskCommands = []string{
+		"touch /boot/usb.disk1",
 		"/etc/init.d/S03usbdev stop",
 		"/etc/init.d/S03usbdev start",
 	}
 
 	unmountDiskCommands = []string{
 		"/etc/init.d/S03usbdev stop",
-		"rm -rf /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0",
-		"rm /boot/usb.disk0",
+		"rm -rf /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk1",
+		"rm /boot/usb.disk1",
 		"/etc/init.d/S03usbdev start",
 	}
 )
@@ -49,10 +63,12 @@ func (s *Service) GetVirtualDevice(c *gin.Context) {
 	var rsp proto.Response
 
 	network, _ := isDeviceExist(virtualNetwork)
+	media, _ := isDeviceExist(virtualMedia)
 	disk, _ := isDeviceExist(virtualDisk)
 
 	rsp.OkRspWithData(c, &proto.GetVirtualDeviceRsp{
 		Network: network,
+		Media:   media,
 		Disk:    disk,
 	})
 	log.Debugf("get virtual device success")
@@ -79,6 +95,15 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 			commands = mountNetworkCommands
 		} else {
 			commands = unmountNetworkCommands
+		}
+	case "media":
+		device = virtualMedia
+
+		exist, _ := isDeviceExist(device)
+		if !exist {
+			commands = mountMediaCommands
+		} else {
+			commands = unmountMediaCommands
 		}
 	case "disk":
 		device = virtualDisk

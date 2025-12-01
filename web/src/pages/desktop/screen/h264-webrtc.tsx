@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
@@ -14,43 +14,62 @@ export const H264Webrtc = () => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const videoElement = document.getElementById('screen') as HTMLVideoElement;
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoOfferSent = useRef(false);
+  const videoIceCandidates = useRef<RTCIceCandidate[]>([]);
 
+  useEffect(() => {
     const url = `${getBaseUrl('ws')}/api/stream/h264`;
     const ws = new W3cWebSocket(url);
 
-    const pc = new RTCPeerConnection({
-      iceServers: [
-        {
-          urls: ['stun:stun.l.google.com:19302']
-        }
-      ]
-    });
+    const iceServers = [{ urls: ['stun:stun.l.google.com:19302'] }];
+    const video = new RTCPeerConnection({ iceServers });
 
-    pc.ontrack = function (event) {
-      if (event.track.kind !== 'video') {
-        console.log('unhandled track kind: ', event.track.kind);
+    // --- Init Video ---
+    video.onnegotiationneeded = async () => {
+      if (videoOfferSent.current || video.signalingState !== 'stable') {
+        console.log('Skipping video negotiation - Waiting for answer or state unstable');
         return;
       }
-      videoElement.srcObject = event.streams[0];
+
+      try {
+        videoOfferSent.current = true;
+        const offer = await video.createOffer({
+          offerToReceiveVideo: true,
+          offerToReceiveAudio: false
+        });
+
+        await video.setLocalDescription(offer);
+
+        sendMsg('video-offer', JSON.stringify(video.localDescription));
+      } catch (error) {
+        videoOfferSent.current = false;
+        console.error('Video negotiation failed:', error);
+      }
+    };
+
+    video.onconnectionstatechange = () => {
+      if (video.iceConnectionState === 'connected') {
+        setIsLoading(false);
+      }
+    };
+
+    video.ontrack = (event) => {
+      if (videoRef.current && event.track.kind === 'video') {
+        videoRef.current.srcObject = new MediaStream([event.track]);
+      }
     };
 
     ws.onopen = () => {
-      pc.onicecandidate = (event) => {
+      videoOfferSent.current = false;
+
+      video.onicecandidate = (event) => {
         if (event.candidate) {
-          ws.send(JSON.stringify({ event: 'candidate', data: JSON.stringify(event.candidate) }));
+          sendMsg('video-candidate', JSON.stringify(event.candidate));
         }
       };
 
-      pc.addTransceiver('video', { direction: 'recvonly' });
-
-      pc.createOffer({ offerToReceiveVideo: true })
-        .then((offer) => {
-          pc.setLocalDescription(offer).catch(console.log);
-          ws.send(JSON.stringify({ event: 'offer', data: JSON.stringify(offer) }));
-        })
-        .catch(console.log);
+      video.addTransceiver('video', { direction: 'recvonly' });
     };
 
     ws.onmessage = (event) => {
@@ -62,28 +81,75 @@ export const H264Webrtc = () => {
         if (!data) return;
 
         switch (msg.event) {
-          case 'answer':
-            pc.setRemoteDescription(data).catch(console.log);
+          case 'video-answer':
+            handleVideoAnswer(data);
             break;
-
-          case 'candidate':
-            pc.addIceCandidate(data).catch(console.log);
+          case 'video-candidate':
+            handleVideoCandidate(data);
             break;
-
+          case 'heartbeat':
+            break;
           default:
-            console.log('unhandled event: ', msg.event);
+            console.log('Unhandled event:', msg.event);
         }
       } catch (err) {
-        console.log(err);
+        console.error('Message processing error:', err);
+      }
+    };
+
+    const handleVideoAnswer = (data: any) => {
+      if (video.signalingState !== 'have-local-offer') {
+        videoOfferSent.current = false;
+        console.warn(`Video signaling state incorrect for answer: ${video.signalingState}`);
+        return;
+      }
+
+      video
+        .setRemoteDescription(new RTCSessionDescription(data))
+        .then(() => {
+          videoOfferSent.current = false;
+          videoIceCandidates.current.forEach((candidate) => {
+            video
+              .addIceCandidate(candidate)
+              .catch((e) => console.error('Video candidate failed to add:', e.message));
+          });
+          videoIceCandidates.current = [];
+        })
+        .catch((error) => {
+          console.error('Video answer set failed:', error);
+          videoOfferSent.current = false;
+        });
+    };
+
+    const handleVideoCandidate = (data: any) => {
+      if (!data.candidate) {
+        return;
+      }
+
+      const candidate = new RTCIceCandidate(data);
+      if (video.remoteDescription) {
+        video
+          .addIceCandidate(candidate)
+          .catch((e) => console.error('Video candidate failed to add:', e.message));
+      } else {
+        videoIceCandidates.current.push(candidate);
+      }
+    };
+
+    const sendMsg = (event: string, data: string) => {
+      if (ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      try {
+        ws.send(JSON.stringify({ event, data }));
+      } catch (err) {
+        console.error('Error sending event: ', err);
       }
     };
 
     const heartbeatTimer = setInterval(() => {
-      try {
-        ws.send(JSON.stringify({ event: 'heartbeat', data: '' }));
-      } catch (err) {
-        console.log(err);
-      }
+      sendMsg('heartbeat', '');
     }, 60 * 1000);
 
     setTimeout(() => {
@@ -91,8 +157,13 @@ export const H264Webrtc = () => {
     }, 5 * 1000);
 
     return () => {
-      ws.close();
-      pc.close();
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+
+      video.close();
+      videoOfferSent.current = false;
+
       if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
       }
@@ -104,6 +175,7 @@ export const H264Webrtc = () => {
       <div className="flex h-screen w-screen items-start justify-center xl:items-center">
         <video
           id="screen"
+          ref={videoRef}
           className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
           style={
             resolution?.width

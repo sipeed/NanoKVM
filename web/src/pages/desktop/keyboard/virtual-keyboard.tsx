@@ -46,6 +46,7 @@ export const VirtualKeyboard = () => {
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'fr', label: 'French' },
+    { value: 'de', label: 'Deutsch' },
     { value: 'ru', label: 'Russian' }
   ];
 
@@ -65,6 +66,7 @@ export const VirtualKeyboard = () => {
     const layoutMap = new Map([
       ['en', 'default'],
       ['ru', 'rus'],
+      ['de', 'qwertz'],
       ['fr', 'azerty']
     ]);
 
@@ -123,6 +125,17 @@ export const VirtualKeyboard = () => {
       if (base === 'KeyQ') return KeyboardCodes.get('KeyA');
       if (base === 'KeyZ') return KeyboardCodes.get('KeyW');
       if (base === 'KeyW') return KeyboardCodes.get('KeyZ');
+      // all other labels use their own code
+      return KeyboardCodes.get(base);
+    }
+    if (keyboardLanguage === 'de' && key.endsWith('_qwertz')) {
+      const base = key.replace('_qwertz', '');
+      // Tausch
+      if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
+      if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
+      
+      if (base === 'IntlBackslash') return KeyboardCodes.get('IntlBackslash_qwertz');
+      
       // all other labels use their own code
       return KeyboardCodes.get(base);
     }

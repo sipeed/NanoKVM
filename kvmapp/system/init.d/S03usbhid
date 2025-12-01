@@ -11,8 +11,20 @@ start_usb_dev(){
 
     echo 0x0101 > bcdUSB
     echo 0x0623 > bcdDevice
-    echo 0x3346 > idVendor
-    echo 0x1009 > idProduct
+    # echo 0x3346 > idVendor
+    # echo 0x1009 > idProduct
+    if [ -e /boot/usb.vid ]
+    then
+        cat /boot/usb.vid > idVendor
+    else
+        echo 0x3346 > idVendor
+    fi
+    if [ -e /boot/usb.pid ]
+    then
+        cat /boot/usb.pid > idProduct
+    else
+        echo 0x1009 > idProduct
+    fi
     mkdir strings/0x409
     # echo '0' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer

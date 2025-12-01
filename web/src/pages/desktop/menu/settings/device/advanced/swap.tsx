@@ -20,6 +20,10 @@ export const Swap = () => {
   ];
 
   useEffect(() => {
+    getSwap();
+  }, []);
+
+  function getSwap() {
     setIsLoading(true);
 
     api
@@ -32,9 +36,9 @@ export const Swap = () => {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }
 
-  async function update(value: string) {
+  function update(value: string) {
     if (isLoading) return;
     setIsLoading(true);
 
