@@ -54,24 +54,27 @@ func (h HWVersion) String() string {
 	}
 }
 
-func getHwVersion() HWVersion {
+func GetHwVersion() HWVersion {
 	content, err := os.ReadFile(HWVersionFile)
 	if err != nil {
 		return HWVersionAlpha
 	}
 
 	version := strings.ReplaceAll(string(content), "\n", "")
-	if version == "beta" {
+	switch version {
+	case "alpha":
+		return HWVersionAlpha
+	case "beta":
 		return HWVersionBeta
-	} else if version == "pcie" {
+	case "pcie":
 		return HWVersionPcie
+	default:
+		return HWVersionAlpha
 	}
-
-	return HWVersionAlpha
 }
 
 func getHardware() (h Hardware) {
-	version := getHwVersion()
+	version := GetHwVersion()
 
 	switch version {
 	case HWVersionAlpha:

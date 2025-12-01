@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/extensions/tailscale.ts';
 
 import { Memory } from './memory.tsx';
+import { Swap } from './swap.tsx';
 import type { State } from './types.ts';
 import { Uninstall } from './uninstall.tsx';
 
@@ -93,6 +94,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
             content={
               <div className="flex min-w-[250px] flex-col">
                 <Memory />
+                <Swap />
                 <Uninstall onSuccess={onSuccess} />
               </div>
             }

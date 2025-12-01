@@ -26,3 +26,4 @@ export function setPreviewUpdates(enable: boolean) {
 export function getPreviewUpdates() {
   return http.get('/api/application/preview');
 }
+

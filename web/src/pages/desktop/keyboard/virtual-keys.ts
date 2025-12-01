@@ -29,6 +29,14 @@ export const keyboardOptions = {
       '{shiftleft} RusZ RusX RusC RusV RusB RusN RusM RusComma RusPeriod RusSlash {shiftright}',
       '{controlleft} {winleft} {altleft} {space} {altright} {winright} {menu} {controlright}'
     ],
+    qwertz: [
+      '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
+      'Backquote_qwertz Digit1_qwertz Digit2_qwertz Digit3_qwertz Digit4_qwertz Digit5_qwertz Digit6_qwertz Digit7_qwertz Digit8_qwertz Digit9_qwertz Digit0_qwertz Minus_qwertz Equal_qwertz {backspace}',
+      '{tab} KeyQ_qwertz KeyW KeyE_qwertz KeyR KeyT KeyZ_qwertz KeyU KeyI KeyO KeyP BracketLeft_qwertz BracketRight_qwertz',
+      '{capslock} KeyA KeyS KeyD KeyF KeyG KeyH KeyJ KeyK KeyL Semicolon_qwertz Quote_qwertz Backslash_qwertz {enter}',
+      '{shiftleft} IntlBackslash_qwertz KeyY_qwertz KeyX KeyC KeyV KeyB KeyN KeyM Comma_qwertz Period_qwertz Slash_qwertz {shiftright}',
+      '{controlleft_qwertz} {winleft} {altleft} {space} {altright_qwertz} {winright} {menu} {controlright_qwertz}'
+    ],
     azerty: [
       '{escape} F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12',
       'Backquote_azerty Digit1_azerty Digit2_azerty Digit3_azerty Digit4_azerty Digit5_azerty Digit6_azerty Digit7_azerty Digit8_azerty Digit9_azerty Digit0_azerty Minus_azerty Equal_azerty {backspace}',
@@ -55,6 +63,39 @@ export const keyboardOptions = {
     Equal: '+<br/>=',
     '{backspace}': 'Backspace',
 
+    Backquote_qwertz: '^<br/>°',
+    Digit1_qwertz: '1<br/>!',
+    Digit2_qwertz: '2<br/>"',
+    Digit3_qwertz: '3<br/>§',
+    Digit4_qwertz: '4<br/>$',
+    Digit5_qwertz: '5<br/>%',
+    Digit6_qwertz: '6<br/>&',
+    Digit7_qwertz: '7{/',
+    Digit8_qwertz: '8[(',
+    Digit9_qwertz: '9])',
+    Digit0_qwertz: '0}=',
+    Minus_qwertz: 'ß\\?',
+    Equal_qwertz: '´<br/>`',
+
+    KeyY_qwertz: 'Y',
+    KeyZ_qwertz: 'Z',
+    
+    KeyQ_qwertz: 'Q<br/>@',
+    KeyE_qwertz: 'E<br/>€',
+    BracketRight_qwertz: '+~*',
+    Backslash_qwertz: '#<br/>\'',
+    IntlBackslash_qwertz: '<|>',
+    Comma_qwertz: ',<br/>;',
+    Period_qwertz: '.<br/>:',
+    Slash_qwertz: '-<br/>_',
+    '{controlleft_qwertz}': 'STRG',
+    '{altright_qwertz}': 'ALT GR',
+    '{controlright_qwertz}': 'STRG',
+    
+    BracketLeft_qwertz: 'Ü',
+    Semicolon_qwertz: 'Ö',
+    Quote_qwertz: 'Ä',
+    
     '{tab}': 'Tab',
     KeyQ: 'Q',
     KeyW: 'W',
@@ -275,7 +316,12 @@ export const specialKeyMap = new Map([
   ['{arrowright}', 'ArrowRight'],
   ['{arrowleft}', 'ArrowLeft'],
   ['{arrowdown}', 'ArrowDown'],
-  ['{arrowup}', 'ArrowUp']
+  ['{arrowup}', 'ArrowUp'],
+
+  //DE
+  ['{controlleft_qwertz}', 'ControlLeft'],
+  ['{controlright_qwertz}', 'ControlRight'],
+  ['{altright_qwertz}', 'AltRight']
 ]);
 
 // modifier keys
@@ -289,7 +335,12 @@ export const modifierKeys = [
   '{controlright}',
   '{altright}',
   '{metaright}',
-  '{winright}'
+  '{winright}',
+  
+  // DE-spezifische Modifier-Tokens (für qwertz-Layout)
+  '{controlleft_qwertz}',
+  '{controlright_qwertz}',
+  '{altright_qwertz}'
 ];
 
 // double line display buttons

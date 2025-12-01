@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,12 +13,14 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/hid"
 )
 
 const (
 	imageDirectory = "/data"
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
 	usbNoRstMarker = "/boot/usb.norst"
 )
@@ -91,6 +94,20 @@ func (s *Service) MountImage(c *gin.Context) {
 		}
 	}
 
+	inquiryVen := "NanoKVM"
+	inquiryPrd := "USB Mass Storage"
+	inquiryVer := 0x0520
+	if req.Cdrom {
+		inquiryPrd = "USB CD/DVD-ROM"
+	}
+	inquiryData := fmt.Sprintf("%-8s%-16s%04x", inquiryVen, inquiryPrd, inquiryVer)
+
+	if err := os.WriteFile(inquiryString, []byte(inquiryData), 0o666); err != nil {
+		log.Errorf("set inquiry %s failed: %s", inquiryData, err)
+		rsp.ErrRsp(c, -2, "set inquiry failed")
+		return
+	}
+
 	// mount if file provided
 	image := req.File
 	if image != "" {
@@ -106,6 +123,14 @@ func (s *Service) MountImage(c *gin.Context) {
 	if _, err := os.Stat(usbNoRstMarker); err == nil {
 		resetUsb = false
 	}
+
+	h := hid.GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
 
 	// reset usb
 	if resetUsb {
@@ -167,4 +192,32 @@ func (s *Service) GetCdRom(c *gin.Context) {
 	}
 
 	rsp.OkRspWithData(c, data)
+}
+
+func (s *Service) DeleteImage(c *gin.Context) {
+	var req proto.DeleteImageReq
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	filename := strings.ToLower(req.File)
+	validPrefix := strings.HasPrefix(filename, imageDirectory)
+	validSuffix := strings.HasSuffix(filename, ".iso") || strings.HasSuffix(filename, ".img")
+
+	if !validPrefix || !validSuffix {
+		rsp.ErrRsp(c, -2, "invalid arguments")
+		return
+	}
+
+	if err := os.Remove(req.File); err != nil {
+		rsp.ErrRsp(c, -3, "remove file failed")
+		log.Errorf("failed to remove file %s: %s", req.File, err)
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("delete image %s success", req.File)
 }

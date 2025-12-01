@@ -47,13 +47,15 @@ const ko = {
       finishBtn: '완료'
     },
     screen: {
+      title: '화면',
       video: '비디오 모드',
+      videoDirectTips: '이 모드를 사용하려면 "설정 > 장치"에서 HTTPS를 활성화하세요',
       resolution: '해상도',
       auto: '자동 설정',
       autoTips:
         '일부 해상도에서는 화면이 왜곡되거나 마우스 동작이 비정상적으로 나타날 수 있습니다. 원격 컴퓨터의 해상도를 변경하거나 자동 설정 대신 수동 설정을 사용해 보세요.',
       fps: 'FPS',
-      customizeFps: 'FPS 설정',
+      customizeFps: '사용자 지정',
       quality: '품질',
       qualityLossless: '무손실',
       qualityHigh: '높음',
@@ -65,6 +67,7 @@ const ko = {
       resetHdmi: 'HDMI 초기화'
     },
     keyboard: {
+      title: '키보드',
       paste: '붙여넣기',
       tips: '표준 키보드 문자 및 기호만 지원됩니다',
       placeholder: '입력하세요',
@@ -73,6 +76,8 @@ const ko = {
       ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
+      title: '마우스',
+      cursor: '커서 스타일',
       default: '기본 커서',
       pointer: '포인터 커서',
       cell: '셀 커서',
@@ -82,8 +87,20 @@ const ko = {
       mode: '마우스 모드',
       absolute: '절대값 모드',
       relative: '상대값 모드',
+      speed: '휠 속도',
+      fast: '빠름',
+      slow: '느림',
       requestPointer: '상대값 모드를 사용 중입니다. 커서를 찾으려면 데스크톱을 클릭하세요.',
-      resetHid: 'HID 초기화'
+      resetHid: 'HID 초기화',
+      hidOnly: {
+        title: 'HID 전용 모드',
+        desc: '마우스와 키보드가 응답하지 않고 HID 초기화도 도움이 되지 않는다면, NanoKVM과 장치 간의 호환성 문제일 수 있습니다. 더 나은 호환성을 위해 HID 전용 모드를 활성화해 보세요.',
+        tip1: 'HID 전용 모드를 활성화하면 가상 USB와 가상 네트워크가 언마운트됩니다',
+        tip2: 'HID 전용 모드에서는 이미지 마운트가 비활성화됩니다',
+        tip3: '모드 전환 후 NanoKVM이 자동으로 재부팅됩니다',
+        enable: 'HID 전용 모드 활성화',
+        disable: 'HID 전용 모드 비활성화'
+      }
     },
     image: {
       title: '이미지',
@@ -129,7 +146,17 @@ const ko = {
       serial: '시리얼 포트 터미널',
       serialPort: '시리얼 포트',
       serialPortPlaceholder: '시리얼 포트를 입력하세요',
-      baudrate: 'Baud rate',
+      baudrate: '전송 속도',
+      parity: '패리티',
+      parityNone: '없음',
+      parityEven: '짝수',
+      parityOdd: '홀수',
+      flowControl: '흐름 제어',
+      flowControlNone: '없음',
+      flowControlSoft: '소프트웨어',
+      flowControlHard: '하드웨어',
+      dataBits: '데이터 비트',
+      stopBits: '정지 비트',
       confirm: '확인'
     },
     wol: {
@@ -147,10 +174,16 @@ const ko = {
     },
     power: {
       title: '전원',
+      showConfirm: '확인',
+      showConfirmTip: '전원 작업에는 추가 확인이 필요합니다',
       reset: '리셋',
       power: '전원',
       powerShort: '전원 (짧게 누르기)',
-      powerLong: '전원 (길게 누르기)'
+      powerLong: '전원 (길게 누르기)',
+      resetConfirm: '리셋 작업을 진행하시겠습니까?',
+      powerConfirm: '전원 작업을 진행하시겠습니까?',
+      okBtn: '네',
+      cancelBtn: '아니오'
     },
     settings: {
       title: '설정',
@@ -164,14 +197,23 @@ const ko = {
         image: '이미지 버전',
         imageTip: 'NanoKVM 시스템 이미지 버전',
         deviceKey: '장치 키',
-        community: '커뮤니티'
+        community: '커뮤니티',
+        hostname: '호스트 이름',
+        hostnameUpdated: '호스트 이름이 업데이트되었습니다. 적용하려면 재부팅하세요.',
+        ipType: {
+          Wired: '유선',
+          Wireless: '무선',
+          Other: '기타'
+        }
       },
       appearance: {
         title: '디자인',
         display: '표시',
         language: '언어',
         menuBar: '메뉴 바',
-        menuBarDesc: '메뉴 바에 아이콘을 표시'
+        menuBarDesc: '메뉴 바에 아이콘을 표시',
+        webTitle: '웹 제목',
+        webTitleDesc: '웹 페이지 제목 사용자 지정'
       },
       device: {
         title: '장치',
@@ -197,10 +239,40 @@ const ko = {
           description: 'SSH 원격 접속 활성화',
           tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
         },
+        tls: {
+          description: 'HTTPS 프로토콜 활성화',
+          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
+        },
+        advanced: '고급 설정',
+        swap: {
+          title: '스왑',
+          disable: '비활성화',
+          description: '스왑 파일 크기 설정',
+          tip: '이 기능을 활성화하면 SD 카드의 수명이 단축될 수 있습니다!'
+        },
+        mouseJiggler: {
+          title: '마우스 흔들기',
+          description: '원격 호스트가 절전 모드로 진입하는 것을 방지',
+          disable: '비활성화',
+          absolute: '절대값 모드',
+          relative: '상대값 모드'
+        },
+        mdns: {
+          description: 'mDNS 검색 서비스 활성화',
+          tip: '사용하지 않는 경우 끄는 것이 좋습니다'
+        },
+        hdmi: {
+          description: 'HDMI/모니터 출력 활성화'
+        },
+        hidOnly: 'HID 전용 모드',
         disk: '가상 디스크',
-        diskDesc: '원격 호스트에서 가상 U-디스크를 마운트합니다.',
+        diskDesc: '원격 호스트에서 가상 USB를 마운트합니다.',
         network: '가상 네트워크',
-        networkDesc: '원격 호스트에서 가상 네트워크 카드를 마운트합니다.'
+        networkDesc: '원격 호스트에서 가상 네트워크 카드를 마운트합니다.',
+        reboot: '재부팅',
+        rebootDesc: 'NanoKVM을 재부팅하시겠습니까?',
+        okBtn: '네',
+        cancelBtn: '아니오'
       },
       tailscale: {
         title: 'Tailscale',
@@ -234,6 +306,7 @@ const ko = {
         deviceIP: '장치 IP',
         account: '계정',
         logout: '로그아웃',
+        logoutDesc: '정말로 로그아웃 하시겠습니까?',
         logout2: '정말로 로그아웃 합니까?',
         uninstall: 'Tailscale 제거',
         okBtn: '네',
@@ -247,19 +320,32 @@ const ko = {
         available: '업데이트가 가능합니다. 정말로 업데이트 할까요?',
         updating: '업데이트 시작. 잠시 기다려주세요...',
         confirm: '확인',
-        cancel: '취소'
+        cancel: '취소',
+        preview: '미리보기 업데이트',
+        previewDesc: '새로운 기능과 개선 사항에 미리 접근하세요',
+        previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!'
       },
       account: {
         title: '계정',
-        webAccount: 'Web 계정',
+        webAccount: '웹 계정',
         password: '비밀번호',
         updateBtn: '업데이트',
-        logoutBtn: '로그아웃'
+        logoutBtn: '로그아웃',
+        logoutDesc: '정말로 로그아웃 하시겠습니까?',
+        okBtn: '네',
+        cancelBtn: '아니오'
       }
     },
     error: {
       title: '문제가 발생했습니다.',
       refresh: '새로고침'
+    },
+    fullscreen: {
+      toggle: '전체 화면 전환'
+    },
+    menu: {
+      collapse: '메뉴 접기',
+      expand: '메뉴 펼치기'
     }
   }
 };

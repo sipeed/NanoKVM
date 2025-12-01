@@ -23,3 +23,10 @@ export function mountImage(file?: string, cdrom?: boolean) {
 export function getCdRom() {
   return http.get('/api/storage/cdrom');
 }
+
+export function deleteImage(file: string) {
+  const data = {
+    file
+  };
+  return http.post('/api/storage/image/delete', data);
+}

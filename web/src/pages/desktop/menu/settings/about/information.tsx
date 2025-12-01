@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Tag, Tooltip } from 'antd';
-import { CircleHelpIcon } from 'lucide-react';
+import { Tooltip } from 'antd';
+import { CircleHelpIcon, EthernetPortIcon, WifiIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
@@ -47,9 +47,15 @@ export const Information = () => {
           {information?.ips && information.ips.length > 0 ? (
             <div className="flex flex-col space-y-1">
               {information.ips.map((ip) => (
-                <div key={ip.addr} className="flex items-center">
-                  <Tag>{t('settings.about.ipType.' + ip.type)}</Tag>
+                <div key={ip.addr} className="flex items-center justify-end space-x-2">
                   <span>{ip.addr}</span>
+                  <div className="size-[16px] text-neutral-500">
+                    {ip.type === 'Wireless' ? (
+                      <WifiIcon size={16} />
+                    ) : (
+                      <EthernetPortIcon size={16} />
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -97,12 +103,6 @@ export const Information = () => {
 
           <span>{information ? information.application : '-'}</span>
         </div>
-
-        {/* device key */}
-        {/*<div className="flex w-full items-center justify-between">*/}
-        {/*  <span>{t('settings.about.deviceKey')}</span>*/}
-        {/*  <span>{information ? information.deviceKey : '-'}</span>*/}
-        {/*</div>*/}
       </div>
     </>
   );

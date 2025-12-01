@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
+import { useSetAtom } from 'jotai';
 import {
   BadgeInfoIcon,
   CircleArrowUpIcon,
@@ -14,6 +15,7 @@ import semver from 'semver';
 
 import * as api from '@/api/application.ts';
 import * as ls from '@/lib/localstorage.ts';
+import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
 
 import { About } from './about';
@@ -31,6 +33,7 @@ export const Settings = () => {
   const [currentTab, setCurrentTab] = useState('about');
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
 
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
@@ -81,11 +84,17 @@ export const Settings = () => {
     }
   }
 
+  function openModal() {
+    setIsModalOpen(true);
+    setIsKeyboardEnable(false);
+  }
+
   function closeModal() {
     if (isLocked) {
       return;
     }
 
+    setIsKeyboardEnable(true);
     setIsModalOpen(false);
     setCurrentTab('about');
   }
@@ -95,7 +104,7 @@ export const Settings = () => {
       <Tooltip title={t('settings.title')} placement="bottom" mouseEnterDelay={0.6}>
         <div
           className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700/80"
-          onClick={() => setIsModalOpen(true)}
+          onClick={openModal}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
             <div className="pt-[3px]">
@@ -107,17 +116,20 @@ export const Settings = () => {
 
       <Modal
         open={isModalOpen}
-        width={900}
+        width={'80%'}
+        centered={true}
         footer={null}
         destroyOnClose={true}
-        styles={{ content: { padding: 0 } }}
         onCancel={closeModal}
+        style={{ maxWidth: '1080px' }}
+        styles={{ content: { padding: 0 } }}
       >
-        <div className="flex min-h-[500px] rounded-lg outline outline-1 outline-neutral-700">
-          <div className="flex flex-col space-y-0.5 rounded-l-lg bg-neutral-800 py-5 sm:w-1/5 sm:px-2">
-            <div className="hidden px-3 text-lg font-bold sm:block">{t('settings.title')}</div>
+        <div className="flex h-[80vh] max-h-[700px] rounded-lg outline outline-1 outline-neutral-700">
+          <div className="flex h-full max-w-[240px] flex-col space-y-0.5 rounded-l-lg bg-neutral-800 px-1 sm:w-1/5 md:px-2">
+            <div className="hidden px-3 pt-10 text-xl sm:block">{t('settings.title')}</div>
 
-            <div className="pt-3" />
+            <div className="h-10 sm:h-5" />
+
             {tabs.map((tab) => (
               <div
                 key={tab.id}
@@ -144,8 +156,8 @@ export const Settings = () => {
             ))}
           </div>
 
-          <div className="flex max-h-[700px] w-full flex-col items-center overflow-y-auto rounded-r-lg bg-neutral-900 px-3 sm:w-4/5">
-            <div className="w-full max-w-[550px] py-10">
+          <div className="flex h-full w-full flex-col items-center overflow-y-auto rounded-r-lg bg-neutral-900 px-3">
+            <div className="w-full max-w-[600px] pb-10 pt-14">
               <>{tabs.find((tab) => tab.id === currentTab)?.component}</>
             </div>
           </div>

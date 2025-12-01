@@ -15,7 +15,6 @@ type Service struct{}
 const (
 	TailscalePath  = "/usr/bin/tailscale"
 	TailscaledPath = "/usr/sbin/tailscaled"
-	ConfigPath     = "etc/sysctl.d/99-tailscale.conf"
 
 	GoMemLimit int64 = 75
 )
@@ -40,6 +39,8 @@ func (s *Service) Install(c *gin.Context) {
 			rsp.ErrRsp(c, -1, "install failed")
 			return
 		}
+
+		_ = NewCli().Start()
 	}
 
 	rsp.OkRsp(c)
@@ -54,7 +55,6 @@ func (s *Service) Uninstall(c *gin.Context) {
 
 	_ = os.Remove(TailscalePath)
 	_ = os.Remove(TailscaledPath)
-	_ = os.Remove(ConfigPath)
 
 	rsp.OkRsp(c)
 	log.Debugf("uninstall tailscale successfully")

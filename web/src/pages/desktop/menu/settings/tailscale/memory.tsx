@@ -27,7 +27,7 @@ export const Memory = () => {
     setIsLoading(true);
 
     const enabled = !isEnabled;
-    const limit = isEnabled ? 0 : 50;
+    const limit = isEnabled ? 0 : 75;
 
     api
       .setMemoryLimit(enabled, limit)
@@ -45,22 +45,20 @@ export const Memory = () => {
   }
 
   return (
-    <>
-      <div className="flex h-[40px] cursor-pointer items-center justify-between space-x-6 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
-        <div className="flex items-center space-x-1">
-          <span>{t('settings.tailscale.memory.title')}</span>
-          <Tooltip
-            title={t('settings.tailscale.memory.tip')}
-            className="cursor-pointer text-neutral-500"
-            placement="top"
-            overlayStyle={{ maxWidth: '350px' }}
-          >
-            <CircleHelpIcon size={15} />
-          </Tooltip>
-        </div>
-
-        <Switch value={isEnabled} size="small" onClick={update} />
+    <div className="flex h-[40px] cursor-pointer items-center justify-between space-x-6 rounded px-2 text-neutral-300 hover:bg-neutral-700/70">
+      <div className="flex items-center space-x-1">
+        <span>{t('settings.tailscale.memory.title')}</span>
+        <Tooltip
+          title={t('settings.tailscale.memory.tip')}
+          className="cursor-pointer text-neutral-500"
+          placement="top"
+          overlayStyle={{ maxWidth: '400px' }}
+        >
+          <CircleHelpIcon size={15} />
+        </Tooltip>
       </div>
-    </>
+
+      <Switch value={isEnabled} size="small" onClick={update} />
+    </div>
   );
 };
