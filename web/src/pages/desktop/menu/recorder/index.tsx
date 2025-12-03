@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { Tooltip } from 'antd';
 import { Video } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const Recorder = () => {
+  const { t } = useTranslation();
   const videoElement = document.getElementById('screen') as HTMLVideoElement;
   const [isRecording, setIsRecording] = useState(false);
   const [elapsedMs, setElapsedMs] = useState(0);
@@ -103,12 +106,20 @@ export const Recorder = () => {
   };
 
   return (
-    <div
-      className="flex h-[28px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700/70"
-      onClick={isRecording ? handleStopRecording : handleStartRecording}
+    <Tooltip
+      title={isRecording ? t('recorder.toggleStop') : t('recorder.toggleStart')}
+      placement="bottom"
+      mouseEnterDelay={0.6}
     >
-      <Video className={isRecording ? 'animate-pulse text-red-400' : ''} size={18} />
-      {isRecording && <span className="p-1 text-xs text-red-300">{formatElapsed(elapsedMs)}</span>}
-    </div>
+      <div
+        className={`flex h-[28px] cursor-pointer items-center justify-center rounded p-1 text-white hover:bg-neutral-700/70 ${'showSaveFilePicker' in window ? '' : 'pointer-events-none'}`}
+        onClick={isRecording ? handleStopRecording : handleStartRecording}
+      >
+        <Video className={isRecording ? 'animate-pulse text-red-400' : ''} size={18} />
+        {isRecording && (
+          <span className="p-1 text-xs text-red-300">{formatElapsed(elapsedMs)}</span>
+        )}
+      </div>
+    </Tooltip>
   );
 };

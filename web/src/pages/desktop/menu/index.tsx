@@ -95,7 +95,7 @@ export const Menu = () => {
               (key) => !menuDisabledItems.includes(key)
             ) && <Divider type="vertical" />}
 
-            {!menuDisabledItems.includes('recorder') && 'showSaveFilePicker' in window && (
+            {!menuDisabledItems.includes('recorder') && (
               <>
                 <Recorder />
                 <Divider type="vertical" />

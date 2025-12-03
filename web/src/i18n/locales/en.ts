@@ -180,7 +180,9 @@ const en = {
       ok: 'Ok'
     },
     recorder: {
-      title: 'Screen Recorder'
+      title: 'Screen Recorder',
+      toggleStart: 'Start Recording (https mode only)',
+      toggleStop: 'Stop Recording'
     },
     download: {
       title: 'Image Downloader',

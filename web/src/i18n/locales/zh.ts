@@ -160,7 +160,9 @@ const zh = {
       ok: '确定'
     },
     recorder: {
-      title: '屏幕录制'
+      title: '屏幕录制',
+      toggleStart: '开始屏幕录制（仅 https 模式）',
+      toggleStop: '停止屏幕录制'
     },
     download: {
       title: '下载镜像',
