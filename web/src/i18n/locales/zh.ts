@@ -159,6 +159,9 @@ const zh = {
       input: '请输入MAC地址',
       ok: '确定'
     },
+    recorder: {
+      title: '屏幕录制'
+    },
     download: {
       title: '下载镜像',
       input: '请输入镜像的下载地址',

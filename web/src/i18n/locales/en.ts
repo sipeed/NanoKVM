@@ -179,6 +179,9 @@ const en = {
       input: 'Please enter the MAC',
       ok: 'Ok'
     },
+    recorder: {
+      title: 'Screen Recorder'
+    },
     download: {
       title: 'Image Downloader',
       input: 'Please enter a remote image URL',
