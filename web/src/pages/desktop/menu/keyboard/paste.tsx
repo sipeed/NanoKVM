@@ -1,4 +1,4 @@
-﻿import { ChangeEvent, useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button, Divider, Input, Modal, Select } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
