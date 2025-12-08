@@ -1,4 +1,5 @@
 const languages = [
+  { key: 'ca', name: 'Català' },
   { key: 'nl', name: 'Nederlands' },
   { key: 'da', name: 'Danish' },
   { key: 'de', name: 'Deutsch' },
@@ -8,7 +9,9 @@ const languages = [
   { key: 'id', name: 'Indonesia' },
   { key: 'it', name: 'Italian' },
   { key: 'pl', name: 'Polski' },
+  { key: 'pt_br', name: 'Português (Brasil)' },
   { key: 'ru', name: 'Русский' },
+  { key: 'tr', name: 'Türkçe'},
   { key: 'ko', name: '한국어' },
   { key: 'zh', name: '简体中文' },
   { key: 'zh_tw', name: '繁體中文' },
@@ -18,7 +21,8 @@ const languages = [
   { key: 'cz', name: 'Česky' },
   { key: 'uk', name: 'Українська' },
   { key: 'nb', name: 'Norsk, bokmål' },
-  { key: 'th', name: 'ภาษาไทย' }
+  { key: 'th', name: 'ภาษาไทย' },
+  { key: 'se', name: "Svenska"}
 ];
 
 languages.sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));

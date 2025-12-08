@@ -27,10 +27,3 @@ export function getPreviewUpdates() {
   return http.get('/api/application/preview');
 }
 
-export function getSettingsDisabledItems() {
-  return http.get('/api/application/settings/disabled-items');
-}
-
-export function getMenuDisableItems(){
-  return http.get("/api/application/menu/disabled-items")
-}

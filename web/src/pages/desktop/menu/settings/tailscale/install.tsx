@@ -36,54 +36,50 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
       });
   }
 
+  if (state === 'failed') {
+    return (
+      <Result
+        status="warning"
+        title={t('settings.tailscale.failed')}
+        subTitle={t('settings.tailscale.retry')}
+        icon={<InfoCircleOutlined />}
+        extra={
+          <Card key="tips" styles={{ body: { padding: 0 } }}>
+            <ul className="list-decimal text-left font-mono text-sm text-neutral-300">
+              <li>
+                {t('settings.tailscale.download')}
+                <a
+                  className="px-1"
+                  href="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
+                  target="_blank"
+                >
+                  {t('settings.tailscale.package')}
+                </a>
+                {t('settings.tailscale.unzip')}
+              </li>
+              <li>{t('settings.tailscale.upTailscale')}</li>
+              <li>{t('settings.tailscale.upTailscaled')}</li>
+              <li>{t('settings.tailscale.refresh')}</li>
+            </ul>
+          </Card>
+        }
+      />
+    );
+  }
+
   return (
-    <>
-      {state !== 'failed' ? (
-        <Result
-          icon={<DownloadOutlined />}
-          subTitle={t('settings.tailscale.notInstall')}
-          extra={
-            <Button
-              key="install"
-              type="primary"
-              size="large"
-              loading={state === 'installing'}
-              onClick={install}
-            >
-              {state === 'installing'
-                ? t('settings.tailscale.installing')
-                : t('settings.tailscale.install')}
-            </Button>
-          }
-        />
-      ) : (
-        <Result
-          status="warning"
-          title={t('settings.tailscale.failed')}
-          subTitle={t('settings.tailscale.retry')}
-          icon={<InfoCircleOutlined />}
-          extra={
-            <Card key="tips" styles={{ body: { padding: 0 } }}>
-              <ul className="list-decimal text-left font-mono text-sm text-neutral-300">
-                <li>
-                  {t('settings.tailscale.download')}
-                  <a
-                    className="px-1"
-                    href="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
-                    target="_blank"
-                  >
-                    {t('settings.tailscale.package')}
-                  </a>
-                  {t('settings.tailscale.unzip')}
-                </li>
-                <li>{t('settings.tailscale.upTailscale')}</li>
-                <li>{t('settings.tailscale.upTailscaled')}</li>
-                <li>{t('settings.tailscale.refresh')}</li>
-              </ul>
-            </Card>
-          }
-        />
-      )}
-    </>
+    <Card>
+      <Result
+        icon={<DownloadOutlined />}
+        subTitle={t('settings.tailscale.notInstall')}
+        extra={
+          <Button key="install" type="primary" loading={state === 'installing'} onClick={install}>
+            {state === 'installing'
+              ? t('settings.tailscale.installing')
+              : t('settings.tailscale.install')}
+          </Button>
+        }
+      />
+    </Card>
   );
 };

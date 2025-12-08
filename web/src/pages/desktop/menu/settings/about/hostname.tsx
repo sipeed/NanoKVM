@@ -1,16 +1,13 @@
 import { useEffect, useState } from 'react';
 import { CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { Button, Input } from 'antd';
-import { useSetAtom } from 'jotai';
 import { ClipboardPenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
 export const Hostname = () => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
 
   const [isLoading, setIsLoading] = useState(false);
   const [hostname, setHostname] = useState('');
@@ -76,8 +73,6 @@ export const Hostname = () => {
           <div className="flex items-center space-x-1">
             <Input
               disabled={isLoading}
-              onFocus={() => setIsKeyboardEnable(false)}
-              onBlur={() => setIsKeyboardEnable(true)}
               style={{ width: 150 }}
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -86,13 +81,13 @@ export const Hostname = () => {
             <Button size="small" icon={<CloseOutlined />} onClick={() => setEditState('')} />
           </div>
         ) : (
-          <div className="flex items-start space-x-2">
+          <div className="flex items-center space-x-2">
             <span>{hostname}</span>
             <div
-              className="cursor-pointer text-blue-500 hover:text-blue-500/60"
+              className="size-[16px] cursor-pointer text-neutral-500 hover:text-blue-500"
               onClick={showInput}
             >
-              <ClipboardPenIcon size={18} />
+              <ClipboardPenIcon size={16} />
             </div>
           </div>
         )}

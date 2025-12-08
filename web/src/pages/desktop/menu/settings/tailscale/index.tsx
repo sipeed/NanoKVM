@@ -9,6 +9,7 @@ import { Device } from './device.tsx';
 import { Header } from './header.tsx';
 import { Install } from './install.tsx';
 import { Login } from './login.tsx';
+import { Run } from './run.tsx';
 import type { Status } from './types.ts';
 
 type TailscaleProps = {
@@ -61,9 +62,9 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
             <Install setIsLocked={setIsLocked} onSuccess={getStatus} />
           )}
 
-          {(status?.state === 'notRunning' || status?.state === 'notLogin') && (
-            <Login onSuccess={getStatus} />
-          )}
+          {status?.state === 'notRunning' && <Run onSuccess={getStatus} />}
+
+          {status?.state === 'notLogin' && <Login onSuccess={getStatus} />}
 
           {(status?.state === 'stopped' || status?.state === 'running') && (
             <Device status={status} onLogout={getStatus} />

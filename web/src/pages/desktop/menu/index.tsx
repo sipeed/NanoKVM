@@ -20,7 +20,6 @@ import { Script } from './script';
 import { Settings } from './settings';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
-import { getMenuDisableItems } from '@/api/application.ts';
 
 export const Menu = () => {
   const { t } = useTranslation();
@@ -35,13 +34,7 @@ export const Menu = () => {
     // disabled menu items
     const items = getMenuDisabledItems();
     setMenuDisabledItems(items);
-    getMenuDisableItems().then(res=>{
-      let disableItems = new Set<string>(items)
-      if(res.code === 0){
-        (res.data as string[]).forEach((ele)=>disableItems.add(ele))
-      }
-      setMenuDisabledItems([...disableItems.values()])
-    })
+
     // react-draggable bounds
     const handleResize = () => {
       if (!nodeRef.current) return;

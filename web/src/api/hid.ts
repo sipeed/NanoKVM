@@ -1,8 +1,8 @@
 import { http } from '@/lib/http.ts';
 
 // paste
-export function paste(content: string) {
-  return http.post('/api/hid/paste', { content });
+export function paste(content: string, langue: string) {
+  return http.post('/api/hid/paste', { content, langue });
 }
 
 // reset hid

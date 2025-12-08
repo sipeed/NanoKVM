@@ -51,13 +51,10 @@ export const Tips = () => {
   return (
     <>
       <div
-        className="flex cursor-pointer items-center space-x-1 text-neutral-400 hover:text-blue-400"
+        className="flex cursor-pointer items-center space-x-1 text-neutral-500 hover:text-blue-500"
         onClick={() => setIsModalOpen(true)}
       >
         <CircleHelpIcon size={16} />
-        {/*<span className="text-sm text-neutral-500 hover:text-neutral-400">*/}
-        {/*  {t('image.tips.title')}*/}
-        {/*</span>*/}
       </div>
 
       <Modal

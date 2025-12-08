@@ -73,7 +73,13 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: 'Read from Clipboard',
+      clipboardPermissionDenied:
+        'Clipboard permission denied. Please allow clipboard access in your browser.',
+      clipboardReadError: 'Failed to read clipboard',
+      dropdownEnglish: 'English',
+      dropdownGerman: 'German'
     },
     mouse: {
       title: 'Mouse',
@@ -106,11 +112,18 @@ const en = {
       title: 'Images',
       loading: 'Loading...',
       empty: 'Nothing Found',
-      cdrom: 'Mount the image in CD-ROM mode',
-      mountFailed: 'Mount Failed',
+      mountMode: 'Mount mode',
+      mountFailed: 'Mount failed',
       mountDesc:
-        "In some systems, it's necessary to eject the virtual disk on the remote host before mounting the image.",
+        'On some systems, you need to eject the virtual disk from the remote host before mounting the image.',
+      unmountFailed: 'Unmount failed',
+      unmountDesc:
+        'On some systems, you need to manually eject from the remote host before unmounting the image.',
       refresh: 'Refresh the image list',
+      attention: 'Attention',
+      deleteConfirm: 'Are you sure you want to delete this image?',
+      okBtn: 'Yes',
+      cancelBtn: 'No',
       tips: {
         title: 'How to upload',
         usb1: 'Connect the NanoKVM to your computer via USB.',
@@ -266,11 +279,15 @@ const en = {
         },
         hidOnly: 'HID-Only Mode',
         disk: 'Virtual Disk',
-        diskDesc: 'Mount virtual U-disk on the remote host',
+        diskDesc: 'Mount SD card on the remote host',
+        media: "Virtual Image",
+        mediaDesc: 'Attach virtual image device to the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+        usb: 'USB Interface',
+        usbDesc: 'Enable USB to host interface',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
@@ -278,8 +295,11 @@ const en = {
         title: 'Tailscale',
         memory: {
           title: 'Memory optimization',
-          tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. It's recommended to set to 75MB if using Tailscale. A Tailscale restart is required for the change to take effect.",
-          disable: 'Disable'
+          tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. A Tailscale restart is required for the change to take effect.'
+        },
+        swap: {
+          title: 'Swap memory',
+          tip: 'If issues persist after enabling memory optimization, try enabling swap memory. This sets the swap file size to 256MB by default, which can be adjusted in "Settings > Device".'
         },
         restart: 'Restart Tailscale?',
         stop: 'Stop Tailscale?',
@@ -296,6 +316,8 @@ const en = {
         upTailscale: 'Upload tailscale to NanoKVM directory /usr/bin/',
         upTailscaled: 'Upload tailscaled to NanoKVM directory /usr/sbin/',
         refresh: 'Refresh current page',
+        notRunning: 'Tailscale is not running. Please start it to continue.',
+        run: 'Start',
         notLogin:
           'The device has not been bound yet. Please login and bind this device to your account.',
         urlPeriod: 'This url is valid for 10 minutes',
@@ -308,6 +330,7 @@ const en = {
         logout: 'Logout',
         logoutDesc: 'Are you sure you want to logout?',
         uninstall: 'Uninstall Tailscale',
+        uninstallDesc: 'Are you sure you want to uninstall Tailscale?',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },

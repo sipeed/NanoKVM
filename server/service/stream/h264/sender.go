@@ -25,7 +25,7 @@ func send() {
 		}
 
 		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
-		if result < 0 {
+		if result < 0 || len(data) == 0 {
 			continue
 		}
 
@@ -39,8 +39,6 @@ func send() {
 				log.Errorf("failed to send h264 data: %s", err)
 			}
 		}
-
-		log.Debugf("send h264 data: %d", len(data))
 
 		if screen.FPS != fps {
 			fps = screen.FPS
