@@ -1,20 +1,29 @@
 import { useEffect, useRef } from 'react';
 import clsx from 'clsx';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse';
-import { resolutionAtom } from '@/jotai/screen.ts';
+import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
 
 import DirectWorker from './direct.worker.ts?worker';
 
 export const H264Direct = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
+  const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const workerRef = useRef<Worker | null>(null);
+
+  useEffect(() => {
+    const scale = storage.getVideoScale()
+    if (scale) {
+      setVideoScale(scale)
+    }
+  }, [setVideoScale])
 
   useEffect(() => {
     if (!window.VideoDecoder) {
@@ -65,11 +74,13 @@ export const H264Direct = () => {
         id="screen"
         ref={canvasRef}
         className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
-        style={
-          resolution?.width
+        style={{
+          transform: `scale(${videoScale})`,
+          transformOrigin: 'center',
+          ...(resolution?.width
             ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-            : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' }
-        }
+            : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' }),
+        }}
       ></canvas>
     </div>
   );
