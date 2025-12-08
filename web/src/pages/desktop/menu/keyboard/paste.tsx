@@ -1,6 +1,4 @@
-import { ChangeEvent, useRef, useState } from 'react';
-import { Button, Input, Modal, type InputRef } from 'antd';
-import { ChangeEvent, useEffect, useRef, useState } from 'react';
+﻿import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Button, Divider, Input, Modal, Select } from 'antd';
 import type { InputRef } from 'antd';
 import clsx from 'clsx';
@@ -43,6 +41,27 @@ export const Paste = () => {
     setInputValue(value);
   }
 
+  async function readFromClipboard() {
+    if (isReadingClipboard) return;
+    setIsReadingClipboard(true);
+
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text) {
+        return;
+      }
+      setInputValue((value) => value + text);
+    } catch (error) {
+      if (error instanceof Error && error.name === 'NotAllowedError') {
+        setErrMsg(t('keyboard.clipboardPermissionDenied'));
+        return;
+      }
+      setErrMsg(t('keyboard.clipboardReadError'));
+    } finally {
+      setIsReadingClipboard(false);
+    }
+  }
+  
   // Extended RU → EN translation including punctuation (applies only if Cyrillic is present)
   function translateRuToEnWithPunctuation(value: string): string {
     const hasCyrillic = /[А-Яа-яЁё]/.test(value);
@@ -79,25 +98,6 @@ export const Paste = () => {
       }
       return ch;
     }).join('');
-  async function readFromClipboard() {
-    if (isReadingClipboard) return;
-    setIsReadingClipboard(true);
-
-    try {
-      const text = await navigator.clipboard.readText();
-      if (!text) {
-        return;
-      }
-      setInputValue((value) => value + text);
-    } catch (error) {
-      if (error instanceof Error && error.name === 'NotAllowedError') {
-        setErrMsg(t('keyboard.clipboardPermissionDenied'));
-        return;
-      }
-      setErrMsg(t('keyboard.clipboardReadError'));
-    } finally {
-      setIsReadingClipboard(false);
-    }
   }
 
   function submit() {
