@@ -28,7 +28,8 @@ export const Paste = () => {
 
   const languages = [
     { value: 'en', label: t('keyboard.dropdownEnglish') },
-    { value: 'de', label: t('keyboard.dropdownGerman') }
+    { value: 'de', label: t('keyboard.dropdownGerman') },
+    { value: 'ru', label: t('keyboard.dropdownRussian') }
   ];
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export const Paste = () => {
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     const value = e.target.value;
-    setStatus(isAsciiOrRU(value) ? '' : 'error');
+    setStatus(isValidForLanguage(value, langue) ? '' : 'error');
     setInputValue(value);
   }
 
@@ -62,10 +63,8 @@ export const Paste = () => {
     }
   }
   
-  // Extended RU → EN translation including punctuation (applies only if Cyrillic is present)
+  // Extended RU → EN translation including punctuation
   function translateRuToEnWithPunctuation(value: string): string {
-    const hasCyrillic = /[А-Яа-яЁё]/.test(value);
-
     const letterMap: Record<string, string> = {
       'ё': '`',
       'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u', 'ш': 'i',
@@ -93,7 +92,7 @@ export const Paste = () => {
         const translated = letterMap[lower];
         return ch === lower ? translated : translated.toUpperCase();
       }
-      if (hasCyrillic && punctuationMap[ch]) {
+      if (punctuationMap[ch]) {
         return punctuationMap[ch];
       }
       return ch;
@@ -104,9 +103,9 @@ export const Paste = () => {
     if (isLoading || !inputValue) return;
     setIsLoading(true);
 
-    const translated = translateRuToEnWithPunctuation(inputValue);
+    const textToSend = langue === 'ru' ? translateRuToEnWithPunctuation(inputValue) : inputValue;
 
-    paste(translated, langue)
+    paste(textToSend, langue)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -131,20 +130,30 @@ export const Paste = () => {
     setIsKeyboardEnable(!open);
   }
 
-  function isAsciiOrRU(value: string) {
-    // Allow ASCII and Russian Cyrillic letters
+  function isValidForLanguage(value: string, selectedLangue: string) {
+    const isRussian = selectedLangue === 'ru';
+    
     for (const ch of value) {
       const code = ch.codePointAt(0) ?? 0;
-      if (code <= 0x7F) continue; // ASCII
-      if (
-        (code >= 0x0410 && code <= 0x042F) || // (А-Я)
-        (code >= 0x0430 && code <= 0x044F) || // (а-я)
-        code === 0x0401 || // (Ё)
-        code === 0x0451    // (ё)
-      ) {
-        continue;
+      
+      if (isRussian) {
+        // For Russian language, allow Cyrillic letters and special characters
+        // that can be typed on Russian keyboard (but not English letters)
+        if (
+          (code >= 0x0410 && code <= 0x042F) || // (А-Я)
+          (code >= 0x0430 && code <= 0x044F) || // (а-я)
+          code === 0x0401 || // (Ё)
+          code === 0x0451 || // (ё)
+          (code >= 0x20 && code <= 0x7E && !(code >= 0x41 && code <= 0x5A) && !(code >= 0x61 && code <= 0x7A)) // Special chars, digits, space, but not English letters
+        ) {
+          continue;
+        }
+        return false;
+      } else {
+        // For English/German, only allow ASCII
+        if (code <= 0x7F) continue;
+        return false;
       }
-      return false;
     }
     return true;
   }
