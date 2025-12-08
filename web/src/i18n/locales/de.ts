@@ -68,11 +68,13 @@ const de = {
     keyboard: {
       title: 'Tastatur',
       paste: 'Einfügen',
-      tips: 'Nur Standard-Tastaturbuchstaben und Symbole werden unterstützt',
+      tips: 'Server Tastaturbelegung',
       placeholder: 'Bitte eingeben',
       submit: 'Senden',
       virtual: 'Tastatur',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      dropdownEnglish: 'Englisch',
+      dropdownGerman: 'Deutsch'
     },
     mouse: {
       title: 'Maus',

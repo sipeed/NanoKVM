@@ -16,3 +16,7 @@ type GetMountedImageRsp struct {
 type GetCdRomRsp struct {
 	Cdrom int64 `json:"cdrom"`
 }
+
+type DeleteImageReq struct {
+	File string `json:"file" validate:"required"`
+}

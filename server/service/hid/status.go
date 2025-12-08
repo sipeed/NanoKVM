@@ -3,6 +3,7 @@ package hid
 import (
 	"NanoKVM-Server/proto"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -16,11 +17,12 @@ import (
 const (
 	ModeNormal  = "normal"
 	ModeHidOnly = "hid-only"
+	ModeFlag    = "/sys/kernel/config/usb_gadget/g0/bcdDevice"
 
-	ModeFlag          = "/sys/kernel/config/usb_gadget/g0/bcdDevice"
-	NormalModeScript  = "/kvmapp/system/init.d/S03usbdev"
-	HidOnlyModeScript = "/kvmapp/system/init.d/S03usbhid"
-	TargetModeScript  = "/etc/init.d/S03usbdev"
+	ModeNormalScript  = "/kvmapp/system/init.d/S03usbdev"
+	ModeHidOnlyScript = "/kvmapp/system/init.d/S03usbhid"
+
+	USBDevScript = "/etc/init.d/S03usbdev"
 )
 
 var modeMap = map[string]string{
@@ -61,9 +63,17 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	srcScript := NormalModeScript
+	h := GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
+
+	srcScript := ModeNormalScript
 	if req.Mode == ModeHidOnly {
-		srcScript = HidOnlyModeScript
+		srcScript = ModeHidOnlyScript
 	}
 
 	if err := copyModeFile(srcScript); err != nil {
@@ -76,6 +86,29 @@ func (s *Service) SetHidMode(c *gin.Context) {
 	log.Println("reboot system...")
 	time.Sleep(500 * time.Millisecond)
 	_ = exec.Command("reboot").Run()
+}
+
+func (s *Service) ResetHid(c *gin.Context) {
+	var rsp proto.Response
+
+	h := GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
+
+	command := fmt.Sprintf("%s restart_phy", USBDevScript)
+	err := exec.Command("sh", "-c", command).Run()
+	if err != nil {
+		log.Errorf("failed to reset hid: %v", err)
+		rsp.ErrRsp(c, -1, "failed to reset hid")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("reset hid success")
 }
 
 func copyModeFile(srcScript string) error {
@@ -98,7 +131,7 @@ func copyModeFile(srcScript string) error {
 	// create and copy to temporary file
 	tmpFile, err := os.CreateTemp("/etc/init.d/", ".S03usbdev-")
 	if err != nil {
-		log.Errorf("failed to create temp %s: %s", TargetModeScript, err)
+		log.Errorf("failed to create temp %s: %s", USBDevScript, err)
 		return err
 	}
 	tmpPath := tmpFile.Name()
@@ -131,12 +164,12 @@ func copyModeFile(srcScript string) error {
 	}
 
 	// replace the target file with the temporary file
-	if err := os.Rename(tmpPath, TargetModeScript); err != nil {
+	if err := os.Rename(tmpPath, USBDevScript); err != nil {
 		log.Errorf("failed to rename %s: %s", tmpPath, err)
 		return err
 	}
 
-	log.Debugf("copy %s to %s successful", srcScript, TargetModeScript)
+	log.Debugf("copy %s to %s successful", srcScript, USBDevScript)
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -21,8 +22,28 @@ const (
 	maxTries = 3
 )
 
+var (
+	updateMutex sync.Mutex
+	isUpdating  bool
+)
+
 func (s *Service) Update(c *gin.Context) {
 	var rsp proto.Response
+
+	updateMutex.Lock()
+	if isUpdating {
+		updateMutex.Unlock()
+		rsp.ErrRsp(c, -1, "update already in progress")
+		return
+	}
+	isUpdating = true
+	updateMutex.Unlock()
+
+	defer func() {
+		updateMutex.Lock()
+		isUpdating = false
+		updateMutex.Unlock()
+	}()
 
 	if err := update(); err != nil {
 		rsp.ErrRsp(c, -1, fmt.Sprintf("update failed: %s", err))

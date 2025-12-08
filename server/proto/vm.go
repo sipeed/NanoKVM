@@ -57,6 +57,7 @@ type DeleteScriptReq struct {
 
 type GetVirtualDeviceRsp struct {
 	Network bool `json:"network"`
+	Media   bool `json:"media"`
 	Disk    bool `json:"disk"`
 }
 
@@ -88,6 +89,10 @@ type GetOLEDRsp struct {
 }
 
 type GetGetHdmiStateRsp struct {
+	Enabled bool `json:"enabled"`
+}
+
+type GetUsbStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 

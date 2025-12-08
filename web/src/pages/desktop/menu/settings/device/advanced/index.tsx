@@ -9,13 +9,12 @@ const children = (
   </div>
 );
 
-export const Advanced = ({disable = false}:{disable?:boolean}) => {
+export const Advanced = () => {
   const { t } = useTranslation();
 
   return (
     <Collapse
       ghost
-      collapsible={disable? 'disabled': 'header'}
       expandIconPosition="end"
       items={[{ key: 'advanced', label: t('settings.device.advanced'), children }]}
     />
