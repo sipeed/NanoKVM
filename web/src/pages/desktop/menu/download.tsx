@@ -21,6 +21,7 @@ export const DownloadImage = () => {
   const [popoverKey, setPopoverKey] = useState(0);
 
   const inputRef = useRef<InputRef>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const intervalId = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -110,6 +111,22 @@ export const DownloadImage = () => {
       });
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setSelectedFile(e.target.files?.[0] ?? null);
+  }
+
+  function upload(file: File | null) {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/api/download/file", {
+      method: "POST",
+      body: formData,
+    });
+  }
+
   const content = (
     <div key={popoverKey} className="min-w-[300px]">
       <div className="flex items-center justify-between px-1">
@@ -122,21 +139,63 @@ export const DownloadImage = () => {
         <div className="text-red-500">{t('download.disabled')}</div>
       ) : (
         <>
-          <div className="pb-1 text-neutral-500">{t('download.input')}</div>
-          <div className="flex items-center space-x-1">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={handleChange}
-              disabled={status === 'in_progress'}
-            />
-            <Button
-              type="primary"
-              onClick={() => download(input)}
-              disabled={status === 'in_progress'}
-            >
-              {t('download.ok')}
-            </Button>
+          <div>
+            <div className="pb-1 text-neutral-500">{t('download.input')}</div>
+            <div className="flex items-center space-x-1">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={handleChange}
+                disabled={status === 'in_progress'}
+              />
+              <Button
+                type="primary"
+                onClick={() => download(input)}
+                disabled={status === 'in_progress'}
+              >
+                {t('download.ok')}
+              </Button>
+            </div>
+          </div>
+          <div>
+            <div className="pb-1 text-neutral-500">{t('upload.input')}</div>
+            <div className="flex items-center space-x-1">
+              <div
+                  className={clsx(
+                    "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl cursor-pointer transition css-9118ya ant-input-outlined",
+                    "hover:bg-neutral-500"
+                  )}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0] ?? null;
+                    setSelectedFile(file);
+                  }}
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                >
+                <span className="text-neutral-100 text-sm">
+                  {selectedFile ? selectedFile.name : "Datei hier ablegen oder klicken zum Auswählen"}
+                </span>
+
+                <Input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  disabled={status === 'in_progress'}
+                  className="hidden"
+                />
+              </div>
+              <Button
+                type="primary"
+                className="h-10 border-2"
+                onClick={() => upload(selectedFile)}
+                disabled={status === 'in_progress' || !selectedFile}
+              >
+                {t('upload.ok')}
+              </Button>
+            </div>
           </div>
         </>
       )}
