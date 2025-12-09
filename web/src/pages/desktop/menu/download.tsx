@@ -22,6 +22,7 @@ export const DownloadImage = () => {
 
   const inputRef = useRef<InputRef>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const intervalId = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -121,6 +122,8 @@ export const DownloadImage = () => {
     const formData = new FormData();
     formData.append("file", file);
 
+    console.log(file);
+
     fetch("/api/download/file", {
       method: "POST",
       body: formData,
@@ -163,15 +166,23 @@ export const DownloadImage = () => {
               <div
                   className={clsx(
                     "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl cursor-pointer transition css-9118ya ant-input-outlined",
-                    "hover:bg-neutral-500"
+                    "hover:bg-neutral-500",
+                    isDragging ? "bg-neutral-500" : ""
                   )}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                  }}
+                  style={isDragging ? { borderColor: "#1668dc" } : {}}
                   onDrop={(e) => {
                     e.preventDefault();
+                    setIsDragging(false);
                     const file = e.dataTransfer.files?.[0] ?? null;
                     setSelectedFile(file);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true); // Datei wird über den Bereich gezogen
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false); // Maus verlässt Bereich
                   }}
                   onClick={() => document.getElementById("file-upload")?.click()}
                 >
