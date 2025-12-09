@@ -183,7 +183,8 @@ const en = {
       title: 'Image Downloader',
       input: 'Please enter a remote image URL',
       ok: 'Ok',
-      disabled: '/data partition is RO, so we cannot download the image'
+      disabled: '/data partition is RO, so we cannot download the image',
+      uploadbox: "Drop file here or click to select"
     },
     power: {
       title: 'Power',
