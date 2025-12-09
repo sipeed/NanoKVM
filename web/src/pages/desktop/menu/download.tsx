@@ -175,8 +175,8 @@ export const DownloadImage = () => {
                   }}
                   onClick={() => document.getElementById("file-upload")?.click()}
                 >
-                <span className="text-neutral-100 text-sm">
-                  {selectedFile ? selectedFile.name : "Datei hier ablegen oder klicken zum Auswählen"}
+                <span className="text-neutral-100 text-sm p-1">
+                  {selectedFile ? selectedFile.name : t('download.uploadbox')}
                 </span>
 
                 <Input
@@ -193,7 +193,7 @@ export const DownloadImage = () => {
                 onClick={() => upload(selectedFile)}
                 disabled={status === 'in_progress' || !selectedFile}
               >
-                {t('upload.ok')}
+                {t('download.ok')}
               </Button>
             </div>
           </div>
