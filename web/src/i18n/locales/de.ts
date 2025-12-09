@@ -168,7 +168,8 @@ const de = {
       title: 'Systemabbild Downloader',
       input: 'Bitte geben Sie die URL für das Remote-Systemabbild ein',
       ok: 'Ok',
-      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden'
+      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
+      uploadbox: "Datei hier ablegen oder klicken zum Auswählen"
     },
     power: {
       title: 'Power',
