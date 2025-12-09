@@ -121,8 +121,6 @@ export const DownloadImage = () => {
     const formData = new FormData();
     formData.append("file", file);
 
-    console.log(file);
-
     fetch("/api/download/file", {
       method: "POST",
       body: formData,
