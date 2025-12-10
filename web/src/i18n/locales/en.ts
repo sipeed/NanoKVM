@@ -184,7 +184,8 @@ const en = {
       input: 'Please enter a remote image URL',
       ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image',
-      uploadbox: "Drop file here or click to select"
+      uploadbox: "Drop file here or click to select",
+      inputfile: "Please enter the image File"
     },
     power: {
       title: 'Power',
