@@ -182,7 +182,7 @@ export const DownloadImage = () => {
             </div>
           </div>
           <div>
-            <div className="pb-1 text-neutral-500">{t('download.input')}</div>
+            <div className="pb-1 text-neutral-500">{t('download.inputfile')}</div>
             <div className="flex items-center space-x-1">
               <div
                   className={clsx(
