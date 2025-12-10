@@ -93,6 +93,144 @@ func (s *Service) StatusImage(c *gin.Context) {
 	})
 }
 
+func (s *Service) DownloadImageFile(c *gin.Context) {
+	var rsp proto.Response
+
+	log.Debug("DownloadImage")
+
+	// Set a sentinel file to mark that there is a download in progress
+	// This is to prevent multiple downloads at the same time
+	if _, err := os.Stat(sentinelPath); err == nil {
+		log.Debug("Download in progress")
+		rsp.ErrRsp(c, -1, "download in progress")
+		return
+	}
+
+	// Create the sentinel file
+	err := os.WriteFile(sentinelPath, []byte("start"), 0644)
+	if err != nil {
+		log.Error("Failed to create sentinel file")
+		rsp.ErrRsp(c, -1, "failed to create sentinel file")
+		return
+	}
+
+    // Multipart Reader direkt nutzen (keine FormFile!)
+    reader, err := c.Request.MultipartReader()
+    if err != nil {
+		rsp.OkRspWithData(c, &proto.StatusImageRsp{
+			Status:     "invalid multipart data",
+			File:       "",
+			Percentage: "",
+		})
+		defer os.Remove(sentinelPath)
+        return
+    }
+
+	
+	var lw *loggingWriter
+
+    for {
+        part, err := reader.NextPart()
+        if err == io.EOF {
+            break
+        }
+        if err != nil {
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "failed to read part",
+				File:       "",
+				Percentage: "",
+			})
+			defer os.Remove(sentinelPath)
+            return
+        }
+
+        if part.FormName() != "file" {
+            continue
+        }
+
+        filename := part.FileName()
+        if filename == "" {
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "no filename",
+				File:       "",
+				Percentage: "",
+			})
+			defer os.Remove(sentinelPath)
+            return
+        }
+
+		data, err := os.ReadFile(sentinelPath)
+		if err != nil {
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "error",
+				File:       "",
+				Percentage: "",
+			})
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+        outPath := "/data/" + filename
+        out, err := os.Create(outPath)
+        if err != nil {
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "cannot create file",
+				File:       "",
+				Percentage: "",
+			})
+			defer os.Remove(sentinelPath)
+            return
+        }
+        defer out.Close()
+
+		if strings.Contains(string(data), "start") {
+			err = os.WriteFile(sentinelPath, []byte(filename), 0644)
+			if err != nil {
+				log.Error("Failed to create sentinel file")
+				rsp.ErrRsp(c, -1, "failed to create sentinel file")
+				defer os.Remove(sentinelPath)
+				return
+			}
+			
+			lw = &loggingWriter{writer: out, totalSize: c.Request.ContentLength}
+			lw.startTicker()
+		} else {
+			if !strings.Contains(string(data), filename) {
+				rsp.OkRspWithData(c, &proto.StatusImageRsp{
+					Status:     "error",
+					File:       "",
+					Percentage: "",
+				})
+				defer os.Remove(sentinelPath)
+				return
+			}
+		}
+
+        // Direkt streamen → kein RAM-Bedarf außer kleinem Buffer
+        _, err = io.Copy(lw, part)
+        if err != nil {
+			rsp.OkRspWithData(c, &proto.StatusImageRsp{
+				Status:     "write failed",
+				File:       "",
+				Percentage: "",
+			})
+			defer os.Remove(sentinelPath)
+            return
+        }
+    }
+	lw.stopTicker()
+
+	rsp.OkRspWithData(c, &proto.StatusImageRsp{
+		Status:     "idle",
+		File:       "",
+		Percentage: "",
+	})
+	
+	
+	defer os.Remove(sentinelPath)
+    return
+}
+
 func (s *Service) DownloadImage(c *gin.Context) {
 	var req proto.MountImageReq
 	var rsp proto.Response
