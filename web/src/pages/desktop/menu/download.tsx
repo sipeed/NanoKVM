@@ -114,20 +114,41 @@ export const DownloadImage = () => {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     setSelectedFile(e.target.files?.[0] ?? null);
+    clearInterval(intervalId.current);
+    intervalId.current = undefined;
   }
 
   function upload(file: File | null) {
     if (!file) return;
 
+    setStatus('in_progress');
+    setLog('Downloading: ' + file.name);
+
     const formData = new FormData();
     formData.append("file", file);
-
-    console.log(file);
 
     fetch("/api/download/file", {
       method: "POST",
       body: formData,
-    });
+    }).catch(() => {
+        clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
+        setStatus('failed');
+        setLog('Failed');
+      }).then(() => {
+        clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
+        setStatus('idle');
+        setLog('');
+      });
+
+    console.log(intervalId.current);
+    // Start the interval to check the download status
+    if (!intervalId.current) {
+      getDownloadStatus();
+      setTimeout(() => {
+        intervalId.current = setInterval(getDownloadStatus, 2500);
+      }, 2500);
+    }
+    
   }
 
   const content = (
@@ -165,26 +186,36 @@ export const DownloadImage = () => {
             <div className="flex items-center space-x-1">
               <div
                   className={clsx(
-                    "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl cursor-pointer transition css-9118ya ant-input-outlined",
-                    "hover:bg-neutral-500",
-                    isDragging ? "bg-neutral-500" : ""
+                    "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl transition css-9118ya ant-input-outlined",
+                    isDragging ? "bg-neutral-500" : "",
+                    status === "in_progress" ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer hover:bg-neutral-500"
                   )}
-                  style={isDragging ? { borderColor: "#1668dc" } : {}}
+                  style={{
+                    ...(isDragging  ? { borderColor: "#1668dc" } : {}),
+                    ...(status === "in_progress" ? { backgroundColor: "rgb(255 255 255 / 16%)" } : {}),
+                    ...(status === "in_progress" ? { borderColor: "rgb(99 99 99)" } : {}),
+                  }}
                   onDrop={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
                     e.preventDefault();
                     setIsDragging(false);
                     const file = e.dataTransfer.files?.[0] ?? null;
                     setSelectedFile(file);
                   }}
                   onDragOver={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
                     e.preventDefault();
                     setIsDragging(true); // Datei wird über den Bereich gezogen
                   }}
                   onDragLeave={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
                     e.preventDefault();
                     setIsDragging(false); // Maus verlässt Bereich
                   }}
-                  onClick={() => document.getElementById("file-upload")?.click()}
+                  onClick={() => {
+                    if (status === "in_progress") return; // deaktiviert
+                    document.getElementById("file-upload")?.click()
+                  }}
                 >
                 <span className="text-neutral-100 text-sm p-1">
                   {selectedFile ? selectedFile.name : t('download.uploadbox')}
