@@ -113,13 +113,27 @@ export const DownloadImage = () => {
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setSelectedFile(e.target.files?.[0] ?? null);
+    const file = e.target.files?.[0] ?? null;
+    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+      setStatus('failed');
+      setLog(t('download.NoISO'));
+      return;
+    }
+    setStatus('idle');
+    setLog('');
+    setSelectedFile(file);
     clearInterval(intervalId.current);
     intervalId.current = undefined;
   }
 
   function upload(file: File | null) {
     if (!file) return;
+
+    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+      setStatus('failed');
+      setLog(t('download.NoISO'));
+      return;
+    }
 
     setStatus('in_progress');
     setLog('Downloading: ' + file.name);
@@ -140,7 +154,6 @@ export const DownloadImage = () => {
         setLog('');
       });
 
-    console.log(intervalId.current);
     // Start the interval to check the download status
     if (!intervalId.current) {
       getDownloadStatus();
@@ -200,6 +213,13 @@ export const DownloadImage = () => {
                     e.preventDefault();
                     setIsDragging(false);
                     const file = e.dataTransfer.files?.[0] ?? null;
+                    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+                      setStatus('failed');
+                      setLog(t('download.NoISO'));
+                      return;
+                    }
+                    setStatus('idle');
+                    setLog('');
                     setSelectedFile(file);
                   }}
                   onDragOver={(e) => {
