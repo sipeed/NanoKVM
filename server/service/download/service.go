@@ -117,11 +117,8 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
     // Multipart Reader direkt nutzen (keine FormFile!)
     reader, err := c.Request.MultipartReader()
     if err != nil {
-		rsp.OkRspWithData(c, &proto.StatusImageRsp{
-			Status:     "invalid multipart data",
-			File:       "",
-			Percentage: "",
-		})
+		log.Error("invalid multipart data")
+		rsp.ErrRsp(c, -1, "invalid multipart data")
 		defer os.Remove(sentinelPath)
         return
     }
@@ -135,11 +132,9 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
             break
         }
         if err != nil {
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "failed to read part",
-				File:       "",
-				Percentage: "",
-			})
+			log.Error("failed to read part")
+			rsp.ErrRsp(c, -1, "failed to read part")
+			lw.stopTicker()
 			defer os.Remove(sentinelPath)
             return
         }
@@ -150,22 +145,18 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 
         filename := part.FileName()
         if filename == "" {
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "no filename",
-				File:       "",
-				Percentage: "",
-			})
+			log.Error("no filename")
+			rsp.ErrRsp(c, -1, "no filename")
+			lw.stopTicker()
 			defer os.Remove(sentinelPath)
             return
         }
 
 		data, err := os.ReadFile(sentinelPath)
 		if err != nil {
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "error",
-				File:       "",
-				Percentage: "",
-			})
+			log.Error("Read failed")
+			rsp.ErrRsp(c, -1, "Read failed")
+			lw.stopTicker()
 			defer os.Remove(sentinelPath)
 			return
 		}
@@ -173,11 +164,9 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
         outPath := "/data/" + filename
         out, err := os.Create(outPath)
         if err != nil {
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "cannot create file",
-				File:       "",
-				Percentage: "",
-			})
+			log.Error("cannot create file")
+			rsp.ErrRsp(c, -1, "cannot create file")
+			lw.stopTicker()
 			defer os.Remove(sentinelPath)
             return
         }
@@ -188,6 +177,8 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 			if err != nil {
 				log.Error("Failed to create sentinel file")
 				rsp.ErrRsp(c, -1, "failed to create sentinel file")
+				lw.stopTicker()
+				defer os.Remove(outPath)
 				defer os.Remove(sentinelPath)
 				return
 			}
@@ -196,11 +187,10 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 			lw.startTicker()
 		} else {
 			if !strings.Contains(string(data), filename) {
-				rsp.OkRspWithData(c, &proto.StatusImageRsp{
-					Status:     "error",
-					File:       "",
-					Percentage: "",
-				})
+				log.Error("failed")
+				rsp.ErrRsp(c, -1, "failed")
+				lw.stopTicker()
+				defer os.Remove(outPath)
 				defer os.Remove(sentinelPath)
 				return
 			}
@@ -209,11 +199,10 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
         // Direkt streamen → kein RAM-Bedarf außer kleinem Buffer
         _, err = io.Copy(lw, part)
         if err != nil {
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "write failed",
-				File:       "",
-				Percentage: "",
-			})
+			log.Error("write failed")
+			rsp.ErrRsp(c, -1, "write failed")
+			lw.stopTicker()
+			defer os.Remove(outPath)
 			defer os.Remove(sentinelPath)
             return
         }
@@ -225,7 +214,6 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		File:       "",
 		Percentage: "",
 	})
-	
 	
 	defer os.Remove(sentinelPath)
     return
