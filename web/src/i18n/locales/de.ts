@@ -170,7 +170,8 @@ const de = {
       ok: 'Ok',
       disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
       uploadbox: "Datei hier ablegen oder klicken zum Auswählen",
-      inputfile: "Bitte geben Sie die Datei für das Systemabbild an"
+      inputfile: "Bitte geben Sie die Datei für das Systemabbild an",
+      NoISO: "Keine ISO"
     },
     power: {
       title: 'Power',
