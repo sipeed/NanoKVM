@@ -185,7 +185,8 @@ const en = {
       ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image',
       uploadbox: "Drop file here or click to select",
-      inputfile: "Please enter the image File"
+      inputfile: "Please enter the image File",
+      NoISO: "No ISO"
     },
     power: {
       title: 'Power',
