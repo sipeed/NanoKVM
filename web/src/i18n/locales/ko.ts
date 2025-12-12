@@ -106,11 +106,18 @@ const ko = {
       title: '이미지',
       loading: '불러오는 중...',
       empty: '아무것도 없습니다.',
-      cdrom: 'CD-ROM 모드로 이미지 마운트',
-      mountFailed: '이미지 마운트 실패',
+      mountMode: '마운트 모드',
+      mountFailed: '마운트 실패',
       mountDesc:
         '일부 시스템에서는 이미지를 마운트하기 전에 원격 호스트에서 가상 디스크를 제거해야 합니다.',
+      unmountFailed: '언마운트 실패',
+      unmountDesc:
+        '일부 시스템에서는 이미지를 언마운트하기 전에 원격 호스트에서 수동으로 제거하여야 합니다.',
       refresh: '이미지 목록 새로고침',
+      attention: '주의',
+      deleteConfirm: '이 이미지를 제거하시겠습니까?',
+      okBtn: '네',
+      cancelBtn: '아니오',
       tips: {
         title: '업로드 방법',
         usb1: 'USB를 통해 NanoKVM을 컴퓨터에 연결하세요.',
@@ -278,8 +285,11 @@ const ko = {
         title: 'Tailscale',
         memory: {
           title: '메모리 최적화',
-          tip: '메모리 사용량이 제한을 초과하면 가비지 컬렉션이 더 적극적으로 실행되어 메모리를 확보하려고 시도합니다. Tailscale을 사용할 경우 50MB로 설정하는 것이 좋습니다. 변경 사항을 적용하려면 Tailscale을 다시 시작해야 합니다.',
-          disable: '비활성화'
+          tip: '메모리 사용량이 제한을 초과하면 가비지 컬렉션이 더 적극적으로 실행되어 메모리를 확보하려고 시도합니다. Tailscale을 사용할 경우 50MB로 설정하는 것이 좋습니다. 변경 사항을 적용하려면 Tailscale을 다시 시작해야 합니다.'
+        },
+        swap: {
+          title: '스왑 메모리',
+          tip: '메모리 최적화를 활성화한 후에도 문제가 지속되면 스왑 메모리를 활성화해 보세요. 이 설정은 스왑 파일 크기를 기본값으로 256MB로 설정하며, "설정 > 기기"에서 조정할 수 있습니다.'
         },
         restart: '정말로 Tailscale을 다시 시작하시겠습니까?',
         stop: '정말로 Tailscale을 중지하시겠습니까?',
@@ -293,9 +303,11 @@ const ko = {
         download: '다운로드 중 :',
         package: '패키지 설치',
         unzip: '압축 해제',
-        upTailscale: 'tailscale을 NanoKVM 의 다음 경로에 업로드 했습니다. : /usr/bin/',
-        upTailscaled: 'tailscaled을 NanoKVM 의 다음 경로에 업로드 했습니다. :  /usr/sbin/',
+        upTailscale: 'tailscale을 NanoKVM의 /usr/bin/ 경로에 업로드 했습니다.',
+        upTailscaled: 'tailscaled을 NanoKVM의 /usr/sbin/ 경로에 업로드 했습니다.',
         refresh: '현재 페이지 새로고침',
+        notRunning: 'Tailscale이 실행되고 있지 않습니다. 계속하려면 시작해 주세요.',
+        run: '시작',
         notLogin:
           '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
         urlPeriod: '이 주소는 10분간 유효합니다.',
@@ -307,8 +319,9 @@ const ko = {
         account: '계정',
         logout: '로그아웃',
         logoutDesc: '정말로 로그아웃 하시겠습니까?',
-        logout2: '정말로 로그아웃 합니까?',
+        logout2: '정말로 로그아웃 할까요?',
         uninstall: 'Tailscale 제거',
+        uninstallDesc: '정말로 Tailscale을 제거할까요?',
         okBtn: '네',
         cancelBtn: '아니오'
       },
