@@ -13,6 +13,8 @@
   <br>
 </div>
 
+> For the recent discussion regarding the **built-in microphone**, please check [Issue #693](https://github.com/sipeed/NanoKVM/issues/693).
+
 ## 🌟 What is NanoKVM?
 
 NanoKVM is a series of compact, open-source IP-KVM devices based on the LicheeRV Nano (RISC-V). NanoKVM allows you to remotely access and control computers as if you were sitting right in front of them – perfect for managing servers, embedded systems, or any headless machine.
