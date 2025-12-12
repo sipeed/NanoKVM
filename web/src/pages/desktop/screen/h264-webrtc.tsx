@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { Spin } from 'antd';
 import clsx from 'clsx';
-import { useAtomValue } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom } from '@/jotai/screen.ts';
+import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
+import * as storage from '@/lib/localstorage.ts'
 
 export const H264Webrtc = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
+  const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -170,6 +172,13 @@ export const H264Webrtc = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const scale = storage.getVideoScale()
+    if (scale) {
+      setVideoScale(scale)
+    }
+  }, [setVideoScale])
+
   return (
     <Spin size="large" tip="Loading" spinning={isLoading}>
       <div className="flex h-screen w-screen items-start justify-center xl:items-center">
@@ -177,11 +186,13 @@ export const H264Webrtc = () => {
           id="screen"
           ref={videoRef}
           className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
-          style={
-            resolution?.width
+          style={{
+            transform: `scale(${videoScale})`,
+            transformOrigin: 'center',
+            ...(resolution?.width
               ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-              : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' }
-          }
+              : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
+          }}
           muted
           autoPlay
           playsInline

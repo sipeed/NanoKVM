@@ -46,6 +46,7 @@ const zh = {
       finishBtn: '完成'
     },
     screen: {
+      scale: '缩放',
       title: '屏幕',
       video: '视频模式',
       videoDirectTips: '该模式需启用 HTTPS，请前往「设置 - 设备」中开启',
