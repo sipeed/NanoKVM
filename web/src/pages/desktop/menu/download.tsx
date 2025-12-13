@@ -200,14 +200,9 @@ export const DownloadImage = () => {
               <div
                   className={clsx(
                     "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl transition css-9118ya ant-input-outlined",
-                    isDragging ? "bg-neutral-500" : "",
-                    status === "in_progress" ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer hover:bg-neutral-500"
+                    isDragging ? "bg-neutral-500 border-blue-500" : "",
+                    status === "in_progress" ? "opacity-50 cursor-not-allowed pointer-events-none border-neutral-600 bg-neutral-700" : "cursor-pointer hover:bg-neutral-500"
                   )}
-                  style={{
-                    ...(isDragging  ? { borderColor: "#1668dc" } : {}),
-                    ...(status === "in_progress" ? { backgroundColor: "rgb(255 255 255 / 16%)" } : {}),
-                    ...(status === "in_progress" ? { borderColor: "rgb(99 99 99)" } : {}),
-                  }}
                   onDrop={(e) => {
                     if (status === "in_progress") return; // deaktiviert
                     e.preventDefault();
