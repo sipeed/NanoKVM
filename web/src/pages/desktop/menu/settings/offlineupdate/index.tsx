@@ -150,7 +150,7 @@ export const OfflineUpdate = ({ setIsLocked }: UpdateProps) => {
                   }}
                 >
                 <span className="text-neutral-100 text-sm p-1">
-                  {selectedFile ? selectedFile.name : t('download.uploadbox')}
+                  {selectedFile ? selectedFile.name : t('settings.offlineupdate.uploadbox')}
                 </span>
 
                 <Input
@@ -166,7 +166,7 @@ export const OfflineUpdate = ({ setIsLocked }: UpdateProps) => {
                 onClick={() => upload(selectedFile)}
                 disabled={!selectedFile}
               >
-                {t('download.ok')}
+                {t('settings.offlineupdate.ok')}
               </Button>
             </div>
           </div>
