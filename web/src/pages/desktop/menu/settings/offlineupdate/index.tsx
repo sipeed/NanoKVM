@@ -104,7 +104,7 @@ export const OfflineUpdate = ({ setIsLocked }: UpdateProps) => {
 
   return (
     <>
-      <div className="text-base font-bold">{t('settings.offlineupdate.title') + ", " + t('settings.offlineupdate.version') + ": " + currentVersion}</div>
+      <div className="text-base font-bold">{t('settings.offlineupdate.title') + ", " + t('settings.about.application') + ": " + currentVersion}</div>
 
       <div className="my-[20px] h-px bg-neutral-500/10" />
 
