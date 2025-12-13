@@ -351,6 +351,16 @@ const en = {
         previewTip:
           'Please be aware that preview releases may contain bugs or incomplete functionality!'
       },
+      offlineupdate: {
+        title: 'Offline Updates',
+        queryFailed: 'Get version failed',
+        updateFailed: 'Update failed. Please retry.',
+        updating: 'Update started. Please wait...',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        inputfile: "Please enter the Update File",
+        noupdatefile: "No update file"
+      },
       account: {
         title: 'Account',
         webAccount: 'Web Account Name',
