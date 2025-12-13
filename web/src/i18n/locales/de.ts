@@ -74,7 +74,8 @@ const de = {
       virtual: 'Tastatur',
       ctrlaltdel: 'Ctrl+Alt+Del',
       dropdownEnglish: 'Englisch',
-      dropdownGerman: 'Deutsch'
+      dropdownGerman: 'Deutsch',
+      dropdownRussian: 'Russisch'
     },
     mouse: {
       title: 'Maus',

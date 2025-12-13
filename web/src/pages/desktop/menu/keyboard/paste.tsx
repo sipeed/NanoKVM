@@ -28,7 +28,8 @@ export const Paste = () => {
 
   const languages = [
     { value: 'en', label: t('keyboard.dropdownEnglish') },
-    { value: 'de', label: t('keyboard.dropdownGerman') }
+    { value: 'de', label: t('keyboard.dropdownGerman') },
+    { value: 'ru', label: t('keyboard.dropdownRussian') }
   ];
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export const Paste = () => {
 
   function onChange(e: ChangeEvent<HTMLTextAreaElement>) {
     const value = e.target.value;
-    setStatus(isASCII(value) ? '' : 'error');
+    setStatus(isValidForLanguage(value, langue) ? '' : 'error');
     setInputValue(value);
   }
 
@@ -61,12 +62,50 @@ export const Paste = () => {
       setIsReadingClipboard(false);
     }
   }
+  
+  // Extended RU → EN translation including punctuation
+  function translateRuToEnWithPunctuation(value: string): string {
+    const letterMap: Record<string, string> = {
+      'ё': '`',
+      'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u', 'ш': 'i',
+      'щ': 'o', 'з': 'p', 'х': '[', 'ъ': ']',
+      'ф': 'a', 'ы': 's', 'в': 'd', 'а': 'f', 'п': 'g', 'р': 'h', 'о': 'j', 'л': 'k',
+      'д': 'l', 'ж': ';', 'э': '\'',
+      'я': 'z', 'ч': 'x', 'с': 'c', 'м': 'v', 'и': 'b', 'т': 'n', 'ь': 'm', 'б': ',', 'ю': '.',
+    };
+
+    const punctuationMap: Record<string, string> = {
+      '"': '@',
+      '№': '#',
+      ';': '$',
+      ':': '^',
+      '?': '&',
+      'Ё': '~',
+      '/': '|',
+      '.': '/',
+      ',': '?',
+    };
+
+    return Array.from(value).map((ch) => {
+      const lower = ch.toLowerCase();
+      if (letterMap[lower]) {
+        const translated = letterMap[lower];
+        return ch === lower ? translated : translated.toUpperCase();
+      }
+      if (punctuationMap[ch]) {
+        return punctuationMap[ch];
+      }
+      return ch;
+    }).join('');
+  }
 
   function submit() {
     if (isLoading || !inputValue) return;
     setIsLoading(true);
 
-    paste(inputValue, langue)
+    const textToSend = langue === 'ru' ? translateRuToEnWithPunctuation(inputValue) : inputValue;
+
+    paste(textToSend, langue)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -91,9 +130,28 @@ export const Paste = () => {
     setIsKeyboardEnable(!open);
   }
 
-  function isASCII(value: string) {
-    for (let i = 0; i < value.length; i++) {
-      if (value.charCodeAt(i) > 127) {
+  function isValidForLanguage(value: string, selectedLangue: string) {
+    const isRussian = selectedLangue === 'ru';
+    
+    for (const ch of value) {
+      const code = ch.codePointAt(0) ?? 0;
+      
+      if (isRussian) {
+        // For Russian language, allow Cyrillic letters and special characters
+        // that can be typed on Russian keyboard (but not English letters)
+        if (
+          (code >= 0x0410 && code <= 0x042F) || // (А-Я)
+          (code >= 0x0430 && code <= 0x044F) || // (а-я)
+          code === 0x0401 || // (Ё)
+          code === 0x0451 || // (ё)
+          (code >= 0x20 && code <= 0x7E && !(code >= 0x41 && code <= 0x5A) && !(code >= 0x61 && code <= 0x7A)) // Special chars, digits, space, but not English letters
+        ) {
+          continue;
+        }
+        return false;
+      } else {
+        // For English/German, only allow ASCII
+        if (code <= 0x7F) continue;
         return false;
       }
     }

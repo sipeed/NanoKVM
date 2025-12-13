@@ -20,25 +20,25 @@ type PasteReq struct {
 }
 
 func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
-	// wenn kein lang angegeben → Standardmap zurück
+	// if no language is specified → return base map
 	if lang == "" {
 		return base
 	}
 
-	// immer Kopie erstellen
+	// always create a copy of the base map
 	m := copyMap(base)
 
 	switch lang {
 	case "de":
-		// Y tauschen
+		// swap Y
 		m['y'] = Char{0, 29}
 		m['Y'] = Char{2, 29}
 
-		// Z tauschen
+		// swap Z
 		m['z'] = Char{0, 28}
 		m['Z'] = Char{2, 28}
 
-		// deutsche Sonderzeichen hinzufügen oder remappen
+		// add German special characters or remap them
 		m['\u00E4'] = Char{0, 52} // ä
 		m['\u00C4'] = Char{2, 52} // Ä
 		m['\u00F6'] = Char{0, 51} // ö
@@ -47,8 +47,8 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['\u00DC'] = Char{2, 47} // Ü
 		m['\u00DF'] = Char{0, 45} // ß
 
-		//Tauschen
-		m['^'] = Char{0, 53}     // muss doppelt sein
+		// swap special characters
+		m['^'] = Char{0, 53}     // must be double
 		m['/'] = Char{2, 36}     // Shift + 7
 		m['('] = Char{2, 37}     // Shift + 8
 		m['&'] = Char{2, 35}     // Shift + 6
@@ -75,7 +75,7 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['-'] = Char{0, 56}     // Shift + -
 		m['_'] = Char{2, 56}     // Shift + -
 
-		//neu
+		// new special characters
 		m['\u00B4'] = Char{0, 46}    // ´
 		m['\u00B0'] = Char{2, 53}    // °
 		m['\u00A7'] = Char{2, 32}    // §
