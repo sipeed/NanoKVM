@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"regexp"
 )
 
 type Service struct{}
@@ -49,6 +50,28 @@ func (s *Service) ImageEnabled(c *gin.Context) {
 	rsp.OkRspWithData(c, &proto.ImageEnabledRsp{
 		Enabled: true,
 	})
+}
+
+func isISO9660(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// ISO-9660 Magic "CD001" bei Offset 32769
+	_, err = f.Seek(0x8001, io.SeekStart)
+	if err != nil {
+		return false, err
+	}
+
+	buf := make([]byte, 5)
+	_, err = io.ReadFull(f, buf)
+	if err != nil {
+		return false, err
+	}
+
+	return string(buf) == "CD001", nil
 }
 
 func (s *Service) StatusImage(c *gin.Context) {
@@ -91,6 +114,170 @@ func (s *Service) StatusImage(c *gin.Context) {
 		File:       "",
 		Percentage: "",
 	})
+}
+
+func (s *Service) DownloadImageFile(c *gin.Context) {
+	var rsp proto.Response
+
+	log.Debug("DownloadImage")
+
+	// Set a sentinel file to mark that there is a download in progress
+	// This is to prevent multiple downloads at the same time
+	if _, err := os.Stat(sentinelPath); err == nil {
+		log.Debug("Download in progress")
+		rsp.ErrRsp(c, -1, "download in progress")
+		return
+	}
+
+	// Create the sentinel file
+	err := os.WriteFile(sentinelPath, []byte("start"), 0644)
+	if err != nil {
+		log.Error("Failed to create sentinel file")
+		rsp.ErrRsp(c, -1, "failed to create sentinel file")
+		return
+	}
+
+    // Multipart Reader direkt nutzen (keine FormFile!)
+    reader, err := c.Request.MultipartReader()
+    if err != nil {
+		log.Error("invalid multipart data")
+		rsp.ErrRsp(c, -1, "invalid multipart data")
+		defer os.Remove(sentinelPath)
+        return
+    }
+
+	
+	var lw *loggingWriter
+
+    for {
+        part, err := reader.NextPart()
+        if err == io.EOF {
+            break
+        }
+        if err != nil {
+			log.Error("failed to read part")
+			rsp.ErrRsp(c, -1, "failed to read part")
+			lw.stopTicker()
+			defer os.Remove(sentinelPath)
+            return
+        }
+
+        if part.FormName() != "file" {
+            continue
+        }
+
+        filename := part.FileName()
+        if filename == "" {
+			log.Error("no filename")
+			rsp.ErrRsp(c, -1, "no filename")
+			lw.stopTicker()
+			defer os.Remove(sentinelPath)
+            return
+        }
+
+		filename = filepath.Base(filename)
+
+		if filename != part.FileName() {
+			log.Warn("path detected in filename")
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		if strings.Contains(filename, "..") {
+			log.Warn("path traversal attempt")
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		if !strings.HasSuffix(strings.ToLower(filename), ".iso") {
+			rsp.ErrRsp(c, -1, "only .iso files allowed")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		valid := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+		if !valid.MatchString(filename) {
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		data, err := os.ReadFile(sentinelPath)
+		if err != nil {
+			log.Error("Read failed")
+			rsp.ErrRsp(c, -1, "Read failed")
+			lw.stopTicker()
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+        outPath := "/data/" + filename
+        out, err := os.Create(outPath)
+        if err != nil {
+			log.Error("cannot create file")
+			rsp.ErrRsp(c, -1, "cannot create file")
+			lw.stopTicker()
+			defer os.Remove(sentinelPath)
+            return
+        }
+        defer out.Close()
+
+		if strings.Contains(string(data), "start") {
+			err = os.WriteFile(sentinelPath, []byte(filename), 0644)
+			if err != nil {
+				log.Error("Failed to create sentinel file")
+				rsp.ErrRsp(c, -1, "failed to create sentinel file")
+				lw.stopTicker()
+				defer os.Remove(outPath)
+				defer os.Remove(sentinelPath)
+				return
+			}
+			
+			lw = &loggingWriter{writer: out, totalSize: c.Request.ContentLength}
+			lw.startTicker()
+		} else {
+			if !strings.Contains(string(data), filename) {
+				log.Error("failed")
+				rsp.ErrRsp(c, -1, "failed")
+				lw.stopTicker()
+				defer os.Remove(outPath)
+				defer os.Remove(sentinelPath)
+				return
+			}
+		}
+
+        // Direkt streamen → kein RAM-Bedarf außer kleinem Buffer
+        _, err = io.Copy(lw, part)
+        if err != nil {
+			log.Error("write failed")
+			rsp.ErrRsp(c, -1, "write failed")
+			lw.stopTicker()
+			defer os.Remove(outPath)
+			defer os.Remove(sentinelPath)
+            return
+        }
+
+		ok, err := isISO9660(outPath)
+		if err != nil || !ok {
+			rsp.ErrRsp(c, -1, "file is not a valid ISO image")
+			lw.stopTicker()
+			defer os.Remove(outPath)
+			defer os.Remove(sentinelPath)
+			return
+		}
+    }
+	lw.stopTicker()
+
+	rsp.OkRspWithData(c, &proto.StatusImageRsp{
+		Status:     "idle",
+		File:       "",
+		Percentage: "",
+	})
+	
+	defer os.Remove(sentinelPath)
+    return
 }
 
 func (s *Service) DownloadImage(c *gin.Context) {

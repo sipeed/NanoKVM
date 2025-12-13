@@ -5,6 +5,11 @@ export function getVersion() {
   return http.get('/api/application/version');
 }
 
+// get application Current version
+export function getCurrentVersion() {
+  return http.get('/api/application/currentversion');
+}
+
 // update application to latest version
 export function update() {
   return http.request({

@@ -48,6 +48,24 @@ func (s *Service) GetVersion(c *gin.Context) {
 	})
 }
 
+func (s *Service) GetCurrentVersion(c *gin.Context) {
+	var rsp proto.Response
+
+	// current version
+	currentVersion := "1.0.0"
+
+	versionFile := fmt.Sprintf("%s/version", AppDir)
+	if version, err := os.ReadFile(versionFile); err == nil {
+		currentVersion = strings.ReplaceAll(string(version), "\n", "")
+	}
+
+	log.Debugf("current version: %s", currentVersion)
+
+	rsp.OkRspWithData(c, &proto.GetVersionRsp{
+		Current: currentVersion,
+	})
+}
+
 func getLatest() (*Latest, error) {
 	baseURL := StableURL
 	if isPreviewEnabled() {

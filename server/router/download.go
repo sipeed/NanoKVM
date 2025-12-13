@@ -14,4 +14,5 @@ func downloadRouter(r *gin.Engine) {
 	api.POST("/download/image", service.DownloadImage)       // download image
 	api.GET("/download/image/status", service.StatusImage)   // download image
 	api.GET("/download/image/enabled", service.ImageEnabled) // download image
+	api.POST("/download/file", service.DownloadImageFile)       // download image
 }
