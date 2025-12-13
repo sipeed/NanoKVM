@@ -360,7 +360,6 @@ const en = {
         cancel: 'Cancel',
         inputfile: "Please enter the Update File",
         noupdatefile: "No update file",
-        version: "Version",
         uploadbox: "Drop file here or click to select",
         ok: 'Ok'
       },
