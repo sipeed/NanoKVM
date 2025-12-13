@@ -14,6 +14,7 @@ func applicationRouter(r *gin.Engine) {
 	api.GET("/application/version", service.GetVersion) // get application version
 	api.GET("/application/currentversion", service.GetCurrentVersion) // get application current version
 	api.POST("/application/update", service.Update)     // update application
+	api.POST("/application/uploadupdate", service.Update)     // upload update application
 
 	api.GET("/application/preview", service.GetPreview)  // get preview updates state
 	api.POST("/application/preview", service.SetPreview) // set preview updates state
