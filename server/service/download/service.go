@@ -152,6 +152,22 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
             return
         }
 
+		filename = filepath.Base(filename)
+
+		if filename != part.FileName() {
+			log.Warn("path detected in filename")
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		if strings.Contains(filename, "..") {
+			log.Warn("path traversal attempt")
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
 		data, err := os.ReadFile(sentinelPath)
 		if err != nil {
 			log.Error("Read failed")
