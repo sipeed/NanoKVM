@@ -228,6 +228,8 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 		return err
 	}
 
+	defer os.Remove(outPath)
+	
 	return nil
 }
 
