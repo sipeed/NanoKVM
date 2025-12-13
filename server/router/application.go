@@ -12,6 +12,7 @@ func applicationRouter(r *gin.Engine) {
 	api := r.Group("/api").Use(middleware.CheckToken())
 
 	api.GET("/application/version", service.GetVersion) // get application version
+	api.GET("/application/version", service.GetCurrentVersion) // get application current version
 	api.POST("/application/update", service.Update)     // update application
 
 	api.GET("/application/preview", service.GetPreview)  // get preview updates state
