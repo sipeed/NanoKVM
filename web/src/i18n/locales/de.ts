@@ -326,7 +326,8 @@ const de = {
         confirm: 'Bestätigen',
         cancel: 'Abbrechen',
         inputfile: "Bitte geben Sie die Datei für das Update an",
-        noupdatefile: "Keine Update Datei"
+        noupdatefile: "Keine Update Datei",
+        version: "Version"
       },
       account: {
         title: 'Konto',
