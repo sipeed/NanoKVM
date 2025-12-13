@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+	"regexp"
 )
 
 type Service struct{}
@@ -49,6 +50,28 @@ func (s *Service) ImageEnabled(c *gin.Context) {
 	rsp.OkRspWithData(c, &proto.ImageEnabledRsp{
 		Enabled: true,
 	})
+}
+
+func isISO9660(path string) (bool, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+
+	// ISO-9660 Magic "CD001" bei Offset 32769
+	_, err = f.Seek(0x8001, io.SeekStart)
+	if err != nil {
+		return false, err
+	}
+
+	buf := make([]byte, 5)
+	_, err = io.ReadFull(f, buf)
+	if err != nil {
+		return false, err
+	}
+
+	return string(buf) == "CD001", nil
 }
 
 func (s *Service) StatusImage(c *gin.Context) {
@@ -168,6 +191,19 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 			return
 		}
 
+		if !strings.HasSuffix(strings.ToLower(filename), ".iso") {
+			rsp.ErrRsp(c, -1, "only .iso files allowed")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
+		valid := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+		if !valid.MatchString(filename) {
+			rsp.ErrRsp(c, -1, "invalid filename")
+			defer os.Remove(sentinelPath)
+			return
+		}
+
 		data, err := os.ReadFile(sentinelPath)
 		if err != nil {
 			log.Error("Read failed")
@@ -222,6 +258,15 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 			defer os.Remove(sentinelPath)
             return
         }
+
+		ok, err := isISO9660(outPath)
+		if err != nil || !ok {
+			rsp.ErrRsp(c, -1, "file is not a valid ISO image")
+			lw.stopTicker()
+			defer os.Remove(outPath)
+			defer os.Remove(sentinelPath)
+			return
+		}
     }
 	lw.stopTicker()
 
