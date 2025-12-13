@@ -359,7 +359,8 @@ const en = {
         confirm: 'Confirm',
         cancel: 'Cancel',
         inputfile: "Please enter the Update File",
-        noupdatefile: "No update file"
+        noupdatefile: "No update file",
+        version: "Version"
       },
       account: {
         title: 'Account',
