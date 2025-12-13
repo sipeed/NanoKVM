@@ -327,7 +327,9 @@ const de = {
         cancel: 'Abbrechen',
         inputfile: "Bitte geben Sie die Datei für das Update an",
         noupdatefile: "Keine Update Datei",
-        version: "Version"
+        version: "Version",
+        uploadbox: "Drop file here or click to select",
+        ok: 'Ok'
       },
       account: {
         title: 'Konto',
