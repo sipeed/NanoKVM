@@ -106,8 +106,6 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
             break
         }
         if err != nil {
-			log.Error("failed to read part")
-			rsp.ErrRsp(c, -1, "failed to read part")
 			lw.stopTicker()
 			defer os.Remove(sentinelPath)
             return err
@@ -119,33 +117,23 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 
         filename := part.FileName()
         if filename == "" {
-			log.Error("no filename")
-			rsp.ErrRsp(c, -1, "no filename")
 			lw.stopTicker()
 			defer os.Remove(sentinelPath)
-            return fmt.Errorf("err0")
+            return fmt.Errorf("no filename")
         }
 
 		filename = filepath.Base(filename)
 
 		if filename != part.FileName() {
-			log.Warn("path detected in filename")
-			rsp.ErrRsp(c, -1, "invalid filename")
 			defer os.Remove(sentinelPath)
-			return fmt.Errorf("err1")
+			return fmt.Errorf("path detected in filename")
 		}
 
 		if strings.Contains(filename, "..") {
 			log.Warn("path traversal attempt")
 			rsp.ErrRsp(c, -1, "invalid filename")
 			defer os.Remove(sentinelPath)
-			return fmt.Errorf("err2")
-		}
-
-		if !strings.HasSuffix(strings.ToLower(filename), ".iso") {
-			rsp.ErrRsp(c, -1, "only .iso files allowed")
-			defer os.Remove(sentinelPath)
-			return fmt.Errorf("err3")
+			return fmt.Errorf("path traversal attempt")
 		}
 
 		valid := regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
@@ -157,8 +145,6 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 
 		data, err := os.ReadFile(sentinelPath)
 		if err != nil {
-			log.Error("Read failed")
-			rsp.ErrRsp(c, -1, "Read failed")
 			lw.stopTicker()
 			defer os.Remove(sentinelPath)
 			return err
@@ -167,8 +153,6 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
         outPath = "/data/" + filename
         out, err := os.Create(outPath)
         if err != nil {
-			log.Error("cannot create file")
-			rsp.ErrRsp(c, -1, "cannot create file")
 			lw.stopTicker()
 			defer os.Remove(sentinelPath)
             return err
@@ -178,8 +162,6 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 		if strings.Contains(string(data), "start") {
 			err = os.WriteFile(sentinelPath, []byte(filename), 0644)
 			if err != nil {
-				log.Error("Failed to create sentinel file")
-				rsp.ErrRsp(c, -1, "failed to create sentinel file")
 				lw.stopTicker()
 				defer os.Remove(outPath)
 				defer os.Remove(sentinelPath)
@@ -190,20 +172,16 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 			lw.startTicker()
 		} else {
 			if !strings.Contains(string(data), filename) {
-				log.Error("failed")
-				rsp.ErrRsp(c, -1, "failed")
 				lw.stopTicker()
 				defer os.Remove(outPath)
 				defer os.Remove(sentinelPath)
-				return fmt.Errorf("err5")
+				return fmt.Errorf("failed")
 			}
 		}
 
         // Direkt streamen → kein RAM-Bedarf außer kleinem Buffer
         _, err = io.Copy(lw, part)
         if err != nil {
-			log.Error("write failed")
-			rsp.ErrRsp(c, -1, "write failed")
 			lw.stopTicker()
 			defer os.Remove(outPath)
 			defer os.Remove(sentinelPath)
@@ -222,32 +200,31 @@ func uploadupdate(rsp proto.Response, c *gin.Context) error {
 
 	// decompress
 	dir, err := utils.UnTarGz(outPath, CacheDir)
-	log.Debugf("untar: %s", dir)
 	if err != nil {
-		log.Errorf("decompress app failed: %s", err)
+		fmt.Errorf("decompress app failed: %s", err)
 		return err
 	}
 
 	// backup old version
 	if err := os.RemoveAll(BackupDir); err != nil {
-		log.Errorf("remove backup failed: %s", err)
+		fmt.Errorf("remove backup failed: %s", err)
 		return err
 	}
 
 	if err := utils.MoveFilesRecursively(AppDir, BackupDir); err != nil {
-		log.Errorf("backup app failed: %s", err)
+		fmt.Errorf("backup app failed: %s", err)
 		return err
 	}
 
 	// update
 	if err := utils.MoveFilesRecursively(dir, AppDir); err != nil {
-		log.Errorf("failed to move update back in place: %s", err)
+		fmt.Errorf("failed to move update back in place: %s", err)
 		return err
 	}
 
 	// modify permissions
 	if err := utils.ChmodRecursively(AppDir, 0o755); err != nil {
-		log.Errorf("chmod failed: %s", err)
+		fmt.Errorf("chmod failed: %s", err)
 		return err
 	}
 
