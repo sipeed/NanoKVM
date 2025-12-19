@@ -94,6 +94,7 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 
 * [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
 * [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_B_30131.pdf)
+* [NanoKVM-PCIe Schematic](https://cn.dl.sipeed.com/fileList/KVM/KVM_PCIE/HDK/01_Schematic/SCH_nanoKVM_PCIE_3105D_2025-12-19.pdf)
 * [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
 <div align="center">
