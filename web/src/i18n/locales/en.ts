@@ -47,6 +47,7 @@ const en = {
       finishBtn: 'Finished'
     },
     screen: {
+      scale: 'Scale',
       title: 'Screen',
       video: 'Video Mode',
       videoDirectTips: 'Enable HTTPS in "Settings > Device" to use this mode',

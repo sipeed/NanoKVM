@@ -2,6 +2,7 @@ import { Resolution } from '@/types';
 
 const LANGUAGE_KEY = 'nano-kvm-language';
 const VIDEO_MODE_KEY = 'nano-kvm-vide-mode';
+const VIDEO_SCALE_KEY = 'nano-kvm-video-scale';
 const WEB_RESOLUTION_KEY = 'nano-kvm-web-resolution';
 const FPS_KEY = 'nano-kvm-fps';
 const QUALITY_KEY = 'nano-kvm-quality';
@@ -63,6 +64,18 @@ export function getVideoMode() {
 
 export function setVideoMode(mode: string) {
   localStorage.setItem(VIDEO_MODE_KEY, mode);
+}
+
+export function getVideoScale(): number | null {
+  const scale = localStorage.getItem(VIDEO_SCALE_KEY)
+  if (scale && Number(scale)) {
+    return Number(scale)
+  }
+  return null
+}
+
+export function setVideoScale(scale: number): void {
+  localStorage.setItem(VIDEO_SCALE_KEY, String(scale))
 }
 
 export function getResolution(): Resolution | null {
