@@ -80,7 +80,8 @@ const en = {
         'Clipboard permission denied. Please allow clipboard access in your browser.',
       clipboardReadError: 'Failed to read clipboard',
       dropdownEnglish: 'English',
-      dropdownGerman: 'German'
+      dropdownGerman: 'German',
+      dropdownRussian: 'Russian'
     },
     mouse: {
       title: 'Mouse',

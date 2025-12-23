@@ -73,7 +73,10 @@ const ru = {
       placeholder: 'Текст для ввода',
       submit: 'Вставить',
       virtual: 'Клавиатура',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      dropdownEnglish: 'Английский',
+      dropdownGerman: 'Немецкий',
+      dropdownRussian: 'Русский'
     },
     mouse: {
       title: 'Мышь',
