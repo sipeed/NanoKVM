@@ -185,7 +185,10 @@ const en = {
       title: 'Image Downloader',
       input: 'Please enter a remote image URL',
       ok: 'Ok',
-      disabled: '/data partition is RO, so we cannot download the image'
+      disabled: '/data partition is RO, so we cannot download the image',
+      uploadbox: "Drop file here or click to select",
+      inputfile: "Please enter the image File",
+      NoISO: "No ISO"
     },
     power: {
       title: 'Power',
@@ -360,6 +363,18 @@ const en = {
         previewDesc: 'Get early access to new features and improvements',
         previewTip:
           'Please be aware that preview releases may contain bugs or incomplete functionality!'
+      },
+      offlineupdate: {
+        title: 'Offline Updates',
+        queryFailed: 'Get version failed',
+        updateFailed: 'Update failed. Please retry.',
+        updating: 'Update started. Please wait...',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        inputfile: "Please enter the Update File",
+        noupdatefile: "No update file",
+        uploadbox: "Drop file here or click to select",
+        ok: 'Ok'
       },
       account: {
         title: 'Account',

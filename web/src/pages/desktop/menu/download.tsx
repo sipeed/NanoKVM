@@ -21,6 +21,8 @@ export const DownloadImage = () => {
   const [popoverKey, setPopoverKey] = useState(0);
 
   const inputRef = useRef<InputRef>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const intervalId = useRef<NodeJS.Timeout | undefined>(undefined);
 
@@ -110,6 +112,58 @@ export const DownloadImage = () => {
       });
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+      setStatus('failed');
+      setLog(t('download.NoISO'));
+      return;
+    }
+    setStatus('idle');
+    setLog('');
+    setSelectedFile(file);
+    clearInterval(intervalId.current);
+    intervalId.current = undefined;
+  }
+
+  function upload(file: File | null) {
+    if (!file) return;
+
+    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+      setStatus('failed');
+      setLog(t('download.NoISO'));
+      return;
+    }
+
+    setStatus('in_progress');
+    setLog('Downloading: ' + file.name);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    fetch("/api/download/file", {
+      method: "POST",
+      body: formData,
+    }).catch(() => {
+        clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
+        setStatus('failed');
+        setLog('Failed');
+      }).then(() => {
+        clearInterval(intervalId.current); // Clear the interval when the download is complete or fails
+        setStatus('idle');
+        setLog('');
+      });
+
+    // Start the interval to check the download status
+    if (!intervalId.current) {
+      getDownloadStatus();
+      setTimeout(() => {
+        intervalId.current = setInterval(getDownloadStatus, 2500);
+      }, 2500);
+    }
+    
+  }
+
   const content = (
     <div key={popoverKey} className="min-w-[300px]">
       <div className="flex items-center justify-between px-1">
@@ -122,21 +176,83 @@ export const DownloadImage = () => {
         <div className="text-red-500">{t('download.disabled')}</div>
       ) : (
         <>
-          <div className="pb-1 text-neutral-500">{t('download.input')}</div>
-          <div className="flex items-center space-x-1">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={handleChange}
-              disabled={status === 'in_progress'}
-            />
-            <Button
-              type="primary"
-              onClick={() => download(input)}
-              disabled={status === 'in_progress'}
-            >
-              {t('download.ok')}
-            </Button>
+          <div>
+            <div className="pb-1 text-neutral-500">{t('download.input')}</div>
+            <div className="flex items-center space-x-1">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={handleChange}
+                disabled={status === 'in_progress'}
+              />
+              <Button
+                type="primary"
+                onClick={() => download(input)}
+                disabled={status === 'in_progress'}
+              >
+                {t('download.ok')}
+              </Button>
+            </div>
+          </div>
+          <div>
+            <div className="pb-1 text-neutral-500">{t('download.inputfile')}</div>
+            <div className="flex items-center space-x-1">
+              <div
+                  className={clsx(
+                    "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl transition css-9118ya ant-input-outlined",
+                    isDragging ? "bg-neutral-500 border-blue-500" : "",
+                    status === "in_progress" ? "opacity-50 cursor-not-allowed pointer-events-none border-neutral-600 bg-neutral-700" : "cursor-pointer hover:bg-neutral-500"
+                  )}
+                  onDrop={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
+                    e.preventDefault();
+                    setIsDragging(false);
+                    const file = e.dataTransfer.files?.[0] ?? null;
+                    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+                      setStatus('failed');
+                      setLog(t('download.NoISO'));
+                      return;
+                    }
+                    setStatus('idle');
+                    setLog('');
+                    setSelectedFile(file);
+                  }}
+                  onDragOver={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
+                    e.preventDefault();
+                    setIsDragging(true); // Datei wird über den Bereich gezogen
+                  }}
+                  onDragLeave={(e) => {
+                    if (status === "in_progress") return; // deaktiviert
+                    e.preventDefault();
+                    setIsDragging(false); // Maus verlässt Bereich
+                  }}
+                  onClick={() => {
+                    if (status === "in_progress") return; // deaktiviert
+                    document.getElementById("file-upload")?.click()
+                  }}
+                >
+                <span className="text-neutral-100 text-sm p-1">
+                  {selectedFile ? selectedFile.name : t('download.uploadbox')}
+                </span>
+
+                <Input
+                  id="file-upload"
+                  type="file"
+                  onChange={handleFileChange}
+                  disabled={status === 'in_progress'}
+                  className="hidden"
+                />
+              </div>
+              <Button
+                type="primary"
+                className="h-10 border-2"
+                onClick={() => upload(selectedFile)}
+                disabled={status === 'in_progress' || !selectedFile}
+              >
+                {t('download.ok')}
+              </Button>
+            </div>
           </div>
         </>
       )}

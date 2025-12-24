@@ -169,7 +169,10 @@ const de = {
       title: 'Systemabbild Downloader',
       input: 'Bitte geben Sie die URL für das Remote-Systemabbild ein',
       ok: 'Ok',
-      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden'
+      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
+      uploadbox: "Datei hier ablegen oder klicken zum Auswählen",
+      inputfile: "Bitte geben Sie die Datei für das Systemabbild an",
+      NoISO: "Keine ISO"
     },
     power: {
       title: 'Power',
@@ -314,8 +317,19 @@ const de = {
         cancel: 'Abbrechen',
         preview: 'Vorab-Versionen',
         previewDesc: 'Erhalten Sie vorab Zugriff auf neue Funktionen und Verbesserungen',
-        previewTip:
-          'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!'
+        previewTip: 'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!'
+      },
+      offlineupdate: {
+        title: 'Offline Aktualisierung',
+        queryFailed: 'Version konnte nicht abgefragt werden',
+        updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
+        updating: 'Aktualisierung gestartet. Bitte warten...',
+        confirm: 'Bestätigen',
+        cancel: 'Abbrechen',
+        inputfile: "Bitte geben Sie die Datei für das Update an",
+        noupdatefile: "Keine Update Datei",
+        uploadbox: "Datei hier ablegen oder zum Auswählen klicken",
+        ok: 'Ok'
       },
       account: {
         title: 'Konto',
