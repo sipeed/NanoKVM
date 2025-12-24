@@ -40,8 +40,9 @@ const zh = {
     wifi: {
       title: 'Wi-Fi',
       description: '配置 NanoKVM Wi-Fi 信息',
-      success: '请检查 NanoKVM 的网络状态，并访问新的 IP 地址。',
+      success: '请前往设备检查 NanoKVM 的网络状态。',
       failed: '操作失败，请重试。',
+      invalidMode: '当前模式不支持配置网络。请先前往设备启用 Wi-Fi 配置模式。',
       confirmBtn: '确定',
       finishBtn: '完成'
     },
@@ -222,7 +223,17 @@ const zh = {
         wifi: {
           title: 'Wi-Fi',
           description: '配置 Wi-Fi 信息',
-          setBtn: '设置'
+          apMode: 'AP 模式已启用，该模式下仅支持扫描二维码配网',
+          connect: '连接 Wi-Fi',
+          connectDesc1: '请输入网络名称和密码',
+          connectDesc2: '请输入密码以连接此网络',
+          disconnect: '是否要断开该网络连接？',
+          failed: '连接失败，请重试',
+          ssid: '名称',
+          password: '密码',
+          joinBtn: '加入',
+          confirmBtn: '确定',
+          cancelBtn: '取消'
         },
         ssh: {
           description: '启用 SSH 远程访问',

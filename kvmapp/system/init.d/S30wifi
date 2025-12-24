@@ -2,24 +2,26 @@
 
 . /etc/profile
 
+APFLAG_FILE=/tmp/wifiap
+
 gen_hostapd_conf() {
-	ssid="${1}"
-	pass="${2}"
-	echo "ctrl_interface=/var/run/hostapd"
-	echo "ctrl_interface_group=0"
-	echo "ssid=${ssid}"
-	echo "hw_mode=g"
-	echo "channel=1"
-	echo "beacon_int=100"
-	echo "dtim_period=2"
-	echo "max_num_sta=255"
-	echo "rts_threshold=-1"
-	echo "fragm_threshold=-1"
-	echo "macaddr_acl=0"
-	echo "auth_algs=3"
-	echo "wpa=2"
-	echo "wpa_passphrase=${pass}"
-	echo "ieee80211n=1"
+    ssid="${1}"
+    pass="${2}"
+    echo "ctrl_interface=/var/run/hostapd"
+    echo "ctrl_interface_group=0"
+    echo "ssid=${ssid}"
+    echo "hw_mode=g"
+    echo "channel=1"
+    echo "beacon_int=100"
+    echo "dtim_period=2"
+    echo "max_num_sta=255"
+    echo "rts_threshold=-1"
+    echo "fragm_threshold=-1"
+    echo "macaddr_acl=0"
+    echo "auth_algs=3"
+    echo "wpa=2"
+    echo "wpa_passphrase=${pass}"
+    echo "ieee80211n=1"
 }
 
 gen_udhcpd_conf() {
@@ -61,19 +63,16 @@ start() {
         chown root:root /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
         chmod 644 /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
     fi
-    if [ -e /etc/kvm/wifi.ssid ]
-    then
-        ssid=`cat /etc/kvm/wifi.ssid`
+    if [ -e /etc/kvm/wifi.ssid ]; then
+        ssid=$(cat /etc/kvm/wifi.ssid)
     fi
-    if [ -e /etc/kvm/wifi.pass ]
-    then
-        pass=`cat /etc/kvm/wifi.pass`
+    if [ -e /etc/kvm/wifi.pass ]; then
+        pass=$(cat /etc/kvm/wifi.pass)
     fi
-    echo "ctrl_interface=/var/run/wpa_supplicant" > /etc/wpa_supplicant.conf
-    wpa_passphrase "$ssid" "$pass" >> /etc/wpa_supplicant.conf
+    echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
+    wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
     wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-    if [ ! -e /boot/wifi.nodhcp ]
-    then
+    if [ ! -e /boot/wifi.nodhcp ]; then
         (udhcpc -i wlan0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.wlan0.pid) &
     fi
 }
@@ -82,33 +81,27 @@ ap_start() {
     echo "wifi mode: ap"
     id2=$(printf "%d" 0x$(sha512sum /sys/class/cvi-base/base_uid | head -c 2))
     id3=$(printf "%d" 0x$(sha512sum /sys/class/cvi-base/base_uid | head -c 4 | tail -c 2))
-    if [ "$id2" = "$id3" ]
-    then
+    if [ "$id2" = "$id3" ]; then
         id2=$((id2 + 1))
     fi
-    if [ "$id2" -ge 255 ]
-    then
+    if [ "$id2" -ge 255 ]; then
         id2=253
     fi
-    if [ "$id3" -ge 255 ]
-    then
+    if [ "$id3" -ge 255 ]; then
         id3=254
     fi
     ssid=""
     pass=""
-    if [ -e /kvmapp/kvm/ap.ssid ]
-    then
-        ssid=`cat /kvmapp/kvm/ap.ssid`
+    if [ -e /kvmapp/kvm/ap.ssid ]; then
+        ssid=$(cat /kvmapp/kvm/ap.ssid)
     fi
-    if [ -e /kvmapp/kvm/ap.pass ]
-    then
-        pass=`cat /kvmapp/kvm/ap.pass`
+    if [ -e /kvmapp/kvm/ap.pass ]; then
+        pass=$(cat /kvmapp/kvm/ap.pass)
     fi
-    gen_hostapd_conf "$ssid" "$pass" > /etc/hostapd.conf
+    gen_hostapd_conf "$ssid" "$pass" >/etc/hostapd.conf
     ipv4_prefix=10.$id3.$id2
-    if [ ! -e /etc/udhcpd.wlan0.conf ]
-    then
-        gen_udhcpd_conf wlan0 "${ipv4_prefix}"  > /etc/udhcpd.wlan0.conf
+    if [ ! -e /etc/udhcpd.wlan0.conf ]; then
+        gen_udhcpd_conf wlan0 "${ipv4_prefix}" >/etc/udhcpd.wlan0.conf
     fi
     # gen_dnsmasq_conf "${ipv4_prefix}"  > /etc/dnsmasq.conf
 
@@ -126,50 +119,52 @@ ap_start() {
     # dnsmasq --pid-file=/tmp/dnsmasq.run -C /etc/dnsmasq.conf
     hostapd -B -i wlan0 /etc/hostapd.conf
     udhcpd -S /etc/udhcpd.wlan0.conf
+
+    if [ ! -f "$APFLAG_FILE" ]; then
+        touch "$APFLAG_FILE"
+    fi
+
 }
 
 stop() {
-	ps -ef|grep hostapd|grep -v grep|awk '{print $1}'|xargs kill -2 || true
-	ps -ef|grep "udhcpd -S /etc/udhcpd.wlan0.conf" |grep -v grep|awk '{print $1}'|xargs kill -2 || true
-	killall wpa_supplicant || true
-	if [ -e /run/udhcpc.wlan0.pid ]
-	then
-		kill `cat /run/udhcpc.wlan0.pid` || true
-		rm -f /run/udhcpc.wlan0.pid
-	fi
-	if [ -e /var/run/udhcpd.wlan0.pid ]
-	then
-		kill `cat /var/run/udhcpd.wlan0.pid`  || true
-		rm -f /var/run/udhcpd.wlan0.pid
-	fi
-	if [ -e /tmp/dnsmasq.run ]
-	then
-		kill `cat /tmp/dnsmasq.run`  || true
-		rm -f /tmp/dnsmasq.run
-	fi
-	# if [ -e /etc/wpa_supplicant.conf]
-	# then
-	# 	echo > /etc/wpa_supplicant.conf
-	# fi
-	airmon-ng stop wlan0mon || true
+    ps -ef | grep hostapd | grep -v grep | awk '{print $1}' | xargs kill -2 || true
+    ps -ef | grep "udhcpd -S /etc/udhcpd.wlan0.conf" | grep -v grep | awk '{print $1}' | xargs kill -2 || true
+    killall wpa_supplicant || true
+    if [ -e /run/udhcpc.wlan0.pid ]; then
+        kill $(cat /run/udhcpc.wlan0.pid) || true
+        rm -f /run/udhcpc.wlan0.pid
+    fi
+    if [ -e /var/run/udhcpd.wlan0.pid ]; then
+        kill $(cat /var/run/udhcpd.wlan0.pid) || true
+        rm -f /var/run/udhcpd.wlan0.pid
+    fi
+    if [ -e /tmp/dnsmasq.run ]; then
+        kill $(cat /tmp/dnsmasq.run) || true
+        rm -f /tmp/dnsmasq.run
+    fi
+    # if [ -e /etc/wpa_supplicant.conf]
+    # then
+    # 	echo > /etc/wpa_supplicant.conf
+    # fi
+    airmon-ng stop wlan0mon || true
+
+    if [ -f "$APFLAG_FILE" ]; then
+        rm "$APFLAG_FILE"
+    fi
 }
 
 restart() {
-	stop
-	start
+    stop
+    start
 }
 
-if [ "${1}" = "start" ]
-then
-	start
-elif [ "${1}" = "stop" ]
-then
-	stop
-elif [ "${1}" = "ap" ]
-then
+if [ "${1}" = "start" ]; then
+    start
+elif [ "${1}" = "stop" ]; then
     stop
-	ap_start
-elif [ "${1}" = "restart" ]
-then
-	restart
+elif [ "${1}" = "ap" ]; then
+    stop
+    ap_start
+elif [ "${1}" = "restart" ]; then
+    restart
 fi

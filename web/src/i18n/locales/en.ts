@@ -41,8 +41,10 @@ const en = {
     wifi: {
       title: 'Wi-Fi',
       description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      success: 'Please go to the device to check the network status of NanoKVM.',
       failed: 'Operation failed, please try again.',
+      invalidMode:
+        'The current mode does not support network setup. Please go to your device and enable Wi-Fi configuration mode.',
       confirmBtn: 'Ok',
       finishBtn: 'Finished'
     },
@@ -186,9 +188,9 @@ const en = {
       input: 'Please enter a remote image URL',
       ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image',
-      uploadbox: "Drop file here or click to select",
-      inputfile: "Please enter the image File",
-      NoISO: "No ISO"
+      uploadbox: 'Drop file here or click to select',
+      inputfile: 'Please enter the image File',
+      NoISO: 'No ISO'
     },
     power: {
       title: 'Power',
@@ -251,7 +253,17 @@ const en = {
         wifi: {
           title: 'Wi-Fi',
           description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          apMode: 'AP mode is enabled, connect to Wi-Fi by scanning QR code',
+          connect: 'Join Wi-Fi',
+          connectDesc1: 'Please enter the network ssid and password',
+          connectDesc2: 'Please enter the password to join this network',
+          disconnect: 'Are you sure to disconnect the network?',
+          failed: 'Connection failed, please try again.',
+          ssid: 'Name',
+          password: 'Password',
+          joinBtn: 'Join',
+          confirmBtn: 'Ok',
+          cancelBtn: 'Cancel'
         },
         ssh: {
           description: 'Enable SSH remote access',
@@ -296,7 +308,7 @@ const en = {
         hidOnly: 'HID-Only Mode',
         disk: 'Virtual Disk',
         diskDesc: 'Mount SD card on the remote host',
-        media: "Virtual Image",
+        media: 'Virtual Image',
         mediaDesc: 'Attach virtual image device to the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
@@ -371,9 +383,9 @@ const en = {
         updating: 'Update started. Please wait...',
         confirm: 'Confirm',
         cancel: 'Cancel',
-        inputfile: "Please enter the Update File",
-        noupdatefile: "No update file",
-        uploadbox: "Drop file here or click to select",
+        inputfile: 'Please enter the Update File',
+        noupdatefile: 'No update file',
+        uploadbox: 'Drop file here or click to select',
         ok: 'Ok'
       },
       account: {
