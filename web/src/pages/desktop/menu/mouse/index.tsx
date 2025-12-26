@@ -5,10 +5,16 @@ import { MouseIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as ls from '@/lib/localstorage';
-import { mouseModeAtom, mouseStyleAtom, scrollIntervalAtom } from '@/jotai/mouse';
+import {
+  mouseModeAtom,
+  mouseStyleAtom,
+  scrollDirectionAtom,
+  scrollIntervalAtom
+} from '@/jotai/mouse';
 import { MenuItem } from '@/components/menu-item.tsx';
 
 import { Cursor } from './cursor.tsx';
+import { Direction } from './direction.tsx';
 import { HidMode } from './hid-mode.tsx';
 import { MouseMode } from './mouse-mode.tsx';
 import { ResetHid } from './reset-hid.tsx';
@@ -19,6 +25,7 @@ export const Mouse = () => {
 
   const setMouseStyle = useSetAtom(mouseStyleAtom);
   const setMouseMode = useSetAtom(mouseModeAtom);
+  const setScrollDirection = useSetAtom(scrollDirectionAtom);
   const setScrollInterval = useSetAtom(scrollIntervalAtom);
 
   useEffect(() => {
@@ -32,6 +39,11 @@ export const Mouse = () => {
       setMouseMode(mouseMode);
     }
 
+    const direction = ls.getMouseScrollDirection();
+    if (direction) {
+      setScrollDirection(direction > 0 ? 1 : -1);
+    }
+
     const interval = ls.getMouseScrollInterval();
     if (interval) {
       setScrollInterval(interval);
@@ -42,6 +54,7 @@ export const Mouse = () => {
     <div className="flex flex-col space-y-1">
       <Cursor />
       <MouseMode />
+      <Direction />
       <Speed />
       <Divider style={{ margin: '10px 0' }} />
 

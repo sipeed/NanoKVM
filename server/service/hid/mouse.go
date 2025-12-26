@@ -59,7 +59,7 @@ func (h *Hid) mouseUp() {
 
 func (h *Hid) mouseScroll(event []int) {
 	direction := 0x01
-	if event[3] > 0 {
+	if event[3] < 0 {
 		direction = -0x1
 	}
 
