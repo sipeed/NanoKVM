@@ -65,6 +65,9 @@ export const Settings = () => {
       if (rsp.code !== 0) {
         return;
       }
+      if (!rsp.data?.current || !rsp.data?.latest) {
+        return;
+      }
 
       if (semver.gt(rsp.data.latest, rsp.data.current)) {
         setIsUpdateAvailable(true);

@@ -63,7 +63,7 @@ export const Preview = () => {
           <Tooltip
             title={t('settings.update.previewTip')}
             className="cursor-pointer"
-            placement="right"
+            placement="top"
             styles={{ root: { maxWidth: '400px' } }}
           >
             <CircleAlertIcon className="text-neutral-500" size={15} />

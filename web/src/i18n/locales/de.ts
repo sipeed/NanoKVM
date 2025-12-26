@@ -14,7 +14,8 @@ const de = {
       placeholderPassword2: 'Bitte Passwort erneut eingeben',
       noEmptyUsername: 'Benutzername benötigt',
       noEmptyPassword: 'Passwort benötigt',
-      noAccount: 'Abfragen der Benutzerdaten fehlgeschlagen, bitte die Seite neu laden oder Passwort zurücksetzen',
+      noAccount:
+        'Abfragen der Benutzerdaten fehlgeschlagen, bitte die Seite neu laden oder Passwort zurücksetzen',
       invalidUser: 'Falscher Benutzername oder falsches Passwort',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
@@ -35,13 +36,15 @@ const de = {
         change1: 'Bitte beachten Sie, dass diese Aktion folgende Passwörter ändert:',
         change2: 'Web Anmelde-Passwort',
         change3: 'System root Passwort (SSH Anmelde-Passwort)',
-        change4: 'Um die Passwörter zurückzusetzen, drücken und halten Sie den BOOT Knopf auf dem NanoKVM.'
+        change4:
+          'Um die Passwörter zurückzusetzen, drücken und halten Sie den BOOT Knopf auf dem NanoKVM.'
       }
     },
     wifi: {
       title: 'Wi-Fi',
       description: 'Wi-Fi Konfiguration für NanoKVM',
-      success: 'Bitte überprüfen Sie den Netzwerk-Status des NanoKVM und greifen Sie über die neue IP Adresse darauf zu.',
+      success:
+        'Bitte überprüfen Sie den Netzwerk-Status des NanoKVM und greifen Sie über die neue IP Adresse darauf zu.',
       failed: 'Aktion fehlgeschlagen, bitte erneut versuchen.',
       confirmBtn: 'Ok',
       finishBtn: 'Fertig'
@@ -52,7 +55,7 @@ const de = {
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
-        "Bildverzerrungen oder ein versetzter Mauszeiger können bei bestimmten Auflösungen auftreten. Versuchen Sie, die Auflösung des entfernten Hosts anzupassen oder den automatischen Modus zu deaktivieren.",
+        'Bildverzerrungen oder ein versetzter Mauszeiger können bei bestimmten Auflösungen auftreten. Versuchen Sie, die Auflösung des entfernten Hosts anzupassen oder den automatischen Modus zu deaktivieren.',
       fps: 'FPS',
       customizeFps: 'Anpassen',
       quality: 'Qualität',
@@ -89,7 +92,8 @@ const de = {
       mode: 'Maus Modus',
       absolute: 'Absoluter Modus',
       relative: 'Relativer Modus',
-      requestPointer: 'Relativer Modus aktiv. Klicken Sie auf den Desktop um den Mauszeiger zu sehen.',
+      requestPointer:
+        'Relativer Modus aktiv. Klicken Sie auf den Desktop um den Mauszeiger zu sehen.',
       resetHid: 'HID zurücksetzen',
       hidOnly: {
         title: 'HID-Only Modus',
@@ -107,23 +111,23 @@ const de = {
       empty: 'Nichts gefunden',
       cdrom: 'Binden Sie das Abbild im CD-ROM Modus ein',
       mountFailed: 'Einbinden fehlgeschlagen',
-      mountDesc: 
-        "In einigen Systemen ist es notwendig, die virtuelle Festplatte auf dem entfernten Host auszuwerfen, bevor das Image eingebunden werden kann.",
+      mountDesc:
+        'In einigen Systemen ist es notwendig, die virtuelle Festplatte auf dem entfernten Host auszuwerfen, bevor das Image eingebunden werden kann.',
       refresh: 'Bilder aktualisieren',
       tips: {
-      title: 'So laden Sie Dateien hoch',
-      usb1: 'Verbinden Sie den NanoKVM über USB mit Ihrem Computer.',
-      usb2: 'Stellen Sie sicher, dass die virtuelle Festplatte eingebunden ist (Einstellungen – Virtuelle Festplatte).',
-      usb3: 'Öffnen Sie die virtuelle Festplatte auf Ihrem Computer und kopieren Sie die Image-Datei in das Stammverzeichnis der virtuellen Festplatte.',
-      scp1: 'Stellen Sie sicher, dass sich der NanoKVM und Ihr Computer im selben lokalen Netzwerk befinden.',
-      scp2: 'Öffnen Sie ein Terminal auf Ihrem Computer und verwenden Sie den SCP-Befehl, um die Image-Datei in das Verzeichnis /data auf dem NanoKVM hochzuladen.',
-      scp3: 'Beispiel: scp your-image-path root@your-nanokvm-ip:/data',
-      tfCard: 'TF-Karte',
-      tf1: 'Diese Methode wird unter Linux-Systemen unterstützt.',
-      tf2: 'Entnehmen Sie die TF-Karte aus dem NanoKVM (bei der FULL-Version muss zuvor das Gehäuse geöffnet werden).',
-      tf3: 'Stecken Sie die TF-Karte in einen Kartenleser und verbinden Sie diesen mit Ihrem Computer.',
-      tf4: 'Kopieren Sie die Image-Datei in das Verzeichnis /data auf der TF-Karte.',
-      tf5: 'Setzen Sie die TF-Karte wieder in den NanoKVM ein.'
+        title: 'So laden Sie Dateien hoch',
+        usb1: 'Verbinden Sie den NanoKVM über USB mit Ihrem Computer.',
+        usb2: 'Stellen Sie sicher, dass die virtuelle Festplatte eingebunden ist (Einstellungen – Virtuelle Festplatte).',
+        usb3: 'Öffnen Sie die virtuelle Festplatte auf Ihrem Computer und kopieren Sie die Image-Datei in das Stammverzeichnis der virtuellen Festplatte.',
+        scp1: 'Stellen Sie sicher, dass sich der NanoKVM und Ihr Computer im selben lokalen Netzwerk befinden.',
+        scp2: 'Öffnen Sie ein Terminal auf Ihrem Computer und verwenden Sie den SCP-Befehl, um die Image-Datei in das Verzeichnis /data auf dem NanoKVM hochzuladen.',
+        scp3: 'Beispiel: scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF-Karte',
+        tf1: 'Diese Methode wird unter Linux-Systemen unterstützt.',
+        tf2: 'Entnehmen Sie die TF-Karte aus dem NanoKVM (bei der FULL-Version muss zuvor das Gehäuse geöffnet werden).',
+        tf3: 'Stecken Sie die TF-Karte in einen Kartenleser und verbinden Sie diesen mit Ihrem Computer.',
+        tf4: 'Kopieren Sie die Image-Datei in das Verzeichnis /data auf der TF-Karte.',
+        tf5: 'Setzen Sie die TF-Karte wieder in den NanoKVM ein.'
       }
     },
     script: {
@@ -169,10 +173,11 @@ const de = {
       title: 'Systemabbild Downloader',
       input: 'Bitte geben Sie die URL für das Remote-Systemabbild ein',
       ok: 'Ok',
-      disabled: '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
-      uploadbox: "Datei hier ablegen oder klicken zum Auswählen",
-      inputfile: "Bitte geben Sie die Datei für das Systemabbild an",
-      NoISO: "Keine ISO"
+      disabled:
+        '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
+      uploadbox: 'Datei hier ablegen oder klicken zum Auswählen',
+      inputfile: 'Bitte geben Sie die Datei für das Systemabbild an',
+      NoISO: 'Keine ISO'
     },
     power: {
       title: 'Power',
@@ -203,9 +208,9 @@ const de = {
         hostname: 'Hostname',
         hostnameUpdated: 'Hostname aktualisiert. Neustarten um zu übernehmen.',
         ipType: {
-          'Wired': 'Kabel',
-          'Wireless': 'Drahtlos',
-          'Other': 'Andere'
+          Wired: 'Kabel',
+          Wireless: 'Drahtlos',
+          Other: 'Andere'
         }
       },
       appearance: {
@@ -246,7 +251,7 @@ const de = {
           title: 'Swap',
           disable: 'Deaktivieren',
           description: 'Grösse der Swap-Datei festlegen',
-          tip: "Das Aktivieren dieser Funktion kann die Lebensdauer Ihrer SD-Karte verkürzen!"
+          tip: 'Das Aktivieren dieser Funktion kann die Lebensdauer Ihrer SD-Karte verkürzen!'
         },
         mouseJiggler: {
           title: 'Mausaktivitäts-Simulator',
@@ -257,7 +262,7 @@ const de = {
         },
         mdns: {
           description: 'mDNS-Erkennungsdienst aktivieren',
-          tip: "Deaktivieren Sie den Dienst, wenn Sie ihn nicht benötigen"
+          tip: 'Deaktivieren Sie den Dienst, wenn Sie ihn nicht benötigen'
         },
         hidOnly: 'HID-Only Mode',
         disk: 'Virtuelle Festplatte',
@@ -273,7 +278,7 @@ const de = {
         title: 'Tailscale',
         memory: {
           title: 'Speicher Optimierung',
-          tip: "Wenn die Speichernutzung das Limit überschreitet, wird die Speicherbereinigung aggressiver durchgeführt, um Speicher freizugeben. Es wird empfohlen, den Wert auf 75 MB zu setzen, wenn Tailscale verwendet wird. Ein Neustart von Tailscale ist erforderlich, damit die Änderung wirksam wird.",
+          tip: 'Wenn die Speichernutzung das Limit überschreitet, wird die Speicherbereinigung aggressiver durchgeführt, um Speicher freizugeben. Es wird empfohlen, den Wert auf 75 MB zu setzen, wenn Tailscale verwendet wird. Ein Neustart von Tailscale ist erforderlich, damit die Änderung wirksam wird.',
           disable: 'Deaktivieren'
         },
         restart: 'Tailscale neu starten?',
@@ -317,19 +322,16 @@ const de = {
         cancel: 'Abbrechen',
         preview: 'Vorab-Versionen',
         previewDesc: 'Erhalten Sie vorab Zugriff auf neue Funktionen und Verbesserungen',
-        previewTip: 'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!'
-      },
-      offlineupdate: {
-        title: 'Offline Aktualisierung',
-        queryFailed: 'Version konnte nicht abgefragt werden',
-        updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.',
-        updating: 'Aktualisierung gestartet. Bitte warten...',
-        confirm: 'Bestätigen',
-        cancel: 'Abbrechen',
-        inputfile: "Bitte geben Sie die Datei für das Update an",
-        noupdatefile: "Keine Update Datei",
-        uploadbox: "Datei hier ablegen oder zum Auswählen klicken",
-        ok: 'Ok'
+        previewTip:
+          'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!',
+        offline: {
+          title: 'Offline Aktualisierung',
+          desc: 'Über lokales Installationspaket aktualisieren',
+          upload: 'Hochladen',
+          invalidName:
+            'Ungültiges Dateinamenformat. Bitte laden Sie von den GitHub-Releases herunter.',
+          updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.'
+        }
       },
       account: {
         title: 'Konto',
@@ -343,7 +345,7 @@ const de = {
       }
     },
     error: {
-      title: "Wir sind auf ein Problem gestossen",
+      title: 'Wir sind auf ein Problem gestossen',
       refresh: 'Neuladen'
     },
     fullscreen: {

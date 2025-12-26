@@ -372,19 +372,14 @@ const en = {
         preview: 'Preview Updates',
         previewDesc: 'Get early access to new features and improvements',
         previewTip:
-          'Please be aware that preview releases may contain bugs or incomplete functionality!'
-      },
-      offlineupdate: {
-        title: 'Offline Updates',
-        queryFailed: 'Get version failed',
-        updateFailed: 'Update failed. Please retry.',
-        updating: 'Update started. Please wait...',
-        confirm: 'Confirm',
-        cancel: 'Cancel',
-        inputfile: 'Please enter the Update File',
-        noupdatefile: 'No update file',
-        uploadbox: 'Drop file here or click to select',
-        ok: 'Ok'
+          'Please be aware that preview releases may contain bugs or incomplete functionality!',
+        offline: {
+          title: 'Offline Updates',
+          desc: 'Update through local installation package',
+          upload: 'Upload',
+          invalidName: 'Invalid filename format. Please download from GitHub releases.',
+          updateFailed: 'Update failed. Please retry.'
+        }
       },
       account: {
         title: 'Account',

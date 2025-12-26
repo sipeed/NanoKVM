@@ -339,7 +339,14 @@ const zh = {
         cancel: '取消',
         preview: '预览更新',
         previewDesc: '率先体验即将推出的新功能和优化',
-        previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！'
+        previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！',
+        offline: {
+          title: '离线更新',
+          desc: '通过本地安装包进行更新',
+          upload: '上传',
+          invalidName: '文件名格式错误，请前往 GitHub 发布页下载安装包。',
+          updateFailed: '更新失败，请重试'
+        }
       },
       account: {
         title: '帐号',

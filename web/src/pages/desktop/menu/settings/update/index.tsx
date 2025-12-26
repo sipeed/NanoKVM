@@ -6,18 +6,19 @@ import semver from 'semver';
 
 import * as api from '@/api/application.ts';
 
+import { Offline } from './offline.tsx';
 import { Preview } from './preview.tsx';
 
 type UpdateProps = {
   setIsLocked: (isClosable: boolean) => void;
 };
 
-type Status = '' | 'loading' | 'updating' | 'outdated' | 'latest' | 'failed';
+// type Status = '' | 'loading' | 'updating' | 'outdated' | 'latest' | 'failed';
 
 export const Update = ({ setIsLocked }: UpdateProps) => {
   const { t } = useTranslation();
 
-  const [status, setStatus] = useState<Status>('');
+  const [status, setStatus] = useState('');
   const [currentVersion, setCurrentVersion] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
   const [errMsg, setErrMsg] = useState('');
@@ -40,10 +41,14 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
         }
 
         setCurrentVersion(rsp.data.current);
-        setLatestVersion(rsp.data.latest);
 
-        const isLatest = semver.gte(rsp.data.current, rsp.data.latest);
-        setStatus(isLatest ? 'latest' : 'outdated');
+        if (rsp.data?.latest) {
+          setLatestVersion(rsp.data.latest);
+          const isLatest = semver.gte(rsp.data.current, rsp.data.latest);
+          setStatus(isLatest ? 'latest' : 'outdated');
+        } else {
+          setStatus('latest');
+        }
       })
       .catch(() => {
         setStatus('failed');
@@ -81,10 +86,15 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <Divider className="opacity-50" />
 
       <Preview />
+      <Offline
+        status={status}
+        setStatus={setStatus}
+        setIsLocked={setIsLocked}
+        setErrMsg={setErrMsg}
+      />
+      <Divider className="opacity-50" />
 
-      <Divider style={{ margin: '50px 0 10px 0', opacity: 0.5 }} />
-
-      <div className="flex min-h-[400px] flex-col justify-between">
+      <div className="flex min-h-[320px] flex-col justify-between">
         {status === 'loading' && (
           <div className="flex justify-center pt-24">
             <Spin indicator={<LoadingOutlined spin />} size="large" />
@@ -94,7 +104,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
         {status === 'updating' && (
           <div className="flex flex-col items-center justify-center space-y-10 pb-10 pt-24">
             <Spin size="large" />
-            <span className="text-blue-600">{t('settings.update.updating')}</span>
+            <span className="text-neutral-500">{t('settings.update.updating')}</span>
           </div>
         )}
 
