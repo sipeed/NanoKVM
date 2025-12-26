@@ -41,9 +41,9 @@ export const VideoMode = () => {
     <>
       {!isDirectSupported && (
         <Tooltip
-          placement="right"
           title={t('screen.videoDirectTips')}
-          overlayStyle={{ maxWidth: '270px' }}
+          placement="right"
+          styles={{ root: { maxWidth: '270px' } }}
         >
           <div className="flex cursor-not-allowed select-none items-center rounded py-1.5 pl-1 pr-5 text-neutral-500 hover:bg-neutral-700/70">
             <div className="flex h-[14px] w-[20px] items-end text-blue-500"></div>

@@ -71,10 +71,10 @@ export const Screen = () => {
   const content = (
     <div className="flex flex-col space-y-1">
       <VideoMode />
-      <Scale />
       <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
+      <Scale />
       {videoMode !== 'mjpeg' && <Gop gop={gop} setGop={setGop} />}
       {videoMode === 'mjpeg' && <FrameDetect />}
       <Reset />

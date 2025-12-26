@@ -48,7 +48,7 @@ export const Power = () => {
   }
 
   const icon = (
-    <div className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-500')}>
+    <div className={clsx('h-[18px] w-[18px]', isPowerOn ? 'text-green-600' : 'text-neutral-300')}>
       {isLoading ? (
         <LoaderCircleIcon className="animate-spin" size={18} />
       ) : (

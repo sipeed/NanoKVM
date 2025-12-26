@@ -8,9 +8,10 @@ export const Fullscreen = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
-    function onFullscreenChange() {
+    const onFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
-    }
+    };
+
     onFullscreenChange();
 
     document.addEventListener('fullscreenchange', onFullscreenChange);
@@ -24,8 +25,14 @@ export const Fullscreen = () => {
     if (!document.fullscreenElement) {
       const element = document.documentElement;
       element.requestFullscreen();
+
+      // @ts-expect-error - https://developer.mozilla.org/en-US/docs/Web/API/Keyboard/lock
+      navigator.keyboard?.lock();
     } else {
       document.exitFullscreen();
+
+      // @ts-expect-error - https://developer.mozilla.org/en-US/docs/Web/API/Keyboard/unlock
+      navigator.keyboard?.unlock();
     }
   }
 

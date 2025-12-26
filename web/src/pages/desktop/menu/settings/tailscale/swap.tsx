@@ -59,7 +59,7 @@ export const Swap = () => {
           title={t('settings.tailscale.swap.tip')}
           className="cursor-pointer text-neutral-500"
           placement="top"
-          overlayStyle={{ maxWidth: '400px' }}
+          styles={{ root: { maxWidth: '400px' } }}
         >
           <CircleHelpIcon size={15} />
         </Tooltip>

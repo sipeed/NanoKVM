@@ -43,17 +43,17 @@ export const Ssh = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex flex-col">
+      <div className="flex flex-col space-y-1">
         <div className="flex items-center space-x-2">
           <span>SSH</span>
 
           <Tooltip
             title={t('settings.device.ssh.tip')}
             className="cursor-pointer"
-            placement="bottom"
-            overlayStyle={{ maxWidth: '300px' }}
+            placement="right"
+            styles={{ root: { maxWidth: '400px' } }}
           >
-            <CircleAlertIcon size={15} />
+            <CircleAlertIcon className="text-neutral-500" size={14} />
           </Tooltip>
         </div>
         <span className="text-xs text-neutral-500">{t('settings.device.ssh.description')}</span>

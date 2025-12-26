@@ -77,12 +77,12 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
 
   return (
     <>
-      <div className="text-base font-bold">{t('settings.update.title')}</div>
-      <Divider />
+      <div className="text-base">{t('settings.update.title')}</div>
+      <Divider className="opacity-50" />
 
       <Preview />
 
-      <div className="my-[40px] h-px bg-neutral-500/10" />
+      <Divider style={{ margin: '50px 0 10px 0', opacity: 0.5 }} />
 
       <div className="flex min-h-[400px] flex-col justify-between">
         {status === 'loading' && (

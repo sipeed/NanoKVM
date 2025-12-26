@@ -59,17 +59,17 @@ export const Swap = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex flex-col">
+      <div className="flex flex-col space-y-1">
         <div className="flex items-center space-x-2">
           <span>{t('settings.device.swap.title')}</span>
 
           <Tooltip
             title={t('settings.device.swap.tip')}
             className="cursor-pointer"
-            placement="bottom"
-            overlayStyle={{ maxWidth: '300px' }}
+            placement="right"
+            styles={{ root: { maxWidth: '400px' } }}
           >
-            <CircleAlertIcon size={15} />
+            <CircleAlertIcon className="text-neutral-500" size={14} />
           </Tooltip>
         </div>
         <span className="text-xs text-neutral-500">{t('settings.device.swap.description')}</span>

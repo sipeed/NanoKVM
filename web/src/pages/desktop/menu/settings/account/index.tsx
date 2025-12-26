@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider } from 'antd';
+import { Button, Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -27,10 +27,10 @@ export const Account = () => {
 
   return (
     <>
-      <div className="text-base font-bold">{t('settings.account.title')}</div>
-      <Divider />
+      <div className="text-base">{t('settings.account.title')}</div>
+      <Divider className="opacity-50" />
 
-      <div className="flex flex-col space-y-5">
+      <div className="flex flex-col space-y-8">
         <div className="flex items-center justify-between">
           <span>{t('settings.account.webAccount')}</span>
           <span>{username ? username : '-'}</span>
@@ -38,15 +38,13 @@ export const Account = () => {
 
         <div className="flex items-center justify-between">
           <span>{t('settings.account.password')}</span>
-          <span
-            className="cursor-pointer text-blue-500 hover:text-blue-500/80"
-            onClick={changePassword}
-          >
+          <Button type="primary" onClick={changePassword}>
             {t('settings.account.updateBtn')}
-          </span>
+          </Button>
         </div>
       </div>
-      <Divider />
+
+      <Divider className="opacity-50" />
 
       <Logout />
     </>

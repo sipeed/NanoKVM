@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Input } from 'antd';
 import { useAtom } from 'jotai';
-import { GlobeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
@@ -46,26 +45,23 @@ export const WebTitle = () => {
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="mt-8 flex items-center justify-between space-x-5">
       <div className="flex flex-col">
-        <div className="flex items-center space-x-1">
-          <div className="flex size-[16px] items-center justify-center">
-            <GlobeIcon size={14} />
-          </div>
-          <span>{t('settings.appearance.webTitle')}</span>
-        </div>
+        <span>{t('settings.appearance.webTitle')}</span>
         <span className="text-xs text-neutral-500">{t('settings.appearance.webTitleDesc')}</span>
       </div>
 
-      <Input
-        disabled={isLoading}
-        style={{ width: 180 }}
-        value={webTitle}
-        onChange={(e) => setWebTitle(e.target.value)}
-        onPressEnter={submit}
-        onBlur={submit}
-        placeholder="NanoKVM"
-      />
+      <div>
+        <Input
+          disabled={isLoading}
+          style={{ width: 180 }}
+          value={webTitle}
+          onChange={(e) => setWebTitle(e.target.value)}
+          onPressEnter={submit}
+          onBlur={submit}
+          placeholder="NanoKVM"
+        />
+      </div>
     </div>
   );
 };

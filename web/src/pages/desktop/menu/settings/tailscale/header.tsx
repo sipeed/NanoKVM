@@ -44,7 +44,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
 
   return (
     <div className="flex items-center justify-between">
-      <span className="text-base font-bold">{t('settings.tailscale.title')}</span>
+      <span className="text-base">{t('settings.tailscale.title')}</span>
 
       <div className="flex items-center space-x-2">
         {state && ['notLogin', 'stopped', 'running'].includes(state) && (
@@ -101,7 +101,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
             placement="bottom"
             trigger="click"
           >
-            <div className="flex cursor-pointer rounded p-1 text-white hover:bg-neutral-600">
+            <div className="flex cursor-pointer rounded p-1 text-white hover:bg-neutral-700/50">
               <EllipsisIcon size={18} />
             </div>
           </Popover>

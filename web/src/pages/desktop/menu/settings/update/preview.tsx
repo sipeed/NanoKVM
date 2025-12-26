@@ -56,17 +56,17 @@ export const Preview = () => {
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex flex-col">
+      <div className="flex flex-col space-y-1">
         <div className="flex items-center space-x-2">
           <span>{t('settings.update.preview')}</span>
 
           <Tooltip
             title={t('settings.update.previewTip')}
             className="cursor-pointer"
-            placement="bottom"
-            overlayStyle={{ maxWidth: '350px' }}
+            placement="right"
+            styles={{ root: { maxWidth: '400px' } }}
           >
-            <CircleAlertIcon size={15} />
+            <CircleAlertIcon className="text-neutral-500" size={15} />
           </Tooltip>
         </div>
 

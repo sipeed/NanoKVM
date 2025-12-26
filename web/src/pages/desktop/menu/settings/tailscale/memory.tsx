@@ -52,7 +52,7 @@ export const Memory = () => {
           title={t('settings.tailscale.memory.tip')}
           className="cursor-pointer text-neutral-500"
           placement="top"
-          overlayStyle={{ maxWidth: '400px' }}
+          styles={{ root: { maxWidth: '400px' } }}
         >
           <CircleHelpIcon size={15} />
         </Tooltip>
