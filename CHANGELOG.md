@@ -1,3 +1,33 @@
+## 2.3.1 (2025-12-26)
+
+### Features
+
+* Added support for offline application updates (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
+* Implemented support for uploading ISO images (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
+* Extended clipboard compatibility to support Russian characters (thanks to [@pekishev](https://github.com/pekishev))
+* Added configuration options for video scaling
+* Added support for configuring mouse scroll wheel direction
+
+### Bug Fixes
+
+* Resolved an issue where custom port may not be accessible
+* Fixed a bug where Web Terminal and Serial Terminal may not disconnect when the page is closed
+
+### Security
+
+* Enhanced validation logic on the Wi-Fi configuration page. Requests are now rejected when the device is not in AP mode to prevent unauthorized changes
+
+### Chore
+
+* Added a Docker image environment to support building `libkvm.so` and `NanoKVM-Server` (thanks to [@lowtech-guy](https://github.com/lowtech-guy))
+* Optimized the Settings UI
+
+### Localization
+
+* Updated Korean translation (thanks to [@kmw0410](https://github.com/kmw0410))
+* Updated Swedish translation (thanks to [@acidflash](https://github.com/acidflash))
+* Updated Spanish translation (thanks to [@Deses](https://github.com/Deses))
+
 ## 2.3.0 [0e30a26](https://github.com/sipeed/NanoKVM/commit/0e30a26db42cbc08416662b49a88a5d16ad93424) (2025-11-26)
 
 ### Features
