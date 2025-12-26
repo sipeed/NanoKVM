@@ -149,4 +149,11 @@ case "$1" in
     start_usb_host
     start_usb_dev
   ;;
+   restart_phy)
+    echo "4340000.usb" > /sys/bus/platform/drivers/dwc2/unbind
+    sleep 1
+    echo "4340000.usb" > /sys/bus/platform/drivers/dwc2/bind
+    start_usb_host
+    start_usb_dev
+  ;;
 esac
