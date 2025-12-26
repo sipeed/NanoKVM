@@ -29,6 +29,8 @@ export const Terminal = () => {
 
     const url = `${getBaseUrl('ws')}/api/vm/terminal`;
     const ws = new WebSocket(url);
+    let isPicocomRunning = false;
+
     ws.onopen = () => {
       const attachAddon = new AttachAddon(ws);
       terminal.loadAddon(attachAddon);
@@ -63,22 +65,44 @@ export const Terminal = () => {
       ws.send(
         `picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits}\r`
       );
+
+      isPicocomRunning = true;
+    };
+
+    const exitPicocom = () => {
+      if (ws.readyState === WebSocket.OPEN && isPicocomRunning) {
+        ws.send('\x01\x18');
+        isPicocomRunning = false;
+      }
     };
 
     const resizeScreen = () => {
       fitAddon.fit();
       sendSize();
     };
+
+    const cleanupConnection = () => {
+      exitPicocom();
+      setTimeout(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
+      }, 100);
+    };
+
+    const handleBeforeUnload = () => {
+      cleanupConnection();
+    };
+
     window.addEventListener('resize', resizeScreen, false);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       terminal.dispose();
-
-      if (ws.readyState === 1) {
-        ws.close();
-      }
+      cleanupConnection();
 
       window.removeEventListener('resize', resizeScreen, false);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
