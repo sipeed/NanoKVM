@@ -101,10 +101,6 @@ type GetGetHdmiStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
-type GetUsbStateRsp struct {
-	Enabled bool `json:"enabled"`
-}
-
 type GetSSHStateRsp struct {
 	Enabled bool `json:"enabled"`
 }

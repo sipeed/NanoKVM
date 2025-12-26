@@ -200,6 +200,7 @@ const zh = {
         title: '外观',
         display: '显示',
         language: '语言',
+        languageDesc: '选择界面语言',
         menuBar: '菜单栏',
         menuBarDesc: '是否在菜单栏中显示图标',
         webTitle: '网站标题',
@@ -275,6 +276,7 @@ const zh = {
           settings: '设置'
         },
         hidOnly: 'HID-Only 模式',
+        hidOnlyDesc: '该模式下不再挂载虚拟设备，仅保留基础的 HID 控制功能。',
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',

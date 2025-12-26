@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Button, Divider, Modal, Typography } from 'antd';
 import clsx from 'clsx';
-import { useAtom } from 'jotai';
 import { PenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/hid.ts';
-import { hidModeAtom } from '@/jotai/mouse.ts';
 
 const { Paragraph } = Typography;
 
 export const HidMode = () => {
   const { t } = useTranslation();
-  const [hidMode, setHidMode] = useAtom(hidModeAtom);
 
+  const [hidMode, setHidMode] = useState<'normal' | 'hid-only'>('normal');
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errMsg, setErrMsg] = useState('');

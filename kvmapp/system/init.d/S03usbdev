@@ -75,7 +75,7 @@ start_usb_dev(){
         fi
         echo 2 > functions/hid.GS1/protocol
         echo 4 > functions/hid.GS1/report_length
-        echo -ne \\x5\\x1\\x9\\x2\\xa1\\x1\\x9\\x1\\xa1\\x0\\x5\\x9\\x19\\x1\\x29\\x3\\x15\\x0\\x25\\x1\\x95\\x3\\x75\\x1\\x81\\x2\\x95\\x1\\x75\\x5\\x81\\x3\\x5\\x1\\x9\\x30\\x9\\x31\\x9\\x38\\x15\\x81\\x25\\x7f\\x75\\x8\\x95\\x3\\x81\\x6\\xc0\\xc0 > functions/hid.GS1/report_desc        
+        echo -ne \\x5\\x1\\x9\\x2\\xa1\\x1\\x9\\x1\\xa1\\x0\\x5\\x9\\x19\\x1\\x29\\x3\\x15\\x0\\x25\\x1\\x95\\x3\\x75\\x1\\x81\\x2\\x95\\x1\\x75\\x5\\x81\\x3\\x5\\x1\\x9\\x30\\x9\\x31\\x9\\x38\\x15\\x81\\x25\\x7f\\x75\\x8\\x95\\x3\\x81\\x6\\xc0\\xc0 > functions/hid.GS1/report_desc
         ln -s functions/hid.GS1 configs/c.1
 
         # touchpad
@@ -94,7 +94,6 @@ start_usb_dev(){
         ln -s functions/hid.GS2 configs/c.1
     fi
 
-    # dedicated for media
     if [ -e /boot/usb.disk0 ]
     then
             mkdir functions/mass_storage.disk0
@@ -109,23 +108,18 @@ start_usb_dev(){
             disk=$(cat /boot/usb.disk0)
             if [ -z "${disk}" ]
             then
-                    echo "" > functions/mass_storage.disk0/lun.0/file
+                    # if [ ! -e /mnt/usbdisk.img ]
+                    # then
+                    #         fallocate -l 8G /mnt/usbdisk.img
+                    #         mkfs.vfat /mnt/usbdisk.img
+                    # fi
+                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
             else
                     cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
             fi
     fi
 
-    # mount data partition
-    if [ -e /boot/usb.disk1 ]
-    then
-            mkdir functions/mass_storage.disk1
-            ln -s functions/mass_storage.disk1 configs/c.1/
-            echo /dev/mmcblk0p3 > functions/mass_storage.disk1/lun.0/file
-    fi
-
-    if [ ! -e /boot/udc.disable ]; then
-        ls /sys/class/udc/ | cat > UDC
-    fi
+    ls /sys/class/udc/ | cat > UDC
     echo device > /proc/cviusb/otg_role
 }
 
@@ -137,9 +131,7 @@ start_usb_host(){
 restart_usb_dev(){
     echo > /sys/kernel/config/usb_gadget/g0/UDC
     sleep 1
-    if [ ! -e /boot/udc.disable ]; then
-        ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
-    fi
+    ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
     echo "USB Restart OK!"
 }
 
