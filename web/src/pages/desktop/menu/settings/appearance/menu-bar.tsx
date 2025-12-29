@@ -6,7 +6,8 @@ import {
   FileJsonIcon,
   NetworkIcon,
   PowerIcon,
-  TerminalSquareIcon
+  TerminalSquareIcon,
+  VideoIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +25,8 @@ export const MenuBar = () => {
     { key: 'script', icon: <FileJsonIcon size={16} className="text-neutral-400" /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} className="text-neutral-400" /> },
     { key: 'wol', icon: <NetworkIcon size={16} className="text-neutral-400" /> },
-    { key: 'power', icon: <PowerIcon size={16} className="text-neutral-400" /> }
+    { key: 'power', icon: <PowerIcon size={16} className="text-neutral-400" /> },
+    { key: 'recorder', icon: <VideoIcon size={16} className="text-neutral-400" /> }
   ];
 
   function updateItems(key: string) {
