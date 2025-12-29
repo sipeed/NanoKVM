@@ -20,6 +20,8 @@ func extensionsRouter(r *gin.Engine) {
 	api.POST("/tailscale/login", ts.Login)         // tailscale login
 	api.POST("/tailscale/logout", ts.Logout)       // tailscale logout
 	api.POST("/tailscale/start", ts.Start)         // tailscale start
-	api.POST("/tailscale/stop", ts.Stop)           // tailscale stop
-	api.POST("/tailscale/restart", ts.Restart)     // tailscale restart
+	api.POST("/tailscale/stop", ts.Stop)               // tailscale stop
+	api.POST("/tailscale/restart", ts.Restart)         // tailscale restart
+	api.GET("/tailscale/auto-update", ts.GetAutoUpdate)  // get auto-update status
+	api.POST("/tailscale/auto-update", ts.SetAutoUpdate) // set auto-update
 }

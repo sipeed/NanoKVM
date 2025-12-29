@@ -20,3 +20,7 @@ type GetTailscaleStatusRsp struct {
 type LoginTailscaleRsp struct {
 	Url string `json:"url"`
 }
+
+type SetAutoUpdateReq struct {
+	Enable bool `form:"enable"`
+}

@@ -18,11 +18,43 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
   const [isRunning, setIsRunning] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isLogging, setIsLogging] = useState(false);
+  const [autoUpdate, setAutoUpdate] = useState(false);
+  const [isAutoUpdateLoading, setIsAutoUpdateLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
   useEffect(() => {
     setIsRunning(status.state === 'running');
+    loadAutoUpdate();
   }, [status]);
+
+  async function loadAutoUpdate() {
+    try {
+      const rsp = await api.getAutoUpdate();
+      if (rsp.code === 0 && rsp.data) {
+        setAutoUpdate(rsp.data.enabled);
+      }
+    } catch (err) {
+      console.error('Failed to load auto-update status:', err);
+    }
+  }
+
+  async function toggleAutoUpdate() {
+    if (isAutoUpdateLoading) return;
+    setIsAutoUpdateLoading(true);
+
+    try {
+      const rsp = await api.setAutoUpdate(!autoUpdate);
+      if (rsp.code === 0) {
+        setAutoUpdate(!autoUpdate);
+      } else {
+        setErrMsg(rsp.msg);
+      }
+    } catch (err) {
+      console.error('Failed to set auto-update:', err);
+    } finally {
+      setIsAutoUpdateLoading(false);
+    }
+  }
 
   async function update() {
     if (isUpdating) return;
@@ -80,6 +112,11 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
       <div className="flex justify-between">
         <span>{t('settings.tailscale.account')}</span>
         <span>{status.account}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span>{t('settings.tailscale.autoUpdate')}</span>
+        <Switch checked={autoUpdate} loading={isAutoUpdateLoading} onClick={toggleAutoUpdate} />
       </div>
       <Divider />
 
