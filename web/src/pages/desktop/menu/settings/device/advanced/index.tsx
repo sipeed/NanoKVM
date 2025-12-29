@@ -4,8 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Swap } from './swap.tsx';
 
 const children = (
-  <div className="py-3">
+  <div className="space-y-6 py-3">
     <Swap />
+    {/*<Autostart />*/}
   </div>
 );
 

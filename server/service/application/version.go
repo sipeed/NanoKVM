@@ -1,7 +1,6 @@
 package application
 
 import (
-	"NanoKVM-Server/proto"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -9,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"NanoKVM-Server/proto"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -36,15 +37,15 @@ func (s *Service) GetVersion(c *gin.Context) {
 	log.Debugf("current version: %s", currentVersion)
 
 	// latest version
+	latestVersion := ""
 	latest, err := getLatest()
-	if err != nil {
-		rsp.ErrRsp(c, -1, "get latest version failed")
-		return
+	if err == nil && latest != nil {
+		latestVersion = latest.Version
 	}
 
 	rsp.OkRspWithData(c, &proto.GetVersionRsp{
 		Current: currentVersion,
-		Latest:  latest.Version,
+		Latest:  latestVersion,
 	})
 }
 

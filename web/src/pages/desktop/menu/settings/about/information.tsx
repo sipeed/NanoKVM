@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
 
+import { Hostname } from './hostname.tsx';
+
 type IP = {
   name: string;
   addr: string;
@@ -38,9 +40,9 @@ export const Information = () => {
 
   return (
     <>
-      <div className="pb-5 text-neutral-400">{t('settings.about.information')}</div>
+      <div className="text-neutral-400">{t('settings.about.information')}</div>
 
-      <div className="flex w-full flex-col space-y-4">
+      <div className="mt-5 flex w-full flex-col space-y-5">
         {/* IP list */}
         <div className="flex w-full items-start justify-between">
           <span>{t('settings.about.ip')}</span>
@@ -103,6 +105,8 @@ export const Information = () => {
 
           <span>{information ? information.application : '-'}</span>
         </div>
+
+        <Hostname />
       </div>
     </>
   );

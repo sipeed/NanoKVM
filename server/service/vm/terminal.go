@@ -50,6 +50,7 @@ func (s *Service) Terminal(c *gin.Context) {
 	defer func() {
 		_ = ptmx.Close()
 		_ = cmd.Process.Kill()
+		_ = cmd.Wait()
 	}()
 
 	go wsWrite(ws, ptmx)

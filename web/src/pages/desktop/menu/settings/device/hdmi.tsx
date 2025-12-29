@@ -61,7 +61,7 @@ export const Hdmi = () => {
     <>
       {isPcie && (
         <div className="flex items-center justify-between">
-          <div className="flex flex-col">
+          <div className="flex flex-col space-y-1">
             <span>HDMI</span>
 
             <span className="text-xs text-neutral-500">

@@ -40,12 +40,14 @@ const zh = {
     wifi: {
       title: 'Wi-Fi',
       description: '配置 NanoKVM Wi-Fi 信息',
-      success: '请检查 NanoKVM 的网络状态，并访问新的 IP 地址。',
+      success: '请前往设备检查 NanoKVM 的网络状态。',
       failed: '操作失败，请重试。',
+      invalidMode: '当前模式不支持配置网络。请先前往设备启用 Wi-Fi 配置模式。',
       confirmBtn: '确定',
       finishBtn: '完成'
     },
     screen: {
+      scale: '缩放',
       title: '屏幕',
       video: '视频模式',
       videoDirectTips: '该模式需启用 HTTPS，请前往「设置 - 设备」中开启',
@@ -85,6 +87,9 @@ const zh = {
       mode: '鼠标模式',
       absolute: '绝对模式',
       relative: '相对模式',
+      direction: '滚轮方向',
+      scrollUp: '向上',
+      scrollDown: '向下',
       speed: '滚轮速度',
       fast: '快',
       slow: '慢',
@@ -203,6 +208,7 @@ const zh = {
         title: '外观',
         display: '显示',
         language: '语言',
+        languageDesc: '选择界面语言',
         menuBar: '菜单栏',
         menuBarDesc: '是否在菜单栏中显示图标',
         webTitle: '网站标题',
@@ -226,7 +232,17 @@ const zh = {
         wifi: {
           title: 'Wi-Fi',
           description: '配置 Wi-Fi 信息',
-          setBtn: '设置'
+          apMode: 'AP 模式已启用，该模式下仅支持扫描二维码配网',
+          connect: '连接 Wi-Fi',
+          connectDesc1: '请输入网络名称和密码',
+          connectDesc2: '请输入密码以连接此网络',
+          disconnect: '是否要断开该网络连接？',
+          failed: '连接失败，请重试',
+          ssid: '名称',
+          password: '密码',
+          joinBtn: '加入',
+          confirmBtn: '确定',
+          cancelBtn: '取消'
         },
         ssh: {
           description: '启用 SSH 远程访问',
@@ -256,7 +272,19 @@ const zh = {
         hdmi: {
           description: '启用 HDMI/显示器 输出功能'
         },
+        autostart: {
+          title: '自动启动脚本设置',
+          description: '管理能够在 NanoKVM 启动时自动运行的脚本文件',
+          new: '创建新脚本',
+          deleteConfirm: '确定要删除该文件吗？',
+          yes: '是',
+          no: '否',
+          scriptName: '自动启动脚本名称',
+          scriptContent: '自动启动脚本内容',
+          settings: '设置'
+        },
         hidOnly: 'HID-Only 模式',
+        hidOnlyDesc: '该模式下不再挂载虚拟设备，仅保留基础的 HID 控制功能。',
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
@@ -319,7 +347,14 @@ const zh = {
         cancel: '取消',
         preview: '预览更新',
         previewDesc: '率先体验即将推出的新功能和优化',
-        previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！'
+        previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！',
+        offline: {
+          title: '离线更新',
+          desc: '通过本地安装包进行更新',
+          upload: '上传',
+          invalidName: '文件名格式错误，请前往 GitHub 发布页下载安装包。',
+          updateFailed: '更新失败，请重试'
+        }
       },
       account: {
         title: '帐号',

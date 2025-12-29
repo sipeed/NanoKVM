@@ -2,7 +2,6 @@ import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { Community } from './community.tsx';
-import { Hostname } from './hostname.tsx';
 import { Information } from './information.tsx';
 
 export const About = () => {
@@ -10,12 +9,11 @@ export const About = () => {
 
   return (
     <>
-      <div className="text-base font-bold">{t('settings.about.title')}</div>
-      <Divider />
+      <div className="text-base">{t('settings.about.title')}</div>
+      <Divider className="opacity-50" />
 
       <Information />
-      <Hostname />
-      <Divider />
+      <Divider className="opacity-50" />
 
       <Community />
     </>

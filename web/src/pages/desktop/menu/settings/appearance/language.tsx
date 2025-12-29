@@ -1,5 +1,4 @@
 import { Select } from 'antd';
-import { LanguagesIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import languages from '@/i18n/languages.ts';
@@ -21,18 +20,20 @@ export const Language = () => {
   }
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-1">
-        <LanguagesIcon size={16} />
+    <div className="mt-5 flex items-center justify-between space-x-5">
+      <div className="flex flex-col space-y-1">
         <span>{t('settings.appearance.language')}</span>
+        <span className="text-xs text-neutral-500">{t('settings.appearance.languageDesc')}</span>
       </div>
 
-      <Select
-        defaultValue={i18n.language}
-        style={{ width: 180 }}
-        options={options}
-        onSelect={changeLanguage}
-      />
+      <div>
+        <Select
+          defaultValue={i18n.language}
+          style={{ width: 180 }}
+          options={options}
+          onSelect={changeLanguage}
+        />
+      </div>
     </div>
   );
 };

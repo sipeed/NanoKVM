@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.1",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@xterm/addon-attach": "^0.11.0",
     "@xterm/addon-fit": "^0.10.0",
     "@xterm/xterm": "^5.5.0",
@@ -22,7 +23,7 @@
     "i18next": "^23.16.4",
     "jotai": "^2.10.1",
     "js-cookie": "^3.0.5",
-    "lucide-react": "^0.469.0",
+    "lucide-react": "^0.562.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",

@@ -3,32 +3,42 @@ import { CheckOutlined, LockOutlined, WifiOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import { connectWifi } from '@/api/network.ts';
+import * as api from '@/api/network.ts';
 import { Head } from '@/components/head.tsx';
 
-type State = '' | 'loading' | 'success' | 'failed';
+type State = '' | 'loading' | 'success' | 'failed' | 'denied';
 
 export const Wifi = () => {
   const { t } = useTranslation();
 
   const [state, setState] = useState<State>('');
 
-  function connect(values: any) {
-    if (state === 'loading' || state === 'success') return;
+  async function connect(values: any) {
+    if (!values.ssid || !values.password) return;
 
-    const ssid = values.ssid;
-    const password = values.password;
-    if (!ssid || !password) return;
-
+    if (state === 'loading') return;
     setState('loading');
 
-    connectWifi(ssid, password)
-      .then((rsp) => {
-        setState(rsp.code === 0 ? 'success' : 'failed');
-      })
-      .catch(() => {
-        setState('failed');
-      });
+    try {
+      const rsp = await api.connectWifiNoAuth(values.ssid, values.password);
+
+      switch (rsp?.code) {
+        case 0:
+          setState('success');
+          return;
+        case -1:
+          setState('denied');
+          return;
+        case -2:
+        case -3:
+          setState('failed');
+          return;
+      }
+    } catch (err) {
+      console.log(err);
+    }
+
+    setState('success');
   }
 
   return (
@@ -74,12 +84,17 @@ export const Wifi = () => {
           </Form.Item>
         </Form>
 
-        <div className="flex h-6 justify-center px-10">
+        <div className="flex max-w-[500px] justify-center px-5 pt-3 md:px-10">
           {state === 'success' && (
             <span className="text-sm text-green-500">{t('wifi.success')}</span>
           )}
 
           {state === 'failed' && <span className="text-sm text-red-500">{t('wifi.failed')} </span>}
+          {state === 'denied' && (
+            <div className="flex flex-col items-center space-y-5">
+              <span className="text-sm text-red-500">{t('wifi.invalidMode')} </span>
+            </div>
+          )}
         </div>
       </div>
     </>

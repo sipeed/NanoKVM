@@ -2,6 +2,7 @@ import { Resolution } from '@/types';
 
 const LANGUAGE_KEY = 'nano-kvm-language';
 const VIDEO_MODE_KEY = 'nano-kvm-vide-mode';
+const VIDEO_SCALE_KEY = 'nano-kvm-video-scale';
 const WEB_RESOLUTION_KEY = 'nano-kvm-web-resolution';
 const FPS_KEY = 'nano-kvm-fps';
 const QUALITY_KEY = 'nano-kvm-quality';
@@ -9,7 +10,8 @@ const GOP_KEY = 'nano-kvm-gop';
 const FRAME_DETECT_KEY = 'nano-kvm-frame-detect';
 const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
-const MOUSE_SCROLL_INTERVAL_KEY = 'nanokvm-kvm-mouse-scroll-interval';
+const MOUSE_SCROLL_DIRECTION_KEY = 'nano-kvm-mouse-scroll-direction';
+const MOUSE_SCROLL_INTERVAL_KEY = 'nano-kvm-mouse-scroll-interval';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
 const KEYBOARD_SYSTEM_KEY = 'nano-kvm-keyboard-system';
 const KEYBOARD_LANGUAGE_KEY = 'nano-kvm-keyboard-language';
@@ -63,6 +65,18 @@ export function getVideoMode() {
 
 export function setVideoMode(mode: string) {
   localStorage.setItem(VIDEO_MODE_KEY, mode);
+}
+
+export function getVideoScale(): number | null {
+  const scale = localStorage.getItem(VIDEO_SCALE_KEY);
+  if (scale && Number(scale)) {
+    return Number(scale);
+  }
+  return null;
+}
+
+export function setVideoScale(scale: number): void {
+  localStorage.setItem(VIDEO_SCALE_KEY, String(scale));
 }
 
 export function getResolution(): Resolution | null {
@@ -129,6 +143,18 @@ export function getMouseMode() {
 
 export function setMouseMode(mouse: string) {
   localStorage.setItem(MOUSE_MODE_KEY, mouse);
+}
+
+export function getMouseScrollDirection(): number | null {
+  const direction = localStorage.getItem(MOUSE_SCROLL_DIRECTION_KEY);
+  if (direction && Number(direction)) {
+    return Number(direction);
+  }
+  return null;
+}
+
+export function setMouseScrollDirection(direction: number): void {
+  localStorage.setItem(MOUSE_SCROLL_DIRECTION_KEY, String(direction));
 }
 
 export function getMouseScrollInterval() {

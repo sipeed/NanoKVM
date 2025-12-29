@@ -20,13 +20,13 @@ export const MenuBar = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const items = [
-    { key: 'image', icon: <DiscIcon size={16} /> },
-    { key: 'download', icon: <DownloadIcon size={16} /> },
-    { key: 'script', icon: <FileJsonIcon size={15} /> },
-    { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
-    { key: 'wol', icon: <NetworkIcon size={16} /> },
-    { key: 'power', icon: <PowerIcon size={16} /> },
-    { key: 'recorder', icon: <VideoIcon size={16} /> }
+    { key: 'image', icon: <DiscIcon size={16} className="text-neutral-400" /> },
+    { key: 'download', icon: <DownloadIcon size={16} className="text-neutral-400" /> },
+    { key: 'script', icon: <FileJsonIcon size={16} className="text-neutral-400" /> },
+    { key: 'terminal', icon: <TerminalSquareIcon size={16} className="text-neutral-400" /> },
+    { key: 'wol', icon: <NetworkIcon size={16} className="text-neutral-400" /> },
+    { key: 'power', icon: <PowerIcon size={16} className="text-neutral-400" /> },
+    { key: 'recorder', icon: <VideoIcon size={16} className="text-neutral-400" /> }
   ];
 
   function updateItems(key: string) {
@@ -47,10 +47,10 @@ export const MenuBar = () => {
         <span className="text-xs text-neutral-500">{t('settings.appearance.menuBarDesc')}</span>
       </div>
 
-      <div className="flex flex-col space-y-4 pt-5">
+      <div className="mt-8 flex flex-col space-y-5">
         {items.map((item) => (
           <div key={item.key} className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-2">
               {item.icon}
               <span>{t(`${item.key}.title`)}</span>
             </div>

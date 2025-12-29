@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 
 import { client } from '@/lib/websocket.ts';
-import { scrollIntervalAtom } from '@/jotai/mouse.ts';
+import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseButton, MouseEvent } from './constants';
 
 export const Absolute = () => {
   const resolution = useAtomValue(resolutionAtom);
+  const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
 
   const lastScrollTimeRef = useRef(0);
@@ -62,8 +63,7 @@ export const Absolute = () => {
     function handleWheel(event: any) {
       disableEvent(event);
 
-      const delta = Math.floor(event.deltaY);
-      if (delta === 0) return;
+      if (Math.floor(event.deltaY) === 0) return;
 
       const currentTime = Date.now();
       if (currentTime - lastScrollTimeRef.current < scrollInterval) {
@@ -71,7 +71,8 @@ export const Absolute = () => {
       }
       lastScrollTimeRef.current = currentTime;
 
-      const data = [2, MouseEvent.Scroll, 0, 0, delta];
+      const deltaY = (event.deltaY > 0 ? 1 : -1) * scrollDirection;
+      const data = [2, MouseEvent.Scroll, 0, 0, deltaY];
       client.send(data);
     }
 
@@ -130,7 +131,7 @@ export const Absolute = () => {
       canvas.removeEventListener('click', disableEvent);
       canvas.removeEventListener('contextmenu', disableEvent);
     };
-  }, [resolution, scrollInterval]);
+  }, [resolution, scrollDirection, scrollInterval]);
 
   // disable default events
   function disableEvent(event: any) {

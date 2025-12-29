@@ -41,12 +41,15 @@ const en = {
     wifi: {
       title: 'Wi-Fi',
       description: 'Configure Wi-Fi for NanoKVM',
-      success: 'Please check the network status of NanoKVM and visit the new IP address.',
+      success: 'Please go to the device to check the network status of NanoKVM.',
       failed: 'Operation failed, please try again.',
+      invalidMode:
+        'The current mode does not support network setup. Please go to your device and enable Wi-Fi configuration mode.',
       confirmBtn: 'Ok',
       finishBtn: 'Finished'
     },
     screen: {
+      scale: 'Scale',
       title: 'Screen',
       video: 'Video Mode',
       videoDirectTips: 'Enable HTTPS in "Settings > Device" to use this mode',
@@ -79,7 +82,8 @@ const en = {
         'Clipboard permission denied. Please allow clipboard access in your browser.',
       clipboardReadError: 'Failed to read clipboard',
       dropdownEnglish: 'English',
-      dropdownGerman: 'German'
+      dropdownGerman: 'German',
+      dropdownRussian: 'Russian'
     },
     mouse: {
       title: 'Mouse',
@@ -93,6 +97,9 @@ const en = {
       mode: 'Mouse mode',
       absolute: 'Absolute mode',
       relative: 'Relative mode',
+      direction: 'Wheel direction',
+      scrollUp: 'Scroll up',
+      scrollDown: 'Scroll down',
       speed: 'Wheel speed',
       fast: 'Fast',
       slow: 'Slow',
@@ -188,7 +195,10 @@ const en = {
       title: 'Image Downloader',
       input: 'Please enter a remote image URL',
       ok: 'Ok',
-      disabled: '/data partition is RO, so we cannot download the image'
+      disabled: '/data partition is RO, so we cannot download the image',
+      uploadbox: 'Drop file here or click to select',
+      inputfile: 'Please enter the image File',
+      NoISO: 'No ISO'
     },
     power: {
       title: 'Power',
@@ -228,6 +238,7 @@ const en = {
         title: 'Appearance',
         display: 'Display',
         language: 'Language',
+        languageDesc: 'Select the language for the interface',
         menuBar: 'Menu Bar',
         menuBarDesc: 'Display icons in the menu bar',
         webTitle: 'Web Title',
@@ -251,7 +262,17 @@ const en = {
         wifi: {
           title: 'Wi-Fi',
           description: 'Configure Wi-Fi',
-          setBtn: 'Config'
+          apMode: 'AP mode is enabled, connect to Wi-Fi by scanning QR code',
+          connect: 'Join Wi-Fi',
+          connectDesc1: 'Please enter the network ssid and password',
+          connectDesc2: 'Please enter the password to join this network',
+          disconnect: 'Are you sure to disconnect the network?',
+          failed: 'Connection failed, please try again.',
+          ssid: 'Name',
+          password: 'Password',
+          joinBtn: 'Join',
+          confirmBtn: 'Ok',
+          cancelBtn: 'Cancel'
         },
         ssh: {
           description: 'Enable SSH remote access',
@@ -282,17 +303,25 @@ const en = {
         hdmi: {
           description: 'Enable HDMI/monitor output'
         },
+        autostart: {
+          title: 'Autostart Scripts Settings',
+          description: 'Manage scripts that run automatically on system startup',
+          new: 'New',
+          deleteConfirm: 'Are you sure you want to delete this file?',
+          yes: 'Yes',
+          no: 'No',
+          scriptName: 'Autostart Script Name',
+          scriptContent: 'Autostart Script Content',
+          settings: 'Settings'
+        },
         hidOnly: 'HID-Only Mode',
+        hidOnlyDesc: 'Stop emulating virtual devices, retaining only basic HID control',
         disk: 'Virtual Disk',
         diskDesc: 'Mount SD card on the remote host',
-        media: "Virtual Image",
-        mediaDesc: 'Attach virtual image device to the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
-        usb: 'USB Interface',
-        usbDesc: 'Enable USB to host interface',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
@@ -351,7 +380,14 @@ const en = {
         preview: 'Preview Updates',
         previewDesc: 'Get early access to new features and improvements',
         previewTip:
-          'Please be aware that preview releases may contain bugs or incomplete functionality!'
+          'Please be aware that preview releases may contain bugs or incomplete functionality!',
+        offline: {
+          title: 'Offline Updates',
+          desc: 'Update through local installation package',
+          upload: 'Upload',
+          invalidName: 'Invalid filename format. Please download from GitHub releases.',
+          updateFailed: 'Update failed. Please retry.'
+        }
       },
       account: {
         title: 'Account',

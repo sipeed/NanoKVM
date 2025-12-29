@@ -15,6 +15,7 @@ import { Gop } from './gop.tsx';
 import { Quality } from './quality';
 import { Reset } from './reset.tsx';
 import { Resolution } from './resolution';
+import { Scale } from './scale';
 import { VideoMode } from './video-mode.tsx';
 
 export const Screen = () => {
@@ -73,6 +74,7 @@ export const Screen = () => {
       <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
+      <Scale />
       {videoMode !== 'mjpeg' && <Gop gop={gop} setGop={setGop} />}
       {videoMode === 'mjpeg' && <FrameDetect />}
       <Reset />

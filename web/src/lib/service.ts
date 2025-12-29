@@ -4,8 +4,15 @@ export function getHostname(): string {
 }
 
 export function getPort(): string {
-  const port = import.meta.env.VITE_SERVER_PORT as string;
-  return port ? port : window.location.port;
+  if (import.meta.env.VITE_SERVER_PORT) {
+    return import.meta.env.VITE_SERVER_PORT;
+  }
+
+  if (window.location.port) {
+    return window.location.port;
+  }
+
+  return window.location.protocol === 'https:' ? '443' : '80';
 }
 
 export function getBaseUrl(type: 'http' | 'ws'): string {
@@ -16,6 +23,11 @@ export function getBaseUrl(type: 'http' | 'ws'): string {
 
   const hostname = getHostname();
   const port = getPort();
+  const baseUrl = `${protocol}//${hostname}`;
 
-  return `${protocol}//${hostname}:${port}`;
+  const isDefaultPort =
+    ((protocol === 'https:' || protocol === 'wss:') && port === '443') ||
+    ((protocol === 'http:' || protocol === 'ws:') && port === '80');
+
+  return isDefaultPort ? baseUrl : `${baseUrl}:${port}`;
 }

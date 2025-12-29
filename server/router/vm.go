@@ -35,10 +35,6 @@ func vmRouter(r *gin.Engine) {
 	api.GET("/vm/oled", service.GetOLED)  // get OLED configuration
 	api.POST("/vm/oled", service.SetOLED) // set OLED configuration
 
-	api.GET("/vm/usb", service.GetUsbState)         // get USB gadget state
-	api.POST("/vm/usb/enable", service.EnableUsb)   // enable USB
-	api.POST("/vm/usb/disable", service.DisableUsb) // disable USB
-
 	// Only supported by PCIe version
 	api.GET("/vm/hdmi", service.GetHdmiState)         // get HDMI state
 	api.POST("/vm/hdmi/reset", service.ResetHdmi)     // reset hdmi
@@ -66,6 +62,11 @@ func vmRouter(r *gin.Engine) {
 	api.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS
 
 	api.POST("/vm/tls", service.SetTls) // enable/disable TLS
+
+	api.GET("/vm/autostart", service.GetAutostart)              // get autostart list
+	api.GET("/vm/autostart/:name", service.GetAutostartContent) // get autostart content
+	api.DELETE("/vm/autostart/:name", service.DeleteAutostart)  // delete autostart script
+	api.POST("/vm/autostart/:name", service.UploadAutostart)    // upload autostart script
 
 	api.POST("/vm/system/reboot", service.Reboot) // reboot system
 }

@@ -31,11 +31,25 @@ export function getWiFi() {
   return http.get('/api/network/wifi');
 }
 
+// connect wifi without auth (only available in wifi configuration mode)
+export function connectWifiNoAuth(ssid: string, password: string) {
+  const data = {
+    ssid,
+    password
+  };
+  return http.post('/api/network/wifi', data);
+}
+
 // connect wifi
 export function connectWifi(ssid: string, password: string) {
   const data = {
     ssid,
     password
   };
-  return http.post('/api/network/wifi', data);
+  return http.post('/api/network/wifi/connect', data);
+}
+
+// disconnect wifi
+export function disconnectWifi() {
+  return http.post('/api/network/wifi/disconnect');
 }

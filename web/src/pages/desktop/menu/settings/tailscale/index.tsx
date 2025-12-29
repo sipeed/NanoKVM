@@ -49,10 +49,10 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
   return (
     <>
       <Header state={status?.state} onSuccess={getStatus} />
-      <Divider />
+      <Divider className="opacity-50" />
 
       {isLoading ? (
-        <div className="flex items-center justify-center space-x-2 pt-5 text-neutral-500">
+        <div className="flex w-full items-center justify-center space-x-2 pt-5 text-neutral-500">
           <LoaderCircleIcon className="animate-spin" size={18} />
           <span>{t('settings.tailscale.loading')}</span>
         </div>
