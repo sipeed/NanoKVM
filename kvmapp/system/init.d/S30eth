@@ -19,6 +19,7 @@ EOF
 }
 
 start() {
+    ip addr flush dev eth0
     if [ -e /boot/eth.nodhcp ]; then
         while IFS= read -r line || [ -n "$line" ]; do
             line=$(clean_line "$line")
