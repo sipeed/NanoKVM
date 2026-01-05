@@ -107,11 +107,11 @@ export const Settings = () => {
     <>
       <Tooltip title={t('settings.title')} placement="bottom" mouseEnterDelay={0.6}>
         <div
-          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-white hover:bg-neutral-700/80"
+          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700/80"
           onClick={openModal}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
-            <div className="pt-[3px]">
+            <div className="pt-[3px] text-neutral-300 hover:text-white">
               <SettingsIcon size={18} />
             </div>
           </Badge>

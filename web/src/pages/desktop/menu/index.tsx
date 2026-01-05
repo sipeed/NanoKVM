@@ -26,9 +26,12 @@ export const Menu = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isMenuMoved, setIsMenuMoved] = useState(false);
+  const [isMenuHovered, setIsMenuHovered] = useState(true);
   const [bounds, setBounds] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
-  const nodeRef = useRef<any>(null);
+  const nodeRef = useRef<HTMLDivElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // disabled menu items
@@ -51,12 +54,31 @@ export const Menu = () => {
     };
 
     handleResize();
+    handleMouseLeave();
 
     window.addEventListener('resize', handleResize);
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
   }, []);
+
+  function handleMouseEnter() {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsMenuHovered(true);
+  }
+
+  function handleMouseLeave() {
+    timerRef.current = setTimeout(() => {
+      setIsMenuHovered(false);
+    }, 5000);
+  }
 
   return (
     <Draggable
@@ -64,13 +86,31 @@ export const Menu = () => {
       bounds={bounds}
       handle="strong"
       positionOffset={{ x: '-50%', y: '0%' }}
+      onStop={(_e, data) => {
+        if (data.x !== 0 || data.y !== 0) {
+          setIsMenuMoved(true);
+        }
+      }}
     >
-      <div ref={nodeRef} className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2">
+      <div
+        ref={nodeRef}
+        className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Trigger area for auto-show when hidden */}
+        {isMenuOpen && (
+          <div className="absolute -top-[10px] left-0 right-0 h-[60px] w-full bg-transparent" />
+        )}
+
         <div className="sticky top-[10px] flex w-full justify-center">
           <div
             className={clsx(
-              'h-[36px] items-center rounded bg-neutral-800/80',
-              isMenuOpen ? 'flex' : 'hidden'
+              'h-[36px] items-center rounded bg-neutral-800/80 transition-all duration-300',
+              isMenuOpen ? 'flex' : 'hidden',
+              isMenuOpen && !isMenuMoved && !isMenuHovered
+                ? '-translate-y-[110%] opacity-80'
+                : 'translate-y-0 opacity-100'
             )}
           >
             <strong>
