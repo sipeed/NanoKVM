@@ -39,7 +39,7 @@ export const Speed = () => {
   }
 
   const content = (
-    <div className="h-[150px] w-[60px] py-3">
+    <div className="h-[150px] min-w-[60px] py-3">
       <Slider
         vertical
         marks={{
