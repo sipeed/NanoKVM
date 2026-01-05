@@ -1,102 +1,98 @@
 import { useEffect, useRef } from 'react';
+import { useAtomValue } from 'jotai';
 
-import { client } from '@/lib/websocket.ts';
-
-import { KeyboardCodes } from './mappings.ts';
+import { KeyboardReport } from '@/lib/keyboard.ts';
+import { client, MessageEvent } from '@/lib/websocket.ts';
+import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
 export const Keyboard = () => {
-  const pressedKeys = useRef<Set<string>>(new Set());
+  const isKeyboardEnabled = useAtomValue(isKeyboardEnableAtom);
 
-  // listen keyboard events
+  const keyboardRef = useRef(new KeyboardReport());
+  const pressedKeys = useRef(new Set<string>());
+
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('blur', releaseAllKeys);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // press button
-    function handleKeyDown(event: KeyboardEvent) {
-      disableEvent(event);
-
-      if (!pressedKeys.current.has(event.code)) {
-        pressedKeys.current.add(event.code);
-      }
-
-      sendKeyDown(event);
-    }
-
-    // release button
-    function handleKeyUp(event: KeyboardEvent) {
-      disableEvent(event);
-
-      if (pressedKeys.current.has(event.code)) {
-        pressedKeys.current.delete(event.code);
-      }
-
-      sendKeyUp();
-    }
-
-    function releaseAllKeys() {
-      if (pressedKeys.current.size === 0) {
-        return;
-      }
-
-      sendKeyUp();
-      pressedKeys.current.clear();
-    }
-
-    function handleVisibilityChange() {
-      if (document.hidden) {
-        releaseAllKeys();
-      }
-    }
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('blur', releaseAllKeys);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
-
-  function sendKeyDown(event: KeyboardEvent) {
-    const code = KeyboardCodes.get(event.code);
-    if (!code) {
-      console.log('unknown code: ', event.code);
+    if (!isKeyboardEnabled) {
+      releaseKeys();
       return;
     }
 
-    let ctrl = 0;
-    if (event.ctrlKey) {
-      if (pressedKeys.current.has('ControlLeft')) {
-        ctrl = 1;
-      } else if (pressedKeys.current.has('ControlRight')) {
-        ctrl = 16;
-      } else if (pressedKeys.current.has('AltRight')) {
-        ctrl = 0;
-      } else {
-        ctrl = 1;
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Key down event
+    function handleKeyDown(event: KeyboardEvent) {
+      if (!isKeyboardEnabled) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const code = event.code;
+      if (pressedKeys.current.has(code)) {
+        return;
+      }
+
+      pressedKeys.current.add(code);
+      handleKeyEvent({ type: 'keydown', code });
+    }
+
+    // Key up event
+    function handleKeyUp(event: KeyboardEvent) {
+      if (!isKeyboardEnabled) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const code = event.code;
+      pressedKeys.current.delete(code);
+      handleKeyEvent({ type: 'keyup', code });
+    }
+
+    // Release all keys when window loses focus
+    function handleBlur() {
+      releaseKeys();
+    }
+
+    // Release all keys before window closes
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        releaseKeys();
       }
     }
 
-    const modifiers = [
-      ctrl,
-      event.shiftKey ? (pressedKeys.current.has('ShiftRight') ? 32 : 2) : 0,
-      event.altKey ? (pressedKeys.current.has('AltRight') ? 64 : 4) : 0,
-      event.metaKey ? (pressedKeys.current.has('MetaRight') ? 128 : 8) : 0
-    ];
+    // Release all keys
+    function releaseKeys() {
+      pressedKeys.current.forEach((code) => {
+        handleKeyEvent({ type: 'keyup', code });
+      });
 
-    client.send([1, code, ...modifiers]);
+      pressedKeys.current.clear();
+
+      const report = keyboardRef.current.reset();
+      sendReport(report);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isKeyboardEnabled]);
+
+  // Keyboard handler
+  function handleKeyEvent(event: { type: 'keydown' | 'keyup'; code: string }) {
+    const kb = keyboardRef.current;
+    const report = event.type === 'keydown' ? kb.keyDown(event.code) : kb.keyUp(event.code);
+    sendReport(report);
   }
 
-  function sendKeyUp() {
-    client.send([1, 0, 0, 0, 0, 0]);
-  }
-
-  // disable the default keyboard events
-  function disableEvent(event: KeyboardEvent) {
-    event.preventDefault();
-    event.stopPropagation();
+  // Send keyboard report
+  function sendReport(report: Uint8Array) {
+    const data = new Uint8Array([MessageEvent.Keyboard, ...report]);
+    client.send(data);
   }
 
   return <></>;

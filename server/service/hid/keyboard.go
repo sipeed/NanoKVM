@@ -1,15 +1,16 @@
 package hid
 
-func (h *Hid) Keyboard(queue <-chan []int) {
-	for event := range queue {
-		code := byte(event[0])
+import (
+	log "github.com/sirupsen/logrus"
+)
 
-		var modifier byte = 0x00
-		if code > 0 {
-			modifier = byte(event[1]) | byte(event[2]) | byte(event[3]) | byte(event[4])
+func (h *Hid) Keyboard(queue <-chan []byte) {
+	for event := range queue {
+		if len(event) != 8 {
+			log.Debugf("invalid keyboard event: %v", event)
+			continue
 		}
 
-		data := []byte{modifier, 0x00, code, 0x00, 0x00, 0x00, 0x00, 0x00}
-		h.WriteHid0(data)
+		h.WriteHid0(event)
 	}
 }

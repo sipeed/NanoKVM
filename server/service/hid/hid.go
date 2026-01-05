@@ -18,9 +18,9 @@ type Hid struct {
 }
 
 const (
-	HID0 = "/dev/hidg0"
-	HID1 = "/dev/hidg1"
-	HID2 = "/dev/hidg2"
+	HID0 = "/dev/hidg0" // Keyboard
+	HID1 = "/dev/hidg1" // Mouse (Relative Mode)
+	HID2 = "/dev/hidg2" // Touchpad (Absolute Mode)
 )
 
 var (
@@ -95,16 +95,22 @@ func (h *Hid) Close() {
 }
 
 func (h *Hid) WriteHid0(data []byte) {
+	deadline := time.Now().Add(8 * time.Millisecond)
+
 	h.kbMutex.Lock()
+	_ = h.g0.SetWriteDeadline(deadline)
 	_, err := h.g0.Write(data)
 	h.kbMutex.Unlock()
 
 	if err != nil {
-		if errors.Is(err, os.ErrClosed) {
+		switch {
+		case errors.Is(err, os.ErrClosed):
 			log.Errorf("hid already closed, reopen it...")
 			h.OpenNoLock()
-		} else {
-			log.Debugf("write to %s failed: %s", HID0, err)
+		case errors.Is(err, os.ErrDeadlineExceeded):
+			log.Debugf("write to %s timeout", HID0)
+		default:
+			log.Errorf("write to %s failed: %s", HID0, err)
 		}
 		return
 	}

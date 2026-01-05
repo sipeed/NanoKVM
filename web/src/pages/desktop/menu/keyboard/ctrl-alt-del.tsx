@@ -1,26 +1,33 @@
 import clsx from 'clsx';
-import { useTranslation } from 'react-i18next';
 import { OctagonMinus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-import { KeyboardCodes, ModifierCodes } from '@/pages/desktop/keyboard/mappings.ts';
-import { client } from '@/lib/websocket.ts';
+import { getKeycode, getModifierBit } from '@/lib/keymap.ts';
+import { client, MessageEvent } from '@/lib/websocket.ts';
 
 export const CtrlAltDel = () => {
   const { t } = useTranslation();
 
   function sendCtrlAltDel() {
-    const ctrl = ModifierCodes.get('ControlLeft')!;
-    const alt = ModifierCodes.get('AltLeft')!;
-    const del = KeyboardCodes.get('Delete')!;
+    const ctrl = getModifierBit('ControlLeft')!;
+    const alt = getModifierBit('AltLeft')!;
+    const modifier = ctrl | alt;
 
-    client.send([1, del, ctrl, 0, alt, 0]);
-    client.send([1, 0, 0, 0, 0, 0]);
-  };
+    const del = getKeycode('Delete')!;
+
+    send(modifier, del);
+    send(0, 0);
+  }
+
+  function send(modifier: number, code: number) {
+    const data = new Uint8Array([MessageEvent.Keyboard, modifier, 0, code, 0, 0, 0, 0, 0]);
+    client.send(data);
+  }
 
   return (
     <div
       className={clsx(
-        "flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-700/70"
+        'flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-700/70'
       )}
       onClick={sendCtrlAltDel}
     >
@@ -28,4 +35,4 @@ export const CtrlAltDel = () => {
       <span>{t('keyboard.ctrlaltdel')}</span>
     </div>
   );
-}
+};

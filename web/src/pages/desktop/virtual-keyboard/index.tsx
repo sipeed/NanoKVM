@@ -12,11 +12,11 @@ import '@/assets/styles/keyboard.css';
 import { ConfigProvider, Segmented, Select, theme } from 'antd';
 import { useMediaQuery } from 'react-responsive';
 
+import { getKeycode, getModifierBit } from '@/lib/keymap.ts';
 import * as storage from '@/lib/localstorage.ts';
-import { client } from '@/lib/websocket.ts';
+import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
-import { KeyboardCodes, ModifierCodes } from './mappings.ts';
 import {
   doubleKeys,
   keyboardArrowsOptions,
@@ -83,6 +83,7 @@ export const VirtualKeyboard = () => {
     setKeyboardLayout('default');
   }, [keyboardSystem, keyboardLanguage]);
 
+  // Press key
   function onKeyPress(key: string) {
     if (modifierKeys.includes(key)) {
       if (activeModifierKeys.includes(key)) {
@@ -97,6 +98,7 @@ export const VirtualKeyboard = () => {
     sendKeydown(key);
   }
 
+  // Release key
   function onKeyReleased(key: string) {
     if (modifierKeys.includes(key)) {
       return;
@@ -105,90 +107,85 @@ export const VirtualKeyboard = () => {
     sendKeyup();
   }
 
+  // Send all keys
   function sendKeydown(key: string) {
-    const code = getKeyCode(key);
+    const code = getKeyboardCode(key);
     if (!code) {
       console.log('unknown code: ', key);
       return;
     }
 
-    const modifiers = sendModifierKeyDown();
+    const modifier = sendModifierKeyDown();
 
-    client.send([1, code, ...modifiers]);
+    send(modifier, code);
   }
 
-  function getKeyCode(key: string) {
+  function getKeyboardCode(key: string) {
     // AZERTY: swap A↔Q and Z↔W on French physical positions
     if (keyboardLanguage === 'fr' && key.endsWith('_azerty')) {
       const base = key.replace('_azerty', '');
-      if (base === 'KeyA') return KeyboardCodes.get('KeyQ');
-      if (base === 'KeyQ') return KeyboardCodes.get('KeyA');
-      if (base === 'KeyZ') return KeyboardCodes.get('KeyW');
-      if (base === 'KeyW') return KeyboardCodes.get('KeyZ');
+      if (base === 'KeyA') return getKeycode('KeyQ');
+      if (base === 'KeyQ') return getKeycode('KeyA');
+      if (base === 'KeyZ') return getKeycode('KeyW');
+      if (base === 'KeyW') return getKeycode('KeyZ');
       // all other labels use their own code
-      return KeyboardCodes.get(base);
+      return getKeycode(base);
     }
+
     if (keyboardLanguage === 'de' && key.endsWith('_qwertz')) {
       const base = key.replace('_qwertz', '');
       // Tausch
-      if (base === 'KeyZ') return KeyboardCodes.get('KeyY');
-      if (base === 'KeyY') return KeyboardCodes.get('KeyZ');
-      
-      if (base === 'IntlBackslash') return KeyboardCodes.get('IntlBackslash_qwertz');
-      
+      if (base === 'KeyZ') return getKeycode('KeyY');
+      if (base === 'KeyY') return getKeycode('KeyZ');
+      if (base === 'IntlBackslash') return getKeycode('IntlBackslash_qwertz');
       // all other labels use their own code
-      return KeyboardCodes.get(base);
+      return getKeycode(base);
     }
 
     const specialKey = specialKeyMap.get(key);
     if (specialKey) {
-      return KeyboardCodes.get(specialKey);
+      return getKeycode(specialKey);
     }
 
-    return KeyboardCodes.get(key);
+    return getKeycode(key);
   }
 
+  // Release all keys
   function sendKeyup() {
     sendModifierKeyUp();
-    client.send([1, 0, 0, 0, 0, 0]);
+    send(0, 0);
   }
 
+  // Send modifier keys
   function sendModifierKeyDown() {
-    let ctrl = 0;
-    let shift = 0;
-    let alt = 0;
-    let meta = 0;
+    let modifier = 0;
 
     activeModifierKeys.forEach((modifierKey) => {
       const key = specialKeyMap.get(modifierKey)!;
 
-      const code = KeyboardCodes.get(key)!;
-      const modifier = ModifierCodes.get(key)!;
+      modifier |= getModifierBit(key)!;
+      const code = getKeycode(key)!;
 
-      if ([1, 16].includes(modifier)) {
-        ctrl = modifier;
-      } else if ([2, 32].includes(modifier)) {
-        shift = modifier;
-      } else if ([4, 64].includes(modifier)) {
-        alt = modifier;
-      } else if ([8, 128].includes(modifier)) {
-        meta = modifier;
-      }
-
-      client.send([1, code, ctrl, shift, alt, meta]);
+      send(modifier, code);
     });
 
-    return [ctrl, shift, alt, meta];
+    return modifier;
   }
 
+  // Release modifier keys
   function sendModifierKeyUp() {
     if (activeModifierKeys.length === 0) return;
 
     activeModifierKeys.forEach(() => {
-      client.send([1, 0, 0, 0, 0, 0]);
+      send(0, 0);
     });
 
     setActiveModifierKeys([]);
+  }
+
+  function send(modifier: number, code: number) {
+    const data = new Uint8Array([MessageEvent.Keyboard, modifier, 0, code, 0, 0, 0, 0, 0]);
+    client.send(data);
   }
 
   function selectSystem(system: string) {

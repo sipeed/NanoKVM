@@ -3,11 +3,12 @@ import { message } from 'antd';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
-import { client } from '@/lib/websocket.ts';
+import { MouseReportRelative } from '@/lib/mouse.ts';
+import { client, MessageEvent } from '@/lib/websocket.ts';
 import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
-import { MouseButton, MouseEvent } from './constants';
+import { MouseRelativeEvent } from './types.ts';
 
 export const Relative = () => {
   const { t } = useTranslation();
@@ -17,17 +18,125 @@ export const Relative = () => {
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
 
+  const mouseRef = useRef(new MouseReportRelative());
   const isLockedRef = useRef(false);
-  const buttonRef = useRef<MouseButton>(MouseButton.None);
   const lastScrollTimeRef = useRef(0);
 
-  // listen mouse events
   useEffect(() => {
-    const canvas = document.getElementById('screen');
-    if (!canvas) return;
+    const screen = document.getElementById('screen');
+    if (!screen) return;
 
+    showMessage();
+
+    screen.addEventListener('click', handleMouseClick);
+    screen.addEventListener('mousedown', handleMouseDown);
+    screen.addEventListener('mouseup', handleMouseUp);
+    screen.addEventListener('mousemove', handleMouseMove);
+    screen.addEventListener('wheel', handleMouseWheel, { passive: false });
+    screen.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('pointerlockchange', handlePointerLockChange);
+
+    // Mouse click event
+    function handleMouseClick(event: MouseEvent) {
+      disableEvent(event);
+
+      if (!isLockedRef.current) {
+        screen?.requestPointerLock();
+      }
+    }
+
+    // Mouse down event
+    function handleMouseDown(e: MouseEvent) {
+      disableEvent(e);
+      handleMouseEvent({ type: 'mousedown', button: e.button });
+    }
+
+    // Mouse up event
+    function handleMouseUp(e: MouseEvent) {
+      disableEvent(e);
+      handleMouseEvent({ type: 'mouseup', button: e.button });
+    }
+
+    // Mouse move event
+    function handleMouseMove(e: any) {
+      disableEvent(e);
+
+      const x = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+      const y = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+      if (x === 0 && y === 0) return;
+
+      const deltaX = Math.abs(x * window.devicePixelRatio) < 10 ? x * 2 : x;
+      const deltaY = Math.abs(y * window.devicePixelRatio) < 10 ? y * 2 : y;
+
+      handleMouseEvent({ type: 'move', deltaX, deltaY });
+    }
+
+    // Mouse wheel event
+    function handleMouseWheel(e: WheelEvent) {
+      disableEvent(e);
+
+      if (Math.floor(e.deltaY) === 0) {
+        return;
+      }
+
+      const currentTime = Date.now();
+      if (currentTime - lastScrollTimeRef.current < scrollInterval) {
+        return;
+      }
+
+      const deltaY = (e.deltaY > 0 ? 1 : -1) * scrollDirection;
+      handleMouseEvent({ type: 'wheel', deltaY });
+      lastScrollTimeRef.current = currentTime;
+    }
+
+    function handlePointerLockChange() {
+      isLockedRef.current = document.pointerLockElement === screen;
+    }
+
+    return () => {
+      screen.removeEventListener('click', handleMouseClick);
+      screen.removeEventListener('mousemove', handleMouseMove);
+      screen.removeEventListener('mousedown', handleMouseDown);
+      screen.removeEventListener('mouseup', handleMouseUp);
+      screen.removeEventListener('wheel', handleMouseWheel);
+      screen.removeEventListener('contextmenu', disableEvent);
+      document.removeEventListener('pointerlockchange', handlePointerLockChange);
+    };
+  }, [resolution, scrollDirection, scrollInterval]);
+
+  // Mouse handler
+  function handleMouseEvent(event: MouseRelativeEvent) {
+    let report: Uint8Array;
+    const mouse = mouseRef.current;
+
+    switch (event.type) {
+      case 'mousedown':
+        mouse.buttonDown(event.button);
+        report = mouse.buildButtonReport();
+        break;
+      case 'mouseup':
+        mouse.buttonUp(event.button);
+        report = mouse.buildButtonReport();
+        break;
+      case 'wheel':
+        report = mouse.buildReport(0, 0, event.deltaY);
+        break;
+      case 'move':
+        report = mouse.buildReport(event.deltaX, event.deltaY);
+        break;
+      default:
+        report = mouse.buildReport(0, 0);
+        break;
+    }
+
+    const data = new Uint8Array([MessageEvent.Mouse, ...report]);
+    client.send(data);
+  }
+
+  // show message
+  function showMessage() {
     messageApi.open({
-      key: 'no_mouse_relative',
+      key: 'requestPointer',
       type: 'info',
       content: t('mouse.requestPointer'),
       duration: 3,
@@ -35,108 +144,7 @@ export const Relative = () => {
         marginTop: '40vh'
       }
     });
-
-    document.addEventListener('pointerlockchange', handlePointerLockChange);
-
-    canvas.addEventListener('click', handleClick);
-    canvas.addEventListener('mousedown', handleMouseDown);
-    canvas.addEventListener('mouseup', handleMouseUp);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('wheel', handleWheel);
-    canvas.addEventListener('contextmenu', disableEvent);
-
-    function handleClick(event: any) {
-      disableEvent(event);
-
-      if (!isLockedRef.current) {
-        canvas!.requestPointerLock();
-      }
-    }
-
-    function handlePointerLockChange() {
-      isLockedRef.current = document.pointerLockElement === canvas;
-    }
-
-    // press button
-    function handleMouseDown(event: any) {
-      disableEvent(event);
-
-      let button: MouseButton;
-      switch (event.button) {
-        case 0:
-          button = MouseButton.Left;
-          break;
-        case 1:
-          button = MouseButton.Wheel;
-          break;
-        case 2:
-          button = MouseButton.Right;
-          break;
-        default:
-          console.log(`unknown button ${event.button}`);
-          return;
-      }
-
-      buttonRef.current = button;
-      const data = [2, MouseEvent.Down, button, 0, 0];
-      client.send(data);
-    }
-
-    // release button
-    function handleMouseUp(event: any) {
-      disableEvent(event);
-
-      buttonRef.current = MouseButton.None;
-      const data = [2, MouseEvent.Up, MouseButton.None, 0, 0];
-      client.send(data);
-    }
-
-    // mouse move
-    function handleMouseMove(event: any) {
-      disableEvent(event);
-
-      const x = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
-      const y = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
-      if (x === 0 && y === 0) return;
-
-      const data = [
-        2,
-        MouseEvent.MoveRelative,
-        buttonRef.current,
-        Math.abs(x) < 10 ? x * 2 : x,
-        Math.abs(y) < 10 ? y * 2 : y
-      ];
-      client.send(data);
-    }
-
-    // mouse scroll
-    function handleWheel(event: any) {
-      disableEvent(event);
-
-      if (Math.floor(event.deltaY) === 0) return;
-
-      const currentTime = Date.now();
-      if (currentTime - lastScrollTimeRef.current < scrollInterval) {
-        return;
-      }
-      lastScrollTimeRef.current = currentTime;
-
-      const deltaY = (event.deltaY > 0 ? 1 : -1) * scrollDirection;
-      const data = [2, MouseEvent.Scroll, 0, 0, deltaY];
-      client.send(data);
-    }
-
-    return () => {
-      document.removeEventListener('pointerlockchange', handlePointerLockChange);
-
-      canvas.removeEventListener('click', handleClick);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mousedown', handleMouseDown);
-      canvas.removeEventListener('mouseup', handleMouseUp);
-      canvas.removeEventListener('wheel', handleWheel);
-      canvas.removeEventListener('contextmenu', disableEvent);
-    };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }
 
   // disable default events
   function disableEvent(event: any) {
