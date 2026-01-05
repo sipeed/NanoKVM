@@ -14,11 +14,10 @@ export function getWolMacs() {
 }
 
 export function deleteWolMac(mac: string) {
-  return http.request({
-    method: 'delete',
-    url: '/api/network/wol/mac',
-    data: { mac }
-  });
+  const data = {
+    mac
+  };
+  return http.delete('/api/network/wol/mac', data);
 }
 
 // set Mac name

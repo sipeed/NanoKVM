@@ -20,9 +20,8 @@ export function getScripts() {
 }
 
 export function deleteScript(name: string) {
-  return http.request({
-    url: '/api/vm/script',
-    method: 'delete',
-    data: { name }
-  });
+  const data = {
+    name
+  };
+  return http.delete('/api/vm/script', data);
 }
