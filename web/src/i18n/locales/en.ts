@@ -76,14 +76,23 @@ const en = {
       placeholder: 'Please input',
       submit: 'Submit',
       virtual: 'Keyboard',
-      ctrlaltdel: 'Ctrl+Alt+Del',
       readClipboard: 'Read from Clipboard',
       clipboardPermissionDenied:
         'Clipboard permission denied. Please allow clipboard access in your browser.',
       clipboardReadError: 'Failed to read clipboard',
       dropdownEnglish: 'English',
       dropdownGerman: 'German',
-      dropdownRussian: 'Russian'
+      dropdownRussian: 'Russian',
+      shortcut: {
+        title: 'Shortcuts',
+        custom: 'Custom',
+        capture: 'Click here to capture shortcut',
+        clear: 'Clear',
+        save: 'Save',
+        captureTips:
+          'Capturing system-level keys (such as the Windows key) requires full-screen permission.',
+        enterFullScreen: 'Toggle full-screen mode.'
+      }
     },
     mouse: {
       title: 'Mouse',

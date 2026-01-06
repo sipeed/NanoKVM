@@ -73,7 +73,15 @@ const zh = {
       placeholder: '请输入内容',
       submit: '确定',
       virtual: '虚拟键盘',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      shortcut: {
+        title: '快捷键',
+        custom: '自定义',
+        capture: '点击此处捕获快捷键',
+        clear: '清空',
+        save: '保存',
+        captureTips: '捕获系统级按键（如 Windows 键）需要全屏权限。',
+        enterFullScreen: '切换全屏模式。'
+      }
     },
     mouse: {
       title: '鼠标',
