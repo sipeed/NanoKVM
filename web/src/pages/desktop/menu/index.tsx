@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { Divider, Tooltip } from 'antd';
 import clsx from 'clsx';
-import { useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 import { MenuIcon, XIcon } from 'lucide-react';
-import Draggable from 'react-draggable';
+import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { useTranslation } from 'react-i18next';
 
 import { getMenuDisabledItems } from '@/lib/localstorage.ts';
-import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
+import { menuDisabledItemsAtom, submenuOpenCountAtom } from '@/jotai/settings.ts';
 
 import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
@@ -24,17 +24,17 @@ import { Wol } from './wol';
 export const Menu = () => {
   const { t } = useTranslation();
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
+  const submenuOpenCount = useAtomValue(submenuOpenCountAtom);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(true);
+  const [isMenuExpanded, setIsMenuExpanded] = useState(true);
   const [isMenuMoved, setIsMenuMoved] = useState(false);
-  const [isMenuHovered, setIsMenuHovered] = useState(true);
+  const [isMenuHidden, setIsMenuHidden] = useState(false);
   const [bounds, setBounds] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
 
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // disabled menu items
     const items = getMenuDisabledItems();
     setMenuDisabledItems(items);
 
@@ -54,30 +54,50 @@ export const Menu = () => {
     };
 
     handleResize();
-    handleMouseLeave();
-
     window.addEventListener('resize', handleResize);
 
     return () => {
+      stopCountdown();
       window.removeEventListener('resize', handleResize);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
     };
   }, []);
 
-  function handleMouseEnter() {
+  useEffect(() => {
+    if (submenuOpenCount === 0) {
+      startCountdown();
+    } else {
+      stopCountdown();
+    }
+  }, [submenuOpenCount]);
+
+  function startCountdown() {
+    if (submenuOpenCount > 0) {
+      return;
+    }
+
+    stopCountdown();
+
+    timerRef.current = setTimeout(() => {
+      setIsMenuHidden(true);
+    }, 5000);
+  }
+
+  function stopCountdown() {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    setIsMenuHovered(true);
   }
 
-  function handleMouseLeave() {
-    timerRef.current = setTimeout(() => {
-      setIsMenuHovered(false);
-    }, 5000);
+  function handleDraggableStop(_e: DraggableEvent, data: DraggableData) {
+    if (data.x !== 0 || data.y !== 0) {
+      setIsMenuMoved(true);
+    }
+  }
+
+  function handleMouseEnter() {
+    stopCountdown();
+    setIsMenuHidden(false);
   }
 
   return (
@@ -86,20 +106,16 @@ export const Menu = () => {
       bounds={bounds}
       handle="strong"
       positionOffset={{ x: '-50%', y: '0%' }}
-      onStop={(_e, data) => {
-        if (data.x !== 0 || data.y !== 0) {
-          setIsMenuMoved(true);
-        }
-      }}
+      onStop={handleDraggableStop}
     >
       <div
         ref={nodeRef}
         className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2"
         onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onMouseLeave={startCountdown}
       >
         {/* Trigger area for auto-show when hidden */}
-        {isMenuOpen && (
+        {isMenuExpanded && (
           <div className="absolute -top-[10px] left-0 right-0 h-[60px] w-full bg-transparent" />
         )}
 
@@ -107,8 +123,8 @@ export const Menu = () => {
           <div
             className={clsx(
               'h-[36px] items-center rounded bg-neutral-800/80 transition-all duration-300',
-              isMenuOpen ? 'flex' : 'hidden',
-              isMenuOpen && !isMenuMoved && !isMenuHovered
+              isMenuExpanded ? 'flex' : 'hidden',
+              isMenuExpanded && !isMenuMoved && isMenuHidden
                 ? '-translate-y-[110%] opacity-80'
                 : 'translate-y-0 opacity-100'
             )}
@@ -147,7 +163,7 @@ export const Menu = () => {
             <Tooltip title={t('menu.collapse')} placement="bottom" mouseEnterDelay={0.6}>
               <div
                 className="mr-1 flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700/80 hover:text-white"
-                onClick={() => setIsMenuOpen((o) => !o)}
+                onClick={() => setIsMenuExpanded((expanded) => !expanded)}
               >
                 <XIcon size={20} />
               </div>
@@ -155,11 +171,11 @@ export const Menu = () => {
           </div>
         </div>
 
-        {!isMenuOpen && (
+        {!isMenuExpanded && (
           <Tooltip title={t('menu.expand')} placement="bottom" mouseEnterDelay={0.6}>
             <div
               className="flex h-[30px] w-[32px] cursor-pointer items-center justify-center rounded bg-neutral-800/50 text-white/50 hover:bg-neutral-700 hover:text-white"
-              onClick={() => setIsMenuOpen((o) => !o)}
+              onClick={() => setIsMenuExpanded((expanded) => !expanded)}
             >
               <MenuIcon size={20} />
             </div>

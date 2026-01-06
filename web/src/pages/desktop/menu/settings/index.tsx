@@ -16,6 +16,7 @@ import semver from 'semver';
 import * as api from '@/api/application.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -35,6 +36,7 @@ export const Settings = () => {
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
 
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
@@ -91,6 +93,7 @@ export const Settings = () => {
   function openModal() {
     setIsModalOpen(true);
     setIsKeyboardEnable(false);
+    setSubmenuOpenCount((count) => count + 1);
   }
 
   function closeModal() {
@@ -101,6 +104,7 @@ export const Settings = () => {
     setIsKeyboardEnable(true);
     setIsModalOpen(false);
     setCurrentTab('about');
+    setSubmenuOpenCount((count) => Math.max(0, count - 1));
   }
 
   return (

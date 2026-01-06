@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Divider, Modal, Segmented } from 'antd';
 import clsx from 'clsx';
+import { useSetAtom } from 'jotai';
 import { DiscIcon, HardDriveIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/storage.ts';
+import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 
 import { Images } from './images.tsx';
 import { Tips } from './tips.tsx';
 
 export const Image = () => {
   const { t } = useTranslation();
+  const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -51,6 +54,11 @@ export const Image = () => {
     });
   }, []);
 
+  function toggleModal(open: boolean) {
+    setIsModalOpen(open);
+    setSubmenuOpenCount((count) => (open ? count + 1 : Math.max(0, count - 1)));
+  }
+
   return (
     <>
       <div
@@ -58,12 +66,12 @@ export const Image = () => {
           'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
           isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
         )}
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => toggleModal(true)}
       >
         <DiscIcon size={18} />
       </div>
 
-      <Modal open={isModalOpen} footer={null} onCancel={() => setIsModalOpen(false)}>
+      <Modal open={isModalOpen} footer={null} onCancel={() => toggleModal(false)}>
         <div className="flex items-center space-x-1">
           <span className="text-xl font-bold">{t('image.title')}</span>
           <Tips />

@@ -1,6 +1,9 @@
 import { ReactNode, useState } from 'react';
 import { Popover, Tooltip } from 'antd';
+import { useSetAtom } from 'jotai';
 import { useMediaQuery } from 'react-responsive';
+
+import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 
 type MenuItemProps = {
   title: string;
@@ -20,6 +23,7 @@ export const MenuItem = ({
   onOpenChange
 }: MenuItemProps) => {
   const isBigScreen = useMediaQuery({ minWidth: 640 });
+  const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
@@ -27,6 +31,9 @@ export const MenuItem = ({
   function togglePopover(open: boolean) {
     setIsTooltipOpen(false);
     setIsPopoverOpen(open);
+
+    // Update global submenu count
+    setSubmenuOpenCount((count) => (open ? count + 1 : Math.max(0, count - 1)));
 
     if (onOpenChange) {
       onOpenChange(open);
