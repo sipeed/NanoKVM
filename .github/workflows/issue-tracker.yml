@@ -1,0 +1,63 @@
+name: Issue Tracker
+
+on:
+  issues:
+    types: [opened, reopened]
+
+jobs:
+  track-issue:
+    name: Track Issue Updates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Issue Data to API
+        env:
+          API_URL: ${{ secrets.ISSUE_TRACKER_API_URL }}
+          VERIFY_TOKEN: ${{ secrets.VERIFY_TOKEN }}
+        run: |
+          ISSUE_DATA=$(cat <<EOF
+          {
+            "action": "${{ github.event.action }}",
+            "issue": {
+              "id": ${{ github.event.issue.id }},
+              "number": ${{ github.event.issue.number }},
+              "title": $(echo '${{ github.event.issue.title }}' | jq -R .),
+              "body": $(echo '${{ github.event.issue.body }}' | jq -Rs .),
+              "state": "${{ github.event.issue.state }}",
+              "created_at": "${{ github.event.issue.created_at }}",
+              "updated_at": "${{ github.event.issue.updated_at }}",
+              "closed_at": "${{ github.event.issue.closed_at }}",
+              "url": "${{ github.event.issue.html_url }}",
+              "user": {
+                "login": "${{ github.event.issue.user.login }}",
+                "id": ${{ github.event.issue.user.id }}
+              },
+              "labels": $(echo '${{ toJSON(github.event.issue.labels) }}' | jq -c .),
+              "assignees": $(echo '${{ toJSON(github.event.issue.assignees) }}' | jq -c .)
+            },
+            "repository": {
+              "name": "${{ github.repository }}",
+              "full_name": "${{ github.event.repository.full_name }}",
+              "url": "${{ github.event.repository.html_url }}"
+            },
+            "sender": {
+              "login": "${{ github.event.sender.login }}",
+              "id": ${{ github.event.sender.id }}
+            }
+          }
+          EOF
+          )
+
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$API_URL" \
+            -H "Content-Type: application/json" \
+            -H "Token: $VERIFY_TOKEN" \
+            -d "$ISSUE_DATA")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+
+          if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+            echo "Successfully sent issue data to API"
+          else
+            echo "Failed to send issue data to API"
+            exit 1
+          fi
