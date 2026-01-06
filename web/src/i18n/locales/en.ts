@@ -195,6 +195,11 @@ const en = {
       input: 'Please enter the MAC',
       ok: 'Ok'
     },
+    recorder: {
+      title: 'Screen Recorder',
+      toggleStart: 'Start Recording (https mode only)',
+      toggleStop: 'Stop Recording'
+    },
     download: {
       title: 'Image Downloader',
       input: 'Please enter a remote image URL',
