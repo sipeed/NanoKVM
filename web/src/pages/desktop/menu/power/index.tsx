@@ -7,10 +7,10 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/vm';
 import * as localstorage from '@/lib/localstorage.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
-
 import { PowerLong } from './power-long.tsx';
 import { PowerShort } from './power-short.tsx';
 import { Reset } from './reset.tsx';
+import { message } from 'antd';
 
 export const Power = () => {
   const { t } = useTranslation();
@@ -38,7 +38,7 @@ export const Power = () => {
         setIsPowerOn(rsp.data.pwr);
       }
     } catch (err) {
-      console.log(err);
+      message.error(t('power.getLedFailed'));
     }
   }
 

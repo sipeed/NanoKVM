@@ -4,6 +4,7 @@ import { CircleAlertIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
+import { message } from 'antd';
 
 export const Tls = () => {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export const Tls = () => {
         setIsEnabled(enable);
       }
     } catch (err) {
-      console.log(err);
+      message.error(t('settings.device.tls.updateFailed'));
     }
   }
 

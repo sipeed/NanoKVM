@@ -204,19 +204,18 @@ const en = {
       inputfile: 'Please enter the image File',
       NoISO: 'No ISO'
     },
-    power: {
-      title: 'Power',
-      showConfirm: 'Confirmation',
-      showConfirmTip: 'Power operations require an extra confirmation',
-      reset: 'Reset',
-      power: 'Power',
-      powerShort: 'Power (short click)',
-      powerLong: 'Power (long click)',
-      resetConfirm: 'Proceed reset operation?',
-      powerConfirm: 'Proceed power operation?',
-      okBtn: 'Yes',
-      cancelBtn: 'No'
-    },
+        power: {
+          title: 'Power',
+          showConfirm: 'Show power confirmation',
+          showConfirmTip: 'Requires confirmation to prevent accidental power operations',
+          getLedFailed: 'Failed to get power state. Please try again.',
+          rebootFailed: 'Failed to reboot. Please try again.',
+          reboot: 'Reboot',
+          rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+          rebootFailed: 'Failed to reboot. Please try again.',
+          okBtn: 'Yes',
+          cancelBtn: 'No'
+        },
     settings: {
       title: 'Settings',
       about: {
@@ -285,49 +284,17 @@ const en = {
         },
         tls: {
           description: 'Enable HTTPS protocol',
-          tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
-        },
-        advanced: 'Advanced Settings',
-        swap: {
-          title: 'Swap',
-          disable: 'Disable',
-          description: 'Set the swap file size',
-          tip: "Enabling this feature could shorten your SD card's usable life!"
-        },
-        mouseJiggler: {
-          title: 'Mouse Jiggler',
-          description: 'Prevent the remote host from sleeping',
-          disable: 'Disable',
-          absolute: 'Absolute Mode',
-          relative: 'Relative Mode'
+          tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.',
+          updateFailed: 'Failed to update TLS state. Please try again.'
         },
         mdns: {
           description: 'Enable mDNS discovery service',
           tip: "Turning it off if it's not needed",
           updateFailed: 'Failed to update mDNS state. Please try again.'
         },
-        hdmi: {
-          description: 'Enable HDMI/monitor output'
-        },
-        autostart: {
-          title: 'Autostart Scripts Settings',
-          description: 'Manage scripts that run automatically on system startup',
-          new: 'New',
-          deleteConfirm: 'Are you sure you want to delete this file?',
-          yes: 'Yes',
-          no: 'No',
-          scriptName: 'Autostart Script Name',
-          scriptContent: 'Autostart Script Content',
-          settings: 'Settings'
-        },
-        hidOnly: 'HID-Only Mode',
-        hidOnlyDesc: 'Stop emulating virtual devices, retaining only basic HID control',
-        disk: 'Virtual Disk',
-        diskDesc: 'Mount SD card on the remote host',
-        network: 'Virtual Network',
-        networkDesc: 'Mount virtual network card on the remote host',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+        rebootFailed: 'Failed to reboot. Please try again.',
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
