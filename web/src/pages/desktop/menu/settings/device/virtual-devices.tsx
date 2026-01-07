@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { getHidMode } from '@/api/hid.ts';
 import * as api from '@/api/virtual-device.ts';
+import { message } from 'antd';
 
 export const VirtualDevices = () => {
   const { t } = useTranslation();
@@ -53,13 +54,13 @@ export const VirtualDevices = () => {
     try {
       const rsp = await api.updateVirtualDevice(device);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(rsp.msg || t('settings.device.updateFailed'));
         return;
       }
 
       await getVirtualDevice();
     } catch (err) {
-      console.log(err);
+      message.error(t('settings.device.updateFailed'));
     } finally {
       setLoading('');
     }

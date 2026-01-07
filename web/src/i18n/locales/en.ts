@@ -324,6 +324,7 @@ const en = {
         diskDesc: 'Mount SD card on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
+        updateFailed: 'Failed to update virtual device. Please try again.',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
         okBtn: 'Yes',
