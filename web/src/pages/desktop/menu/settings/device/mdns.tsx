@@ -4,6 +4,7 @@ import { CircleAlertIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
+import { message } from 'antd';
 
 export const Mdns = () => {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ export const Mdns = () => {
     setIsLoading(false);
 
     if (rsp.code !== 0) {
-      console.log(rsp.msg);
+      message.error(rsp.msg || t('settings.device.mdns.updateFailed'));
       return;
     }
 

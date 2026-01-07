@@ -5,6 +5,7 @@ import { WifiIcon, WifiPenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/network.ts';
+import { message } from 'antd';
 
 export const Wifi = () => {
   const { t } = useTranslation();
@@ -64,7 +65,7 @@ export const Wifi = () => {
       setConnectedWifi(ssid);
       setIsModalOpen(false);
     } catch (err) {
-      console.log(err);
+      message.error(t('settings.device.wifi.failed'));
     } finally {
       setStatus('');
     }
@@ -84,7 +85,7 @@ export const Wifi = () => {
 
       setConnectedWifi('');
     } catch (err) {
-      console.log(err);
+      message.error(t('settings.device.wifi.failed'));
     } finally {
       setStatus('');
     }

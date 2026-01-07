@@ -280,7 +280,8 @@ const en = {
         },
         ssh: {
           description: 'Enable SSH remote access',
-          tip: 'Set a strong password before enabling (Account - Change Password)'
+          tip: 'Set a strong password before enabling (Account - Change Password)',
+          updateFailed: 'Failed to update SSH state. Please try again.'
         },
         tls: {
           description: 'Enable HTTPS protocol',
@@ -302,7 +303,8 @@ const en = {
         },
         mdns: {
           description: 'Enable mDNS discovery service',
-          tip: "Turning it off if it's not needed"
+          tip: "Turning it off if it's not needed",
+          updateFailed: 'Failed to update mDNS state. Please try again.'
         },
         hdmi: {
           description: 'Enable HDMI/monitor output'
