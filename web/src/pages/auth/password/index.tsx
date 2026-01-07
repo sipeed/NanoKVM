@@ -30,7 +30,7 @@ export const Password = () => {
       return;
     }
     if (!validateString(values.password)) {
-      setMsg('auth.illegalPassword');
+      setMsg(t('auth.illegalPassword'));
       return;
     }
 
