@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"NanoKVM-Server/config"
 	"NanoKVM-Server/proto"
 
 	"github.com/gin-gonic/gin"
@@ -88,3 +89,17 @@ func getLatest() (*Latest, error) {
 	log.Debugf("get application latest version: %s", latest.Version)
 	return &latest, nil
 }
+
+func (s *Service) GetAuthStatus(c *gin.Context) {
+	var rsp proto.Response
+
+	"NanoKVM-Server/config"
+
+	conf := config.GetInstance()
+	enabled := conf.Authentication != "disable"
+
+	rsp.OkRspWithData(c, &proto.GetAuthStatusRsp{
+		Enabled: enabled,
+	})
+}
+

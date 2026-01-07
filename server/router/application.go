@@ -17,4 +17,6 @@ func applicationRouter(r *gin.Engine) {
 
 	api.GET("/application/preview", service.GetPreview)  // get preview updates state
 	api.POST("/application/preview", service.SetPreview) // set preview updates state
+
+	r.GET("/api/application/auth/status", service.GetAuthStatus) // get authentication status (no token required)
 }

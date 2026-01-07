@@ -12,3 +12,8 @@ type GetPreviewRsp struct {
 type SetPreviewReq struct {
 	Enable bool `validate:"omitempty"`
 }
+
+type GetAuthStatusRsp struct {
+	Enabled bool `json:"enabled"`
+}
+

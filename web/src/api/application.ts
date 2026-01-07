@@ -37,3 +37,9 @@ export function setPreviewUpdates(enable: boolean) {
 export function getPreviewUpdates() {
   return http.get('/api/application/preview');
 }
+
+// get authentication status
+export function getAuthStatus() {
+  return http.get('/api/application/auth/status');
+}
+
