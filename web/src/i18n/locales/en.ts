@@ -131,13 +131,15 @@ const en = {
       mountMode: 'Mount mode',
       mountFailed: 'Mount failed',
       mountDesc:
-        'On some systems, you need to eject the virtual disk from the remote host before mounting the image.',
+        'On some systems, you need to eject the virtual disk from the remote host before mounting an image.',
       unmountFailed: 'Unmount failed',
       unmountDesc:
-        'On some systems, you need to manually eject from the remote host before unmounting the image.',
-      refresh: 'Refresh the image list',
+        'On some systems, you need to manually eject from the remote host before unmounting an image.',
+      refresh: 'Refresh image list',
       attention: 'Attention',
       deleteConfirm: 'Are you sure you want to delete this image?',
+      deleteFailed: 'Delete failed',
+      deleteDesc: 'Failed to delete the image file. Please check if the file is in use or try again.',
       okBtn: 'Yes',
       cancelBtn: 'No',
       tips: {

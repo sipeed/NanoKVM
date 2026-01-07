@@ -130,6 +130,11 @@ export const Images = ({ isOpen, cdrom, setIsMounted }: ImagesProps) => {
       .then((rsp) => {
         if (rsp.code !== 0) {
           console.log(rsp.msg);
+          notify.open({
+            message: t('image.deleteFailed'),
+            description: t('image.deleteDesc'),
+            duration: 10
+          });
           return;
         }
 
