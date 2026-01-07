@@ -101,6 +101,8 @@ export const VirtualKeyboard = () => {
   // Release key
   function onKeyReleased(key: string) {
     if (modifierKeys.includes(key)) {
+      setActiveModifierKeys(activeModifierKeys.filter((k) => k !== key));
+      sendModifierKeyUp();
       return;
     }
 
@@ -174,13 +176,14 @@ export const VirtualKeyboard = () => {
 
   // Release modifier keys
   function sendModifierKeyUp() {
-    if (activeModifierKeys.length === 0) return;
+    let modifier = 0;
 
-    activeModifierKeys.forEach(() => {
-      send(0, 0);
+    activeModifierKeys.forEach((modifierKey) => {
+      const key = specialKeyMap.get(modifierKey)!;
+      modifier |= getModifierBit(key)!;
     });
 
-    setActiveModifierKeys([]);
+    send(modifier, 0);
   }
 
   function send(modifier: number, code: number) {
