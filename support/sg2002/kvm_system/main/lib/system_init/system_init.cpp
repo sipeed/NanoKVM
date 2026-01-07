@@ -87,7 +87,7 @@ void new_app_init(void)
 	// Add necessary configuration files for program execution
 	system("mkdir /kvmapp/kvm");
 	system("mkdir /etc/kvm");
-	system("echo 0 > /kvmapp/kvm/now_fps");
+	system("echo 0 > /tmp/now_fps");
 	system("echo 30 > /kvmapp/kvm/fps");
 	system("echo 2000 > /kvmapp/kvm/qlty");
 	system("echo 720 > /kvmapp/kvm/res");

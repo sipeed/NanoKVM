@@ -265,7 +265,7 @@ void kvm_update_stream_fps(void)
 	uint8_t RW_Data[10];
 
 	// FPS
-	fp = fopen("/kvmapp/kvm/now_fps", "r");
+	fp = fopen("/tmp/now_fps", "r");
     fseek(fp, 0, SEEK_END);
     file_size = ftell(fp); 
     fseek(fp, 0, SEEK_SET);
