@@ -15,6 +15,7 @@ const (
 	AvahiDaemonPid          = "/run/avahi-daemon/pid"
 	AvahiDaemonScript       = "/etc/init.d/S50avahi-daemon"
 	AvahiDaemonBackupScript = "/kvmapp/system/init.d/S50avahi-daemon"
+	AvahiDaemonDisabledFlag = "/etc/kvm/mdns_disabled"
 )
 
 func (s *Service) GetMdnsState(c *gin.Context) {
@@ -37,6 +38,7 @@ func (s *Service) EnableMdns(c *gin.Context) {
 	}
 
 	commands := []string{
+		fmt.Sprintf("rm -f %s", AvahiDaemonDisabledFlag),
 		fmt.Sprintf("cp -f %s %s", AvahiDaemonBackupScript, AvahiDaemonScript),
 		fmt.Sprintf("%s start", AvahiDaemonScript),
 	}
@@ -62,7 +64,12 @@ func (s *Service) DisableMdns(c *gin.Context) {
 		return
 	}
 
-	command := fmt.Sprintf("kill -9 %s", pid)
+	commands := []string{
+		fmt.Sprintf("kill -9 %s", pid),
+		fmt.Sprintf("touch %s", AvahiDaemonDisabledFlag),
+	}
+
+	command := strings.Join(commands, " && ")
 	err := exec.Command("sh", "-c", command).Run()
 	if err != nil {
 		log.Errorf("failed to stop avahi-daemon: %s", err)
@@ -71,7 +78,6 @@ func (s *Service) DisableMdns(c *gin.Context) {
 	}
 
 	_ = os.Remove(AvahiDaemonPid)
-	_ = os.Remove(AvahiDaemonScript)
 
 	rsp.OkRsp(c)
 	log.Debugf("avahi-daemon stopped")

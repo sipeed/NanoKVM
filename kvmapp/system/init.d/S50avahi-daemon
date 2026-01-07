@@ -3,8 +3,14 @@
 # avahi-daemon init script
 
 DAEMON=/usr/sbin/avahi-daemon
+DISABLED_FLAG=/etc/kvm/mdns_disabled
+
 case "$1" in
     start)
+	if [ -f "$DISABLED_FLAG" ]; then
+		echo "mDNS is disabled, skipping avahi-daemon start"
+		exit 0
+	fi
 	$DAEMON -c || $DAEMON -D
 	;;
     stop)
