@@ -291,12 +291,14 @@ static int _free_leak_memory_of_ion(void)
     }
 
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL) {
-        if (sscanf(line, "%*d %s %s %*d %s", alloc_buf_size_str, phy_addr_str, buffer_name) == 3) {
+		if (sscanf(line, "%*d %s %s %*d %s", alloc_buf_size_str, phy_addr_str, buffer_name) == 3) {
 			printf("[ION] %s  %s  %s\r\n", alloc_buf_size_str, phy_addr_str, buffer_name);
 			// FIXME: release jpeg_ion
 			if (strcmp(buffer_name, "VI_DMA_BUF")
-				&& strcmp(buffer_name, "ISP_SHARED_BUFFER_0"))
+				&& strcmp(buffer_name, "ISP_SHARED_BUFFER_0")) {
+				// Skip freeing for these special buffers (persist in memory)
 				continue;
+			}
 			struct sys_ion_data_new ion_data = {
 				.cached = 1,
 				.dmabuf_fd = (uint32_t)-1,
