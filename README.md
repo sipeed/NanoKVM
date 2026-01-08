@@ -79,7 +79,65 @@ We offer several NanoKVM versions to suit your needs:
 ├── web             # NanoKVM Front-end (UI)
 ├── server          # NanoKVM Back-end (Service)
 ├── support         # Auxiliary modules (Image subsystem, status, updates, OLED, HID, etc.)
-├── ...
+├── tools           # Utilities and helper tools
+│   └── nanokvm_update_edid  # EDID editor tool
+└── ...
+```
+
+### EDID Editor Tool
+
+NanoKVM includes an EDID (Extended Display Identification Data) editor tool that allows you to customize the display capabilities reported to the connected host system. This is useful for:
+- Supporting resolutions not detected automatically
+- Fixing display compatibility issues
+- Setting custom refresh rates
+
+**Usage:**
+
+1. SSH into your NanoKVM device
+2. Navigate to the tools directory:
+   ```bash
+   cd /path/to/NanoKVM/tools/nanokvm_update_edid
+   ```
+
+3. Compile the tool (if not already compiled):
+   ```bash
+   make
+   ```
+
+4. Run the EDID editor with your EDID binary file:
+   ```bash
+   ./nanokvm_update_edid /path/to/your_edid.bin
+   ```
+
+**Built-in Template:**
+
+A pre-configured 1080P EDID template is included:
+- `E21_NanoKVM.bin` - Standard 1080P EDID (256 bytes)
+
+**Creating Custom EDID:**
+
+You can create custom EDID files using various tools:
+- [Linux EDID Generator](https://github.com/fakrul/edid-generator)
+- [EDID Editor (Windows)](https://www.entechtaiwan.com/tools/edid-editor)
+- [AW EDID Editor](http://www.tawbware.com/edid/awedin.html)
+
+**Important Notes:**
+- EDID data must be exactly 256 bytes
+- Invalid EDID data may cause display issues
+- For Cube/Lite hardware versions, you **must manually power cycle the device** after updating EDID
+- For PCIe version, EDID changes apply automatically without power cycling
+
+**Example workflow:**
+```bash
+# 1. Compile the tool
+cd /path/to/NanoKVM/tools/nanokvm_update_edid
+make
+
+# 2. Use built-in 1080P template or provide your custom EDID
+./nanokvm_update_edid E21_NanoKVM.bin
+
+# 3. Or use a custom EDID file you created
+./nanokvm_update_edid /path/to/custom_1080p_edid.bin
 ```
 
 ## 🔩 Hardware Platform (NanoKVM Cube/PCIe)
