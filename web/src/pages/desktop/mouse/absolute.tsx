@@ -146,17 +146,20 @@ export const Absolute = () => {
       if (e.touches.length === 0) {
         return;
       }
-
       const touch = e.touches[0];
-      const { x, y } = getCoordinate(touch);
 
       // Handle two-finger scroll first
       if (e.touches.length > 1) {
-        const deltaY = (touch.clientY - lastTouchYRef.current > 0 ? 1 : -1) * scrollDirection;
-        lastTouchYRef.current = touch.clientY;
-        if (Math.abs(deltaY) > 2) {
-          handleMouseEvent({ type: 'wheel', deltaY });
+        const currentTime = Date.now();
+        if (currentTime - lastScrollTimeRef.current < scrollInterval) {
+          return;
         }
+
+        const deltaY = (touch.clientY - lastTouchYRef.current > 0 ? 1 : -1) * scrollDirection;
+        handleMouseEvent({ type: 'wheel', deltaY });
+
+        lastTouchYRef.current = touch.clientY;
+        lastScrollTimeRef.current = currentTime;
         return;
       }
 
@@ -192,6 +195,7 @@ export const Absolute = () => {
       }
 
       if (isDraggingRef.current || isLongPressRef.current) {
+        const { x, y } = getCoordinate(touch);
         handleMouseEvent({ type: 'move', x, y });
       }
     }
