@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider, Switch, Tooltip } from 'antd';
+import { Divider, message, Switch, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { LoaderCircleIcon, PowerIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

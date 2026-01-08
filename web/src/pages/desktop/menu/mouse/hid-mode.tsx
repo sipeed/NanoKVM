@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Divider, Modal, Typography } from 'antd';
+import { Button, Divider, message, Modal, Typography } from 'antd';
 import clsx from 'clsx';
 import { PenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,6 @@ const { Paragraph } = Typography;
 
 export const HidMode = () => {
   const { t } = useTranslation();
-  const { message } = require('antd');
 
   const [hidMode, setHidMode] = useState<'normal' | 'hid-only'>('normal');
   const [isLoading, setIsLoading] = useState(false);
@@ -39,18 +38,7 @@ export const HidMode = () => {
       });
   }
 
-   function getHidMode() {
-  }
-
   function updateHidMode() {
-
-  function updateHidMode() {
-    message.error(t('mouse.updateFailed'));
-  }
-
-  function updateHidMode() {
-    message.error(t('mouse.updateFailed'));
-  }
     if (isLoading) return;
     setIsLoading(true);
 
@@ -71,7 +59,7 @@ export const HidMode = () => {
         }
       })
       .catch((err) => {
-        console.log(err);
+        message.error(t('mouse.updateFailed'));
         setIsLoading(false);
         clearTimeout(timeoutId);
       });

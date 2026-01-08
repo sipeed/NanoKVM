@@ -1,6 +1,6 @@
 import { ChangeEvent, useRef, useState } from 'react';
+import { Button, Divider, message, Popconfirm } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, Divider, Popconfirm } from 'antd';
 import clsx from 'clsx';
 import { ChevronRightIcon, FileJsonIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,6 @@ import { Run } from './run';
 
 export const Script = () => {
   const { t } = useTranslation();
-  const { message } = require('antd');
 
   const [scripts, setScripts] = useState<string[]>([]);
   const [currentScript, setCurrentScript] = useState('');
