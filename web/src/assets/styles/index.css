@@ -22,6 +22,24 @@ html, body {
   background: #444;
 }
 
+/* Hide scrollbars on touch devices (iPadOS, mobile) while keeping scroll functionality */
+@media (hover: none) and (pointer: coarse) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .overflow-auto::-webkit-scrollbar,
+  .overflow-y-auto::-webkit-scrollbar,
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .spin {
 animation: spin 1s linear;
 }
