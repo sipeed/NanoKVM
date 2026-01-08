@@ -89,8 +89,11 @@ const en = {
         capture: 'Click here to capture shortcut',
         clear: 'Clear',
         save: 'Save',
+        getFailed: 'Failed to load shortcuts',
+        addFailed: 'Failed to add shortcut',
+        deleteFailed: 'Failed to delete shortcut',
         captureTips:
-          'Capturing system-level keys (such as the Windows key) requires full-screen permission.',
+          'Capturing system-level keys (such as Windows key) requires full-screen permission.',
         enterFullScreen: 'Toggle full-screen mode.'
       }
     },
@@ -125,6 +128,73 @@ const en = {
       }
     },
     image: {
+      wifi: {
+        title: 'Wi-Fi',
+        description: 'Configure Wi-Fi',
+        apMode: 'AP mode is enabled, connect to Wi-Fi by scanning QR code',
+        connect: 'Join Wi-Fi',
+        connectDesc1: 'Please enter network ssid and password',
+        connectDesc2: 'Please enter password to join this network',
+        disconnect: 'Are you sure you want to disconnect the network?',
+        failed: 'Connection failed, please try again.',
+        ssid: 'Name',
+        password: 'Password',
+        joinBtn: 'Join',
+        confirmBtn: 'Ok',
+        cancelBtn: 'Cancel'
+      },
+      ssh: {
+        description: 'Enable SSH remote access',
+        tip: 'Set a strong password before enabling (Account - Change Password)'
+      },
+      tls: {
+        description: 'Enable HTTPS protocol',
+        tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
+      },
+      advanced: 'Advanced Settings',
+      swap: {
+        title: 'Swap',
+        disable: 'Disable',
+        description: 'Set swap file size',
+        tip: "Enabling this feature could shorten your SD card's usable life!"
+      },
+      mouseJiggler: {
+        title: 'Mouse Jiggler',
+        description: 'Prevent remote host from sleeping',
+        disable: 'Disable',
+        absolute: 'Absolute Mode',
+        relative: 'Relative Mode'
+      },
+      mdns: {
+        description: 'Enable mDNS discovery service',
+        tip: "Turning it off if it's not needed"
+      },
+      hdmi: {
+        description: 'Enable HDMI/monitor output'
+      },
+      autostart: {
+        title: 'Autostart Scripts Settings',
+        description: 'Manage scripts that run automatically on system startup',
+        new: 'New',
+        deleteConfirm: 'Are you sure you want to delete this file?',
+        yes: 'Yes',
+        no: 'No',
+        scriptName: 'Autostart Script Name',
+        scriptContent: 'Autostart Script Content',
+        settings: 'Settings'
+      },
+      hidOnly: 'HID-Only Mode',
+      hidOnlyDesc: 'Stop emulating virtual devices, retaining only basic HID control',
+      disk: 'Virtual Disk',
+      diskDesc: 'Mount SD card on remote host',
+      network: 'Virtual Network',
+      networkDesc: 'Mount virtual network card on remote host',
+      reboot: 'Reboot',
+      rebootDesc: 'Are you sure you want to reboot NanoKVM?',
+        okBtn: 'Yes',
+        cancelBtn: 'No'
+      },
+      image: {
       title: 'Images',
       loading: 'Loading...',
       empty: 'Nothing Found',

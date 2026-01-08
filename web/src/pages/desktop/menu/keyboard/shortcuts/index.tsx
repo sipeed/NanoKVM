@@ -71,13 +71,41 @@ export const Shortcuts = () => {
 
       const rsp = await api.deleteShortcut(shortcut.id);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('keyboard.shortcut.getFailed'));
+        return;
+      }
+
+      setCustomShortcuts(rsp.data.shortcuts);
+    } catch (err) {
+      message.error('Failed to load keyboard shortcuts');
+    }
+
+  async function addShortcut(shortcut: ShortcutInterface) {
+    try {
+      const rsp = await api.addShortcut(shortcut.keys);
+      if (rsp.code !== 0) {
+        message.error(t('keyboard.shortcut.addFailed'));
         return;
       }
 
       await getShortcuts();
     } catch (err) {
-      console.log(err);
+      message.error('Failed to add keyboard shortcut');
+    }
+
+  async function delShortcut(shortcut: ShortcutInterface) {
+    try {
+      if (!shortcut.id) return;
+
+      const rsp = await api.deleteShortcut(shortcut.id);
+      if (rsp.code !== 0) {
+        message.error(t('keyboard.shortcut.deleteFailed'));
+        return;
+      }
+
+      await getShortcuts();
+    } catch (err) {
+      message.error('Failed to delete keyboard shortcut');
     }
   }
 

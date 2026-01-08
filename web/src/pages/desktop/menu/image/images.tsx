@@ -86,13 +86,13 @@ export const Images = ({ isOpen, cdrom, setIsMounted }: ImagesProps) => {
     const filename = isMounted ? '' : image;
 
     api
-      .mountImage(filename, cdrom)
-      .then((rsp) => {
-        if (rsp.code !== 0) {
-          console.log(rsp.msg);
-          openNotification(isMounted);
-          return;
-        }
+       .mountImage(filename, cdrom)
+       .then((rsp) => {
+         if (rsp.code !== 0) {
+           message.error(t('image.mountFailed'));
+           openNotification(isMounted);
+           return;
+         }
 
         setMountedImage(filename);
         setIsMounted(!!filename);
@@ -126,21 +126,21 @@ export const Images = ({ isOpen, cdrom, setIsMounted }: ImagesProps) => {
     setIsModalOpen(false);
 
     api
-      .deleteImage(selectedImage)
-      .then((rsp) => {
-        if (rsp.code !== 0) {
-          console.log(rsp.msg);
-          return;
-        }
+       .deleteImage(selectedImage)
+       .then((rsp) => {
+         if (rsp.code !== 0) {
+           message.error(t('image.deleteFailed'));
+           return;
+         }
 
-        getImages();
+         getImages();
 
-        setSelectedImage('');
-      })
-      .finally(() => {
-        setDeletingImage('');
-      });
-  }
+         setSelectedImage('');
+       })
+       .finally(() => {
+         setDeletingImage('');
+       });
+   }
 
   // show mount/unmount failed notification
   function openNotification(isMounted: boolean) {

@@ -38,7 +38,7 @@ export const Power = () => {
         setIsPowerOn(rsp.data.pwr);
       }
     } catch (err) {
-      console.log(err);
+      message.error('Failed to get power state. Please try again.');
     }
   }
 

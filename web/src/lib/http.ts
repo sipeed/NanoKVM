@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
+import { message } from 'antd';
 
 import { removeToken } from '@/lib/cookie.ts';
 import { getBaseUrl } from '@/lib/service.ts';
@@ -39,7 +40,7 @@ class Http {
         return response.data;
       },
       (error) => {
-        console.log(error);
+        message.error('Network request failed');
         const code = error.response?.status;
         if (code === 401) {
           removeToken();

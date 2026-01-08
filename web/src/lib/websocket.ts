@@ -141,7 +141,7 @@ export class WsClient {
         handlers.forEach((handler) => handler(message));
       }
     } catch (err) {
-      console.log(err);
+      message.error('WebSocket message handling failed');
     }
   }
 
