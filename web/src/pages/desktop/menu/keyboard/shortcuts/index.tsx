@@ -12,6 +12,7 @@ import type { Shortcut as ShortcutInterface } from './types.ts';
 
 export const Shortcuts = () => {
   const { t } = useTranslation();
+  const { message } = require('antd');
 
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -41,13 +42,13 @@ export const Shortcuts = () => {
     try {
       const rsp = await api.getShortcuts();
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('keyboard.shortcut.getFailed'));
         return;
       }
 
       setCustomShortcuts(rsp.data.shortcuts);
     } catch (err) {
-      console.log(err);
+      message.error(t('keyboard.shortcut.getFailed'));
     }
   }
 
@@ -55,13 +56,13 @@ export const Shortcuts = () => {
     try {
       const rsp = await api.addShortcut(shortcut.keys);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('keyboard.shortcut.addFailed'));
         return;
       }
 
       await getShortcuts();
     } catch (err) {
-      console.log(err);
+      message.error(t('keyboard.shortcut.addFailed'));
     }
   }
 
@@ -71,13 +72,13 @@ export const Shortcuts = () => {
 
       const rsp = await api.deleteShortcut(shortcut.id);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('keyboard.shortcut.deleteFailed'));
         return;
       }
 
       await getShortcuts();
     } catch (err) {
-      console.log(err);
+      message.error(t('keyboard.shortcut.deleteFailed'));
     }
   }
 

@@ -89,9 +89,12 @@ const en = {
         capture: 'Click here to capture shortcut',
         clear: 'Clear',
         save: 'Save',
-        captureTips:
-          'Capturing system-level keys (such as the Windows key) requires full-screen permission.',
-        enterFullScreen: 'Toggle full-screen mode.'
+          captureTips:
+            'Capturing system-level keys (such as Windows key) requires full-screen permission.',
+            enterFullScreen: 'Toggle full-screen mode.',
+          getFailed: 'Failed to load shortcuts',
+          addFailed: 'Failed to add shortcut',
+          deleteFailed: 'Failed to delete shortcut'
       }
     },
     mouse: {
@@ -114,10 +117,11 @@ const en = {
       slow: 'Slow',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
       resetHid: 'Reset HID',
+      updateFailed: 'Failed to update mouse mode',
       hidOnly: {
         title: 'HID-Only mode',
-        desc: "If your mouse and keyboard stop responding and resetting HID doesn't help, it could be a compatibility issue between the NanoKVM and the device. Try to enable HID-Only mode for better compatibility.",
-        tip1: 'Enabling HID-Only mode will unmount the virtual U-disk and virtual network',
+        desc: "If your mouse and keyboard stop responding and resetting HID doesn't help, it could be a compatibility issue between NanoKVM and device. Try to enable HID-Only mode for better compatibility.",
+        tip1: 'Enabling HID-Only mode will unmount virtual U-disk and virtual network',
         tip2: 'In HID-Only mode, image mounting is disabled',
         tip3: 'NanoKVM will automatically reboot after switching modes',
         enable: 'Enable HID-Only mode',
@@ -167,7 +171,10 @@ const en = {
       confirm: 'Yes',
       cancel: 'No',
       delete: 'Delete',
-      close: 'Close'
+      close: 'Close',
+      uploadFailed: 'Failed to upload script',
+      deleteFailed: 'Failed to delete script',
+      getFailed: 'Failed to load scripts'
     },
     terminal: {
       title: 'Terminal',
@@ -215,7 +222,9 @@ const en = {
       resetConfirm: 'Proceed reset operation?',
       powerConfirm: 'Proceed power operation?',
       okBtn: 'Yes',
-      cancelBtn: 'No'
+      cancelBtn: 'No',
+      getLedFailed: 'Failed to get LED status',
+      updateFailed: 'Failed to update power settings'
     },
     settings: {
       title: 'Settings',

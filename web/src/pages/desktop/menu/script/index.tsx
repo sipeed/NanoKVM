@@ -12,6 +12,7 @@ import { Run } from './run';
 
 export const Script = () => {
   const { t } = useTranslation();
+  const { message } = require('antd');
 
   const [scripts, setScripts] = useState<string[]>([]);
   const [currentScript, setCurrentScript] = useState('');
@@ -50,7 +51,7 @@ export const Script = () => {
       .uploadScript(formData)
       .then((rsp) => {
         if (rsp.code !== 0) {
-          console.log(rsp.msg);
+          message.error(t('script.uploadFailed'));
           return;
         }
 
@@ -71,7 +72,7 @@ export const Script = () => {
     } else {
       api.runScript(currentScript, type).then((rsp) => {
         if (rsp.code !== 0) {
-          console.log(rsp.msg);
+          message.error(t('script.runFailed'));
           return;
         }
       });
@@ -81,7 +82,7 @@ export const Script = () => {
   function getScripts() {
     api.getScripts().then((rsp) => {
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('script.getFailed'));
         return;
       }
 
@@ -96,7 +97,7 @@ export const Script = () => {
 
     api.deleteScript(currentScript).then((rsp) => {
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('script.deleteFailed'));
         return;
       }
 

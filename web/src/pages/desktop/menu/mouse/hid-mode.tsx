@@ -10,6 +10,7 @@ const { Paragraph } = Typography;
 
 export const HidMode = () => {
   const { t } = useTranslation();
+  const { message } = require('antd');
 
   const [hidMode, setHidMode] = useState<'normal' | 'hid-only'>('normal');
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +39,18 @@ export const HidMode = () => {
       });
   }
 
+   function getHidMode() {
+  }
+
   function updateHidMode() {
+
+  function updateHidMode() {
+    message.error(t('mouse.updateFailed'));
+  }
+
+  function updateHidMode() {
+    message.error(t('mouse.updateFailed'));
+  }
     if (isLoading) return;
     setIsLoading(true);
 
@@ -53,6 +65,7 @@ export const HidMode = () => {
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
+          message.error(t('mouse.updateFailed'));
           setIsLoading(false);
           clearTimeout(timeoutId);
         }
