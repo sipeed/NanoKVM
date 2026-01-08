@@ -1,3 +1,22 @@
+## 2.3.2 (2025-01-08)
+
+### Features
+
+* Added support for custom keyboard shortcuts
+* Added support for mouse Forward and Back buttons (reboot required)
+* Added support for touchscreen mouse operation
+* The menu bar now supports auto-hide and drag
+
+### Bug Fixes
+
+* Fixed an issue where the previous IP address was not released after configuring a static IP
+
+### Performance
+
+* Refactored the keyboard to support simultaneous keystrokes and a wider range of international layouts (reboot required)
+* Refactored the mouse to improve response latency
+* Refactored the WebSocket module to transmit keyboard and mouse data using the standard HID format
+
 ## 2.3.1 (2025-12-26)
 
 ### Features
