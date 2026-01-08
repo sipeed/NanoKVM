@@ -44,6 +44,8 @@ init_alpha_hw(){
   echo in > /sys/class/gpio/gpio${Alpha_HDD_LED_Pin}/direction     # hdd led
   echo out > /sys/class/gpio/gpio${Alpha_PWR_KEY_Pin}/direction    # pwr key
   echo out > /sys/class/gpio/gpio${Alpha_RST_KEY_Pin}/direction    # rst key
+  echo 0 > /sys/class/gpio/gpio${Alpha_PWR_KEY_Pin}/value         # pwr key released
+  echo 0 > /sys/class/gpio/gpio${Alpha_RST_KEY_Pin}/value         # rst key released
 
   rmmod /mnt/system/ko/i2c-gpio.ko
   rmmod /mnt/system/ko/i2c-algo-bit.ko
@@ -85,8 +87,9 @@ init_beta_pcie_hw(){
   echo out > /sys/class/gpio/gpio${Beta_PWR_KEY_Pin}/direction    # pwr key
   echo out > /sys/class/gpio/gpio${Beta_RST_KEY_Pin}/direction    # rst key
   echo out > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/direction    # rst key
-
-  echo 1 > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/value    # rst key
+  echo 0 > /sys/class/gpio/gpio${Beta_PWR_KEY_Pin}/value         # pwr key released
+  echo 0 > /sys/class/gpio/gpio${Beta_RST_KEY_Pin}/value         # rst key released
+  echo 1 > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/value      # hdmi rst
 
   rmmod /mnt/system/ko/i2c-gpio.ko
   rmmod /mnt/system/ko/i2c-algo-bit.ko
