@@ -212,7 +212,6 @@ const en = {
           rebootFailed: 'Failed to reboot. Please try again.',
           reboot: 'Reboot',
           rebootDesc: 'Are you sure you want to reboot NanoKVM?',
-          rebootFailed: 'Failed to reboot. Please try again.',
           okBtn: 'Yes',
           cancelBtn: 'No'
         },

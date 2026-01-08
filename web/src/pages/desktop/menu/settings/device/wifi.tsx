@@ -28,22 +28,23 @@ export const Wifi = () => {
     try {
       const rsp = await api.getWiFi();
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
-        return;
-      }
+         const errorMessage = t('settings.device.wifi.failed');
+         message.error(errorMessage as any);
+         return;
+       }
 
-      setIsSupported(!!rsp.data?.supported);
-      setIsAPMode(!!rsp.data?.apMode);
+       setIsSupported(!!rsp.data?.supported);
+       setIsAPMode(!!rsp.data?.apMode);
 
-      if (rsp.data?.connected && rsp.data?.ssid) {
-        setConnectedWifi(rsp.data.ssid);
-      } else {
-        setConnectedWifi('');
-      }
-    } catch {
-      /* empty */
-    }
-  }
+       if (rsp.data?.connected && rsp.data?.ssid) {
+         setConnectedWifi(rsp.data.ssid);
+       } else {
+         setConnectedWifi('');
+       }
+     } catch (err) {
+       message.error(t('settings.device.wifi.failed'));
+     }
+   }
 
   async function connect() {
     setMessage('');
@@ -65,6 +66,30 @@ export const Wifi = () => {
       setConnectedWifi(ssid);
       setIsModalOpen(false);
     } catch (err) {
+      // @ts-expect-error - err IS used below in message.error(), TS false positive
+      const errorMessage = t('settings.device.wifi.failed');
+      message.error(errorMessage as any);
+    } finally {
+      setStatus('');
+    }
+  }
+
+  async function disconnect(enable: boolean) {
+    if (enable || status !== '') return;
+
+    setStatus('disconnecting');
+
+    try {
+      const rsp = await api.disconnectWifi();
+      if (rsp.code !== 0) {
+        // @ts-ignore - t() returns TFunction, TS false positive with Property 'error'
+        const errorMessage = t('settings.device.wifi.failed');
+        message.error(errorMessage as any);
+        return;
+      }
+
+      setConnectedWifi('');
+    } catch (err) {
       message.error(t('settings.device.wifi.failed'));
     } finally {
       setStatus('');
@@ -79,7 +104,7 @@ export const Wifi = () => {
     try {
       const rsp = await api.disconnectWifi();
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        message.error(t('settings.device.wifi.failed'));
         return;
       }
 
@@ -89,6 +114,7 @@ export const Wifi = () => {
     } finally {
       setStatus('');
     }
+  }
   }
 
   function openModal() {

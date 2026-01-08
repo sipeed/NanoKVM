@@ -23,7 +23,7 @@ export const Reboot = () => {
       .reboot()
       .then((rsp) => {
         if (rsp.code !== 0) {
-          message.error(rsp.msg || t('settings.device.rebootFailed'));
+          message.error(rsp.msg ? String(rsp.msg) : t('settings.device.rebootFailed'));
           setIsLoading(false);
           clearTimeout(timeoutId);
         }
