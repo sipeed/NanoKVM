@@ -109,10 +109,10 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 			return
 		}
 	}
-
+	
 	on, _ := isDeviceExist(device)
 	rsp.OkRspWithData(c, &proto.UpdateVirtualDeviceRsp{
-		On: on,
+		On: !on,
 	})
 
 	log.Debugf("update virtual device %s success", req.Device)
