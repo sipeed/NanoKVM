@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Divider, Modal, Segmented } from 'antd';
+import { Divider, Modal, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import { DiscIcon, HardDriveIcon } from 'lucide-react';
@@ -61,15 +61,17 @@ export const Image = () => {
 
   return (
     <>
-      <div
-        className={clsx(
-          'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
-          isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
-        )}
-        onClick={() => toggleModal(true)}
-      >
-        <DiscIcon size={18} />
-      </div>
+      <Tooltip title={t('image.title')} placement="bottom" mouseEnterDelay={0.6}>
+        <div
+          className={clsx(
+            'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
+            isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
+          )}
+          onClick={() => toggleModal(true)}
+        >
+          <DiscIcon size={18} />
+        </div>
+      </Tooltip>
 
       <Modal open={isModalOpen} footer={null} onCancel={() => toggleModal(false)}>
         <div className="flex items-center space-x-1">

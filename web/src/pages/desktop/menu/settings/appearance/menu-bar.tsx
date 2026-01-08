@@ -4,9 +4,11 @@ import {
   DiscIcon,
   DownloadIcon,
   FileJsonIcon,
+  MaximizeIcon,
   NetworkIcon,
   PowerIcon,
-  TerminalSquareIcon
+  TerminalSquareIcon,
+  XIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -19,12 +21,14 @@ export const MenuBar = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const items = [
-    { key: 'image', icon: <DiscIcon size={16} className="text-neutral-400" /> },
-    { key: 'download', icon: <DownloadIcon size={16} className="text-neutral-400" /> },
-    { key: 'script', icon: <FileJsonIcon size={16} className="text-neutral-400" /> },
-    { key: 'terminal', icon: <TerminalSquareIcon size={16} className="text-neutral-400" /> },
-    { key: 'wol', icon: <NetworkIcon size={16} className="text-neutral-400" /> },
-    { key: 'power', icon: <PowerIcon size={16} className="text-neutral-400" /> }
+    { key: 'image', icon: <DiscIcon size={16} /> },
+    { key: 'download', icon: <DownloadIcon size={16} /> },
+    { key: 'script', icon: <FileJsonIcon size={16} /> },
+    { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
+    { key: 'wol', icon: <NetworkIcon size={16} /> },
+    { key: 'power', icon: <PowerIcon size={16} /> },
+    { key: 'fullscreen', icon: <MaximizeIcon size={16} />, label: 'fullscreen.toggle' },
+    { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
   ];
 
   function updateItems(key: string) {
@@ -48,10 +52,13 @@ export const MenuBar = () => {
       <div className="mt-8 flex flex-col space-y-5">
         {items.map((item) => (
           <div key={item.key} className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-neutral-400">
               {item.icon}
-              <span>{t(`${item.key}.title`)}</span>
+              <span className="text-neutral-300">
+                {item.label ? t(item.label) : t(`${item.key}.title`)}
+              </span>
             </div>
+
             <Switch
               value={!menuDisabledItems.includes(item.key)}
               onChange={() => updateItems(item.key)}

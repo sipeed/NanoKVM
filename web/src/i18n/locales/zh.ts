@@ -214,7 +214,7 @@ const zh = {
         languageDesc: '选择界面语言',
         menuBar: '菜单栏',
         menuBarDesc: '是否在菜单栏中显示图标',
-        webTitle: '网站标题',
+        webTitle: '网页标题',
         webTitleDesc: '自定义网站页面标题'
       },
       device: {
