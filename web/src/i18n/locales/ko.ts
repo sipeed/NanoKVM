@@ -217,6 +217,7 @@ const ko = {
         title: '디자인',
         display: '표시',
         language: '언어',
+        languageDesc: '인터페이스 언어를 선택하세요',
         menuBar: '메뉴 바',
         menuBarDesc: '메뉴 바에 아이콘을 표시',
         webTitle: '웹 제목',
@@ -336,7 +337,14 @@ const ko = {
         cancel: '취소',
         preview: '미리보기 업데이트',
         previewDesc: '새로운 기능과 개선 사항에 미리 접근하세요',
-        previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!'
+        previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!',
+        offline: {
+          title: '오프라인 업데이트',
+          desc: '로컬 설치 패키지를 통한 업데이트',
+          upload: '업로드',
+          invalidName: '유효하지 않은 파일 이름 형식입니다. GitHub 릴리즈에서 다운로드하세요.',
+          updateFailed: '업데이트에 실패했습니다. 재시도하세요.'
+        }
       },
       account: {
         title: '계정',
