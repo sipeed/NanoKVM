@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 
 import { KeyboardReport } from '@/lib/keyboard.ts';
+import { isModifier } from '@/lib/keymap';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
@@ -46,6 +47,17 @@ export const Keyboard = () => {
       event.stopPropagation();
 
       const code = event.code;
+
+      // Compatible with macOS's command key combinations
+      if (code === 'MetaLeft' || code === 'MetaRight') {
+        pressedKeys.current.forEach((pressedCode) => {
+          if (!isModifier(pressedCode)) {
+            handleKeyEvent({ type: 'keyup', code: pressedCode });
+            pressedKeys.current.delete(pressedCode);
+          }
+        });
+      }
+
       pressedKeys.current.delete(code);
       handleKeyEvent({ type: 'keyup', code });
     }
