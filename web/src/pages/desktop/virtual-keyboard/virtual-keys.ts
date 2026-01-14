@@ -79,11 +79,11 @@ export const keyboardOptions = {
 
     KeyY_qwertz: 'Y',
     KeyZ_qwertz: 'Z',
-    
+
     KeyQ_qwertz: 'Q<br/>@',
     KeyE_qwertz: 'E<br/>€',
     BracketRight_qwertz: '+~*',
-    Backslash_qwertz: '#<br/>\'',
+    Backslash_qwertz: "#<br/>'",
     IntlBackslash_qwertz: '<|>',
     Comma_qwertz: ',<br/>;',
     Period_qwertz: '.<br/>:',
@@ -91,11 +91,11 @@ export const keyboardOptions = {
     '{controlleft_qwertz}': 'STRG',
     '{altright_qwertz}': 'ALT GR',
     '{controlright_qwertz}': 'STRG',
-    
+
     BracketLeft_qwertz: 'Ü',
     Semicolon_qwertz: 'Ö',
     Quote_qwertz: 'Ä',
-    
+
     '{tab}': 'Tab',
     KeyQ: 'Q',
     KeyW: 'W',
@@ -336,7 +336,7 @@ export const modifierKeys = [
   '{altright}',
   '{metaright}',
   '{winright}',
-  
+
   // DE-spezifische Modifier-Tokens (für qwertz-Layout)
   '{controlleft_qwertz}',
   '{controlright_qwertz}',
