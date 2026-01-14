@@ -94,7 +94,7 @@ const tr = {
       resetHid: 'İnsan Arayüz Cihazı\'nı sıfırlayın',
       hidOnly: {
         title: 'Sadece İnsan Arayüz Cihazı modu',
-        desc: "Eğer fare ve klavye çalışmayı bırakırsa ve İnsan Arayüz Cihazı\'nı sıfırlamak sorunu çözmezse bunun sebebi cihazınız ve NanoKVM arasındaki bir uyumluluk sorunu olabilir. Uyumluluğu arttırmak için Sadece İnsan Arayüz Cihazı modunu kullanın.",
+        desc: "Eğer fare ve klavye çalışmayı bırakırsa ve İnsan Arayüz Cihazı'nı sıfırlamak sorunu çözmezse bunun sebebi cihazınız ve NanoKVM arasındaki bir uyumluluk sorunu olabilir. Uyumluluğu arttırmak için Sadece İnsan Arayüz Cihazı modunu kullanın.",
         tip1: 'Sadece İnsan Arayüz Cihazı modunu aktifleştirmek, sanal U-disk’i ve sanal ağı devre dışı bırakacaktır.',
         tip2: 'Sadece İnsan Arayüz Cihazı modunda disk imajı bağlama özelliği devre dışı bırakılır',
         tip3: 'NanoKVM mod değişiminden sonra kendiliğinden yeniden başlatılacaktır',
