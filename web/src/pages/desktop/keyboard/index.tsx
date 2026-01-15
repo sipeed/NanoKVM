@@ -1,18 +1,31 @@
 import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 
+import { getOperatingSystem } from '@/lib/browser.ts';
 import { KeyboardReport } from '@/lib/keyboard.ts';
 import { isModifier } from '@/lib/keymap';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+
+interface AltGrState {
+  active: boolean;
+  ctrlLeftTimestamp: number;
+}
+
+const ALTGR_THRESHOLD_MS = 10;
 
 export const Keyboard = () => {
   const isKeyboardEnabled = useAtomValue(isKeyboardEnableAtom);
 
   const keyboardRef = useRef(new KeyboardReport());
   const pressedKeys = useRef(new Set<string>());
+  const altGrState = useRef<AltGrState | null>(null);
 
   useEffect(() => {
+    if (getOperatingSystem() === 'Windows' && !altGrState.current) {
+      altGrState.current = { active: false, ctrlLeftTimestamp: 0 };
+    }
+
     if (!isKeyboardEnabled) {
       releaseKeys();
       return;
@@ -31,8 +44,20 @@ export const Keyboard = () => {
       event.stopPropagation();
 
       const code = event.code;
-      if (pressedKeys.current.has(code)) {
-        return;
+      if (pressedKeys.current.has(code)) return;
+
+      // When AltGr is pressed, browsers send ControlLeft followed immediately by AltRight
+      if (altGrState.current) {
+        if (code === 'ControlLeft') {
+          altGrState.current.ctrlLeftTimestamp = event.timeStamp;
+        } else if (code === 'AltRight') {
+          const timeDiff = event.timeStamp - altGrState.current.ctrlLeftTimestamp;
+          if (timeDiff < ALTGR_THRESHOLD_MS && pressedKeys.current.has('ControlLeft')) {
+            pressedKeys.current.delete('ControlLeft');
+            handleKeyEvent({ type: 'keyup', code: 'ControlLeft' });
+            altGrState.current.active = true;
+          }
+        }
       }
 
       pressedKeys.current.add(code);
@@ -48,14 +73,28 @@ export const Keyboard = () => {
 
       const code = event.code;
 
+      // Handle AltGr state for Windows
+      if (altGrState.current?.active) {
+        if (code === 'ControlLeft') return;
+
+        if (code === 'AltRight') {
+          altGrState.current.active = false;
+        }
+      }
+
       // Compatible with macOS's command key combinations
       if (code === 'MetaLeft' || code === 'MetaRight') {
+        const keysToRelease: string[] = [];
         pressedKeys.current.forEach((pressedCode) => {
           if (!isModifier(pressedCode)) {
-            handleKeyEvent({ type: 'keyup', code: pressedCode });
-            pressedKeys.current.delete(pressedCode);
+            keysToRelease.push(pressedCode);
           }
         });
+
+        for (const key of keysToRelease) {
+          handleKeyEvent({ type: 'keyup', code: key });
+          pressedKeys.current.delete(key);
+        }
       }
 
       pressedKeys.current.delete(code);
@@ -82,6 +121,12 @@ export const Keyboard = () => {
 
       pressedKeys.current.clear();
 
+      // Reset AltGr state
+      if (altGrState.current) {
+        altGrState.current.active = false;
+        altGrState.current.ctrlLeftTimestamp = 0;
+      }
+
       const report = keyboardRef.current.reset();
       sendReport(report);
     }
@@ -91,6 +136,8 @@ export const Keyboard = () => {
       document.removeEventListener('keyup', handleKeyUp);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+      releaseKeys();
     };
   }, [isKeyboardEnabled]);
 
