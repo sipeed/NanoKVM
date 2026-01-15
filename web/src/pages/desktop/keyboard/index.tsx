@@ -20,6 +20,7 @@ export const Keyboard = () => {
   const keyboardRef = useRef(new KeyboardReport());
   const pressedKeys = useRef(new Set<string>());
   const altGrState = useRef<AltGrState | null>(null);
+  const isComposing = useRef(false);
 
   useEffect(() => {
     if (getOperatingSystem() === 'Windows' && !altGrState.current) {
@@ -33,12 +34,17 @@ export const Keyboard = () => {
 
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener('compositionstart', handleCompositionStart);
+    document.addEventListener('compositionend', handleCompositionEnd);
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     // Key down event
     function handleKeyDown(event: KeyboardEvent) {
       if (!isKeyboardEnabled) return;
+
+      // Skip during IME composition
+      if (isComposing.current || event.isComposing) return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -67,6 +73,8 @@ export const Keyboard = () => {
     // Key up event
     function handleKeyUp(event: KeyboardEvent) {
       if (!isKeyboardEnabled) return;
+
+      if (isComposing.current || event.isComposing) return;
 
       event.preventDefault();
       event.stopPropagation();
@@ -99,6 +107,16 @@ export const Keyboard = () => {
 
       pressedKeys.current.delete(code);
       handleKeyEvent({ type: 'keyup', code });
+    }
+
+    // Composition start event
+    function handleCompositionStart() {
+      isComposing.current = true;
+    }
+
+    // Composition end event
+    function handleCompositionEnd() {
+      isComposing.current = false;
     }
 
     // Release all keys when window loses focus
@@ -134,6 +152,8 @@ export const Keyboard = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener('compositionstart', handleCompositionStart);
+      document.removeEventListener('compositionend', handleCompositionEnd);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
