@@ -8,3 +8,6 @@ export const submenuOpenCountAtom = atom(0);
 
 // web title
 export const webTitleAtom = atom('');
+
+// menu display mode: 'off' | 'auto' | 'always'
+export const menuDisplayModeAtom = atom<string>('auto');

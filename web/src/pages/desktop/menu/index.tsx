@@ -1,12 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Divider } from 'antd';
 import clsx from 'clsx';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
-import { getMenuDisabledItems } from '@/lib/localstorage.ts';
-import { menuDisabledItemsAtom, submenuOpenCountAtom } from '@/jotai/settings.ts';
+import { menuDisabledItemsAtom, menuDisplayModeAtom } from '@/jotai/settings.ts';
+import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
+import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 
 import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
@@ -21,99 +22,27 @@ import { Settings } from './settings';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
 
-const HIDE_TIMEOUT = 8000;
-
 export const Menu = () => {
-  const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
-  const submenuOpenCount = useAtomValue(submenuOpenCountAtom);
-
-  const [isMenuExpanded, setIsMenuExpanded] = useState(true);
-  const [isMenuMoved, setIsMenuMoved] = useState(false);
-  const [isMenuHovered, setIsMenuHovered] = useState(false);
-  const [isMenuHidden, setIsMenuHidden] = useState(false);
-  const [menuBounds, setMenuBounds] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
-
   const nodeRef = useRef<HTMLDivElement | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // init menu
-  useEffect(() => {
-    const items = getMenuDisabledItems();
-    setMenuDisabledItems(items);
+  const menuDisplayMode = useAtomValue(menuDisplayModeAtom);
+  const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
 
-    startCountdown();
-    handleResize();
+  const {
+    isInitialized,
+    isMenuExpanded,
+    isMenuHidden,
+    isInvisible,
+    handleHovered,
+    handleMoved,
+    setIsMenuExpanded
+  } = useMenuVisibility();
 
-    window.addEventListener('resize', handleResize);
+  const menuBounds = useMenuBounds(nodeRef, isMenuExpanded);
 
-    return () => {
-      stopCountdown();
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-
-  // handle menu bounds
-  useEffect(() => {
-    handleResize();
-  }, [menuDisabledItems, isMenuExpanded]);
-
-  // handle hide timer
-  useEffect(() => {
-    if (submenuOpenCount === 0 && !isMenuHovered) {
-      startCountdown();
-      return;
-    }
-
-    stopCountdown();
-  }, [submenuOpenCount, isMenuHovered]);
-
-  function handleResize() {
-    if (!nodeRef.current) return;
-
-    const elementRect = nodeRef.current.getBoundingClientRect();
-    const width = (window.innerWidth - elementRect.width) / 2;
-
-    setMenuBounds({
-      left: -width,
-      top: -10,
-      right: width,
-      bottom: window.innerHeight - elementRect.height - 10
-    });
-  }
-
-  function startCountdown() {
-    if (submenuOpenCount > 0 || !isMenuExpanded || isMenuMoved) {
-      return;
-    }
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    timerRef.current = setTimeout(() => {
-      setIsMenuHidden(true);
-    }, HIDE_TIMEOUT);
-  }
-
-  function stopCountdown() {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }
-
-  function handleMoved(_e: DraggableEvent, data: DraggableData) {
+  function onDragStop(_e: DraggableEvent, data: DraggableData) {
     if (data.x === 0 && data.y === 0) return;
-    if (isMenuMoved) return;
-
-    setIsMenuMoved(true);
-  }
-
-  function handleHovered(hovered: boolean) {
-    setIsMenuHovered(hovered);
-    if (hovered) {
-      setIsMenuHidden(false);
-    }
+    handleMoved();
   }
 
   function isEnabled(item: string) {
@@ -126,11 +55,15 @@ export const Menu = () => {
       bounds={menuBounds}
       handle="strong"
       positionOffset={{ x: '-50%', y: '0%' }}
-      onStop={handleMoved}
+      onStop={onDragStop}
     >
       <div
         ref={nodeRef}
-        className="fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2"
+        className={clsx(
+          'fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2 transition-opacity duration-300',
+          isInitialized ? 'opacity-100' : 'opacity-0',
+          isInvisible && 'invisible'
+        )}
         onMouseEnter={() => handleHovered(true)}
         onMouseLeave={() => handleHovered(false)}
         onBlur={() => handleHovered(false)}
@@ -144,7 +77,6 @@ export const Menu = () => {
         <div className="sticky top-[10px] flex w-full justify-center">
           <div
             className={clsx(
-              'h-[36px] items-center rounded bg-neutral-800/80 transition-all duration-300',
               'h-[36px] items-center rounded bg-neutral-800/80 pl-1 pr-2 transition-all duration-300',
               isMenuExpanded ? 'flex' : 'hidden',
               isMenuHidden ? '-translate-y-[110%] opacity-80' : 'translate-y-0 opacity-100'
@@ -186,7 +118,7 @@ export const Menu = () => {
         </div>
 
         {/* Menubar expand button */}
-        {!isMenuExpanded && <Expand toggleMenu={setIsMenuExpanded} />}
+        {!isMenuExpanded && menuDisplayMode !== 'off' && <Expand toggleMenu={setIsMenuExpanded} />}
       </div>
     </Draggable>
   );

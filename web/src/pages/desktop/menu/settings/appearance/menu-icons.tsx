@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 
-export const MenuBar = () => {
+export const MenuIcons = () => {
   const { t } = useTranslation();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
@@ -43,13 +43,15 @@ export const MenuBar = () => {
   }
 
   return (
-    <>
+    <div className="mt-8 flex flex-col space-y-5">
       <div className="flex flex-col">
-        <span className="text-neutral-400">{t('settings.appearance.menuBar')}</span>
-        <span className="text-xs text-neutral-500">{t('settings.appearance.menuBarDesc')}</span>
+        <span className="text-neutral-400">{t('settings.appearance.menuBar.icons')}</span>
+        <span className="text-xs text-neutral-500">
+          {t('settings.appearance.menuBar.iconsDesc')}
+        </span>
       </div>
 
-      <div className="mt-8 flex flex-col space-y-5">
+      <div className="mt-5 flex flex-col space-y-5">
         {items.map((item) => (
           <div key={item.key} className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-neutral-400">
@@ -66,6 +68,6 @@ export const MenuBar = () => {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 };
