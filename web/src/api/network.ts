@@ -52,3 +52,23 @@ export function connectWifi(ssid: string, password: string) {
 export function disconnectWifi() {
   return http.post('/api/network/wifi/disconnect');
 }
+
+// ethernet configuration
+export interface EthernetConfig {
+  dhcp: boolean;
+  ip: string;
+  netmask: string;
+  gateway: string;
+  dns1: string;
+  dns2: string;
+}
+
+// get ethernet configuration
+export function getEthernetConfig() {
+  return http.get('/api/network/ethernet');
+}
+
+// set ethernet configuration
+export function setEthernetConfig(config: EthernetConfig) {
+  return http.post('/api/network/ethernet', config);
+}
