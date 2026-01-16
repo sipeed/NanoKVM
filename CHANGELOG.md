@@ -1,3 +1,25 @@
+## 2.3.3 (2026-01-16)
+
+### Features
+
+* Added support for setting the display mode of the menu bar
+
+### Bug Fixes
+
+* Fixed a keyboard issue where IME composition events were not handled correctly
+* Resolved an issue where the `AltGr` key was not recognized on the Windows system
+* Fixed a bug where `Command` key combinations were not fully released on the macOS system
+* Fixed input issues with the `IntlBackslash` key on the German virtual keyboard
+
+### Localization
+
+* Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
+
+### Chores
+
+* Bump react-router-dom from 6.27.0 to 6.30.3
+* Updated eslint
+
 ## 2.3.2 (2026-01-08)
 
 ### Features
