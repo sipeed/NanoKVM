@@ -218,10 +218,18 @@ const ko = {
         display: '표시',
         language: '언어',
         languageDesc: '인터페이스 언어를 선택하세요',
-        menuBar: '메뉴 바',
-        menuBarDesc: '메뉴 바에 아이콘을 표시',
         webTitle: '웹 제목',
-        webTitleDesc: '웹 페이지 제목 사용자 지정'
+        webTitleDesc: '웹 페이지 제목 사용자 지정',
+        menuBar: {
+          title: '메뉴 바',
+          mode: '표시 모드',
+          modeDesc: '메뉴 바를 화면에 표시합니다',
+          modeOff: '꺼짐',
+          modeAuto: '자동 숨기기',
+          modeAlways: '항상 보이기',
+          icons: '하위 메뉴 아이콘',
+          iconsDesc: '메뉴 바에 하위 메뉴 아이콘을 표시합니다'
+        }
       },
       device: {
         title: '장치',
