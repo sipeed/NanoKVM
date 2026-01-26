@@ -17,6 +17,9 @@ func hidRouter(r *gin.Engine) {
 	api.POST("/hid/shortcut", service.AddShortcut)      // add shortcut
 	api.DELETE("/hid/shortcut", service.DeleteShortcut) // delete shortcut
 
+	api.GET("/hid/shortcut/leader-key", service.GetLeaderKey)  // set shortcut leader key
+	api.POST("/hid/shortcut/leader-key", service.SetLeaderKey) // set shortcut leader key
+
 	api.GET("/hid/mode", service.GetHidMode)  // get hid mode
 	api.POST("/hid/mode", service.SetHidMode) // set hid mode
 	api.POST("/hid/reset", service.ResetHid)  // reset hid

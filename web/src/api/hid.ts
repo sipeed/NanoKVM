@@ -43,3 +43,13 @@ export function deleteShortcut(id: string) {
   };
   return http.delete('/api/hid/shortcut', data);
 }
+
+// get shortcut leader key
+export function getLeaderKey() {
+  return http.get('/api/hid/shortcut/leader-key');
+}
+
+// set shortcut leader key
+export function setLeaderKey(key: string) {
+  return http.post('/api/hid/shortcut/leader-key', { key });
+}

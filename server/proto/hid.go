@@ -29,3 +29,11 @@ type AddShortcutReq struct {
 type DeleteShortcutReq struct {
 	ID string `validate:"required"`
 }
+
+type SetLeaderKeyReq struct {
+	Key string `validate:"omitempty"`
+}
+
+type GetLeaderKeyRsp struct {
+	Key string `json:"key"`
+}

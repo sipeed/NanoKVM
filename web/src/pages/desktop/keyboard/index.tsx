@@ -7,34 +7,38 @@ import { isModifier } from '@/lib/keymap';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
+import { Recorder } from './recorder.tsx';
+import { useAltGr } from './useAltGr.ts';
+import { useLeaderKey } from './useLeaderKey.ts';
 import { normalizeKeyCode } from './utils.ts';
 
-interface AltGrState {
-  active: boolean;
-  ctrlLeftTimestamp: number;
-}
-
-const ALTGR_THRESHOLD_MS = 10;
-
 export const Keyboard = () => {
+  const os = getOperatingSystem();
+
   const isKeyboardEnabled = useAtomValue(isKeyboardEnableAtom);
 
   const keyboardRef = useRef(new KeyboardReport());
   const pressedKeys = useRef(new Set<string>());
-  const altGrState = useRef<AltGrState | null>(null);
   const isComposing = useRef(false);
 
+  // Send key event helper
+  const sendKeyEvent = (type: 'keydown' | 'keyup', code: string) => {
+    const kb = keyboardRef.current;
+    const report = type === 'keydown' ? kb.keyDown(code) : kb.keyUp(code);
+    sendReport(report);
+  };
+
+  // Init leader key handler
+  const leaderKey = useLeaderKey(pressedKeys, sendKeyEvent);
+  const leaderKeyRef = useRef(leaderKey);
+  leaderKeyRef.current = leaderKey;
+
+  // Init AltGr key handler
+  const altGr = useAltGr(os, pressedKeys, sendKeyEvent);
+  const altGrRef = useRef(altGr);
+  altGrRef.current = altGr;
+
   useEffect(() => {
-    const os = getOperatingSystem();
-    if (os === 'Windows' && !altGrState.current) {
-      altGrState.current = { active: false, ctrlLeftTimestamp: 0 };
-    }
-
-    if (!isKeyboardEnabled) {
-      releaseKeys();
-      return;
-    }
-
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
     document.addEventListener('compositionstart', handleCompositionStart);
@@ -42,116 +46,94 @@ export const Keyboard = () => {
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Key down event
     function handleKeyDown(event: KeyboardEvent) {
       if (!isKeyboardEnabled) return;
-
-      // Skip during IME composition
       if (isComposing.current || event.isComposing) return;
 
       event.preventDefault();
       event.stopPropagation();
 
       const code = normalizeKeyCode(event, os);
-      if (!code || pressedKeys.current.has(code)) {
+      if (!code || pressedKeys.current.has(code)) return;
+
+      // Handle leader key
+      const leaderHandled = leaderKeyRef.current.handleKeyDown(code);
+      if (leaderHandled) {
         return;
       }
 
-      // When AltGr is pressed, browsers send ControlLeft followed immediately by AltRight
-      if (altGrState.current) {
-        if (code === 'ControlLeft') {
-          altGrState.current.ctrlLeftTimestamp = event.timeStamp;
-        } else if (code === 'AltRight') {
-          const timeDiff = event.timeStamp - altGrState.current.ctrlLeftTimestamp;
-          if (timeDiff < ALTGR_THRESHOLD_MS && pressedKeys.current.has('ControlLeft')) {
-            pressedKeys.current.delete('ControlLeft');
-            handleKeyEvent({ type: 'keyup', code: 'ControlLeft' });
-            altGrState.current.active = true;
-          }
-        }
-      }
+      // Handle AltGr key
+      altGrRef.current.handleKeyDown(code, event.timeStamp);
 
       pressedKeys.current.add(code);
-      handleKeyEvent({ type: 'keydown', code });
+      sendKeyEvent('keydown', code);
     }
 
-    // Key up event
     function handleKeyUp(event: KeyboardEvent) {
       if (!isKeyboardEnabled) return;
-
       if (isComposing.current || event.isComposing) return;
 
       event.preventDefault();
       event.stopPropagation();
 
       const code = normalizeKeyCode(event, os);
-      if (!code) {
+      if (!code) return;
+
+      // Handle leader key release
+      const leaderHandled = leaderKeyRef.current.handleKeyUp(code);
+      if (leaderHandled) {
         return;
       }
 
-      // Handle AltGr state for Windows
-      if (altGrState.current?.active) {
-        if (code === 'ControlLeft') return;
-
-        if (code === 'AltRight') {
-          altGrState.current.active = false;
-        }
+      // Handle AltGr key release
+      const altGrHandled = altGrRef.current.handleKeyUp(code);
+      if (altGrHandled) {
+        return;
       }
 
-      // Compatible with macOS's command key combinations
+      // Release Meta combinations (macOS compatibility)
       if (code === 'MetaLeft' || code === 'MetaRight') {
-        const keysToRelease: string[] = [];
-        pressedKeys.current.forEach((pressedCode) => {
-          if (!isModifier(pressedCode)) {
-            keysToRelease.push(pressedCode);
-          }
-        });
-
-        for (const key of keysToRelease) {
-          handleKeyEvent({ type: 'keyup', code: key });
-          pressedKeys.current.delete(key);
-        }
+        releaseMetaCombinations();
       }
 
       pressedKeys.current.delete(code);
-      handleKeyEvent({ type: 'keyup', code });
+      sendKeyEvent('keyup', code);
     }
 
-    // Composition start event
     function handleCompositionStart() {
       isComposing.current = true;
     }
 
-    // Composition end event
     function handleCompositionEnd() {
       isComposing.current = false;
     }
 
-    // Release all keys when window loses focus
     function handleBlur() {
       releaseKeys();
     }
 
-    // Release all keys before window closes
     function handleVisibilityChange() {
       if (document.hidden) {
         releaseKeys();
       }
     }
 
-    // Release all keys
+    function releaseMetaCombinations() {
+      const keysToRelease = Array.from(pressedKeys.current).filter((code) => !isModifier(code));
+      for (const key of keysToRelease) {
+        sendKeyEvent('keyup', key);
+        pressedKeys.current.delete(key);
+      }
+    }
+
     function releaseKeys() {
       pressedKeys.current.forEach((code) => {
-        handleKeyEvent({ type: 'keyup', code });
+        sendKeyEvent('keyup', code);
       });
-
       pressedKeys.current.clear();
 
-      // Reset AltGr state
-      if (altGrState.current) {
-        altGrState.current.active = false;
-        altGrState.current.ctrlLeftTimestamp = 0;
-      }
+      leaderKeyRef.current.reset();
+      altGrRef.current.reset();
 
       const report = keyboardRef.current.reset();
       sendReport(report);
@@ -169,18 +151,14 @@ export const Keyboard = () => {
     };
   }, [isKeyboardEnabled]);
 
-  // Keyboard handler
-  function handleKeyEvent(event: { type: 'keydown' | 'keyup'; code: string }) {
-    const kb = keyboardRef.current;
-    const report = event.type === 'keydown' ? kb.keyDown(event.code) : kb.keyUp(event.code);
-    sendReport(report);
-  }
-
-  // Send keyboard report
   function sendReport(report: Uint8Array) {
     const data = new Uint8Array([MessageEvent.Keyboard, ...report]);
     client.send(data);
   }
 
-  return <></>;
+  return (
+    <>
+      <Recorder recordMode={leaderKey.recordMode} recordedKeys={leaderKey.recordedKeys} />
+    </>
+  );
 };

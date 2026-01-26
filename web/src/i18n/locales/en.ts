@@ -92,6 +92,34 @@ const en = {
         captureTips:
           'Capturing system-level keys (such as the Windows key) requires full-screen permission.',
         enterFullScreen: 'Toggle full-screen mode.'
+      },
+      leaderKey: {
+        title: 'Leader Key',
+        desc: 'Bypass browser restrictions and send system shortcuts directly to the remote host.',
+        howToUse: 'How to Use',
+        simultaneous: {
+          title: 'Simultaneous Mode',
+          desc1: 'Press and hold the Leader Key, then press the shortcut.',
+          desc2: 'Intuitive, but may conflict with system shortcuts.'
+        },
+        sequential: {
+          title: 'Sequential Mode',
+          desc1:
+            'Press the Leader Key → press the shortcut in sequence → press the Leader Key again.',
+          desc2: 'Requires more steps, but completely avoids system conflicts.'
+        },
+        enable: 'Enable Leader Key',
+        tip: 'When assigned as a Leader Key, this key functions exclusively as a shortcut trigger and loses its default behavior.',
+        placeholder: 'Please press the Leader Key',
+        shiftRight: 'Right Shift',
+        ctrlRight: 'Right Ctrl',
+        metaRight: 'Right Win',
+        submit: 'Submit',
+        recorder: {
+          rec: 'REC',
+          activate: 'Activate keys',
+          input: 'Please press the shortcut...'
+        }
       }
     },
     mouse: {
