@@ -1,3 +1,19 @@
+## 2.3.4 (2026-01-26)
+
+### Features
+
+* Introduced `Leader Key` functionality to bypass local browser shortcut interception
+
+### Bug Fixes
+
+* Fixed an issue where the Right Shift key was not being recognized on Windows system
+* Fixed a bug where the menu bar would fail to close correctly
+
+### Localization
+
+* Updated Traditional Chinese translations (thanks to [@j796160836](https://github.com/j796160836))
+* Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
+
 ## 2.3.3 (2026-01-16)
 
 ### Features
