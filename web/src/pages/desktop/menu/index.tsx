@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
-import { menuDisabledItemsAtom, menuDisplayModeAtom } from '@/jotai/settings.ts';
+import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
 import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 
@@ -25,14 +25,12 @@ import { Wol } from './wol';
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
-  const menuDisplayMode = useAtomValue(menuDisplayModeAtom);
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
 
   const {
     isInitialized,
     isMenuExpanded,
     isMenuHidden,
-    isInvisible,
     handleHovered,
     handleMoved,
     setIsMenuExpanded
@@ -61,8 +59,7 @@ export const Menu = () => {
         ref={nodeRef}
         className={clsx(
           'fixed left-1/2 top-[10px] z-[1000] -translate-x-1/2 transition-opacity duration-300',
-          isInitialized ? 'opacity-100' : 'opacity-0',
-          isInvisible && 'invisible'
+          isInitialized ? 'opacity-100' : 'opacity-0'
         )}
         onMouseEnter={() => handleHovered(true)}
         onMouseLeave={() => handleHovered(false)}
@@ -118,7 +115,7 @@ export const Menu = () => {
         </div>
 
         {/* Menubar expand button */}
-        {!isMenuExpanded && menuDisplayMode !== 'off' && <Expand toggleMenu={setIsMenuExpanded} />}
+        {!isMenuExpanded && <Expand toggleMenu={setIsMenuExpanded} />}
       </div>
     </Draggable>
   );
