@@ -1,10 +1,11 @@
 package vm
 
 import (
-	"NanoKVM-Server/config"
 	"fmt"
 	"os"
 	"strings"
+
+	"NanoKVM-Server/config"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -19,6 +20,7 @@ var imageVersionMap = map[string]string{
 	"2024-11-13-09-59-9c961a.img": "v1.3.0",
 	"2025-02-17-19-08-3649fe.img": "v1.4.0",
 	"2025-04-17-14-21-98d17d.img": "v1.4.1",
+	"2026-01-05-1_4_1.img":        "v1.4.2",
 }
 
 func (s *Service) GetInfo(c *gin.Context) {
