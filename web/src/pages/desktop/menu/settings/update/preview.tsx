@@ -5,7 +5,11 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/application.ts';
 
-export const Preview = () => {
+interface PreviewProps {
+  checkForUpdates: () => void;
+}
+
+export const Preview = ({ checkForUpdates }: PreviewProps) => {
   const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -48,6 +52,7 @@ export const Preview = () => {
         }
 
         setIsEnabled(enable);
+        checkForUpdates();
       })
       .finally(() => {
         setIsLoading(false);

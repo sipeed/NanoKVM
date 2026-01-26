@@ -13,8 +13,6 @@ type UpdateProps = {
   setIsLocked: (isClosable: boolean) => void;
 };
 
-// type Status = '' | 'loading' | 'updating' | 'outdated' | 'latest' | 'failed';
-
 export const Update = ({ setIsLocked }: UpdateProps) => {
   const { t } = useTranslation();
 
@@ -85,7 +83,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <div className="text-base">{t('settings.update.title')}</div>
       <Divider className="opacity-50" />
 
-      <Preview />
+      <Preview checkForUpdates={checkForUpdates} />
       <Offline
         status={status}
         setStatus={setStatus}
