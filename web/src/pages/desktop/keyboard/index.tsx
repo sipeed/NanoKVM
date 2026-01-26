@@ -7,6 +7,8 @@ import { isModifier } from '@/lib/keymap';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
+import { normalizeKeyCode } from './utils.ts';
+
 interface AltGrState {
   active: boolean;
   ctrlLeftTimestamp: number;
@@ -23,7 +25,8 @@ export const Keyboard = () => {
   const isComposing = useRef(false);
 
   useEffect(() => {
-    if (getOperatingSystem() === 'Windows' && !altGrState.current) {
+    const os = getOperatingSystem();
+    if (os === 'Windows' && !altGrState.current) {
       altGrState.current = { active: false, ctrlLeftTimestamp: 0 };
     }
 
@@ -49,8 +52,10 @@ export const Keyboard = () => {
       event.preventDefault();
       event.stopPropagation();
 
-      const code = event.code;
-      if (pressedKeys.current.has(code)) return;
+      const code = normalizeKeyCode(event, os);
+      if (!code || pressedKeys.current.has(code)) {
+        return;
+      }
 
       // When AltGr is pressed, browsers send ControlLeft followed immediately by AltRight
       if (altGrState.current) {
@@ -79,7 +84,10 @@ export const Keyboard = () => {
       event.preventDefault();
       event.stopPropagation();
 
-      const code = event.code;
+      const code = normalizeKeyCode(event, os);
+      if (!code) {
+        return;
+      }
 
       // Handle AltGr state for Windows
       if (altGrState.current?.active) {

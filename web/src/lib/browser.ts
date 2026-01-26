@@ -1,28 +1,33 @@
+export type System = 'Windows' | 'macOS' | 'Linux' | 'Unknown';
+
 export interface BrowserInfo {
-  os: string;
+  os: System;
   isChrome: boolean;
 }
 
-export function getOperatingSystem(): string {
+export function getOperatingSystem(): System {
   if (typeof window === 'undefined') {
     return 'Unknown';
   }
 
-  const platformSource =
+  if ('userAgentData' in navigator) {
     // @ts-expect-error check userAgentData.platform
-    'userAgentData' in navigator ? navigator.userAgentData.platform : navigator.platform;
-
-  if (!platformSource) {
-    return 'Unknown';
+    const platform = navigator.userAgentData?.platform?.toLowerCase();
+    if (platform) {
+      if (platform === 'windows') return 'Windows';
+      if (platform === 'macos') return 'macOS';
+      if (platform === 'linux' || platform === 'android') return 'Linux';
+    }
   }
 
-  const platform = platformSource.toLowerCase();
+  // Fallback to User Agent
+  const userAgent = navigator.userAgent;
 
-  if (platform.startsWith('win')) return 'Windows';
-  if (platform.startsWith('mac')) return 'macOS';
-  if (platform.startsWith('linux')) return 'Linux';
+  if (/Win/i.test(userAgent)) return 'Windows';
+  if (/Mac|iPhone|iPod|iPad/i.test(userAgent)) return 'macOS';
+  if (/Linux|Android/i.test(userAgent)) return 'Linux';
 
-  return platformSource;
+  return 'Unknown';
 }
 
 export function isChromeBrowser(): boolean {
