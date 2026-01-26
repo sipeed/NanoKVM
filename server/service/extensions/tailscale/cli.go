@@ -145,3 +145,36 @@ func (c *Cli) Logout() error {
 	command := "tailscale logout"
 	return exec.Command("sh", "-c", command).Run()
 }
+
+func (c *Cli) SetAutoUpdate(enable bool) error {
+	arg := "false"
+	if enable {
+		arg = "true"
+	}
+	command := fmt.Sprintf("tailscale set --auto-update=%s", arg)
+	return exec.Command("sh", "-c", command).Run()
+}
+
+func (c *Cli) GetAutoUpdate() (bool, error) {
+	command := "tailscale debug prefs"
+	cmd := exec.Command("sh", "-c", command)
+
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return false, err
+	}
+
+	// 解析 JSON 输出，查找 AutoUpdate.Apply 字段
+	var prefs struct {
+		AutoUpdate struct {
+			Check bool `json:"Check"`
+			Apply bool `json:"Apply"`
+		} `json:"AutoUpdate"`
+	}
+
+	if err := json.Unmarshal(output, &prefs); err != nil {
+		return false, err
+	}
+
+	return prefs.AutoUpdate.Apply, nil
+}
