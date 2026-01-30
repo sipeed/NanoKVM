@@ -94,6 +94,7 @@ start_usb_dev(){
         ln -s functions/hid.GS2 configs/c.1
     fi
 
+    # dedicated for media
     if [ -e /boot/usb.disk0 ]
     then
             mkdir functions/mass_storage.disk0
@@ -108,18 +109,22 @@ start_usb_dev(){
             disk=$(cat /boot/usb.disk0)
             if [ -z "${disk}" ]
             then
-                    # if [ ! -e /mnt/usbdisk.img ]
-                    # then
-                    #         fallocate -l 8G /mnt/usbdisk.img
-                    #         mkfs.vfat /mnt/usbdisk.img
-                    # fi
-                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
+                    echo "" > functions/mass_storage.disk0/lun.0/file
             else
                     cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
             fi
     fi
 
-    ls /sys/class/udc/ | cat > UDC
+    # mount data partition
+    if [ -e /boot/usb.disk1 ]; then
+        mkdir functions/mass_storage.disk1
+        ln -s functions/mass_storage.disk1 configs/c.1/
+        echo /dev/mmcblk0p3 > functions/mass_storage.disk1/lun.0/file
+    fi
+
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > UDC
+    fi
     echo device > /proc/cviusb/otg_role
 }
 
@@ -131,7 +136,9 @@ start_usb_host(){
 restart_usb_dev(){
     echo > /sys/kernel/config/usb_gadget/g0/UDC
     sleep 1
-    ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    if [ ! -e /boot/udc.disable ]; then
+        ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
+    fi
     echo "USB Restart OK!"
 }
 
