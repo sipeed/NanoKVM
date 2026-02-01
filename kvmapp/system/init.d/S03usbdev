@@ -24,7 +24,13 @@ start_usb_dev(){
         echo 0x1009 > idProduct
     fi
     mkdir strings/0x409
-    echo '0123456789ABCDEF' > strings/0x409/serialnumber
+    if [ -f /sys/class/cvi-base/base_uid ]; then
+        _uid=$(awk '{print $2}' /sys/class/cvi-base/base_uid)
+        _serial=$(echo "$_uid" | tr -d '_')
+        echo "$_serial" > strings/0x409/serialnumber
+    else
+        echo '0123456789ABCDEF' > strings/0x409/serialnumber
+    fi
     echo 'sipeed' > strings/0x409/manufacturer
     echo 'NanoKVM' > strings/0x409/product
 
