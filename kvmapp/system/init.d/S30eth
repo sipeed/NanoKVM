@@ -39,7 +39,7 @@ start() {
         done < /boot/eth.nodhcp
 
         ip a show dev eth0 | grep inet > /dev/null || {
-            udhcpc -i eth0 -t 3 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid &>/dev/null
+            udhcpc -i eth0 -t 3 -T 1 -A 5 -b -O 121 -p /run/udhcpc.eth0.pid &>/dev/null
             ip a show dev eth0 | grep inet > /dev/null
         } || {
             inet=$RESERVE_INET
@@ -47,7 +47,7 @@ start() {
             ip a add "$inet" brd + dev eth0
         } || exit 1
     else
-        udhcpc -i eth0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid &
+        udhcpc -i eth0 -t 10 -T 1 -A 5 -b -O 121 -p /run/udhcpc.eth0.pid &
     fi
 }
 
