@@ -689,8 +689,8 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		uint8_t RW_Data[35];
 		FILE *fp;
 		int file_size;
-		if(access("/kvmapp/kvm/width", F_OK) == 0){
-			fp = fopen("/kvmapp/kvm/width", "r");
+		if(access("/tmp/kvm/width", F_OK) == 0){
+			fp = fopen("/tmp/kvm/width", "r");
 			fseek(fp, 0, SEEK_END);
 			file_size = ftell(fp); 
 			fseek(fp, 0, SEEK_SET);
@@ -701,8 +701,8 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		} else {
 			pstSize->u32Width = 1920;
 		}
-		if(access("/kvmapp/kvm/height", F_OK) == 0){
-			fp = fopen("/kvmapp/kvm/height", "r");
+		if(access("/tmp/kvm/height", F_OK) == 0){
+			fp = fopen("/tmp/kvm/height", "r");
 			fseek(fp, 0, SEEK_END);
 			file_size = ftell(fp); 
 			fseek(fp, 0, SEEK_SET);

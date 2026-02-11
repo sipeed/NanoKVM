@@ -265,7 +265,7 @@ void kvm_update_stream_fps(void)
 	uint8_t RW_Data[10];
 
 	// FPS
-	fp = fopen("/kvmapp/kvm/now_fps", "r");
+	fp = fopen("/tmp/kvm/now_fps", "r");
     fseek(fp, 0, SEEK_END);
     file_size = ftell(fp); 
     fseek(fp, 0, SEEK_SET);
@@ -330,16 +330,16 @@ void kvm_update_hdmi_res(void)
 	int file_size;
 	uint8_t RW_Data[10];
 	// HDMI width
-	fp = fopen("/kvmapp/kvm/width", "r");
+	fp = fopen("/tmp/kvm/width", "r");
 	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
+	file_size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	fread(RW_Data, sizeof(char), file_size, fp);
 	fclose(fp);
 	RW_Data[file_size] = 0;
 	kvm_sys_state.hdmi_width = atoi((char*)RW_Data);
 	// HDMI height
-	fp = fopen("/kvmapp/kvm/height", "r");
+	fp = fopen("/tmp/kvm/height", "r");
 	fseek(fp, 0, SEEK_END);
 	file_size = ftell(fp); 
 	fseek(fp, 0, SEEK_SET);
@@ -406,7 +406,7 @@ void kvm_update_wifi_state(void)
 			// break;	// Start checking the connection directly.
 		case 0:
 		// WiFi is available but not connected.
-			system("echo 0 > /kvmapp/kvm/wifi_state");
+			system("echo 0 > /tmp/kvm/wifi_state");
 			if (get_ip_addr(WiFi_IP) && get_ip_addr(WiFi_ROUTE)){
 				// IP+Route has been acquired
 				if(kvm_sys_state.ping_allow){
@@ -422,7 +422,7 @@ void kvm_update_wifi_state(void)
 			break;
 		case 1:
 		// Connected to the network & continuously checking if it can ping successfully.
-			system("echo 1 > /kvmapp/kvm/wifi_state");
+			system("echo 1 > /tmp/kvm/wifi_state");
 			get_ip_addr(WiFi_IP);
 			if(kvm_sys_state.ping_allow){
 				if (kvm_sys_state.wifi_route[0] != 0){

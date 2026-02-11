@@ -36,8 +36,8 @@
 #define kvmv_data_buffer_size   4
 #define Try_rounds_HDMI_err_res 5
 
-#define vi_width_path           "/kvmapp/kvm/width"
-#define vi_height_path          "/kvmapp/kvm/height"
+#define vi_width_path           "/tmp/kvm/width"
+#define vi_height_path          "/tmp/kvm/height"
 #define hdmi_mode_path          "/etc/kvm/hdmi_mode"
 #define hdmi_state_path         "/proc/lt_int"
 #define watchdog_mode_path      "/etc/kvm/watchdog"
@@ -340,8 +340,8 @@ int get_manual_resolution(void)
     int res = 0;
 
     // get res
-    if(access("/kvmapp/kvm/width", F_OK) == 0){
-        fp = fopen("/kvmapp/kvm/width", "r");
+    if(access("/tmp/kvm/width", F_OK) == 0){
+        fp = fopen("/tmp/kvm/width", "r");
         fseek(fp, 0, SEEK_END);
         file_size = ftell(fp); 
         fseek(fp, 0, SEEK_SET);
@@ -352,8 +352,8 @@ int get_manual_resolution(void)
     } else {
         tmp_width = 1920;
     }
-    if(access("/kvmapp/kvm/height", F_OK) == 0){
-        fp = fopen("/kvmapp/kvm/height", "r");
+    if(access("/tmp/kvm/height", F_OK) == 0){
+        fp = fopen("/tmp/kvm/height", "r");
         fseek(fp, 0, SEEK_END);
         file_size = ftell(fp); 
         fseek(fp, 0, SEEK_SET);
@@ -1697,12 +1697,12 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
 			if(kvmv_cfg.cam_state == 0) {
 				kvmv_cfg.cam_state = 1;
                 kvmv_cfg.hdmi_cable_state = 1;
-				system("echo 1 > /kvmapp/kvm/state");
+				system("echo 1 > /tmp/kvm/state");
 			}
         } else {
 			if(kvmv_cfg.cam_state == 1) {
 				kvmv_cfg.cam_state = 0;
-				system("echo 0 > /kvmapp/kvm/state");
+				system("echo 0 > /tmp/kvm/state");
 			}
 			delete img;
             debug("[kvmv]can`t get img...\n");
