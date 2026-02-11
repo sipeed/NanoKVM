@@ -85,14 +85,15 @@ void new_app_init(void)
 	system("rm -f /etc/init.d/S99*");
 	
 	// Add necessary configuration files for program execution
-	system("mkdir /kvmapp/kvm");
-	system("mkdir /etc/kvm");
-	system("echo 0 > /kvmapp/kvm/now_fps");
+	system("mkdir -p /kvmapp/kvm");
+	system("mkdir -p /tmp/kvm");
+	system("mkdir -p /etc/kvm");
+	system("echo 0 > /tmp/kvm/now_fps");
 	system("echo 30 > /kvmapp/kvm/fps");
 	system("echo 2000 > /kvmapp/kvm/qlty");
 	system("echo 720 > /kvmapp/kvm/res");
 	system("echo h264 > /kvmapp/kvm/type");
-	system("echo 0 > /kvmapp/kvm/state");
+	system("echo 0 > /tmp/kvm/state");
 	system("touch /etc/kvm/frame_detact");
 
 	// rm jpg_stream & kvm_stream
