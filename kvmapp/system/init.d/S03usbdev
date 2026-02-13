@@ -54,7 +54,7 @@ start_usb_dev(){
         then
             echo 1 > functions/hid.GS0/subclass
         fi
-        if [ ! -e /boot/usb.notwakeup ]
+        if [ -e /boot/usb.wakeup ]
         then
             echo 1 > functions/hid.GS0/wakeup_on_write
         fi
@@ -69,7 +69,7 @@ start_usb_dev(){
         then
             echo 1 > functions/hid.GS1/subclass
         fi
-        if [ ! -e /boot/usb.notwakeup ]
+        if [ -e /boot/usb.wakeup ]
         then
             echo 1 > functions/hid.GS1/wakeup_on_write
         fi
@@ -84,7 +84,7 @@ start_usb_dev(){
         then
             echo 1 > functions/hid.GS2/subclass
         fi
-        if [ ! -e /boot/usb.notwakeup ]
+        if [ -e /boot/usb.wakeup ]
         then
             echo 1 > functions/hid.GS2/wakeup_on_write
         fi
