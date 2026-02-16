@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/extensions/tailscale.ts';
 
 import { Device } from './device.tsx';
+import { ErrorHelp } from './error-help.tsx';
 import { Header } from './header.tsx';
 import { Install } from './install.tsx';
 import { Login } from './login.tsx';
@@ -39,7 +40,11 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
           return;
         }
 
+        setErrMsg('');
         setStatus(rsp.data);
+      })
+      .catch((err) => {
+        setErrMsg(err.message || 'Failed to get status');
       })
       .finally(() => {
         setIsLoading(false);
@@ -70,7 +75,7 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
             <Device status={status} onLogout={getStatus} />
           )}
 
-          {errMsg && <div className="pt-5 text-red-500">{errMsg}</div>}
+          {errMsg && <ErrorHelp error={errMsg} onRefresh={getStatus} />}
         </>
       )}
     </>

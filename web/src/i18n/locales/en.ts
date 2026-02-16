@@ -367,6 +367,8 @@ const en = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to Tailscale? NetBird will be stopped.',
         memory: {
           title: 'Memory optimization',
           tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. A Tailscale restart is required for the change to take effect.'
@@ -406,7 +408,59 @@ const en = {
         uninstall: 'Uninstall Tailscale',
         uninstallDesc: 'Are you sure you want to uninstall Tailscale?',
         okBtn: 'Yes',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        error: {
+          title: 'Tailscale operation failed',
+          intro: 'Error details:',
+          stepWait: '1. Wait 10-15 seconds and retry the action.',
+          stepRestartUI: '2. Click "Restart Service" below.',
+          stepRestartSSH: '3. If needed, run: /etc/init.d/S98tailscaled restart',
+          stepReboot: '4. Reboot NanoKVM only if the steps above do not help.',
+          restartButton: 'Restart Service',
+          refreshButton: 'Refresh Status'
+        }
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to NetBird? Tailscale will be stopped.',
+        loading: 'Loading...',
+        notInstall: 'NetBird is not installed.',
+        install: 'Install',
+        installing: 'Installing',
+        notRunning: 'NetBird service is not running.',
+        run: 'Start',
+        connectTitle: 'Connect by Setup Key',
+        setupKey: 'Setup Key',
+        managementUrl: 'Management URL',
+        adminUrl: 'Admin URL (optional)',
+        connect: 'Connect',
+        invalidInput: 'Setup Key and Management URL are required.',
+        state: 'State',
+        running: 'Running',
+        stopped: 'Stopped',
+        deviceName: 'Device Name',
+        deviceIP: 'Device IP',
+        version: 'Version',
+        disconnect: 'Disconnect',
+        disconnectConfirm: 'Disconnect from NetBird?',
+        refresh: 'Refresh',
+        restart: 'Restart',
+        restartConfirm: 'Restart NetBird service?',
+        stop: 'Stop',
+        stopConfirm: 'Stop NetBird service?',
+        okBtn: 'Yes',
+        cancelBtn: 'No',
+        error: {
+          title: 'NetBird operation failed',
+          intro: 'Error details:',
+          stepWait: '1. Wait 10-15 seconds and retry the action.',
+          stepRestartUI: '2. Click "Restart Service" below.',
+          stepRestartSSH: '3. If needed, run: /etc/init.d/S99netbird restart',
+          stepReboot: '4. Reboot NanoKVM only if the steps above do not help.',
+          restartButton: 'Restart Service',
+          refreshButton: 'Refresh Status'
+        }
       },
       update: {
         title: 'Check for Updates',

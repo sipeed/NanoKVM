@@ -3,6 +3,7 @@ package tailscale
 import (
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/utils"
+	"fmt"
 	"net"
 	"os"
 
@@ -16,7 +17,7 @@ const (
 	TailscalePath  = "/usr/bin/tailscale"
 	TailscaledPath = "/usr/sbin/tailscaled"
 
-	GoMemLimit int64 = 75
+	GoMemLimit int64 = 30
 )
 
 var StateMap = map[string]proto.TailscaleState{
@@ -65,7 +66,7 @@ func (s *Service) Start(c *gin.Context) {
 
 	err := NewCli().Start()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "start failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("start failed: %v", err))
 		log.Errorf("failed to run tailscale start: %s", err)
 		return
 	}
@@ -83,7 +84,7 @@ func (s *Service) Restart(c *gin.Context) {
 
 	err := NewCli().Restart()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "restart failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("restart failed: %v", err))
 		log.Errorf("failed to run tailscale restart: %s", err)
 		return
 	}
@@ -97,7 +98,7 @@ func (s *Service) Stop(c *gin.Context) {
 
 	err := NewCli().Stop()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "stop failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("stop failed: %v", err))
 		log.Errorf("failed to run tailscale stop: %s", err)
 		return
 	}
@@ -113,7 +114,7 @@ func (s *Service) Up(c *gin.Context) {
 
 	err := NewCli().Up()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "tailscale up failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("tailscale up failed: %v", err))
 		log.Errorf("failed to run tailscale up: %s", err)
 		return
 	}
@@ -127,7 +128,7 @@ func (s *Service) Down(c *gin.Context) {
 
 	err := NewCli().Down()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "tailscale down failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("tailscale down failed: %v", err))
 		log.Errorf("failed to run tailscale down: %s", err)
 		return
 	}
@@ -162,7 +163,7 @@ func (s *Service) Login(c *gin.Context) {
 	url, err := cli.Login()
 	if err != nil {
 		log.Errorf("failed to run tailscale login: %s", err)
-		rsp.ErrRsp(c, -2, "login failed")
+		rsp.ErrRsp(c, -2, fmt.Sprintf("login failed: %v", err))
 		return
 	}
 
@@ -182,7 +183,7 @@ func (s *Service) Logout(c *gin.Context) {
 
 	err := NewCli().Logout()
 	if err != nil {
-		rsp.ErrRsp(c, -1, "logout failed")
+		rsp.ErrRsp(c, -1, fmt.Sprintf("logout failed: %v", err))
 		log.Errorf("failed to run tailscale logout: %s", err)
 		return
 	}

@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/tailscale.ts';
 
+import { ErrorHelp } from './error-help.tsx';
+
 import { Status } from './types.ts';
 
 type DeviceProps = {
@@ -104,7 +106,7 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
         </Popconfirm>
       </div>
 
-      {errMsg && <span className="text-red-500">{errMsg}</span>}
+      {errMsg && <ErrorHelp error={errMsg} onRefresh={onLogout} />}
     </div>
   );
 };

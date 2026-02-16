@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/tailscale.ts';
 
+import { ErrorHelp } from './error-help.tsx';
+
 type LoginProps = {
   onSuccess: () => void;
 };
@@ -72,7 +74,7 @@ export const Login = ({ onSuccess }: LoginProps) => {
         </div>
       )}
 
-      {errMsg && <span className="text-red-500">{errMsg}</span>}
+      {errMsg && <ErrorHelp error={errMsg} onRefresh={onSuccess} />}
     </div>
   );
 };

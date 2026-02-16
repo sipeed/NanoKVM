@@ -47,7 +47,7 @@ case "$1" in
                      value=$(cat /etc/kvm/GOMEMLIMIT)
                      export GOMEMLIMIT="${value}MiB"
                 else
-                     export GOMEMLIMIT=512MiB
+                     export GOMEMLIMIT=30MiB
                 fi
 
                 echo "GOMEMLIMIT set to ${GOMEMLIMIT}"
