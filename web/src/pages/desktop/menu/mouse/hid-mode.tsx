@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Divider, Modal, Typography } from 'antd';
+import { Button, Divider, Modal, Select, Switch, Typography } from 'antd';
 import clsx from 'clsx';
 import { PenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -11,14 +11,40 @@ const { Paragraph } = Typography;
 export const HidMode = () => {
   const { t } = useTranslation();
 
-  const [hidMode, setHidMode] = useState<'normal' | 'hid-only'>('normal');
+  const [hidMode, setHidMode] = useState<'normal' | 'hid-only' | 'kbd-only' | 'no-hid'>('normal');
+  const [biosMode, setBiosMode] = useState<'normal' | 'bios'>('normal');
+  const [wowMode, setWowMode] = useState<'no-wow' | 'wow'>('wow');
+  const [toggleMode, setToggleMode] = useState('');
+  const [toggleBIOS, setToggleBIOS] = useState(biosBool());
+  const [toggleWoW, setToggleWoW] = useState(wowBool());
   const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
+  const ModeOptions = [
+    { value: 'normal', label: t('mouse.hidMode.normal') },
+    { value: 'hid-only', label: t('mouse.hidMode.hidonly') },
+    { value: 'kbd-only', label: t('mouse.hidMode.kbdonly') },
+    { value: 'no-hid', label: t('mouse.hidMode.nohid') },
+  ];
+
   useEffect(() => {
     getHidMode();
+    getBiosMode();
+    getWowMode();
   }, []);
+
+  function biosBool(): boolean {
+    return biosMode === 'bios';
+  }
+
+  function wowBool(): boolean {
+    return wowMode === 'wow';
+  }
+
+  function noModeChange(): boolean {
+    return (hidMode === toggleMode || toggleMode === '') && (biosBool() === toggleBIOS) && (wowBool() === toggleWoW)
+  }
 
   function getHidMode() {
     setIsLoading(true);
@@ -42,14 +68,21 @@ export const HidMode = () => {
     if (isLoading) return;
     setIsLoading(true);
 
+    if (noModeChange()) {
+      setIsModalOpen(false);
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       window.location.reload();
-    }, 30000);
+    }, 5000);
 
-    const mode = hidMode === 'normal' ? 'hid-only' : 'normal';
+    const mode = toggleMode === '' ? hidMode : toggleMode;
+    const bios = toggleBIOS ? 'bios' : 'normal';
+    const wow = toggleWoW ? 'wow' : 'no-wow';
 
     api
-      .setHidMode(mode)
+      .setHidMode(mode, bios, wow)
       .then((rsp) => {
         if (rsp.code !== 0) {
           setErrMsg(rsp.msg);
@@ -64,22 +97,65 @@ export const HidMode = () => {
       });
   }
 
+  function getBiosMode() {
+    setIsLoading(true);
+
+    api
+      .getBiosMode()
+      .then((rsp) => {
+        if (rsp.code !== 0) {
+          return;
+        }
+
+        setBiosMode(rsp.data.mode);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  function getWowMode() {
+    setIsLoading(true);
+
+    api
+      .getWowMode()
+      .then((rsp) => {
+        if (rsp.code !== 0) {
+          return;
+        }
+
+        setWowMode(rsp.data.mode);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }
+
+  function updateModal(modal: boolean) {
+    if (modal) {
+      setToggleBIOS(biosBool());
+      setToggleWoW(wowBool());
+      setIsLoading(false);
+    }
+    setIsModalOpen(modal);
+  }
+
   return (
     <>
       <div
         className={clsx(
           'flex h-[30px] cursor-pointer select-none items-center space-x-2 rounded px-3 hover:bg-neutral-700/70',
-          hidMode === 'hid-only' ? 'text-blue-500' : 'text-neutral-300'
+          hidMode === 'hid-only' ? 'text-blue-500' : hidMode === 'kbd-only' ? 'text-blue-500' : hidMode === 'no-hid' ? 'text-yellow-400' : 'text-neutral-300'
         )}
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => updateModal(true)}
       >
         <PenIcon size={18} />
-        <span>{t('mouse.hidOnly.title')}</span>
+        <span>{t('mouse.hidMode.title')}</span>
       </div>
 
       <Modal
         open={isModalOpen}
-        title={t('mouse.hidOnly.title')}
+        title={t('mouse.hidMode.title')}
         width={580}
         centered={false}
         footer={false}
@@ -87,21 +163,48 @@ export const HidMode = () => {
       >
         <Divider />
 
-        <Paragraph>{t('mouse.hidOnly.desc')}</Paragraph>
+        <Paragraph>{t('mouse.hidMode.desc')}</Paragraph>
 
         <Paragraph type="secondary">
           <ul>
-            <li>{t('mouse.hidOnly.tip1')}</li>
-            <li>{t('mouse.hidOnly.tip2')}</li>
-            <li>{t('mouse.hidOnly.tip3')}</li>
+            <li>{t('mouse.hidMode.tip1')}</li>
+            <li>{t('mouse.hidMode.tip2')}</li>
+            <li>{t('mouse.hidMode.tip3')}</li>
           </ul>
         </Paragraph>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1">
+            <PenIcon size={16} />
+            <span>{t('mouse.hidMode.title')}</span>
+          </div>
+
+          <Select
+            defaultValue={hidMode}
+            style={{ width: 180 }}
+            options={ModeOptions}
+            onSelect={setToggleMode}
+          />
+
+          <div className="flex flex-col">
+            <span>{t('mouse.hidMode.bios')}</span>
+          </div>
+
+          <Switch checked={toggleBIOS} loading={isLoading} onChange={setToggleBIOS} />
+
+          <div className="flex flex-col">
+            <span>{t('mouse.hidMode.wow')}</span>
+          </div>
+
+          <Switch checked={toggleWoW} loading={isLoading} onChange={setToggleWoW} />
+
+        </div>
 
         {errMsg && <div className="pt-1 text-sm text-red-500">{errMsg}</div>}
 
         <div className="flex justify-center pt-5">
           <Button danger type="primary" loading={isLoading} onClick={updateHidMode}>
-            {hidMode === 'normal' ? t('mouse.hidOnly.enable') : t('mouse.hidOnly.disable')}
+            {noModeChange() ? t('mouse.hidMode.close') : t('mouse.hidMode.enable')}
           </Button>
         </div>
       </Modal>
