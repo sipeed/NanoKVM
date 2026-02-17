@@ -24,15 +24,31 @@ start_usb_dev(){
         echo 0x1009 > idProduct
     fi
     mkdir strings/0x409
-    echo '0123456789ABCDEF' > strings/0x409/serialnumber
-    echo 'sipeed' > strings/0x409/manufacturer
-    echo 'NanoKVM' > strings/0x409/product
+    if [ -e /boot/usb.serial ]; then
+        cat /boot/usb.serial > strings/0x409/serialnumber
+    else
+        echo '0123456789ABCDEF' > strings/0x409/serialnumber
+    fi
+    if [ -e /boot/usb.manufacturer ]; then
+        cat /boot/usb.manufacturer > strings/0x409/manufacturer
+    else
+        echo 'sipeed' > strings/0x409/manufacturer
+    fi
+    if [ -e /boot/usb.product ]; then
+        cat /boot/usb.product > strings/0x409/product
+    else
+        echo 'NanoKVM' > strings/0x409/product
+    fi
 
     mkdir configs/c.1
     echo 0xE0 > configs/c.1/bmAttributes
     echo 120 > configs/c.1/MaxPower
     mkdir configs/c.1/strings/0x409
-    echo "NanoKVM" >  configs/c.1/strings/0x409/configuration
+    if [ -e /boot/usb.product ]; then
+        cat /boot/usb.product > configs/c.1/strings/0x409/configuration
+    else
+        echo "NanoKVM" > configs/c.1/strings/0x409/configuration
+    fi
 
     if [ -e /boot/usb.ncm ]
     then
