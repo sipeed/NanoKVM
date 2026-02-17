@@ -269,6 +269,49 @@ const tr = {
         diskDesc: 'Sanal U-disk\'i uzak ana bilgisayara bağla',
         network: 'Sanal Ağ',
         networkDesc: 'Sanal ağ kartını uzak ana bilgisayara bağla',
+        usbDescriptor: {
+          title: 'USB Descriptor',
+          description: 'Customize how the USB device appears to the target host',
+          preset: 'Preset',
+          vendorName: 'Manufacturer',
+          productName: 'Product Name',
+          serialNumber: 'Serial Number',
+          chars: 'chars',
+          randomize: 'Random',
+          readDevice: 'Read Device',
+          restoreDefaults: 'Restore Defaults',
+          apply: 'Apply Changes',
+          applySuccess: 'USB descriptor updated. The target will see a brief USB reconnection.',
+          restoreSuccess: 'USB descriptor restored to factory defaults.',
+          vidPidWarning:
+            'Changing VID/PID may cause the target OS to reinstall USB drivers. Use known values to avoid compatibility issues.',
+          confirmTitle: 'Confirm VID/PID Change',
+          confirmMessage:
+            'Changing the VID or PID may cause the target operating system to reinstall USB drivers. Are you sure you want to continue?',
+          confirm: 'Yes, Apply',
+          cancel: 'Cancel',
+          presetGroups: {
+            generic: 'Generic',
+            brand: 'Brand',
+            custom: 'Custom'
+          },
+          presets: {
+            genericKeyboard: 'Generic Keyboard',
+            genericMouse: 'Generic Mouse',
+            genericComposite: 'Generic Composite',
+            genericHid: 'Generic HID Device',
+            logitechKeyboard: 'Logitech Keyboard K120',
+            logitechMouse: 'Logitech USB Optical Mouse',
+            microsoftKeyboard: 'Microsoft Wired Keyboard',
+            dellKeyboard: 'Dell KB216 Keyboard'
+          },
+          errors: {
+            readFailed: 'Failed to read USB descriptor',
+            writeFailed: 'Failed to write USB descriptor',
+            restoreFailed: 'Failed to restore USB defaults',
+            invalidHex: 'VID and PID must be valid hex values (e.g. 0x1234)'
+          }
+        },
         reboot: 'Yeniden Başlat',
         rebootDesc: 'NanoKVM\'i yeniden başlatmak istediğinizden emin misiniz?',
         okBtn: 'Evet',
