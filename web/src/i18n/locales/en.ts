@@ -451,6 +451,8 @@ const en = {
         disconnectConfirm: 'Disconnect from NetBird?',
         reconfigure: 'Reconfigure',
         refresh: 'Refresh',
+        uninstall: 'Uninstall NetBird',
+        uninstallDesc: 'Are you sure you want to uninstall NetBird?',
         restart: 'Restart',
         restartConfirm: 'Restart NetBird service?',
         stop: 'Stop',

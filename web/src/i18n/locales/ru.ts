@@ -351,6 +351,8 @@ const ru = {
         disconnectConfirm: 'Отключить NetBird?',
         reconfigure: 'Переподключить',
         refresh: 'Обновить',
+        uninstall: 'Удалить NetBird',
+        uninstallDesc: 'Вы уверены, что хотите удалить NetBird?',
         restart: 'Перезапустить',
         restartConfirm: 'Перезапустить сервис NetBird?',
         stop: 'Остановить',

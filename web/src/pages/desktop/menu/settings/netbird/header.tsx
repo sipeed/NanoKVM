@@ -1,25 +1,27 @@
 import { useEffect, useState } from 'react';
-import { Button, Popconfirm, Space, Switch } from 'antd';
-import { CircleStopIcon, RotateCwIcon } from 'lucide-react';
+import { Popconfirm, Popover, Switch } from 'antd';
+import { CircleStopIcon, EllipsisIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/netbird.ts';
 import * as vpnApi from '@/api/extensions/vpn.ts';
 
 import type { State } from './types.ts';
+import { Uninstall } from './uninstall.tsx';
 
 type HeaderProps = {
   state: State | undefined;
   onSuccess: () => void;
 };
 
+type Loading = '' | 'restarting' | 'stopping';
+
 export const Header = ({ state, onSuccess }: HeaderProps) => {
   const { t } = useTranslation();
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [loading, setLoading] = useState<Loading>('');
   const [isAutostart, setIsAutostart] = useState(false);
   const [autostartLoading, setAutostartLoading] = useState(false);
-
-  const canOperate = state !== 'notInstall';
 
   useEffect(() => {
     vpnApi.getPreference().then((rsp: any) => {
@@ -39,25 +41,30 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
         setIsAutostart(true);
         onSuccess();
       })
+      .catch((err) => {
+        console.error('Failed to set VPN preference:', err);
+      })
       .finally(() => {
         setAutostartLoading(false);
       });
   }
 
   function restart() {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (loading !== '') return;
+    setLoading('restarting');
+
     api.restart().finally(() => {
-      setIsLoading(false);
+      setLoading('');
       onSuccess();
     });
   }
 
   function stop() {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (loading !== '') return;
+    setLoading('stopping');
+
     api.stop().finally(() => {
-      setIsLoading(false);
+      setLoading('');
       onSuccess();
     });
   }
@@ -67,7 +74,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
       <div className="flex items-center space-x-2">
         <span className="text-base">{t('settings.netbird.title')}</span>
 
-        {canOperate && (
+        {state && state !== 'notInstall' && (
           <Popconfirm
             title={t('settings.netbird.autostartConfirm')}
             onConfirm={() => handleAutostartChange(true)}
@@ -86,31 +93,64 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
         )}
       </div>
 
-      {canOperate && (
-        <Space>
-          <Popconfirm
-            title={t('settings.netbird.restartConfirm')}
-            okText={t('settings.netbird.okBtn')}
-            cancelText={t('settings.netbird.cancelBtn')}
-            onConfirm={restart}
-          >
-            <Button loading={isLoading} icon={<RotateCwIcon size={14} />}>
-              {t('settings.netbird.restart')}
-            </Button>
-          </Popconfirm>
+      <div className="flex items-center space-x-2">
+        {state && ['notRunning', 'notLogin', 'stopped', 'running'].includes(state) && (
+          <>
+            {/* restart button */}
+            <Popconfirm
+              title={t('settings.netbird.restartConfirm')}
+              onConfirm={restart}
+              okText={t('settings.netbird.okBtn')}
+              cancelText={t('settings.netbird.cancelBtn')}
+              placement="bottom"
+              disabled={loading !== ''}
+            >
+              <div className="flex cursor-pointer rounded p-1 text-green-500 hover:bg-neutral-600 hover:text-green-500/80">
+                {loading === 'restarting' ? (
+                  <LoaderIcon className="animate-spin" size={18} />
+                ) : (
+                  <RotateCwIcon size={18} />
+                )}
+              </div>
+            </Popconfirm>
 
-          <Popconfirm
-            title={t('settings.netbird.stopConfirm')}
-            okText={t('settings.netbird.okBtn')}
-            cancelText={t('settings.netbird.cancelBtn')}
-            onConfirm={stop}
+            {/* stop button */}
+            <Popconfirm
+              title={t('settings.netbird.stopConfirm')}
+              onConfirm={stop}
+              okText={t('settings.netbird.okBtn')}
+              cancelText={t('settings.netbird.cancelBtn')}
+              placement="bottom"
+              disabled={loading !== ''}
+            >
+              <div className="flex cursor-pointer rounded p-1 text-red-500 hover:bg-neutral-600 hover:text-red-500/80">
+                {loading === 'stopping' ? (
+                  <LoaderIcon className="animate-spin" size={18} />
+                ) : (
+                  <CircleStopIcon size={18} />
+                )}
+              </div>
+            </Popconfirm>
+          </>
+        )}
+
+        {/* more button */}
+        {state && state !== 'notInstall' && (
+          <Popover
+            content={
+              <div className="flex min-w-[250px] flex-col">
+                <Uninstall onSuccess={onSuccess} />
+              </div>
+            }
+            placement="bottom"
+            trigger="click"
           >
-            <Button danger loading={isLoading} icon={<CircleStopIcon size={14} />}>
-              {t('settings.netbird.stop')}
-            </Button>
-          </Popconfirm>
-        </Space>
-      )}
+            <div className="flex cursor-pointer rounded p-1 text-white hover:bg-neutral-700/50">
+              <EllipsisIcon size={18} />
+            </div>
+          </Popover>
+        )}
+      </div>
     </div>
   );
 };

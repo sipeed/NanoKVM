@@ -43,6 +43,9 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
         setIsAutostart(true);
         onSuccess();
       })
+      .catch((err) => {
+        console.error('Failed to set VPN preference:', err);
+      })
       .finally(() => {
         setAutostartLoading(false);
       });
