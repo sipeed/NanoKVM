@@ -12,6 +12,10 @@ export function getStatus() {
   return http.get('/api/extensions/netbird/status');
 }
 
+export function login() {
+  return http.post('/api/extensions/netbird/login');
+}
+
 export function start() {
   return http.post('/api/extensions/netbird/start');
 }

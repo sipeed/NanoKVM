@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Button, Card, Descriptions, Popconfirm, Tag } from 'antd';
+import { Button, Card, Descriptions, Divider, Popconfirm, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/netbird.ts';
 
+import { Connect } from './connect.tsx';
 import { ErrorHelp } from './error-help.tsx';
 
 import type { Status } from './types.ts';
@@ -18,6 +19,7 @@ export const Device = ({ status, onRefresh }: DeviceProps) => {
 
   const [isDownLoading, setIsDownLoading] = useState(false);
   const [errMsg, setErrMsg] = useState('');
+  const [showReconfigure, setShowReconfigure] = useState(false);
 
   const connected = status.state === 'running';
 
@@ -72,8 +74,27 @@ export const Device = ({ status, onRefresh }: DeviceProps) => {
           </Button>
         </Popconfirm>
 
+        {!connected && (
+          <Button onClick={() => setShowReconfigure(!showReconfigure)}>
+            {t('settings.netbird.reconfigure')}
+          </Button>
+        )}
+
         <Button onClick={onRefresh}>{t('settings.netbird.refresh')}</Button>
       </div>
+
+      {showReconfigure && (
+        <>
+          <Divider className="opacity-50" />
+          <Connect
+            onSuccess={() => {
+              setShowReconfigure(false);
+              onRefresh();
+            }}
+            defaultManagementUrl={status.managementUrl}
+          />
+        </>
+      )}
 
       {errMsg && <ErrorHelp error={errMsg} onRefresh={onRefresh} />}
     </Card>

@@ -23,3 +23,7 @@ type UpNetbirdReq struct {
 	ManagementURL string `json:"managementUrl" form:"managementUrl" validate:"required"`
 	AdminURL      string `json:"adminUrl" form:"adminUrl"`
 }
+
+type LoginNetbirdRsp struct {
+	Url string `json:"url"`
+}

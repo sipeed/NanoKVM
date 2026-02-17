@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Card, Input } from 'antd';
+import { UserSwitchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Segmented } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/extensions/netbird.ts';
@@ -8,19 +9,60 @@ import { ErrorHelp } from './error-help.tsx';
 
 type ConnectProps = {
   onSuccess: () => void;
+  defaultManagementUrl?: string;
 };
 
-export const Connect = ({ onSuccess }: ConnectProps) => {
+type Mode = 'official' | 'custom';
+
+export const Connect = ({ onSuccess, defaultManagementUrl }: ConnectProps) => {
   const { t } = useTranslation();
 
+  const [mode, setMode] = useState<Mode>(
+    defaultManagementUrl && !defaultManagementUrl.includes('api.netbird.io') ? 'custom' : 'official'
+  );
+
+  // Official server state
+  const [loginUrl, setLoginUrl] = useState('');
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+
+  // Custom server state
   const [setupKey, setSetupKey] = useState('');
-  const [managementUrl, setManagementUrl] = useState('');
+  const [managementUrl, setManagementUrl] = useState(defaultManagementUrl || '');
   const [adminUrl, setAdminUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
+
   const [errMsg, setErrMsg] = useState('');
 
+  function login() {
+    if (isLoginLoading) return;
+    setErrMsg('');
+    setIsLoginLoading(true);
+
+    api
+      .login()
+      .then((rsp) => {
+        if (rsp.code !== 0) {
+          setErrMsg(rsp.msg);
+          return;
+        }
+
+        const url = rsp.data?.url;
+        if (!url) {
+          onSuccess();
+          return;
+        }
+
+        setLoginUrl(url);
+        window.open(url, '_blank');
+        setTimeout(() => setLoginUrl(''), 10 * 60 * 1000);
+      })
+      .finally(() => {
+        setIsLoginLoading(false);
+      });
+  }
+
   function connect() {
-    if (isLoading) return;
+    if (isConnecting) return;
     setErrMsg('');
 
     const key = setupKey.trim();
@@ -32,7 +74,7 @@ export const Connect = ({ onSuccess }: ConnectProps) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsConnecting(true);
 
     api
       .up(key, mgmt, admin)
@@ -41,11 +83,10 @@ export const Connect = ({ onSuccess }: ConnectProps) => {
           setErrMsg(rsp.msg);
           return;
         }
-
         onSuccess();
       })
       .finally(() => {
-        setIsLoading(false);
+        setIsConnecting(false);
       });
   }
 
@@ -54,27 +95,74 @@ export const Connect = ({ onSuccess }: ConnectProps) => {
       <div className="space-y-3">
         <div className="text-base">{t('settings.netbird.connectTitle')}</div>
 
-        <Input.Password
-          placeholder={t('settings.netbird.setupKey')}
-          value={setupKey}
-          onChange={(e) => setSetupKey(e.target.value)}
+        <Segmented
+          block
+          value={mode}
+          onChange={(val) => {
+            setMode(val as Mode);
+            setErrMsg('');
+            setLoginUrl('');
+          }}
+          options={[
+            { label: t('settings.netbird.officialServer'), value: 'official' },
+            { label: t('settings.netbird.customServer'), value: 'custom' }
+          ]}
         />
 
-        <Input
-          placeholder={t('settings.netbird.managementUrl')}
-          value={managementUrl}
-          onChange={(e) => setManagementUrl(e.target.value)}
-        />
+        {mode === 'official' && (
+          <div className="flex flex-col items-center space-y-4 pt-2">
+            {loginUrl === '' ? (
+              <Button
+                type="primary"
+                size="large"
+                shape="round"
+                icon={<UserSwitchOutlined />}
+                loading={isLoginLoading}
+                onClick={login}
+              >
+                {t('settings.netbird.login')}
+              </Button>
+            ) : (
+              <div className="flex w-full flex-col items-center space-y-3">
+                <Button type="link" href={loginUrl} target="_blank">
+                  {loginUrl}
+                </Button>
+                <span className="text-xs text-neutral-600">
+                  {t('settings.netbird.urlPeriod')}
+                </span>
+                <Button type="primary" size="large" shape="round" onClick={onSuccess}>
+                  {t('settings.netbird.loginSuccess')}
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
-        <Input
-          placeholder={t('settings.netbird.adminUrl')}
-          value={adminUrl}
-          onChange={(e) => setAdminUrl(e.target.value)}
-        />
+        {mode === 'custom' && (
+          <>
+            <Input.Password
+              placeholder={t('settings.netbird.setupKey')}
+              value={setupKey}
+              onChange={(e) => setSetupKey(e.target.value)}
+            />
 
-        <Button type="primary" loading={isLoading} onClick={connect}>
-          {t('settings.netbird.connect')}
-        </Button>
+            <Input
+              placeholder={t('settings.netbird.managementUrl')}
+              value={managementUrl}
+              onChange={(e) => setManagementUrl(e.target.value)}
+            />
+
+            <Input
+              placeholder={t('settings.netbird.adminUrl')}
+              value={adminUrl}
+              onChange={(e) => setAdminUrl(e.target.value)}
+            />
+
+            <Button type="primary" loading={isConnecting} onClick={connect}>
+              {t('settings.netbird.connect')}
+            </Button>
+          </>
+        )}
       </div>
 
       {errMsg && <ErrorHelp error={errMsg} onRefresh={onSuccess} />}

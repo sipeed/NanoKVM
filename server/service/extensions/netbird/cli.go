@@ -1,10 +1,12 @@
 package netbird
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -73,6 +75,86 @@ func (c *Cli) Up(setupKey string, managementURL string, adminURL string) error {
 	}
 
 	return runCommand(command, true)
+}
+
+func (c *Cli) ResetToOfficialServer() error {
+	_ = c.Stop()
+	_ = exec.Command("sh", "-c", "rm -f /var/lib/netbird/default.json").Run()
+	return c.Start()
+}
+
+func (c *Cli) WaitForSocket(timeout time.Duration) error {
+	socketPath := "/var/run/netbird.sock"
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if _, err := exec.Command("sh", "-c", "test -S "+socketPath).Output(); err == nil {
+			return nil
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return fmt.Errorf("netbird daemon socket not ready after %s", timeout)
+}
+
+func (c *Cli) Login() (string, error) {
+	if err := c.WaitForSocket(10 * time.Second); err != nil {
+		return "", err
+	}
+
+	command := "netbird up --daemon-addr unix:///var/run/netbird.sock --no-browser"
+	cmd := exec.Command("sh", "-c", command)
+
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return "", err
+	}
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return "", err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return "", err
+	}
+
+	urlRe := regexp.MustCompile(`https://\S+`)
+	urlCh := make(chan string, 1)
+
+	scanForURL := func(r *bufio.Reader) {
+		for {
+			line, err := r.ReadString('\n')
+			if match := urlRe.FindString(line); match != "" {
+				select {
+				case urlCh <- match:
+				default:
+				}
+				return
+			}
+			if err != nil {
+				return
+			}
+		}
+	}
+
+	go scanForURL(bufio.NewReader(stdout))
+	go scanForURL(bufio.NewReader(stderr))
+
+	// Wait for URL or command to finish
+	done := make(chan error, 1)
+	go func() { done <- cmd.Wait() }()
+
+	select {
+	case url := <-urlCh:
+		return url, nil
+	case err := <-done:
+		// Command finished without producing a URL — already logged in
+		if err == nil {
+			return "", nil
+		}
+		return "", fmt.Errorf("netbird up failed: %w", err)
+	case <-time.After(60 * time.Second):
+		_ = cmd.Process.Kill()
+		return "", fmt.Errorf("timed out waiting for login URL")
+	}
 }
 
 func (c *Cli) Down() error {

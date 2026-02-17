@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -92,6 +93,32 @@ func (s *Service) Stop(c *gin.Context) {
 	rsp.OkRsp(c)
 }
 
+func (s *Service) Login(c *gin.Context) {
+	var rsp proto.Response
+
+	cli := NewCli()
+
+	// Reset config to official server and restart daemon
+	if err := cli.ResetToOfficialServer(); err != nil {
+		rsp.ErrRsp(c, -1, fmt.Sprintf("reset to official server failed: %v", err))
+		log.Errorf("failed to reset netbird to official server: %s", err)
+		return
+	}
+
+	url, err := cli.Login()
+	if err != nil {
+		log.Errorf("failed to run netbird login: %s", err)
+		rsp.ErrRsp(c, -2, fmt.Sprintf("login failed: %v", err))
+		return
+	}
+
+	rsp.OkRspWithData(c, &proto.LoginNetbirdRsp{
+		Url: url,
+	})
+
+	log.Debugf("netbird login url: %s", url)
+}
+
 func (s *Service) Up(c *gin.Context) {
 	var req proto.UpNetbirdReq
 	var rsp proto.Response
@@ -102,16 +129,17 @@ func (s *Service) Up(c *gin.Context) {
 	}
 
 	cli := NewCli()
-	running, err := cli.ServiceRunning()
-	if err != nil {
-		rsp.ErrRsp(c, -2, fmt.Sprintf("service status failed: %v", err))
+
+	// Reset config and restart daemon so new management URL takes effect cleanly
+	if err := cli.ResetToOfficialServer(); err != nil {
+		rsp.ErrRsp(c, -2, fmt.Sprintf("reset failed: %v", err))
+		log.Errorf("failed to reset netbird before up: %s", err)
 		return
 	}
-	if !running {
-		if err := cli.Start(); err != nil {
-			rsp.ErrRsp(c, -3, fmt.Sprintf("service start failed: %v", err))
-			return
-		}
+
+	if err := cli.WaitForSocket(10 * time.Second); err != nil {
+		rsp.ErrRsp(c, -3, fmt.Sprintf("daemon not ready: %v", err))
+		return
 	}
 
 	if err := cli.Up(req.SetupKey, req.ManagementURL, req.AdminURL); err != nil {
