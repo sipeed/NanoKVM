@@ -1,5 +1,56 @@
 #!/bin/sh
-# nanokvm Rev3.1
+# nanokvm Rev3.2
+
+SWAPFILE="/data/swapfile"
+SWAP_SIZE_MB=128
+
+setup_swap() {
+  if [ -f "$SWAPFILE" ]; then
+    swapon "$SWAPFILE" 2>/dev/null
+    return
+  fi
+
+  echo "Creating ${SWAP_SIZE_MB}MB swap file..."
+  dd if=/dev/zero of="$SWAPFILE" bs=1M count=$SWAP_SIZE_MB 2>/dev/null
+  chmod 600 "$SWAPFILE"
+  mkswap "$SWAPFILE" >/dev/null 2>&1
+  swapon "$SWAPFILE" 2>/dev/null
+  echo "Swap enabled: $SWAPFILE"
+}
+
+stop_tailscale() {
+  if [ -x /etc/init.d/S98tailscaled ]; then
+    /etc/init.d/S98tailscaled stop >/dev/null 2>&1
+  fi
+}
+
+stop_netbird() {
+  if [ -x /etc/init.d/S99netbird ]; then
+    /etc/init.d/S99netbird stop >/dev/null 2>&1
+  fi
+  killall netbird 2>/dev/null
+}
+
+start_tailscale() {
+  if [ -x /usr/sbin/tailscaled ] && [ -x /usr/bin/tailscale ] && [ -f /kvmapp/system/init.d/S98tailscaled ]; then
+    cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/S98tailscaled
+    chmod 755 /etc/init.d/S98tailscaled
+    /etc/init.d/S98tailscaled start >/dev/null 2>&1 &
+  fi
+}
+
+start_netbird() {
+  if [ -f /kvmapp/system/netbird/netbird ]; then
+    cp -f /kvmapp/system/netbird/netbird /usr/bin/netbird
+    chmod 755 /usr/bin/netbird
+  fi
+
+  if [ -x /usr/bin/netbird ] && [ -f /kvmapp/system/init.d/S99netbird ]; then
+    cp -f /kvmapp/system/init.d/S99netbird /etc/init.d/S99netbird
+    chmod 755 /etc/init.d/S99netbird
+    /etc/init.d/S99netbird start >/dev/null 2>&1 &
+  fi
+}
 
 case "$1" in
   start)
@@ -15,6 +66,9 @@ case "$1" in
         second_uint=$(echo "$str_value" | cut -d'_' -f2)
         echo "$first_uint$second_uint" > /device_key
     fi
+
+    # Enable swap before starting Go services
+    setup_swap
 
     # Set iptables rules (skip if already present)
     iptables -C INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
@@ -32,36 +86,90 @@ case "$1" in
     iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
-    # Start services
+    # Start services with GOMEMLIMIT
     cp -r /kvmapp/kvm_system /tmp/
     /tmp/kvm_system/kvm_system &
 
     cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    GOMEMLIMIT=20MiB /tmp/server/NanoKVM-Server &
+    SERVER_PID=$!
+
+    # Protect NanoKVM-Server from OOM killer
+    sleep 1
+    if [ -d "/proc/$SERVER_PID" ]; then
+      echo -800 > /proc/$SERVER_PID/oom_score_adj 2>/dev/null
+    fi
+
+    # Read VPN preference (default: tailscale)
+    VPN_PREF="tailscale"
+    if [ -f /etc/kvm/vpn ]; then
+      VPN_PREF=$(cat /etc/kvm/vpn)
+    fi
+
+    case "$VPN_PREF" in
+      netbird)
+        rm -f /etc/init.d/S98tailscaled
+        start_netbird
+        ;;
+      *)
+        rm -f /etc/init.d/S99netbird
+        start_tailscale
+        ;;
+    esac
    ;;
 
   stop)
-    killall kvm_system
-    killall NanoKVM-Server
-    rm -r /tmp/kvm_system /tmp/server
+    stop_netbird
+    stop_tailscale
+    killall kvm_system 2>/dev/null
+    killall NanoKVM-Server 2>/dev/null
+    rm -rf /tmp/kvm_system /tmp/server
     echo "OK"
    ;;
 
   restart)
-    killall kvm_system
-    killall NanoKVM-Server
-    rm -r /tmp/kvm_system /tmp/server
+    stop_netbird
+    stop_tailscale
+    killall kvm_system 2>/dev/null
+    killall NanoKVM-Server 2>/dev/null
+    rm -rf /tmp/kvm_system /tmp/server
+
+    # Ensure swap is active
+    setup_swap
 
     cp -r /kvmapp/kvm_system /tmp/
     /tmp/kvm_system/kvm_system &
 
     cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    GOMEMLIMIT=20MiB /tmp/server/NanoKVM-Server &
+    SERVER_PID=$!
+
+    sleep 1
+    if [ -d "/proc/$SERVER_PID" ]; then
+      echo -800 > /proc/$SERVER_PID/oom_score_adj 2>/dev/null
+    fi
+
+    # Read VPN preference (default: tailscale)
+    VPN_PREF="tailscale"
+    if [ -f /etc/kvm/vpn ]; then
+      VPN_PREF=$(cat /etc/kvm/vpn)
+    fi
+
+    case "$VPN_PREF" in
+      netbird)
+        rm -f /etc/init.d/S98tailscaled
+        start_netbird
+        ;;
+      *)
+        rm -f /etc/init.d/S99netbird
+        start_tailscale
+        ;;
+    esac
 
     sync
     echo "OK"
    ;;
-    
+
   *)
     echo "Usage: $0 {start|stop|restart}"
     exit 1

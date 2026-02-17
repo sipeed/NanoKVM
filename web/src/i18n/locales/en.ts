@@ -367,6 +367,8 @@ const en = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to Tailscale? NetBird will be stopped.',
         memory: {
           title: 'Memory optimization',
           tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. A Tailscale restart is required for the change to take effect.'
@@ -407,6 +409,43 @@ const en = {
         uninstallDesc: 'Are you sure you want to uninstall Tailscale?',
         okBtn: 'Yes',
         cancelBtn: 'No'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to NetBird? Tailscale will be stopped.',
+        restart: 'Restart NetBird?',
+        stop: 'Stop NetBird?',
+        stopDesc: 'Disconnect NetBird and disable automatic startup on boot.',
+        loading: 'Loading...',
+        notInstall: 'NetBird is not installed.',
+        install: 'Install',
+        installing: 'Installing',
+        notRunning: 'NetBird service is not running.',
+        run: 'Start',
+        notLogin:
+          'The device has not been bound yet. Please login and bind this device to your account.',
+        urlPeriod: 'This url is valid for 10 minutes',
+        login: 'Login',
+        loginSuccess: 'I have logged in',
+        enable: 'Enable NetBird',
+        deviceName: 'Device Name',
+        deviceIP: 'Device IP',
+        version: 'Version',
+        disconnect: 'Disconnect',
+        disconnectConfirm: 'Are you sure you want to disconnect?',
+        okBtn: 'Yes',
+        cancelBtn: 'No',
+        error: {
+          title: 'NetBird operation failed',
+          intro: 'Error details:',
+          stepWait: '1. Wait 10-15 seconds and retry the action.',
+          stepRestartUI: '2. Click "Restart Service" below.',
+          stepRestartSSH: '3. If needed, run: /etc/init.d/S99netbird restart',
+          stepReboot: '4. Reboot NanoKVM only if the steps above do not help.',
+          restartButton: 'Restart Service',
+          refreshButton: 'Refresh Status'
+        }
       },
       update: {
         title: 'Check for Updates',
