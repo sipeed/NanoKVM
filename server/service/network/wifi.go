@@ -19,7 +19,7 @@ const (
 	WiFiSSID       = "/etc/kvm/wifi.ssid"
 	WiFiPasswd     = "/etc/kvm/wifi.pass"
 	WiFiConnect    = "/kvmapp/kvm/wifi_try_connect"
-	WiFiStateFile  = "/kvmapp/kvm/wifi_state"
+	WiFiStateFile  = "/tmp/kvm/wifi_state"
 	WiFiScript     = "/etc/init.d/S30wifi"
 )
 
