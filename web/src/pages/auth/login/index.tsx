@@ -1,4 +1,4 @@
-import { useEffect, useState, ReactElement } from 'react';
+import { ReactElement, useEffect, useState } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,12 @@ export const Login = (): ReactElement => {
       .login(username, password)
       .then((rsp: any) => {
         if (rsp.code !== 0) {
-          setMsg(rsp.code === -2 ? t('auth.invalidUser') : t('auth.error'));
+          let errorMsg = t('auth.error');
+          if (rsp.code === -2) errorMsg = t('auth.invalidUser');
+          else if (rsp.code === -5) errorMsg = t('auth.locked');
+          else if (rsp.code === -4) errorMsg = t('auth.globalLocked');
+
+          setMsg(errorMsg);
           return;
         }
 
@@ -80,7 +85,8 @@ export const Login = (): ReactElement => {
                 setTimeout(() => {
                   (evt.target as HTMLImageElement).classList.remove('animate-spin');
                 }, 1000);
-              }} />
+              }}
+            />
           </div>
           <Form.Item
             name="username"
@@ -100,7 +106,7 @@ export const Login = (): ReactElement => {
             />
           </Form.Item>
 
-          <div className="text-red-500">{msg}</div>
+          <div className="pb-1 text-red-500">{msg}</div>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" className="w-full" loading={isLoading}>

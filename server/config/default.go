@@ -26,6 +26,10 @@ var defaultConfig = &Config{
 		TurnCred: "",
 	},
 	Authentication: "enable",
+	Security: Security{
+		LoginLockoutDuration: 0,
+		LoginMaxFailures:     5,
+	},
 }
 
 func checkDefaultValue() {

@@ -16,6 +16,8 @@ const zh = {
       noEmptyPassword: '密码不能为空',
       noAccount: '获取用户信息失败，请刷新重试或重置密码',
       invalidUser: '用户名或密码错误',
+      locked: '登录太频繁，请稍后再试',
+      globalLocked: '系统防爆破保护中，请稍后再试',
       error: '未知错误',
       changePassword: '修改密码',
       changePasswordDesc: '为了您的设备安全，请修改密码!',

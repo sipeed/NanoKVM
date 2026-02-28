@@ -1,10 +1,11 @@
 package auth
 
 import (
+	"time"
+
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -23,6 +24,13 @@ func (s *Service) Login(c *gin.Context) {
 		return
 	}
 
+	clientIP := GetClientIP(c)
+	if locked, code, msg := CheckLoginAttempt(clientIP); locked {
+		time.Sleep(3 * time.Second)
+		rsp.ErrRsp(c, code, msg)
+		return
+	}
+
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		time.Sleep(3 * time.Second)
 		rsp.ErrRsp(c, -1, "invalid parameters")
@@ -31,9 +39,17 @@ func (s *Service) Login(c *gin.Context) {
 
 	if ok := CompareAccount(req.Username, req.Password); !ok {
 		time.Sleep(2 * time.Second)
+
+		if locked, code, msg := RecordLoginFailure(clientIP); locked {
+			rsp.ErrRsp(c, code, msg)
+			return
+		}
+
 		rsp.ErrRsp(c, -2, "invalid username or password")
 		return
 	}
+
+	ClearLoginAttempt(clientIP)
 
 	token, err := middleware.GenerateJWT(req.Username)
 	if err != nil {

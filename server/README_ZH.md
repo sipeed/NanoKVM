@@ -24,40 +24,39 @@ server
 配置文件路径为 `/etc/kvm/server.yaml`。
 
 ```yaml
-proto: http
+# 网络设置
+proto: http            # 访问协议，默认为 `http`，仅当配置了证书时支持改为 `https`
 port:
-    http: 80
-    https: 443
+    http: 80           # HTTP 服务的监听端口，默认为 `80`
+    https: 443         # HTTPS 服务的监听端口（启用 https 协议时生效），默认为 `443`
 cert:
-    crt: server.crt
-    key: server.key
+    crt: server.crt    # HTTPS 服务使用的公钥证书路径
+    key: server.key    # HTTPS 服务使用的私钥文件路径
 
-# 日志级别（debug/info/warn/error）
-# 注意：在生产环境中使用 info 或 error。debug 模式仅在开发环境中使用。
+
+# 日志配置
 logger:
-    level: info
-    file: stdout
+    level: info     # 全局日志打印级别，从高到底可选 `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`。默认为 `info`
+    file: stdout    # 日志输出目标位置。若填写 `stdout` 则输出在控制台。配置为文件路径则会输出到对应的文件。默认为 `stdout`
 
-# 鉴权设置（enable/disable）
-# 注意：生产环境中请勿使用 disable。
-authentication: enable
 
+# 认证与安全
+authentication: enable              # 是否开启 HTTP 接口与网页的身份校验。可选 `enable` (开启) 或 `disable` (禁用)。默认为 `enable`。强烈建议公开在互联网的机器开启此项！
 jwt:
-   # jwt 密钥。设置为空则使用随机生成的64位密钥
-   secretKey: ""
-   # jwt token 过期时间（单位：秒），默认为2678400（31天）
-   refreshTokenDuration: 2678400
-   # 在帐号登出时是否使所有 jwt token 失效。默认为 true
-   revokeTokensOnLogout: true
+   secretKey: ""                    # 用于签发和验证 JWT Token 的密钥。如果不填，服务启动时将自动随机生成
+   refreshTokenDuration: 2678400    # 登录超时的刷新周期（单位：秒）。默认为 `2678400`（约31天）
+   revokeTokensOnLogout: true       # 退出登录时是否废除所有现存的 Token。启用此项可以在注销时轮换 SecretKey，强迫所有终端重新登录。默认为 `true`
+security:
+   loginLockoutDuration: 0,         # 达到失败上限后，禁止该 IP 再次尝试登录的持续时间（单位：秒）。如果设为 `0` 或不填，则代表不开启防暴力破解功能。默认为 `0`
+   loginMaxFailures:     5,         # 允许触发保护前，单个 IP 连续登录失败的最大次数。默认为 `5`
 
-# 自定义 STUN 服务器的地址
-# 注意：可以设置为“disable”来禁用 STUN 服务（例如在局域网环境中使用时）
-stun: stun.l.google.com:19302
 
+# WebRTC 内网穿透
+stun: stun.l.google.com:19302    # 默认使用的 STUN 服务器地址，用于打洞获取公网 IP 建立 P2P 流
 turn:
-    turnAddr: example_addr
-    turnUser: example_user
-    turnCred: example_cred
+    turnAddr: example_addr       # 当 P2P 直连失败时，作为备用的中继（TURN）服务器地址（格式如 `ip:port`）。留空表示不使用 TURN 中继
+    turnUser: example_user       # TURN 服务器授权连接时使用的用户名
+    turnCred: example_cred       # TURN 服务器授权连接时使用的凭据/密码
 ```
 
 ## 编译部署

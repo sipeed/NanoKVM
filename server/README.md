@@ -26,41 +26,39 @@ server
 The configuration file path is `/etc/kvm/server.yaml`.
 
 ```yaml
-proto: http
+# Network Settings
+proto: http            # Access protocol. Can be changed to `https` only when certificates are configured. Default is `http`
 port:
-    http: 80
-    https: 443
+    http: 80           # The listening port for the HTTP service. Default is `80`
+    https: 443         # The listening port for the HTTPS service (effective when HTTPS is enabled). Default is `443`
 cert:
-    crt: server.crt
-    key: server.key
+    crt: server.crt    # The path to the public key certificate for HTTPS
+    key: server.key    # The path to the private key file for HTTPS
 
-# Log level (debug/info/warn/error)
-# Note: Use 'info' or 'error' in production, 'debug' only for development
+
+# Logging Configuration
 logger:
-    level: info
-    file: stdout
+    level: info     # Global log output level. Evaluated options from highest to lowest detail: `trace`, `debug`, `info`, `warn`, `error`, `fatal`, `panic`. Default is `info`
+    file: stdout    # Log output destination. `stdout` outputs to the standard console. A file path directs log output to that file. Default is `stdout`
 
-# Authentication setting (enable/disable)
-# Note: Only disable authentication in development environment
-authentication: enable
 
+# Authentication & Security
+authentication: enable              # Whether to enable identity verification for HTTP API and Web endpoints. Options are `enable` or `disable`. Default is `enable`. Highly recommended to leave this enabled for internet-facing devices!
 jwt:
-   # JWT secret key. If left empty, a random 64-byte key will be generated automatically.
-   secretKey: ""
-   # JWT token expiration time in seconds. Default: 2678400 (31 days)
-   refreshTokenDuration: 2678400
-   # Invalidate all JWT tokens when the user logs out. Default: true
-   revokeTokensOnLogout: true
+   secretKey: ""                    # The secret key used to sign and verify JWT Tokens. If left empty, a random key will be generated automatically on startup
+   refreshTokenDuration: 2678400    # The token refresh duration threshold in seconds before forcing a re-login. Default is `2678400` (~31 days)
+   revokeTokensOnLogout: true       # Whether to invalidate all existing tokens upon logout by rotating the SecretKey. Default is `true`
+security:
+   loginLockoutDuration: 0,         # The duration (in seconds) to ban an IP from attempting to log in again after reaching the failure limit. If set to `0` or left empty, brute-force protection is disabled. Default is `0`
+   loginMaxFailures:     5,         # The maximum number of continuous failed login attempts allowed per IP before triggering protection. Default is `5`
 
-# Address for custom STUN server
-# Note: You can disable the STUN service by setting it to 'disable' (e.g., in a LAN environment)
-stun: stun.l.google.com:19302
 
-# Address and authentication for custom TURN server
+# WebRTC Traversal Settings
+stun: stun.l.google.com:19302 # The default STUN server address used for NAT hole-punching to establish P2P streams
 turn:
-    turnAddr: example_addr
-    turnUser: example_user
-    turnCred: example_cred
+    turnAddr: example_addr    # The relay (TURN) server address (format `ip:port`) used as a fallback when P2P connection fails. Leave empty to disable TURN relay
+    turnUser: example_user    # The username required for authorization to the TURN server
+    turnCred: example_cred    # The credential/password required for authorization to the TURN server
 ```
 
 ## Compile & Deploy

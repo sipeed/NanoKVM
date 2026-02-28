@@ -16,6 +16,8 @@ const en = {
       noEmptyPassword: 'Password required',
       noAccount: 'Failed to get user information, please refresh web page or reset password',
       invalidUser: 'Invalid username or password',
+      locked: 'Too many logins, please try again later',
+      globalLocked: 'System under protection, please try again later',
       error: 'Unexpected error',
       changePassword: 'Change Password',
       changePasswordDesc: 'For the security of your device, please change the password!',
