@@ -1,3 +1,17 @@
+## 2.3.5 (2026-02-28)
+
+### Features
+
+* Implemented login brute-force protection with lockout mechanism
+
+### Bug Fixes
+
+* Improved Tailscale error handling in UI components and refined backend state mapping
+
+### Chores
+
+* Updated server and web dependencies
+
 ## 2.3.4 (2026-01-26)
 
 ### Features
