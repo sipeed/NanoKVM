@@ -41,6 +41,9 @@ export const Tailscale = ({ setIsLocked }: TailscaleProps) => {
 
         setStatus(rsp.data);
       })
+      .catch((err) => {
+        setErrMsg(err?.message || 'Failed to get status');
+      })
       .finally(() => {
         setIsLoading(false);
       });

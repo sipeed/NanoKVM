@@ -29,9 +29,12 @@ export const Install = ({ setIsLocked, onSuccess }: InstallProps) => {
         }
 
         onSuccess();
+        setState('');
+      })
+      .catch(() => {
+        setState('failed');
       })
       .finally(() => {
-        setState('');
         setIsLocked(false);
       });
   }

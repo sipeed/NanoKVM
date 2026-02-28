@@ -38,6 +38,9 @@ export const Login = ({ onSuccess }: LoginProps) => {
         window.open(url, '_blank');
         setTimeout(() => setLoginUrl(''), 10 * 60 * 1000);
       })
+      .catch((err) => {
+        setErrMsg(err?.message || 'Failed to login');
+      })
       .finally(() => {
         setIsLoading(false);
       });

@@ -20,11 +20,13 @@ const (
 )
 
 var StateMap = map[string]proto.TailscaleState{
-	"NoState":    proto.TailscaleNotRunning,
-	"Starting":   proto.TailscaleNotRunning,
-	"NeedsLogin": proto.TailscaleNotLogin,
-	"Running":    proto.TailscaleRunning,
-	"Stopped":    proto.TailscaleStopped,
+	"NoState":          proto.TailscaleNotRunning,
+	"Starting":         proto.TailscaleNotRunning,
+	"NeedsLogin":       proto.TailscaleNotLogin,
+	"NeedsMachineAuth": proto.TailscaleNotLogin,
+	"InUseOtherUser":   proto.TailscaleNotLogin,
+	"Running":          proto.TailscaleRunning,
+	"Stopped":          proto.TailscaleStopped,
 }
 
 func NewService() *Service {

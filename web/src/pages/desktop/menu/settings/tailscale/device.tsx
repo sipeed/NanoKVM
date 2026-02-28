@@ -55,6 +55,9 @@ export const Device = ({ status, onLogout }: DeviceProps) => {
 
         onLogout();
       })
+      .catch((err) => {
+        setErrMsg(err?.message || 'Failed to logout');
+      })
       .finally(() => {
         setIsLogging(false);
       });

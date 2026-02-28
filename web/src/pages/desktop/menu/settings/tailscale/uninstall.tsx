@@ -45,6 +45,7 @@ export const Uninstall = ({ onSuccess }: UninstallProps) => {
       <Modal
         title={title}
         open={isModalOpen}
+        centered={true}
         okType="danger"
         okText={t('settings.tailscale.okBtn')}
         cancelText={t('settings.tailscale.cancelBtn')}
