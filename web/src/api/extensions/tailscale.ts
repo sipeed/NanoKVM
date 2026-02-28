@@ -49,3 +49,13 @@ export function login() {
 export function logout() {
   return http.post('/api/extensions/tailscale/logout');
 }
+
+// get auto-update status
+export function getAutoUpdate() {
+  return http.get('/api/extensions/tailscale/auto-update');
+}
+
+// set auto-update
+export function setAutoUpdate(enable: boolean) {
+  return http.post('/api/extensions/tailscale/auto-update', { enable });
+}

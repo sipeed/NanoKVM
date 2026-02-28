@@ -237,3 +237,47 @@ func (s *Service) GetStatus(c *gin.Context) {
 	rsp.OkRspWithData(c, &data)
 	log.Debugf("get tailscale status successfully")
 }
+
+func (s *Service) GetAutoUpdate(c *gin.Context) {
+	var rsp proto.Response
+
+	if !isInstalled() {
+		rsp.ErrRsp(c, -1, "tailscale not installed")
+		return
+	}
+
+	enabled, err := NewCli().GetAutoUpdate()
+	if err != nil {
+		log.Errorf("failed to get auto-update status: %s", err)
+		rsp.ErrRsp(c, -2, "failed to get status")
+		return
+	}
+
+	rsp.OkRspWithData(c, map[string]bool{"enabled": enabled})
+	log.Debugf("get tailscale auto-update status: %v", enabled)
+}
+
+func (s *Service) SetAutoUpdate(c *gin.Context) {
+	var rsp proto.Response
+
+	if !isInstalled() {
+		rsp.ErrRsp(c, -1, "tailscale not installed")
+		return
+	}
+
+	var req proto.SetAutoUpdateReq
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -2, "invalid parameters")
+		return
+	}
+
+	err := NewCli().SetAutoUpdate(req.Enable)
+	if err != nil {
+		log.Errorf("failed to set auto-update: %s", err)
+		rsp.ErrRsp(c, -3, "failed to set auto-update")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("set tailscale auto-update: %v", req.Enable)
+}
