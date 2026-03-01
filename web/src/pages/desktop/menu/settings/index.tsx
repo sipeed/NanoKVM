@@ -17,6 +17,7 @@ import * as api from '@/api/application.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
+import { Netbird as NetbirdIcon } from '@/components/icons/netbird';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -24,6 +25,7 @@ import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
 import { Device } from './device';
+import { Netbird } from './netbird';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
 
@@ -46,6 +48,11 @@ export const Settings = () => {
       id: 'tailscale',
       icon: <TailscaleIcon />,
       component: <Tailscale setIsLocked={setIsLocked} />
+    },
+    {
+      id: 'netbird',
+      icon: <NetbirdIcon />,
+      component: <Netbird setIsLocked={setIsLocked} />
     },
     {
       id: 'update',
