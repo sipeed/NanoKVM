@@ -1,15 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Popconfirm, Popover, Switch } from 'antd';
-import { CircleStopIcon, EllipsisIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
+import { Popconfirm, Switch } from 'antd';
+import { CircleStopIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import * as api from '@/api/extensions/tailscale.ts';
+import * as api from '@/api/extensions/netbird.ts';
 import * as vpnApi from '@/api/extensions/vpn.ts';
 
-import { Memory } from './memory.tsx';
-import { Swap } from './swap.tsx';
 import type { State } from './types.ts';
-import { Uninstall } from './uninstall.tsx';
 
 type HeaderProps = {
   state: State | undefined;
@@ -28,7 +25,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
   useEffect(() => {
     vpnApi.getPreference().then((rsp: any) => {
       if (rsp.data?.vpn) {
-        setIsAutostart(rsp.data.vpn === 'tailscale');
+        setIsAutostart(rsp.data.vpn === 'netbird');
       }
     });
   }, []);
@@ -38,7 +35,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
     setAutostartLoading(true);
 
     vpnApi
-      .setPreference('tailscale')
+      .setPreference('netbird')
       .then(() => {
         setIsAutostart(true);
         onSuccess();
@@ -71,14 +68,14 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center space-x-2">
-        <span className="text-base">{t('settings.tailscale.title')}</span>
+        <span className="text-base">{t('settings.netbird.title')}</span>
 
         {state && state !== 'notInstall' && (
           <Popconfirm
-            title={t('settings.tailscale.autostartConfirm')}
+            title={t('settings.netbird.autostartConfirm')}
             onConfirm={() => handleAutostartChange(true)}
-            okText={t('settings.tailscale.okBtn')}
-            cancelText={t('settings.tailscale.cancelBtn')}
+            okText={t('settings.netbird.okBtn')}
+            cancelText={t('settings.netbird.cancelBtn')}
             placement="bottom"
             disabled={isAutostart}
           >
@@ -86,7 +83,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
               checked={isAutostart}
               loading={autostartLoading}
               size="small"
-              title={t('settings.tailscale.autostart')}
+              title={t('settings.netbird.autostart')}
             />
           </Popconfirm>
         )}
@@ -97,10 +94,10 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
           <>
             {/* restart button */}
             <Popconfirm
-              title={t('settings.tailscale.restart')}
+              title={t('settings.netbird.restart')}
               onConfirm={restart}
-              okText={t('settings.tailscale.okBtn')}
-              cancelText={t('settings.tailscale.cancelBtn')}
+              okText={t('settings.netbird.okBtn')}
+              cancelText={t('settings.netbird.cancelBtn')}
               placement="bottom"
               disabled={loading !== ''}
             >
@@ -115,11 +112,11 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
 
             {/* stop button */}
             <Popconfirm
-              title={t('settings.tailscale.stop')}
-              description={t('settings.tailscale.stopDesc')}
+              title={t('settings.netbird.stop')}
+              description={t('settings.netbird.stopDesc')}
               onConfirm={stop}
-              okText={t('settings.tailscale.okBtn')}
-              cancelText={t('settings.tailscale.cancelBtn')}
+              okText={t('settings.netbird.okBtn')}
+              cancelText={t('settings.netbird.cancelBtn')}
               placement="bottom"
               disabled={loading !== ''}
             >
@@ -132,25 +129,6 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
               </div>
             </Popconfirm>
           </>
-        )}
-
-        {/* more button */}
-        {state && state !== 'notInstall' && (
-          <Popover
-            content={
-              <div className="flex min-w-[250px] flex-col">
-                <Memory />
-                <Swap />
-                <Uninstall onSuccess={onSuccess} />
-              </div>
-            }
-            placement="bottom"
-            trigger="click"
-          >
-            <div className="flex cursor-pointer rounded p-1 text-white hover:bg-neutral-700/50">
-              <EllipsisIcon size={18} />
-            </div>
-          </Popover>
         )}
       </div>
     </div>

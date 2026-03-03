@@ -1,0 +1,80 @@
+#!/bin/sh
+
+DAEMON="netbird"
+DAEMON_PATH="/usr/bin/netbird"
+PIDFILE="/var/run/$DAEMON.pid"
+LOGDIR="/var/log/netbird"
+LOGFILE="$LOGDIR/netbird.log"
+
+ensure_tun() {
+  [ -d /dev/net ] || mkdir -p /dev/net
+  if [ ! -c /dev/net/tun ]; then
+    [ -x /sbin/modprobe ] && modprobe tun 2>/dev/null || true
+    [ -f /lib/modules/tun.ko ] && insmod /lib/modules/tun.ko 2>/dev/null || true
+    mknod /dev/net/tun c 10 200 2>/dev/null || true
+    chmod 0755 /dev/net/tun 2>/dev/null || true
+  fi
+}
+
+is_running() {
+  [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null
+}
+
+case "$1" in
+  start)
+    [ -x "$DAEMON_PATH" ] || {
+      echo "$DAEMON_PATH not found"
+      exit 1
+    }
+
+    if is_running; then
+      echo "$DAEMON already running"
+      exit 0
+    fi
+
+    mkdir -p /var/run "$LOGDIR"
+    ensure_tun
+
+    export GOMEMLIMIT=30MiB
+
+    printf "Starting %s (GOMEMLIMIT=%s): " "$DAEMON" "$GOMEMLIMIT"
+    start-stop-daemon -S -bmq -p "$PIDFILE" -x "$DAEMON_PATH" -- service run >>"$LOGFILE" 2>&1
+    if [ $? = 0 ]; then
+      echo "OK"
+    else
+      echo "FAIL"
+      exit 1
+    fi
+    ;;
+
+  stop)
+    printf "Stopping %s: " "$DAEMON"
+    if [ -f "$PIDFILE" ]; then
+      start-stop-daemon -K -p "$PIDFILE" >/dev/null 2>&1
+      [ $? = 0 ] && (echo "OK"; rm -f "$PIDFILE") || (echo "FAIL"; exit 1)
+    else
+      echo "not running"
+    fi
+    ;;
+
+  restart)
+    "$0" stop
+    "$0" start
+    ;;
+
+  status)
+    if is_running; then
+      echo "$DAEMON is running"
+      exit 0
+    fi
+    echo "$DAEMON is not running"
+    exit 1
+    ;;
+
+  *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
