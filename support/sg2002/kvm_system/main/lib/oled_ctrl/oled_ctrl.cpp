@@ -347,7 +347,7 @@ void OLED_ShowState(uint8_t x,uint8_t y,char chr,uint8_t size)
 	}
 }
 
-void OLED_ShowLogo()
+void OLED_ShowKVMLogo()
 {
 	uint16_t i=0;
     uint8_t x = 20;
@@ -368,7 +368,7 @@ void OLED_ShowLogo()
 void OLED_Showline_1()
 {
 	uint16_t i=0;
-    uint8_t x = 17;
+    uint8_t x = 18;
     uint8_t y = 0;
 	for(i=112; i<116; i++)
 	{   
@@ -383,15 +383,32 @@ void OLED_Showline_1()
 	}
 }
 
-void OLED_ShowSipeedLogo()
+void OLED_ShowLogo()
 {
 	uint16_t i=0;
     uint8_t x = 0;
     uint8_t y = 0;
 	uint8_t start_position = 0;
-	if(kvm_hw_ver == 2) start_position = 4;
+	// if(kvm_hw_ver == 2) start_position = 2;
+	
+	// 检测/boot/logo.bin 文件是否存在且大小为 32byte
+	uint8_t logo_data[32];
+	uint8_t use_file = 0;
+	FILE *fp = fopen("/boot/logo.bin", "rb");
+	if(fp != NULL){
+		fseek(fp, 0, SEEK_END);
+		long file_size = ftell(fp);
+		rewind(fp);
+		if(file_size == 32){
+			if(fread(logo_data, sizeof(uint8_t), 32, fp) == 32){
+				use_file = 1;
+			}
+		}
+		fclose(fp);
+	}
+	
 	for(i = start_position; i < 32; i++)
-	{   
+	{
         if(i%2==0){
             x++;
             y = 0;
@@ -399,7 +416,11 @@ void OLED_ShowSipeedLogo()
             y = 1;
         }
         OLED_Set_Pos(x, y);
-		oled_write_register(OLED_DATA, oled_sipeed_logo[i]);
+		if(use_file){
+			oled_write_register(OLED_DATA, logo_data[i]);
+		} else {
+			oled_write_register(OLED_DATA, oled_sipeed_logo[i]);
+		}
 	}
 }
 

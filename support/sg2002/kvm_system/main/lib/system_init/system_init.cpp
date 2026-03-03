@@ -53,6 +53,7 @@ void Production_testing_patch(void)
 void new_app_init(void)
 {
 	// Update the necessary scripts
+	system("rm -f /boot/logo.jpeg");
 	system("cp -f /kvmapp/system/update-nanokvm.py /etc/kvm/");
 	system("rm -f /etc/init.d/S02udisk");
 	system("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/");

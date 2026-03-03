@@ -13,8 +13,8 @@ void kvm_init_cube_ui(void)
 
 	OLED_Clear();
 	// OLED_Revolve();
+	OLED_ShowKVMLogo();
 	OLED_ShowLogo();
-	OLED_ShowSipeedLogo();
 	OLED_ShowKVMState(HDMI_STATE, 	0);
 	OLED_ShowKVMState(HID_STATE, 	0);
 	OLED_ShowKVMState(ETH_STATE, 	0);
@@ -37,7 +37,7 @@ void kvm_init_pcie_ui(void)
 {
 	OLED_Revolve();
 	OLED_Showline_1();
-	OLED_ShowSipeedLogo();
+	OLED_ShowLogo();
 	OLED_ShowKVMState(HDMI_STATE, 	0);
 	OLED_ShowKVMState(HID_STATE, 	0);
 	OLED_ShowKVMState(ETH_STATE, 	0);
