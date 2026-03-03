@@ -66,6 +66,11 @@ void new_app_init(void)
 	} else {
 		system("rm -f /etc/init.d/S30wifi");
 	}
+	
+	// if exit /etc/init.d/S98tailscaled then cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/
+	if(access("/etc/init.d/S98tailscaled", F_OK) == 0){
+		system("cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/");
+	}
 
 	// rmmod soph_saradc
 	system("rmmod soph_saradc");
