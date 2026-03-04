@@ -3,7 +3,7 @@
 **Compatible Hardware:** NanoKVM-Cube, NanoKVM-PCIe
 
 🛠️ **Tool Description:**
-This is a logo generator for the NanoKVM OLED display. You can use it to create a `logo.bin` file and place it in the `/boot` directory of your NanoKVM system.
+This is a logo generator for the NanoKVM OLED display and Web. You can use it to create a `logo.bin` and `logo.ico` file and place them in the `/boot` directory of your NanoKVM system.
 
 📋 **Instructions:**
 
@@ -30,7 +30,7 @@ This is a logo generator for the NanoKVM OLED display. You can use it to create 
     Click on individual pixels to adjust details. If you prefer an inverted display, just click the invert button 🔄
 
 7.  **Export and deploy:**
-    Export the `logo.bin` file and copy it to the `/boot` directory of your NanoKVM system. You can do this by:
+    Export the `logo.bin` & `logo.ico`, then copy it to the `/boot` directory of your NanoKVM system. You can do this by:
     *   Enabling SSH and using SCP to copy the file 💻
     *   Or directly placing it in the boot partition of your TF card 💾
 

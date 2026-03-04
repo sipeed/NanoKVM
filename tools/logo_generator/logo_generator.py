@@ -21,7 +21,7 @@ LANGUAGES = {
         'click_hint': '💡 点击图片以修改像素',
         'btn_invert': '🔃 反转',
         'btn_reset': '🔄 重置',
-        'btn_export': '💾 导出 logo.bin',
+        'btn_export': '💾 导出',
         'btn_quit': '❌ 退出',
         'help_text_with_image': '快捷键：↑↓ 调整±10 | ←→ 调整±1 | I 反转 | R 重置 | D 导出 | Q 退出',
         'help_text_editor': '快捷键：I 反转 | R 清空 | D 导出 | Q 退出',
@@ -33,7 +33,7 @@ LANGUAGES = {
         'status_reset_image': '已重置为原始图片',
         'status_reset_canvas': '已清空画布',
         'status_export_error': '错误：没有可导出的数据',
-        'status_exported': '✅ 已导出 logo.bin (32 字节)',
+        'status_exported': '✅ 已导出 logo 文件',
         'status_pixel_toggled': '切换像素 ({}, {})',
         'lang_select_title': '选择语言 / Select Language',
         'btn_chinese': '中文 (Chinese)',
@@ -56,7 +56,7 @@ LANGUAGES = {
         'click_hint': '💡 Click image to toggle pixels',
         'btn_invert': '🔃 Invert',
         'btn_reset': '🔄 Reset',
-        'btn_export': '💾 Export logo.bin',
+        'btn_export': '💾 Export',
         'btn_quit': '❌ Quit',
         'help_text_with_image': 'Shortcuts: ↑↓ ±10 | ←→ ±1 | I Invert | R Reset | D Export | Q Quit',
         'help_text_editor': 'Shortcuts: I Invert | R Clear | D Export | Q Quit',
@@ -68,7 +68,7 @@ LANGUAGES = {
         'status_reset_image': 'Reset to original image',
         'status_reset_canvas': 'Canvas cleared',
         'status_export_error': 'Error: No data to export',
-        'status_exported': '✅ Exported logo.bin (32 bytes)',
+        'status_exported': '✅ Exported logo file',
         'status_pixel_toggled': 'Toggled pixel ({}, {})',
         'lang_select_title': '选择语言 / Select Language',
         'btn_chinese': '中文 (Chinese)',
@@ -148,6 +148,72 @@ def binary_to_bytes(binary):
             data.append(reverse_byte(byte))
 
     return bytes(data)
+
+
+def binary_to_image(binary_data, size=64):
+    """
+    Convert 16x16 binary data to 64x64 RGBA image
+
+    Args:
+        binary_data: 16x16 numpy array of binary values
+        size: Size to scale the image to (default 64)
+
+    Returns:
+        PIL Image in RGBA mode
+    """
+    # Create 16x16 RGBA image from binary data
+    img_16 = Image.new('RGBA', (16, 16), (0, 0, 0, 255))  # Black for 1
+    pixels = img_16.load()
+    
+    for y in range(16):
+        for x in range(16):
+            if binary_data[y][x] == 1:
+                pixels[x, y] = (255, 255, 255, 255)  # White
+            else:
+                pixels[x, y] = (0, 0, 0, 255)  # Black
+    
+    # Scale to 64x64 using NEAREST for pixel-perfect scaling
+    img_64 = img_16.resize((size, size), Image.Resampling.NEAREST)
+    return img_64
+
+
+def image_to_ico(image_path=None, binary_data=None, output_path="logo.ico", size=64):
+    """
+    Convert image or binary data to 64x64 32-bit ICO file
+
+    Args:
+        image_path: Path to the source image (optional if binary_data is provided)
+        binary_data: 16x16 numpy array of binary values (optional if image_path is provided)
+        output_path: Output ICO file path
+        size: Size to scale the icon to (default 64)
+    """
+    try:
+        if image_path and os.path.exists(image_path):
+            img = Image.open(image_path).convert('RGBA')
+            
+            # If not square, crop the center region
+            if img.width != img.height:
+                min_size = min(img.width, img.height)
+                left = (img.width - min_size) // 2
+                top = (img.height - min_size) // 2
+                img = img.crop((left, top, left + min_size, top + min_size))
+
+            # Resize to 64x64 using LANCZOS for high quality
+            img_64 = img.resize((size, size), Image.Resampling.LANCZOS)
+        elif binary_data is not None:
+            # Convert binary data to image and scale
+            img_64 = binary_to_image(binary_data, size)
+        else:
+            print("Error: No image source provided")
+            return False
+            
+    except Exception as e:
+        print(f"Error: Failed to create ICO - {e}")
+        return False
+
+    # Save as ICO with 32-bit color depth
+    img_64.save(output_path, format='ICO', sizes=[(size, size)])
+    return True
 
 
 class PixelGrid(Static):
@@ -475,7 +541,7 @@ class LogoApp(App):
             self.status.update(self.lang['status_reset_canvas'])
 
     def action_export(self):
-        """Export logo.bin"""
+        """Export logo.bin and logo.ico"""
         if self.current_binary is None:
             self.status.update(self.lang['status_export_error'])
             return
@@ -484,6 +550,13 @@ class LogoApp(App):
 
         with open("logo.bin", "wb") as f:
             f.write(data)
+
+        # Export 64x64 32-bit ICO file
+        if self.has_image and self.image_path:
+            image_to_ico(self.image_path, "logo.ico", size=64)
+        else:
+            # Export from current canvas (16x16 -> 64x64)
+            image_to_ico(binary_data=self.current_binary, output_path="logo.ico", size=64)
 
         self.status.update(self.lang['status_exported'])
 

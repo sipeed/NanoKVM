@@ -32,6 +32,18 @@ case "$1" in
     iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
+    # Logo selection
+    if [ -f /boot/logo.ico ]; then
+        if [ ! -f /kvmapp/server/web/original.ico ]; then
+            mv /kvmapp/server/web/sipeed.ico /kvmapp/server/web/original.ico
+            cp /boot/logo.ico /kvmapp/server/web/sipeed.ico
+        fi
+    else
+        if [ -f /kvmapp/server/web/original.ico ]; then
+            mv /kvmapp/server/web/original.ico /kvmapp/server/web/sipeed.ico
+        fi
+    fi
+
     # Start services
     cp -r /kvmapp/kvm_system /tmp/
     /tmp/kvm_system/kvm_system &
