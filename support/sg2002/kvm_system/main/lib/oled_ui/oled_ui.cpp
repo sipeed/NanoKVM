@@ -412,8 +412,15 @@ void show_wifi_config_ip(void)
 {
 	OLED_Clear();
 	get_ip_addr(WiFi_IP);
-	OLED_ShowString(0, 1, "Config IP:", 8);
-	OLED_ShowString_AlignRight(63, 2, (char*)kvm_sys_state.wifi_addr, 4);
+	OLED_ShowString(1, 0, "Config URL", 8);
+	OLED_ShowString_AlignRight(63, 1, "----------------", 4);
+	// OLED_ShowString_AlignRight(63, 2, (char*)kvm_sys_state.wifi_addr, 4);
+	static char wifi_addr_with_path[30];
+	static char wifi_addr_with_key[30];
+	sprintf(wifi_addr_with_path, "%s/#/", kvm_sys_state.wifi_addr);
+	sprintf(wifi_addr_with_key, "WIFI?P=%s", kvm_sys_state.wifi_ap_pass);
+	OLED_ShowString_AlignRight(63, 2, wifi_addr_with_path, 4);
+	OLED_ShowString_AlignRight(63, 3, wifi_addr_with_key, 4);
 }
 
 void show_wifi_config_QR(void)
@@ -421,8 +428,7 @@ void show_wifi_config_QR(void)
 	static char cmd[70];
 	OLED_Clear();
 	get_ip_addr(WiFi_IP);
-	printf("http://%s/#/wifi\n", kvm_sys_state.wifi_addr);
-	sprintf(cmd, "http://%s/#/wifi", kvm_sys_state.wifi_addr);
+	sprintf(cmd, "http://%s/#/WIFI?P=%s", kvm_sys_state.wifi_addr, kvm_sys_state.wifi_ap_pass);
 	qrencode(cmd);
 }
 
