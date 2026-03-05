@@ -162,7 +162,13 @@ then
       if [ -e $SOURCE_PATH ]
       then
         cp -rf $SOURCE_PATH $TARGET_PATH
-        echo -e "\e[36m[build] \e[32mkvm_system has been moved to kvmapp.\e[0m"
+        if [ "$Project_Name" = "kvm_system" ]
+        then
+          echo -e "\e[36m[build] \e[32mkvm_system has been moved to kvmapp.\e[0m"
+        else
+          echo -e "\e[36m[build] \e[32mkvm_vision has been moved to kvmapp.\e[0m"
+        fi
+        
       else
         echo -e "\e[36m[build] \e[31mThe source file does not exist. Please compile using \e[34m./build kvm_system \e[31mfirst.\e[0m"
       fi
