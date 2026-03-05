@@ -58,7 +58,7 @@ case "$1" in
   kvm_vision)
     Project_Name="kvm_vision"
     Project_PATH="$NanoKVM_PATH/support/sg2002/kvm_vision_test"
-    echo -e "\e[36m[build] \e[32mProject: kvm_system \e[0m"
+    echo -e "\e[36m[build] \e[32mProject: kvm_vision \e[0m"
   ;;
   *)
     echo -e "\e[36m[build] \e[31mInvalid project name \e[0m"
