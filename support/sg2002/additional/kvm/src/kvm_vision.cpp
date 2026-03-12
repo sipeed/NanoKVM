@@ -164,6 +164,7 @@ uint16_t hdmi_res_list[][2] = {
     {1152, 864},
     {1024, 768},
     {800, 600},
+	{640, 480},
 };
 
 uint16_t hdmi_unsupported_res_list[][2] = {
