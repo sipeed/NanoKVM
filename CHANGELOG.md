@@ -1,3 +1,18 @@
+## 2.3.6 (2026-03-12)
+
+### Features
+
+* Implemented AP password authentication for the WiFi configuration page
+* Added Korean and Japanese virtual keyboard layouts (thanks to [@klim4-bot](https://github.com/klim4-bot))
+* Enabled support for 640x480 resolution (thanks to [@Voranto](https://github.com/Voranto))
+* Added encryption parameters for OLED distribution network
+* Added custom logo function and logo generation tools
+* Added update mechanism for tailscale startup script
+
+### Localization
+
+* Updated Japanese translation (thanks to [@tkmsst](https://github.com/tkmsst))
+
 ## 2.3.5 (2026-02-28)
 
 ### Features
