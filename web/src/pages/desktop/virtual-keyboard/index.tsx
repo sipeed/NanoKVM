@@ -46,8 +46,10 @@ export const VirtualKeyboard = () => {
   const languages = [
     { value: 'en', label: 'English' },
     { value: 'fr', label: 'French' },
-    { value: 'de', label: 'Deutsch' },
-    { value: 'ru', label: 'Russian' }
+    { value: 'de', label: 'German' },
+    { value: 'ru', label: 'Russian' },
+    { value: 'ko', label: 'Korean' },
+    { value: 'ja', label: 'Japanese' }
   ];
 
   useEffect(() => {
@@ -67,7 +69,9 @@ export const VirtualKeyboard = () => {
       ['en', 'default'],
       ['ru', 'rus'],
       ['de', 'qwertz'],
-      ['fr', 'azerty']
+      ['fr', 'azerty'],
+      ['ko', 'ko'],
+      ['ja', 'ja']
     ]);
 
     if (keyboardLanguage === 'en' && keyboardSystem === 'mac') {
@@ -138,6 +142,16 @@ export const VirtualKeyboard = () => {
       if (base === 'KeyZ') return getKeycode('KeyY');
       if (base === 'KeyY') return getKeycode('KeyZ');
       // all other labels use their own code
+      return getKeycode(base);
+    }
+
+    if (keyboardLanguage === 'ko' && key.endsWith('_ko')) {
+      const base = key.replace('_ko', '');
+      return getKeycode(base);
+    }
+
+    if (keyboardLanguage === 'ja' && key.endsWith('_ja')) {
+      const base = key.replace('_ja', '');
       return getKeycode(base);
     }
 
