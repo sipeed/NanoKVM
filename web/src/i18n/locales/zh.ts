@@ -46,7 +46,14 @@ const zh = {
       failed: '操作失败，请重试。',
       invalidMode: '当前模式不支持配置网络。请先前往设备启用 Wi-Fi 配置模式。',
       confirmBtn: '确定',
-      finishBtn: '完成'
+      finishBtn: '完成',
+      ap: {
+        authTitle: '身份验证',
+        authDescription: '请输入 AP 密码以继续',
+        authFailed: '密码错误',
+        passPlaceholder: 'AP 密码',
+        verifyBtn: '验证',
+      }
     },
     screen: {
       scale: '缩放',

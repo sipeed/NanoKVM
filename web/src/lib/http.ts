@@ -58,11 +58,12 @@ class Http {
     });
   }
 
-  public post(url: string, data?: any): Promise<Response> {
+  public post(url: string, data?: any, config?: AxiosRequestConfig): Promise<Response> {
     return this.instance.request({
       method: 'post',
       url,
-      data
+      data,
+      ...config
     });
   }
 

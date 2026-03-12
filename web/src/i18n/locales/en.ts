@@ -48,7 +48,14 @@ const en = {
       invalidMode:
         'The current mode does not support network setup. Please go to your device and enable Wi-Fi configuration mode.',
       confirmBtn: 'Ok',
-      finishBtn: 'Finished'
+      finishBtn: 'Finished',
+      ap: {
+        authTitle: 'Authentication Required',
+        authDescription: 'Please enter the AP password to continue',
+        authFailed: 'Invalid AP password',
+        passPlaceholder: 'AP password',
+        verifyBtn: 'Verify',
+      }
     },
     screen: {
       scale: 'Scale',

@@ -1,6 +1,7 @@
 package network
 
 import (
+	"crypto/subtle"
 	"fmt"
 	"os"
 	"os/exec"
@@ -21,6 +22,7 @@ const (
 	WiFiConnect    = "/kvmapp/kvm/wifi_try_connect"
 	WiFiStateFile  = "/kvmapp/kvm/wifi_state"
 	WiFiScript     = "/etc/init.d/S30wifi"
+	WiFiApPassFile = "/kvmapp/kvm/ap.pass"
 )
 
 func (s *Service) GetWifi(c *gin.Context) {
@@ -62,6 +64,15 @@ func (s *Service) ConnectWifiNoAuth(c *gin.Context) {
 		return
 	}
 
+	// Verify AP Password
+	apKey := c.GetHeader("X-AP-Key")
+	expectedPass := getApPassword()
+	if apKey == "" || expectedPass == "" || subtle.ConstantTimeCompare([]byte(apKey), []byte(expectedPass)) != 1 {
+		time.Sleep(2 * time.Second)
+		rsp.ErrRsp(c, -4, "unauthorized")
+		return
+	}
+
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		time.Sleep(1 * time.Second)
 		rsp.ErrRsp(c, -2, "invalid parameters")
@@ -77,6 +88,26 @@ func (s *Service) ConnectWifiNoAuth(c *gin.Context) {
 
 	rsp.OkRsp(c)
 	log.Debugf("set wifi ap mode successfully")
+}
+
+func (s *Service) VerifyApLogin(c *gin.Context) {
+	var rsp proto.Response
+
+	if !isSupported() || !isAPMode() {
+		time.Sleep(2 * time.Second)
+		rsp.ErrRsp(c, -1, "invalid mode")
+		return
+	}
+
+	apKey := c.GetHeader("X-AP-Key")
+	expectedPass := getApPassword()
+	if apKey == "" || expectedPass == "" || subtle.ConstantTimeCompare([]byte(apKey), []byte(expectedPass)) != 1 {
+		time.Sleep(2 * time.Second)
+		rsp.ErrRsp(c, -4, "unauthorized")
+		return
+	}
+
+	rsp.OkRsp(c)
 }
 
 func (s *Service) ConnectWifi(c *gin.Context) {
@@ -111,7 +142,6 @@ func (s *Service) ConnectWifi(c *gin.Context) {
 	}
 
 	rsp.ErrRsp(c, -3, "failed to get wifi status")
-	return
 }
 
 func (s *Service) DisconnectWifi(c *gin.Context) {
@@ -181,4 +211,13 @@ func getWiFiSsid() string {
 	}
 
 	return strings.ReplaceAll(string(ssidByte), "\n", "")
+}
+
+func getApPassword() string {
+	passByte, err := os.ReadFile(WiFiApPassFile)
+	if err != nil {
+		return ""
+	}
+
+	return strings.ReplaceAll(string(passByte), "\n", "")
 }

@@ -31,12 +31,29 @@ export function getWiFi() {
 }
 
 // connect wifi without auth (only available in wifi configuration mode)
-export function connectWifiNoAuth(ssid: string, password: string) {
+export function connectWifiNoAuth(ssid: string, password: string, apPassword?: string) {
   const data = {
     ssid,
     password
   };
-  return http.post('/api/network/wifi', data);
+  return http.post('/api/network/wifi', data, {
+    headers: {
+      'X-AP-Key': apPassword || ''
+    }
+  });
+}
+
+// verify ap login
+export function verifyApLogin(apPassword: string) {
+  return http.post(
+    '/api/network/wifi/verify',
+    {},
+    {
+      headers: {
+        'X-AP-Key': apPassword || ''
+      }
+    }
+  );
 }
 
 // connect wifi
