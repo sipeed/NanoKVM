@@ -69,10 +69,11 @@ func run() {
 
 	router.Init(r)
 
-	httpAddr := fmt.Sprintf(":%d", conf.Port.Http)
-	httpsAddr := fmt.Sprintf(":%d", conf.Port.Https)
+	httpAddr := fmt.Sprintf("%s:%d", conf.Host, conf.Port.Http)
 
 	if conf.Proto == "https" {
+		httpsAddr := fmt.Sprintf("%s:%d", conf.Host, conf.Port.Https)
+
 		go func() {
 			r.Use(middleware.Tls())
 			err := r.RunTLS(httpsAddr, conf.Cert.Crt, conf.Cert.Key)
