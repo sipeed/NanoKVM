@@ -209,7 +209,14 @@ void kvm_eth_state_disp(ip_addr_t _ip_type, uint8_t first_disp)
 		(_ip_type_old != _ip_type) || 
 		first_disp || ip_changed(ETH_IP))
 	{
-		kvm_oled_state.eth_state = kvm_sys_state.eth_state;
+		// ensure eth_addr is updated
+		if (kvm_sys_state.eth_state >= 2) {
+			if (kvm_sys_state.eth_addr[0] != 0) 
+				kvm_oled_state.eth_state = kvm_sys_state.eth_state;
+		} else {
+			kvm_oled_state.eth_state = kvm_sys_state.eth_state;
+		}
+		
 		_ip_type_old = _ip_type;
 		switch(kvm_oled_state.eth_state){
 			case -1:
