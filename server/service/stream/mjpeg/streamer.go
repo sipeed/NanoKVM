@@ -14,9 +14,11 @@ import (
 )
 
 type Streamer struct {
-	mutex   sync.RWMutex
-	clients map[*gin.Context]bool
-	running int32
+	mutex       sync.RWMutex
+	clients     map[*gin.Context]bool
+	running     int32
+	frameMutex  sync.RWMutex
+	latestFrame LatestFrame
 }
 
 func NewStreamer() *Streamer {
@@ -86,6 +88,8 @@ func (s *Streamer) run() {
 			continue
 		}
 
+		s.setLatestFrame(data, screen.Width, screen.Height)
+
 		clients := s.getClients()
 		for _, client := range clients {
 			if err := writeFrame(client, data); err != nil {
@@ -101,6 +105,36 @@ func (s *Streamer) run() {
 
 		stream.GetFrameRateCounter().Update()
 	}
+}
+
+func (s *Streamer) setLatestFrame(data []byte, width uint16, height uint16) {
+	frameCopy := append([]byte(nil), data...)
+
+	s.frameMutex.Lock()
+	defer s.frameMutex.Unlock()
+
+	s.latestFrame = LatestFrame{
+		Data:       frameCopy,
+		Width:      width,
+		Height:     height,
+		CapturedAt: time.Now(),
+	}
+}
+
+func (s *Streamer) getLatestFrame() (LatestFrame, bool) {
+	s.frameMutex.RLock()
+	defer s.frameMutex.RUnlock()
+
+	if len(s.latestFrame.Data) == 0 {
+		return LatestFrame{}, false
+	}
+
+	return LatestFrame{
+		Data:       append([]byte(nil), s.latestFrame.Data...),
+		Width:      s.latestFrame.Width,
+		Height:     s.latestFrame.Height,
+		CapturedAt: s.latestFrame.CapturedAt,
+	}, true
 }
 
 func writeFrame(c *gin.Context, data []byte) (err error) {

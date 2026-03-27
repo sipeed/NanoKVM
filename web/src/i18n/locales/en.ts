@@ -54,7 +54,7 @@ const en = {
         authDescription: 'Please enter the AP password to continue',
         authFailed: 'Invalid AP password',
         passPlaceholder: 'AP password',
-        verifyBtn: 'Verify',
+        verifyBtn: 'Verify'
       }
     },
     screen: {
@@ -447,6 +447,125 @@ const en = {
         logoutDesc: 'Are you sure you want to logout?',
         okBtn: 'Yes',
         cancelBtn: 'No'
+      }
+    },
+    picoclaw: {
+      title: 'PicoClaw Assistant',
+      empty: 'Open the panel and start a task to begin.',
+      inputPlaceholder: 'Describe what you want the PicoClaw to do',
+      newConversation: 'New conversation',
+      processing: 'Processing...',
+      agent: {
+        defaultTitle: 'General Assistant',
+        defaultDescription: 'General chat, search, and workspace help.',
+        kvmTitle: 'Remote Control',
+        kvmDescription: 'Operate the remote host through NanoKVM.',
+        switched: 'Agent role switched',
+        switchFailed: 'Failed to switch agent role'
+      },
+      send: 'Send',
+      cancel: 'Cancel',
+      status: {
+        connecting: 'Connecting to gateway...',
+        connected: 'PicoClaw session connected',
+        disconnected: 'PicoClaw session closed',
+        stopped: 'Stop request sent',
+        runtimeStarted: 'PicoClaw runtime started',
+        runtimeStartFailed: 'Failed to start PicoClaw runtime',
+        runtimeStopped: 'PicoClaw runtime stopped',
+        runtimeStopFailed: 'Failed to stop PicoClaw runtime'
+      },
+      connection: {
+        runtime: {
+          checking: 'Checking',
+          ready: 'Runtime ready',
+          stopped: 'Runtime stopped',
+          unavailable: 'Runtime unavailable',
+          configError: 'Configuration error'
+        },
+        transport: {
+          connecting: 'Connecting',
+          connected: 'Connected'
+        },
+        run: {
+          idle: 'Idle',
+          busy: 'Busy'
+        }
+      },
+      message: {
+        toolAction: 'Action',
+        observation: 'Observation',
+        screenshot: 'Screenshot'
+      },
+      overlay: {
+        locked: 'PicoClaw is controlling the device. Manual input is paused.'
+      },
+      install: {
+        install: 'Install PicoClaw',
+        installing: 'Installing PicoClaw',
+        success: 'PicoClaw installed successfully',
+        failed: 'Failed to install PicoClaw',
+        uninstalling: 'Uninstalling runtime...',
+        uninstalled: 'Runtime uninstalled successfully.',
+        uninstallFailed: 'Uninstall failed.',
+        requiredTitle: 'PicoClaw is not installed',
+        requiredDescription: 'Install PicoClaw before starting the PicoClaw runtime.',
+        progressDescription: 'PicoClaw is being downloaded and installed.',
+        stages: {
+          preparing: 'Preparing',
+          downloading: 'Downloading',
+          extracting: 'Extracting',
+          installing: 'Installing',
+          installed: 'Installed',
+          install_timeout: 'Timed Out',
+          install_failed: 'Failed'
+        }
+      },
+      model: {
+        requiredTitle: 'Model configuration is required',
+        requiredDescription: 'Configure the PicoClaw model before using PicoClaw chat.',
+        menuLabel: 'Configure model',
+        modelIdentifier: 'Model Identifier',
+        modelIdentifierPlaceholder: 'openai/gpt-5.4',
+        apiBase: 'API Base URL',
+        apiBasePlaceholder: 'https://api.example.com/v1',
+        apiKey: 'API Key',
+        apiKeyPlaceholder: 'Enter the model API key',
+        save: 'Save',
+        saving: 'Saving',
+        saved: 'Model configuration saved',
+        saveFailed: 'Failed to save model configuration',
+        invalid: 'Model identifier, API base URL, and API key are required'
+      },
+      uninstall: {
+        menuLabel: 'Uninstall',
+        confirmTitle: 'Uninstall PicoClaw',
+        confirmContent:
+          'Are you sure you want to uninstall PicoClaw? This will delete the executable and all configuration files.',
+        confirmOk: 'Uninstall',
+        confirmCancel: 'Cancel'
+      },
+      history: {
+        title: 'History',
+        loading: 'Loading sessions...',
+        emptyTitle: 'No history yet',
+        emptyDescription: 'Previous PicoClaw sessions will appear here.',
+        loadFailed: 'Failed to load session history',
+        deleteFailed: 'Failed to delete session',
+        deleteConfirmTitle: 'Delete session',
+        deleteConfirmContent: 'Are you sure you want to delete "{{title}}"?',
+        deleteConfirmOk: 'Delete',
+        deleteConfirmCancel: 'Cancel',
+        messageCount_one: '{{count}} message',
+        messageCount_other: '{{count}} messages'
+      },
+      config: {
+        startRuntime: 'Start PicoClaw',
+        stopRuntime: 'Stop PicoClaw'
+      },
+      start: {
+        title: 'Start PicoClaw',
+        description: 'Start the runtime to begin using the PicoClaw assistant.'
       }
     },
     error: {

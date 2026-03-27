@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/picoclaw"
 	"NanoKVM-Server/service/vm/jiggler"
 
 	"github.com/gorilla/websocket"
@@ -50,14 +51,26 @@ func (c *Client) Read() error {
 			return err
 		}
 
+		if len(data) == 0 {
+			continue
+		}
+
 		log.Debugf("received message %d: %v", messageType, data)
 
 		switch data[0] {
 		case Heartbeat:
 			c.UpdateHeartbeat()
 		case KeyboardEvent:
+			if picoclaw.GetSessionLock().BlocksManualInput() {
+				log.Debug("manual keyboard input dropped while AI session holds control")
+				continue
+			}
 			writeQueue(c.keyboard, data[1:])
 		case MouseEvent:
+			if picoclaw.GetSessionLock().BlocksManualInput() {
+				log.Debug("manual mouse input dropped while AI session holds control")
+				continue
+			}
 			writeQueue(c.mouse, data[1:])
 		}
 	}

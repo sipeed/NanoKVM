@@ -1,7 +1,9 @@
 package middleware
 
 import (
+	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -18,25 +20,54 @@ type Token struct {
 
 func CheckToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		conf := config.GetInstance()
-
-		if conf.Authentication == "disable" {
+		if allowByToken(c) {
 			c.Next()
 			return
-		}
-
-		cookie, err := c.Cookie("nano-kvm-token")
-		if err == nil {
-			_, err = ParseJWT(cookie)
-			if err == nil {
-				c.Next()
-				return
-			}
 		}
 
 		c.JSON(http.StatusUnauthorized, "unauthorized")
 		c.Abort()
 	}
+}
+
+func CheckTokenOrLocalhost() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if allowByToken(c) || isLoopbackRemote(c.Request.RemoteAddr) {
+			c.Next()
+			return
+		}
+
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		c.Abort()
+	}
+}
+
+func allowByToken(c *gin.Context) bool {
+	conf := config.GetInstance()
+
+	if conf.Authentication == "disable" {
+		return true
+	}
+
+	cookie, err := c.Cookie("nano-kvm-token")
+	if err != nil {
+		return false
+	}
+
+	_, err = ParseJWT(cookie)
+	return err == nil
+}
+
+func isLoopbackRemote(remoteAddr string) bool {
+	host := remoteAddr
+	if strings.Contains(remoteAddr, ":") {
+		if parsedHost, _, err := net.SplitHostPort(remoteAddr); err == nil {
+			host = parsedHost
+		}
+	}
+
+	ip := net.ParseIP(strings.Trim(host, "[]"))
+	return ip != nil && ip.IsLoopback()
 }
 
 func GenerateJWT(username string) (string, error) {

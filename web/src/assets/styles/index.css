@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
   background: #000;
@@ -23,7 +24,7 @@ html, body {
 }
 
 .spin {
-animation: spin 1s linear;
+  animation: spin 1s linear;
 }
 
 @keyframes spin {
@@ -32,5 +33,34 @@ animation: spin 1s linear;
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* PicoClaw Chat Custom Scrollbar */
+.picoclaw-sidebar-scrollbar *::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.picoclaw-sidebar-scrollbar *::-webkit-scrollbar-track {
+  background: transparent;
+}
+.picoclaw-sidebar-scrollbar *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.picoclaw-sidebar-scrollbar *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* PicoClaw Chat Loading Animation */
+@keyframes picoclaw-loading-bounce {
+  0%,
+  100% {
+    transform: translateY(0.5px);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateY(-1.5px);
+    opacity: 1;
   }
 }

@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
-import { Image } from 'antd';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { useAtomValue, useAtom } from 'jotai';
+import { useAtom, useAtomValue } from 'jotai';
 
 import MonitorXIcon from '@/assets/images/monitor-x.svg';
 import { stopFrameDetect } from '@/api/stream.ts';
 import { getFrameDetect } from '@/lib/localstorage.ts';
+import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
-import * as storage from '@/lib/localstorage.ts'
-
 
 export const Mjpeg = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
+  const [hasError, setHasError] = useState(false);
+  const scaledWidth = resolution?.width ? resolution.width * videoScale : undefined;
 
   useEffect(() => {
     // stop frame detect for a while
@@ -26,29 +26,36 @@ export const Mjpeg = () => {
   }, [resolution]);
 
   useEffect(() => {
-    const scale = storage.getVideoScale()
+    const scale = storage.getVideoScale();
     if (scale) {
-      setVideoScale(scale)
+      setVideoScale(scale);
     }
-  }, [setVideoScale])
+  }, [setVideoScale]);
 
   return (
-    <div className="flex h-screen w-screen items-start justify-center xl:items-center"
-    style={{
-      transform: `scale(${videoScale})`,
-      transformOrigin: 'center'
-    }}>
-      <Image
+    <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+      <img
         id="screen"
-        className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
-        style={
-          resolution?.width
-            ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-            : { maxHeight: '100vh', objectFit: 'scale-down' }
-        }
-        src={`${getBaseUrl('http')}/api/stream/mjpeg`}
-        fallback={MonitorXIcon}
-        preview={false}
+        className={clsx('block select-none', mouseStyle)}
+        style={{
+          width: scaledWidth ? `min(100%, ${scaledWidth}px)` : '100%',
+          height: 'auto',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          aspectRatio:
+            resolution?.width && resolution?.height
+              ? `${resolution.width} / ${resolution.height}`
+              : undefined,
+          objectFit: 'contain'
+        }}
+        src={hasError ? MonitorXIcon : `${getBaseUrl('http')}/api/stream/mjpeg`}
+        onError={() => setHasError(true)}
+        onLoad={() => {
+          if (hasError) {
+            setHasError(false);
+          }
+        }}
+        alt="screen"
       />
     </div>
   );

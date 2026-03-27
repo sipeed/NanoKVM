@@ -36,6 +36,7 @@ func server(r *gin.Engine) {
 	storageRouter(r)
 	networkRouter(r)
 	hidRouter(r)
+	picoclawRouter(r)
 	wsRouter(r)
 	downloadRouter(r)
 	extensionsRouter(r)
