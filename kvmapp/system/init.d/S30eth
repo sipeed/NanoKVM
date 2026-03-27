@@ -15,6 +15,10 @@ EOF
     ipnum=$(( (a<<24) + (b<<16) + (c<<8) + d ))
     mask=$(( 0xFFFFFFFF << (32-netid) & 0xFFFFFFFF ))
     gwnum=$(( (ipnum & mask) | 1 ))
+    if [ $gwnum -eq $ipnum ]; then
+        broadcast=$(( (ipnum & mask) | (0xFFFFFFFF & ~mask) ))
+        gwnum=$(( broadcast - 1 ))
+    fi
     echo "$(( (gwnum>>24)&255 )).$(( (gwnum>>16)&255 )).$(( (gwnum>>8)&255 )).$(( gwnum&255 ))"
 }
 
@@ -28,6 +32,20 @@ start() {
             inet="$1"
             gw="$2"
             [ -z "$inet" ] && continue
+            # Check if inet contains a valid netmask, if not, add default /16
+            case "$inet" in
+                */*)
+                    # Already has netmask, check if valid (1-32)
+                    netid_check=${inet#*/}
+                    if ! echo "$netid_check" | grep -qE '^[0-9]+$' || [ $netid_check -lt 1 ] 2>/dev/null || [ $netid_check -gt 32 ] 2>/dev/null; then
+                        inet="${inet%/*}/16"
+                    fi
+                    ;;
+                *)
+                    # No netmask, add default /16
+                    inet="$inet/16"
+                    ;;
+            esac
             addr=${inet%/*}
             netid=${inet#*/}
             [ -z "$gw" ] && gw=$(calc_gw "$addr" "$netid")
