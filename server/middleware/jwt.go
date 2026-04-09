@@ -1,9 +1,7 @@
 package middleware
 
 import (
-	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -56,18 +54,6 @@ func allowByToken(c *gin.Context) bool {
 
 	_, err = ParseJWT(cookie)
 	return err == nil
-}
-
-func isLoopbackRemote(remoteAddr string) bool {
-	host := remoteAddr
-	if strings.Contains(remoteAddr, ":") {
-		if parsedHost, _, err := net.SplitHostPort(remoteAddr); err == nil {
-			host = parsedHost
-		}
-	}
-
-	ip := net.ParseIP(strings.Trim(host, "[]"))
-	return ip != nil && ip.IsLoopback()
 }
 
 func GenerateJWT(username string) (string, error) {

@@ -24,14 +24,19 @@ var (
 	probeLoopOnce    sync.Once
 )
 
+const runtimeStatusRefreshInterval = 2 * time.Second
+
 func NewService() *Service {
-	return &Service{
+	service := &Service{
 		vision:  common.GetKvmVision(),
 		hid:     hid.GetHid(),
 		config:  getConfigStore(),
 		lock:    GetSessionLock(),
 		runtime: getRuntimeStore(),
 	}
+
+	_ = cleanupInactiveSharedImageSessionDirs("")
+	return service
 }
 
 func getConfigStore() *ConfigStore {
@@ -113,8 +118,20 @@ func (s *Service) UpdateConfig(c *gin.Context) {
 
 func (s *Service) GetRuntimeStatus(c *gin.Context) {
 	s.startRuntimeProbeLoop()
-	_ = s.ensureRuntimeReady()
-	writeSuccess(c, withAgentProfile(s.runtime.Get()))
+	status := s.runtime.Get()
+	if shouldRefreshRuntimeStatus(status) {
+		_ = s.ensureRuntimeReady()
+		status = s.runtime.Get()
+	}
+
+	if installed, ok := picoclawInstalledState(); ok {
+		status.Installed = installed
+		s.runtime.Update(func(current *RuntimeStatus) {
+			current.Installed = installed
+		})
+	}
+
+	writeSuccess(c, withAgentProfile(status))
 }
 
 func (s *Service) GetRuntimeSession(c *gin.Context) {
@@ -291,22 +308,6 @@ func (s *Service) ensureRuntimeReady() *PicoclawError {
 	}
 
 configReady:
-	if patchErr := ensurePicoclawNanoKVMDefaults(); patchErr != nil {
-		s.runtime.Set(RuntimeStatus{
-			Ready:           false,
-			Installed:       true,
-			Installing:      false,
-			InstallProgress: 0,
-			InstallPath:     picoclawBinaryPath,
-			ModelConfigured: false,
-			Status:          "config_error",
-			ConfigError:     patchErr.Error(),
-			LastError:       patchErr.Error(),
-			CheckedAt:       time.Now(),
-			CurrentSession:  s.lock.Owner(),
-		})
-		return newPicoclawError(CodeRuntimeUnavailable, "gateway config is invalid")
-	}
 	if syncErr := s.syncConfigFromPicoclaw(); syncErr != nil {
 		return syncErr
 	}
@@ -428,10 +429,27 @@ func (s *Service) startRuntimeProbeLoop() {
 			ticker := time.NewTicker(30 * time.Second)
 			defer ticker.Stop()
 
-			_ = s.ensureRuntimeReady()
 			for range ticker.C {
 				_ = s.ensureRuntimeReady()
 			}
 		}()
 	})
+}
+
+func shouldRefreshRuntimeStatus(status RuntimeStatus) bool {
+	if status.Installing {
+		return false
+	}
+	if status.CheckedAt.IsZero() {
+		return true
+	}
+	return time.Since(status.CheckedAt) >= runtimeStatusRefreshInterval
+}
+
+func picoclawInstalledState() (bool, bool) {
+	installed, err := isPicoclawInstalled()
+	if err != nil {
+		return false, false
+	}
+	return installed, true
 }

@@ -89,6 +89,10 @@ func (s *Service) UpdateModelConfig(c *gin.Context) {
 		writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, err.Error()))
 		return
 	}
+	if err := ensurePicoclawStartupDefaults(); err != nil {
+		writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, "model config saved, but failed to persist picoclaw defaults: "+err.Error()))
+		return
+	}
 
 	if shouldRestart {
 		if _, _, stopErr := s.stopRuntime(); stopErr != nil {
@@ -137,7 +141,8 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 	}
 
 	modelUpdated := false
-	for _, item := range modelListValue {
+	updatedModelIndex := -1
+	for index, item := range modelListValue {
 		modelMap, ok := item.(map[string]any)
 		if !ok {
 			continue
@@ -152,6 +157,7 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 		delete(modelMap, "api_key")
 		delete(modelMap, "api_keys")
 		modelUpdated = true
+		updatedModelIndex = index
 		break
 	}
 	if !modelUpdated {
@@ -161,6 +167,7 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 			"api_base":   apiBase,
 		})
 		doc.raw["model_list"] = modelListValue
+		updatedModelIndex = len(modelListValue) - 1
 	}
 
 	agents, ok := doc.raw["agents"].(map[string]any)
@@ -182,7 +189,8 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 	if doc.security.ModelList == nil {
 		doc.security.ModelList = map[string]picoclawModelSecurityEntry{}
 	}
-	doc.security.ModelList[modelName] = picoclawModelSecurityEntry{
+	securityModelName := indexedModelName(modelListValue, updatedModelIndex, modelName)
+	doc.security.ModelList[securityModelName] = picoclawModelSecurityEntry{
 		APIKeys: []string{apiKey},
 	}
 	if err := doc.saveSecurity(); err != nil {
@@ -190,4 +198,28 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 	}
 
 	return modelName, nil
+}
+
+func indexedModelName(modelList []any, targetIndex int, modelName string) string {
+	if targetIndex < 0 {
+		return modelName
+	}
+
+	currentIndex := 0
+	for index, item := range modelList {
+		modelMap, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		currentModelName := strings.TrimSpace(fmt.Sprintf("%v", modelMap["model_name"]))
+		if currentModelName != modelName {
+			continue
+		}
+		if index == targetIndex {
+			return fmt.Sprintf("%s:%d", modelName, currentIndex)
+		}
+		currentIndex++
+	}
+
+	return modelName
 }

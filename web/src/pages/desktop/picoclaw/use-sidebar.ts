@@ -20,7 +20,8 @@ import {
 import {
   getPicoclawSidebarConnectionLabel,
   getPicoclawSidebarMode,
-  getPicoclawSidebarStatusColor
+  getPicoclawSidebarStatusColor,
+  isPicoclawRuntimeInstalling
 } from './runtime-view.ts';
 import { createPicoclawSidebarActions } from './sidebar-actions.ts';
 import {
@@ -38,7 +39,7 @@ export const useSidebar = () => {
   const [transportState, setTransportState] = useAtom(picoclawTransportStateAtom);
   const [runState, setRunState] = useAtom(picoclawRunStateAtom);
   const [runtimeStatus, setRuntimeStatus] = useAtom(picoclawRuntimeStatusAtom);
-  const [config, setConfig] = useAtom(picoclawConfigAtom);
+  const [config] = useAtom(picoclawConfigAtom);
   const [, setTakeover] = useAtom(picoclawTakeoverStateAtom);
   const setOverlay = useSetAtom(picoclawOverlayAtom);
   const previousInstallStateRef = useRef<{ installing: boolean; status: string }>({
@@ -66,13 +67,20 @@ export const useSidebar = () => {
   const [installSnapshot, setInstallSnapshot] = useState<PicoclawRuntimeInstallSnapshot | null>(
     () => getPicoclawRuntimeInstallSnapshot()
   );
-  const isRuntimeInstallActive =
-    runtimeStatus?.installing === true ||
-    runtimeStatus?.status === 'installing' ||
-    installSnapshot?.installing === true;
+  const isRuntimeStatusInstalling = isPicoclawRuntimeInstalling(runtimeStatus);
+  const isSnapshotInstalling = !runtimeStatus && installSnapshot?.installing === true;
+  const isRuntimeInstallActive = isRuntimeStatusInstalling || isSnapshotInstalling;
   const isInstallingRuntime = isInstallRequestPending || isRuntimeInstallActive;
-  const installProgress = runtimeStatus?.install_progress ?? installSnapshot?.installProgress;
-  const installStage = runtimeStatus?.install_stage ?? installSnapshot?.installStage;
+  const installProgress = isRuntimeStatusInstalling
+    ? runtimeStatus?.install_progress ?? installSnapshot?.installProgress
+    : isSnapshotInstalling
+      ? installSnapshot?.installProgress
+      : undefined;
+  const installStage = isRuntimeStatusInstalling
+    ? runtimeStatus?.install_stage ?? installSnapshot?.installStage
+    : isSnapshotInstalling
+      ? installSnapshot?.installStage
+      : undefined;
   const actions = createPicoclawSidebarActions({
     t,
     runtimeStatus,
@@ -81,7 +89,6 @@ export const useSidebar = () => {
     modelApiBase,
     modelApiKey,
     modelIdentifier,
-    setConfig,
     setRuntimeStatus,
     setMessages,
     setTakeover,
@@ -93,7 +100,6 @@ export const useSidebar = () => {
     setIsInstallRequestPending,
     setInstallSnapshot,
     setIsSavingModelConfig,
-    setModelApiKey,
     setIsSwitchingAgent,
     setIsUninstallRequestPending
   });

@@ -4,6 +4,7 @@ import "NanoKVM-Server/service/hid"
 
 func ReleaseSession(sessionID string) {
 	GetSessionLock().Release(sessionID)
+	cleanupSharedImageSession(sessionID)
 	releaseAllHIDState()
 }
 

@@ -4,7 +4,6 @@ import type { TFunction } from 'i18next';
 import {
   closeGateway,
   connectGateway,
-  getPicoclawConfig,
   getRuntimeStatus,
   installRuntime,
   picoclawGateway,
@@ -21,7 +20,6 @@ import {
 } from '@/lib/picoclaw-storage.ts';
 import type {
   PicoclawChatMessage,
-  PicoclawConfigState,
   PicoclawOverlayState,
   PicoclawRunState,
   PicoclawRuntimeStatus,
@@ -43,7 +41,6 @@ type PicoclawSidebarActionOptions = {
   modelApiBase: string;
   modelApiKey: string;
   modelIdentifier: string;
-  setConfig: Dispatch<SetStateAction<PicoclawConfigState>>;
   setRuntimeStatus: RuntimeStatusSetter;
   setMessages: MessageSetter;
   setTakeover: TakeoverSetter;
@@ -55,7 +52,6 @@ type PicoclawSidebarActionOptions = {
   setIsInstallRequestPending: Dispatch<SetStateAction<boolean>>;
   setInstallSnapshot: Dispatch<SetStateAction<PicoclawRuntimeInstallSnapshot | null>>;
   setIsSavingModelConfig: Dispatch<SetStateAction<boolean>>;
-  setModelApiKey: Dispatch<SetStateAction<string>>;
   setIsSwitchingAgent: Dispatch<SetStateAction<boolean>>;
   setIsUninstallRequestPending: Dispatch<SetStateAction<boolean>>;
 };
@@ -69,7 +65,6 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     modelApiBase,
     modelApiKey,
     modelIdentifier,
-    setConfig,
     setRuntimeStatus,
     setMessages,
     setTakeover,
@@ -81,28 +76,23 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     setIsInstallRequestPending,
     setInstallSnapshot,
     setIsSavingModelConfig,
-    setModelApiKey,
     setIsSwitchingAgent,
     setIsUninstallRequestPending
   } = options;
 
   async function refreshState() {
-    const [configRsp, runtimeRsp] = await Promise.allSettled([
-      getPicoclawConfig(),
-      getRuntimeStatus()
-    ]);
     let nextRuntimeStatus = runtimeStatus;
+    let runtimeRsp;
 
-    if (configRsp.status === 'fulfilled' && configRsp.value.code === 0) {
-      setConfig((current) => ({
-        ...current,
-        gatewayUrl: configRsp.value.data.gateway_url || current.gatewayUrl
-      }));
+    try {
+      runtimeRsp = await getRuntimeStatus();
+    } catch {
+      return nextRuntimeStatus;
     }
 
-    if (runtimeRsp.status === 'fulfilled' && runtimeRsp.value.code === 0) {
-      nextRuntimeStatus = runtimeRsp.value.data;
-      setRuntimeStatus(runtimeRsp.value.data);
+    if (runtimeRsp.code === 0) {
+      nextRuntimeStatus = runtimeRsp.data;
+      setRuntimeStatus(runtimeRsp.data);
     }
 
     return nextRuntimeStatus;
@@ -327,7 +317,6 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
       });
       if (response.code === 0) {
         setRuntimeStatus(response.data.status);
-        setModelApiKey('');
         setIsModelConfigOpen(false);
         setMessages((current) => [...current, createStatusMessage(t('picoclaw.model.saved'))]);
         await refreshState();

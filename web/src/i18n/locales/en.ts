@@ -524,6 +524,8 @@ const en = {
       model: {
         requiredTitle: 'Model configuration is required',
         requiredDescription: 'Configure the PicoClaw model before using PicoClaw chat.',
+        docsTitle: 'Configuration Guide',
+        docsDesc: 'Supported models and protocols',
         menuLabel: 'Configure model',
         modelIdentifier: 'Model Identifier',
         modelIdentifierPlaceholder: 'openai/gpt-5.4',

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Button, Input } from 'antd';
 import { useSetAtom } from 'jotai';
-import { CpuIcon, KeyRoundIcon, LinkIcon, SaveIcon } from 'lucide-react';
+import { BookOpenIcon, CpuIcon, ExternalLinkIcon, KeyRoundIcon, LinkIcon, SaveIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
@@ -53,6 +53,29 @@ export const SidebarModelConfig = ({
         {t('picoclaw.model.requiredDescription')}
         {modelName && <span className="ml-1 text-neutral-400">{modelName}</span>}
       </div>
+
+      {/* Documentation Link */}
+      <a
+        href="https://docs.picoclaw.io/docs/configuration/model-list/#supported-vendors-and-protocols"
+        target="_blank"
+        rel="noreferrer"
+        className="group mb-5 flex items-center justify-between rounded-lg border border-white/[0.06] bg-white/[0.02] p-3 transition-colors hover:border-white/[0.1] hover:bg-white/[0.04]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md border border-white/[0.08] bg-white/[0.04]">
+            <BookOpenIcon className="text-sky-400" size={14} />
+          </div>
+          <div>
+            <div className="text-xs font-medium text-neutral-300">
+              {t('picoclaw.model.docsTitle', 'Configuration Guide')}
+            </div>
+            <div className="mt-0.5 text-[11px] text-neutral-500">
+              {t('picoclaw.model.docsDesc', 'Supported models and protocols')}
+            </div>
+          </div>
+        </div>
+        <ExternalLinkIcon size={14} className="text-neutral-500 transition-colors group-hover:text-neutral-300" />
+      </a>
 
       {/* Fields */}
       <div className="space-y-4">

@@ -8,6 +8,12 @@ import type {
 
 export type PicoclawSidebarMode = 'loading' | 'install' | 'model' | 'chat';
 
+export function isPicoclawRuntimeInstalling(
+  runtimeStatus: PicoclawRuntimeStatus | null | undefined
+) {
+  return runtimeStatus?.installing === true || runtimeStatus?.status === 'installing';
+}
+
 export function getPicoclawSidebarMode(
   runtimeStatus: PicoclawRuntimeStatus | null,
   isInitializing: boolean
@@ -29,7 +35,7 @@ export function canConnectGateway(runtimeStatus: PicoclawRuntimeStatus | null) {
     return false;
   }
 
-  if (runtimeStatus.installing) {
+  if (isPicoclawRuntimeInstalling(runtimeStatus)) {
     return false;
   }
 
@@ -50,7 +56,7 @@ export function getPicoclawSidebarStatusColor(
     return '#38bdf8';
   }
 
-  if (runtimeStatus.installing || transportState === 'connecting') {
+  if (isPicoclawRuntimeInstalling(runtimeStatus) || transportState === 'connecting') {
     return '#38bdf8';
   }
 
@@ -80,7 +86,7 @@ export function getPicoclawSidebarConnectionLabel(
     return t('picoclaw.connection.runtime.checking');
   }
 
-  if (runtimeStatus.installing) {
+  if (isPicoclawRuntimeInstalling(runtimeStatus)) {
     return t('picoclaw.install.installing');
   }
 

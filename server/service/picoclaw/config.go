@@ -43,12 +43,17 @@ func defaultConfig() Config {
 }
 
 func (s *Service) syncConfigFromPicoclaw() *PicoclawError {
+	installed, installedKnown := picoclawInstalledState()
+
 	if patchErr := preparePicoclawConfigForRead(); patchErr != nil {
 		s.runtime.Update(func(status *RuntimeStatus) {
 			status.Ready = false
 			status.Status = "config_error"
 			status.ConfigError = patchErr.Error()
 			status.LastError = patchErr.Error()
+			if installedKnown {
+				status.Installed = installed
+			}
 			status.CheckedAt = time.Now()
 		})
 		return newPicoclawError(CodeRuntimeUnavailable, patchErr.Error())
@@ -61,6 +66,9 @@ func (s *Service) syncConfigFromPicoclaw() *PicoclawError {
 			status.Status = "config_error"
 			status.ConfigError = err.Error()
 			status.LastError = err.Error()
+			if installedKnown {
+				status.Installed = installed
+			}
 			status.CheckedAt = time.Now()
 		})
 		return newPicoclawError(CodeRuntimeUnavailable, err.Error())
@@ -112,11 +120,11 @@ func loadPicoclawGatewaySettings() (picoclawGatewaySettings, error) {
 	if err != nil {
 		return picoclawGatewaySettings{}, err
 	}
+	if err := ensurePicoclawPicoChannelEnabled(doc); err != nil {
+		return picoclawGatewaySettings{}, err
+	}
 
 	cfg := doc.config
-	if !cfg.Channels.Pico.Enabled {
-		return picoclawGatewaySettings{}, fmt.Errorf("picoclaw pico channel is disabled")
-	}
 
 	host := cfg.Gateway.Host
 	if host == "" || host == "0.0.0.0" {
@@ -130,7 +138,7 @@ func loadPicoclawGatewaySettings() (picoclawGatewaySettings, error) {
 
 	settings := picoclawGatewaySettings{
 		GatewayURL:      fmt.Sprintf("ws://%s:%d%s", host, port, picoclawGatewayPath),
-		Token:           strings.TrimSpace(doc.resolvedPicoToken()),
+		Token:           doc.resolvedGatewayToken(),
 		AllowTokenQuery: cfg.Channels.Pico.AllowTokenQuery,
 	}
 	settings.TargetModelName = resolvePicoclawTargetModelName(cfg)
@@ -167,5 +175,5 @@ func preparePicoclawConfigForRead() error {
 		return fmt.Errorf("failed to stat picoclaw config: %w", err)
 	}
 
-	return ensurePicoclawNanoKVMDefaults()
+	return nil
 }

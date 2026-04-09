@@ -46,7 +46,7 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 		})
 		return "", "", newPicoclawError(CodeRuntimeStartFailed, err.Error())
 	}
-	if err := ensurePicoclawNanoKVMDefaults(); err != nil {
+	if err := ensurePicoclawStartupDefaults(); err != nil {
 		s.runtime.Update(func(status *RuntimeStatus) {
 			status.Ready = false
 			status.Installed = true
@@ -194,9 +194,6 @@ func runPicoclawOnboard() (string, *PicoclawError) {
 			trimmedOutput = execErr.Error()
 		}
 		return trimmedOutput, newPicoclawError(CodeRuntimeUnavailable, "failed to initialize picoclaw config")
-	}
-	if err := ensurePicoclawNanoKVMDefaults(); err != nil {
-		return trimmedOutput, newPicoclawError(CodeRuntimeUnavailable, err.Error())
 	}
 
 	return trimmedOutput, nil

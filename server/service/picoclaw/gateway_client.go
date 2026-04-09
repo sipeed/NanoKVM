@@ -25,7 +25,6 @@ func (s *Service) connectGateway(sessionID string) (*websocket.Conn, *PicoclawEr
 		})
 		return nil, newPicoclawError(CodeRuntimeUnavailable, err.Error())
 	}
-
 	header := http.Header{}
 	if cfg.Token != "" {
 		header.Set("Authorization", fmt.Sprintf("Bearer %s", cfg.Token))

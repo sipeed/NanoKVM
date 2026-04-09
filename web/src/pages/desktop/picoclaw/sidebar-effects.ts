@@ -26,7 +26,7 @@ import {
   HIDDEN_OVERLAY,
   retainLatestObservationScreenshot
 } from './message-utils.ts';
-import { canConnectGateway } from './runtime-view.ts';
+import { canConnectGateway, isPicoclawRuntimeInstalling } from './runtime-view.ts';
 
 type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
 type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
@@ -283,7 +283,9 @@ export function usePicoclawInstallSnapshotSync({
       return;
     }
 
-    if (runtimeStatus.installing || runtimeStatus.status === 'installing') {
+    const isInstalling = isPicoclawRuntimeInstalling(runtimeStatus);
+
+    if (isInstalling) {
       const nextSnapshot = {
         installing: true,
         installProgress: runtimeStatus.install_progress,
@@ -292,27 +294,20 @@ export function usePicoclawInstallSnapshotSync({
       };
       setInstallSnapshot(nextSnapshot);
       setPicoclawRuntimeInstallSnapshot(nextSnapshot);
-    } else if (
-      runtimeStatus.installed === true ||
-      runtimeStatus.status === 'install_failed' ||
-      runtimeStatus.status === 'install_timeout'
-    ) {
+    } else {
       setInstallSnapshot(null);
       clearPicoclawRuntimeInstallSnapshot();
     }
 
     const previous = previousInstallStateRef.current;
-    if (previous.installing && !runtimeStatus.installing) {
-      if (runtimeStatus.status === 'installed') {
+    if (previous.installing && !isInstalling) {
+      if (runtimeStatus.installed === true) {
         setMessages((current) => [...current, createStatusMessage(t('picoclaw.install.success'))]);
-      } else if (
-        runtimeStatus.status === 'install_failed' ||
-        runtimeStatus.status === 'install_timeout'
-      ) {
+      } else {
         setMessages((current) => [
           ...current,
           createErrorMessage({
-            code: runtimeStatus.status.toUpperCase(),
+            code: (runtimeStatus.status || 'runtime_install_failed').toUpperCase(),
             message: runtimeStatus.last_error || t('picoclaw.install.failed'),
             raw: runtimeStatus
           })
@@ -321,7 +316,7 @@ export function usePicoclawInstallSnapshotSync({
     }
 
     previousInstallStateRef.current = {
-      installing: runtimeStatus.installing,
+      installing: isInstalling,
       status: runtimeStatus.status
     };
   }, [runtimeStatus, setInstallSnapshot, setMessages, t, previousInstallStateRef]);

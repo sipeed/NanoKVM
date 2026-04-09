@@ -4,7 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"reflect"
 	"strings"
+
+	serverConfig "NanoKVM-Server/config"
 )
 
 const (
@@ -12,39 +15,56 @@ const (
 	defaultPicoclawReadSec  = 60
 	defaultPicoclawWriteSec = 10
 	defaultPicoclawMaxConns = 100
-	defaultNanoKVMHTTPPort  = 80
 )
 
-type picoclawConfigRule func(*picoclawConfigPatcher)
-
-type picoclawConfigPatcher struct {
-	raw     map[string]any
-	changed bool
+type picoclawConfigDefault struct {
+	path  []string
+	value any
 }
 
-func ensurePicoclawNanoKVMDefaults() error {
+var picoclawNanoKVMDefaults = []picoclawConfigDefault{
+	{path: []string{"agents", "defaults", "restrict_to_workspace"}, value: false},
+	{path: []string{"agents", "defaults", "allow_read_outside_workspace"}, value: true},
+	{path: []string{"agents", "defaults", "tool_feedback", "enabled"}, value: true},
+	{path: []string{"gateway", "host"}, value: defaultPicoclawGatewayHost},
+	{path: []string{"gateway", "port"}, value: defaultPicoclawGatewayPort},
+	{path: []string{"gateway", "hot_reload"}, value: false},
+	{path: []string{"tools", "cron", "allow_command"}, value: true},
+	{path: []string{"tools", "exec", "allow_remote"}, value: true},
+	{path: []string{"tools", "exec", "enable_deny_patterns"}, value: false},
+	{path: []string{"session", "dm_scope"}, value: "per-channel"},
+	{path: []string{"channels", "pico", "allow_token_query"}, value: false},
+	{path: []string{"channels", "pico", "ping_interval"}, value: defaultPicoclawPingSec},
+	{path: []string{"channels", "pico", "read_timeout"}, value: defaultPicoclawReadSec},
+	{path: []string{"channels", "pico", "write_timeout"}, value: defaultPicoclawWriteSec},
+	{path: []string{"channels", "pico", "max_connections"}, value: defaultPicoclawMaxConns},
+	{path: []string{"tools", "mcp", "enabled"}, value: true},
+}
+
+func ensurePicoclawStartupDefaults() error {
 	doc, err := loadPicoclawConfigDocument()
 	if err != nil {
 		return err
 	}
 
-	patcher := &picoclawConfigPatcher{raw: doc.raw}
-	for _, rule := range picoclawNanoKVMConfigRules() {
-		rule(patcher)
+	editor := &picoclawConfigEditor{raw: doc.raw}
+	forceEnablePicoclawPicoChannel(doc, editor)
+	if err := applyPicoclawStartupDefaults(editor); err != nil {
+		return err
 	}
 
-	tokenChanged, err := ensurePicoclawPicoToken(doc, patcher)
+	tokenChanged, err := ensurePicoclawPicoToken(doc)
 	if err != nil {
 		return err
 	}
 
-	if patcher.changed {
-		if err := doc.saveConfig(); err != nil {
+	if tokenChanged {
+		if err := doc.saveSecurity(); err != nil {
 			return err
 		}
 	}
-	if tokenChanged {
-		if err := doc.saveSecurity(); err != nil {
+	if editor.changed {
+		if err := doc.saveConfig(); err != nil {
 			return err
 		}
 	}
@@ -52,166 +72,116 @@ func ensurePicoclawNanoKVMDefaults() error {
 	return nil
 }
 
-func picoclawNanoKVMConfigRules() []picoclawConfigRule {
-	return []picoclawConfigRule{
-		func(p *picoclawConfigPatcher) {
-			p.setBool(false, "agents", "defaults", "restrict_to_workspace")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "agents", "defaults", "allow_read_outside_workspace")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "agents", "defaults", "tool_feedback", "enabled")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setString(defaultPicoclawGatewayHost, "gateway", "host")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setInt(defaultPicoclawGatewayPort, "gateway", "port")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(false, "gateway", "hot_reload")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "tools", "cron", "allow_command")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "tools", "exec", "allow_remote")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(false, "tools", "exec", "enable_deny_patterns")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setString("per-channel", "session", "dm_scope")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "channels", "pico", "enabled")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(false, "channels", "pico", "allow_token_query")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setInt(defaultPicoclawPingSec, "channels", "pico", "ping_interval")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setInt(defaultPicoclawReadSec, "channels", "pico", "read_timeout")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setInt(defaultPicoclawWriteSec, "channels", "pico", "write_timeout")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setInt(defaultPicoclawMaxConns, "channels", "pico", "max_connections")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.setBool(true, "tools", "mcp", "enabled")
-		},
-		func(p *picoclawConfigPatcher) {
-			p.ensureMCPServer("nanokvm", map[string]any{
-				"enabled": true,
-				"type":    "http",
-				"url":     fmt.Sprintf("http://%s:%d/api/picoclaw/mcp", defaultPicoclawGatewayHost, defaultNanoKVMHTTPPort),
-			})
-		},
+func ensurePicoclawPicoChannelEnabled(doc *picoclawConfigDocument) error {
+	if doc == nil || doc.config.Channels.Pico.Enabled {
+		return nil
 	}
+
+	editor := &picoclawConfigEditor{raw: doc.raw}
+	forceEnablePicoclawPicoChannel(doc, editor)
+	if !editor.changed {
+		return nil
+	}
+
+	return doc.saveConfig()
 }
 
-func (p *picoclawConfigPatcher) setString(value string, path ...string) {
-	target := p.ensureObject(path[:len(path)-1]...)
-	if setJSONString(target, path[len(path)-1], value) {
-		p.changed = true
+func applyPicoclawStartupDefaults(editor *picoclawConfigEditor) error {
+	for _, entry := range picoclawNanoKVMDefaults {
+		editor.setValue(entry.value, entry.path...)
 	}
+	server, err := defaultPicoclawMCPServer()
+	if err != nil {
+		return err
+	}
+	editor.setMCPServer("nanokvm", server)
+	return nil
 }
 
-func (p *picoclawConfigPatcher) setBool(value bool, path ...string) {
-	target := p.ensureObject(path[:len(path)-1]...)
-	if setJSONBool(target, path[len(path)-1], value) {
-		p.changed = true
+func forceEnablePicoclawPicoChannel(doc *picoclawConfigDocument, editor *picoclawConfigEditor) {
+	if doc == nil || editor == nil || doc.config.Channels.Pico.Enabled {
+		return
 	}
+
+	editor.setValue(true, "channels", "pico", "enabled")
+	doc.config.Channels.Pico.Enabled = true
 }
 
-func (p *picoclawConfigPatcher) setInt(value int, path ...string) {
-	target := p.ensureObject(path[:len(path)-1]...)
-	if setJSONInt(target, path[len(path)-1], value) {
-		p.changed = true
+func defaultPicoclawMCPServer() (map[string]any, error) {
+	internalToken, err := serverConfig.GetPicoclawInternalToken()
+	if err != nil {
+		return nil, err
 	}
+
+	return map[string]any{
+		"enabled": true,
+		"type":    "http",
+		"url":     nanoKVMMCPURL(),
+		"headers": map[string]any{
+			serverConfig.PicoclawInternalTokenHeader: internalToken,
+		},
+	}, nil
 }
 
-func (p *picoclawConfigPatcher) getString(path ...string) string {
+func nanoKVMMCPURL() string {
+	port := serverConfig.GetInstance().Port.Http
+	if port <= 0 {
+		port = 80
+	}
+
+	return fmt.Sprintf("http://%s:%d/api/picoclaw/mcp", defaultPicoclawGatewayHost, port)
+}
+
+type picoclawConfigEditor struct {
+	raw     map[string]any
+	changed bool
+}
+
+func (e *picoclawConfigEditor) setValue(value any, path ...string) {
 	if len(path) == 0 {
-		return ""
+		return
 	}
 
-	current := any(p.raw)
-	for _, key := range path {
-		object, ok := current.(map[string]any)
-		if !ok {
-			return ""
-		}
-		current = object[key]
+	target := e.ensureObject(path[:len(path)-1]...)
+	key := path[len(path)-1]
+	if current, exists := target[key]; exists && reflect.DeepEqual(current, value) {
+		return
 	}
 
-	return strings.TrimSpace(fmt.Sprintf("%v", current))
+	target[key] = value
+	e.changed = true
 }
 
-func (p *picoclawConfigPatcher) ensureObject(path ...string) map[string]any {
-	current := p.raw
+func (e *picoclawConfigEditor) ensureObject(path ...string) map[string]any {
+	current := e.raw
 	for _, key := range path {
 		next, ok := current[key].(map[string]any)
 		if !ok {
 			next = map[string]any{}
 			current[key] = next
-			p.changed = true
+			e.changed = true
 		}
 		current = next
 	}
 	return current
 }
 
-func (p *picoclawConfigPatcher) ensureMCPServer(name string, fields map[string]any) {
-	servers := p.ensureObject("tools", "mcp", "servers")
+func (e *picoclawConfigEditor) setMCPServer(name string, fields map[string]any) {
+	servers := e.ensureObject("tools", "mcp", "servers")
 	entry, ok := servers[name].(map[string]any)
 	if !ok {
 		entry = map[string]any{}
 		servers[name] = entry
-		p.changed = true
+		e.changed = true
 	}
-	for k, v := range fields {
-		if entry[k] != v {
-			entry[k] = v
-			p.changed = true
-		}
-	}
-}
 
-func setJSONString(target map[string]any, key string, value string) bool {
-	if strings.TrimSpace(fmt.Sprintf("%v", target[key])) == value {
-		return false
-	}
-	target[key] = value
-	return true
-}
-
-func setJSONBool(target map[string]any, key string, value bool) bool {
-	if current, ok := target[key].(bool); ok && current == value {
-		return false
-	}
-	target[key] = value
-	return true
-}
-
-func setJSONInt(target map[string]any, key string, value int) bool {
-	switch current := target[key].(type) {
-	case float64:
-		if int(current) == value {
-			return false
+	for key, value := range fields {
+		if current, exists := entry[key]; exists && reflect.DeepEqual(current, value) {
+			continue
 		}
-	case int:
-		if current == value {
-			return false
-		}
+		entry[key] = value
+		e.changed = true
 	}
-	target[key] = value
-	return true
 }
 
 func generatePicoclawToken() (string, error) {
@@ -222,17 +192,11 @@ func generatePicoclawToken() (string, error) {
 	return hex.EncodeToString(buf), nil
 }
 
-func ensurePicoclawPicoToken(doc *picoclawConfigDocument, patcher *picoclawConfigPatcher) (bool, error) {
-	token := strings.TrimSpace(doc.resolvedPicoToken())
-	if token == "" {
-		var err error
-		token, err = generatePicoclawToken()
-		if err != nil {
-			return false, err
-		}
+func ensurePicoclawPicoToken(doc *picoclawConfigDocument) (bool, error) {
+	token, err := picoSecurityToken(doc)
+	if err != nil {
+		return false, err
 	}
-
-	patcher.setString(token, "channels", "pico", "token")
 
 	if doc.security.Channels.Pico == nil {
 		doc.security.Channels.Pico = &picoclawPicoSecurity{}
@@ -243,4 +207,22 @@ func ensurePicoclawPicoToken(doc *picoclawConfigDocument, patcher *picoclawConfi
 
 	doc.security.Channels.Pico.Token = token
 	return true, nil
+}
+
+func picoSecurityToken(doc *picoclawConfigDocument) (string, error) {
+	if doc == nil {
+		return "", nil
+	}
+
+	if doc.security.Channels.Pico != nil {
+		if token := strings.TrimSpace(doc.security.Channels.Pico.Token); token != "" {
+			return token, nil
+		}
+	}
+
+	if token := strings.TrimSpace(doc.config.Channels.Pico.Token); token != "" {
+		return token, nil
+	}
+
+	return generatePicoclawToken()
 }

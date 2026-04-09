@@ -489,6 +489,8 @@ const zh = {
       model: {
         requiredTitle: '需要配置模型',
         requiredDescription: '在使用 PicoClaw 聊天之前，请先配置 PicoClaw 模型。',
+        docsTitle: '配置指南',
+        docsDesc: '支持的模型与协议',
         menuLabel: '配置模型',
         modelIdentifier: '模型标识',
         modelIdentifierPlaceholder: 'openai/gpt-5.4',

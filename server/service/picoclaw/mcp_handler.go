@@ -19,10 +19,10 @@ type jsonRPCRequest struct {
 }
 
 type jsonRPCResponse struct {
-	JSONRPC string      `json:"jsonrpc"`
+	JSONRPC string          `json:"jsonrpc"`
 	ID      json.RawMessage `json:"id"`
-	Result  interface{} `json:"result,omitempty"`
-	Error   *jsonRPCError `json:"error,omitempty"`
+	Result  interface{}     `json:"result,omitempty"`
+	Error   *jsonRPCError   `json:"error,omitempty"`
 }
 
 type jsonRPCError struct {
@@ -203,15 +203,19 @@ func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage) jsonRP
 		Result: map[string]interface{}{
 			"content": []map[string]interface{}{
 				{
+					"type": "text",
+					"text": "screenshot captured",
+				},
+				{
 					"type":     "image",
 					"data":     b64,
 					"mimeType": "image/jpeg",
 				},
 			},
 			"meta": map[string]interface{}{
-				"source_width":  meta.SourceWidth,
-				"source_height": meta.SourceHeight,
-				"capture_width": meta.CaptureWidth,
+				"source_width":   meta.SourceWidth,
+				"source_height":  meta.SourceHeight,
+				"capture_width":  meta.CaptureWidth,
 				"capture_height": meta.CaptureHeight,
 			},
 		},

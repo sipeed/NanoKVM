@@ -12,6 +12,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	picoclawPIDFileName        = ".picoclaw.pid"
+	picoclawGatewayTokenPrefix = "pico-"
+)
+
 type picoclawConfigFile struct {
 	Agents struct {
 		Defaults struct {
@@ -165,6 +170,10 @@ type picoclawPicoSecurity struct {
 	Token string `yaml:"token,omitempty"`
 }
 
+type picoclawPIDFile struct {
+	Token string `json:"token"`
+}
+
 func (d *picoclawConfigDocument) resolvedPicoToken() string {
 	if d == nil {
 		return ""
@@ -175,6 +184,58 @@ func (d *picoclawConfigDocument) resolvedPicoToken() string {
 		}
 	}
 	return d.config.Channels.Pico.Token
+}
+
+func (d *picoclawConfigDocument) resolvedGatewayToken() string {
+	baseToken := strings.TrimSpace(d.resolvedPicoToken())
+	if baseToken == "" {
+		return ""
+	}
+
+	runtimeToken, err := d.resolvedPIDToken()
+	if err != nil {
+		return baseToken
+	}
+
+	return composePicoclawGatewayToken(baseToken, runtimeToken)
+}
+
+func (d *picoclawConfigDocument) resolvedPIDToken() (string, error) {
+	if d == nil || d.configPath == "" {
+		return "", nil
+	}
+
+	pidPath := filepath.Join(filepath.Dir(d.configPath), picoclawPIDFileName)
+	data, err := os.ReadFile(pidPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", fmt.Errorf("failed to read picoclaw pid file: %w", err)
+	}
+
+	var pidFile picoclawPIDFile
+	if err := json.Unmarshal(data, &pidFile); err != nil {
+		return "", fmt.Errorf("failed to parse picoclaw pid file: %w", err)
+	}
+
+	return strings.TrimSpace(pidFile.Token), nil
+}
+
+func composePicoclawGatewayToken(baseToken, runtimeToken string) string {
+	baseToken = strings.TrimSpace(baseToken)
+	runtimeToken = strings.TrimSpace(runtimeToken)
+
+	switch {
+	case baseToken == "":
+		return ""
+	case strings.HasPrefix(baseToken, picoclawGatewayTokenPrefix):
+		return baseToken
+	case runtimeToken == "":
+		return baseToken
+	default:
+		return picoclawGatewayTokenPrefix + runtimeToken + baseToken
+	}
 }
 
 func loadPicoclawSecurityConfig(securityPath string) (picoclawSecurityConfig, error) {

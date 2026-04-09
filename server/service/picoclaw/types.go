@@ -216,16 +216,24 @@ const (
 )
 
 type GatewaySession struct {
-	SessionID  string
-	State      SessionState
-	Downstream *websocket.Conn
-	Upstream   *websocket.Conn
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
-	closeOnce  sync.Once
+	SessionID         string
+	State             SessionState
+	Downstream        *websocket.Conn
+	Upstream          *websocket.Conn
+	CreatedAt         time.Time
+	UpdatedAt         time.Time
+	closeOnce         sync.Once
+	upstreamWriteMu   sync.Mutex
+	downstreamWriteMu sync.Mutex
 }
 
 type SessionManager struct {
 	mu       sync.RWMutex
 	sessions map[string]*GatewaySession
+}
+
+type LoadImageRequest struct {
+	Path     string `json:"path"`
+	Prompt   string `json:"prompt"`
+	Filename string `json:"filename"`
 }

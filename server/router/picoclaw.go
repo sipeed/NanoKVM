@@ -19,6 +19,7 @@ func picoclawRouter(r *gin.Engine) {
 	api.POST("/config", service.UpdateConfig)
 	api.POST("/model/config", service.UpdateModelConfig)
 	api.POST("/agent/profile", service.UpdateAgentProfile)
+	api.POST("/load-image", service.LoadImage)
 	api.GET("/sessions", service.ListSessions)
 	api.GET("/sessions/:id", service.GetSession)
 	api.DELETE("/sessions/:id", service.DeleteSession)

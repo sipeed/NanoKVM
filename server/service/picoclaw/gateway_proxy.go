@@ -87,8 +87,8 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	wg.Add(4)
 	go s.runPingLoop("downstream", downstream, cfg, &wg)
 	go s.runPingLoop("upstream", upstream, cfg, &wg)
-	go s.proxyMessages("downstream", downstream, upstream, cfg, &wg, results)
-	go s.proxyMessages("upstream", upstream, downstream, cfg, &wg, results)
+	go s.proxyMessages("downstream", session, downstream, cfg, &wg, results)
+	go s.proxyMessages("upstream", session, upstream, cfg, &wg, results)
 
 	result := <-results
 	closeCode := result.CloseCode
@@ -108,7 +108,7 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	wg.Wait()
 }
 
-func (s *Service) proxyMessages(source string, src *websocket.Conn, dst *websocket.Conn, cfg Config, wg *sync.WaitGroup, results chan<- relayResult) {
+func (s *Service) proxyMessages(source string, session *GatewaySession, src *websocket.Conn, cfg Config, wg *sync.WaitGroup, results chan<- relayResult) {
 	defer wg.Done()
 
 	for {
@@ -131,12 +131,18 @@ func (s *Service) proxyMessages(source string, src *websocket.Conn, dst *websock
 			return
 		}
 
-		_ = dst.SetWriteDeadline(time.Now().Add(time.Duration(cfg.WriteTimeoutMs) * time.Millisecond))
-		if err := dst.WriteMessage(messageType, data); err != nil {
+		var writeErr error
+		switch source {
+		case "downstream":
+			writeErr = session.writeUpstreamMessage(cfg, messageType, data)
+		default:
+			writeErr = session.writeDownstreamMessage(cfg, messageType, data)
+		}
+		if writeErr != nil {
 			results <- relayResult{
 				Source:    source,
-				CloseCode: closeCodeFromError(source, err),
-				Reason:    closeReasonFromError(err),
+				CloseCode: closeCodeFromError(source, writeErr),
+				Reason:    closeReasonFromError(writeErr),
 			}
 			return
 		}
