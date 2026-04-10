@@ -1,3 +1,17 @@
+## 2.4.0 (2026-04-10)
+
+### Features
+
+* **Introduced [PicoClaw](https://github.com/sipeed/picoclaw)** — an AI-powered remote desktop assistant built into NanoKVM. PicoClaw seamlessly integrates a lightweight AI agent with NanoKVM's underlying hardware capabilities. Key highlights include:
+  * **Zero-Agent Architecture:** Operates entirely through HDMI video capture (vision) and USB HID emulation (keyboard/mouse). No SSH access, network connection to the host, or OS-level software installation is required.
+  * **Natural Language Control:** Features a built-in chat interface allowing users to issue complex instructions in plain text.
+  * **Autonomous GUI Operation:** The AI agent can autonomously observe the remote host's screen, understand UI elements, reason about the task, and execute operations mimicking human behavior.
+
+### Bug Fixes
+
+* Added a default subnet mask for static IP configurations
+* Fixed an issue where the IP address would occasionally not display
+
 ## 2.3.6 (2026-03-12)
 
 ### Features
