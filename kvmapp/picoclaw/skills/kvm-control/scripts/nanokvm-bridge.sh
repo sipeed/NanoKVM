@@ -59,6 +59,29 @@ cleanup_file() {
   fi
 }
 
+base_url_uses_loopback() {
+  host_port="${BASE_URL#*://}"
+  host_port="${host_port%%/*}"
+
+  case "$host_port" in
+    127.0.0.1|127.0.0.1:*|localhost|localhost:*|\[::1\]|\[::1\]:*|::1|::1:*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+run_curl() {
+  if base_url_uses_loopback; then
+    curl -L -k "$@"
+    return $?
+  fi
+
+  curl -L "$@"
+}
+
 normalize_session_hint() {
   value="${1-}"
   case "$value" in
@@ -159,7 +182,7 @@ resolve_session_from_runtime() {
   response_file="$(mktemp_file)" || return 1
 
   status="$(
-    curl -sS \
+    run_curl -sS \
       -X GET \
       --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
       -m "$TIMEOUT_SECONDS" \
@@ -257,7 +280,7 @@ request_json() {
 
   if [ "$method" = "GET" ]; then
     status="$(
-      curl -sS \
+      run_curl -sS \
         -X GET \
         --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
         -m "$TIMEOUT_SECONDS" \
@@ -268,7 +291,7 @@ request_json() {
     )"
   else
     status="$(
-      curl -sS \
+      run_curl -sS \
         -X "$method" \
         --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
         -m "$TIMEOUT_SECONDS" \
@@ -333,7 +356,7 @@ request_binary() {
   response_file="$(mktemp_file)" || die "TEMPFILE_FAILED" "failed to create temporary response file"
   header_file="$(mktemp_file)" || die "TEMPFILE_FAILED" "failed to create temporary header file"
 
-  curl -sS \
+  run_curl -sS \
     -X GET \
     --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
     -m "$TIMEOUT_SECONDS" \

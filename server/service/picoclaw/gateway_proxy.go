@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"NanoKVM-Server/service/stream/mjpeg"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -76,6 +78,7 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	GetSessionManager().AttachUpstream(sessionID, upstream)
 	GetSessionManager().AttachDownstream(sessionID, downstream)
 	GetSessionManager().SetState(sessionID, SessionStateActive)
+	mjpeg.EnableLatestFrameCache()
 
 	var wg sync.WaitGroup
 	results := make(chan relayResult, 2)
@@ -181,6 +184,7 @@ func (s *Service) closeGatewaySession(session *GatewaySession, closeCode int, re
 	}
 
 	session.closeOnce.Do(func() {
+		mjpeg.DisableLatestFrameCache()
 		GetSessionManager().SetState(session.SessionID, SessionStateClosing)
 
 		if session.Upstream != nil {

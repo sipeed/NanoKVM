@@ -84,12 +84,12 @@ export const Desktop = () => {
                 </div>
               </Splitter.Panel>
               <Splitter.Panel
-                size={isPicoclawChatOpen ? picoclawSidebarWidth : 0}
-                min={isPicoclawChatOpen ? 340 : 0}
+                size={isBigScreen && isPicoclawChatOpen ? picoclawSidebarWidth : 0}
+                min={isBigScreen && isPicoclawChatOpen ? 340 : 0}
                 max="45%"
-                resizable={isPicoclawChatOpen}
+                resizable={isBigScreen && isPicoclawChatOpen}
               >
-                {isPicoclawChatOpen ? <PicoclawSidebar /> : null}
+                {isBigScreen && isPicoclawChatOpen ? <PicoclawSidebar /> : null}
               </Splitter.Panel>
             </Splitter>
           </div>
@@ -98,6 +98,12 @@ export const Desktop = () => {
           <Keyboard />
         </div>
       )}
+
+      {!isBigScreen && isPicoclawChatOpen ? (
+        <div className="fixed inset-x-0 bottom-0 top-14 z-[980] overflow-hidden bg-[#0d0d0f] shadow-2xl">
+          <PicoclawSidebar />
+        </div>
+      ) : null}
 
       <VirtualKeyboard />
     </div>

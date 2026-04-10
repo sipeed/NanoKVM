@@ -31,3 +31,11 @@ func Connect(c *gin.Context) {
 func GetLatestFrame() (LatestFrame, bool) {
 	return streamer.getLatestFrame()
 }
+
+func EnableLatestFrameCache() {
+	streamer.enableLatestFrameCache()
+}
+
+func DisableLatestFrameCache() {
+	streamer.disableLatestFrameCache()
+}

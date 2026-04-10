@@ -14,40 +14,66 @@ const hiddenAssistantMessagePrefix = '🔧 `message`';
 
 function extractDisplayText(value: unknown): string {
   if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (!trimmed) {
+    const normalized = normalizeLiteralEmptyText(value);
+    if (!normalized) {
       return '';
     }
 
     try {
-      const parsed = JSON.parse(trimmed) as unknown;
+      const parsed = JSON.parse(normalized) as unknown;
       if (parsed && typeof parsed === 'object') {
         const record = parsed as Record<string, unknown>;
-        if (typeof record.content === 'string' && record.content.trim()) {
-          return record.content;
+        if (typeof record.content === 'string') {
+          const content = normalizeLiteralEmptyText(record.content);
+          if (content) {
+            return content;
+          }
         }
-        if (typeof record.text === 'string' && record.text.trim()) {
-          return record.text;
+        if (typeof record.text === 'string') {
+          const text = normalizeLiteralEmptyText(record.text);
+          if (text) {
+            return text;
+          }
         }
       }
     } catch {
-      return trimmed;
+      return normalized;
     }
 
-    return trimmed;
+    return normalized;
   }
 
   if (value && typeof value === 'object') {
     const record = value as Record<string, unknown>;
-    if (typeof record.content === 'string' && record.content.trim()) {
-      return record.content;
+    if (typeof record.content === 'string') {
+      const content = normalizeLiteralEmptyText(record.content);
+      if (content) {
+        return content;
+      }
     }
-    if (typeof record.text === 'string' && record.text.trim()) {
-      return record.text;
+    if (typeof record.text === 'string') {
+      const text = normalizeLiteralEmptyText(record.text);
+      if (text) {
+        return text;
+      }
     }
   }
 
   return '';
+}
+
+function normalizeLiteralEmptyText(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const normalized = trimmed.toLowerCase();
+  if (normalized === 'null' || normalized === 'undefined') {
+    return '';
+  }
+
+  return trimmed;
 }
 
 export const Message = ({ message }: MessageProps) => {
@@ -74,6 +100,10 @@ export const Message = ({ message }: MessageProps) => {
       extractDisplayText(message.action) ||
       extractDisplayText(message.raw);
 
+    if (!toolText) {
+      return null;
+    }
+
     return (
       <div className="border-white/8 rounded-xl border bg-white/[0.03] px-3 py-2 text-xs text-neutral-300">
         <div className="mb-1 flex items-center gap-2 text-[11px] uppercase tracking-wide text-neutral-500">
@@ -86,13 +116,20 @@ export const Message = ({ message }: MessageProps) => {
   }
 
   if (message.kind === 'observation') {
+    const observationText = extractDisplayText(message.text);
+    if (!observationText && !message.imageBase64) {
+      return null;
+    }
+
     return (
       <div className="rounded-lg border border-sky-400/20 bg-sky-400/10 px-3 py-2 text-sm text-sky-50">
         <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-sky-200">
           <ImageIcon size={14} />
           <span>{t('picoclaw.message.observation')}</span>
         </div>
-        {message.text && <MarkdownContent content={message.text} className="mb-2 break-words" />}
+        {observationText && (
+          <MarkdownContent content={observationText} className="mb-2 break-words" />
+        )}
         {message.imageBase64 && (
           <img
             alt={t('picoclaw.message.screenshot')}
@@ -109,6 +146,11 @@ export const Message = ({ message }: MessageProps) => {
   }
 
   const isUser = message.kind === 'user';
+  const messageText = isUser ? message.text : extractDisplayText(message.text);
+
+  if (!messageText) {
+    return null;
+  }
 
   return (
     <div className={clsx('flex', isUser ? 'justify-end' : 'justify-start')}>
@@ -118,7 +160,7 @@ export const Message = ({ message }: MessageProps) => {
           isUser ? 'bg-sky-500 text-white' : 'bg-neutral-800 text-neutral-100'
         )}
       >
-        <MarkdownContent content={message.text} className="break-words" />
+        <MarkdownContent content={messageText} className="break-words" />
       </div>
     </div>
   );

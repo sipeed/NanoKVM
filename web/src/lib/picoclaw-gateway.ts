@@ -401,19 +401,20 @@ function extractText(message: Record<string, unknown>) {
   const content = payload.content ?? message.content ?? payload.text ?? message.text;
 
   if (typeof content === 'string') {
-    return content;
+    return normalizeLiteralEmptyText(content);
   }
   if (Array.isArray(content)) {
     return content
       .map((item) => {
         if (typeof item === 'string') {
-          return item;
+          return normalizeLiteralEmptyText(item);
         }
         if (item && typeof item === 'object' && 'text' in item) {
-          return String((item as Record<string, unknown>).text || '');
+          return normalizeLiteralEmptyText(String((item as Record<string, unknown>).text || ''));
         }
         return '';
       })
+      .filter(Boolean)
       .join('\n')
       .trim();
   }
@@ -438,14 +439,33 @@ function extractAction(message: Record<string, unknown>) {
     return null;
   }
 
+  const action = normalizeLiteralEmptyText(actionValue);
+  if (!action) {
+    return null;
+  }
+
   const x = typeof payload.x === 'number' ? payload.x : undefined;
   const y = typeof payload.y === 'number' ? payload.y : undefined;
 
   return {
-    action: actionValue,
+    action,
     x,
     y
   };
+}
+
+function normalizeLiteralEmptyText(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  const normalized = trimmed.toLowerCase();
+  if (normalized === 'null' || normalized === 'undefined') {
+    return '';
+  }
+
+  return trimmed;
 }
 
 export const picoclawGateway = new PicoClawGateway();

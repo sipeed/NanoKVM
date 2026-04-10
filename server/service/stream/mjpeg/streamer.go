@@ -19,6 +19,7 @@ type Streamer struct {
 	running     int32
 	frameMutex  sync.RWMutex
 	latestFrame LatestFrame
+	cacheRefs   int32
 }
 
 func NewStreamer() *Streamer {
@@ -88,7 +89,9 @@ func (s *Streamer) run() {
 			continue
 		}
 
-		s.setLatestFrame(data, screen.Width, screen.Height)
+		if s.frameCacheEnabled() {
+			s.setLatestFrame(data, screen.Width, screen.Height)
+		}
 
 		clients := s.getClients()
 		for _, client := range clients {
@@ -121,7 +124,42 @@ func (s *Streamer) setLatestFrame(data []byte, width uint16, height uint16) {
 	}
 }
 
+func (s *Streamer) clearLatestFrame() {
+	s.frameMutex.Lock()
+	defer s.frameMutex.Unlock()
+
+	s.latestFrame = LatestFrame{}
+}
+
+func (s *Streamer) enableLatestFrameCache() {
+	atomic.AddInt32(&s.cacheRefs, 1)
+}
+
+func (s *Streamer) disableLatestFrameCache() {
+	for {
+		current := atomic.LoadInt32(&s.cacheRefs)
+		if current <= 0 {
+			return
+		}
+
+		if atomic.CompareAndSwapInt32(&s.cacheRefs, current, current-1) {
+			if current == 1 {
+				s.clearLatestFrame()
+			}
+			return
+		}
+	}
+}
+
+func (s *Streamer) frameCacheEnabled() bool {
+	return atomic.LoadInt32(&s.cacheRefs) > 0
+}
+
 func (s *Streamer) getLatestFrame() (LatestFrame, bool) {
+	if !s.frameCacheEnabled() {
+		return LatestFrame{}, false
+	}
+
 	s.frameMutex.RLock()
 	defer s.frameMutex.RUnlock()
 

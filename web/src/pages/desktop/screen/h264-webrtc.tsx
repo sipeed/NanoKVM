@@ -13,11 +13,6 @@ export const H264Webrtc = () => {
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
   const [isLoading, setIsLoading] = useState(true);
-  const [streamSize, setStreamSize] = useState<{ width: number; height: number } | null>(null);
-
-  const displayWidth = streamSize?.width || resolution?.width;
-  const displayHeight = streamSize?.height || resolution?.height;
-  const scaledWidth = displayWidth ? displayWidth * videoScale : undefined;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const videoOfferSent = useRef(false);
@@ -182,18 +177,6 @@ export const H264Webrtc = () => {
     }
   }, [setVideoScale]);
 
-  function updateVideoMetrics() {
-    const element = videoRef.current;
-    if (!element || element.videoWidth <= 0 || element.videoHeight <= 0) {
-      return;
-    }
-
-    setStreamSize({
-      width: element.videoWidth,
-      height: element.videoHeight
-    });
-  }
-
   return (
     <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden">
       <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
@@ -202,13 +185,11 @@ export const H264Webrtc = () => {
           ref={videoRef}
           className={clsx('block select-none', mouseStyle)}
           style={{
-            width: scaledWidth ? `min(100%, ${scaledWidth}px)` : '100%',
-            height: 'auto',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            aspectRatio:
-              displayWidth && displayHeight ? `${displayWidth} / ${displayHeight}` : undefined,
-            objectFit: 'contain'
+            transform: `scale(${videoScale})`,
+            transformOrigin: 'center',
+            ...(resolution?.width
+              ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
+              : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
           }}
           muted
           autoPlay
@@ -218,11 +199,7 @@ export const H264Webrtc = () => {
             e.stopPropagation();
             e.preventDefault();
           }}
-          onLoadedMetadata={() => {
-            updateVideoMetrics();
-          }}
           onPlaying={() => {
-            updateVideoMetrics();
             setIsLoading(false);
           }}
         />
