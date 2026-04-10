@@ -26,25 +26,36 @@ func GetSessionLock() *SessionLock {
 }
 
 func (l *SessionLock) Ensure(sessionID string) *PicoclawError {
+	_, err := l.acquire(sessionID)
+	return err
+}
+
+func (l *SessionLock) AcquireTemporary(sessionID string) (bool, *PicoclawError) {
+	return l.acquire(sessionID)
+}
+
+func (l *SessionLock) acquire(sessionID string) (bool, *PicoclawError) {
 	if sessionID == "" {
-		return newPicoclawError(CodeSessionIDInvalid, "invalid PicoClaw session")
+		return false, newPicoclawError(CodeSessionIDInvalid, "invalid PicoClaw session")
 	}
 
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
 	if l.ownerSessionID == "" || l.ownerSessionID == sessionID {
+		acquired := l.ownerSessionID == ""
+		now := time.Now()
 		l.ownerSessionID = sessionID
 		if l.acquiredAt.IsZero() {
-			l.acquiredAt = time.Now()
+			l.acquiredAt = now
 		}
-		l.expiresAt = time.Now().Add(30 * time.Minute)
-		return nil
+		l.expiresAt = now.Add(30 * time.Minute)
+		return acquired, nil
 	}
 
 	err := newPicoclawError(CodePicoclawLockHeld, "another PicoClaw session is running")
 	err.SessionID = l.ownerSessionID
-	return err
+	return false, err
 }
 
 func (l *SessionLock) Release(sessionID string) bool {

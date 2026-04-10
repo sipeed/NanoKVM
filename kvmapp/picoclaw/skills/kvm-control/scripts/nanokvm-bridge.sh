@@ -8,6 +8,8 @@ TIMEOUT_SECONDS="${NANOKVM_BRIDGE_TIMEOUT_SECONDS:-15}"
 CONNECT_TIMEOUT_SECONDS="${NANOKVM_BRIDGE_CONNECT_TIMEOUT_SECONDS:-5}"
 SCREENSHOT_WIDTH="${NANOKVM_BRIDGE_SCREENSHOT_WIDTH:-640}"
 SCREENSHOT_QUALITY="${NANOKVM_BRIDGE_SCREENSHOT_QUALITY:-50}"
+INTERNAL_TOKEN="${NANOKVM_BRIDGE_INTERNAL_TOKEN:-${NANOKVM_INTERNAL_TOKEN:-}}"
+INTERNAL_TOKEN_FILE="${NANOKVM_BRIDGE_INTERNAL_TOKEN_FILE:-/etc/kvm/.picoclaw_internal_token}"
 SESSION_ID=""
 
 json_escape() {
@@ -80,6 +82,18 @@ run_curl() {
   fi
 
   curl -L "$@"
+}
+
+resolve_internal_token() {
+  if [ -n "$INTERNAL_TOKEN" ]; then
+    return 0
+  fi
+
+  if [ -r "$INTERNAL_TOKEN_FILE" ]; then
+    INTERNAL_TOKEN="$(tr -d '\r\n' < "$INTERNAL_TOKEN_FILE")"
+  fi
+
+  [ -n "$INTERNAL_TOKEN" ]
 }
 
 normalize_session_hint() {
@@ -181,15 +195,33 @@ resolve_session_from_runtime() {
   url="${BASE_URL%/}${API_PREFIX}/runtime/session"
   response_file="$(mktemp_file)" || return 1
 
-  status="$(
-    run_curl -sS \
-      -X GET \
-      --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
-      -m "$TIMEOUT_SECONDS" \
-      -o "$response_file" \
-      -w '%{http_code}' \
-      "$url" 2>/dev/null
-  )"
+  internal_token_header=""
+  if base_url_uses_loopback && resolve_internal_token; then
+    internal_token_header="X-NanoKVM-Internal-Token: $INTERNAL_TOKEN"
+  fi
+
+  if [ -n "$internal_token_header" ]; then
+    status="$(
+      run_curl -sS \
+        -X GET \
+        --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+        -m "$TIMEOUT_SECONDS" \
+        -H "$internal_token_header" \
+        -o "$response_file" \
+        -w '%{http_code}' \
+        "$url" 2>/dev/null
+    )"
+  else
+    status="$(
+      run_curl -sS \
+        -X GET \
+        --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+        -m "$TIMEOUT_SECONDS" \
+        -o "$response_file" \
+        -w '%{http_code}' \
+        "$url" 2>/dev/null
+    )"
+  fi
   curl_exit=$?
 
   if [ "$curl_exit" -ne 0 ]; then
@@ -277,31 +309,66 @@ request_json() {
   body="${3-}"
   url="${BASE_URL%/}${API_PREFIX}${endpoint}"
   response_file="$(mktemp_file)" || die "TEMPFILE_FAILED" "failed to create temporary response file"
+  internal_token_header=""
+
+  if base_url_uses_loopback && resolve_internal_token; then
+    internal_token_header="X-NanoKVM-Internal-Token: $INTERNAL_TOKEN"
+  fi
 
   if [ "$method" = "GET" ]; then
-    status="$(
-      run_curl -sS \
-        -X GET \
-        --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
-        -m "$TIMEOUT_SECONDS" \
-        -H "X-PicoClaw-Session-ID: $SESSION_ID" \
-        -o "$response_file" \
-        -w '%{http_code}' \
-        "$url"
-    )"
+    if [ -n "$internal_token_header" ]; then
+      status="$(
+        run_curl -sS \
+          -X GET \
+          --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+          -m "$TIMEOUT_SECONDS" \
+          -H "$internal_token_header" \
+          -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          "$url"
+      )"
+    else
+      status="$(
+        run_curl -sS \
+          -X GET \
+          --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+          -m "$TIMEOUT_SECONDS" \
+          -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          "$url"
+      )"
+    fi
   else
-    status="$(
-      run_curl -sS \
-        -X "$method" \
-        --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
-        -m "$TIMEOUT_SECONDS" \
-        -H "Content-Type: application/json" \
-        -H "X-PicoClaw-Session-ID: $SESSION_ID" \
-        --data "$body" \
-        -o "$response_file" \
-        -w '%{http_code}' \
-        "$url"
-    )"
+    if [ -n "$internal_token_header" ]; then
+      status="$(
+        run_curl -sS \
+          -X "$method" \
+          --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+          -m "$TIMEOUT_SECONDS" \
+          -H "Content-Type: application/json" \
+          -H "$internal_token_header" \
+          -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+          --data "$body" \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          "$url"
+      )"
+    else
+      status="$(
+        run_curl -sS \
+          -X "$method" \
+          --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+          -m "$TIMEOUT_SECONDS" \
+          -H "Content-Type: application/json" \
+          -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+          --data "$body" \
+          -o "$response_file" \
+          -w '%{http_code}' \
+          "$url"
+      )"
+    fi
   fi
   curl_exit=$?
 
@@ -355,15 +422,32 @@ request_binary() {
   url="${BASE_URL%/}${API_PREFIX}${endpoint}"
   response_file="$(mktemp_file)" || die "TEMPFILE_FAILED" "failed to create temporary response file"
   header_file="$(mktemp_file)" || die "TEMPFILE_FAILED" "failed to create temporary header file"
+  internal_token_header=""
 
-  run_curl -sS \
-    -X GET \
-    --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
-    -m "$TIMEOUT_SECONDS" \
-    -H "X-PicoClaw-Session-ID: $SESSION_ID" \
-    -D "$header_file" \
-    -o "$response_file" \
-    "$url"
+  if base_url_uses_loopback && resolve_internal_token; then
+    internal_token_header="X-NanoKVM-Internal-Token: $INTERNAL_TOKEN"
+  fi
+
+  if [ -n "$internal_token_header" ]; then
+    run_curl -sS \
+      -X GET \
+      --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+      -m "$TIMEOUT_SECONDS" \
+      -H "$internal_token_header" \
+      -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+      -D "$header_file" \
+      -o "$response_file" \
+      "$url"
+  else
+    run_curl -sS \
+      -X GET \
+      --connect-timeout "$CONNECT_TIMEOUT_SECONDS" \
+      -m "$TIMEOUT_SECONDS" \
+      -H "X-PicoClaw-Session-ID: $SESSION_ID" \
+      -D "$header_file" \
+      -o "$response_file" \
+      "$url"
+  fi
   curl_exit=$?
 
   if [ "$curl_exit" -ne 0 ]; then

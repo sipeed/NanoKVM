@@ -97,10 +97,6 @@ func (s *Service) requireSessionID(c *gin.Context) (string, *PicoclawError) {
 		return "", newPicoclawError(CodeSessionIDMissing, "missing X-PicoClaw-Session-ID")
 	}
 
-	if err := s.lock.Ensure(sessionID); err != nil {
-		return "", err
-	}
-
 	return sessionID, nil
 }
 

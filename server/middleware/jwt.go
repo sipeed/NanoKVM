@@ -23,20 +23,29 @@ func CheckToken() gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		c.Abort()
+		abortUnauthorized(c)
 	}
 }
 
-func CheckTokenOrLocalhost() gin.HandlerFunc {
+func CheckLoopbackInternalToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if allowByToken(c) || isLoopbackRemote(c.Request.RemoteAddr) {
+		if allowByLoopbackInternalToken(c.Request) {
 			c.Next()
 			return
 		}
 
-		c.JSON(http.StatusUnauthorized, "unauthorized")
-		c.Abort()
+		abortUnauthorized(c)
+	}
+}
+
+func CheckTokenOrLoopbackInternalToken() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if allowByToken(c) || allowByLoopbackInternalToken(c.Request) {
+			c.Next()
+			return
+		}
+
+		abortUnauthorized(c)
 	}
 }
 
@@ -54,6 +63,11 @@ func allowByToken(c *gin.Context) bool {
 
 	_, err = ParseJWT(cookie)
 	return err == nil
+}
+
+func abortUnauthorized(c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, "unauthorized")
+	c.Abort()
 }
 
 func GenerateJWT(username string) (string, error) {

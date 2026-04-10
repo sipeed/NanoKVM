@@ -32,7 +32,6 @@ var picoclawNanoKVMDefaults = []picoclawConfigDefault{
 	{path: []string{"tools", "cron", "allow_command"}, value: true},
 	{path: []string{"tools", "exec", "allow_remote"}, value: true},
 	{path: []string{"tools", "exec", "enable_deny_patterns"}, value: false},
-	{path: []string{"session", "dm_scope"}, value: "per-channel"},
 	{path: []string{"channels", "pico", "allow_token_query"}, value: false},
 	{path: []string{"channels", "pico", "ping_interval"}, value: defaultPicoclawPingSec},
 	{path: []string{"channels", "pico", "read_timeout"}, value: defaultPicoclawReadSec},

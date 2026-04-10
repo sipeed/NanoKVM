@@ -14,8 +14,8 @@ import (
 var screenshotRetryDelay = 100 * time.Millisecond
 
 const (
-	screenshotRetryCount       = 3
-	cachedFrameMaxAge          = 2 * time.Second
+	screenshotRetryCount             = 3
+	cachedFrameMaxAge                = 2 * time.Second
 	defaultPicoclawScreenshotWidth   = 960
 	defaultPicoclawScreenshotHeight  = 540
 	defaultPicoclawScreenshotQuality = 60
@@ -28,10 +28,19 @@ func (s *Service) Screenshot(c *gin.Context) {
 		return
 	}
 
-	_, sessionErr := s.requireSessionID(c)
+	sessionID, sessionErr := s.requireSessionID(c)
 	if sessionErr != nil {
 		writePicoclawError(c, sessionErr)
 		return
+	}
+
+	releaseAfter, lockErr := s.lock.AcquireTemporary(sessionID)
+	if lockErr != nil {
+		writePicoclawError(c, lockErr)
+		return
+	}
+	if releaseAfter {
+		defer s.lock.Release(sessionID)
 	}
 
 	data, meta, err := s.captureScreenshot(query)

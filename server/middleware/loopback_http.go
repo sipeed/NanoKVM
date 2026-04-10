@@ -48,8 +48,12 @@ func ListenAndServeLoopbackHTTPRedirect(
 	}))
 }
 
+func allowByLoopbackInternalToken(req *http.Request) bool {
+	return req != nil && isLoopbackRemote(req.RemoteAddr) && hasValidLoopbackHTTPToken(req)
+}
+
 func isLoopbackAllowedPath(req *http.Request, allowedPaths map[string]struct{}) bool {
-	if req == nil || !isLoopbackRemote(req.RemoteAddr) {
+	if !allowByLoopbackInternalToken(req) {
 		return false
 	}
 

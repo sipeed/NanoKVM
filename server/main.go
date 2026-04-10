@@ -78,7 +78,12 @@ func run() {
 			}
 		}()
 
-		if err := middleware.ListenAndServeLoopbackHTTPRedirect(httpAddr, httpsAddr, r, "/api/picoclaw/mcp"); err != nil {
+		if err := middleware.ListenAndServeLoopbackHTTPRedirect(
+			httpAddr,
+			httpsAddr,
+			r,
+			router.PicoclawLoopbackHTTPAllowedPaths()...,
+		); err != nil {
 			panic("start http server failed")
 		}
 	} else {

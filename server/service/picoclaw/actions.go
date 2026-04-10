@@ -26,6 +26,15 @@ func (s *Service) Actions(c *gin.Context) {
 		return
 	}
 
+	releaseAfter, lockErr := s.lock.AcquireTemporary(sessionID)
+	if lockErr != nil {
+		writePicoclawError(c, lockErr)
+		return
+	}
+	if releaseAfter {
+		defer s.lock.Release(sessionID)
+	}
+
 	actions, actionErr := normalizeActions(c)
 	if actionErr != nil {
 		writePicoclawError(c, actionErr)
