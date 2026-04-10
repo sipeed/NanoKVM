@@ -1,19 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtom, useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
-import * as storage from '@/lib/localstorage.ts'
 
 export const H264Webrtc = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
-
   const [isLoading, setIsLoading] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -173,19 +171,19 @@ export const H264Webrtc = () => {
   }, []);
 
   useEffect(() => {
-    const scale = storage.getVideoScale()
+    const scale = storage.getVideoScale();
     if (scale) {
-      setVideoScale(scale)
+      setVideoScale(scale);
     }
-  }, [setVideoScale])
+  }, [setVideoScale]);
 
   return (
-    <Spin size="large" tip="Loading" spinning={isLoading}>
-      <div className="flex h-screen w-screen items-start justify-center xl:items-center">
+    <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden">
+      <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
         <video
           id="screen"
           ref={videoRef}
-          className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
+          className={clsx('block select-none', mouseStyle)}
           style={{
             transform: `scale(${videoScale})`,
             transformOrigin: 'center',
@@ -206,6 +204,14 @@ export const H264Webrtc = () => {
           }}
         />
       </div>
-    </Spin>
+
+      {isLoading && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
+          <div className="rounded-full bg-neutral-900/85 px-4 py-2 text-sm text-neutral-100 shadow-lg">
+            Loading
+          </div>
+        </div>
+      )}
+    </div>
   );
 };

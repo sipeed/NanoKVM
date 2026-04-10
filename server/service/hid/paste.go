@@ -131,6 +131,10 @@ func copyMap(src map[rune]Char) map[rune]Char {
 	return dst
 }
 
+func GetCharMap(lang string) map[rune]Char {
+	return LangueSwitch(charMap, lang)
+}
+
 var charMap = map[rune]Char{
 	// Lowercase letters
 	'a': {0, 4}, 'b': {0, 5}, 'c': {0, 6}, 'd': {0, 7}, 'e': {0, 8},

@@ -43,21 +43,22 @@ export const Absolute = () => {
   const VELOCITY_THRESHOLD = 0.3;
 
   useEffect(() => {
-    const screen = document.getElementById('screen') as HTMLVideoElement;
+    const screen = document.getElementById('screen') as HTMLVideoElement | null;
     if (!screen) return;
+    const target = screen;
 
-    screen.addEventListener('mousedown', handleMouseDown);
-    screen.addEventListener('mouseup', handleMouseUp);
-    screen.addEventListener('mousemove', handleMouseMove);
-    screen.addEventListener('wheel', handleWheel);
-    screen.addEventListener('click', disableEvent);
-    screen.addEventListener('contextmenu', disableEvent);
+    target.addEventListener('mousedown', handleMouseDown);
+    target.addEventListener('mouseup', handleMouseUp);
+    target.addEventListener('mousemove', handleMouseMove);
+    target.addEventListener('wheel', handleWheel);
+    target.addEventListener('click', disableEvent);
+    target.addEventListener('contextmenu', disableEvent);
 
     if (isBigScreen) {
-      screen.addEventListener('touchstart', handleTouchStart);
-      screen.addEventListener('touchmove', handleTouchMove);
-      screen.addEventListener('touchend', handleTouchEnd);
-      screen.addEventListener('touchcancel', handleTouchCancel);
+      target.addEventListener('touchstart', handleTouchStart);
+      target.addEventListener('touchmove', handleTouchMove);
+      target.addEventListener('touchend', handleTouchEnd);
+      target.addEventListener('touchcancel', handleTouchCancel);
     }
 
     // Mouse down event
@@ -257,15 +258,16 @@ export const Absolute = () => {
     }
 
     function getCorrectedCoords(clientX: number, clientY: number) {
-      const rect = screen.getBoundingClientRect();
+      const rect = target.getBoundingClientRect();
 
-      if (!screen.videoWidth || !screen.videoHeight) {
+      const mediaSize = getMediaSize(target);
+      if (!mediaSize) {
         const x = (clientX - rect.left) / rect.width;
         const y = (clientY - rect.top) / rect.height;
         return { x, y };
       }
 
-      const videoRatio = screen.videoWidth / screen.videoHeight;
+      const mediaRatio = mediaSize.width / mediaSize.height;
       const elementRatio = rect.width / rect.height;
 
       let renderedWidth = rect.width;
@@ -273,11 +275,11 @@ export const Absolute = () => {
       let offsetX = 0;
       let offsetY = 0;
 
-      if (videoRatio > elementRatio) {
-        renderedHeight = rect.width / videoRatio;
+      if (mediaRatio > elementRatio) {
+        renderedHeight = rect.width / mediaRatio;
         offsetY = (rect.height - renderedHeight) / 2;
       } else {
-        renderedWidth = rect.height * videoRatio;
+        renderedWidth = rect.height * mediaRatio;
         offsetX = (rect.width - renderedWidth) / 2;
       }
 
@@ -288,16 +290,16 @@ export const Absolute = () => {
     }
 
     return () => {
-      screen.removeEventListener('mousemove', handleMouseMove);
-      screen.removeEventListener('mousedown', handleMouseDown);
-      screen.removeEventListener('mouseup', handleMouseUp);
-      screen.removeEventListener('wheel', handleWheel);
-      screen.removeEventListener('click', disableEvent);
-      screen.removeEventListener('contextmenu', disableEvent);
-      screen.removeEventListener('touchstart', handleTouchStart);
-      screen.removeEventListener('touchmove', handleTouchMove);
-      screen.removeEventListener('touchend', handleTouchEnd);
-      screen.removeEventListener('touchcancel', handleTouchCancel);
+      target.removeEventListener('mousemove', handleMouseMove);
+      target.removeEventListener('mousedown', handleMouseDown);
+      target.removeEventListener('mouseup', handleMouseUp);
+      target.removeEventListener('wheel', handleWheel);
+      target.removeEventListener('click', disableEvent);
+      target.removeEventListener('contextmenu', disableEvent);
+      target.removeEventListener('touchstart', handleTouchStart);
+      target.removeEventListener('touchmove', handleTouchMove);
+      target.removeEventListener('touchend', handleTouchEnd);
+      target.removeEventListener('touchcancel', handleTouchCancel);
 
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
@@ -347,3 +349,19 @@ export const Absolute = () => {
 
   return <></>;
 };
+
+function getMediaSize(screen: Element) {
+  if (screen instanceof HTMLVideoElement && screen.videoWidth > 0 && screen.videoHeight > 0) {
+    return { width: screen.videoWidth, height: screen.videoHeight };
+  }
+
+  if (screen instanceof HTMLImageElement && screen.naturalWidth > 0 && screen.naturalHeight > 0) {
+    return { width: screen.naturalWidth, height: screen.naturalHeight };
+  }
+
+  if (screen instanceof HTMLCanvasElement && screen.width > 0 && screen.height > 0) {
+    return { width: screen.width, height: screen.height };
+  }
+
+  return null;
+}

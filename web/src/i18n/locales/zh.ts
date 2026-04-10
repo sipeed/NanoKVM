@@ -52,7 +52,7 @@ const zh = {
         authDescription: '请输入 AP 密码以继续',
         authFailed: '密码错误',
         passPlaceholder: 'AP 密码',
-        verifyBtn: '验证',
+        verifyBtn: '验证'
       }
     },
     screen: {
@@ -412,6 +412,126 @@ const zh = {
         logoutDesc: '确定要退出吗？',
         confirm: '确定',
         cancel: '取消'
+      }
+    },
+    picoclaw: {
+      title: 'PicoClaw 助手',
+      empty: '打开面板并发送任务后，PicoClaw 会开始工作。',
+      inputPlaceholder: '描述你希望 PicoClaw 执行的操作',
+      newConversation: '新对话',
+      processing: '正在处理中...',
+      agent: {
+        defaultTitle: '通用助手',
+        defaultDescription: '适合普通问答、搜索和工作区辅助。',
+        kvmTitle: '远程控制',
+        kvmDescription: '通过 NanoKVM 操作下游远程主机。',
+        switched: '角色已切换',
+        switchFailed: '切换角色失败'
+      },
+      send: '发送',
+      cancel: '取消',
+      status: {
+        connecting: '正在连接 Gateway...',
+        connected: 'PicoClaw 会话已连接',
+        disconnected: 'PicoClaw 会话已关闭',
+        stopped: '已发送停止请求',
+        runtimeStarted: 'PicoClaw 运行时已启动',
+        runtimeStartFailed: '启动 PicoClaw 运行时失败',
+        runtimeStopped: 'PicoClaw 运行时已停止',
+        runtimeStopFailed: '停止 PicoClaw 运行时失败'
+      },
+      connection: {
+        runtime: {
+          checking: '检查中',
+          ready: '运行时已就绪',
+          stopped: '运行时未启动',
+          unavailable: '运行时不可用',
+          configError: '配置错误'
+        },
+        transport: {
+          connecting: '连接中',
+          connected: '已连接'
+        },
+        run: {
+          idle: '空闲',
+          busy: '执行中'
+        }
+      },
+      message: {
+        toolAction: '动作',
+        observation: '观察',
+        screenshot: '截图'
+      },
+      overlay: {
+        locked: 'PicoClaw 正在控制设备，手动输入已暂停。'
+      },
+      install: {
+        install: '安装 PicoClaw',
+        installing: '正在安装 PicoClaw',
+        success: 'PicoClaw 安装成功',
+        failed: 'PicoClaw 安装失败',
+        uninstalling: '正在卸载运行时...',
+        uninstalled: '运行时卸载成功。',
+        uninstallFailed: '卸载失败。',
+        requiredTitle: '未安装 PicoClaw',
+        requiredDescription: '在启动 PicoClaw 运行时之前，需要先下载安装 PicoClaw。',
+        progressDescription: '正在下载并安装 PicoClaw。',
+        stages: {
+          preparing: '准备中',
+          downloading: '下载中',
+          extracting: '解压中',
+          installing: '安装中',
+          installed: '已安装',
+          install_timeout: '已超时',
+          install_failed: '失败'
+        }
+      },
+      model: {
+        requiredTitle: '需要配置模型',
+        requiredDescription: '在使用 PicoClaw 聊天之前，请先配置 PicoClaw 模型。',
+        docsTitle: '配置指南',
+        docsDesc: '支持的模型与协议',
+        menuLabel: '配置模型',
+        modelIdentifier: '模型标识',
+        modelIdentifierPlaceholder: 'openai/gpt-5.4',
+        apiBase: 'API Base URL',
+        apiBasePlaceholder: 'https://api.example.com/v1',
+        apiKey: 'API Key',
+        apiKeyPlaceholder: '请输入模型 API Key',
+        save: '保存模型配置',
+        saving: '正在保存模型配置',
+        saved: '模型配置已保存',
+        saveFailed: '保存模型配置失败',
+        invalid: '模型标识、API Base URL 和 API Key 不能为空'
+      },
+      uninstall: {
+        menuLabel: '卸载',
+        confirmTitle: '卸载 PicoClaw',
+        confirmContent: '确定要卸载 PicoClaw 吗？这会删除可执行文件和所有配置文件。',
+        confirmOk: '卸载',
+        confirmCancel: '取消'
+      },
+      history: {
+        title: '历史会话',
+        loading: '正在加载历史会话...',
+        emptyTitle: '还没有历史会话',
+        emptyDescription: '之前的 PicoClaw 会话会显示在这里。',
+        loadFailed: '加载会话历史失败',
+        deleteFailed: '删除会话失败',
+        deleteConfirmTitle: '删除会话',
+        deleteConfirmContent: '确定要删除“{{title}}”吗？',
+        deleteConfirmOk: '删除',
+        deleteConfirmCancel: '取消',
+        messageCount_one: '{{count}} 条消息',
+        messageCount_other: '{{count}} 条消息'
+      },
+      config: {
+        startRuntime: '启动 PicoClaw',
+        stopRuntime: '停止 PicoClaw'
+      },
+      start: {
+        title: '启动 PicoClaw',
+        description: '启动运行时后即可开始使用 PicoClaw 助手。'
       }
     },
     error: {

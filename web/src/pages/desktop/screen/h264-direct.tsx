@@ -19,11 +19,11 @@ export const H264Direct = () => {
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    const scale = storage.getVideoScale()
+    const scale = storage.getVideoScale();
     if (scale) {
-      setVideoScale(scale)
+      setVideoScale(scale);
     }
-  }, [setVideoScale])
+  }, [setVideoScale]);
 
   useEffect(() => {
     if (!window.VideoDecoder) {
@@ -69,17 +69,17 @@ export const H264Direct = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-screen items-start justify-center xl:items-center">
+    <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
       <canvas
         id="screen"
         ref={canvasRef}
-        className={clsx('block min-h-[480px] min-w-[640px] select-none', mouseStyle)}
+        className={clsx('block select-none', mouseStyle)}
         style={{
           transform: `scale(${videoScale})`,
           transformOrigin: 'center',
           ...(resolution?.width
             ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-            : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' }),
+            : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
         }}
       ></canvas>
     </div>

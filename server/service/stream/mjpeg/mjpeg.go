@@ -8,6 +8,13 @@ import (
 
 var streamer = NewStreamer()
 
+type LatestFrame struct {
+	Data       []byte
+	Width      uint16
+	Height     uint16
+	CapturedAt time.Time
+}
+
 func Connect(c *gin.Context) {
 	c.Header("Content-Type", "multipart/x-mixed-replace; boundary=frame")
 	c.Header("Cache-Control", "no-cache")
@@ -19,4 +26,16 @@ func Connect(c *gin.Context) {
 	defer streamer.RemoveClient(c)
 
 	<-c.Request.Context().Done()
+}
+
+func GetLatestFrame() (LatestFrame, bool) {
+	return streamer.getLatestFrame()
+}
+
+func EnableLatestFrameCache() {
+	streamer.enableLatestFrameCache()
+}
+
+func DisableLatestFrameCache() {
+	streamer.disableLatestFrameCache()
 }

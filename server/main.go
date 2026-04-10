@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -74,38 +72,24 @@ func run() {
 
 	if conf.Proto == "https" {
 		go func() {
-			r.Use(middleware.Tls())
 			err := r.RunTLS(httpsAddr, conf.Cert.Crt, conf.Cert.Key)
 			if err != nil {
 				panic("start https server failed")
 			}
 		}()
 
-		runRedirect(httpAddr, httpsAddr)
+		if err := middleware.ListenAndServeLoopbackHTTPRedirect(
+			httpAddr,
+			httpsAddr,
+			r,
+			router.PicoclawLoopbackHTTPAllowedPaths()...,
+		); err != nil {
+			panic("start http server failed")
+		}
 	} else {
 		if err := r.Run(httpAddr); err != nil {
 			panic("start http server failed")
 		}
-	}
-}
-
-func runRedirect(httpPort string, httpsPort string) {
-	err := http.ListenAndServe(httpPort, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		host := req.Host
-		if strings.Contains(host, httpPort) {
-			host = strings.Split(host, httpPort)[0]
-		}
-
-		targetURL := "https://" + host + req.URL.String()
-		if httpsPort != ":443" {
-			targetURL = "https://" + host + httpsPort + req.URL.String()
-		}
-
-		http.Redirect(w, req, targetURL, http.StatusTemporaryRedirect)
-	}))
-
-	if err != nil {
-		panic("start http server failed")
 	}
 }
 

@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
+import { Robot } from '@/components/icons/robot.tsx';
 
 export const MenuIcons = () => {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ export const MenuIcons = () => {
     { key: 'script', icon: <FileJsonIcon size={16} /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
     { key: 'wol', icon: <NetworkIcon size={16} /> },
+    { key: 'picoclaw', icon: <Robot size={16} /> },
     { key: 'power', icon: <PowerIcon size={16} /> },
     { key: 'fullscreen', icon: <MaximizeIcon size={16} />, label: 'fullscreen.toggle' },
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }

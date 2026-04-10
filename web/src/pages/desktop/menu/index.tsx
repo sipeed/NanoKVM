@@ -15,6 +15,7 @@ import { Image } from './image';
 import { Keyboard } from './keyboard';
 import { Mouse } from './mouse';
 import { Collapse, Expand } from './operations';
+import { Picoclaw } from './picoclaw';
 import { Power } from './power';
 import { Screen } from './screen';
 import { Script } from './script';
@@ -99,6 +100,13 @@ export const Menu = () => {
 
             {['image', 'download', 'script', 'terminal', 'wol'].some(isEnabled) && (
               <Divider type="vertical" />
+            )}
+
+            {isEnabled('picoclaw') && (
+              <>
+                <Picoclaw />
+                <Divider type="vertical" />
+              </>
             )}
 
             {isEnabled('power') && (

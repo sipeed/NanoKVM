@@ -6,6 +6,7 @@ import { KeyboardReport } from '@/lib/keyboard.ts';
 import { isModifier } from '@/lib/keymap';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { picoclawTakeoverStateAtom } from '@/jotai/picoclaw.ts';
 
 import { Recorder } from './recorder.tsx';
 import { useAltGr } from './useAltGr.ts';
@@ -16,6 +17,7 @@ export const Keyboard = () => {
   const os = getOperatingSystem();
 
   const isKeyboardEnabled = useAtomValue(isKeyboardEnableAtom);
+  const picoclawTakeoverState = useAtomValue(picoclawTakeoverStateAtom);
 
   const keyboardRef = useRef(new KeyboardReport());
   const pressedKeys = useRef(new Set<string>());
@@ -37,6 +39,17 @@ export const Keyboard = () => {
   const altGr = useAltGr(os, pressedKeys, sendKeyEvent);
   const altGrRef = useRef(altGr);
   altGrRef.current = altGr;
+
+  useEffect(() => {
+    if (!picoclawTakeoverState.active) {
+      return;
+    }
+
+    pressedKeys.current.clear();
+    leaderKeyRef.current.reset();
+    altGrRef.current.reset();
+    sendReport(keyboardRef.current.reset());
+  }, [picoclawTakeoverState.active]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
