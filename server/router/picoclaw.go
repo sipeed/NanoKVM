@@ -15,8 +15,6 @@ func picoclawRouter(r *gin.Engine) {
 	api.GET("/screenshot", service.Screenshot)
 	api.POST("/actions", service.Actions)
 	api.POST("/mcp", service.MCPHandler)
-	api.GET("/config", service.GetConfig)
-	api.POST("/config", service.UpdateConfig)
 	api.POST("/model/config", service.UpdateModelConfig)
 	api.POST("/agent/profile", service.UpdateAgentProfile)
 	api.POST("/load-image", service.LoadImage)

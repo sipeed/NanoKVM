@@ -72,7 +72,6 @@ export type PicoclawTakeoverState = {
 };
 
 export type PicoclawConfigState = {
-  gatewayUrl: string;
   maxSteps: number;
   maxRuntimeMs: number;
 };
@@ -87,7 +86,6 @@ export const picoclawOverlayAtom = atom<PicoclawOverlayState>({
   message: ''
 });
 export const picoclawConfigAtom = atom<PicoclawConfigState>({
-  gatewayUrl: '',
   maxSteps: getPicoclawMaxSteps(),
   maxRuntimeMs: getPicoclawMaxRuntimeMs()
 });

@@ -49,28 +49,6 @@ type Config struct {
 	Token            string `json:"token,omitempty"`
 }
 
-type ConfigResponse struct {
-	GatewayURL       string `json:"gateway_url"`
-	ConnectTimeoutMs int    `json:"connect_timeout_ms"`
-	ReadTimeoutMs    int    `json:"read_timeout_ms"`
-	WriteTimeoutMs   int    `json:"write_timeout_ms"`
-	PingIntervalMs   int    `json:"ping_interval_ms"`
-	MaxMessageBytes  int    `json:"max_message_bytes"`
-	AllowTokenQuery  bool   `json:"allow_token_query"`
-	TokenConfigured  bool   `json:"token_configured"`
-}
-
-type ConfigUpdate struct {
-	GatewayURL       *string `json:"gateway_url"`
-	ConnectTimeoutMs *int    `json:"connect_timeout_ms"`
-	ReadTimeoutMs    *int    `json:"read_timeout_ms"`
-	WriteTimeoutMs   *int    `json:"write_timeout_ms"`
-	PingIntervalMs   *int    `json:"ping_interval_ms"`
-	MaxMessageBytes  *int    `json:"max_message_bytes"`
-	AllowTokenQuery  *bool   `json:"allow_token_query"`
-	Token            *string `json:"token"`
-}
-
 type RuntimeStatus struct {
 	Ready           bool      `json:"ready"`
 	Installed       bool      `json:"installed"`
@@ -208,10 +186,10 @@ const (
 )
 
 const (
-	CloseCodePicoclawLockHeld         = 4001
+	CloseCodePicoclawLockHeld   = 4001
 	CloseCodeRuntimeUnavailable = 4002
 	CloseCodeAuthFailed         = 4003
-	CloseCodePicoclawTakenOver        = 4004
+	CloseCodePicoclawTakenOver  = 4004
 	CloseCodeUpstreamClosed     = 4005
 )
 

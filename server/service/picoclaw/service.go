@@ -2,7 +2,6 @@ package picoclaw
 
 import (
 	"net"
-	"net/http"
 	"net/url"
 	"os"
 	"sync"
@@ -67,55 +66,6 @@ func getRuntimeStore() *RuntimeStore {
 	return runtimeStore
 }
 
-func (s *Service) GetConfig(c *gin.Context) {
-	s.startRuntimeProbeLoop()
-	_ = s.syncConfigFromPicoclaw()
-	cfg := s.config.Get()
-	writeSuccess(c, cfg.toResponse())
-}
-
-func (s *Service) UpdateConfig(c *gin.Context) {
-	var req ConfigUpdate
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code":    CodeInvalidAction,
-			"message": "invalid config payload",
-		})
-		return
-	}
-
-	cfg := s.config.Get()
-	if req.GatewayURL != nil {
-		cfg.GatewayURL = *req.GatewayURL
-	}
-	if req.ConnectTimeoutMs != nil && *req.ConnectTimeoutMs > 0 {
-		cfg.ConnectTimeoutMs = *req.ConnectTimeoutMs
-	}
-	if req.ReadTimeoutMs != nil && *req.ReadTimeoutMs > 0 {
-		cfg.ReadTimeoutMs = *req.ReadTimeoutMs
-	}
-	if req.WriteTimeoutMs != nil && *req.WriteTimeoutMs > 0 {
-		cfg.WriteTimeoutMs = *req.WriteTimeoutMs
-	}
-	if req.PingIntervalMs != nil && *req.PingIntervalMs > 0 {
-		cfg.PingIntervalMs = *req.PingIntervalMs
-	}
-	if req.MaxMessageBytes != nil && *req.MaxMessageBytes > 0 {
-		cfg.MaxMessageBytes = *req.MaxMessageBytes
-	}
-	if req.AllowTokenQuery != nil {
-		cfg.AllowTokenQuery = *req.AllowTokenQuery
-	}
-	if req.Token != nil {
-		cfg.Token = *req.Token
-	}
-
-	s.config.Set(cfg)
-	_ = s.syncConfigFromPicoclaw()
-	_ = s.ensureRuntimeReady()
-	writeSuccess(c, s.config.Get().toResponse())
-}
-
 func (s *Service) GetRuntimeStatus(c *gin.Context) {
 	s.startRuntimeProbeLoop()
 	status := s.runtime.Get()
@@ -152,19 +102,6 @@ func (s *Service) requireSessionID(c *gin.Context) (string, *PicoclawError) {
 	}
 
 	return sessionID, nil
-}
-
-func (c Config) toResponse() ConfigResponse {
-	return ConfigResponse{
-		GatewayURL:       c.GatewayURL,
-		ConnectTimeoutMs: c.ConnectTimeoutMs,
-		ReadTimeoutMs:    c.ReadTimeoutMs,
-		WriteTimeoutMs:   c.WriteTimeoutMs,
-		PingIntervalMs:   c.PingIntervalMs,
-		MaxMessageBytes:  c.MaxMessageBytes,
-		AllowTokenQuery:  c.AllowTokenQuery,
-		TokenConfigured:  c.Token != "",
-	}
 }
 
 func (s *ConfigStore) Get() Config {

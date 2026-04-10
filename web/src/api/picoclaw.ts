@@ -7,10 +7,6 @@ import {
 
 const sessionIDHeader = 'X-PicoClaw-Session-ID';
 
-type ConfigRequest = {
-  gateway_url?: string;
-};
-
 type ModelConfigRequest = {
   model: string;
   api_base: string;
@@ -42,14 +38,6 @@ export type PicoclawSessionDetail = {
   created: string;
   updated: string;
 };
-
-export function getPicoclawConfig() {
-  return http.get('/api/picoclaw/config');
-}
-
-export function setPicoclawConfig(data: ConfigRequest) {
-  return http.post('/api/picoclaw/config', data);
-}
 
 export function setPicoclawModelConfig(data: ModelConfigRequest) {
   return http.post('/api/picoclaw/model/config', data);
