@@ -11,6 +11,7 @@ type MessageProps = {
 };
 
 const hiddenAssistantMessagePrefix = '🔧 `message`';
+const nullToolFeedbackPattern = /^🔧\s*`[^`]+`\s*```(?:[\w-]+)?\s*null\s*```$/s;
 
 function extractDisplayText(value: unknown): string {
   if (typeof value === 'string') {
@@ -74,6 +75,17 @@ function normalizeLiteralEmptyText(value: string): string {
   }
 
   return trimmed;
+}
+
+function shouldHideAssistantMessage(value?: string): boolean {
+  const normalized = normalizeLiteralEmptyText(value || '');
+  if (!normalized) {
+    return false;
+  }
+
+  return (
+    normalized.startsWith(hiddenAssistantMessagePrefix) || nullToolFeedbackPattern.test(normalized)
+  );
 }
 
 export const Message = ({ message }: MessageProps) => {
@@ -141,7 +153,7 @@ export const Message = ({ message }: MessageProps) => {
     );
   }
 
-  if (message.text?.startsWith(hiddenAssistantMessagePrefix)) {
+  if (message.kind === 'assistant' && shouldHideAssistantMessage(message.text)) {
     return null;
   }
 

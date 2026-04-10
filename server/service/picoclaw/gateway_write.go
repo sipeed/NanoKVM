@@ -27,12 +27,30 @@ func newPicoGatewayMessage(sessionID string, payload map[string]any) picoGateway
 	}
 }
 
+func newPicoGatewayObservationMessage(sessionID string, payload map[string]any) picoGatewayMessage {
+	return picoGatewayMessage{
+		Type:      "observation",
+		ID:        uuid.NewString(),
+		SessionID: sessionID,
+		Timestamp: time.Now().UnixMilli(),
+		Payload:   payload,
+	}
+}
+
 func (session *GatewaySession) writeUpstreamJSON(cfg Config, value any) error {
 	raw, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
 	return session.writeUpstreamMessage(cfg, websocket.TextMessage, raw)
+}
+
+func (session *GatewaySession) writeDownstreamJSON(cfg Config, value any) error {
+	raw, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return session.writeDownstreamMessage(cfg, websocket.TextMessage, raw)
 }
 
 func (session *GatewaySession) writeUpstreamMessage(cfg Config, messageType int, data []byte) error {

@@ -26,16 +26,13 @@ var (
 const runtimeStatusRefreshInterval = 2 * time.Second
 
 func NewService() *Service {
-	service := &Service{
+	return &Service{
 		vision:  common.GetKvmVision(),
 		hid:     hid.GetHid(),
 		config:  getConfigStore(),
 		lock:    GetSessionLock(),
 		runtime: getRuntimeStore(),
 	}
-
-	_ = cleanupInactiveSharedImageSessionDirs("")
-	return service
 }
 
 func getConfigStore() *ConfigStore {

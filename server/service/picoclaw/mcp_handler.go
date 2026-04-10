@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // JSON-RPC 2.0 types for MCP HTTP transport
@@ -162,7 +164,7 @@ func (s *Service) mcpToolsCall(req jsonRPCRequest, c *gin.Context) jsonRPCRespon
 
 	switch params.Name {
 	case "kvm_screenshot":
-		return s.mcpScreenshot(req, params.Arguments)
+		return s.mcpScreenshot(req, params.Arguments, c)
 	case "kvm_actions":
 		return s.mcpActions(req, params.Arguments, c)
 	default:
@@ -174,7 +176,7 @@ func (s *Service) mcpToolsCall(req jsonRPCRequest, c *gin.Context) jsonRPCRespon
 	}
 }
 
-func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage) jsonRPCResponse {
+func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage, c *gin.Context) jsonRPCResponse {
 	var params struct {
 		Width   uint16 `json:"width"`
 		Height  uint16 `json:"height"`
@@ -197,6 +199,8 @@ func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage) jsonRP
 	}
 
 	b64 := base64.StdEncoding.EncodeToString(data)
+	s.publishMCPObservation(c, "screenshot captured", b64)
+
 	return jsonRPCResponse{
 		JSONRPC: "2.0",
 		ID:      req.ID,
@@ -219,6 +223,26 @@ func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage) jsonRP
 				"capture_height": meta.CaptureHeight,
 			},
 		},
+	}
+}
+
+func (s *Service) publishMCPObservation(c *gin.Context, text string, imageBase64 string) {
+	if strings.TrimSpace(imageBase64) == "" {
+		return
+	}
+
+	sessionID, session, err := s.requireActiveGatewaySession(c)
+	if err != nil || session == nil || session.Downstream == nil {
+		return
+	}
+
+	message := newPicoGatewayObservationMessage(sessionID, map[string]any{
+		"content":      text,
+		"image_base64": imageBase64,
+		"mime_type":    "image/jpeg",
+	})
+	if writeErr := session.writeDownstreamJSON(s.config.Get(), message); writeErr != nil {
+		log.Warnf("failed to deliver picoclaw observation message: %v", writeErr)
 	}
 }
 

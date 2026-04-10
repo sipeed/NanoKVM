@@ -92,27 +92,3 @@ func (m *SessionManager) Remove(sessionID string) {
 	defer m.mu.Unlock()
 	delete(m.sessions, sessionID)
 }
-
-func (m *SessionManager) ActiveSessionDirNames(currentSessionID string) map[string]struct{} {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
-
-	active := make(map[string]struct{}, len(m.sessions)+1)
-	if currentSessionID != "" {
-		active[sanitizeSharedImageSessionDir(currentSessionID)] = struct{}{}
-	}
-
-	for sessionID, session := range m.sessions {
-		if session == nil {
-			continue
-		}
-		switch session.State {
-		case SessionStateClosing, SessionStateClosed:
-			continue
-		default:
-			active[sanitizeSharedImageSessionDir(sessionID)] = struct{}{}
-		}
-	}
-
-	return active
-}

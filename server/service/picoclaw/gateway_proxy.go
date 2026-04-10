@@ -184,6 +184,8 @@ func (s *Service) closeGatewaySession(session *GatewaySession, closeCode int, re
 	}
 
 	session.closeOnce.Do(func() {
+		hadDownstream := session.Downstream != nil
+
 		mjpeg.DisableLatestFrameCache()
 		GetSessionManager().SetState(session.SessionID, SessionStateClosing)
 
@@ -194,6 +196,10 @@ func (s *Service) closeGatewaySession(session *GatewaySession, closeCode int, re
 		if session.Downstream != nil {
 			writeGatewayClose(session.Downstream, closeCode, reason)
 			_ = session.Downstream.Close()
+		}
+
+		if hadDownstream {
+			cleanupPicoclawMediaTempDir()
 		}
 
 		ReleaseSession(session.SessionID)
