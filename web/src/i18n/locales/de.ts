@@ -78,6 +78,7 @@ const de = {
       ctrlaltdel: 'Ctrl+Alt+Del',
       dropdownEnglish: 'Englisch',
       dropdownGerman: 'Deutsch',
+      dropdownFrench: 'Französisch',
       dropdownRussian: 'Russisch'
     },
     mouse: {
