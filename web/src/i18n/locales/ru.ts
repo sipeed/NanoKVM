@@ -76,6 +76,7 @@ const ru = {
       ctrlaltdel: 'Ctrl+Alt+Del',
       dropdownEnglish: 'Английский',
       dropdownGerman: 'Немецкий',
+      dropdownFrench: 'Французский',
       dropdownRussian: 'Русский'
     },
     mouse: {
