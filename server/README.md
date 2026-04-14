@@ -28,6 +28,7 @@ The configuration file path is `/etc/kvm/server.yaml`.
 ```yaml
 # Network Settings
 proto: http            # Access protocol. Can be changed to `https` only when certificates are configured. Default is `http`
+host: 0.0.0.0           # The listening address for the HTTP/HTTPS service.
 port:
     http: 80           # The listening port for the HTTP service. Default is `80`
     https: 443         # The listening port for the HTTPS service (effective when HTTPS is enabled). Default is `443`
