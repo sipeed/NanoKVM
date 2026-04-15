@@ -26,6 +26,7 @@ server
 ```yaml
 # 网络设置
 proto: http            # 访问协议，默认为 `http`，仅当配置了证书时支持改为 `https`
+host: ""
 port:
     http: 80           # HTTP 服务的监听端口，默认为 `80`
     https: 443         # HTTPS 服务的监听端口（启用 https 协议时生效），默认为 `443`

@@ -2,6 +2,7 @@ package config
 
 type Config struct {
 	Proto          string   `yaml:"proto"`
+	Host           string   `yaml:"host"`
 	Port           Port     `yaml:"port"`
 	Cert           Cert     `yaml:"cert"`
 	Logger         Logger   `yaml:"logger"`
