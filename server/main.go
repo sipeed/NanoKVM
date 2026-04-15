@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"strconv"
@@ -68,13 +69,13 @@ func run() {
 
 	router.Init(r)
 
-	httpAddr := fmt.Sprintf("%s:%d", conf.Host, conf.Port.Http)
+	httpAddr := listenAddr(conf.Host, strconv.Itoa(conf.Port.Http))
 
 	if conf.Proto == "https" {
-		httpsAddr := fmt.Sprintf("%s:%d", conf.Host, conf.Port.Https)
+		httpsPortStr := strconv.Itoa(conf.Port.Https)
 
 		go func() {
-			err := r.RunTLS(httpsAddr, conf.Cert.Crt, conf.Cert.Key)
+			err := r.RunTLS(listenAddr(conf.Host, httpsPortStr), conf.Cert.Crt, conf.Cert.Key)
 			if err != nil {
 				panic("start https server failed")
 			}
@@ -82,7 +83,7 @@ func run() {
 
 		if err := middleware.ListenAndServeLoopbackHTTPRedirect(
 			httpAddr,
-			strconv.Itoa(conf.Port.Https),
+			httpsPortStr,
 			r,
 			router.PicoclawLoopbackHTTPAllowedPaths()...,
 		); err != nil {
@@ -97,4 +98,11 @@ func run() {
 
 func dispose() {
 	common.GetKvmVision().Close()
+}
+
+func listenAddr(host string, port string) string {
+	if host == "" {
+		return fmt.Sprintf(":%s", port)
+	}
+	return net.JoinHostPort(host, port)
 }

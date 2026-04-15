@@ -38,8 +38,12 @@ func ListenAndServeLoopbackHTTPRedirect(
 		if h, _, err := net.SplitHostPort(host); err == nil {
 			host = h
 		}
+
+		if strings.Contains(host, ":") {
+			host = "[" + host + "]"
+		}
 		if httpsPort != "443" {
-			host = net.JoinHostPort(host, httpsPort)
+			host += ":" + httpsPort
 		}
 
 		http.Redirect(w, req, "https://"+host+req.URL.RequestURI(), http.StatusTemporaryRedirect)
