@@ -41,3 +41,9 @@ func server(r *gin.Engine) {
 	downloadRouter(r)
 	extensionsRouter(r)
 }
+
+func LoopbackHTTPAllowedPaths() []string {
+	paths := PicoclawLoopbackHTTPAllowedPaths()
+	paths = append(paths, HIDLoopbackHTTPAllowedPaths()...)
+	return paths
+}

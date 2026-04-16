@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
 
+const DEFAULT_POWER_LONG_DURATION_SECONDS = 12;
+
 type PowerLongProps = {
   showConfirm: boolean;
   isLoading: boolean;
@@ -14,7 +16,7 @@ type PowerLongProps = {
 export const PowerLong = ({ showConfirm, isLoading, setIsLoading }: PowerLongProps) => {
   const { t } = useTranslation();
 
-  const [duration, setDuration] = useState(8);
+  const [duration, setDuration] = useState(DEFAULT_POWER_LONG_DURATION_SECONDS);
 
   function power() {
     if (isLoading) return;
@@ -55,7 +57,7 @@ export const PowerLong = ({ showConfirm, isLoading, setIsLoading }: PowerLongPro
 
       <div className="px-3">
         <Slider
-          defaultValue={8}
+          defaultValue={DEFAULT_POWER_LONG_DURATION_SECONDS}
           min={1}
           max={30}
           tooltip={{ placement: 'bottom' }}

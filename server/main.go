@@ -28,6 +28,10 @@ func main() {
 }
 
 func initialize() {
+	if err := config.EnsurePicoclawInternalToken(); err != nil {
+		log.Fatalf("failed to initialize picoclaw internal token: %v", err)
+	}
+
 	logger.Init()
 
 	// init screen parameters
@@ -82,7 +86,7 @@ func run() {
 			httpAddr,
 			httpsAddr,
 			r,
-			router.PicoclawLoopbackHTTPAllowedPaths()...,
+			router.LoopbackHTTPAllowedPaths()...,
 		); err != nil {
 			panic("start http server failed")
 		}

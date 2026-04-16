@@ -91,6 +91,30 @@ func (s *Service) SetHidMode(c *gin.Context) {
 func (s *Service) ResetHid(c *gin.Context) {
 	var rsp proto.Response
 
+	if err := ResetUSBPHY(); err != nil {
+		log.Errorf("failed to reset hid: %v", err)
+		rsp.ErrRsp(c, -1, "failed to reset hid")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("reset hid success")
+}
+
+func (s *Service) RecoverUSB(c *gin.Context) {
+	var rsp proto.Response
+
+	if err := ResetUSBPHY(); err != nil {
+		log.Errorf("failed to recover usb: %v", err)
+		rsp.ErrRsp(c, -1, "failed to recover usb")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("recover usb success")
+}
+
+func ResetUSBPHY() error {
 	h := GetHid()
 	h.Lock()
 	h.CloseNoLock()
@@ -102,13 +126,10 @@ func (s *Service) ResetHid(c *gin.Context) {
 	command := fmt.Sprintf("%s restart_phy", USBDevScript)
 	err := exec.Command("sh", "-c", command).Run()
 	if err != nil {
-		log.Errorf("failed to reset hid: %v", err)
-		rsp.ErrRsp(c, -1, "failed to reset hid")
-		return
+		return err
 	}
 
-	rsp.OkRsp(c)
-	log.Debugf("reset hid success")
+	return nil
 }
 
 func copyModeFile(srcScript string) error {

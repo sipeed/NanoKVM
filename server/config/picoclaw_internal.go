@@ -25,9 +25,13 @@ func GetPicoclawInternalToken() (string, error) {
 		return picoclawInternalToken.value, nil
 	}
 
-	if token, err := readPicoclawInternalToken(); err == nil && token != "" {
-		picoclawInternalToken.value = token
-		return token, nil
+	if token, err := readPicoclawInternalToken(); err == nil {
+		if token != "" {
+			picoclawInternalToken.value = token
+			return token, nil
+		}
+	} else if !os.IsNotExist(err) {
+		return "", err
 	}
 
 	token := generateRandomSecretKey()
@@ -40,6 +44,11 @@ func GetPicoclawInternalToken() (string, error) {
 
 	picoclawInternalToken.value = token
 	return token, nil
+}
+
+func EnsurePicoclawInternalToken() error {
+	_, err := GetPicoclawInternalToken()
+	return err
 }
 
 func readPicoclawInternalToken() (string, error) {

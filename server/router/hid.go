@@ -7,9 +7,16 @@ import (
 	"NanoKVM-Server/service/hid"
 )
 
+const internalUSBRecoverPath = "/api/internal/usb/recover"
+
+func HIDLoopbackHTTPAllowedPaths() []string {
+	return []string{internalUSBRecoverPath}
+}
+
 func hidRouter(r *gin.Engine) {
 	service := hid.NewService()
 	api := r.Group("/api").Use(middleware.CheckToken())
+	localAPI := r.Group("/api/internal").Use(middleware.CheckLoopbackInternalToken())
 
 	api.POST("/hid/paste", service.Paste) // paste
 
@@ -23,4 +30,6 @@ func hidRouter(r *gin.Engine) {
 	api.GET("/hid/mode", service.GetHidMode)  // get hid mode
 	api.POST("/hid/mode", service.SetHidMode) // set hid mode
 	api.POST("/hid/reset", service.ResetHid)  // reset hid
+
+	localAPI.POST("/usb/recover", service.RecoverUSB)
 }
