@@ -91,6 +91,7 @@ const en = {
       clipboardReadError: 'Failed to read clipboard',
       dropdownEnglish: 'English',
       dropdownGerman: 'German',
+      dropdownFrench: 'French',
       dropdownRussian: 'Russian',
       shortcut: {
         title: 'Shortcuts',

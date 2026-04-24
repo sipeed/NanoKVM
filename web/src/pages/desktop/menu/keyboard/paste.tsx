@@ -29,6 +29,7 @@ export const Paste = () => {
   const languages = [
     { value: 'en', label: t('keyboard.dropdownEnglish') },
     { value: 'de', label: t('keyboard.dropdownGerman') },
+    { value: 'fr', label: t('keyboard.dropdownFrench') },
     { value: 'ru', label: t('keyboard.dropdownRussian') }
   ];
 
@@ -132,10 +133,11 @@ export const Paste = () => {
 
   function isValidForLanguage(value: string, selectedLangue: string) {
     const isRussian = selectedLangue === 'ru';
-    
+    const isFrench = selectedLangue === 'fr';
+
     for (const ch of value) {
       const code = ch.codePointAt(0) ?? 0;
-      
+
       if (isRussian) {
         // For Russian language, allow Cyrillic letters and special characters
         // that can be typed on Russian keyboard (but not English letters)
@@ -148,6 +150,12 @@ export const Paste = () => {
         ) {
           continue;
         }
+        return false;
+      } else if (isFrench) {
+        // For French, allow ASCII and Latin-1/Extended accented characters
+        // (é è ê ë à â ù û ç î ï ô œ æ ° µ £ § ¨ etc.)
+        if (code <= 0x7F) continue;
+        if (code >= 0x00A0 && code <= 0x017E) continue;
         return false;
       } else {
         // For English/German, only allow ASCII

@@ -70,7 +70,14 @@ const fr = {
       placeholder: 'Veuillez saisir',
       submit: 'Soumettre',
       virtual: 'Clavier',
-      ctrlaltdel: 'Ctrl+Alt+Del'
+      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: 'Lire le presse-papiers',
+      clipboardPermissionDenied: "Accès au presse-papiers refusé. Veuillez autoriser l'accès dans votre navigateur.",
+      clipboardReadError: 'Échec de la lecture du presse-papiers',
+      dropdownEnglish: 'Anglais',
+      dropdownGerman: 'Allemand',
+      dropdownFrench: 'Français',
+      dropdownRussian: 'Russe'
     },
     mouse: {
       default: 'Curseur par défaut',

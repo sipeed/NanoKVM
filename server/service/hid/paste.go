@@ -83,6 +83,81 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['\u00B2'] = Char{0x40, 31} // ²
 		m['\u00B3'] = Char{0x40, 32} // ³
 
+	case "fr":
+		// French AZERTY layout
+		// Letters: a↔q swap, z↔w swap, m moved to physical ; position
+		m['a'] = Char{0, 20}  // a is at physical Q key (HID 20)
+		m['A'] = Char{2, 20}
+		m['q'] = Char{0, 4}   // q is at physical A key (HID 4)
+		m['Q'] = Char{2, 4}
+		m['z'] = Char{0, 26}  // z is at physical W key (HID 26)
+		m['Z'] = Char{2, 26}
+		m['w'] = Char{0, 29}  // w is at physical Z key (HID 29)
+		m['W'] = Char{2, 29}
+		m['m'] = Char{0, 51}  // m is at physical ; key (HID 51)
+		m['M'] = Char{2, 51}
+
+		// Numbers require Shift on AZERTY
+		m['1'] = Char{2, 30}
+		m['2'] = Char{2, 31}
+		m['3'] = Char{2, 32}
+		m['4'] = Char{2, 33}
+		m['5'] = Char{2, 34}
+		m['6'] = Char{2, 35}
+		m['7'] = Char{2, 36}
+		m['8'] = Char{2, 37}
+		m['9'] = Char{2, 38}
+		m['0'] = Char{2, 39}
+
+		// Unshifted number row → French/special characters
+		m['&'] = Char{0, 30}         // & at physical key 1
+		m['\u00E9'] = Char{0, 31}    // é at physical key 2
+		m['"'] = Char{0, 32}         // " at physical key 3
+		m['\''] = Char{0, 33}        // ' at physical key 4
+		m['('] = Char{0, 34}         // ( at physical key 5
+		m['-'] = Char{0, 35}         // - at physical key 6
+		m['\u00E8'] = Char{0, 36}    // è at physical key 7
+		m['_'] = Char{0, 37}         // _ at physical key 8
+		m['\u00E7'] = Char{0, 38}    // ç at physical key 9
+		m['\u00E0'] = Char{0, 39}    // à at physical key 0
+
+		// Physical - key (HID 45) → ) on AZERTY
+		m[')'] = Char{0, 45}         // ) at physical - key
+		m['\u00B0'] = Char{2, 45}    // ° at shift+physical - key
+
+		// Letter-row bracket/special keys
+		m['^'] = Char{0, 47}         // ^ (dead) at physical [ key (HID 47)
+		m['\u00A8'] = Char{2, 47}    // ¨ at shift+[
+		m['$'] = Char{0, 48}         // $ at physical ] key (HID 48)
+		m['\u00A3'] = Char{2, 48}    // £ at shift+]
+		m['*'] = Char{0, 49}         // * at physical \ key (HID 49)
+		m['\u00B5'] = Char{2, 49}    // µ at shift+\
+		m['\u00F9'] = Char{0, 52}    // ù at physical ' key (HID 52)
+		m['%'] = Char{2, 52}         // % at shift+'
+
+		// Bottom row remappings
+		m[','] = Char{0, 16}         // , at physical M key (HID 16)
+		m['?'] = Char{2, 16}         // ? at shift+physical M
+		m[';'] = Char{0, 54}         // ; at physical , key (HID 54)
+		m['.'] = Char{2, 54}         // . at shift+physical ,
+		m[':'] = Char{0, 55}         // : at physical . key (HID 55)
+		m['/'] = Char{2, 55}         // / at shift+physical .
+		m['!'] = Char{0, 56}         // ! at physical / key (HID 56)
+		m['\u00A7'] = Char{2, 56}    // § at shift+physical /
+
+		// AltGr combinations
+		m['~'] = Char{0x40, 31}      // AltGr+2
+		m['#'] = Char{0x40, 32}      // AltGr+3
+		m['{'] = Char{0x40, 33}      // AltGr+4
+		m['['] = Char{0x40, 34}      // AltGr+5
+		m['|'] = Char{0x40, 35}      // AltGr+6
+		m['`'] = Char{0x40, 36}      // AltGr+7
+		m['\\'] = Char{0x40, 37}     // AltGr+8
+		m[']'] = Char{0x40, 45}      // AltGr+physical -
+		m['}'] = Char{0x40, 46}      // AltGr+=
+		m['@'] = Char{0x40, 39}      // AltGr+0
+		m['\u20AC'] = Char{0x40, 8}  // € AltGr+E
+
 	}
 	return m
 }
