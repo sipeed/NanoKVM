@@ -30,7 +30,7 @@ Choose the NanoKVM model that best fits your deployment:
   - **Latency:** Hardware-accelerated encoding reduces latency from 100-150ms to **50-100ms**.
 
 <div align="center">
-  <img src="https://cdn.sipeed.com/public/nanokvm-products.jpg" alt="NanoKVM Product Family" width="80%" style="margin: 20px 0;">
+  <img src="https://cdn.sipeed.com/public/nanokvm-products-v2.jpg" alt="NanoKVM Product Family" width="100%" style="margin: 20px 0;">
 </div>
 
 > If you are looking for a USB-based KVM solution, check out [NanoKVM-USB](https://github.com/sipeed/NanoKVM-USB).
