@@ -34,20 +34,27 @@ func ListenAndServeLoopbackHTTPRedirect(
 			return
 		}
 
-		host := req.Host
-		if h, _, err := net.SplitHostPort(host); err == nil {
-			host = h
-		}
-
-		if strings.Contains(host, ":") {
-			host = "[" + host + "]"
-		}
-		if httpsPort != "443" {
-			host += ":" + httpsPort
-		}
-
-		http.Redirect(w, req, "https://"+host+req.URL.RequestURI(), http.StatusTemporaryRedirect)
+		http.Redirect(w, req, "https://"+redirectHost(req.Host, httpsPort)+req.URL.RequestURI(), http.StatusTemporaryRedirect)
 	}))
+}
+
+func redirectHost(requestHost string, httpsPort string) string {
+	host := requestHost
+	if h, _, err := net.SplitHostPort(requestHost); err == nil {
+		host = h
+	} else if strings.HasPrefix(host, "[") && strings.HasSuffix(host, "]") {
+		host = strings.TrimPrefix(strings.TrimSuffix(host, "]"), "[")
+	}
+
+	if httpsPort != "443" {
+		return net.JoinHostPort(host, httpsPort)
+	}
+
+	if strings.Contains(host, ":") && !strings.HasPrefix(host, "[") && !strings.HasSuffix(host, "]") {
+		return "[" + host + "]"
+	}
+
+	return host
 }
 
 func allowByLoopbackInternalToken(req *http.Request) bool {

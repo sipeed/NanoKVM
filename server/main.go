@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"strconv"
@@ -73,17 +71,32 @@ func run() {
 
 	router.Init(r)
 
-	httpAddr := listenAddr(conf.Host, strconv.Itoa(conf.Port.Http))
+	httpAddr := utils.ListenAddr(conf.Host, strconv.Itoa(conf.Port.Http))
+	loopbackHTTPAddr := utils.ListenAddr("127.0.0.1", strconv.Itoa(conf.Port.Http))
+	needsLoopbackHTTP := utils.NeedsDedicatedLoopbackListener(conf.Host)
 
 	if conf.Proto == "https" {
 		httpsPortStr := strconv.Itoa(conf.Port.Https)
 
 		go func() {
-			err := r.RunTLS(listenAddr(conf.Host, httpsPortStr), conf.Cert.Crt, conf.Cert.Key)
+			err := r.RunTLS(utils.ListenAddr(conf.Host, httpsPortStr), conf.Cert.Crt, conf.Cert.Key)
 			if err != nil {
 				panic("start https server failed")
 			}
 		}()
+
+		if needsLoopbackHTTP {
+			go func() {
+				if err := middleware.ListenAndServeLoopbackHTTPRedirect(
+					loopbackHTTPAddr,
+					httpsPortStr,
+					r,
+					router.LoopbackHTTPAllowedPaths()...,
+				); err != nil {
+					panic("start loopback http server failed")
+				}
+			}()
+		}
 
 		if err := middleware.ListenAndServeLoopbackHTTPRedirect(
 			httpAddr,
@@ -94,6 +107,14 @@ func run() {
 			panic("start http server failed")
 		}
 	} else {
+		if needsLoopbackHTTP {
+			go func() {
+				if err := r.Run(loopbackHTTPAddr); err != nil {
+					panic("start loopback http server failed")
+				}
+			}()
+		}
+
 		if err := r.Run(httpAddr); err != nil {
 			panic("start http server failed")
 		}
@@ -102,11 +123,4 @@ func run() {
 
 func dispose() {
 	common.GetKvmVision().Close()
-}
-
-func listenAddr(host string, port string) string {
-	if host == "" {
-		return fmt.Sprintf(":%s", port)
-	}
-	return net.JoinHostPort(host, port)
 }
