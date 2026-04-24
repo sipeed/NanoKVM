@@ -226,9 +226,9 @@ uint8_t lt6911_get_csi_res()
 	// setenv("KVM_CSI_HEIGHT", to_string(Hactive).c_str(), 1);
 	// setenv("KVM_CSI_WIDTH",  to_string(Vactive).c_str(), 1);
 
-	sprintf(Cmd, "echo %d > /kvmapp/kvm/width", Hactive);
+	sprintf(Cmd, "echo %d > /tmp/kvm/width", Hactive);
 	system(Cmd);
-	sprintf(Cmd, "echo %d > /kvmapp/kvm/height", Vactive);
+	sprintf(Cmd, "echo %d > /tmp/kvm/height", Vactive);
 	system(Cmd);
 
 	delete dat0;
