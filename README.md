@@ -13,23 +13,21 @@
   <br>
 </div>
 
-> For the recent discussion regarding the **built-in microphone**, please check [Issue #693](https://github.com/sipeed/NanoKVM/issues/693).
-
 ## 🌟 What is NanoKVM?
 
-NanoKVM is a series of compact, open-source IP-KVM devices based on the LicheeRV Nano (RISC-V). NanoKVM allows you to remotely access and control computers as if you were sitting right in front of them – perfect for managing servers, embedded systems, or any headless machine.
+NanoKVM is a series of compact, open-source IP-KVM devices based on the LicheeRV Nano (RISC-V). It lets you remotely access and control computers as if you were sitting in front of them, making it useful for servers, embedded systems, and other headless machines.
 
 ## 📦 Product Family
 
-We offer several NanoKVM versions to suit your needs:
+Choose the NanoKVM model that best fits your deployment:
 
-* **NanoKVM-Cube Lite:** A barebones kit for DIY enthusiasts and enterprise users requiring bulk deployment.
-* **NanoKVM-Cube Full:** A complete package featuring a sleek case, accessories, and a pre-flashed system SD card. Ready to use out-of-the-box; ideal for individual users.
-* **NanoKVM-PCIe:** A unique form factor with a PCIe bracket for internal chassis mounting. It draws power directly from the PCIe slot and supports optional WiFi and PoE functions.
-* **[NanoKVM-Pro:](https://github.com/sipeed/NanoKVM-Pro)** Based on popular demand, the **Pro version** delivers significant performance upgrades:
-  * **Resolution:** Upgraded from 1080P to stunning **4K@30fps / 2K@60fps**.
-  * **Network:** Blazing fast **1Gbps Ethernet + PoE + WiFi 6** ((upgraded from 100Mbps).
-  * **Latency:** Encoder accelerated latency reduced from 100-150ms to **50-100ms**.
+- **NanoKVM-Cube Lite:** A barebones kit for DIY users and bulk deployments.
+- **NanoKVM-Cube Full:** A ready-to-use kit with a case, accessories, and a pre-flashed system SD card.
+- **NanoKVM-PCIe:** A PCIe-bracket form factor for internal chassis mounting. It draws power from the PCIe slot and supports optional Wi-Fi and PoE.
+- **[NanoKVM-Pro](https://github.com/sipeed/NanoKVM-Pro):** A higher-performance version with major upgrades:
+  - **Resolution:** Up to **4K@30fps / 2K@60fps**.
+  - **Network:** **1Gbps Ethernet + PoE + Wi-Fi 6**, upgraded from 100Mbps Ethernet.
+  - **Latency:** Hardware-accelerated encoding reduces latency from 100-150ms to **50-100ms**.
 
 <div align="center">
   <img src="https://cdn.sipeed.com/public/nanokvm-products.jpg" alt="NanoKVM Product Family" width="80%" style="margin: 20px 0;">
@@ -40,36 +38,36 @@ We offer several NanoKVM versions to suit your needs:
 ## 🛠️ Technical Specifications
 
 | Feature            | NanoKVM-Pro                           | NanoKVM (Cube/PCIe)               | GxxKVM                             | JxxKVM                              |
-|------------------- |-------------------------------------- |---------------------------------- |----------------------------------- |------------------------------------ |
+| ------------------ | ------------------------------------- | --------------------------------- | ---------------------------------- | ----------------------------------- |
 | Core               | AX630C 2xA53 1.2G                     | SG2002 1xC906 1.0G                | RV1126 4xA7 1.5G                   | RV1106 1xA7 1.2G                    |
-| Memory & Storage   | 1G LPDDR4X + 32G eMMC                 | 256M DDR3 + 32G microSD           | 1G DDR3 + 8G eMMc                  | 256M DDR3 + 16G eMMC                |
+| Memory & Storage   | 1G LPDDR4X + 32G eMMC                 | 256M DDR3 + 32G microSD           | 1G DDR3 + 8G eMMC                  | 256M DDR3 + 16G eMMC                |
 | System             | NanoKVM / PiKVM                       | NanoKVM                           | GxxKVM                             | JxxKVM                              |
 | Resolution         | 4K@30fps / 2K@60fps                   | 1080P@60fps                       | 4K@30fps / 2K@60fps                | 1080P@60fps                         |
-| HDMI Loopout       | 4K loopout                            | x                                 | x                                  | x                                   |
-| Video Encoding     | MJPEG / H.264 / H.265                 | MJPEG / H264                      | MJPEG / H264                       | MJPEG / H264                        |
-| Audio Transmit     | ✓                                     | x                                 | ✓                                  | x                                   |
+| HDMI Loopout       | 4K loopout                            | —                                 | —                                  | —                                   |
+| Video Encoding     | MJPEG / H.264 / H.265                 | MJPEG / H.264                     | MJPEG / H.264                      | MJPEG / H.264                       |
+| Audio Transmit     | ✓                                     | —                                 | ✓                                  | —                                   |
 | UEFI / BIOS        | ✓                                     | ✓                                 | ✓                                  | ✓                                   |
 | Emulated USB Keyboard & Mouse | ✓                          | ✓                                 | ✓                                  | ✓                                   |
 | Emulated USB ISO   | ✓                                     | ✓                                 | ✓                                  | ✓                                   |
-| IPMI               | ✓                                     | ✓                                 | ✓                                  | x                                   |
+| IPMI               | ✓                                     | ✓                                 | ✓                                  | —                                   |
 | Wake-on-LAN        | ✓                                     | ✓                                 | ✓                                  | ✓                                   |
 | Web Terminal       | ✓                                     | ✓                                 | ✓                                  | ✓                                   |
-| Serial Terminal    | 2 channels                            | 2 channels                        | x                                  | 1 channel                           |
-| Custom Scripts     | ✓                                     | ✓                                 | x                                  | x                                   |
+| Serial Terminal    | 2 channels                            | 2 channels                        | —                                  | 1 channel                           |
+| Custom Scripts     | ✓                                     | ✓                                 | —                                  | —                                   |
 | Storage            | 32G eMMC 300MB/s                      | 32G MicroSD 12MB/s                | 8G eMMC 120MB/s                    | 8G eMMC 60MB/s                      |
 | Ethernet           | 1000M                                 | 100M                              | 1000M                              | 100M                                |
-| PoE                | Optional                              | Optional                          | x                                  | x                                   |
-| WiFi               | Optional WiFi6                        | Optional WiFi6                    | x                                  | x                                   |
+| PoE                | Optional                              | Optional                          | —                                  | —                                   |
+| Wi-Fi              | Optional Wi-Fi 6                      | Optional Wi-Fi 6                  | —                                  | —                                   |
 | ATX Power Control  | ✓                                     | ✓                                 | Extra $15                          | Extra $10                           |
-| Display            | 1.47" 320x172 LCD / 0.96" 128x64 OLED | 0.96" 128x64 OLED                 | -                                  | 1.68" 280x240                       |
-| More Features      | Sync LED Strip / Smart Assistant      | -                                 | -                                  | -                                   |
+| Display            | 1.47" 320x172 LCD / 0.96" 128x64 OLED | 0.96" 128x64 OLED                 | —                                  | 1.68" 280x240                       |
+| More Features      | Sync LED Strip / Smart Assistant      | —                                 | —                                  | —                                   |
 | Power Consumption  | 0.6A@5V                               | 0.2A@5V                           | 0.4A@5V                            | 0.2A@5V                             |
 | Power Input        | USB-C or PoE                          | USB-C                             | USB-C                              | USB-C                               |
 | Dimensions         | 65x65x26mm                            | 40x36x36mm                        | 80x60x17.5mm                       | 60x43x(24~31)mm                     |
 
 ## 📂 Project Structure
 
-``` shell
+```text
 ├── kvmapp          # APP update package
 │   ├── jpg_stream  # Legacy support for direct updates from older versions
 │   ├── kvm_new_app # Triggers components for kvm_system updates
@@ -82,20 +80,36 @@ We offer several NanoKVM versions to suit your needs:
 ├── ...
 ```
 
+## 💻 Development
+
+Start with the guide that matches the part of NanoKVM you want to work on:
+
+- **System support modules:** Build and update the low-level hardware support components in [support/sg2002/README.md](support/sg2002/README.md).
+- **Backend service:** Set up, build, and understand the Go service in [server/README.md](server/README.md).
+- **Frontend UI:** Develop, lint, and build the React interface in [web/README.md](web/README.md).
+
+> Backend compilation and runtime validation require the target toolchain or a NanoKVM device. See the module-specific guides above for the latest development workflow.
+
 ## 🔩 Hardware Platform (NanoKVM Cube/PCIe)
 
-NanoKVM is based on Sipeed [LicheeRV Nano](https://wiki.sipeed.com/hardware/zh/lichee/RV_Nano/1_intro.html). You can find specifications, schematics, and dimensional drawings in the [download station](http://cn.dl.sipeed.com/shareURL/LICHEE/LicheeRV_Nano).
+NanoKVM is based on Sipeed [LicheeRV Nano](https://wiki.sipeed.com/hardware/zh/lichee/RV_Nano/1_intro.html). You can find specifications, schematics, and dimensional drawings in the [download station](https://dl.sipeed.com/shareURL/LICHEE/LicheeRV_Nano).
 
-The NanoKVM Lite is constructed by the LicheeRV Nano and HDMItoCSI board, and the NanoKVM FULL adds the NanoKVM-A/B board and shell to the NanoKVM Lite. The HDMItoCSI board is used to convert the HDMI signal; NanoKVM-A, including OLED, ATX control output (USB Type-C interface), auxiliary power supply and ATX power on/off and reset buttons; The NanoKVM-B is connected to the plate at one end and the computer at the other end is connected to the computer ATX-Pin, which is used to remotely control the power of the computer.
+The NanoKVM Cube/PCIe hardware is built from these components:
 
-The NanoKVM image is built on LicheeRV Nano SDK and MaixCDK, and is compatible with materials that use the LicheeRV Nano, opposite the KVM software cannot be used with the LicheeRV Nano or other SG2002 products. If you would like to build an HDMI input application on LicheeRV Nano or MaixCam, please contact us for technical support.
+- **NanoKVM Lite:** LicheeRV Nano plus the HDMI-to-CSI board.
+- **NanoKVM Full:** NanoKVM Lite plus the NanoKVM-A/B boards and enclosure.
+- **HDMI-to-CSI board:** Converts the HDMI input signal.
+- **NanoKVM-A board:** Provides OLED, ATX control output through USB-C, auxiliary power, and physical ATX power/reset buttons.
+- **NanoKVM-B board:** Connects NanoKVM-A to the host computer's ATX pins for remote power control.
 
-Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the multimedia subsystem, which NanoKVM will use for video image acquisition and processing.
+The NanoKVM image is built with the LicheeRV Nano SDK and MaixCDK. It is intended for NanoKVM hardware and is not a general-purpose KVM software package for other LicheeRV Nano or SG2002 products. If you want to build an HDMI input application on LicheeRV Nano or MaixCam, please contact us for technical support.
 
-* [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
-* [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_B_30131.pdf)
-* [NanoKVM-PCIe Schematic](https://cn.dl.sipeed.com/fileList/KVM/KVM_PCIE/HDK/01_Schematic/SCH_nanoKVM_PCIE_3105D_2025-12-19.pdf)
-* [NanoKVM img](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
+> Note: Of the 256MB memory on SG2002, 158MB is currently allocated to the multimedia subsystem for video capture and processing.
+
+- [NanoKVM-A Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_A_30111.pdf)
+- [NanoKVM-B Schematic](https://cn.dl.sipeed.com/fileList/KVM/nanoKVM/HDK/02_Schematic/SCH_RV_Nano_KVM_B_30131.pdf)
+- [NanoKVM-PCIe Schematic](https://cn.dl.sipeed.com/fileList/KVM/KVM_PCIE/HDK/01_Schematic/SCH_nanoKVM_PCIE_3105D_2025-12-19.pdf)
+- [NanoKVM image](https://github.com/sipeed/NanoKVM/releases/tag/NanoKVM)
 
 <div align="center">
   <img src="https://wiki.sipeed.com/hardware/zh/kvm/assets/NanoKVM/1_intro/NanoKVM_2.jpg" alt="NanoKVM PCB Pinout" width="80%" style="margin: 20px 0;">
@@ -103,7 +117,7 @@ Note: Out of the 256MB memory in SG2002, 158MB is currently allocated for the mu
 
 ## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
+We welcome contributions. To get started:
 
 1. Fork the repository.
 2. Create a feature branch.
@@ -117,17 +131,17 @@ Please keep your pull requests small and focused to facilitate easier review and
 
 ## 🛒 Where to Buy
 
-* [Aliexpress(global except USA&Russia)](https://www.aliexpress.com/item/1005007369816019.html)
-* [淘宝](https://item.taobao.com/item.htm?id=811206560480)
-* [Preorder (any other country that not support in Aliexpress or Taobao)](https://sipeed.com/nanokvm)
+- [AliExpress (global, except USA and Russia)](https://www.aliexpress.com/item/1005007369816019.html)
+- [Taobao](https://item.taobao.com/item.htm?id=811206560480)
+- [Preorder for other regions](https://sipeed.com/nanokvm)
 
 ## 💬 Community & Support
 
-* [Discord](https://discord.gg/V4sAZ9XWpN)
-* QQ group: 703230713
-* email: [support@sipeed.com](mailto:support@sipeed.com)
-* [FAQ](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/faq.html)
+- [Discord](https://discord.gg/V4sAZ9XWpN)
+- QQ group: 703230713
+- Email: [support@sipeed.com](mailto:support@sipeed.com)
+- [FAQ](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/faq.html)
 
 ## 📜 License
 
-This project is licensed under the GPL-3.0 License - see the LICENSE file for details.
+This project is licensed under the GPL-3.0 License. See [LICENSE](LICENSE) for details.
