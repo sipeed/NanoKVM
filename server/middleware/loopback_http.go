@@ -10,7 +10,7 @@ import (
 )
 
 func ListenAndServeLoopbackHTTPRedirect(
-	httpPort string,
+	httpAddr string,
 	httpsPort string,
 	handler http.Handler,
 	allowedPaths ...string,
@@ -23,7 +23,7 @@ func ListenAndServeLoopbackHTTPRedirect(
 		allowlist[path] = struct{}{}
 	}
 
-	return http.ListenAndServe(httpPort, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	return http.ListenAndServe(httpAddr, http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if isLoopbackAllowedPath(req, allowlist) {
 			if hasValidLoopbackHTTPToken(req) {
 				handler.ServeHTTP(w, req)
@@ -35,16 +35,18 @@ func ListenAndServeLoopbackHTTPRedirect(
 		}
 
 		host := req.Host
-		if strings.Contains(host, httpPort) {
-			host = strings.Split(host, httpPort)[0]
+		if h, _, err := net.SplitHostPort(host); err == nil {
+			host = h
 		}
 
-		targetURL := "https://" + host + req.URL.String()
-		if httpsPort != ":443" {
-			targetURL = "https://" + host + httpsPort + req.URL.String()
+		if strings.Contains(host, ":") {
+			host = "[" + host + "]"
+		}
+		if httpsPort != "443" {
+			host += ":" + httpsPort
 		}
 
-		http.Redirect(w, req, targetURL, http.StatusTemporaryRedirect)
+		http.Redirect(w, req, "https://"+host+req.URL.RequestURI(), http.StatusTemporaryRedirect)
 	}))
 }
 

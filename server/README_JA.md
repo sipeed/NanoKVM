@@ -27,6 +27,7 @@ server
 
 ```yaml
 proto: http
+host: ""
 port:
     http: 80
     https: 443
