@@ -18,6 +18,8 @@ const KEYBOARD_LANGUAGE_KEY = 'nano-kvm-keyboard-language';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 const MENU_AUTO_HIDE_KEY = 'nano-kvm-menu-auto-hide';
+const MENU_SNAP_EDGE_KEY = 'nano-kvm-menu-snap-edge';
+const MENU_SNAP_OFFSET_KEY = 'nano-kvm-menu-snap-offset';
 const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
 
 type ItemWithExpiry = {
@@ -229,4 +231,31 @@ export function getPowerConfirm() {
 
 export function setPowerConfirm(enabled: boolean) {
   localStorage.setItem(POWER_CONFIRM_KEY, String(enabled));
+}
+
+export type SnapEdge = 'top' | 'bottom' | 'left' | 'right' | null;
+
+export function getMenuSnapEdge(): SnapEdge {
+  const v = localStorage.getItem(MENU_SNAP_EDGE_KEY);
+  if (v === 'top' || v === 'bottom' || v === 'left' || v === 'right') return v;
+  return null;
+}
+
+export function setMenuSnapEdge(edge: SnapEdge) {
+  if (edge === null) {
+    localStorage.removeItem(MENU_SNAP_EDGE_KEY);
+  } else {
+    localStorage.setItem(MENU_SNAP_EDGE_KEY, edge);
+  }
+}
+
+// Perpendicular axis normalized position [0,1] when snapped (e.g. left/right edge => vertical %)
+export function getMenuSnapOffset(): number {
+  const v = localStorage.getItem(MENU_SNAP_OFFSET_KEY);
+  const n = parseFloat(v ?? '');
+  return isNaN(n) ? 0.5 : Math.max(0, Math.min(1, n));
+}
+
+export function setMenuSnapOffset(offset: number) {
+  localStorage.setItem(MENU_SNAP_OFFSET_KEY, String(offset));
 }

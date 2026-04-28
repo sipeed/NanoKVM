@@ -28,6 +28,8 @@ const en = {
       ok: 'Ok',
       cancel: 'Cancel',
       loginButtonText: 'Login',
+      rememberPassword: 'Remember Password',
+      autoLogin: 'Auto Login',
       tips: {
         reset1:
           'To reset the passwords, press and hold the BOOT button on the NanoKVM for 10 seconds.',
