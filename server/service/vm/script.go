@@ -70,7 +70,7 @@ func (s *Service) UploadScript(c *gin.Context) {
 
 	_ = utils.EnsurePermission(target, 0o100)
 
-	data := &proto.UploadScriptRsp{
+	data := &proto.FileRsp{
 		File: header.Filename,
 	}
 	rsp.OkRspWithData(c, data)

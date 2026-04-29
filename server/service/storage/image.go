@@ -161,7 +161,7 @@ func (s *Service) GetMountedImage(c *gin.Context) {
 		image = ""
 	}
 
-	data := &proto.GetMountedImageRsp{
+	data := &proto.FileRsp{
 		File: image,
 	}
 

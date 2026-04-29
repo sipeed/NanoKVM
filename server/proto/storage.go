@@ -5,10 +5,6 @@ type MountImageReq struct {
 	Cdrom bool   `json:"cdrom" validate:"omitempty"`
 }
 
-type GetMountedImageRsp struct {
-	File string `json:"file"`
-}
-
 type GetCdRomRsp struct {
 	Cdrom int64 `json:"cdrom"`
 }

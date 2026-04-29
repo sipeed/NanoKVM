@@ -7,3 +7,7 @@ type EnabledRsp struct {
 type FilesRsp struct {
 	Files []string `json:"files"`
 }
+
+type FileRsp struct {
+	File string `json:"file"`
+}

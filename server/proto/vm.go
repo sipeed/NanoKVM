@@ -34,10 +34,6 @@ type SetScreenReq struct {
 	Value int    `validate:"number"`   // value
 }
 
-type UploadScriptRsp struct {
-	File string `json:"file"`
-}
-
 type RunScriptReq struct {
 	Name string `validate:"required"`
 	Type string `validate:"required"` // foreground | background
