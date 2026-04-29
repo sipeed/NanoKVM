@@ -54,3 +54,15 @@ func TestProgressWriterUpdatesStatusFile(t *testing.T) {
 		t.Fatalf("unexpected status content %q", got)
 	}
 }
+
+func TestParseProgressStatus(t *testing.T) {
+	status := ParseProgressStatus("image.iso;50.00%")
+	if status.File != "image.iso" || status.Percentage != "50.00%" {
+		t.Fatalf("unexpected parsed status: %#v", status)
+	}
+
+	status = ParseProgressStatus("image.iso")
+	if status.File != "image.iso" || status.Percentage != "" {
+		t.Fatalf("unexpected parsed status without percentage: %#v", status)
+	}
+}

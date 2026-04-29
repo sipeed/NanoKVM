@@ -14,22 +14,19 @@ import {
 import { getErrorMessage, getResponseErrorMessage } from '@/lib/errors.ts';
 import { generateUUIDv4 } from '@/lib/picoclaw-gateway.ts';
 import type {
-  PicoclawChatMessage,
   PicoclawConfigState,
+  PicoclawMessageSetter,
   PicoclawOverlayState,
   PicoclawRunState,
   PicoclawRuntimeStatus,
+  PicoclawRuntimeStatusSetter,
   PicoclawSessionListItem,
-  PicoclawTakeoverState,
+  PicoclawTakeoverSetter,
   PicoclawTransportState
 } from '@/types';
 
 import { createErrorMessage, createStatusMessage, HIDDEN_OVERLAY } from './message-utils.ts';
 import { canConnectGateway } from './runtime-view.ts';
-
-type RuntimeStatusSetter = Dispatch<SetStateAction<PicoclawRuntimeStatus | null>>;
-type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
-type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
 
 type PicoclawSidebarSessionActionOptions = {
   t: TFunction;
@@ -41,8 +38,8 @@ type PicoclawSidebarSessionActionOptions = {
   isFreshConversation: boolean;
   isSwitchingSession: boolean;
   refreshState: () => Promise<PicoclawRuntimeStatus | null>;
-  setMessages: MessageSetter;
-  setTakeover: TakeoverSetter;
+  setMessages: PicoclawMessageSetter;
+  setTakeover: PicoclawTakeoverSetter;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
@@ -54,7 +51,7 @@ type PicoclawSidebarSessionActionOptions = {
   setIsLoadingHistory: Dispatch<SetStateAction<boolean>>;
   setIsDeletingSession: Dispatch<SetStateAction<boolean>>;
   setIsSwitchingSession: Dispatch<SetStateAction<boolean>>;
-  setRuntimeStatus: RuntimeStatusSetter;
+  setRuntimeStatus: PicoclawRuntimeStatusSetter;
 };
 
 export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSessionActionOptions) {

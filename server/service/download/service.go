@@ -80,22 +80,12 @@ func (s *Service) StatusImage(c *gin.Context) {
 			})
 			return
 		}
-		splitted := strings.SplitN(content, ";", 2)
-		if len(splitted) == 1 {
-			// No percentage, just the URL
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "in_progress",
-				File:       splitted[0],
-				Percentage: "",
-			})
-		} else {
-			// Percentage is available
-			rsp.OkRspWithData(c, &proto.StatusImageRsp{
-				Status:     "in_progress",
-				File:       splitted[0],
-				Percentage: splitted[1],
-			})
-		}
+		status := utils.ParseProgressStatus(content)
+		rsp.OkRspWithData(c, &proto.StatusImageRsp{
+			Status:     "in_progress",
+			File:       status.File,
+			Percentage: status.Percentage,
+		})
 
 		return
 	}

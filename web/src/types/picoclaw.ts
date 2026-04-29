@@ -1,3 +1,5 @@
+import type { Dispatch, SetStateAction } from 'react';
+
 export type PicoclawTransportState = 'disconnected' | 'connecting' | 'connected' | 'error';
 
 export type PicoclawRunState = 'idle' | 'busy';
@@ -51,6 +53,12 @@ export type PicoclawTakeoverState = {
   sessionId?: string;
   reason?: string;
 };
+
+export type PicoclawMessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
+export type PicoclawRuntimeStatusSetter = Dispatch<
+  SetStateAction<PicoclawRuntimeStatus | null>
+>;
+export type PicoclawTakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
 
 export type PicoclawConfigState = {
   maxSteps: number;

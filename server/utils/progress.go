@@ -31,6 +31,11 @@ type ProgressWriter struct {
 	stopOnce   sync.Once
 }
 
+type ProgressStatus struct {
+	File       string
+	Percentage string
+}
+
 func NewProgressWriter(w io.Writer, totalSize int64, statusPath string) *ProgressWriter {
 	pw := &ProgressWriter{
 		writer:     w,
@@ -66,13 +71,9 @@ func (pw *ProgressWriter) updateStatus() {
 		return
 	}
 
-	parts := strings.SplitN(string(content), ";", 2)
-	if len(parts) == 0 {
-		return
-	}
-
+	status := ParseProgressStatus(string(content))
 	percentage := float64(pw.written) / float64(pw.totalSize) * 100
-	newContent := fmt.Sprintf("%s;%.2f%%", parts[0], percentage)
+	newContent := fmt.Sprintf("%s;%.2f%%", status.File, percentage)
 
 	if err := os.WriteFile(pw.statusPath, []byte(newContent), ProgressStatusPermission); err != nil {
 		log.Error("Failed to update sentinel file")
@@ -100,6 +101,15 @@ func ProgressStatusExists() bool {
 func ReadProgressStatus() (string, error) {
 	content, err := os.ReadFile(ProgressStatusPath)
 	return string(content), err
+}
+
+func ParseProgressStatus(content string) ProgressStatus {
+	parts := strings.SplitN(content, ";", 2)
+	status := ProgressStatus{File: parts[0]}
+	if len(parts) > 1 {
+		status.Percentage = parts[1]
+	}
+	return status
 }
 
 func WriteProgressStatus(content string) error {

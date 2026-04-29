@@ -23,20 +23,17 @@ import {
   setPicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
 import type {
-  PicoclawChatMessage,
+  PicoclawMessageSetter,
   PicoclawOverlayState,
   PicoclawRunState,
   PicoclawRuntimeInstallSnapshot,
   PicoclawRuntimeStatus,
-  PicoclawTakeoverState,
+  PicoclawRuntimeStatusSetter,
+  PicoclawTakeoverSetter,
   PicoclawTransportState
 } from '@/types';
 
 import { createErrorMessage, createStatusMessage, HIDDEN_OVERLAY } from './message-utils.ts';
-
-type RuntimeStatusSetter = Dispatch<SetStateAction<PicoclawRuntimeStatus | null>>;
-type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
-type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
 
 type PicoclawSidebarActionOptions = {
   t: TFunction;
@@ -46,9 +43,9 @@ type PicoclawSidebarActionOptions = {
   modelApiBase: string;
   modelApiKey: string;
   modelIdentifier: string;
-  setRuntimeStatus: RuntimeStatusSetter;
-  setMessages: MessageSetter;
-  setTakeover: TakeoverSetter;
+  setRuntimeStatus: PicoclawRuntimeStatusSetter;
+  setMessages: PicoclawMessageSetter;
+  setTakeover: PicoclawTakeoverSetter;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
