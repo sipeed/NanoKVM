@@ -36,7 +36,7 @@ func (s *Service) GetScripts(c *gin.Context) {
 		return
 	}
 
-	rsp.OkRspWithData(c, &proto.GetScriptsRsp{
+	rsp.OkRspWithData(c, &proto.FilesRsp{
 		Files: files,
 	})
 

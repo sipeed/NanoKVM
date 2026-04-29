@@ -34,10 +34,6 @@ type SetScreenReq struct {
 	Value int    `validate:"number"`   // value
 }
 
-type GetScriptsRsp struct {
-	Files []string `json:"files"`
-}
-
 type UploadScriptRsp struct {
 	File string `json:"file"`
 }
@@ -56,10 +52,6 @@ type DeleteScriptReq struct {
 }
 
 // autostart
-type GetAutostartRsp struct {
-	Files []string `json:"files"`
-}
-
 type UploadAutostartReq struct {
 	Content string `json:"content"`
 }
@@ -97,14 +89,6 @@ type GetOLEDRsp struct {
 	Sleep int  `json:"sleep"`
 }
 
-type GetGetHdmiStateRsp struct {
-	Enabled bool `json:"enabled"`
-}
-
-type GetSSHStateRsp struct {
-	Enabled bool `json:"enabled"`
-}
-
 type GetSwapRsp struct {
 	Size int64 `json:"size"` // unit: MB
 }
@@ -121,10 +105,6 @@ type GetMouseJigglerRsp struct {
 type SetMouseJigglerReq struct {
 	Enabled bool   `validate:"omitempty"`
 	Mode    string `validate:"omitempty"`
-}
-
-type GetMdnsStateRsp struct {
-	Enabled bool `json:"enabled"`
 }
 
 type SetHostnameReq struct {

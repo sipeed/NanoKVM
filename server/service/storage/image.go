@@ -48,7 +48,7 @@ func (s *Service) GetImages(c *gin.Context) {
 		return
 	}
 
-	rsp.OkRspWithData(c, &proto.GetImagesRsp{
+	rsp.OkRspWithData(c, &proto.FilesRsp{
 		Files: images,
 	})
 	log.Debugf("get images success, total %d", len(images))

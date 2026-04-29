@@ -20,7 +20,7 @@ func (s *Service) GetSSHState(c *gin.Context) {
 	var rsp proto.Response
 
 	enabled := isSSHEnabled()
-	rsp.OkRspWithData(c, &proto.GetSSHStateRsp{
+	rsp.OkRspWithData(c, &proto.EnabledRsp{
 		Enabled: enabled,
 	})
 }

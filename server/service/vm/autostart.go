@@ -31,7 +31,7 @@ func (s *Service) GetAutostart(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "get autostart directory fail")
 		return
 	}
-	rsp.OkRspWithData(c, &proto.GetAutostartRsp{
+	rsp.OkRspWithData(c, &proto.FilesRsp{
 		Files: files,
 	})
 

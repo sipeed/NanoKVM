@@ -22,7 +22,7 @@ func (s *Service) GetMdnsState(c *gin.Context) {
 
 	pid := getAvahiDaemonPid()
 
-	rsp.OkRspWithData(c, &proto.GetMdnsStateRsp{
+	rsp.OkRspWithData(c, &proto.EnabledRsp{
 		Enabled: pid != "",
 	})
 }
