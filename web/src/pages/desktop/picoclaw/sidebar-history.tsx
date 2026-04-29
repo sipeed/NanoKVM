@@ -3,7 +3,7 @@ import { Button, Modal } from 'antd';
 import { Clock3Icon, MessageSquareTextIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import type { PicoclawSessionListItem } from '@/api/picoclaw.ts';
+import type { PicoclawSessionListItem } from '@/types';
 
 type SidebarHistoryProps = {
   sessions: PicoclawSessionListItem[];

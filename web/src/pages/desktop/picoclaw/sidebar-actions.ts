@@ -14,18 +14,23 @@ import {
   uninstallRuntime
 } from '@/api/picoclaw.ts';
 import {
+  getErrorMessage,
+  getResponseErrorMessage,
+  isUnexpectedEOFError
+} from '@/lib/errors.ts';
+import {
   clearPicoclawRuntimeInstallSnapshot,
-  setPicoclawRuntimeInstallSnapshot,
-  type PicoclawRuntimeInstallSnapshot
+  setPicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
 import type {
   PicoclawChatMessage,
   PicoclawOverlayState,
   PicoclawRunState,
+  PicoclawRuntimeInstallSnapshot,
   PicoclawRuntimeStatus,
   PicoclawTakeoverState,
   PicoclawTransportState
-} from '@/jotai/picoclaw.ts';
+} from '@/types';
 
 import { createErrorMessage, createStatusMessage, HIDDEN_OVERLAY } from './message-utils.ts';
 
@@ -98,15 +103,6 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     return nextRuntimeStatus;
   }
 
-  function isUnexpectedEOFError(error: unknown) {
-    if (!(error instanceof Error)) {
-      return false;
-    }
-
-    const message = error.message.toLowerCase();
-    return message.includes('unexpected eof') || message === 'eof';
-  }
-
   function isExpectedRuntimeState(status: PicoclawRuntimeStatus | null, shouldStop: boolean) {
     if (!status) {
       return false;
@@ -124,6 +120,13 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
 
     try {
       const isRuntimeReady = runtimeStatus?.ready === true;
+      const successMessage = t(
+        isRuntimeReady ? 'picoclaw.status.runtimeStopped' : 'picoclaw.status.runtimeStarted'
+      );
+      const failureMessage = t(
+        isRuntimeReady ? 'picoclaw.status.runtimeStopFailed' : 'picoclaw.status.runtimeStartFailed'
+      );
+      const failureCode = isRuntimeReady ? 'RUNTIME_STOP_FAILED' : 'RUNTIME_START_FAILED';
       let response;
 
       try {
@@ -137,11 +140,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
           setRuntimeStatus(latestRuntimeStatus ?? null);
           setMessages((current) => [
             ...current,
-            createStatusMessage(
-              t(
-                isRuntimeReady ? 'picoclaw.status.runtimeStopped' : 'picoclaw.status.runtimeStarted'
-              )
-            )
+            createStatusMessage(successMessage)
           ]);
 
           if (isRuntimeReady) {
@@ -165,18 +164,11 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
           return;
         }
 
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : t(
-                isRuntimeReady
-                  ? 'picoclaw.status.runtimeStopFailed'
-                  : 'picoclaw.status.runtimeStartFailed'
-              );
+        const errorMessage = getErrorMessage(error, failureMessage);
         setMessages((current) => [
           ...current,
           createErrorMessage({
-            code: isRuntimeReady ? 'RUNTIME_STOP_FAILED' : 'RUNTIME_START_FAILED',
+            code: failureCode,
             message: errorMessage,
             raw: error
           })
@@ -188,9 +180,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         setRuntimeStatus(response.data.status);
         setMessages((current) => [
           ...current,
-          createStatusMessage(
-            t(isRuntimeReady ? 'picoclaw.status.runtimeStopped' : 'picoclaw.status.runtimeStarted')
-          )
+          createStatusMessage(successMessage)
         ]);
 
         if (isRuntimeReady) {
@@ -211,18 +201,11 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
           }
         }
       } else {
-        const errorMessage =
-          (response as { message?: string; msg?: string }).message ||
-          (response as { message?: string; msg?: string }).msg ||
-          t(
-            isRuntimeReady
-              ? 'picoclaw.status.runtimeStopFailed'
-              : 'picoclaw.status.runtimeStartFailed'
-          );
+        const errorMessage = getResponseErrorMessage(response, failureMessage);
         setMessages((current) => [
           ...current,
           createErrorMessage({
-            code: isRuntimeReady ? 'RUNTIME_STOP_FAILED' : 'RUNTIME_START_FAILED',
+            code: failureCode,
             message: errorMessage,
             raw: response
           })
@@ -264,10 +247,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         return;
       }
 
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.install.failed');
+      const errorMessage = getResponseErrorMessage(response, t('picoclaw.install.failed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -279,7 +259,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     } catch (error) {
       setInstallSnapshot(null);
       clearPicoclawRuntimeInstallSnapshot();
-      const errorMessage = error instanceof Error ? error.message : t('picoclaw.install.failed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.install.failed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -323,10 +303,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         return;
       }
 
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.model.saveFailed');
+      const errorMessage = getResponseErrorMessage(response, t('picoclaw.model.saveFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -336,7 +313,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         })
       ]);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('picoclaw.model.saveFailed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.model.saveFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -373,10 +350,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         return;
       }
 
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.agent.switchFailed');
+      const errorMessage = getResponseErrorMessage(response, t('picoclaw.agent.switchFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -386,8 +360,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         })
       ]);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('picoclaw.agent.switchFailed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.agent.switchFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -417,10 +390,10 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         return;
       }
 
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.install.uninstallFailed');
+      const errorMessage = getResponseErrorMessage(
+        response,
+        t('picoclaw.install.uninstallFailed')
+      );
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -430,8 +403,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         })
       ]);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('picoclaw.install.uninstallFailed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.install.uninstallFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({

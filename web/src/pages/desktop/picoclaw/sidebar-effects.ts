@@ -5,17 +5,17 @@ import type { TFunction } from 'i18next';
 import { closeGateway, connectGateway, picoclawGateway } from '@/api/picoclaw.ts';
 import {
   clearPicoclawRuntimeInstallSnapshot,
-  setPicoclawRuntimeInstallSnapshot,
-  type PicoclawRuntimeInstallSnapshot
+  setPicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
 import type {
   PicoclawChatMessage,
   PicoclawOverlayState,
   PicoclawRunState,
+  PicoclawRuntimeInstallSnapshot,
   PicoclawRuntimeStatus,
   PicoclawTakeoverState,
   PicoclawTransportState
-} from '@/jotai/picoclaw.ts';
+} from '@/types';
 
 import {
   createAssistantMessage,

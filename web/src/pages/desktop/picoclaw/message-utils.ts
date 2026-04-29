@@ -1,11 +1,11 @@
+import { generateUUIDv4 } from '@/lib/picoclaw-gateway.ts';
 import type {
   GatewayAssistantMessage,
   GatewayError,
   GatewayObservation,
-  GatewayToolAction
-} from '@/lib/picoclaw-gateway.ts';
-import { generateUUIDv4 } from '@/lib/picoclaw-gateway.ts';
-import type { PicoclawChatMessage } from '@/jotai/picoclaw.ts';
+  GatewayToolAction,
+  PicoclawChatMessage
+} from '@/types';
 
 export const HIDDEN_OVERLAY = {
   visible: false,

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { BotIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import type { PicoclawChatMessage, PicoclawRunState } from '@/jotai/picoclaw.ts';
+import type { PicoclawChatMessage, PicoclawRunState } from '@/types';
 
 import { MessageLoading } from './message-loading.tsx';
 import { Message } from './message.tsx';

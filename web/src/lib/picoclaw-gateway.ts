@@ -1,62 +1,20 @@
 import { clearPicoclawSessionId, setPicoclawSessionId } from '@/lib/picoclaw-storage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
-
-export type GatewayTransportState = 'disconnected' | 'connecting' | 'connected' | 'error';
-
-export type GatewayRunState = 'idle' | 'busy';
-
-export type GatewayRuntimeStatus = {
-  ready: boolean;
-  installed: boolean;
-  installing: boolean;
-  install_progress?: number;
-  install_stage?: string;
-  install_path?: string;
-  model_configured: boolean;
-  model_name?: string;
-  status: string;
-  config_error?: string;
-  last_error?: string;
-  checked_at?: string;
-  current_session?: string;
-};
-
-export type GatewayAssistantMessage = {
-  id: string;
-  text: string;
-  raw: Record<string, unknown>;
-};
-
-export type GatewayToolAction = {
-  id: string;
-  action: string;
-  x?: number;
-  y?: number;
-  raw: Record<string, unknown>;
-};
-
-export type GatewayObservation = {
-  id: string;
-  text?: string;
-  imageBase64?: string;
-  raw: Record<string, unknown>;
-};
-
-export type GatewayError = {
-  code: string;
-  message: string;
-  raw?: unknown;
-};
-
-export type GatewayClose = {
-  code: number;
-  reason: string;
-};
+import { normalizeLiteralEmptyText } from '@/lib/text.ts';
+import type {
+  GatewayAssistantMessage,
+  GatewayClose,
+  GatewayError,
+  GatewayObservation,
+  GatewayToolAction,
+  PicoclawRunState,
+  PicoclawTransportState
+} from '@/types';
 
 type GatewayEventMap = {
   connected: { sessionId: string };
-  transport_state: GatewayTransportState;
-  run_state: GatewayRunState;
+  transport_state: PicoclawTransportState;
+  run_state: PicoclawRunState;
   assistant_message: GatewayAssistantMessage;
   tool_action: GatewayToolAction;
   observation: GatewayObservation;
@@ -304,11 +262,11 @@ class PicoClawGateway {
     }
   }
 
-  private setTransportState(state: GatewayTransportState) {
+  private setTransportState(state: PicoclawTransportState) {
     this.emit('transport_state', state);
   }
 
-  private setRunState(state: GatewayRunState) {
+  private setRunState(state: PicoclawRunState) {
     this.emit('run_state', state);
   }
 
@@ -452,20 +410,6 @@ function extractAction(message: Record<string, unknown>) {
     x,
     y
   };
-}
-
-function normalizeLiteralEmptyText(value: string) {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return '';
-  }
-
-  const normalized = trimmed.toLowerCase();
-  if (normalized === 'null' || normalized === 'undefined') {
-    return '';
-  }
-
-  return trimmed;
 }
 
 export const picoclawGateway = new PicoClawGateway();

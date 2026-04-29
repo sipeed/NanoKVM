@@ -1,9 +1,6 @@
 import { http } from '@/lib/http.ts';
-import {
-  picoclawGateway,
-  type GatewayRunState,
-  type GatewayTransportState
-} from '@/lib/picoclaw-gateway.ts';
+import { picoclawGateway } from '@/lib/picoclaw-gateway.ts';
+import type { PicoclawRunState, PicoclawTransportState } from '@/types';
 
 const sessionIDHeader = 'X-PicoClaw-Session-ID';
 
@@ -15,28 +12,6 @@ type ModelConfigRequest = {
 
 type AgentProfileRequest = {
   profile: string;
-};
-
-export type PicoclawSessionListItem = {
-  id: string;
-  title: string;
-  preview: string;
-  message_count: number;
-  created: string;
-  updated: string;
-};
-
-export type PicoclawSessionDetailMessage = {
-  role: 'user' | 'assistant';
-  content: string;
-};
-
-export type PicoclawSessionDetail = {
-  id: string;
-  messages: PicoclawSessionDetailMessage[];
-  summary?: string;
-  created: string;
-  updated: string;
 };
 
 export function setPicoclawModelConfig(data: ModelConfigRequest) {
@@ -119,11 +94,11 @@ export function closeGateway() {
   void releaseRuntimeSession(activeSessionId).catch(() => undefined);
 }
 
-export function onGatewayConnectionState(listener: (state: GatewayTransportState) => void) {
+export function onGatewayConnectionState(listener: (state: PicoclawTransportState) => void) {
   return picoclawGateway.on('transport_state', listener);
 }
 
-export function onGatewayRunState(listener: (state: GatewayRunState) => void) {
+export function onGatewayRunState(listener: (state: PicoclawRunState) => void) {
   return picoclawGateway.on('run_state', listener);
 }
 
