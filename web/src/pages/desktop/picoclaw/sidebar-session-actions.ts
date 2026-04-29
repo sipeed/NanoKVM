@@ -9,26 +9,24 @@ import {
   listPicoclawSessions,
   picoclawGateway,
   sendChatMessage,
-  sendStopMessage,
-  type PicoclawSessionListItem
+  sendStopMessage
 } from '@/api/picoclaw.ts';
+import { getErrorMessage, getResponseErrorMessage } from '@/lib/errors.ts';
 import { generateUUIDv4 } from '@/lib/picoclaw-gateway.ts';
 import type {
-  PicoclawChatMessage,
   PicoclawConfigState,
+  PicoclawMessageSetter,
   PicoclawOverlayState,
   PicoclawRunState,
   PicoclawRuntimeStatus,
-  PicoclawTakeoverState,
+  PicoclawRuntimeStatusSetter,
+  PicoclawSessionListItem,
+  PicoclawTakeoverSetter,
   PicoclawTransportState
-} from '@/jotai/picoclaw.ts';
+} from '@/types';
 
 import { createErrorMessage, createStatusMessage, HIDDEN_OVERLAY } from './message-utils.ts';
 import { canConnectGateway } from './runtime-view.ts';
-
-type RuntimeStatusSetter = Dispatch<SetStateAction<PicoclawRuntimeStatus | null>>;
-type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
-type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
 
 type PicoclawSidebarSessionActionOptions = {
   t: TFunction;
@@ -40,8 +38,8 @@ type PicoclawSidebarSessionActionOptions = {
   isFreshConversation: boolean;
   isSwitchingSession: boolean;
   refreshState: () => Promise<PicoclawRuntimeStatus | null>;
-  setMessages: MessageSetter;
-  setTakeover: TakeoverSetter;
+  setMessages: PicoclawMessageSetter;
+  setTakeover: PicoclawTakeoverSetter;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
@@ -53,7 +51,7 @@ type PicoclawSidebarSessionActionOptions = {
   setIsLoadingHistory: Dispatch<SetStateAction<boolean>>;
   setIsDeletingSession: Dispatch<SetStateAction<boolean>>;
   setIsSwitchingSession: Dispatch<SetStateAction<boolean>>;
-  setRuntimeStatus: RuntimeStatusSetter;
+  setRuntimeStatus: PicoclawRuntimeStatusSetter;
 };
 
 export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSessionActionOptions) {
@@ -201,10 +199,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
     try {
       const response = await getPicoclawSession(sessionId);
       if (response.code !== 0) {
-        const errorMessage =
-          (response as { message?: string; msg?: string }).message ||
-          (response as { message?: string; msg?: string }).msg ||
-          t('picoclaw.history.loadFailed');
+        const errorMessage = getResponseErrorMessage(response, t('picoclaw.history.loadFailed'));
         setMessages((current) => [
           ...current,
           createErrorMessage({
@@ -255,8 +250,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
         }
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('picoclaw.history.loadFailed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.history.loadFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -279,10 +273,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
         return;
       }
 
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.history.deleteFailed');
+      const errorMessage = getResponseErrorMessage(response, t('picoclaw.history.deleteFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({
@@ -292,8 +283,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
         })
       ]);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : t('picoclaw.history.deleteFailed');
+      const errorMessage = getErrorMessage(error, t('picoclaw.history.deleteFailed'));
       setMessages((current) => [
         ...current,
         createErrorMessage({

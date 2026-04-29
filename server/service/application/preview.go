@@ -17,7 +17,7 @@ func (s *Service) GetPreview(c *gin.Context) {
 
 	isEnabled := isPreviewEnabled()
 
-	rsp.OkRspWithData(c, &proto.GetPreviewRsp{
+	rsp.OkRspWithData(c, &proto.EnabledRsp{
 		Enabled: isEnabled,
 	})
 }

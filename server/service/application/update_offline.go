@@ -7,16 +7,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"regexp"
-	"strings"
 	"time"
 
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
-
-var validFilenameRegex = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 
 func (s *Service) OfflineUpdate(c *gin.Context) {
 	var rsp proto.Response
@@ -76,7 +73,7 @@ func offlineUpdate(c *gin.Context) error {
 }
 
 func checkDownloadInProgress() error {
-	if _, err := os.Stat(sentinelPath); err == nil {
+	if utils.ProgressStatusExists() {
 		log.Debug("Download in progress")
 		return fmt.Errorf("download already in progress")
 	}
@@ -84,7 +81,7 @@ func checkDownloadInProgress() error {
 }
 
 func createSentinelFile() error {
-	if err := os.WriteFile(sentinelPath, []byte("downloading"), sentinelPermission); err != nil {
+	if err := utils.WriteProgressStatus("downloading"); err != nil {
 		log.Errorf("Failed to create sentinel file: %v", err)
 		return fmt.Errorf("failed to create sentinel file: %w", err)
 	}
@@ -126,7 +123,7 @@ func saveUploadedFile(part *multipart.Part, contentLength int64) (string, error)
 		return "", fmt.Errorf("no filename provided")
 	}
 
-	if err := validateFilename(filename); err != nil {
+	if err := utils.ValidateFlatFilename(filename); err != nil {
 		return "", err
 	}
 
@@ -137,7 +134,7 @@ func saveUploadedFile(part *multipart.Part, contentLength int64) (string, error)
 	}
 	defer out.Close()
 
-	pw := newProgressWriter(out, contentLength)
+	pw := utils.NewProgressWriter(out, contentLength, utils.ProgressStatusPath)
 	defer pw.Stop()
 
 	if _, err := io.Copy(pw, part); err != nil {
@@ -147,30 +144,6 @@ func saveUploadedFile(part *multipart.Part, contentLength int64) (string, error)
 	return outPath, nil
 }
 
-func validateFilename(filename string) error {
-	baseName := filepath.Base(filename)
-
-	// Check if the path contains directory components
-	if baseName != filename {
-		log.Warnf("Path detected in filename: %s", filename)
-		return fmt.Errorf("path detected in filename")
-	}
-
-	// Check for path traversal attempts
-	if strings.Contains(filename, "..") {
-		log.Warnf("Path traversal attempt: %s", filename)
-		return fmt.Errorf("invalid filename: path traversal detected")
-	}
-
-	// Validate filename characters
-	if !validFilenameRegex.MatchString(filename) {
-		log.Warnf("Invalid filename characters: %s", filename)
-		return fmt.Errorf("invalid filename: contains invalid characters")
-	}
-
-	return nil
-}
-
 func removeSentinelFile() {
-	_ = os.Remove(sentinelPath)
+	utils.ClearProgressStatus()
 }

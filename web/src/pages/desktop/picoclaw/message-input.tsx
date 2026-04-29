@@ -5,7 +5,7 @@ import { PlusIcon, SendIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
-import type { PicoclawTransportState } from '@/jotai/picoclaw.ts';
+import type { PicoclawTransportState } from '@/types';
 
 type MessageInputProps = {
   transportState: PicoclawTransportState;

@@ -2,7 +2,8 @@ import clsx from 'clsx';
 import { ImageIcon, SparklesIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import type { PicoclawChatMessage } from '@/jotai/picoclaw.ts';
+import { normalizeLiteralEmptyText } from '@/lib/text.ts';
+import type { PicoclawChatMessage } from '@/types';
 
 import { MarkdownContent } from './markdown-content.tsx';
 
@@ -61,20 +62,6 @@ function extractDisplayText(value: unknown): string {
   }
 
   return '';
-}
-
-function normalizeLiteralEmptyText(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    return '';
-  }
-
-  const normalized = trimmed.toLowerCase();
-  if (normalized === 'null' || normalized === 'undefined') {
-    return '';
-  }
-
-  return trimmed;
 }
 
 function shouldHideAssistantMessage(value?: string): boolean {

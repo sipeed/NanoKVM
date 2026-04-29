@@ -1,3 +1,5 @@
+import type { PicoclawRuntimeInstallSnapshot } from '@/types';
+
 const PICOCLAW_SESSION_ID_KEY = 'nano-kvm-picoclaw-session-id';
 const LEGACY_AI_SESSION_ID_KEY = 'nano-kvm-ai-session-id';
 const PICOCLAW_MAX_STEPS_KEY = 'nano-kvm-picoclaw-max-steps';
@@ -6,13 +8,6 @@ const PICOCLAW_MAX_RUNTIME_KEY = 'nano-kvm-picoclaw-max-runtime-ms';
 const LEGACY_AI_MAX_RUNTIME_KEY = 'nano-kvm-ai-max-runtime-ms';
 const PICOCLAW_RUNTIME_INSTALL_SNAPSHOT_KEY = 'nano-kvm-picoclaw-runtime-install-snapshot';
 const LEGACY_AI_RUNTIME_INSTALL_SNAPSHOT_KEY = 'nano-kvm-ai-runtime-install-snapshot';
-
-export type PicoclawRuntimeInstallSnapshot = {
-  installing: boolean;
-  installProgress?: number;
-  installStage?: string;
-  status?: string;
-};
 
 function getSessionStore() {
   try {

@@ -2,11 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
-import type { PicoclawSessionListItem } from '@/api/picoclaw.ts';
-import {
-  getPicoclawRuntimeInstallSnapshot,
-  type PicoclawRuntimeInstallSnapshot
-} from '@/lib/picoclaw-storage.ts';
+import { getPicoclawRuntimeInstallSnapshot } from '@/lib/picoclaw-storage.ts';
 import {
   picoclawConfigAtom,
   picoclawMessagesAtom,
@@ -16,6 +12,10 @@ import {
   picoclawTakeoverStateAtom,
   picoclawTransportStateAtom
 } from '@/jotai/picoclaw.ts';
+import type {
+  PicoclawRuntimeInstallSnapshot,
+  PicoclawSessionListItem
+} from '@/types';
 
 import {
   getPicoclawSidebarConnectionLabel,

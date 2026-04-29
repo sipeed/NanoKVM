@@ -52,7 +52,7 @@ func (s *Service) DisableHdmi(c *gin.Context) {
 func (s *Service) GetHdmiState(c *gin.Context) {
 	var rsp proto.Response
 
-	rsp.OkRspWithData(c, &proto.GetGetHdmiStateRsp{
+	rsp.OkRspWithData(c, &proto.EnabledRsp{
 		Enabled: !utils.IsHdmiDisabled(),
 	})
 

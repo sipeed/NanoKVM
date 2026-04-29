@@ -5,17 +5,17 @@ import type { TFunction } from 'i18next';
 import { closeGateway, connectGateway, picoclawGateway } from '@/api/picoclaw.ts';
 import {
   clearPicoclawRuntimeInstallSnapshot,
-  setPicoclawRuntimeInstallSnapshot,
-  type PicoclawRuntimeInstallSnapshot
+  setPicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
 import type {
-  PicoclawChatMessage,
+  PicoclawMessageSetter,
   PicoclawOverlayState,
   PicoclawRunState,
+  PicoclawRuntimeInstallSnapshot,
   PicoclawRuntimeStatus,
-  PicoclawTakeoverState,
+  PicoclawTakeoverSetter,
   PicoclawTransportState
-} from '@/jotai/picoclaw.ts';
+} from '@/types';
 
 import {
   createAssistantMessage,
@@ -28,14 +28,11 @@ import {
 } from './message-utils.ts';
 import { canConnectGateway, isPicoclawRuntimeInstalling } from './runtime-view.ts';
 
-type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
-type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
-
 type GatewayEventOptions = {
   t: TFunction;
   setActiveSessionId: Dispatch<SetStateAction<string>>;
-  setTakeover: TakeoverSetter;
-  setMessages: MessageSetter;
+  setTakeover: PicoclawTakeoverSetter;
+  setMessages: PicoclawMessageSetter;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
@@ -46,9 +43,9 @@ type LifecycleOptions = {
   refreshStateRef: MutableRefObject<() => Promise<PicoclawRuntimeStatus | null>>;
   setActiveSessionId: Dispatch<SetStateAction<string>>;
   setIsFreshConversation: Dispatch<SetStateAction<boolean>>;
-  setMessages: MessageSetter;
+  setMessages: PicoclawMessageSetter;
   setIsInitializing: Dispatch<SetStateAction<boolean>>;
-  setTakeover: TakeoverSetter;
+  setTakeover: PicoclawTakeoverSetter;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
@@ -59,7 +56,7 @@ type InstallSnapshotOptions = {
   runtimeStatus: PicoclawRuntimeStatus | null;
   setInstallSnapshot: Dispatch<SetStateAction<PicoclawRuntimeInstallSnapshot | null>>;
   previousInstallStateRef: MutableRefObject<{ installing: boolean; status: string }>;
-  setMessages: MessageSetter;
+  setMessages: PicoclawMessageSetter;
 };
 
 export function usePicoclawGatewayEvents({

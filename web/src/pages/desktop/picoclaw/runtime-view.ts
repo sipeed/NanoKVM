@@ -4,7 +4,7 @@ import type {
   PicoclawRunState,
   PicoclawRuntimeStatus,
   PicoclawTransportState
-} from '@/jotai/picoclaw.ts';
+} from '@/types';
 
 export type PicoclawSidebarMode = 'loading' | 'install' | 'model' | 'chat';
 
