@@ -136,10 +136,15 @@ func loadPicoclawGatewaySettings() (picoclawGatewaySettings, error) {
 		port = defaultPicoclawGatewayPort
 	}
 
+	picoSettings := picoclawPicoSettingsV3{}
+	if pico, ok := cfg.Channels["pico"]; ok {
+		picoSettings = pico.Settings
+	}
+
 	settings := picoclawGatewaySettings{
 		GatewayURL:      fmt.Sprintf("ws://%s:%d%s", host, port, picoclawGatewayPath),
 		Token:           doc.resolvedGatewayToken(),
-		AllowTokenQuery: cfg.Channels.Pico.AllowTokenQuery,
+		AllowTokenQuery: picoSettings.AllowTokenQuery,
 	}
 	settings.TargetModelName = resolvePicoclawTargetModelName(cfg)
 
@@ -148,11 +153,11 @@ func loadPicoclawGatewaySettings() (picoclawGatewaySettings, error) {
 		settings.ModelName = settings.TargetModelName
 	}
 
-	if cfg.Channels.Pico.PingInterval > 0 {
-		settings.PingIntervalMs = cfg.Channels.Pico.PingInterval * 1000
+	if picoSettings.PingInterval > 0 {
+		settings.PingIntervalMs = picoSettings.PingInterval * 1000
 	}
-	if cfg.Channels.Pico.ReadTimeout > 0 {
-		settings.ReadTimeoutMs = cfg.Channels.Pico.ReadTimeout * 1000
+	if picoSettings.ReadTimeout > 0 {
+		settings.ReadTimeoutMs = picoSettings.ReadTimeout * 1000
 	}
 
 	return settings, nil
