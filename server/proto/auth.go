@@ -11,6 +11,7 @@ type LoginRsp struct {
 
 type GetAccountRsp struct {
 	Username string `json:"username"`
+	Role     string `json:"role"`
 }
 
 type ChangePasswordReq struct {
@@ -20,4 +21,27 @@ type ChangePasswordReq struct {
 
 type IsPasswordUpdatedRsp struct {
 	IsUpdated bool `json:"isUpdated"`
+}
+
+// --- Multi-user management ---
+
+type UserInfo struct {
+	Username string `json:"username"`
+	Role     string `json:"role"`
+	Enabled  bool   `json:"enabled"`
+}
+
+type ListUsersRsp struct {
+	Users []UserInfo `json:"users"`
+}
+
+type CreateUserReq struct {
+	Username string `json:"username" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	Role     string `json:"role" validate:"required"`
+}
+
+type UpdateUserReq struct {
+	Role    string `json:"role"`
+	Enabled *bool  `json:"enabled"`
 }

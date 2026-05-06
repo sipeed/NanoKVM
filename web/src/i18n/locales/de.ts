@@ -78,7 +78,6 @@ const de = {
       ctrlaltdel: 'Ctrl+Alt+Del',
       dropdownEnglish: 'Englisch',
       dropdownGerman: 'Deutsch',
-      dropdownFrench: 'Französisch',
       dropdownRussian: 'Russisch'
     },
     mouse: {
@@ -333,6 +332,38 @@ const de = {
             'Ungültiges Dateinamenformat. Bitte laden Sie von den GitHub-Releases herunter.',
           updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.'
         }
+      },
+      users: {
+        title: 'Benutzerverwaltung',
+        addUser: 'Benutzer hinzufügen',
+        colUsername: 'Benutzername',
+        colRole: 'Rolle',
+        colEnabled: 'Aktiv',
+        colActions: 'Aktionen',
+        rolesTitle: 'Rollen-Übersicht',
+        roleAdmin: 'Vollzugriff + Benutzerverwaltung',
+        roleOperator: 'KVM nutzen: Stream, Tastatur, Maus, Power-Buttons',
+        roleViewer: 'Nur Stream anschauen',
+        changePassword: 'Passwort ändern',
+        newPassword: 'Neues Passwort',
+        confirmPassword: 'Passwort bestätigen',
+        pwdMismatch: 'Passwörter stimmen nicht überein',
+        pwdSuccess: 'Passwort erfolgreich geändert',
+        pwdFailed: 'Passwort ändern fehlgeschlagen',
+        password: 'Passwort',
+        delete: 'Löschen',
+        deleteConfirm: 'Benutzer wirklich löschen?',
+        createSuccess: 'Benutzer erstellt',
+        createFailed: 'Erstellen fehlgeschlagen',
+        deleteSuccess: 'Benutzer gelöscht',
+        deleteFailed: 'Löschen fehlgeschlagen',
+        updateSuccess: 'Aktualisiert',
+        updateFailed: 'Aktualisierung fehlgeschlagen',
+        loadFailed: 'Benutzer laden fehlgeschlagen',
+        usernameRequired: 'Benutzername eingeben',
+        passwordRequired: 'Passwort eingeben',
+        okBtn: 'OK',
+        cancelBtn: 'Abbrechen'
       },
       account: {
         title: 'Konto',

@@ -8,6 +8,7 @@ import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
 import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
+import { useRole } from '@/hooks/useRole.ts';
 
 import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
@@ -25,8 +26,8 @@ import { Wol } from './wol';
 
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
-
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
+  const { isOperator, isAdmin } = useRole();
 
   const {
     isInitialized,
@@ -66,12 +67,10 @@ export const Menu = () => {
         onMouseLeave={() => handleHovered(false)}
         onBlur={() => handleHovered(false)}
       >
-        {/* Trigger area for auto-show when hidden */}
         {isMenuExpanded && (
           <div className="absolute -top-[10px] left-0 right-0 h-[46px] w-full bg-transparent" />
         )}
 
-        {/* Menubar */}
         <div className="sticky top-[10px] flex w-full justify-center">
           <div
             className={clsx(
@@ -87,29 +86,40 @@ export const Menu = () => {
             </strong>
             <Divider type="vertical" />
 
+            {/* Screen immer sichtbar (nur Anzeige) */}
             <Screen />
-            <Keyboard />
-            <Mouse />
+
+            {/* Tastatur & Maus: nur operator+ */}
+            {isOperator && <Keyboard />}
+            {isOperator && <Mouse />}
+
             <Divider type="vertical" />
 
+            {/* Image/Download: alle */}
             {isEnabled('image') && <Image />}
             {isEnabled('download') && <DownloadImage />}
-            {isEnabled('script') && <Script />}
-            {isEnabled('terminal') && <Terminal />}
-            {isEnabled('wol') && <Wol />}
 
-            {['image', 'download', 'script', 'terminal', 'wol'].some(isEnabled) && (
+            {/* Script & Terminal: nur operator+ */}
+            {isOperator && isEnabled('script') && <Script />}
+            {isOperator && isEnabled('terminal') && <Terminal />}
+
+            {/* WoL: nur admin */}
+            {isAdmin && isEnabled('wol') && <Wol />}
+
+            {['image', 'download'].some(isEnabled) && (
               <Divider type="vertical" />
             )}
 
-            {isEnabled('picoclaw') && (
+            {/* Picoclaw: nur admin */}
+            {isAdmin && isEnabled('picoclaw') && (
               <>
                 <Picoclaw />
                 <Divider type="vertical" />
               </>
             )}
 
-            {isEnabled('power') && (
+            {/* Power/GPIO: nur operator+ */}
+            {isOperator && isEnabled('power') && (
               <>
                 <Power />
                 <Divider type="vertical" />
@@ -122,7 +132,6 @@ export const Menu = () => {
           </div>
         </div>
 
-        {/* Menubar expand button */}
         {!isMenuExpanded && <Expand toggleMenu={setIsMenuExpanded} />}
       </div>
     </Draggable>
