@@ -56,7 +56,7 @@ export const Wifi = () => {
       const rsp = await api.connectWifi(ssid, password);
       if (rsp.code !== 0) {
         console.log(rsp.msg);
-        setMessage(t('settings.device.wifi.failed'));
+        setMessage(t('settings.network.wifi.failed'));
         getWiFi();
         return;
       }
@@ -109,9 +109,9 @@ export const Wifi = () => {
   if (isAPMode) {
     return (
       <div className="flex items-center justify-between">
-        <div className="flex flex-col">
-          <span>{t('settings.device.wifi.title')}</span>
-          <span className="text-xs text-neutral-500">{t('settings.device.wifi.apMode')}</span>
+        <div className="flex flex-col space-y-1">
+          <span>{t('settings.network.wifi.title')}</span>
+          <span className="text-xs text-neutral-500">{t('settings.network.wifi.apMode')}</span>
         </div>
 
         <Button shape="round" size="small" disabled>
@@ -127,8 +127,10 @@ export const Wifi = () => {
     <>
       <div className="flex items-center justify-between">
         <div className="flex flex-col space-y-1">
-          <span>{t('settings.device.wifi.title')}</span>
-          <span className="text-xs text-neutral-500">{t('settings.device.wifi.description')}</span>
+          <span>{t('settings.network.wifi.title')}</span>
+          <span className="text-xs text-neutral-500">
+            {connectedWiFi ? connectedWiFi : t('settings.network.wifi.description')}
+          </span>
         </div>
 
         <Button
@@ -149,8 +151,8 @@ export const Wifi = () => {
         centered={true}
         onOk={connect}
         onCancel={closeModal}
-        okText={t('settings.device.wifi.joinBtn')}
-        cancelText={t('settings.device.wifi.cancelBtn')}
+        okText={t('settings.network.wifi.joinBtn')}
+        cancelText={t('settings.network.wifi.cancelBtn')}
         confirmLoading={status === 'connecting'}
       >
         {/* title */}
@@ -161,9 +163,9 @@ export const Wifi = () => {
 
           {!connectedWiFi ? (
             <div className="flex flex-col">
-              <span className="text-lg font-bold">{t('settings.device.wifi.connect')}</span>
+              <span className="text-lg font-bold">{t('settings.network.wifi.connect')}</span>
               <span className="text-xs text-neutral-400">
-                {t('settings.device.wifi.connectDesc1')}
+                {t('settings.network.wifi.connectDesc1')}
               </span>
             </div>
           ) : (
@@ -188,14 +190,14 @@ export const Wifi = () => {
             value={ssid}
             style={{ width: '300px' }}
             prefix={<WifiOutlined />}
-            placeholder={t('settings.device.wifi.ssid')}
+            placeholder={t('settings.network.wifi.ssid')}
             onChange={(e) => setSsid(e.target.value)}
           />
           <Input.Password
             value={password}
             style={{ width: '300px' }}
             prefix={<LockOutlined />}
-            placeholder={t('settings.device.wifi.password')}
+            placeholder={t('settings.network.wifi.password')}
             onChange={(e) => setPassword(e.target.value)}
           />
 

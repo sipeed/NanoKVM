@@ -276,28 +276,9 @@ const zh = {
           1800: '30分钟',
           3600: '1小时'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: '配置 Wi-Fi 信息',
-          apMode: 'AP 模式已启用，该模式下仅支持扫描二维码配网',
-          connect: '连接 Wi-Fi',
-          connectDesc1: '请输入网络名称和密码',
-          connectDesc2: '请输入密码以连接此网络',
-          disconnect: '是否要断开该网络连接？',
-          failed: '连接失败，请重试',
-          ssid: '名称',
-          password: '密码',
-          joinBtn: '加入',
-          confirmBtn: '确定',
-          cancelBtn: '取消'
-        },
         ssh: {
           description: '启用 SSH 远程访问',
           tip: '启用前请务必设置强密码（帐号 - 修改密码）'
-        },
-        tls: {
-          description: '启用 HTTPS 协议',
-          tip: '注意：使用 HTTPS 可能导致延迟增加，特别是在 MJPEG 视频模式下。'
         },
         advanced: '高级设置',
         swap: {
@@ -338,6 +319,52 @@ const zh = {
         networkDesc: '在远程主机中挂载虚拟网卡',
         okBtn: '是',
         cancelBtn: '否'
+      },
+      network: {
+        title: '网络',
+        wifi: {
+          title: 'Wi-Fi',
+          description: '配置 Wi-Fi 信息',
+          apMode: 'AP 模式已启用，该模式下仅支持扫描二维码配网',
+          connect: '连接 Wi-Fi',
+          connectDesc1: '请输入网络名称和密码',
+          connectDesc2: '请输入密码以连接此网络',
+          disconnect: '是否要断开该网络连接？',
+          failed: '连接失败，请重试',
+          ssid: '名称',
+          password: '密码',
+          joinBtn: '加入',
+          confirmBtn: '确定',
+          cancelBtn: '取消'
+        },
+        tls: {
+          description: '启用 HTTPS 协议',
+          tip: '注意：使用 HTTPS 可能导致延迟增加，特别是在 MJPEG 视频模式下。'
+        },
+        dns: {
+          title: 'DNS',
+          description: '配置 NanoKVM 使用的 DNS 服务器',
+          mode: '模式',
+          dhcp: 'DHCP',
+          manual: '手动',
+          add: '添加 DNS',
+          save: '保存',
+          invalid: '请输入有效的 IP 地址',
+          noDhcp: '当前未获取到 DHCP DNS',
+          saved: 'DNS 设置已保存',
+          saveFailed: '保存 DNS 设置失败',
+          unsaved: '有未保存的更改',
+          maxServers: '最多允许 {{count}} 个 DNS 服务器',
+          dnsServers: 'DNS 服务器',
+          dhcpServersDescription: 'DNS 服务器由 DHCP 自动获取。',
+          manualServersDescription: 'DNS 服务器可以手动编辑。',
+          networkDetails: '网络详情',
+          interface: '接口',
+          ipAddress: 'IP 地址',
+          subnetMask: '子网掩码',
+          router: '路由器',
+          none: '无'
+        }
       },
       tailscale: {
         title: 'Tailscale',

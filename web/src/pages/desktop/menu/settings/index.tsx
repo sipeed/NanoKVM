@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import {
   BadgeInfoIcon,
   CircleArrowUpIcon,
+  NetworkIcon,
   PaletteIcon,
   SettingsIcon,
   SmartphoneIcon,
@@ -24,6 +25,7 @@ import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
 import { Device } from './device';
+import { Network } from './network';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
 
@@ -33,6 +35,7 @@ export const Settings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [currentTab, setCurrentTab] = useState('about');
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
@@ -42,6 +45,7 @@ export const Settings = () => {
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
     { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
+    { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
     {
       id: 'tailscale',
       icon: <TailscaleIcon />,
@@ -61,6 +65,10 @@ export const Settings = () => {
       checkForUpdates();
     }
   }, []);
+
+  useEffect(() => {
+    scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [currentTab]);
 
   function checkForUpdates() {
     api.getVersion().then((rsp: any) => {
@@ -162,7 +170,10 @@ export const Settings = () => {
             ))}
           </div>
 
-          <ScrollArea className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3">
+          <ScrollArea
+            viewportRef={scrollViewportRef}
+            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3"
+          >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
                 <>{tabs.find((tab) => tab.id === currentTab)?.component}</>

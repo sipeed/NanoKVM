@@ -267,28 +267,9 @@ const ja = {
           1800: '30分',
           3600: '1時間'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Wi-Fi 設定',
-          apMode: 'AP モードが有効になりました。QR コードをスキャンして Wi-Fi に接続してください。',
-          connect: 'Wi-Fi に接続',
-          connectDesc1: 'SSID とパスワードを入力してください',
-          connectDesc2: 'このネットワークに接続するためのパスワードを入力してください',
-          disconnect: 'このネットワーク接続を切断しますか？',
-          failed: '接続に失敗しました。もう一度お試しください。',
-          ssid: 'SSID',
-          password: 'パスワード',
-          joinBtn: '接続',
-          confirmBtn: 'OK',
-          cancelBtn: 'キャンセル'
-        },
         ssh: {
           description: 'SSH リモートアクセスを有効にする',
           tip: '使用する前に必ず強力なパスワードを設定してください（アカウント - パスワードの変更）'
-        },
-        tls: {
-          description: 'HTTPS プロトコルを有効にする',
-          tip: '注意：HTTPS を使用すると、特に MJPEG ビデオモードで遅延が増加する可能性があります。'
         },
         advanced: '詳細設定',
         swap: {
@@ -329,6 +310,52 @@ const ja = {
         networkDesc: 'リモートホストに仮想ネットワークカードをマウントする',
         okBtn: 'はい',
         cancelBtn: 'いいえ'
+      },
+      network: {
+        title: 'ネットワーク',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi 設定',
+          apMode: 'AP モードが有効になりました。QR コードをスキャンして Wi-Fi に接続してください。',
+          connect: 'Wi-Fi に接続',
+          connectDesc1: 'SSID とパスワードを入力してください',
+          connectDesc2: 'このネットワークに接続するためのパスワードを入力してください',
+          disconnect: 'このネットワーク接続を切断しますか？',
+          failed: '接続に失敗しました。もう一度お試しください。',
+          ssid: 'SSID',
+          password: 'パスワード',
+          joinBtn: '接続',
+          confirmBtn: 'OK',
+          cancelBtn: 'キャンセル'
+        },
+        tls: {
+          description: 'HTTPS プロトコルを有効にする',
+          tip: '注意：HTTPS を使用すると、特に MJPEG ビデオモードで遅延が増加する可能性があります。'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'NanoKVM の DNS サーバーを設定',
+          mode: 'モード',
+          dhcp: 'DHCP',
+          manual: '手動',
+          add: 'DNS を追加',
+          save: '保存',
+          invalid: '有効な IP アドレスを入力してください',
+          noDhcp: '現在 DHCP DNS は利用できません',
+          saved: 'DNS 設定を保存しました',
+          saveFailed: 'DNS 設定の保存に失敗しました',
+          unsaved: '未保存の変更',
+          maxServers: 'DNS サーバーは最大 {{count}} 個までです',
+          dnsServers: 'DNS サーバー',
+          dhcpServersDescription: 'DNS サーバーは DHCP から自動取得されます。',
+          manualServersDescription: 'DNS サーバーは手動で編集できます。',
+          networkDetails: 'ネットワーク詳細',
+          interface: 'インターフェイス',
+          ipAddress: 'IP アドレス',
+          subnetMask: 'サブネットマスク',
+          router: 'ルーター',
+          none: 'なし'
+        }
       },
       tailscale: {
         title: 'Tailscale',

@@ -183,15 +183,56 @@ const it = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Rete',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configura Wi-Fi',
+          apMode: 'La modalità AP è attiva, connettiti al Wi-Fi scansionando il codice QR',
+          connect: 'Connetti Wi-Fi',
+          connectDesc1: 'Inserisci SSID e password della rete',
+          connectDesc2: 'Inserisci la password per unirti a questa rete',
+          disconnect: 'Vuoi davvero disconnettere la rete?',
+          failed: 'Connessione non riuscita, riprova.',
+          ssid: 'Nome',
+          password: 'Password',
+          joinBtn: 'Connetti',
+          confirmBtn: 'OK',
+          cancelBtn: 'Annulla'
+        },
+        tls: {
+          description: 'Abilita protocollo HTTPS',
+          tip: 'Attenzione: l\'uso di HTTPS può aumentare la latenza, soprattutto in modalità video MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Configura i server DNS per NanoKVM',
+          mode: 'Modalità',
+          dhcp: 'DHCP',
+          manual: 'Manuale',
+          add: 'Aggiungi DNS',
+          save: 'Salva',
+          invalid: 'Inserisci un indirizzo IP valido',
+          noDhcp: 'Nessun DNS DHCP è attualmente disponibile',
+          saved: 'Impostazioni DNS salvate',
+          saveFailed: 'Impossibile salvare le impostazioni DNS',
+          unsaved: 'Modifiche non salvate',
+          maxServers: 'Sono consentiti al massimo {{count}} server DNS',
+          dnsServers: 'Server DNS',
+          dhcpServersDescription: 'I server DNS vengono ottenuti automaticamente da DHCP.',
+          manualServersDescription: 'I server DNS possono essere modificati manualmente.',
+          networkDetails: 'Dettagli rete',
+          interface: 'Interfaccia',
+          ipAddress: 'Indirizzo IP',
+          subnetMask: 'Subnet mask',
+          router: 'Router',
+          none: 'Nessuno'
+        }
       },
       tailscale: {
         title: 'Tailscale',

@@ -182,15 +182,56 @@ const nb = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Nettverk',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Konfigurer Wi-Fi',
+          apMode: 'AP-modus er aktivert, koble til Wi-Fi ved å skanne QR-koden',
+          connect: 'Koble til Wi-Fi',
+          connectDesc1: 'Skriv inn nettverkets SSID og passord',
+          connectDesc2: 'Skriv inn passordet for å koble til dette nettverket',
+          disconnect: 'Er du sikker på at du vil koble fra nettverket?',
+          failed: 'Tilkobling mislyktes, prøv igjen.',
+          ssid: 'Navn',
+          password: 'Passord',
+          joinBtn: 'Koble til',
+          confirmBtn: 'OK',
+          cancelBtn: 'Avbryt'
+        },
+        tls: {
+          description: 'Aktiver HTTPS-protokoll',
+          tip: 'Merk: Bruk av HTTPS kan øke forsinkelsen, spesielt i MJPEG-videomodus.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Konfigurer DNS-servere for NanoKVM',
+          mode: 'Modus',
+          dhcp: 'DHCP',
+          manual: 'Manuell',
+          add: 'Legg til DNS',
+          save: 'Lagre',
+          invalid: 'Skriv inn en gyldig IP-adresse',
+          noDhcp: 'Ingen DHCP-DNS er tilgjengelig nå',
+          saved: 'DNS-innstillinger lagret',
+          saveFailed: 'Kunne ikke lagre DNS-innstillinger',
+          unsaved: 'Ulagrede endringer',
+          maxServers: 'Maksimalt {{count}} DNS-servere er tillatt',
+          dnsServers: 'DNS-servere',
+          dhcpServersDescription: 'DNS-servere hentes automatisk fra DHCP.',
+          manualServersDescription: 'DNS-servere kan redigeres manuelt.',
+          networkDetails: 'Nettverksdetaljer',
+          interface: 'Grensesnitt',
+          ipAddress: 'IP-adresse',
+          subnetMask: 'Subnettmaske',
+          router: 'Ruter',
+          none: 'Ingen'
+        }
       },
       tailscale: {
         title: 'Tailscale',

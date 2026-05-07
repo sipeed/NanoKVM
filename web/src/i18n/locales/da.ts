@@ -181,15 +181,56 @@ const da = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Netværk',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Konfigurer Wi-Fi',
+          apMode: 'AP-tilstand er aktiveret, opret forbindelse til Wi-Fi ved at scanne QR-koden',
+          connect: 'Tilslut Wi-Fi',
+          connectDesc1: 'Indtast netværkets SSID og adgangskode',
+          connectDesc2: 'Indtast adgangskoden for at tilslutte dette netværk',
+          disconnect: 'Er du sikker på, at du vil afbryde netværket?',
+          failed: 'Forbindelsen mislykkedes, prøv igen.',
+          ssid: 'Navn',
+          password: 'Adgangskode',
+          joinBtn: 'Tilslut',
+          confirmBtn: 'OK',
+          cancelBtn: 'Annuller'
+        },
+        tls: {
+          description: 'Aktiver HTTPS-protokol',
+          tip: 'Bemærk: Brug af HTTPS kan øge forsinkelsen, især med MJPEG-videotilstand.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Konfigurer DNS-servere til NanoKVM',
+          mode: 'Tilstand',
+          dhcp: 'DHCP',
+          manual: 'Manuel',
+          add: 'Tilføj DNS',
+          save: 'Gem',
+          invalid: 'Indtast en gyldig IP-adresse',
+          noDhcp: 'Ingen DHCP-DNS er tilgængelig i øjeblikket',
+          saved: 'DNS-indstillinger gemt',
+          saveFailed: 'DNS-indstillinger kunne ikke gemmes',
+          unsaved: 'Ikke-gemte ændringer',
+          maxServers: 'Maksimalt {{count}} DNS-servere er tilladt',
+          dnsServers: 'DNS-servere',
+          dhcpServersDescription: 'DNS-servere hentes automatisk fra DHCP.',
+          manualServersDescription: 'DNS-servere kan redigeres manuelt.',
+          networkDetails: 'Netværksdetaljer',
+          interface: 'Grænseflade',
+          ipAddress: 'IP-adresse',
+          subnetMask: 'Undernetmaske',
+          router: 'Router',
+          none: 'Ingen'
+        }
       },
       tailscale: {
         title: 'Tailscale',

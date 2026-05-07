@@ -246,18 +246,9 @@ const ko = {
           1800: '30분',
           3600: '1시간'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Wi-Fi 설정',
-          setBtn: '설정'
-        },
         ssh: {
           description: 'SSH 원격 접속 활성화',
           tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
-        },
-        tls: {
-          description: 'HTTPS 프로토콜 활성화',
-          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
         },
         advanced: '고급 설정',
         swap: {
@@ -289,6 +280,52 @@ const ko = {
         rebootDesc: 'NanoKVM을 재부팅하시겠습니까?',
         okBtn: '네',
         cancelBtn: '아니오'
+      },
+      network: {
+        title: '네트워크',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi 설정',
+          apMode: 'AP 모드가 활성화되었습니다. QR 코드를 스캔하여 Wi-Fi에 연결하세요',
+          connect: 'Wi-Fi 연결',
+          connectDesc1: '네트워크 SSID와 비밀번호를 입력하세요',
+          connectDesc2: '이 네트워크에 연결할 비밀번호를 입력하세요',
+          disconnect: '네트워크 연결을 끊으시겠습니까?',
+          failed: '연결에 실패했습니다. 다시 시도하세요.',
+          ssid: '이름',
+          password: '비밀번호',
+          joinBtn: '연결',
+          confirmBtn: '확인',
+          cancelBtn: '취소'
+        },
+        tls: {
+          description: 'HTTPS 프로토콜 활성화',
+          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'NanoKVM의 DNS 서버 설정',
+          mode: '모드',
+          dhcp: 'DHCP',
+          manual: '수동',
+          add: 'DNS 추가',
+          save: '저장',
+          invalid: '유효한 IP 주소를 입력하세요',
+          noDhcp: '현재 사용 가능한 DHCP DNS가 없습니다',
+          saved: 'DNS 설정이 저장되었습니다',
+          saveFailed: 'DNS 설정 저장 실패',
+          unsaved: '저장되지 않은 변경사항',
+          maxServers: '최대 {{count}}개의 DNS 서버가 허용됩니다',
+          dnsServers: 'DNS 서버',
+          dhcpServersDescription: 'DNS 서버는 DHCP에서 자동으로 가져옵니다.',
+          manualServersDescription: 'DNS 서버를 수동으로 편집할 수 있습니다.',
+          networkDetails: '네트워크 세부 정보',
+          interface: '인터페이스',
+          ipAddress: 'IP 주소',
+          subnetMask: '서브넷 마스크',
+          router: '라우터',
+          none: '없음'
+        }
       },
       tailscale: {
         title: 'Tailscale',

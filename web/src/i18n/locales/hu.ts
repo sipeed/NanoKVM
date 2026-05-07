@@ -183,15 +183,56 @@ const hu = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Hálózat',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi beállítása',
+          apMode: 'Az AP mód engedélyezve van, csatlakozzon a Wi-Fihez a QR-kód beolvasásával',
+          connect: 'Wi-Fi csatlakoztatása',
+          connectDesc1: 'Adja meg a hálózat SSID-jét és jelszavát',
+          connectDesc2: 'Adja meg a jelszót a hálózathoz való csatlakozáshoz',
+          disconnect: 'Biztosan bontja a hálózati kapcsolatot?',
+          failed: 'A csatlakozás sikertelen, próbálja újra.',
+          ssid: 'Név',
+          password: 'Jelszó',
+          joinBtn: 'Csatlakozás',
+          confirmBtn: 'OK',
+          cancelBtn: 'Mégse'
+        },
+        tls: {
+          description: 'HTTPS protokoll engedélyezése',
+          tip: 'Figyelem: A HTTPS használata növelheti a késleltetést, különösen MJPEG videó módban.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'DNS-kiszolgálók beállítása a NanoKVM számára',
+          mode: 'Mód',
+          dhcp: 'DHCP',
+          manual: 'Kézi',
+          add: 'DNS hozzáadása',
+          save: 'Mentés',
+          invalid: 'Adjon meg egy érvényes IP-címet',
+          noDhcp: 'Jelenleg nincs elérhető DHCP DNS',
+          saved: 'DNS-beállítások mentve',
+          saveFailed: 'Nem sikerült menteni a DNS-beállításokat',
+          unsaved: 'Nem mentett módosítások',
+          maxServers: 'Legfeljebb {{count}} DNS-kiszolgáló engedélyezett',
+          dnsServers: 'DNS-kiszolgálók',
+          dhcpServersDescription: 'A DNS-kiszolgálók automatikusan DHCP-n keresztül érkeznek.',
+          manualServersDescription: 'A DNS-kiszolgálók kézzel szerkeszthetők.',
+          networkDetails: 'Hálózati részletek',
+          interface: 'Interfész',
+          ipAddress: 'IP-cím',
+          subnetMask: 'Alhálózati maszk',
+          router: 'Router',
+          none: 'Nincs'
+        }
       },
       tailscale: {
         title: 'Tailscale',

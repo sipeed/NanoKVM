@@ -226,18 +226,9 @@ const ca = {
           1800: "30 min",
           3600: "1 h"
         },
-        wifi: {
-          title: "Xarxa sense fils",
-          description: "Configura la xarxa sense fils",
-          setBtn: "Configura"
-        },
         ssh: {
           description: "Activa accés remot per SSH",
           tip: "Configura una contrasenya segura abans (Compte - Canvia contrasenya)"
-        },
-        tls: {
-          description: "Activa el protocol HTTPS",
-          tip: "Atenció: Usar HTTPS pot augmentar la latència, sobretot amb vídeo MJPEG."
         },
         advanced: "Configuració avançada",
         swap: {
@@ -269,6 +260,52 @@ const ca = {
         rebootDesc: "Segur que vols reiniciar el NanoKVM?",
         okBtn: "Sí",
         cancelBtn: "No"
+      },
+      network: {
+        title: 'Xarxa',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configura la xarxa Wi-Fi',
+          apMode: 'El mode AP està activat; connecta\'t al Wi-Fi escanejant el codi QR',
+          connect: 'Connecta\'t a Wi-Fi',
+          connectDesc1: 'Introdueix el SSID i la contrasenya de la xarxa',
+          connectDesc2: 'Introdueix la contrasenya per connectar-te a aquesta xarxa',
+          disconnect: 'Segur que vols desconnectar la xarxa?',
+          failed: 'La connexió ha fallat, torna-ho a provar.',
+          ssid: 'Nom',
+          password: 'Contrasenya',
+          joinBtn: 'Connecta',
+          confirmBtn: 'D\'acord',
+          cancelBtn: 'Cancel·la'
+        },
+        tls: {
+          description: 'Activa el protocol HTTPS',
+          tip: 'Atenció: Usar HTTPS pot augmentar la latència, sobretot amb vídeo MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Configura els servidors DNS per a NanoKVM',
+          mode: 'Mode',
+          dhcp: 'DHCP',
+          manual: 'Manual',
+          add: 'Afegeix DNS',
+          save: 'Desa',
+          invalid: 'Introdueix una adreça IP vàlida',
+          noDhcp: 'No hi ha cap DNS DHCP disponible actualment',
+          saved: 'Configuració DNS desada',
+          saveFailed: 'No s\'ha pogut desar la configuració DNS',
+          unsaved: 'Canvis no desats',
+          maxServers: 'Es permeten com a màxim {{count}} servidors DNS',
+          dnsServers: 'Servidors DNS',
+          dhcpServersDescription: 'Els servidors DNS s\'obtenen automàticament via DHCP.',
+          manualServersDescription: 'Els servidors DNS es poden editar manualment.',
+          networkDetails: 'Detalls de xarxa',
+          interface: 'Interfície',
+          ipAddress: 'Adreça IP',
+          subnetMask: 'Màscara de subxarxa',
+          router: 'Encaminador',
+          none: 'Cap'
+        }
       },
       tailscale: {
         title: "Tailscale",

@@ -182,15 +182,56 @@ const id = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Jaringan',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Konfigurasi Wi-Fi',
+          apMode: 'Mode AP aktif, sambungkan ke Wi-Fi dengan memindai kode QR',
+          connect: 'Hubungkan Wi-Fi',
+          connectDesc1: 'Masukkan SSID jaringan dan kata sandi',
+          connectDesc2: 'Masukkan kata sandi untuk bergabung ke jaringan ini',
+          disconnect: 'Yakin ingin memutuskan jaringan?',
+          failed: 'Koneksi gagal, coba lagi.',
+          ssid: 'Nama',
+          password: 'Kata sandi',
+          joinBtn: 'Gabung',
+          confirmBtn: 'OK',
+          cancelBtn: 'Batal'
+        },
+        tls: {
+          description: 'Aktifkan protokol HTTPS',
+          tip: 'Perhatian: Menggunakan HTTPS dapat meningkatkan latensi, terutama pada mode video MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Konfigurasi server DNS untuk NanoKVM',
+          mode: 'Mode',
+          dhcp: 'DHCP',
+          manual: 'Manual',
+          add: 'Tambah DNS',
+          save: 'Simpan',
+          invalid: 'Masukkan alamat IP yang valid',
+          noDhcp: 'DNS DHCP saat ini tidak tersedia',
+          saved: 'Pengaturan DNS disimpan',
+          saveFailed: 'Gagal menyimpan pengaturan DNS',
+          unsaved: 'Perubahan belum disimpan',
+          maxServers: 'Maksimal {{count}} server DNS diizinkan',
+          dnsServers: 'Server DNS',
+          dhcpServersDescription: 'Server DNS diperoleh otomatis dari DHCP.',
+          manualServersDescription: 'Server DNS dapat diedit secara manual.',
+          networkDetails: 'Detail Jaringan',
+          interface: 'Antarmuka',
+          ipAddress: 'Alamat IP',
+          subnetMask: 'Subnet Mask',
+          router: 'Router',
+          none: 'Tidak ada'
+        }
       },
       tailscale: {
         title: 'Tailscale',

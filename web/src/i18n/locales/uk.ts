@@ -227,18 +227,9 @@ const uk = {
           1800: '30 хв',
           3600: '1 година'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Налаштування Wi-Fi',
-          setBtn: 'Конфігурація'
-        },
         ssh: {
           description: 'Увімкніть віддалений доступ по SSH',
           tip: 'Перед ввімкненням встановіть надійний пароль (Обліковий запис - Зміна пароля)'
-        },
-        tls: {
-          description: 'Увімкнути протокол HTTPS',
-          tip: 'Будьте в курсі: Використання HTTPS може збільшити затримку, особливо в режимі відео MJPEG.'
         },
         advanced: 'Розширені налаштування',
         swap: {
@@ -267,6 +258,52 @@ const uk = {
         rebootDesc: 'Ви впевнені, що хочете перезавантажити Nanokvm?',
         okBtn: 'Так',
         cancelBtn: 'Ні'
+      },
+      network: {
+        title: 'Мережа',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Налаштування Wi-Fi',
+          apMode: 'Режим AP увімкнено, підключіться до Wi-Fi, відсканувавши QR-код',
+          connect: 'Підключити Wi-Fi',
+          connectDesc1: 'Введіть SSID мережі та пароль',
+          connectDesc2: 'Введіть пароль, щоб підключитися до цієї мережі',
+          disconnect: 'Ви впевнені, що хочете відключити мережу?',
+          failed: 'Не вдалося підключитися, спробуйте ще раз.',
+          ssid: 'Назва',
+          password: 'Пароль',
+          joinBtn: 'Підключити',
+          confirmBtn: 'OK',
+          cancelBtn: 'Скасувати'
+        },
+        tls: {
+          description: 'Увімкнути протокол HTTPS',
+          tip: 'Будьте в курсі: Використання HTTPS може збільшити затримку, особливо в режимі відео MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Налаштування DNS-серверів для NanoKVM',
+          mode: 'Режим',
+          dhcp: 'DHCP',
+          manual: 'Вручну',
+          add: 'Додати DNS',
+          save: 'Зберегти',
+          invalid: 'Введіть дійсну IP-адресу',
+          noDhcp: 'Наразі DHCP DNS недоступний',
+          saved: 'Налаштування DNS збережено',
+          saveFailed: 'Не вдалося зберегти налаштування DNS',
+          unsaved: 'Незбережені зміни',
+          maxServers: 'Дозволено щонайбільше {{count}} DNS-серверів',
+          dnsServers: 'DNS-сервери',
+          dhcpServersDescription: 'DNS-сервери автоматично отримуються з DHCP.',
+          manualServersDescription: 'DNS-сервери можна редагувати вручну.',
+          networkDetails: 'Відомості про мережу',
+          interface: 'Інтерфейс',
+          ipAddress: 'IP-адреса',
+          subnetMask: 'Маска підмережі',
+          router: 'Маршрутизатор',
+          none: 'Немає'
+        }
       },
       tailscale: {
         title: 'Tailscale',

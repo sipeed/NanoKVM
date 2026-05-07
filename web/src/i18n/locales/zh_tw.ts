@@ -258,29 +258,9 @@ const zh_tw = {
           1800: '30 分鐘',
           3600: '1 小時'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: '設定 Wi-Fi',
-          setBtn: '設定',
-          apMode: 'AP 模式已啟用，該模式下僅支援掃描 QRCode 配網',
-          connect: '連線 Wi-Fi',
-          connectDesc1: '請輸入網路名稱和密碼',
-          connectDesc2: '請輸入密碼以連線此網路',
-          disconnect: '是否要中斷該網路連線？',
-          failed: '連線失敗，請重試',
-          ssid: 'SSID 名稱',
-          password: '密碼',
-          joinBtn: '加入',
-          confirmBtn: '確定',
-          cancelBtn: '取消'
-        },
         ssh: {
           description: '啟用 SSH 伺服器',
           tip: '啟用前請務必設定強密碼（帳號 - 更改密碼）'
-        },
-        tls: {
-          description: '啟用 HTTPS 協議',
-          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
         },
         advanced: '進階設定',
         swap: {
@@ -324,6 +304,52 @@ const zh_tw = {
         rebootDesc: '您確定要重新啟動 NanoKVM?',
         okBtn: '確定',
         cancelBtn: '取消'
+      },
+      network: {
+        title: '網路',
+        wifi: {
+          title: 'Wi-Fi',
+          description: '設定 Wi-Fi',
+          apMode: 'AP 模式已啟用，該模式下僅支援掃描 QRCode 配網',
+          connect: '連線 Wi-Fi',
+          connectDesc1: '請輸入網路名稱和密碼',
+          connectDesc2: '請輸入密碼以連線此網路',
+          disconnect: '是否要中斷該網路連線？',
+          failed: '連線失敗，請重試',
+          ssid: 'SSID 名稱',
+          password: '密碼',
+          joinBtn: '加入',
+          confirmBtn: '確定',
+          cancelBtn: '取消'
+        },
+        tls: {
+          description: '啟用 HTTPS 協議',
+          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
+        },
+        dns: {
+          title: 'DNS',
+          description: '設定 NanoKVM 使用的 DNS 伺服器',
+          mode: '模式',
+          dhcp: 'DHCP',
+          manual: '手動',
+          add: '新增 DNS',
+          save: '儲存',
+          invalid: '請輸入有效的 IP 位址',
+          noDhcp: '目前未取得 DHCP DNS',
+          saved: 'DNS 設定已儲存',
+          saveFailed: '儲存 DNS 設定失敗',
+          unsaved: '有未儲存的變更',
+          maxServers: '最多允許 {{count}} 個 DNS 伺服器',
+          dnsServers: 'DNS 伺服器',
+          dhcpServersDescription: 'DNS 伺服器由 DHCP 自動取得。',
+          manualServersDescription: 'DNS 伺服器可以手動編輯。',
+          networkDetails: '網路詳細資訊',
+          interface: '介面',
+          ipAddress: 'IP 位址',
+          subnetMask: '子網路遮罩',
+          router: '路由器',
+          none: '無'
+        }
       },
       tailscale: {
         title: 'Tailscale',

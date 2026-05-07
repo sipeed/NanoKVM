@@ -1,0 +1,56 @@
+#!/bin/sh
+
+ACTION="$1"
+CACHE="/etc/resolv.conf.dhcp"
+ACTIVE="/etc/resolv.conf"
+MODE="/etc/kvm/network/dns.mode"
+BOOT="/boot/resolv.conf"
+
+[ "$ACTION" = "bound" ] || [ "$ACTION" = "renew" ] || exit 0
+[ -n "$dns" ] || exit 0
+
+TMPFILE="$(mktemp)" || exit 1
+
+write_search_domain() {
+	if [ -n "$search" ]; then
+		printf "search"
+		for domain_name in $search; do
+			printf " %s" "$domain_name"
+		done
+		printf "\n"
+		return
+	fi
+
+	if [ -n "$domain" ]; then
+		printf "domain %s\n" "$domain"
+		return
+	fi
+
+	for source in "$CACHE" "$ACTIVE"; do
+		[ -f "$source" ] || continue
+		while IFS= read -r line; do
+			line="${line%%#*}"
+			set -- $line
+			[ "$1" = "search" ] || [ "$1" = "domain" ] || continue
+			[ -n "$2" ] || continue
+			printf "%s\n" "$line"
+			return
+		done < "$source"
+	done
+}
+
+{
+	write_search_domain
+	for server in $dns; do
+		printf "nameserver %s\n" "$server"
+	done
+} > "$TMPFILE"
+
+cat "$TMPFILE" > "$CACHE"
+MODE_VALUE="$(cat "$MODE" 2>/dev/null)"
+if [ "$MODE_VALUE" = "dhcp" ] || { [ -z "$MODE_VALUE" ] && [ ! -f "$BOOT" ]; }; then
+	cat "$TMPFILE" > "$ACTIVE"
+fi
+rm -f "$TMPFILE"
+
+exit 0
