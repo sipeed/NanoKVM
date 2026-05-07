@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import {
   BadgeInfoIcon,
   CircleArrowUpIcon,
+  NetworkIcon,
   PaletteIcon,
   SettingsIcon,
   ShieldIcon,
@@ -15,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import semver from 'semver';
 
 import * as api from '@/api/application.ts';
-import * as authApi from '@/api/auth.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
@@ -27,6 +27,7 @@ import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
 import { Device } from './device';
+import { Network } from './network';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
 import { Users } from './users';
@@ -38,30 +39,34 @@ export const Settings = () => {
   const [isLocked, setIsLocked] = useState(false);
   const [currentTab, setCurrentTab] = useState('about');
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
   const { isAdmin, isOperator } = useRole();
 
   // Tabs basierend auf Rolle
   const allTabs = [
-    { id: 'about',      roles: ['admin','operator','viewer'], icon: <BadgeInfoIcon size={16} />,   component: <About /> },
-    { id: 'appearance', roles: ['admin','operator','viewer'], icon: <PaletteIcon size={16} />,     component: <Appearance /> },
-    { id: 'device',     roles: ['admin'],                     icon: <SmartphoneIcon size={16} />,  component: <Device /> },
-    { id: 'tailscale',  roles: ['admin'],                     icon: <TailscaleIcon />,             component: <Tailscale setIsLocked={setIsLocked} /> },
-    { id: 'update',     roles: ['admin'],                     icon: <CircleArrowUpIcon size={16} />, component: <Update setIsLocked={setIsLocked} /> },
-    { id: 'account',    roles: ['admin','operator','viewer'], icon: <UserRoundIcon size={18} />,   component: <Account /> },
-    { id: 'users',      roles: ['admin'],                     icon: <ShieldIcon size={16} />,      component: <Users /> },
+    { id: 'about',      roles: ['admin', 'operator', 'viewer'], icon: <BadgeInfoIcon size={16} />,     component: <About /> },
+    { id: 'appearance', roles: ['admin', 'operator', 'viewer'], icon: <PaletteIcon size={16} />,       component: <Appearance /> },
+    { id: 'device',     roles: ['admin'],                       icon: <SmartphoneIcon size={16} />,    component: <Device /> },
+    { id: 'network',    roles: ['admin'],                       icon: <NetworkIcon size={16} />,       component: <Network /> },
+    { id: 'tailscale',  roles: ['admin'],                       icon: <TailscaleIcon />,               component: <Tailscale setIsLocked={setIsLocked} /> },
+    { id: 'update',     roles: ['admin'],                       icon: <CircleArrowUpIcon size={16} />, component: <Update setIsLocked={setIsLocked} /> },
+    { id: 'account',    roles: ['admin', 'operator', 'viewer'], icon: <UserRoundIcon size={18} />,     component: <Account /> },
+    { id: 'users',      roles: ['admin'],                       icon: <ShieldIcon size={16} />,        component: <Users /> }
   ];
 
   const currentRole = isAdmin ? 'admin' : isOperator ? 'operator' : 'viewer';
-  const tabs = allTabs.filter(t => t.roles.includes(currentRole));
+  const tabs = allTabs.filter((t) => t.roles.includes(currentRole));
 
   useEffect(() => {
     const skip = ls.getSkipUpdate();
     if (!skip) checkForUpdates();
-
-
   }, []);
+
+  useEffect(() => {
+    scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });
+  }, [currentTab]);
 
   function checkForUpdates() {
     api.getVersion().then((rsp: any) => {
@@ -151,7 +156,10 @@ export const Settings = () => {
             ))}
           </div>
 
-          <ScrollArea className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3">
+          <ScrollArea
+            viewportRef={scrollViewportRef}
+            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3"
+          >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
                 <>{tabs.find((tab) => tab.id === currentTab)?.component}</>
