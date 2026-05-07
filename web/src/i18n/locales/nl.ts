@@ -182,15 +182,56 @@ const nl = {
           1800: '30 min',
           3600: '1 uur'
         },
-        wifi: {
-          title: 'Wifi',
-          description: 'Configureer wifi',
-          setBtn: 'Config'
-        },
         disk: 'Virtuele schijf',
         diskDesc: 'Koppel virtuele U-schijf aan de externe host',
         network: 'Virtueel Netwerk',
         networkDesc: 'Koppel virtueel netwerk kaart aan de externe host'
+      },
+      network: {
+        title: 'Netwerk',
+        wifi: {
+          title: 'Wifi',
+          description: 'Configureer wifi',
+          apMode: 'AP-modus is ingeschakeld, maak verbinding met wifi door de QR-code te scannen',
+          connect: 'Wifi verbinden',
+          connectDesc1: 'Voer de netwerk-SSID en het wachtwoord in',
+          connectDesc2: 'Voer het wachtwoord in om met dit netwerk te verbinden',
+          disconnect: 'Weet je zeker dat je de netwerkverbinding wilt verbreken?',
+          failed: 'Verbinding mislukt, probeer het opnieuw.',
+          ssid: 'Naam',
+          password: 'Wachtwoord',
+          joinBtn: 'Verbinden',
+          confirmBtn: 'OK',
+          cancelBtn: 'Annuleren'
+        },
+        tls: {
+          description: 'HTTPS-protocol inschakelen',
+          tip: 'Let op: HTTPS gebruiken kan de latentie verhogen, vooral in MJPEG-videomodus.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Configureer DNS-servers voor NanoKVM',
+          mode: 'Modus',
+          dhcp: 'DHCP',
+          manual: 'Handmatig',
+          add: 'DNS toevoegen',
+          save: 'Opslaan',
+          invalid: 'Voer een geldig IP-adres in',
+          noDhcp: 'Er is momenteel geen DHCP-DNS beschikbaar',
+          saved: 'DNS-instellingen opgeslagen',
+          saveFailed: 'DNS-instellingen opslaan mislukt',
+          unsaved: 'Niet-opgeslagen wijzigingen',
+          maxServers: 'Maximaal {{count}} DNS-servers toegestaan',
+          dnsServers: 'DNS-servers',
+          dhcpServersDescription: 'DNS-servers worden automatisch via DHCP verkregen.',
+          manualServersDescription: 'DNS-servers kunnen handmatig worden bewerkt.',
+          networkDetails: 'Netwerkdetails',
+          interface: 'Interface',
+          ipAddress: 'IP-adres',
+          subnetMask: 'Subnetmasker',
+          router: 'Router',
+          none: 'Geen'
+        }
       },
       tailscale: {
         title: 'Tailscale',

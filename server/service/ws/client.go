@@ -102,21 +102,42 @@ func (c *Client) UpdateHeartbeat() {
 }
 
 func (c *Client) Close() {
-	_ = c.ws.Close()
+	c.closeOnce.Do(func() {
+		if c.ws != nil {
+			_ = c.ws.Close()
+		}
 
-	closeQueue(c.keyboard)
-	closeQueue(c.mouse)
+		if c.keyboard != nil {
+			close(c.keyboard)
+		}
+		if c.mouse != nil {
+			close(c.mouse)
+		}
 
-	log.Debug("websocket disconnected")
+		log.Debug("websocket disconnected")
+	})
 }
 
 func writeQueue(queue chan []byte, data []byte) {
-	queue <- data
+	if !sendQueue(queue, data) {
+		log.Debug("hid event dropped because websocket queue is closed")
+		return
+	}
+
 	jiggler.GetJiggler().Update()
 }
 
-func closeQueue(queue chan []byte) {
-	for range queue {
+func sendQueue(queue chan []byte, data []byte) (ok bool) {
+	if queue == nil {
+		return false
 	}
-	close(queue)
+
+	defer func() {
+		if r := recover(); r != nil {
+			ok = false
+		}
+	}()
+
+	queue <- data
+	return true
 }

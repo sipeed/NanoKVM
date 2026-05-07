@@ -194,15 +194,56 @@ const fr = {
           1800: '30 min',
           3600: '1 heure'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configurez le Wi-Fi',
-          setBtn: 'Configurer'
-        },
         disk: 'Disque virtuel',
         diskDesc: 'Monter le disque virtuel U sur l\'hôte distant',
         network: 'Réseau virtuel',
         networkDesc: 'Monter la carte réseau virtuelle sur l\'hôte distant'
+      },
+      network: {
+        title: 'Réseau',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configurez le Wi-Fi',
+          apMode: 'Le mode AP est activé, connectez-vous au Wi-Fi en scannant le code QR',
+          connect: 'Connecter le Wi-Fi',
+          connectDesc1: 'Veuillez saisir le SSID du réseau et le mot de passe',
+          connectDesc2: 'Veuillez saisir le mot de passe pour rejoindre ce réseau',
+          disconnect: 'Voulez-vous vraiment déconnecter le réseau ?',
+          failed: 'Échec de la connexion, veuillez réessayer.',
+          ssid: 'Nom',
+          password: 'Mot de passe',
+          joinBtn: 'Rejoindre',
+          confirmBtn: 'OK',
+          cancelBtn: 'Annuler'
+        },
+        tls: {
+          description: 'Activer le protocole HTTPS',
+          tip: 'Attention : l\'utilisation de HTTPS peut augmenter la latence, surtout en mode vidéo MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Configurer les serveurs DNS pour NanoKVM',
+          mode: 'Mode',
+          dhcp: 'DHCP',
+          manual: 'Manuel',
+          add: 'Ajouter un DNS',
+          save: 'Enregistrer',
+          invalid: 'Veuillez saisir une adresse IP valide',
+          noDhcp: 'Aucun DNS DHCP n\'est actuellement disponible',
+          saved: 'Paramètres DNS enregistrés',
+          saveFailed: 'Échec de l\'enregistrement des paramètres DNS',
+          unsaved: 'Modifications non enregistrées',
+          maxServers: '{{count}} serveurs DNS maximum autorisés',
+          dnsServers: 'Serveurs DNS',
+          dhcpServersDescription: 'Les serveurs DNS sont obtenus automatiquement par DHCP.',
+          manualServersDescription: 'Les serveurs DNS peuvent être modifiés manuellement.',
+          networkDetails: 'Détails du réseau',
+          interface: 'Interface',
+          ipAddress: 'Adresse IP',
+          subnetMask: 'Masque de sous-réseau',
+          router: 'Routeur',
+          none: 'Aucun'
+        }
       },
       tailscale: {
         title: 'Tailscale',

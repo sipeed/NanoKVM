@@ -118,15 +118,15 @@ func ResetUSBPHY() error {
 	h := GetHid()
 	h.Lock()
 	h.CloseNoLock()
-	defer func() {
-		h.OpenNoLock()
-		h.Unlock()
-	}()
+	defer h.Unlock()
 
 	command := fmt.Sprintf("%s restart_phy", USBDevScript)
-	err := exec.Command("sh", "-c", command).Run()
-	if err != nil {
-		return err
+	if err := exec.Command("sh", "-c", command).Run(); err != nil {
+		return fmt.Errorf("restart usb phy: %w", err)
+	}
+
+	if err := h.OpenNoLockWithRetry(hidReopenTimeout, hidReopenRetryDelay); err != nil {
+		return fmt.Errorf("reopen HID devices after usb phy reset: %w", err)
 	}
 
 	return nil

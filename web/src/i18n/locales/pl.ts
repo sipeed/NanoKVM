@@ -184,15 +184,56 @@ const pl = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Sieć',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Skonfiguruj Wi-Fi',
+          apMode: 'Tryb AP jest włączony, połącz z Wi-Fi skanując kod QR',
+          connect: 'Połącz Wi-Fi',
+          connectDesc1: 'Wprowadź SSID sieci i hasło',
+          connectDesc2: 'Wprowadź hasło, aby połączyć się z tą siecią',
+          disconnect: 'Czy na pewno chcesz rozłączyć sieć?',
+          failed: 'Połączenie nie powiodło się, spróbuj ponownie.',
+          ssid: 'Nazwa',
+          password: 'Hasło',
+          joinBtn: 'Połącz',
+          confirmBtn: 'OK',
+          cancelBtn: 'Anuluj'
+        },
+        tls: {
+          description: 'Włącz protokół HTTPS',
+          tip: 'Uwaga: użycie HTTPS może zwiększyć opóźnienie, szczególnie w trybie wideo MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Skonfiguruj serwery DNS dla NanoKVM',
+          mode: 'Tryb',
+          dhcp: 'DHCP',
+          manual: 'Ręcznie',
+          add: 'Dodaj DNS',
+          save: 'Zapisz',
+          invalid: 'Wprowadź prawidłowy adres IP',
+          noDhcp: 'Brak obecnie dostępnego DNS z DHCP',
+          saved: 'Ustawienia DNS zapisane',
+          saveFailed: 'Nie udało się zapisać ustawień DNS',
+          unsaved: 'Niezapisane zmiany',
+          maxServers: 'Dozwolone jest maksymalnie {{count}} serwerów DNS',
+          dnsServers: 'Serwery DNS',
+          dhcpServersDescription: 'Serwery DNS są automatycznie pobierane z DHCP.',
+          manualServersDescription: 'Serwery DNS można edytować ręcznie.',
+          networkDetails: 'Szczegóły sieci',
+          interface: 'Interfejs',
+          ipAddress: 'Adres IP',
+          subnetMask: 'Maska podsieci',
+          router: 'Router',
+          none: 'Brak'
+        }
       },
       tailscale: {
         title: 'Tailscale',

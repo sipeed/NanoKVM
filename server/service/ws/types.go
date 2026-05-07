@@ -21,6 +21,7 @@ type Client struct {
 	mouse         chan []byte
 	lastHeartbeat time.Time
 	mutex         sync.Mutex
+	closeOnce     sync.Once
 }
 
 type Message struct {

@@ -10,6 +10,8 @@ var (
 	sessionLock     *SessionLock
 )
 
+const sessionLockDuration = 30 * time.Minute
+
 type SessionLock struct {
 	mu             sync.Mutex
 	ownerSessionID string
@@ -34,6 +36,35 @@ func (l *SessionLock) AcquireTemporary(sessionID string) (bool, *PicoclawError) 
 	return l.acquire(sessionID)
 }
 
+func (l *SessionLock) Renew(sessionID string) bool {
+	if sessionID == "" {
+		return false
+	}
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if l.ownerSessionID != sessionID {
+		return false
+	}
+
+	l.expiresAt = time.Now().Add(sessionLockDuration)
+	return true
+}
+
+func (l *SessionLock) clearExpiredLocked(now time.Time) {
+	if l.ownerSessionID == "" {
+		return
+	}
+	if l.expiresAt.IsZero() || now.Before(l.expiresAt) {
+		return
+	}
+
+	l.ownerSessionID = ""
+	l.acquiredAt = time.Time{}
+	l.expiresAt = time.Time{}
+}
+
 func (l *SessionLock) acquire(sessionID string) (bool, *PicoclawError) {
 	if sessionID == "" {
 		return false, newPicoclawError(CodeSessionIDInvalid, "invalid PicoClaw session")
@@ -42,14 +73,16 @@ func (l *SessionLock) acquire(sessionID string) (bool, *PicoclawError) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
+	now := time.Now()
+	l.clearExpiredLocked(now)
+
 	if l.ownerSessionID == "" || l.ownerSessionID == sessionID {
 		acquired := l.ownerSessionID == ""
-		now := time.Now()
 		l.ownerSessionID = sessionID
 		if l.acquiredAt.IsZero() {
 			l.acquiredAt = now
 		}
-		l.expiresAt = now.Add(30 * time.Minute)
+		l.expiresAt = now.Add(sessionLockDuration)
 		return acquired, nil
 	}
 
@@ -79,19 +112,24 @@ func (l *SessionLock) ForceTakeover(sessionID string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
+	now := time.Now()
 	l.ownerSessionID = sessionID
-	l.acquiredAt = time.Now()
-	l.expiresAt = time.Now().Add(30 * time.Minute)
+	l.acquiredAt = now
+	l.expiresAt = now.Add(sessionLockDuration)
 }
 
 func (l *SessionLock) Owner() string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	l.clearExpiredLocked(time.Now())
 	return l.ownerSessionID
 }
 
 func (l *SessionLock) BlocksManualInput() bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+
+	l.clearExpiredLocked(time.Now())
 	return l.ownerSessionID != ""
 }

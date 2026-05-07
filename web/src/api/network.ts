@@ -1,5 +1,7 @@
 import { http } from '@/lib/http.ts';
 
+export type DNSMode = 'manual' | 'dhcp';
+
 // wake on lan
 export function wol(mac: string) {
   const data = {
@@ -68,4 +70,12 @@ export function connectWifi(ssid: string, password: string) {
 // disconnect wifi
 export function disconnectWifi() {
   return http.post('/api/network/wifi/disconnect');
+}
+
+export function getDNS() {
+  return http.get('/api/network/dns');
+}
+
+export function setDNS(mode: DNSMode, servers: string[]) {
+  return http.post('/api/network/dns', { mode, servers });
 }

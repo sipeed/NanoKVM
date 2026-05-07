@@ -88,8 +88,8 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	s.configureRelayConn(upstream, cfg)
 
 	wg.Add(4)
-	go s.runPingLoop("downstream", downstream, cfg, &wg)
-	go s.runPingLoop("upstream", upstream, cfg, &wg)
+	go s.runPingLoop("downstream", session.SessionID, downstream, cfg, &wg)
+	go s.runPingLoop("upstream", session.SessionID, upstream, cfg, &wg)
 	go s.proxyMessages("downstream", session, downstream, cfg, &wg, results)
 	go s.proxyMessages("upstream", session, upstream, cfg, &wg, results)
 
@@ -134,6 +134,15 @@ func (s *Service) proxyMessages(source string, session *GatewaySession, src *web
 			return
 		}
 
+		if !s.lock.Renew(session.SessionID) {
+			results <- relayResult{
+				Source:    source,
+				CloseCode: CloseCodePicoclawTakenOver,
+				Reason:    "session lock lost",
+			}
+			return
+		}
+
 		var writeErr error
 		switch source {
 		case "downstream":
@@ -152,13 +161,19 @@ func (s *Service) proxyMessages(source string, session *GatewaySession, src *web
 	}
 }
 
-func (s *Service) runPingLoop(name string, conn *websocket.Conn, cfg Config, wg *sync.WaitGroup) {
+func (s *Service) runPingLoop(name string, sessionID string, conn *websocket.Conn, cfg Config, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	ticker := time.NewTicker(time.Duration(cfg.PingIntervalMs) * time.Millisecond)
 	defer ticker.Stop()
 
 	for range ticker.C {
+		if !s.lock.Renew(sessionID) {
+			writeGatewayClose(conn, CloseCodePicoclawTakenOver, "session lock lost")
+			_ = conn.Close()
+			return
+		}
+
 		if err := conn.WriteControl(
 			websocket.PingMessage,
 			[]byte(name),

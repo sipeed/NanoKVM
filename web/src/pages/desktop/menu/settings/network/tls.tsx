@@ -52,7 +52,7 @@ export const Tls = () => {
           <span>HTTPS</span>
 
           <Tooltip
-            title={t('settings.device.tls.tip')}
+            title={t('settings.network.tls.tip')}
             className="cursor-pointer"
             placement="right"
             styles={{ root: { maxWidth: '400px' } }}
@@ -60,7 +60,7 @@ export const Tls = () => {
             <CircleAlertIcon className="text-neutral-500" size={14} />
           </Tooltip>
         </div>
-        <span className="text-xs text-neutral-500">{t('settings.device.tls.description')}</span>
+        <span className="text-xs text-neutral-500">{t('settings.network.tls.description')}</span>
       </div>
 
       <Switch checked={isEnabled} loading={isLoading} onChange={update} />

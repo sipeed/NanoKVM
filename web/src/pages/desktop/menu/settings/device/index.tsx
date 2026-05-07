@@ -8,9 +8,7 @@ import { MouseJiggler } from './mouse-jiggler.tsx';
 import { Oled } from './oled.tsx';
 import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
-import { Tls } from './tls.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
-import { Wifi } from './wifi.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
@@ -21,7 +19,6 @@ export const Device = () => {
       <Divider className="opacity-50" />
 
       <div className="flex flex-col space-y-8">
-        <Tls />
         <Ssh />
         <Mdns />
         <Hdmi />
@@ -31,7 +28,6 @@ export const Device = () => {
         <Divider className="opacity-50" />
 
         <Oled />
-        <Wifi />
         <MouseJiggler />
         <Divider className="opacity-50" />
 

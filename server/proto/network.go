@@ -28,3 +28,25 @@ type ConnectWifiReq struct {
 	Ssid     string `validate:"required"`
 	Password string `valid:"required"`
 }
+
+type GetDNSRsp struct {
+	Mode      string   `json:"mode"`
+	Servers   []string `json:"servers"`
+	Effective []string `json:"effective"`
+	DHCP      []string `json:"dhcp"`
+	Info      DNSInfo  `json:"info"`
+}
+
+type SetDNSReq struct {
+	Mode    string   `json:"mode" validate:"required,oneof=manual dhcp"`
+	Servers []string `json:"servers"`
+}
+
+type DNSInfo struct {
+	Interface     string   `json:"interface"`
+	Type          string   `json:"type"`
+	Address       string   `json:"address"`
+	SubnetMask    string   `json:"subnetMask"`
+	Gateway       string   `json:"gateway"`
+	SearchDomains []string `json:"searchDomains"`
+}

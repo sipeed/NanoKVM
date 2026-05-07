@@ -237,18 +237,9 @@ const es = {
           1800: '30 min',
           3600: '1 hora'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configura el Wi-Fi',
-          setBtn: 'Configurar'
-        },
         ssh: {
           description: 'Habilitar acceso remoto SSH',
           tip: 'Establece una contraseña segura antes de habilitar (Cuenta - Cambiar contraseña)'
-        },
-        tls: {
-          description: 'Habilitar protocolo HTTPS',
-          tip: 'Aviso: Usar HTTPS puede aumentar la latencia, especialmente en modo de vídeo MJPEG.'
         },
         advanced: 'Ajustes avanzados',
         swap: {
@@ -284,6 +275,52 @@ const es = {
         usbDesc: 'Habilitar interfaz USB hacia el host',
         okBtn: 'Sí',
         cancelBtn: 'No'
+      },
+      network: {
+        title: 'Red',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configura el Wi-Fi',
+          apMode: 'El modo AP está activado; conéctate al Wi-Fi escaneando el código QR',
+          connect: 'Conectar Wi-Fi',
+          connectDesc1: 'Introduce el SSID de la red y la contraseña',
+          connectDesc2: 'Introduce la contraseña para unirte a esta red',
+          disconnect: '¿Seguro que quieres desconectar la red?',
+          failed: 'Error de conexión, inténtalo de nuevo.',
+          ssid: 'Nombre',
+          password: 'Contraseña',
+          joinBtn: 'Unirse',
+          confirmBtn: 'Aceptar',
+          cancelBtn: 'Cancelar'
+        },
+        tls: {
+          description: 'Habilitar protocolo HTTPS',
+          tip: 'Aviso: Usar HTTPS puede aumentar la latencia, especialmente en modo de vídeo MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Configura los servidores DNS para NanoKVM',
+          mode: 'Modo',
+          dhcp: 'DHCP',
+          manual: 'Manual',
+          add: 'Añadir DNS',
+          save: 'Guardar',
+          invalid: 'Introduce una dirección IP válida',
+          noDhcp: 'No hay DNS DHCP disponible actualmente',
+          saved: 'Configuración DNS guardada',
+          saveFailed: 'No se pudo guardar la configuración DNS',
+          unsaved: 'Cambios sin guardar',
+          maxServers: 'Se permiten como máximo {{count}} servidores DNS',
+          dnsServers: 'Servidores DNS',
+          dhcpServersDescription: 'Los servidores DNS se obtienen automáticamente por DHCP.',
+          manualServersDescription: 'Los servidores DNS se pueden editar manualmente.',
+          networkDetails: 'Detalles de red',
+          interface: 'Interfaz',
+          ipAddress: 'Dirección IP',
+          subnetMask: 'Máscara de subred',
+          router: 'Router',
+          none: 'Ninguno'
+        }
       },
       tailscale: {
         title: 'Tailscale',

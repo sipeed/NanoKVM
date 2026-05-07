@@ -183,15 +183,56 @@ const cz = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Síť',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Nastavit Wi-Fi',
+          apMode: 'Režim AP je povolen, připojte se k Wi-Fi naskenováním QR kódu',
+          connect: 'Připojit Wi-Fi',
+          connectDesc1: 'Zadejte SSID sítě a heslo',
+          connectDesc2: 'Zadejte heslo pro připojení k této síti',
+          disconnect: 'Opravdu chcete síť odpojit?',
+          failed: 'Připojení se nezdařilo, zkuste to znovu.',
+          ssid: 'Název',
+          password: 'Heslo',
+          joinBtn: 'Připojit',
+          confirmBtn: 'OK',
+          cancelBtn: 'Zrušit'
+        },
+        tls: {
+          description: 'Povolit protokol HTTPS',
+          tip: 'Upozornění: Použití HTTPS může zvýšit latenci, zejména v režimu videa MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Nastavit DNS servery pro NanoKVM',
+          mode: 'Režim',
+          dhcp: 'DHCP',
+          manual: 'Ručně',
+          add: 'Přidat DNS',
+          save: 'Uložit',
+          invalid: 'Zadejte platnou IP adresu',
+          noDhcp: 'Momentálně není k dispozici žádné DHCP DNS',
+          saved: 'Nastavení DNS uloženo',
+          saveFailed: 'Nastavení DNS se nepodařilo uložit',
+          unsaved: 'Neuložené změny',
+          maxServers: 'Je povoleno maximálně {{count}} DNS serverů',
+          dnsServers: 'DNS servery',
+          dhcpServersDescription: 'DNS servery jsou automaticky získávány z DHCP.',
+          manualServersDescription: 'DNS servery lze upravit ručně.',
+          networkDetails: 'Podrobnosti sítě',
+          interface: 'Rozhraní',
+          ipAddress: 'IP adresa',
+          subnetMask: 'Maska podsítě',
+          router: 'Router',
+          none: 'Žádné'
+        }
       },
       tailscale: {
         title: 'Tailscale',

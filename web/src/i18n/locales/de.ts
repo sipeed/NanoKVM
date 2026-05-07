@@ -237,11 +237,6 @@ const de = {
           1800: '30 Min',
           3600: '1 Stunde'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Wi-Fi konfigurieren',
-          setBtn: 'Konfigurieren'
-        },
         ssh: {
           description: 'Aktiviere entfernten SSH-Zugang',
           tip: 'Setzten Sie ein starkes Passwort vor dem aktivieren (Konto - Passwort ändern)'
@@ -273,6 +268,52 @@ const de = {
         rebootDesc: 'Sind Sie sicher dass Sie NanoKVM neustarten möchten?',
         okBtn: 'Ja',
         cancelBtn: 'Nein'
+      },
+      network: {
+        title: 'Netzwerk',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi konfigurieren',
+          apMode: 'AP-Modus ist aktiviert, verbinden Sie sich per QR-Code mit dem Wi-Fi',
+          connect: 'Wi-Fi verbinden',
+          connectDesc1: 'Bitte geben Sie die Netzwerk-SSID und das Passwort ein',
+          connectDesc2: 'Bitte geben Sie das Passwort ein, um diesem Netzwerk beizutreten',
+          disconnect: 'Möchten Sie die Netzwerkverbindung wirklich trennen?',
+          failed: 'Verbindung fehlgeschlagen, bitte erneut versuchen.',
+          ssid: 'Name',
+          password: 'Passwort',
+          joinBtn: 'Verbinden',
+          confirmBtn: 'OK',
+          cancelBtn: 'Abbrechen'
+        },
+        tls: {
+          description: 'HTTPS-Protokoll aktivieren',
+          tip: 'Hinweis: Die Verwendung von HTTPS kann die Latenz erhöhen, besonders im MJPEG-Videomodus.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'DNS-Server für NanoKVM konfigurieren',
+          mode: 'Modus',
+          dhcp: 'DHCP',
+          manual: 'Manuell',
+          add: 'DNS hinzufügen',
+          save: 'Speichern',
+          invalid: 'Bitte geben Sie eine gültige IP-Adresse ein',
+          noDhcp: 'Derzeit ist kein DHCP-DNS verfügbar',
+          saved: 'DNS-Einstellungen gespeichert',
+          saveFailed: 'DNS-Einstellungen konnten nicht gespeichert werden',
+          unsaved: 'Ungespeicherte Änderungen',
+          maxServers: 'Maximal {{count}} DNS-Server erlaubt',
+          dnsServers: 'DNS-Server',
+          dhcpServersDescription: 'DNS-Server werden automatisch per DHCP bezogen.',
+          manualServersDescription: 'DNS-Server können manuell bearbeitet werden.',
+          networkDetails: 'Netzwerkdetails',
+          interface: 'Schnittstelle',
+          ipAddress: 'IP-Adresse',
+          subnetMask: 'Subnetzmaske',
+          router: 'Router',
+          none: 'Keine'
+        }
       },
       tailscale: {
         title: 'Tailscale',

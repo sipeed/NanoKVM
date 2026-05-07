@@ -181,15 +181,56 @@ const vi = {
           1800: '30 min',
           3600: '1 hour'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          setBtn: 'Config'
-        },
         disk: 'Virtual Disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host'
+      },
+      network: {
+        title: 'Mạng',
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Cấu hình Wi-Fi',
+          apMode: 'Chế độ AP đang bật, hãy kết nối Wi-Fi bằng cách quét mã QR',
+          connect: 'Kết nối Wi-Fi',
+          connectDesc1: 'Vui lòng nhập SSID mạng và mật khẩu',
+          connectDesc2: 'Vui lòng nhập mật khẩu để tham gia mạng này',
+          disconnect: 'Bạn có chắc muốn ngắt kết nối mạng không?',
+          failed: 'Kết nối thất bại, vui lòng thử lại.',
+          ssid: 'Tên',
+          password: 'Mật khẩu',
+          joinBtn: 'Tham gia',
+          confirmBtn: 'OK',
+          cancelBtn: 'Hủy'
+        },
+        tls: {
+          description: 'Bật giao thức HTTPS',
+          tip: 'Lưu ý: Sử dụng HTTPS có thể tăng độ trễ, đặc biệt trong chế độ video MJPEG.'
+        },
+        dns: {
+          title: 'DNS',
+          description: 'Cấu hình máy chủ DNS cho NanoKVM',
+          mode: 'Chế độ',
+          dhcp: 'DHCP',
+          manual: 'Thủ công',
+          add: 'Thêm DNS',
+          save: 'Lưu',
+          invalid: 'Vui lòng nhập địa chỉ IP hợp lệ',
+          noDhcp: 'Hiện không có DNS DHCP khả dụng',
+          saved: 'Đã lưu cài đặt DNS',
+          saveFailed: 'Không thể lưu cài đặt DNS',
+          unsaved: 'Thay đổi chưa lưu',
+          maxServers: 'Cho phép tối đa {{count}} máy chủ DNS',
+          dnsServers: 'Máy chủ DNS',
+          dhcpServersDescription: 'Máy chủ DNS được tự động lấy từ DHCP.',
+          manualServersDescription: 'Có thể chỉnh sửa máy chủ DNS thủ công.',
+          networkDetails: 'Chi tiết mạng',
+          interface: 'Giao diện',
+          ipAddress: 'Địa chỉ IP',
+          subnetMask: 'Mặt nạ mạng con',
+          router: 'Bộ định tuyến',
+          none: 'Không có'
+        }
       },
       tailscale: {
         title: 'Tailscale',
