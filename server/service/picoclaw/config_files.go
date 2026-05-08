@@ -12,11 +12,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	picoclawPIDFileName        = ".picoclaw.pid"
-	picoclawGatewayTokenPrefix = "pico-"
-)
-
 type picoclawConfigFile struct {
 	Agents struct {
 		Defaults struct {
@@ -36,15 +31,22 @@ type picoclawConfigFile struct {
 		APIKey    string   `json:"api_key"`
 		APIKeys   []string `json:"api_keys,omitempty"`
 	} `json:"model_list"`
-	Channels struct {
-		Pico struct {
-			Enabled         bool   `json:"enabled"`
-			Token           string `json:"token"`
-			AllowTokenQuery bool   `json:"allow_token_query"`
-			PingInterval    int    `json:"ping_interval"`
-			ReadTimeout     int    `json:"read_timeout"`
-		} `json:"pico"`
-	} `json:"channels"`
+	Channels map[string]picoclawChannelEntry `json:"channel_list"`
+}
+
+type picoclawChannelEntry struct {
+	Type     string                 `json:"type"`
+	Enabled  bool                   `json:"enabled"`
+	Settings picoclawPicoSettingsV3 `json:"settings"`
+}
+
+type picoclawPicoSettingsV3 struct {
+	Token           string `json:"token,omitempty"`
+	AllowTokenQuery bool   `json:"allow_token_query,omitempty"`
+	PingInterval    int    `json:"ping_interval,omitempty"`
+	ReadTimeout     int    `json:"read_timeout,omitempty"`
+	WriteTimeout    int    `json:"write_timeout,omitempty"`
+	MaxConnections  int    `json:"max_connections,omitempty"`
 }
 
 type picoclawConfigDocument struct {
@@ -154,88 +156,45 @@ func (d *picoclawConfigDocument) saveSecurity() error {
 }
 
 type picoclawSecurityConfig struct {
-	ModelList map[string]picoclawModelSecurityEntry `yaml:"model_list,omitempty"`
-	Channels  picoclawSecurityChannels              `yaml:"channels,omitempty"`
+	ModelList   map[string]picoclawModelSecurityEntry   `yaml:"model_list,omitempty"`
+	ChannelList map[string]picoclawChannelSecurityEntry `yaml:"channel_list,omitempty"`
 }
 
 type picoclawModelSecurityEntry struct {
 	APIKeys []string `yaml:"api_keys,omitempty"`
 }
 
-type picoclawSecurityChannels struct {
-	Pico *picoclawPicoSecurity `yaml:"pico,omitempty"`
+type picoclawChannelSecurityEntry struct {
+	Token    string                           `yaml:"token,omitempty"`
+	Settings *picoclawChannelSecuritySettings `yaml:"settings,omitempty"`
 }
 
-type picoclawPicoSecurity struct {
+type picoclawChannelSecuritySettings struct {
 	Token string `yaml:"token,omitempty"`
-}
-
-type picoclawPIDFile struct {
-	Token string `json:"token"`
 }
 
 func (d *picoclawConfigDocument) resolvedPicoToken() string {
 	if d == nil {
 		return ""
 	}
-	if d.security.Channels.Pico != nil {
-		if token := d.security.Channels.Pico.Token; token != "" {
-			return token
+	// Check security config (channel_list.pico with nested settings)
+	if entry, ok := d.security.ChannelList["pico"]; ok {
+		if entry.Settings != nil && entry.Settings.Token != "" {
+			return entry.Settings.Token
+		}
+		if entry.Token != "" {
+			return entry.Token
 		}
 	}
-	return d.config.Channels.Pico.Token
+	// Fall back to config.json channel_list.pico.settings.token
+	if pico, ok := d.config.Channels["pico"]; ok {
+		return pico.Settings.Token
+	}
+	return ""
 }
 
 func (d *picoclawConfigDocument) resolvedGatewayToken() string {
-	baseToken := strings.TrimSpace(d.resolvedPicoToken())
-	if baseToken == "" {
-		return ""
-	}
-
-	runtimeToken, err := d.resolvedPIDToken()
-	if err != nil {
-		return baseToken
-	}
-
-	return composePicoclawGatewayToken(baseToken, runtimeToken)
-}
-
-func (d *picoclawConfigDocument) resolvedPIDToken() (string, error) {
-	if d == nil || d.configPath == "" {
-		return "", nil
-	}
-
-	pidPath := filepath.Join(filepath.Dir(d.configPath), picoclawPIDFileName)
-	data, err := os.ReadFile(pidPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", nil
-		}
-		return "", fmt.Errorf("failed to read picoclaw pid file: %w", err)
-	}
-
-	var pidFile picoclawPIDFile
-	if err := json.Unmarshal(data, &pidFile); err != nil {
-		return "", fmt.Errorf("failed to parse picoclaw pid file: %w", err)
-	}
-
-	return strings.TrimSpace(pidFile.Token), nil
-}
-
-func composePicoclawGatewayToken(baseToken, runtimeToken string) string {
-	baseToken = strings.TrimSpace(baseToken)
-	runtimeToken = strings.TrimSpace(runtimeToken)
-
-	switch {
-	case baseToken == "":
-		return ""
-	case strings.HasPrefix(baseToken, picoclawGatewayTokenPrefix):
-		return baseToken
-	case runtimeToken == "":
-		return baseToken
-	default:
-		return picoclawGatewayTokenPrefix + runtimeToken + baseToken
-	}
+	return strings.TrimSpace(d.resolvedPicoToken())
 }
 
 func loadPicoclawSecurityConfig(securityPath string) (picoclawSecurityConfig, error) {
