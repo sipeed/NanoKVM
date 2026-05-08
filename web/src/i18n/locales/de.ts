@@ -65,7 +65,7 @@ const de = {
       title: 'Bildschirm',
       video: 'Video Modus',
       videoDirectTips:
-        'Aktivieren Sie HTTPS unter „Einstellungen > Gerät", um diesen Modus zu verwenden',
+        'Aktivieren Sie HTTPS unter „Einstellungen > Gerät“, um diesen Modus zu verwenden',
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
@@ -417,7 +417,7 @@ const de = {
         },
         swap: {
           title: 'Speicher austauschen',
-          tip: 'Wenn die Probleme nach der Aktivierung der Speicheroptimierung weiterhin bestehen, versuchen Sie, den Swap-Speicher zu aktivieren. Dadurch wird die Größe der Auslagerungsdatei standardmäßig auf 256MB festgelegt, was unter „Einstellungen > Gerät" angepasst werden kann.'
+          tip: 'Wenn die Probleme nach der Aktivierung der Speicheroptimierung weiterhin bestehen, versuchen Sie, den Swap-Speicher zu aktivieren. Dadurch wird die Größe der Auslagerungsdatei standardmäßig auf 256MB festgelegt, was unter „Einstellungen > Gerät“ angepasst werden kann.'
         },
         restart: 'Tailscale neu starten?',
         stop: 'Tailscale stoppen?',
@@ -624,7 +624,7 @@ const de = {
         loadFailed: 'Der Sitzungsverlauf konnte nicht geladen werden',
         deleteFailed: 'Sitzung konnte nicht gelöscht werden',
         deleteConfirmTitle: 'Sitzung löschen',
-        deleteConfirmContent: 'Sind Sie sicher, dass Sie „{{title}}" löschen möchten?',
+        deleteConfirmContent: 'Sind Sie sicher, dass Sie „{{title}}“ löschen möchten?',
         deleteConfirmOk: 'Löschen',
         deleteConfirmCancel: 'Abbrechen',
         messageCount_one: '{{count}} Nachricht',
