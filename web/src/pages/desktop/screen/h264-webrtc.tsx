@@ -5,6 +5,7 @@ import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
 import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
+import { useScreenFitScale } from '@/hooks/useScreenFitScale.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
 
@@ -15,8 +16,11 @@ export const H264Webrtc = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoOfferSent = useRef(false);
   const videoIceCandidates = useRef<RTCIceCandidate[]>([]);
+
+  const fitScale = useScreenFitScale(containerRef);
 
   useEffect(() => {
     const url = `${getBaseUrl('ws')}/api/stream/h264`;
@@ -179,16 +183,19 @@ export const H264Webrtc = () => {
 
   return (
     <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden">
-      <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+      <div
+        ref={containerRef}
+        className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden"
+      >
         <video
           id="screen"
           ref={videoRef}
           className={clsx('block select-none', mouseStyle)}
           style={{
-            transform: `scale(${videoScale})`,
+            transform: `scale(${fitScale * videoScale})`,
             transformOrigin: 'center',
             ...(resolution?.width
-              ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
+              ? { width: resolution.width, height: resolution.height }
               : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
           }}
           muted
