@@ -82,6 +82,13 @@ const zh = {
       placeholder: '请输入内容',
       submit: '确定',
       virtual: '虚拟键盘',
+      readClipboard: '从剪贴板读取',
+      clipboardPermissionDenied: '剪贴板权限被拒绝。请允许您的浏览器访问剪贴板。',
+      clipboardReadError: '无法读取剪贴板',
+      dropdownEnglish: '英语',
+      dropdownGerman: '德语',
+      dropdownFrench: '法语',
+      dropdownRussian: '俄语',
       shortcut: {
         title: '快捷键',
         custom: '自定义',
@@ -102,7 +109,7 @@ const zh = {
         },
         sequential: {
           title: '序列输入模式',
-          desc1: '点击【引导键】开始 → 依次点击【快捷键】→ 点击【引导键】结束。',
+          desc1: '点击引导键开始 → 依次点击快捷键 → 再次点击引导键结束。',
           desc2: '步骤较多，但能完美避开系统键位冲突。'
         },
         enable: '启用引导键',
@@ -142,8 +149,8 @@ const zh = {
       hidOnly: {
         title: 'HID-Only 模式',
         desc: '若使用过程中遇到鼠标键盘无响应，且重置 HID 无效，可能是 NanoKVM 与您的设备存在兼容性问题。建议尝试启用 HID-Only 模式以提升兼容性。',
-        tip1: '启用该模式会禁用虚拟U盘和虚拟网卡',
-        tip2: '该模式下无法使用镜像挂载功能',
+        tip1: '启用 HID-Only 模式会卸载虚拟 U 盘和虚拟网络',
+        tip2: 'HID-Only 模式下，镜像挂载将被禁用',
         tip3: '切换模式后将自动重启 NanoKVM',
         enable: '启用 HID-Only 模式',
         disable: '关闭 HID-Only 模式'
@@ -199,6 +206,16 @@ const zh = {
       serialPort: '串口',
       serialPortPlaceholder: '请输入串口',
       baudrate: '波特率',
+      parity: '奇偶校验',
+      parityNone: '无',
+      parityEven: '偶校验',
+      parityOdd: '奇校验',
+      flowControl: '流量控制',
+      flowControlNone: '无',
+      flowControlSoft: '软件',
+      flowControlHard: '硬件',
+      dataBits: '数据位',
+      stopBits: '停止位',
       confirm: '确定'
     },
     wol: {
@@ -210,9 +227,12 @@ const zh = {
     },
     download: {
       title: '下载镜像',
-      input: '请输入镜像的下载地址',
+      input: '请输入远程镜像 URL',
       ok: '确定',
-      disabled: '/data 是只读分区，无法下载镜像'
+      disabled: '/data 是只读分区，无法下载镜像',
+      uploadbox: '将文件拖放到此处或单击选择',
+      inputfile: '请输入图片文件',
+      NoISO: '无 ISO'
     },
     power: {
       title: '电源',
@@ -241,7 +261,12 @@ const zh = {
         deviceKey: '设备码',
         community: '社区',
         hostname: '主机名',
-        hostnameUpdated: '主机名修改成功，重启后生效'
+        hostnameUpdated: '主机名修改成功，重启后生效',
+        ipType: {
+          Wired: '有线',
+          Wireless: '无线',
+          Other: '其他'
+        }
       },
       appearance: {
         title: '外观',
@@ -282,6 +307,7 @@ const zh = {
         },
         advanced: '高级设置',
         swap: {
+          title: '交换',
           disable: '禁用',
           description: '设置交换文件大小',
           tip: '启用该功能可能会减少SD卡使用寿命！'
@@ -317,6 +343,8 @@ const zh = {
         diskDesc: '在远程主机中挂载虚拟U盘',
         network: '虚拟网卡',
         networkDesc: '在远程主机中挂载虚拟网卡',
+        reboot: '重新启动',
+        rebootDesc: '您确定要重新启动 NanoKVM 吗？',
         okBtn: '是',
         cancelBtn: '否'
       },
@@ -325,7 +353,7 @@ const zh = {
         wifi: {
           title: 'Wi-Fi',
           description: '配置 Wi-Fi 信息',
-          apMode: 'AP 模式已启用，该模式下仅支持扫描二维码配网',
+          apMode: 'AP 模式已启用，请扫描二维码连接 Wi-Fi',
           connect: '连接 Wi-Fi',
           connectDesc1: '请输入网络名称和密码',
           connectDesc2: '请输入密码以连接此网络',
@@ -378,7 +406,7 @@ const zh = {
         },
         restart: '取定要重启 Tailscale 吗？',
         stop: '确定要停止 Tailscale 吗？',
-        stopDesc: '该操作会退出登录，并停止开机自动启动。',
+        stopDesc: '退出 Tailscale 并禁用开机自动启动。',
         loading: '加载中...',
         notInstall: '未检测到 Tailscale，请先安装',
         install: '安装',
@@ -388,8 +416,8 @@ const zh = {
         download: '下载',
         package: '安装包',
         unzip: '并解压',
-        upTailscale: '将 tailscale 文件上传到 /usr/bin/ 目录',
-        upTailscaled: '将 tailscaled 文件上传到 /usr/sbin/ 目录',
+        upTailscale: '将 tailscale 上传到 NanoKVM 的 /usr/bin/ 目录',
+        upTailscaled: '将 tailscaled 上传到 NanoKVM 的 /usr/sbin/ 目录',
         refresh: '刷新页面',
         notRunning: 'Tailscale 尚未运行，请先执行启动操作',
         run: '启动',
@@ -405,8 +433,6 @@ const zh = {
         logoutDesc: '确定要退出吗？',
         uninstall: '卸载 Tailscale',
         uninstallDesc: '确定要卸载 Tailscale 吗？',
-        reboot: '重启',
-        rebootDesc: '你确定要重启 NanoKVM 吗？',
         okBtn: '确认',
         cancelBtn: '取消'
       },
@@ -437,8 +463,8 @@ const zh = {
         updateBtn: '修改',
         logoutBtn: '退出',
         logoutDesc: '确定要退出吗？',
-        confirm: '确定',
-        cancel: '取消'
+        okBtn: '确定',
+        cancelBtn: '取消'
       }
     },
     picoclaw: {
