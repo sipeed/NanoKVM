@@ -17,6 +17,8 @@ const de = {
       noAccount:
         'Abfragen der Benutzerdaten fehlgeschlagen, bitte die Seite neu laden oder Passwort zurücksetzen',
       invalidUser: 'Falscher Benutzername oder falsches Passwort',
+      locked: 'Zu viele Anmeldungen, bitte versuchen Sie es später noch einmal',
+      globalLocked: 'System wird geschützt, bitte versuchen Sie es später erneut',
       error: 'Unerwarteter Fehler',
       changePassword: 'Passwort ändern',
       changePasswordDesc: 'Für die Sicherheit Ihres Geräts ändern Sie bitte das Passwort!',
@@ -46,12 +48,24 @@ const de = {
       success:
         'Bitte überprüfen Sie den Netzwerk-Status des NanoKVM und greifen Sie über die neue IP Adresse darauf zu.',
       failed: 'Aktion fehlgeschlagen, bitte erneut versuchen.',
+      invalidMode:
+        'Der aktuelle Modus unterstützt keine Netzwerkeinrichtung. Bitte gehen Sie zu Ihrem Gerät und aktivieren Sie den Wi-Fi-Konfigurationsmodus.',
       confirmBtn: 'Ok',
-      finishBtn: 'Fertig'
+      finishBtn: 'Fertig',
+      ap: {
+        authTitle: 'Authentifizierung erforderlich',
+        authDescription: 'Bitte geben Sie das Passwort AP ein, um fortzufahren',
+        authFailed: 'Ungültiges AP Passwort',
+        passPlaceholder: 'AP Passwort',
+        verifyBtn: 'Überprüfen'
+      }
     },
     screen: {
+      scale: 'Skala',
       title: 'Bildschirm',
       video: 'Video Modus',
+      videoDirectTips:
+        'Aktivieren Sie HTTPS unter „Einstellungen > Gerät", um diesen Modus zu verwenden',
       resolution: 'Auflösung',
       auto: 'Automatisch',
       autoTips:
@@ -75,10 +89,52 @@ const de = {
       placeholder: 'Bitte eingeben',
       submit: 'Senden',
       virtual: 'Tastatur',
-      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: 'Aus der Zwischenablage lesen',
+      clipboardPermissionDenied:
+        'Berechtigung für die Zwischenablage verweigert. Bitte erlauben Sie den Zugriff auf die Zwischenablage in Ihrem Browser.',
+      clipboardReadError: 'Zwischenablage konnte nicht gelesen werden',
       dropdownEnglish: 'Englisch',
       dropdownGerman: 'Deutsch',
-      dropdownRussian: 'Russisch'
+      dropdownFrench: 'Französisch',
+      dropdownRussian: 'Russisch',
+      shortcut: {
+        title: 'Verknüpfungen',
+        custom: 'Benutzerdefiniert',
+        capture: 'Klicken Sie hier, um die Verknüpfung zu erfassen',
+        clear: 'Klar',
+        save: 'Speichern',
+        captureTips:
+          'Das Erfassen systemweiter Tasten (z. B. der Windows-Taste) erfordert die Vollbildberechtigung.',
+        enterFullScreen: 'Vollbildmodus umschalten.'
+      },
+      leaderKey: {
+        title: 'Leader-Taste',
+        desc: 'Browserbeschränkungen umgehen und Systemverknüpfungen direkt an den Remote-Host senden.',
+        howToUse: 'Verwendung',
+        simultaneous: {
+          title: 'Simultanmodus',
+          desc1: 'Halten Sie die Leader-Taste gedrückt und drücken Sie dann die Tastenkombination.',
+          desc2: 'Intuitiv, kann jedoch zu Konflikten mit Systemverknüpfungen führen.'
+        },
+        sequential: {
+          title: 'Sequenzieller Modus',
+          desc1:
+            'Drücken Sie die Leader-Taste → drücken Sie die Tastenkombination nacheinander → drücken Sie erneut die Leader-Taste.',
+          desc2: 'Erfordert mehr Schritte, vermeidet jedoch vollständig Systemkonflikte.'
+        },
+        enable: 'Leader-Taste aktivieren',
+        tip: 'Wenn diese Taste als Leader-Taste zugewiesen wird, dient sie ausschließlich als Auslöser für Tastenkombinationen und verliert ihr Standardverhalten.',
+        placeholder: 'Bitte drücken Sie die Leader-Taste',
+        shiftRight: 'Rechts Shift',
+        ctrlRight: 'Rechts Ctrl',
+        metaRight: 'Rechts Win',
+        submit: 'Senden',
+        recorder: {
+          rec: 'REC',
+          activate: 'Tasten aktivieren',
+          input: 'Bitte drücken Sie die Tastenkombination...'
+        }
+      }
     },
     mouse: {
       title: 'Maus',
@@ -92,11 +148,17 @@ const de = {
       mode: 'Maus Modus',
       absolute: 'Absoluter Modus',
       relative: 'Relativer Modus',
+      direction: 'Scrollrichtung',
+      scrollUp: 'Nach oben scrollen',
+      scrollDown: 'Scrollen Sie nach unten',
+      speed: 'Scrollgeschwindigkeit',
+      fast: 'Schnell',
+      slow: 'Langsam',
       requestPointer:
         'Relativer Modus aktiv. Klicken Sie auf den Desktop um den Mauszeiger zu sehen.',
       resetHid: 'HID zurücksetzen',
       hidOnly: {
-        title: 'HID-Only Modus',
+        title: 'HID-Only-Modus',
         desc: 'Wenn Ihre Maus und Tastatur nicht mehr reagieren und das Zurücksetzen der HID-Verbindung nicht hilft, könnte es sich um ein Kompatibilitätsproblem zwischen dem NanoKVM und dem Gerät handeln. Versuchen Sie, den HID-Only Modus zu aktivieren, um die Kompatibilität zu verbessern.',
         tip1: 'Die Aktivierung des HID-Only Modus entfernt das virtuelle U-Laufwerk und das virtuelle Netzwerk.',
         tip2: 'Im HID-Only Modus ist das Einbinden von Systemabbilder deaktiviert.',
@@ -109,11 +171,18 @@ const de = {
       title: 'Bilder',
       loading: 'Lädt...',
       empty: 'Nichts gefunden',
-      cdrom: 'Binden Sie das Abbild im CD-ROM Modus ein',
+      mountMode: 'Mount-Modus',
       mountFailed: 'Einbinden fehlgeschlagen',
       mountDesc:
         'In einigen Systemen ist es notwendig, die virtuelle Festplatte auf dem entfernten Host auszuwerfen, bevor das Image eingebunden werden kann.',
+      unmountFailed: 'Das Aufheben der Bereitstellung ist fehlgeschlagen',
+      unmountDesc:
+        'Auf einigen Systemen müssen Sie das Image manuell vom Remote-Host auswerfen, bevor Sie die Bereitstellung aufheben.',
       refresh: 'Bilder aktualisieren',
+      attention: 'Achtung',
+      deleteConfirm: 'Sind Sie sicher, dass Sie dieses Bild löschen möchten?',
+      okBtn: 'Ja',
+      cancelBtn: 'Nein',
       tips: {
         title: 'So laden Sie Dateien hoch',
         usb1: 'Verbinden Sie den NanoKVM über USB mit Ihrem Computer.',
@@ -156,8 +225,8 @@ const de = {
       parityOdd: 'Ungerade',
       flowControl: 'Fluss-Kontrolle',
       flowControlNone: 'Keine',
-      flowControlSoft: 'Wenig',
-      flowControlHard: 'Viel',
+      flowControlSoft: 'Software',
+      flowControlHard: 'Hardware',
       dataBits: 'Daten bits',
       stopBits: 'Stopp bits',
       confirm: 'Ok'
@@ -203,7 +272,7 @@ const de = {
         applicationTip: 'NanoKVM Web Applikations-Version',
         image: 'Systemabbild-Version',
         imageTip: 'NanoKVM Systemabbild-Version',
-        deviceKey: 'Geräte Schlüssel',
+        deviceKey: 'Geräteschlüssel',
         community: 'Community',
         hostname: 'Hostname',
         hostnameUpdated: 'Hostname aktualisiert. Neustarten um zu übernehmen.',
@@ -217,10 +286,19 @@ const de = {
         title: 'Erscheinungsbild',
         display: 'Bildschirm',
         language: 'Sprache',
-        menuBar: 'Menu-Leiste',
-        menuBarDesc: 'Symbole in der Menu-Leiste anzeigen',
+        languageDesc: 'Wählen Sie die Sprache für die Benutzeroberfläche aus',
         webTitle: 'Web Titel',
-        webTitleDesc: 'Passen Sie den Web-Seite Titel an'
+        webTitleDesc: 'Passen Sie den Web-Seite Titel an',
+        menuBar: {
+          title: 'Menüleiste',
+          mode: 'Anzeigemodus',
+          modeDesc: 'Menüleiste auf dem Bildschirm anzeigen',
+          modeOff: 'Aus',
+          modeAuto: 'Automatisch ausblenden',
+          modeAlways: 'Immer sichtbar',
+          icons: 'Untermenüsymbole',
+          iconsDesc: 'Untermenüsymbole in der Menüleiste anzeigen'
+        }
       },
       device: {
         title: 'Gerät',
@@ -259,7 +337,23 @@ const de = {
           description: 'mDNS-Erkennungsdienst aktivieren',
           tip: 'Deaktivieren Sie den Dienst, wenn Sie ihn nicht benötigen'
         },
+        hdmi: {
+          description: 'HDMI/Monitor-Ausgabe aktivieren'
+        },
+        autostart: {
+          title: 'Autostart-Skripteinstellungen',
+          description: 'Skripte verwalten, die beim Systemstart automatisch ausgeführt werden',
+          new: 'Neu',
+          deleteConfirm: 'Möchten Sie diese Datei wirklich löschen?',
+          yes: 'Ja',
+          no: 'Nein',
+          scriptName: 'Name des Autostart-Skripts',
+          scriptContent: 'Inhalt des Autostart-Skripts',
+          settings: 'Einstellungen'
+        },
         hidOnly: 'HID-Only Mode',
+        hidOnlyDesc:
+          'Hören Sie auf, virtuelle Geräte zu emulieren, und behalten Sie nur die grundlegende HID-Steuerung bei',
         disk: 'Virtuelle Festplatte',
         diskDesc: 'Binde das virtuelle U-Laufwerk an den entfernten Host',
         network: 'Virtuelles Netzwerk',
@@ -305,8 +399,8 @@ const de = {
           unsaved: 'Ungespeicherte Änderungen',
           maxServers: 'Maximal {{count}} DNS-Server erlaubt',
           dnsServers: 'DNS-Server',
-          dhcpServersDescription: 'DNS-Server werden automatisch per DHCP bezogen.',
-          manualServersDescription: 'DNS-Server können manuell bearbeitet werden.',
+          dhcpServersDescription: 'DNS-Server werden automatisch per DHCP bezogen',
+          manualServersDescription: 'DNS-Server können manuell bearbeitet werden',
           networkDetails: 'Netzwerkdetails',
           interface: 'Schnittstelle',
           ipAddress: 'IP-Adresse',
@@ -319,8 +413,11 @@ const de = {
         title: 'Tailscale',
         memory: {
           title: 'Speicher Optimierung',
-          tip: 'Wenn die Speichernutzung das Limit überschreitet, wird die Speicherbereinigung aggressiver durchgeführt, um Speicher freizugeben. Es wird empfohlen, den Wert auf 75 MB zu setzen, wenn Tailscale verwendet wird. Ein Neustart von Tailscale ist erforderlich, damit die Änderung wirksam wird.',
-          disable: 'Deaktivieren'
+          tip: 'Wenn die Speichernutzung das Limit überschreitet, wird die Speicherbereinigung aggressiver durchgeführt, um Speicher freizugeben. Es wird empfohlen, den Wert auf 75 MB zu setzen, wenn Tailscale verwendet wird. Ein Neustart von Tailscale ist erforderlich, damit die Änderung wirksam wird.'
+        },
+        swap: {
+          title: 'Speicher austauschen',
+          tip: 'Wenn die Probleme nach der Aktivierung der Speicheroptimierung weiterhin bestehen, versuchen Sie, den Swap-Speicher zu aktivieren. Dadurch wird die Größe der Auslagerungsdatei standardmäßig auf 256MB festgelegt, was unter „Einstellungen > Gerät" angepasst werden kann.'
         },
         restart: 'Tailscale neu starten?',
         stop: 'Tailscale stoppen?',
@@ -337,6 +434,8 @@ const de = {
         upTailscale: 'Tailscale nach /usr/bin/ auf NanoKVM hochladen',
         upTailscaled: 'Tailscaled nach /usr/bin/ auf NanoKVM hochladen',
         refresh: 'Aktuelle Seite neu laden',
+        notRunning: 'Tailscale läuft nicht. Bitte starten Sie es, um fortzufahren.',
+        run: 'Start',
         notLogin:
           'Das Gerät konnte noch nicht gefunden werden. Bitte melden Sie sich an und verknüpfen Sie dieses Gerät mit Ihrem Konto.',
         urlPeriod: 'Diese URL ist für 10 Minuten gültig',
@@ -349,6 +448,7 @@ const de = {
         logout: 'Abmelden',
         logoutDesc: 'Möchten Sie sich wirklich abmelden?',
         uninstall: 'Tailscale deinstallieren',
+        uninstallDesc: 'Sind Sie sicher, dass Sie Tailscale deinstallieren möchten?',
         okBtn: 'Ja',
         cancelBtn: 'Nein'
       },
@@ -415,6 +515,129 @@ const de = {
         logoutDesc: 'Möchten Sie sich wirklich abmelden?',
         okBtn: 'Ja',
         cancelBtn: 'Nein'
+      }
+    },
+    picoclaw: {
+      title: 'PicoClaw Assistent',
+      empty: 'Öffnen Sie das Bedienfeld und starten Sie eine Aufgabe.',
+      inputPlaceholder: 'Beschreiben Sie, was der PicoClaw tun soll',
+      newConversation: 'Neues Gespräch',
+      processing: 'Wird verarbeitet...',
+      agent: {
+        defaultTitle: 'Allgemeiner Assistent',
+        defaultDescription: 'Allgemeine Chat-, Such- und Arbeitsbereichshilfe.',
+        kvmTitle: 'Fernsteuerung',
+        kvmDescription: 'Betreiben Sie den Remote-Host über NanoKVM.',
+        switched: 'Agentenrolle gewechselt',
+        switchFailed: 'Agentenrolle konnte nicht gewechselt werden'
+      },
+      send: 'Senden',
+      cancel: 'Abbrechen',
+      status: {
+        connecting: 'Verbindung zum Gateway wird hergestellt...',
+        connected: 'PicoClaw Sitzung verbunden',
+        disconnected: 'PicoClaw Sitzung geschlossen',
+        stopped: 'Stoppanforderung gesendet',
+        runtimeStarted: 'PicoClaw Runtime gestartet',
+        runtimeStartFailed: 'PicoClaw Runtime konnte nicht gestartet werden',
+        runtimeStopped: 'PicoClaw Runtime gestoppt',
+        runtimeStopFailed: 'PicoClaw Runtime konnte nicht gestoppt werden'
+      },
+      connection: {
+        runtime: {
+          checking: 'Überprüfung',
+          ready: 'Runtime bereit',
+          stopped: 'Runtime gestoppt',
+          unavailable: 'Runtime nicht verfügbar',
+          configError: 'Konfigurationsfehler'
+        },
+        transport: {
+          connecting: 'Verbinden',
+          connected: 'Verbunden'
+        },
+        run: {
+          idle: 'Leerlauf',
+          busy: 'Beschäftigt'
+        }
+      },
+      message: {
+        toolAction: 'Aktion',
+        observation: 'Beobachtung',
+        screenshot: 'Screenshot'
+      },
+      overlay: {
+        locked: 'PicoClaw steuert das Gerät. Die manuelle Eingabe wird angehalten.'
+      },
+      install: {
+        install: 'Installieren Sie PicoClaw',
+        installing: 'Installation von PicoClaw',
+        success: 'PicoClaw erfolgreich installiert',
+        failed: 'Installation von PicoClaw fehlgeschlagen',
+        uninstalling: 'Runtime wird deinstalliert...',
+        uninstalled: 'Runtime erfolgreich deinstalliert.',
+        uninstallFailed: 'Deinstallation fehlgeschlagen.',
+        requiredTitle: 'PicoClaw ist nicht installiert',
+        requiredDescription: 'Installieren Sie PicoClaw, bevor Sie die PicoClaw Runtime starten.',
+        progressDescription: 'PicoClaw wird heruntergeladen und installiert.',
+        stages: {
+          preparing: 'Vorbereiten',
+          downloading: 'Wird heruntergeladen',
+          extracting: 'Extrahieren',
+          installing: 'Installiere',
+          installed: 'Installiert',
+          install_timeout: 'Zeitüberschreitung',
+          install_failed: 'Fehlgeschlagen'
+        }
+      },
+      model: {
+        requiredTitle: 'Modellkonfiguration ist erforderlich',
+        requiredDescription:
+          'Konfigurieren Sie das PicoClaw-Modell, bevor Sie den PicoClaw-Chat verwenden.',
+        docsTitle: 'Konfigurationshandbuch',
+        docsDesc: 'Unterstützte Modelle und Protokolle',
+        menuLabel: 'Modell konfigurieren',
+        modelIdentifier: 'Modell-ID',
+        modelIdentifierPlaceholder: 'openai/gpt-5.4',
+        apiBase: 'API Base URL',
+        apiBasePlaceholder: 'https://api.example.com/v1',
+        apiKey: 'API-Schlüssel',
+        apiKeyPlaceholder: 'API-Schlüssel des Modells eingeben',
+        save: 'Speichern',
+        saving: 'Speichern',
+        saved: 'Modellkonfiguration gespeichert',
+        saveFailed: 'Modellkonfiguration konnte nicht gespeichert werden',
+        invalid: 'Modellkennung, API Base URL und API-Schlüssel sind erforderlich'
+      },
+      uninstall: {
+        menuLabel: 'Deinstallieren',
+        confirmTitle: 'Deinstallieren PicoClaw',
+        confirmContent:
+          'Sind Sie sicher, dass Sie PicoClaw deinstallieren möchten? Dadurch werden die ausführbare Datei und alle Konfigurationsdateien gelöscht.',
+        confirmOk: 'Deinstallieren',
+        confirmCancel: 'Abbrechen'
+      },
+      history: {
+        title: 'Verlauf',
+        loading: 'Sitzungen werden geladen...',
+        emptyTitle: 'Noch keine Historie',
+        emptyDescription: 'Frühere PicoClaw-Sitzungen werden hier angezeigt.',
+        loadFailed: 'Der Sitzungsverlauf konnte nicht geladen werden',
+        deleteFailed: 'Sitzung konnte nicht gelöscht werden',
+        deleteConfirmTitle: 'Sitzung löschen',
+        deleteConfirmContent: 'Sind Sie sicher, dass Sie „{{title}}" löschen möchten?',
+        deleteConfirmOk: 'Löschen',
+        deleteConfirmCancel: 'Abbrechen',
+        messageCount_one: '{{count}} Nachricht',
+        messageCount_other: '{{count}} Nachrichten'
+      },
+      config: {
+        startRuntime: 'PicoClaw starten',
+        stopRuntime: 'PicoClaw stoppen'
+      },
+      start: {
+        title: 'PicoClaw starten',
+        description:
+          'Starten Sie die Runtime, um mit der Verwendung des PicoClaw-Assistenten zu beginnen.'
       }
     },
     error: {
