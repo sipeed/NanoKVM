@@ -237,9 +237,18 @@ const es = {
           1800: '30 min',
           3600: '1 hora'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configura el Wi-Fi',
+          setBtn: 'Configurar'
+        },
         ssh: {
           description: 'Habilitar acceso remoto SSH',
           tip: 'Establece una contraseña segura antes de habilitar (Cuenta - Cambiar contraseña)'
+        },
+        tls: {
+          description: 'Habilitar protocolo HTTPS',
+          tip: 'Aviso: Usar HTTPS puede aumentar la latencia, especialmente en modo de vídeo MJPEG.'
         },
         advanced: 'Ajustes avanzados',
         swap: {
@@ -275,52 +284,6 @@ const es = {
         usbDesc: 'Habilitar interfaz USB hacia el host',
         okBtn: 'Sí',
         cancelBtn: 'No'
-      },
-      network: {
-        title: 'Red',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configura el Wi-Fi',
-          apMode: 'El modo AP está activado; conéctate al Wi-Fi escaneando el código QR',
-          connect: 'Conectar Wi-Fi',
-          connectDesc1: 'Introduce el SSID de la red y la contraseña',
-          connectDesc2: 'Introduce la contraseña para unirte a esta red',
-          disconnect: '¿Seguro que quieres desconectar la red?',
-          failed: 'Error de conexión, inténtalo de nuevo.',
-          ssid: 'Nombre',
-          password: 'Contraseña',
-          joinBtn: 'Unirse',
-          confirmBtn: 'Aceptar',
-          cancelBtn: 'Cancelar'
-        },
-        tls: {
-          description: 'Habilitar protocolo HTTPS',
-          tip: 'Aviso: Usar HTTPS puede aumentar la latencia, especialmente en modo de vídeo MJPEG.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Configura los servidores DNS para NanoKVM',
-          mode: 'Modo',
-          dhcp: 'DHCP',
-          manual: 'Manual',
-          add: 'Añadir DNS',
-          save: 'Guardar',
-          invalid: 'Introduce una dirección IP válida',
-          noDhcp: 'No hay DNS DHCP disponible actualmente',
-          saved: 'Configuración DNS guardada',
-          saveFailed: 'No se pudo guardar la configuración DNS',
-          unsaved: 'Cambios sin guardar',
-          maxServers: 'Se permiten como máximo {{count}} servidores DNS',
-          dnsServers: 'Servidores DNS',
-          dhcpServersDescription: 'Los servidores DNS se obtienen automáticamente por DHCP.',
-          manualServersDescription: 'Los servidores DNS se pueden editar manualmente.',
-          networkDetails: 'Detalles de red',
-          interface: 'Interfaz',
-          ipAddress: 'Dirección IP',
-          subnetMask: 'Máscara de subred',
-          router: 'Router',
-          none: 'Ninguno'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -376,6 +339,38 @@ const es = {
         preview: 'Vista previa de actualizaciones',
         previewDesc: 'Accede anticipadamente a nuevas funciones y mejoras',
         previewTip: 'Ten en cuenta que las versiones de vista previa pueden contener errores o funcionalidades incompletas'
+      },
+      users: {
+        title: 'Gestión de usuarios',
+        addUser: 'Agregar usuario',
+        colUsername: 'Nombre de usuario',
+        colRole: 'Rol',
+        colEnabled: 'Activo',
+        colActions: 'Acciones',
+        rolesTitle: 'Resumen de roles',
+        roleAdmin: 'Acceso completo + gestión de usuarios',
+        roleOperator: 'Uso del KVM: stream, teclado, ratón, botones de encendido',
+        roleViewer: 'Solo visualización del stream',
+        changePassword: 'Cambiar contraseña',
+        newPassword: 'Nueva contraseña',
+        confirmPassword: 'Confirmar contraseña',
+        pwdMismatch: 'Las contraseñas no coinciden',
+        pwdSuccess: 'Contraseña cambiada con éxito',
+        pwdFailed: 'Error al cambiar la contraseña',
+        password: 'Contraseña',
+        delete: 'Eliminar',
+        deleteConfirm: '¿Está seguro de que desea eliminar este usuario?',
+        createSuccess: 'Usuario creado',
+        createFailed: 'Error al crear el usuario',
+        deleteSuccess: 'Usuario eliminado',
+        deleteFailed: 'Error al eliminar',
+        updateSuccess: 'Actualizado',
+        updateFailed: 'Error de actualización',
+        loadFailed: 'Error al cargar usuarios',
+        usernameRequired: 'Ingrese el nombre de usuario',
+        passwordRequired: 'Ingrese la contraseña',
+        okBtn: 'Aceptar',
+        cancelBtn: 'Cancelar'
       },
       account: {
         title: 'Cuenta',

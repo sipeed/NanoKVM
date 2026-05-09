@@ -226,9 +226,18 @@ const ca = {
           1800: "30 min",
           3600: "1 h"
         },
+        wifi: {
+          title: "Xarxa sense fils",
+          description: "Configura la xarxa sense fils",
+          setBtn: "Configura"
+        },
         ssh: {
           description: "Activa accés remot per SSH",
           tip: "Configura una contrasenya segura abans (Compte - Canvia contrasenya)"
+        },
+        tls: {
+          description: "Activa el protocol HTTPS",
+          tip: "Atenció: Usar HTTPS pot augmentar la latència, sobretot amb vídeo MJPEG."
         },
         advanced: "Configuració avançada",
         swap: {
@@ -260,52 +269,6 @@ const ca = {
         rebootDesc: "Segur que vols reiniciar el NanoKVM?",
         okBtn: "Sí",
         cancelBtn: "No"
-      },
-      network: {
-        title: 'Xarxa',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configura la xarxa Wi-Fi',
-          apMode: 'El mode AP està activat; connecta\'t al Wi-Fi escanejant el codi QR',
-          connect: 'Connecta\'t a Wi-Fi',
-          connectDesc1: 'Introdueix el SSID i la contrasenya de la xarxa',
-          connectDesc2: 'Introdueix la contrasenya per connectar-te a aquesta xarxa',
-          disconnect: 'Segur que vols desconnectar la xarxa?',
-          failed: 'La connexió ha fallat, torna-ho a provar.',
-          ssid: 'Nom',
-          password: 'Contrasenya',
-          joinBtn: 'Connecta',
-          confirmBtn: 'D\'acord',
-          cancelBtn: 'Cancel·la'
-        },
-        tls: {
-          description: 'Activa el protocol HTTPS',
-          tip: 'Atenció: Usar HTTPS pot augmentar la latència, sobretot amb vídeo MJPEG.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Configura els servidors DNS per a NanoKVM',
-          mode: 'Mode',
-          dhcp: 'DHCP',
-          manual: 'Manual',
-          add: 'Afegeix DNS',
-          save: 'Desa',
-          invalid: 'Introdueix una adreça IP vàlida',
-          noDhcp: 'No hi ha cap DNS DHCP disponible actualment',
-          saved: 'Configuració DNS desada',
-          saveFailed: 'No s\'ha pogut desar la configuració DNS',
-          unsaved: 'Canvis no desats',
-          maxServers: 'Es permeten com a màxim {{count}} servidors DNS',
-          dnsServers: 'Servidors DNS',
-          dhcpServersDescription: 'Els servidors DNS s\'obtenen automàticament via DHCP.',
-          manualServersDescription: 'Els servidors DNS es poden editar manualment.',
-          networkDetails: 'Detalls de xarxa',
-          interface: 'Interfície',
-          ipAddress: 'Adreça IP',
-          subnetMask: 'Màscara de subxarxa',
-          router: 'Encaminador',
-          none: 'Cap'
-        }
       },
       tailscale: {
         title: "Tailscale",
@@ -355,6 +318,38 @@ const ca = {
         preview: "Versió de prova",
         previewDesc: "Prova noves funcions abans que ningú",
         previewTip: "Compte: aquestes versions poden tenir errors o funcions inacabades!"
+      },
+      users: {
+        title: 'Gestió d\'usuaris',
+        addUser: 'Afegir usuari',
+        colUsername: 'Nom d\'usuari',
+        colRole: 'Rol',
+        colEnabled: 'Actiu',
+        colActions: 'Accions',
+        rolesTitle: 'Visió general dels rols',
+        roleAdmin: 'Accés complet + gestió d\'usuaris',
+        roleOperator: 'Ús del KVM: stream, teclat, ratolí, botons d\'engegada',
+        roleViewer: 'Només visualització de l\'stream',
+        changePassword: 'Canviar contrasenya',
+        newPassword: 'Nova contrasenya',
+        confirmPassword: 'Confirmar contrasenya',
+        pwdMismatch: 'Les contrasenyes no coincideixen',
+        pwdSuccess: 'Contrasenya canviada correctament',
+        pwdFailed: 'No s\'ha pogut canviar la contrasenya',
+        password: 'Contrasenya',
+        delete: 'Eliminar',
+        deleteConfirm: 'Segur que voleu eliminar aquest usuari?',
+        createSuccess: 'Usuari creat',
+        createFailed: 'No s\'ha pogut crear l\'usuari',
+        deleteSuccess: 'Usuari eliminat',
+        deleteFailed: 'No s\'ha pogut eliminar l\'usuari',
+        updateSuccess: 'Actualitzat',
+        updateFailed: 'Actualització fallida',
+        loadFailed: 'No s\'han pogut carregar els usuaris',
+        usernameRequired: 'Introduïu el nom d\'usuari',
+        passwordRequired: 'Introduïu la contrasenya',
+        okBtn: 'D\'acord',
+        cancelBtn: 'Cancel·lar'
       },
       account: {
         title: "Compte",

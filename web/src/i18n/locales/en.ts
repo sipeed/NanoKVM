@@ -308,9 +308,28 @@ const en = {
           1800: '30 min',
           3600: '1 hour'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configure Wi-Fi',
+          apMode: 'AP mode is enabled, connect to Wi-Fi by scanning QR code',
+          connect: 'Join Wi-Fi',
+          connectDesc1: 'Please enter the network ssid and password',
+          connectDesc2: 'Please enter the password to join this network',
+          disconnect: 'Are you sure to disconnect the network?',
+          failed: 'Connection failed, please try again.',
+          ssid: 'Name',
+          password: 'Password',
+          joinBtn: 'Join',
+          confirmBtn: 'Ok',
+          cancelBtn: 'Cancel'
+        },
         ssh: {
           description: 'Enable SSH remote access',
           tip: 'Set a strong password before enabling (Account - Change Password)'
+        },
+        tls: {
+          description: 'Enable HTTPS protocol',
+          tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
         },
         advanced: 'Advanced Settings',
         swap: {
@@ -354,52 +373,6 @@ const en = {
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
         okBtn: 'Yes',
         cancelBtn: 'No'
-      },
-      network: {
-        title: 'Network',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configure Wi-Fi',
-          apMode: 'AP mode is enabled, connect to Wi-Fi by scanning QR code',
-          connect: 'Join Wi-Fi',
-          connectDesc1: 'Please enter the network ssid and password',
-          connectDesc2: 'Please enter the password to join this network',
-          disconnect: 'Are you sure to disconnect the network?',
-          failed: 'Connection failed, please try again.',
-          ssid: 'Name',
-          password: 'Password',
-          joinBtn: 'Join',
-          confirmBtn: 'Ok',
-          cancelBtn: 'Cancel'
-        },
-        tls: {
-          description: 'Enable HTTPS protocol',
-          tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Configure DNS servers for NanoKVM',
-          mode: 'Mode',
-          dhcp: 'DHCP',
-          manual: 'Manual',
-          add: 'Add DNS',
-          save: 'Save',
-          invalid: 'Please enter a valid IP address',
-          noDhcp: 'No DHCP DNS is currently available',
-          saved: 'DNS settings saved',
-          saveFailed: 'Failed to save DNS settings',
-          unsaved: 'Unsaved changes',
-          maxServers: 'Maximum {{count}} DNS servers allowed',
-          dnsServers: 'DNS Servers',
-          dhcpServersDescription: 'DNS servers are automatically obtained from DHCP.',
-          manualServersDescription: 'DNS servers can be edited manually.',
-          networkDetails: 'Network Details',
-          interface: 'Interface',
-          ipAddress: 'IP Address',
-          subnetMask: 'Subnet Mask',
-          router: 'Router',
-          none: 'None'
-        }
       },
       tailscale: {
         title: 'Tailscale',

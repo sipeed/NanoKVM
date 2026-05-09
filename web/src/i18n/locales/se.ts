@@ -242,9 +242,18 @@ const se = {
           1800: '30 min',
           3600: '1 timme'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Konfigurera Wi-Fi',
+          setBtn: 'Konfigurera'
+        },
         ssh: {
           description: 'Aktivera SSH-fjärråtkomst',
           tip: 'Ställ in ett starkt lösenord innan du aktiverar (Konto - Byt lösenord)'
+        },
+        tls: {
+          description: 'Aktivera HTTPS-protokoll',
+          tip: 'Observera: Användning av HTTPS kan öka fördröjningen, särskilt med MJPEG-läge.'
         },
         advanced: 'Avancerade inställningar',
         swap: {
@@ -276,52 +285,6 @@ const se = {
         rebootDesc: 'Är du säker på att du vill starta om NanoKVM?',
         okBtn: 'Ja',
         cancelBtn: 'Nej'
-      },
-      network: {
-        title: 'Nätverk',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Konfigurera Wi-Fi',
-          apMode: 'AP-läge är aktiverat, anslut till Wi-Fi genom att skanna QR-koden',
-          connect: 'Anslut Wi-Fi',
-          connectDesc1: 'Ange nätverkets SSID och lösenord',
-          connectDesc2: 'Ange lösenordet för att ansluta till detta nätverk',
-          disconnect: 'Är du säker på att du vill koppla från nätverket?',
-          failed: 'Anslutningen misslyckades, försök igen.',
-          ssid: 'Namn',
-          password: 'Lösenord',
-          joinBtn: 'Anslut',
-          confirmBtn: 'OK',
-          cancelBtn: 'Avbryt'
-        },
-        tls: {
-          description: 'Aktivera HTTPS-protokoll',
-          tip: 'Observera: Användning av HTTPS kan öka fördröjningen, särskilt med MJPEG-läge.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Konfigurera DNS-servrar för NanoKVM',
-          mode: 'Läge',
-          dhcp: 'DHCP',
-          manual: 'Manuell',
-          add: 'Lägg till DNS',
-          save: 'Spara',
-          invalid: 'Ange en giltig IP-adress',
-          noDhcp: 'Ingen DHCP-DNS är tillgänglig just nu',
-          saved: 'DNS-inställningar sparade',
-          saveFailed: 'Det gick inte att spara DNS-inställningar',
-          unsaved: 'Osparade ändringar',
-          maxServers: 'Maximalt {{count}} DNS-servrar tillåtna',
-          dnsServers: 'DNS-servrar',
-          dhcpServersDescription: 'DNS-servrar hämtas automatiskt från DHCP.',
-          manualServersDescription: 'DNS-servrar kan redigeras manuellt.',
-          networkDetails: 'Nätverksdetaljer',
-          interface: 'Gränssnitt',
-          ipAddress: 'IP-adress',
-          subnetMask: 'Subnätmask',
-          router: 'Router',
-          none: 'Ingen'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -373,6 +336,38 @@ const se = {
         previewDesc: 'Få tidig tillgång till nya funktioner och förbättringar',
         previewTip:
           'Observera att förhandsversioner kan innehålla buggar eller ofullständig funktionalitet!'
+      },
+      users: {
+        title: 'Användarhantering',
+        addUser: 'Lägg till användare',
+        colUsername: 'Användarnamn',
+        colRole: 'Roll',
+        colEnabled: 'Aktiv',
+        colActions: 'Åtgärder',
+        rolesTitle: 'Rollöversikt',
+        roleAdmin: 'Full åtkomst + användarhantering',
+        roleOperator: 'KVM-användning: ström, tangentbord, mus, strömbrytare',
+        roleViewer: 'Endast strömvisning',
+        changePassword: 'Ändra lösenord',
+        newPassword: 'Nytt lösenord',
+        confirmPassword: 'Bekräfta lösenord',
+        pwdMismatch: 'Lösenorden matchar inte',
+        pwdSuccess: 'Lösenord ändrat',
+        pwdFailed: 'Det gick inte att ändra lösenordet',
+        password: 'Lösenord',
+        delete: 'Ta bort',
+        deleteConfirm: 'Är du säker på att du vill ta bort denna användare?',
+        createSuccess: 'Användare skapad',
+        createFailed: 'Kunde inte skapa användare',
+        deleteSuccess: 'Användare borttagen',
+        deleteFailed: 'Borttagning misslyckades',
+        updateSuccess: 'Uppdaterad',
+        updateFailed: 'Uppdatering misslyckades',
+        loadFailed: 'Det gick inte att läsa in användare',
+        usernameRequired: 'Ange användarnamn',
+        passwordRequired: 'Ange lösenord',
+        okBtn: 'OK',
+        cancelBtn: 'Avbryt'
       },
       account: {
         title: 'Konto',

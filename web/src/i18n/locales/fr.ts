@@ -70,14 +70,7 @@ const fr = {
       placeholder: 'Veuillez saisir',
       submit: 'Soumettre',
       virtual: 'Clavier',
-      ctrlaltdel: 'Ctrl+Alt+Del',
-      readClipboard: 'Lire le presse-papiers',
-      clipboardPermissionDenied: "Accès au presse-papiers refusé. Veuillez autoriser l'accès dans votre navigateur.",
-      clipboardReadError: 'Échec de la lecture du presse-papiers',
-      dropdownEnglish: 'Anglais',
-      dropdownGerman: 'Allemand',
-      dropdownFrench: 'Français',
-      dropdownRussian: 'Russe'
+      ctrlaltdel: 'Ctrl+Alt+Del'
     },
     mouse: {
       default: 'Curseur par défaut',
@@ -194,56 +187,15 @@ const fr = {
           1800: '30 min',
           3600: '1 heure'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configurez le Wi-Fi',
+          setBtn: 'Configurer'
+        },
         disk: 'Disque virtuel',
         diskDesc: 'Monter le disque virtuel U sur l\'hôte distant',
         network: 'Réseau virtuel',
         networkDesc: 'Monter la carte réseau virtuelle sur l\'hôte distant'
-      },
-      network: {
-        title: 'Réseau',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configurez le Wi-Fi',
-          apMode: 'Le mode AP est activé, connectez-vous au Wi-Fi en scannant le code QR',
-          connect: 'Connecter le Wi-Fi',
-          connectDesc1: 'Veuillez saisir le SSID du réseau et le mot de passe',
-          connectDesc2: 'Veuillez saisir le mot de passe pour rejoindre ce réseau',
-          disconnect: 'Voulez-vous vraiment déconnecter le réseau ?',
-          failed: 'Échec de la connexion, veuillez réessayer.',
-          ssid: 'Nom',
-          password: 'Mot de passe',
-          joinBtn: 'Rejoindre',
-          confirmBtn: 'OK',
-          cancelBtn: 'Annuler'
-        },
-        tls: {
-          description: 'Activer le protocole HTTPS',
-          tip: 'Attention : l\'utilisation de HTTPS peut augmenter la latence, surtout en mode vidéo MJPEG.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Configurer les serveurs DNS pour NanoKVM',
-          mode: 'Mode',
-          dhcp: 'DHCP',
-          manual: 'Manuel',
-          add: 'Ajouter un DNS',
-          save: 'Enregistrer',
-          invalid: 'Veuillez saisir une adresse IP valide',
-          noDhcp: 'Aucun DNS DHCP n\'est actuellement disponible',
-          saved: 'Paramètres DNS enregistrés',
-          saveFailed: 'Échec de l\'enregistrement des paramètres DNS',
-          unsaved: 'Modifications non enregistrées',
-          maxServers: '{{count}} serveurs DNS maximum autorisés',
-          dnsServers: 'Serveurs DNS',
-          dhcpServersDescription: 'Les serveurs DNS sont obtenus automatiquement par DHCP.',
-          manualServersDescription: 'Les serveurs DNS peuvent être modifiés manuellement.',
-          networkDetails: 'Détails du réseau',
-          interface: 'Interface',
-          ipAddress: 'Adresse IP',
-          subnetMask: 'Masque de sous-réseau',
-          router: 'Routeur',
-          none: 'Aucun'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -289,6 +241,38 @@ const fr = {
         updating: 'Mise à jour en cours. Veuillez patienter...',
         confirm: 'Confirmer',
         cancel: 'Annuler'
+      },
+      users: {
+        title: 'Gestion des utilisateurs',
+        addUser: 'Ajouter un utilisateur',
+        colUsername: 'Nom d\'utilisateur',
+        colRole: 'Rôle',
+        colEnabled: 'Actif',
+        colActions: 'Actions',
+        rolesTitle: 'Aperçu des rôles',
+        roleAdmin: 'Accès complet + gestion des utilisateurs',
+        roleOperator: 'Utiliser le KVM : flux, clavier, souris, boutons d\'alimentation',
+        roleViewer: 'Visualisation du flux uniquement',
+        changePassword: 'Changer le mot de passe',
+        newPassword: 'Nouveau mot de passe',
+        confirmPassword: 'Confirmer le mot de passe',
+        pwdMismatch: 'Les mots de passe ne correspondent pas',
+        pwdSuccess: 'Mot de passe modifié avec succès',
+        pwdFailed: 'Échec du changement de mot de passe',
+        password: 'Mot de passe',
+        delete: 'Supprimer',
+        deleteConfirm: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
+        createSuccess: 'Utilisateur créé',
+        createFailed: 'Échec de la création',
+        deleteSuccess: 'Utilisateur supprimé',
+        deleteFailed: 'Échec de la suppression',
+        updateSuccess: 'Mis à jour',
+        updateFailed: 'Échec de la mise à jour',
+        loadFailed: 'Échec du chargement des utilisateurs',
+        usernameRequired: 'Saisissez le nom d\'utilisateur',
+        passwordRequired: 'Saisissez le mot de passe',
+        okBtn: 'OK',
+        cancelBtn: 'Annuler'
       },
       account: {
         title: 'Compte',

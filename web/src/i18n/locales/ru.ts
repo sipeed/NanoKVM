@@ -76,7 +76,6 @@ const ru = {
       ctrlaltdel: 'Ctrl+Alt+Del',
       dropdownEnglish: 'Английский',
       dropdownGerman: 'Немецкий',
-      dropdownFrench: 'Французский',
       dropdownRussian: 'Русский'
     },
     mouse: {
@@ -231,9 +230,18 @@ const ru = {
           1800: '30 мин',
           3600: '1 час'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Настройка Wi-Fi',
+          setBtn: 'Конфигурация'
+        },
         ssh: {
           description: 'Включить удаленный доступ по SSH',
           tip: 'Задайте сильный пароль перед включением (Аккаунт - Пароль - Обновить)'
+        },
+        tls: {
+          description: 'Включить HTTPS Protocol',
+          tip: 'Имейте в виду: использование HTTPS может увеличить задержку, особенно в режиме видео MJPEG.'
         },
         advanced: 'Дополнительные настройки',
         swap: {
@@ -262,52 +270,6 @@ const ru = {
         rebootDesc: 'Вы уверены, что хотите перезагрузить NanoKVM?',
         okBtn: 'Да',
         cancelBtn: 'Нет'
-      },
-      network: {
-        title: 'Сеть',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Настройка Wi-Fi',
-          apMode: 'Режим AP включен, подключитесь к Wi-Fi, отсканировав QR-код',
-          connect: 'Подключить Wi-Fi',
-          connectDesc1: 'Введите SSID сети и пароль',
-          connectDesc2: 'Введите пароль для подключения к этой сети',
-          disconnect: 'Вы уверены, что хотите отключить сеть?',
-          failed: 'Не удалось подключиться, попробуйте снова.',
-          ssid: 'Имя',
-          password: 'Пароль',
-          joinBtn: 'Подключить',
-          confirmBtn: 'OK',
-          cancelBtn: 'Отмена'
-        },
-        tls: {
-          description: 'Включить протокол HTTPS',
-          tip: 'Имейте в виду: использование HTTPS может увеличить задержку, особенно в режиме видео MJPEG.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Настройка DNS-серверов для NanoKVM',
-          mode: 'Режим',
-          dhcp: 'DHCP',
-          manual: 'Вручную',
-          add: 'Добавить DNS',
-          save: 'Сохранить',
-          invalid: 'Введите допустимый IP-адрес',
-          noDhcp: 'DNS от DHCP сейчас недоступен',
-          saved: 'Настройки DNS сохранены',
-          saveFailed: 'Не удалось сохранить настройки DNS',
-          unsaved: 'Несохраненные изменения',
-          maxServers: 'Разрешено не более {{count}} DNS-серверов',
-          dnsServers: 'DNS-серверы',
-          dhcpServersDescription: 'DNS-серверы автоматически получаются от DHCP.',
-          manualServersDescription: 'DNS-серверы можно редактировать вручную.',
-          networkDetails: 'Сведения о сети',
-          interface: 'Интерфейс',
-          ipAddress: 'IP-адрес',
-          subnetMask: 'Маска подсети',
-          router: 'Маршрутизатор',
-          none: 'Нет'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -359,6 +321,38 @@ const ru = {
         previewDesc: 'Получайте ранний доступ к новым функциям и улучшениям',
         previewTip:
           'Обратите внимание: в ранних версиях могут быть ошибки или незавершённый функционал!'
+      },
+      users: {
+        title: 'Управление пользователями',
+        addUser: 'Добавить пользователя',
+        colUsername: 'Имя пользователя',
+        colRole: 'Роль',
+        colEnabled: 'Активен',
+        colActions: 'Действия',
+        rolesTitle: 'Обзор ролей',
+        roleAdmin: 'Полный доступ + управление пользователями',
+        roleOperator: 'Использование KVM: поток, клавиатура, мышь, кнопки питания',
+        roleViewer: 'Только просмотр потока',
+        changePassword: 'Сменить пароль',
+        newPassword: 'Новый пароль',
+        confirmPassword: 'Подтвердите пароль',
+        pwdMismatch: 'Пароли не совпадают',
+        pwdSuccess: 'Пароль успешно изменен',
+        pwdFailed: 'Не удалось изменить пароль',
+        password: 'Пароль',
+        delete: 'Удалить',
+        deleteConfirm: 'Вы уверены, что хотите удалить этого пользователя?',
+        createSuccess: 'Пользователь создан',
+        createFailed: 'Не удалось создать',
+        deleteSuccess: 'Пользователь удален',
+        deleteFailed: 'Не удалось удалить',
+        updateSuccess: 'Обновлено',
+        updateFailed: 'Ошибка обновления',
+        loadFailed: 'Не удалось загрузить пользователей',
+        usernameRequired: 'Введите имя пользователя',
+        passwordRequired: 'Введите пароль',
+        okBtn: 'OK',
+        cancelBtn: 'Отмена'
       },
       account: {
         title: 'Аккаунт',

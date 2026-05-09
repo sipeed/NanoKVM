@@ -258,9 +258,29 @@ const zh_tw = {
           1800: '30 分鐘',
           3600: '1 小時'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: '設定 Wi-Fi',
+          setBtn: '設定',
+          apMode: 'AP 模式已啟用，該模式下僅支援掃描 QRCode 配網',
+          connect: '連線 Wi-Fi',
+          connectDesc1: '請輸入網路名稱和密碼',
+          connectDesc2: '請輸入密碼以連線此網路',
+          disconnect: '是否要中斷該網路連線？',
+          failed: '連線失敗，請重試',
+          ssid: 'SSID 名稱',
+          password: '密碼',
+          joinBtn: '加入',
+          confirmBtn: '確定',
+          cancelBtn: '取消'
+        },
         ssh: {
           description: '啟用 SSH 伺服器',
           tip: '啟用前請務必設定強密碼（帳號 - 更改密碼）'
+        },
+        tls: {
+          description: '啟用 HTTPS 協議',
+          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
         },
         advanced: '進階設定',
         swap: {
@@ -304,52 +324,6 @@ const zh_tw = {
         rebootDesc: '您確定要重新啟動 NanoKVM?',
         okBtn: '確定',
         cancelBtn: '取消'
-      },
-      network: {
-        title: '網路',
-        wifi: {
-          title: 'Wi-Fi',
-          description: '設定 Wi-Fi',
-          apMode: 'AP 模式已啟用，該模式下僅支援掃描 QRCode 配網',
-          connect: '連線 Wi-Fi',
-          connectDesc1: '請輸入網路名稱和密碼',
-          connectDesc2: '請輸入密碼以連線此網路',
-          disconnect: '是否要中斷該網路連線？',
-          failed: '連線失敗，請重試',
-          ssid: 'SSID 名稱',
-          password: '密碼',
-          joinBtn: '加入',
-          confirmBtn: '確定',
-          cancelBtn: '取消'
-        },
-        tls: {
-          description: '啟用 HTTPS 協議',
-          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
-        },
-        dns: {
-          title: 'DNS',
-          description: '設定 NanoKVM 使用的 DNS 伺服器',
-          mode: '模式',
-          dhcp: 'DHCP',
-          manual: '手動',
-          add: '新增 DNS',
-          save: '儲存',
-          invalid: '請輸入有效的 IP 位址',
-          noDhcp: '目前未取得 DHCP DNS',
-          saved: 'DNS 設定已儲存',
-          saveFailed: '儲存 DNS 設定失敗',
-          unsaved: '有未儲存的變更',
-          maxServers: '最多允許 {{count}} 個 DNS 伺服器',
-          dnsServers: 'DNS 伺服器',
-          dhcpServersDescription: 'DNS 伺服器由 DHCP 自動取得。',
-          manualServersDescription: 'DNS 伺服器可以手動編輯。',
-          networkDetails: '網路詳細資訊',
-          interface: '介面',
-          ipAddress: 'IP 位址',
-          subnetMask: '子網路遮罩',
-          router: '路由器',
-          none: '無'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -415,6 +389,38 @@ const zh_tw = {
           invalidName: '檔名格式錯誤，請前往 GitHub 釋出頁下載安裝包。',
           updateFailed: '更新失敗，請重試'
         }
+      },
+      users: {
+        title: '使用者管理',
+        addUser: '新增使用者',
+        colUsername: '使用者名稱',
+        colRole: '角色',
+        colEnabled: '啟用',
+        colActions: '操作',
+        rolesTitle: '角色概覽',
+        roleAdmin: '完全存取 + 使用者管理',
+        roleOperator: 'KVM 使用：串流、鍵盤、滑鼠、電源按鈕',
+        roleViewer: '僅檢視串流',
+        changePassword: '變更密碼',
+        newPassword: '新密碼',
+        confirmPassword: '確認密碼',
+        pwdMismatch: '密碼不相符',
+        pwdSuccess: '密碼變更成功',
+        pwdFailed: '變更密碼失敗',
+        password: '密碼',
+        delete: '刪除',
+        deleteConfirm: '確定要刪除此使用者嗎？',
+        createSuccess: '使用者已建立',
+        createFailed: '建立失敗',
+        deleteSuccess: '使用者已刪除',
+        deleteFailed: '刪除失敗',
+        updateSuccess: '已更新',
+        updateFailed: '更新失敗',
+        loadFailed: '載入使用者失敗',
+        usernameRequired: '請輸入使用者名稱',
+        passwordRequired: '請輸入密碼',
+        okBtn: '確定',
+        cancelBtn: '取消'
       },
       account: {
         title: '帳號',

@@ -246,9 +246,18 @@ const ko = {
           1800: '30분',
           3600: '1시간'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi 설정',
+          setBtn: '설정'
+        },
         ssh: {
           description: 'SSH 원격 접속 활성화',
           tip: '활성화하기 전에 강력한 비밀번호를 설정하세요. (계정 - 비밀번호 변경)'
+        },
+        tls: {
+          description: 'HTTPS 프로토콜 활성화',
+          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
         },
         advanced: '고급 설정',
         swap: {
@@ -280,52 +289,6 @@ const ko = {
         rebootDesc: 'NanoKVM을 재부팅하시겠습니까?',
         okBtn: '네',
         cancelBtn: '아니오'
-      },
-      network: {
-        title: '네트워크',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Wi-Fi 설정',
-          apMode: 'AP 모드가 활성화되었습니다. QR 코드를 스캔하여 Wi-Fi에 연결하세요',
-          connect: 'Wi-Fi 연결',
-          connectDesc1: '네트워크 SSID와 비밀번호를 입력하세요',
-          connectDesc2: '이 네트워크에 연결할 비밀번호를 입력하세요',
-          disconnect: '네트워크 연결을 끊으시겠습니까?',
-          failed: '연결에 실패했습니다. 다시 시도하세요.',
-          ssid: '이름',
-          password: '비밀번호',
-          joinBtn: '연결',
-          confirmBtn: '확인',
-          cancelBtn: '취소'
-        },
-        tls: {
-          description: 'HTTPS 프로토콜 활성화',
-          tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'NanoKVM의 DNS 서버 설정',
-          mode: '모드',
-          dhcp: 'DHCP',
-          manual: '수동',
-          add: 'DNS 추가',
-          save: '저장',
-          invalid: '유효한 IP 주소를 입력하세요',
-          noDhcp: '현재 사용 가능한 DHCP DNS가 없습니다',
-          saved: 'DNS 설정이 저장되었습니다',
-          saveFailed: 'DNS 설정 저장 실패',
-          unsaved: '저장되지 않은 변경사항',
-          maxServers: '최대 {{count}}개의 DNS 서버가 허용됩니다',
-          dnsServers: 'DNS 서버',
-          dhcpServersDescription: 'DNS 서버는 DHCP에서 자동으로 가져옵니다.',
-          manualServersDescription: 'DNS 서버를 수동으로 편집할 수 있습니다.',
-          networkDetails: '네트워크 세부 정보',
-          interface: '인터페이스',
-          ipAddress: 'IP 주소',
-          subnetMask: '서브넷 마스크',
-          router: '라우터',
-          none: '없음'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -391,6 +354,38 @@ const ko = {
           updateFailed: '업데이트에 실패했습니다. 재시도하세요.'
         }
       },
+      users: {
+        title: '사용자 관리',
+        addUser: '사용자 추가',
+        colUsername: '사용자 이름',
+        colRole: '역할',
+        colEnabled: '활성',
+        colActions: '작업',
+        rolesTitle: '역할 개요',
+        roleAdmin: '전체 액세스 + 사용자 관리',
+        roleOperator: 'KVM 사용: 스트림, 키보드, 마우스, 전원 버튼',
+        roleViewer: '스트림 보기 전용',
+        changePassword: '비밀번호 변경',
+        newPassword: '새 비밀번호',
+        confirmPassword: '비밀번호 확인',
+        pwdMismatch: '비밀번호가 일치하지 않습니다',
+        pwdSuccess: '비밀번호가 변경되었습니다',
+        pwdFailed: '비밀번호 변경에 실패했습니다',
+        password: '비밀번호',
+        delete: '삭제',
+        deleteConfirm: '이 사용자를 삭제하시겠습니까?',
+        createSuccess: '사용자가 생성되었습니다',
+        createFailed: '생성에 실패했습니다',
+        deleteSuccess: '사용자가 삭제되었습니다',
+        deleteFailed: '삭제에 실패했습니다',
+        updateSuccess: '업데이트됨',
+        updateFailed: '업데이트 실패',
+        loadFailed: '사용자 로드 실패',
+        usernameRequired: '사용자 이름을 입력하세요',
+        passwordRequired: '비밀번호를 입력하세요',
+        okBtn: '확인',
+        cancelBtn: '취소'
+      },
       account: {
         title: '계정',
         webAccount: '웹 계정',
@@ -400,127 +395,6 @@ const ko = {
         logoutDesc: '정말로 로그아웃 하시겠습니까?',
         okBtn: '네',
         cancelBtn: '아니오'
-      }
-    },
-    picoclaw: {
-      title: 'PicoClaw 어시스턴트',
-      empty: '패널을 열고 작업을 시작하세요.',
-      inputPlaceholder: 'PicoClaw가 무엇을 하기를 원하는지 설명하세요',
-      newConversation: '새 대화',
-      processing: '처리 중...',
-      agent: {
-        defaultTitle: '일반 어시스턴트',
-        defaultDescription: '일반 대화, 검색, 작업 공간 지원.',
-        kvmTitle: '원격 제어',
-        kvmDescription: 'NanoKVM을 통한 원격 호스트 제어.',
-        switched: '에이전트 역할 변경됨',
-        switchFailed: '에이전트 역할 변경에 실패했습니다'
-      },
-      send: '전송',
-      cancel: '취소',
-      status: {
-        connecting: '게이트웨이 연결 중...',
-        connected: 'PicoClaw 세션이 연결되었습니다',
-        disconnected: 'PicoClaw 세션이 종료되었습니다',
-        stopped: '요청 전송 중지',
-        runtimeStarted: 'PicoClaw 런타임이 시작되었습니다',
-        runtimeStartFailed: 'PicoClaw 런타임 시작에 실패했습니다',
-        runtimeStopped: 'PicoClaw 런타임이 중지되었습니다',
-        runtimeStopFailed: 'PicoClaw 런타임 중지에 실패했습니다'
-      },
-      connection: {
-        runtime: {
-          checking: '확인 중',
-          ready: '런타임 준비됨',
-          stopped: '런타임 중지됨',
-          unavailable: '런타임 사용 불가',
-          configError: '구성 에러'
-        },
-        transport: {
-          connecting: '연결 중',
-          connected: '연결됨'
-        },
-        run: {
-          idle: '대기',
-          busy: '작업 중'
-        }
-      },
-      message: {
-        toolAction: '동작',
-        observation: '관찰',
-        screenshot: '스크린샷'
-      },
-      overlay: {
-        locked: 'PicoClaw가 기기를 제어하고 있습니다. 수동 입력이 일시 중지됩니다.'
-      },
-      install: {
-        install: 'PicoClaw 설치',
-        installing: 'PicoClaw 설치 중',
-        success: 'PicoClaw가 성공적으로 설치되었습니다',
-        failed: 'PicoClaw 설치에 실패했습니다',
-        uninstalling: '런타임 삭제 중...',
-        uninstalled: '런타임 삭제에 성공했습니다.',
-        uninstallFailed: '삭제에 실패했습니다.',
-        requiredTitle: 'PicoClaw가 설치되지 않았습니다',
-        requiredDescription: 'PicoClaw를 설치하기 전에 PicoClaw 런타임을 먼저 설치하세요.',
-        progressDescription: 'PicoClaw가 다운로되고 설치되고 있습니다.',
-        stages: {
-          preparing: '준비 중',
-          downloading: '다운로드 중',
-          extracting: '압축 해제 중',
-          installing: '설치 중',
-          installed: '설치 완료',
-          install_timeout: '시간 초과',
-          install_failed: '실패'
-        }
-      },
-      model: {
-        requiredTitle: '모델 구성이 필요합니다',
-        requiredDescription: 'PicoClaw 채팅을 사용하기 전에 PicoClaw 모델을 구성하세요.',
-        docsTitle: '구성 가이드',
-        docsDesc: '지원하는 모델과 프로트콜',
-        menuLabel: '모델 구성',
-        modelIdentifier: '모델 식별자',
-        modelIdentifierPlaceholder: 'openai/gpt-5.4',
-        apiBase: 'API 기본 URL',
-        apiBasePlaceholder: 'https://api.example.com/v1',
-        apiKey: 'API 키',
-        apiKeyPlaceholder: '모델 API 키를 입력하세요',
-        save: '저장',
-        saving: '저장 중',
-        saved: '모델 구성이 저장되었습니다',
-        saveFailed: '모델 구성 저장에 실패했습니다',
-        invalid: '모델 식별자, API 기본 URL, API 키가 필요합니다'
-      },
-      uninstall: {
-        menuLabel: '제거',
-        confirmTitle: 'PicoClaw 제거',
-        confirmContent:
-          'PicoClaw를 정말로 제거할까요? 실행 파일과 모든 구성 파일이 삭제됩니다.',
-        confirmOk: '제거',
-        confirmCancel: '취소'
-      },
-      history: {
-        title: '기록',
-        loading: '기록 불러오는 중...',
-        emptyTitle: '기록 없음',
-        emptyDescription: '이전 PicoClaw 세션은 여기에 표시됩니다.',
-        loadFailed: '세션 기록을 불러오지 못했습니다',
-        deleteFailed: '세션 삭제에 실패했습니다',
-        deleteConfirmTitle: '세션 삭제',
-        deleteConfirmContent: '정말로 "{{title}}"를 삭제할까요?',
-        deleteConfirmOk: '삭제',
-        deleteConfirmCancel: '취소',
-        messageCount_one: '{{count}}개의 메시지',
-        messageCount_other: '{{count}}개의 메시지'
-      },
-      config: {
-        startRuntime: 'PicoClaw 시작',
-        stopRuntime: 'PicoClaw 중지'
-      },
-      start: {
-        title: 'PicoClaw 시작',
-        description: '런타임을 시작하여 PicoClaw 어시스턴트를 시작합니다.'
       }
     },
     error: {

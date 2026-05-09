@@ -226,9 +226,18 @@ const pt_br = {
           1800: '30 min',
           3600: '1 hora'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Configurar Wi-Fi',
+          setBtn: 'Configurar'
+        },
         ssh: {
           description: 'Habilitar acesso remoto SSH',
           tip: 'Defina uma senha forte antes de habilitar (Conta - Mudar Senha)'
+        },
+        tls: {
+          description: 'Habilitar protocolo HTTPS',
+          tip: 'Atenção: O uso de HTTPS pode aumentar a latência, especialmente com o modo de vídeo MJPEG.'
         },
         advanced: 'Configurações Avançadas',
         swap: {
@@ -260,52 +269,6 @@ const pt_br = {
         rebootDesc: 'Tem certeza de que deseja reiniciar o NanoKVM?',
         okBtn: 'Sim',
         cancelBtn: 'Não'
-      },
-      network: {
-        title: 'Rede',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Configurar Wi-Fi',
-          apMode: 'O modo AP está ativado, conecte-se ao Wi-Fi escaneando o QR code',
-          connect: 'Conectar Wi-Fi',
-          connectDesc1: 'Digite o SSID da rede e a senha',
-          connectDesc2: 'Digite a senha para entrar nesta rede',
-          disconnect: 'Tem certeza de que deseja desconectar a rede?',
-          failed: 'Falha na conexão, tente novamente.',
-          ssid: 'Nome',
-          password: 'Senha',
-          joinBtn: 'Entrar',
-          confirmBtn: 'OK',
-          cancelBtn: 'Cancelar'
-        },
-        tls: {
-          description: 'Habilitar protocolo HTTPS',
-          tip: 'Atenção: O uso de HTTPS pode aumentar a latência, especialmente com o modo de vídeo MJPEG.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'Configurar servidores DNS para o NanoKVM',
-          mode: 'Modo',
-          dhcp: 'DHCP',
-          manual: 'Manual',
-          add: 'Adicionar DNS',
-          save: 'Salvar',
-          invalid: 'Digite um endereço IP válido',
-          noDhcp: 'Nenhum DNS DHCP está disponível no momento',
-          saved: 'Configurações de DNS salvas',
-          saveFailed: 'Falha ao salvar as configurações de DNS',
-          unsaved: 'Alterações não salvas',
-          maxServers: 'Máximo de {{count}} servidores DNS permitido',
-          dnsServers: 'Servidores DNS',
-          dhcpServersDescription: 'Os servidores DNS são obtidos automaticamente via DHCP.',
-          manualServersDescription: 'Os servidores DNS podem ser editados manualmente.',
-          networkDetails: 'Detalhes da rede',
-          interface: 'Interface',
-          ipAddress: 'Endereço IP',
-          subnetMask: 'Máscara de sub-rede',
-          router: 'Roteador',
-          none: 'Nenhum'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -355,6 +318,38 @@ const pt_br = {
         preview: 'Prévia das Atualizações',
         previewDesc: 'Tenha acesso antecipado a novos recursos e melhorias',
         previewTip: 'Esteja ciente de que as versões de prévia podem conter bugs ou funcionalidade incompleta!'
+      },
+      users: {
+        title: 'Gerenciamento de usuários',
+        addUser: 'Adicionar usuário',
+        colUsername: 'Nome de usuário',
+        colRole: 'Função',
+        colEnabled: 'Ativo',
+        colActions: 'Ações',
+        rolesTitle: 'Visão geral das funções',
+        roleAdmin: 'Acesso total + gerenciamento de usuários',
+        roleOperator: 'Uso do KVM: stream, teclado, mouse, botões de energia',
+        roleViewer: 'Apenas visualização do stream',
+        changePassword: 'Alterar senha',
+        newPassword: 'Nova senha',
+        confirmPassword: 'Confirmar senha',
+        pwdMismatch: 'As senhas não coincidem',
+        pwdSuccess: 'Senha alterada com sucesso',
+        pwdFailed: 'Falha ao alterar a senha',
+        password: 'Senha',
+        delete: 'Excluir',
+        deleteConfirm: 'Tem certeza que deseja excluir este usuário?',
+        createSuccess: 'Usuário criado',
+        createFailed: 'Falha ao criar usuário',
+        deleteSuccess: 'Usuário excluído',
+        deleteFailed: 'Falha ao excluir',
+        updateSuccess: 'Atualizado',
+        updateFailed: 'Falha na atualização',
+        loadFailed: 'Falha ao carregar usuários',
+        usernameRequired: 'Digite o nome de usuário',
+        passwordRequired: 'Digite a senha',
+        okBtn: 'OK',
+        cancelBtn: 'Cancelar'
       },
       account: {
         title: 'Conta',

@@ -230,9 +230,18 @@ const tr = {
           1800: '30 dakika',
           3600: '1 saat'
         },
+        wifi: {
+          title: 'Wi-Fi',
+          description: 'Wi-Fi ayarlayın',
+          setBtn: 'Ayarla'
+        },
         ssh: {
           description: 'Güvenli Kabuk Bağlantısı (SSH) aktif et',
           tip: 'Aktifleştirmeden önce güçlü bir şifreye sahip olduğunuzdan emin olun (Hesap - Şifremi Değiştir)'
+        },
+        tls: {
+          description: 'HTTPS protokolünü etkinleştir',
+          tip: 'HTTPS protokolü bağlantıda gecikmeye sebep olabilir, özellikle MJPEG görüntü modu ile.'
         },
         advanced: 'Gelişmiş Ayarlar',
         swap: {
@@ -264,52 +273,6 @@ const tr = {
         rebootDesc: 'NanoKVM\'i yeniden başlatmak istediğinizden emin misiniz?',
         okBtn: 'Evet',
         cancelBtn: 'Hayır'
-      },
-      network: {
-        title: 'Ağ',
-        wifi: {
-          title: 'Wi-Fi',
-          description: 'Wi-Fi ayarlayın',
-          apMode: 'AP modu etkin, QR kodu tarayarak Wi-Fi\'ye bağlanın',
-          connect: 'Wi-Fi\'ye bağlan',
-          connectDesc1: 'Lütfen ağ SSID\'sini ve parolayı girin',
-          connectDesc2: 'Bu ağa katılmak için parolayı girin',
-          disconnect: 'Ağ bağlantısını kesmek istediğinizden emin misiniz?',
-          failed: 'Bağlantı başarısız, lütfen tekrar deneyin.',
-          ssid: 'Ad',
-          password: 'Parola',
-          joinBtn: 'Katıl',
-          confirmBtn: 'Tamam',
-          cancelBtn: 'İptal'
-        },
-        tls: {
-          description: 'HTTPS protokolünü etkinleştir',
-          tip: 'HTTPS protokolü bağlantıda gecikmeye sebep olabilir, özellikle MJPEG görüntü modu ile.'
-        },
-        dns: {
-          title: 'DNS',
-          description: 'NanoKVM için DNS sunucularını yapılandır',
-          mode: 'Mod',
-          dhcp: 'DHCP',
-          manual: 'Manuel',
-          add: 'DNS ekle',
-          save: 'Kaydet',
-          invalid: 'Geçerli bir IP adresi girin',
-          noDhcp: 'Şu anda DHCP DNS mevcut değil',
-          saved: 'DNS ayarları kaydedildi',
-          saveFailed: 'DNS ayarları kaydedilemedi',
-          unsaved: 'Kaydedilmemiş değişiklikler',
-          maxServers: 'En fazla {{count}} DNS sunucusuna izin verilir',
-          dnsServers: 'DNS Sunucuları',
-          dhcpServersDescription: 'DNS sunucuları DHCP\'den otomatik olarak alınır.',
-          manualServersDescription: 'DNS sunucuları manuel olarak düzenlenebilir.',
-          networkDetails: 'Ağ Ayrıntıları',
-          interface: 'Arayüz',
-          ipAddress: 'IP Adresi',
-          subnetMask: 'Alt Ağ Maskesi',
-          router: 'Yönlendirici',
-          none: 'Yok'
-        }
       },
       tailscale: {
         title: 'Tailscale',
@@ -361,6 +324,38 @@ const tr = {
         previewDesc: 'En son geliştirmelere ve özelliklere erken erişin',
         previewTip:
           'Ön izleme güncellemelerinin tamamlanmamış olduğunu ve sorunlara sebep olabileceğini unutmayın!'
+      },
+      users: {
+        title: 'Kullanıcı Yönetimi',
+        addUser: 'Kullanıcı Ekle',
+        colUsername: 'Kullanıcı Adı',
+        colRole: 'Rol',
+        colEnabled: 'Aktif',
+        colActions: 'Eylemler',
+        rolesTitle: 'Roller Genel Bakış',
+        roleAdmin: 'Tam erişim + kullanıcı yönetimi',
+        roleOperator: 'KVM kullanımı: yayın, klavye, fare, güç düğmeleri',
+        roleViewer: 'Yalnızca yayın görüntüleme',
+        changePassword: 'Şifre Değiştir',
+        newPassword: 'Yeni Şifre',
+        confirmPassword: 'Şifreyi Onayla',
+        pwdMismatch: 'Şifreler eşleşmiyor',
+        pwdSuccess: 'Şifre başarıyla değiştirildi',
+        pwdFailed: 'Şifre değiştirilemedi',
+        password: 'Şifre',
+        delete: 'Sil',
+        deleteConfirm: 'Bu kullanıcıyı silmek istediğinizden emin misiniz?',
+        createSuccess: 'Kullanıcı oluşturuldu',
+        createFailed: 'Oluşturma başarısız',
+        deleteSuccess: 'Kullanıcı silindi',
+        deleteFailed: 'Silme başarısız',
+        updateSuccess: 'Güncellendi',
+        updateFailed: 'Güncelleme başarısız',
+        loadFailed: 'Kullanıcılar yüklenemedi',
+        usernameRequired: 'Kullanıcı adı girin',
+        passwordRequired: 'Şifre girin',
+        okBtn: 'Tamam',
+        cancelBtn: 'İptal'
       },
       account: {
         title: 'Hesap',

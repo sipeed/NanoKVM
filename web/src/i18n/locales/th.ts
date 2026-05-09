@@ -205,6 +205,11 @@ const th = {
             1800: '30 นาที',
             3600: '1 ชั่วโมง'
           },
+          wifi: {
+            title: 'Wi-Fi',
+            description: 'ตั้งค่า Wi-Fi',
+            setBtn: 'ยืนยัน'
+          },
           ssh: {
             description: 'เปิดใช้งาน SSH',
             tip: 'ตั้งรหัสผ่านทีปลอดถัยก่อนเปิดใช้งาน (บัญชี - เปลี่ยนรหัสผ่าน)'
@@ -213,52 +218,6 @@ const th = {
           diskDesc: 'เปิดใช้งาน U-disk จำลอง',
           network: 'เครือข่ายจำลอง',
           networkDesc: 'เปิดใช้งานอุปกรณ์เครือข่ายจำลอง'
-        },
-        network: {
-          title: 'เครือข่าย',
-          wifi: {
-            title: 'Wi-Fi',
-            description: 'ตั้งค่า Wi-Fi',
-            apMode: 'เปิดใช้งานโหมด AP แล้ว ให้เชื่อมต่อ Wi-Fi โดยสแกนรหัส QR',
-            connect: 'เชื่อมต่อ Wi-Fi',
-            connectDesc1: 'กรุณาใส่ SSID และรหัสผ่านของเครือข่าย',
-            connectDesc2: 'กรุณาใส่รหัสผ่านเพื่อเข้าร่วมเครือข่ายนี้',
-            disconnect: 'คุณแน่ใจหรือไม่ว่าต้องการตัดการเชื่อมต่อเครือข่าย?',
-            failed: 'เชื่อมต่อไม่สำเร็จ กรุณาลองอีกครั้ง',
-            ssid: 'ชื่อ',
-            password: 'รหัสผ่าน',
-            joinBtn: 'เข้าร่วม',
-            confirmBtn: 'ตกลง',
-            cancelBtn: 'ยกเลิก'
-          },
-          tls: {
-            description: 'เปิดใช้งานโปรโตคอล HTTPS',
-            tip: 'โปรดทราบ: การใช้ HTTPS อาจเพิ่มความหน่วง โดยเฉพาะในโหมดวิดีโอ MJPEG'
-          },
-          dns: {
-            title: 'DNS',
-            description: 'ตั้งค่าเซิร์ฟเวอร์ DNS สำหรับ NanoKVM',
-            mode: 'โหมด',
-            dhcp: 'DHCP',
-            manual: 'กำหนดเอง',
-            add: 'เพิ่ม DNS',
-            save: 'บันทึก',
-            invalid: 'กรุณาใส่ที่อยู่ IP ที่ถูกต้อง',
-            noDhcp: 'ขณะนี้ไม่มี DHCP DNS ให้ใช้งาน',
-            saved: 'บันทึกการตั้งค่า DNS แล้ว',
-            saveFailed: 'บันทึกการตั้งค่า DNS ไม่สำเร็จ',
-            unsaved: 'มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก',
-            maxServers: 'อนุญาตเซิร์ฟเวอร์ DNS ได้สูงสุด {{count}} รายการ',
-            dnsServers: 'เซิร์ฟเวอร์ DNS',
-            dhcpServersDescription: 'เซิร์ฟเวอร์ DNS จะได้รับจาก DHCP โดยอัตโนมัติ',
-            manualServersDescription: 'สามารถแก้ไขเซิร์ฟเวอร์ DNS ได้ด้วยตนเอง',
-            networkDetails: 'รายละเอียดเครือข่าย',
-            interface: 'อินเทอร์เฟซ',
-            ipAddress: 'ที่อยู่ IP',
-            subnetMask: 'Subnet Mask',
-            router: 'เราเตอร์',
-            none: 'ไม่มี'
-          }
         },
         tailscale: {
           title: 'Tailscale',
@@ -309,7 +268,39 @@ const th = {
             previewDesc: 'เข้าถึงฟีเจอร์และการปรับปรุงใหม่ก่อนใคร',
             previewTip: 'โปรดทราบว่าการเผยแพร่ตัวอย่างอาจมีข้อบกพร่องหรือฟังก์ชันการทำงานที่ไม่สมบูรณ์!'
         },
-        account: {
+        users: {
+        title: 'การจัดการผู้ใช้',
+        addUser: 'เพิ่มผู้ใช้',
+        colUsername: 'ชื่อผู้ใช้',
+        colRole: 'บทบาท',
+        colEnabled: 'เปิดใช้งาน',
+        colActions: 'การดำเนินการ',
+        rolesTitle: 'ภาพรวมบทบาท',
+        roleAdmin: 'เข้าถึงเต็มรูปแบบ + การจัดการผู้ใช้',
+        roleOperator: 'การใช้ KVM: สตรีม คีย์บอร์ด เมาส์ ปุ่มเปิด/ปิด',
+        roleViewer: 'ดูสตรีมเท่านั้น',
+        changePassword: 'เปลี่ยนรหัสผ่าน',
+        newPassword: 'รหัสผ่านใหม่',
+        confirmPassword: 'ยืนยันรหัสผ่าน',
+        pwdMismatch: 'รหัสผ่านไม่ตรงกัน',
+        pwdSuccess: 'เปลี่ยนรหัสผ่านสำเร็จ',
+        pwdFailed: 'ไม่สามารถเปลี่ยนรหัสผ่านได้',
+        password: 'รหัสผ่าน',
+        delete: 'ลบ',
+        deleteConfirm: 'คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?',
+        createSuccess: 'สร้างผู้ใช้แล้ว',
+        createFailed: 'การสร้างล้มเหลว',
+        deleteSuccess: 'ลบผู้ใช้แล้ว',
+        deleteFailed: 'การลบล้มเหลว',
+        updateSuccess: 'อัปเดตแล้ว',
+        updateFailed: 'การอัปเดตล้มเหลว',
+        loadFailed: 'โหลดผู้ใช้ไม่สำเร็จ',
+        usernameRequired: 'กรุณากรอกชื่อผู้ใช้',
+        passwordRequired: 'กรุณากรอกรหัสผ่าน',
+        okBtn: 'ตกลง',
+        cancelBtn: 'ยกเลิก'
+      },
+      account: {
           title: 'บัญชี',
           webAccount: 'ชื่อผู้ใช้',
           password: 'รหัสผ่าน',
