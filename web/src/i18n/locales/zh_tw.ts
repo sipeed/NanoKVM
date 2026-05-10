@@ -16,6 +16,8 @@ const zh_tw = {
       noEmptyPassword: '密碼不能為空',
       noAccount: '找不到使用者，請重新整理網頁或重設密碼',
       invalidUser: '使用者名稱或密碼錯誤',
+      locked: '登入次數過多，請稍後重試',
+      globalLocked: '系統受保護，請稍後重試',
       error: '非預期性錯誤',
       changePassword: '更改密碼',
       changePasswordDesc: '為了您的裝置安全，請修改登入密碼。',
@@ -44,7 +46,14 @@ const zh_tw = {
       failed: '操作失敗，請重試。',
       invalidMode: '目前模式不支援設定網路。請先前往裝置啟用 Wi-Fi 配置模式。',
       confirmBtn: '確定',
-      finishBtn: '完成'
+      finishBtn: '完成',
+      ap: {
+        authTitle: '需要身份驗證',
+        authDescription: '請輸入 AP 密碼繼續',
+        authFailed: 'AP 密碼無效',
+        passPlaceholder: 'AP 密碼',
+        verifyBtn: '驗證'
+      }
     },
     screen: {
       scale: '缩放',
@@ -73,15 +82,48 @@ const zh_tw = {
       placeholder: '請輸入內容',
       submit: '送出',
       virtual: '虛擬鍵盤',
-      ctrlaltdel: 'Ctrl+Alt+Del',
+      readClipboard: '從剪貼簿讀取',
+      clipboardPermissionDenied: '剪貼簿權限被拒絕。請允許您的瀏覽器存取剪貼簿。',
+      clipboardReadError: '無法讀取剪貼簿',
+      dropdownEnglish: '英語',
+      dropdownGerman: '德語',
+      dropdownFrench: '法語',
+      dropdownRussian: '俄語',
       shortcut: {
         title: '快捷鍵',
         custom: '自定義',
         capture: '點選此處錄製快捷鍵',
         clear: '清空',
         save: '儲存',
-        captureTips: '錄製系統級按鍵（如 Windows 鍵）需要全螢幕的權限。',
+        captureTips: '擷取系統級按鍵（如 Windows 鍵）需要全螢幕權限。',
         enterFullScreen: '切換全螢幕模式。'
+      },
+      leaderKey: {
+        title: '引導鍵',
+        desc: '繞過瀏覽器限制並將系統捷徑直接傳送到遠端主機。',
+        howToUse: '如何使用',
+        simultaneous: {
+          title: '同步模式',
+          desc1: '按住引導鍵不放，同時按下目標快捷鍵。',
+          desc2: '直觀，但可能與系統快速鍵衝突。'
+        },
+        sequential: {
+          title: '順序模式',
+          desc1: '點擊引導鍵開始 → 依序點擊快捷鍵 → 再次點擊引導鍵結束。',
+          desc2: '需要更多步驟，但完全避免了系統衝突。'
+        },
+        enable: '啟用引導鍵',
+        tip: '設為引導鍵後，該按鍵將僅用於觸發快捷鍵，不再作為普通按鍵使用。',
+        placeholder: '請按下引導鍵',
+        shiftRight: '右 Shift',
+        ctrlRight: '右 Ctrl',
+        metaRight: '右 Win',
+        submit: '送出',
+        recorder: {
+          rec: '記錄',
+          activate: '啟用按鍵',
+          input: '請按快捷鍵...'
+        }
       }
     },
     mouse: {
@@ -106,7 +148,7 @@ const zh_tw = {
       resetHid: '重設 HID',
       hidOnly: {
         title: 'HID-Only 模式',
-        desc: "如果您的滑鼠和鍵盤沒有反應，且重設 HID 無效，可能是 NanoKVM 與您的裝置間有相容性問題。請嘗試啟用 HID-Only 模式以獲得更好的相容性。",
+        desc: '如果您的滑鼠和鍵盤沒有反應，且重設 HID 無效，可能是 NanoKVM 與您的裝置間有相容性問題。請嘗試啟用 HID-Only 模式以獲得更好的相容性。',
         tip1: '啟用 HID-Only 模式將會停用虛擬隨身碟和虛擬網卡的功能',
         tip2: '在 HID-Only 模式下，映像檔掛載功能將被停用',
         tip3: 'NanoKVM 將在切換模式後自動重新啟動',
@@ -118,7 +160,6 @@ const zh_tw = {
       title: '映像檔',
       loading: '載入中...',
       empty: '未找到任何內容',
-      cdrom: '以CD-ROM模式掛載',
       mountMode: '掛載模式',
       mountFailed: '掛載失敗',
       mountDesc: '在某些系統中，需要在遠端主機中彈出虛擬硬碟後再掛載映像檔。',
@@ -162,19 +203,19 @@ const zh_tw = {
       title: '終端機',
       nanokvm: 'NanoKVM 終端機',
       serial: 'Serial Port 終端機',
-      serialPort: 'Serial Port',
+      serialPort: '序列埠',
       serialPortPlaceholder: '請輸入 Serial Port',
-      baudrate: 'Baud rate',
-      parity: 'Parity',
+      baudrate: '鮑率',
+      parity: '同位檢查',
       parityNone: 'None',
-      parityEven: 'Even',
-      parityOdd: 'Odd',
-      flowControl: 'Flow control',
+      parityEven: '偶同位',
+      parityOdd: '奇同位',
+      flowControl: '流量控制',
       flowControlNone: 'None',
-      flowControlSoft: 'Soft',
-      flowControlHard: 'Hard',
-      dataBits: 'Data bits',
-      stopBits: 'Stop bits',
+      flowControlSoft: '軟體',
+      flowControlHard: '硬體',
+      dataBits: '資料位元',
+      stopBits: '停止位元',
       confirm: '確定'
     },
     wol: {
@@ -188,7 +229,10 @@ const zh_tw = {
       title: '下载映像檔',
       input: '請輸入映像檔的下載 URL',
       ok: '確定',
-      disabled: '/data 為唯讀目錄，無法下載映像檔'
+      disabled: '/data 為唯讀目錄，無法下載映像檔',
+      uploadbox: '將檔案拖曳到此處或按一下選擇',
+      inputfile: '請輸入圖片檔案',
+      NoISO: '無 ISO'
     },
     power: {
       title: '電源控制',
@@ -229,7 +273,6 @@ const zh_tw = {
         display: '顯示',
         language: '語言',
         languageDesc: '選擇介面語言',
-        menuBarDesc: '是否在選單列中顯示圖案',
         webTitle: '網頁標題',
         webTitleDesc: '自訂網頁標題',
         menuBar: {
@@ -258,36 +301,16 @@ const zh_tw = {
           1800: '30 分鐘',
           3600: '1 小時'
         },
-        wifi: {
-          title: 'Wi-Fi',
-          description: '設定 Wi-Fi',
-          setBtn: '設定',
-          apMode: 'AP 模式已啟用，該模式下僅支援掃描 QRCode 配網',
-          connect: '連線 Wi-Fi',
-          connectDesc1: '請輸入網路名稱和密碼',
-          connectDesc2: '請輸入密碼以連線此網路',
-          disconnect: '是否要中斷該網路連線？',
-          failed: '連線失敗，請重試',
-          ssid: 'SSID 名稱',
-          password: '密碼',
-          joinBtn: '加入',
-          confirmBtn: '確定',
-          cancelBtn: '取消'
-        },
         ssh: {
           description: '啟用 SSH 伺服器',
           tip: '啟用前請務必設定強密碼（帳號 - 更改密碼）'
-        },
-        tls: {
-          description: '啟用 HTTPS 協議',
-          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
         },
         advanced: '進階設定',
         swap: {
           title: 'Swap',
           disable: '停用',
           description: '設定 Swap 檔大小',
-          tip: "啟用此功能可能會減少SD卡的使用壽命！"
+          tip: '啟用此功能可能會減少SD卡的使用壽命！'
         },
         mouseJiggler: {
           title: '滑鼠抖動模式 (Mouse Jiggler)',
@@ -298,7 +321,7 @@ const zh_tw = {
         },
         mdns: {
           description: '啟用 mDNS 發現服務',
-          tip: "若無需求，建議關閉此功能"
+          tip: '若無需求，建議關閉此功能'
         },
         hdmi: {
           description: '啟用 HDMI/螢幕 輸出'
@@ -315,7 +338,7 @@ const zh_tw = {
           settings: '設定'
         },
         hidOnly: 'HID-Only 模式',
-        hidOnlyDesc: '該模式下不再打開虛擬隨身碟，僅保留基礎的 鍵盤/滑鼠 的控制功能。',
+        hidOnlyDesc: '停止模擬虛擬設備，僅保留基礎 HID 控制',
         disk: '虛擬隨身碟',
         diskDesc: '在遠端主機上連接虛擬隨身碟',
         network: '虛擬網卡',
@@ -325,12 +348,57 @@ const zh_tw = {
         okBtn: '確定',
         cancelBtn: '取消'
       },
+      network: {
+        title: '網路',
+        wifi: {
+          title: 'Wi-Fi',
+          description: '設定 Wi-Fi',
+          apMode: 'AP 模式已啟用，請掃描 QRCode 連接 Wi-Fi',
+          connect: '連線 Wi-Fi',
+          connectDesc1: '請輸入網路名稱和密碼',
+          connectDesc2: '請輸入密碼以連線此網路',
+          disconnect: '是否要中斷該網路連線？',
+          failed: '連線失敗，請重試',
+          ssid: 'SSID 名稱',
+          password: '密碼',
+          joinBtn: '加入',
+          confirmBtn: '確定',
+          cancelBtn: '取消'
+        },
+        tls: {
+          description: '啟用 HTTPS 協議',
+          tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
+        },
+        dns: {
+          title: 'DNS',
+          description: '設定 NanoKVM 使用的 DNS 伺服器',
+          mode: '模式',
+          dhcp: 'DHCP',
+          manual: '手動',
+          add: '新增 DNS',
+          save: '儲存',
+          invalid: '請輸入有效的 IP 位址',
+          noDhcp: '目前未取得 DHCP DNS',
+          saved: 'DNS 設定已儲存',
+          saveFailed: '儲存 DNS 設定失敗',
+          unsaved: '有未儲存的變更',
+          maxServers: '最多允許 {{count}} 個 DNS 伺服器',
+          dnsServers: 'DNS 伺服器',
+          dhcpServersDescription: 'DNS 伺服器由 DHCP 自動取得',
+          manualServersDescription: 'DNS 伺服器可以手動編輯',
+          networkDetails: '網路詳細資訊',
+          interface: '介面',
+          ipAddress: 'IP 位址',
+          subnetMask: '子網路遮罩',
+          router: '路由器',
+          none: '無'
+        }
+      },
       tailscale: {
         title: 'Tailscale',
         memory: {
           title: '記憶體最佳化',
-          tip: '當記憶體使用量超過限制時，會更積極的進行垃圾回收來嘗試釋放記憶體。若使用 Tailscale 建議設定為 50MB，於重啟 Tailscale 後生效。',
-          disable: '關閉'
+          tip: '當記憶體使用量超過限制時，會更積極的進行垃圾回收來嘗試釋放記憶體。若使用 Tailscale 建議設定為 50MB，於重啟 Tailscale 後生效。'
         },
         swap: {
           title: 'Swap',
@@ -338,7 +406,7 @@ const zh_tw = {
         },
         restart: '確定要重啟 Tailscale 嗎？',
         stop: '確定要停止 Tailscale 嗎？',
-        stopDesc: '此操作將會登出帳號，並停止開機自動啟動。',
+        stopDesc: '登出 Tailscale 並停用開機自動啟動。',
         loading: '載入中...',
         notInstall: '未找到 Tailscale ！請先安裝。',
         install: '安裝',
@@ -365,8 +433,6 @@ const zh_tw = {
         logoutDesc: '確認要登出嗎？',
         uninstall: '移除 Tailscale',
         uninstallDesc: '確定要解除安裝 Tailscale 嗎？',
-        reboot: '重啟',
-        rebootDesc: '您確定要重啟 NanoKVM 嗎？',
         okBtn: '確認',
         cancelBtn: '取消'
       },
@@ -429,8 +495,128 @@ const zh_tw = {
         updateBtn: '修改',
         logoutBtn: '登出',
         logoutDesc: '您確定要登出嗎?',
-        confirm: '確定',
-        cancel: '取消'
+        okBtn: '確定',
+        cancelBtn: '取消'
+      }
+    },
+    picoclaw: {
+      title: 'PicoClaw 助理',
+      empty: '打開面板並啟動一個任務來開始。',
+      inputPlaceholder: '描述您希望 PicoClaw 執行的操作',
+      newConversation: '新對話',
+      processing: '正在處理...',
+      agent: {
+        defaultTitle: '通用助理',
+        defaultDescription: '一般聊天、搜尋和工作區域幫助。',
+        kvmTitle: '遠端控制',
+        kvmDescription: '透過 NanoKVM 操作遠端主機。',
+        switched: '代理角色已切換',
+        switchFailed: '代理角色切換失敗'
+      },
+      send: '發送',
+      cancel: '取消',
+      status: {
+        connecting: '正在連線 Gateway...',
+        connected: 'PicoClaw 會話已連線',
+        disconnected: 'PicoClaw 會話已關閉',
+        stopped: '已發送停止請求',
+        runtimeStarted: 'PicoClaw Runtime 已啟動',
+        runtimeStartFailed: '啟動 PicoClaw Runtime 失敗',
+        runtimeStopped: 'PicoClaw Runtime 已停止',
+        runtimeStopFailed: '停止 PicoClaw Runtime 失敗'
+      },
+      connection: {
+        runtime: {
+          checking: '檢查中',
+          ready: 'Runtime 已就緒',
+          stopped: 'Runtime 未啟動',
+          unavailable: 'Runtime 不可用',
+          configError: '設定錯誤'
+        },
+        transport: {
+          connecting: '連接中',
+          connected: '已連接'
+        },
+        run: {
+          idle: '空閒',
+          busy: '忙'
+        }
+      },
+      message: {
+        toolAction: '行動',
+        observation: '觀察',
+        screenshot: '截圖'
+      },
+      overlay: {
+        locked: 'PicoClaw 正在控制設備。手動輸入已暫停。'
+      },
+      install: {
+        install: '安裝 PicoClaw',
+        installing: '正在安裝 PicoClaw',
+        success: 'PicoClaw 安裝成功',
+        failed: 'PicoClaw 安裝失敗',
+        uninstalling: '正在解除安裝 Runtime...',
+        uninstalled: 'Runtime 解除安裝成功。',
+        uninstallFailed: '解除安裝失敗。',
+        requiredTitle: 'PicoClaw 未安裝',
+        requiredDescription: '在啟動 PicoClaw Runtime 之前，請先安裝 PicoClaw。',
+        progressDescription: '正在下載並安裝 PicoClaw。',
+        stages: {
+          preparing: '準備中',
+          downloading: '下載中',
+          extracting: '解壓縮中',
+          installing: '安裝中',
+          installed: '已安裝',
+          install_timeout: '超時',
+          install_failed: '失敗'
+        }
+      },
+      model: {
+        requiredTitle: '需要設定模型',
+        requiredDescription: '在使用 PicoClaw 聊天之前，請先設定 PicoClaw 模型。',
+        docsTitle: '設定指南',
+        docsDesc: '支援的模型與通訊協定',
+        menuLabel: '設定模型',
+        modelIdentifier: '模型標識符',
+        modelIdentifierPlaceholder: 'openai/gpt-5.4',
+        apiBase: 'API Base URL',
+        apiBasePlaceholder: 'https://api.example.com/v1',
+        apiKey: 'API Key',
+        apiKeyPlaceholder: '請輸入模型 API Key',
+        save: '儲存',
+        saving: '儲存中',
+        saved: '模型設定已儲存',
+        saveFailed: '儲存模型設定失敗',
+        invalid: '模型標識、API Base URL 和 API Key 不能為空'
+      },
+      uninstall: {
+        menuLabel: '解除安裝',
+        confirmTitle: '解除安裝 PicoClaw',
+        confirmContent: '您確定要解除安裝 PicoClaw 嗎？這將刪除可執行檔和所有設定檔。',
+        confirmOk: '解除安裝',
+        confirmCancel: '取消'
+      },
+      history: {
+        title: '歷史會話',
+        loading: '正在載入會話...',
+        emptyTitle: '還沒有歷史記錄',
+        emptyDescription: '之前的 PicoClaw 會話將會出現在此。',
+        loadFailed: '無法載入會話歷史記錄',
+        deleteFailed: '刪除會話失敗',
+        deleteConfirmTitle: '刪除會話',
+        deleteConfirmContent: '您確定要刪除「{{title}}」嗎？',
+        deleteConfirmOk: '刪除',
+        deleteConfirmCancel: '取消',
+        messageCount_one: '{{count}} 則訊息',
+        messageCount_other: '{{count}} 則訊息'
+      },
+      config: {
+        startRuntime: '啟動 PicoClaw',
+        stopRuntime: '停止 PicoClaw'
+      },
+      start: {
+        title: '啟動 PicoClaw',
+        description: '啟動 Runtime 後即可開始使用 PicoClaw 助理。'
       }
     },
     error: {
