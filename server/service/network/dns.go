@@ -28,6 +28,7 @@ const (
 	bootResolvBackup = "/boot/resolv.conf.manual.bak"
 	etcResolvFile    = "/etc/resolv.conf"
 	dhcpResolvFile   = "/etc/resolv.conf.dhcp"
+	tmpResolvFile    = "/tmp/resolv.conf"
 	udhcpcHookFile   = "/usr/share/udhcpc/default.script.d/99-nanokvm-dns"
 
 	maxDNSServers = 6
@@ -55,7 +56,7 @@ func (s *Service) GetDNS(c *gin.Context) {
 	}
 
 	effective, _ := parseResolvConf(etcResolvFile)
-	dhcpConfig, _ := readDHCPResolvConfig(mode == dnsModeDHCP)
+	dhcpConfig, _ := readDHCPResolvConfig(canFallbackEffectiveForDHCP())
 	dhcp := dhcpConfig.Servers
 	info := getDNSInfo()
 
@@ -141,7 +142,7 @@ func setManualDNS(servers []string) error {
 }
 
 func setDHCPDNS() error {
-	dhcpConfig, err := readDHCPResolvConfig(currentDNSMode() == dnsModeDHCP)
+	dhcpConfig, err := readDHCPResolvConfig(canFallbackEffectiveForDHCP())
 	if err != nil {
 		return fmt.Errorf("failed to read dhcp dns: %w", err)
 	}
@@ -177,7 +178,7 @@ func setDHCPDNS() error {
 }
 
 func currentDNSMode() string {
-	mode := readDNSMode()
+	mode := readRawDNSMode()
 	if mode == "" {
 		mode = defaultDNSMode()
 	}
@@ -186,6 +187,10 @@ func currentDNSMode() string {
 }
 
 func readDNSMode() string {
+	return readRawDNSMode()
+}
+
+func readRawDNSMode() string {
 	data, err := os.ReadFile(dnsModeFile)
 	if err != nil {
 		return ""
@@ -197,6 +202,21 @@ func readDNSMode() string {
 	}
 
 	return mode
+}
+
+func canFallbackEffectiveForDHCP() bool {
+	mode := readRawDNSMode()
+	if mode == dnsModeDHCP {
+		return true
+	}
+	if mode == dnsModeManual {
+		return false
+	}
+	if _, err := os.Stat(bootResolvFile); os.IsNotExist(err) {
+		return true
+	}
+
+	return false
 }
 
 func defaultDNSMode() string {
@@ -260,6 +280,11 @@ func readDHCPResolvConfig(allowEffectiveFallback bool) (resolvConfig, error) {
 		return config, nil
 	}
 
+	tmpConfig, tmpErr := parseResolvConfig(tmpResolvFile)
+	if tmpErr == nil && len(tmpConfig.Servers) > 0 {
+		return tmpConfig, nil
+	}
+
 	if allowEffectiveFallback {
 		effective, effectiveErr := parseResolvConfig(etcResolvFile)
 		if effectiveErr == nil && len(effective.Servers) > 0 {
@@ -269,6 +294,9 @@ func readDHCPResolvConfig(allowEffectiveFallback bool) (resolvConfig, error) {
 
 	if err != nil && !os.IsNotExist(err) {
 		return resolvConfig{}, err
+	}
+	if tmpErr != nil && !os.IsNotExist(tmpErr) {
+		return resolvConfig{}, tmpErr
 	}
 
 	return resolvConfig{}, nil
@@ -357,7 +385,7 @@ func getDNSInfo() proto.DNSInfo {
 		Gateway:   gateway,
 	}
 
-	dhcpConfig, _ := readDHCPResolvConfig(currentDNSMode() == dnsModeDHCP)
+	dhcpConfig, _ := readDHCPResolvConfig(canFallbackEffectiveForDHCP())
 	info.SearchDomains = dhcpConfig.SearchDomains
 
 	if ifaceName == "" {

@@ -1,11 +1,39 @@
+## 2.4.1 (2026-05-08)
+
+### Features
+
+* Added DNS management to Network settings, including DHCP/manual modes, effective DNS display, network details, IPv4/IPv6 server validation, and persistent udhcpc hook support
+* Added a configurable server `host` option for binding NanoKVM to a specific listen address (thanks to [@allmazz](https://github.com/allmazz))
+* Added French keyboard layout support and language options (thanks to [@ilyesAj](https://github.com/ilyesAj))
+
+### Bug Fixes
+
+* Hardened HID recovery and cleanup by adding non-blocking HID writes, bounded reopen retries, stale event draining, and release reports after write failures
+* Fixed the `kvm_vision` project name and build output message in the SG2002 build script (thanks to [@Voranto](https://github.com/Voranto))
+
+### UI Improvements
+
+* Moved TLS and Wi-Fi settings into the Network settings section
+* Optimized the Settings scrollbar style
+
+### Localization
+
+* Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
+* Synchronized translations of other languages according to English
+
+### Security
+
+* Upgraded vulnerable web dependencies
+
 ## 2.4.0 (2026-04-10)
 
 ### Features
 
-* **Introduced [PicoClaw](https://github.com/sipeed/picoclaw)** — an AI-powered remote desktop assistant built into NanoKVM. PicoClaw seamlessly integrates a lightweight AI agent with NanoKVM's underlying hardware capabilities. Key highlights include:
+* **Introduced [PicoClaw](https://github.com/sipeed/picoclaw) support** — an AI-powered remote desktop assistant for NanoKVM. PicoClaw seamlessly integrates a lightweight AI agent with NanoKVM's underlying hardware capabilities. Key highlights include:
   * **Zero-Agent Architecture:** Operates entirely through HDMI video capture (vision) and USB HID emulation (keyboard/mouse). No SSH access, network connection to the host, or OS-level software installation is required.
   * **Natural Language Control:** Features a built-in chat interface allowing users to issue complex instructions in plain text.
   * **Autonomous GUI Operation:** The AI agent can autonomously observe the remote host's screen, understand UI elements, reason about the task, and execute operations mimicking human behavior.
+  * **Installation Note:** PicoClaw is not built into the NanoKVM device or firmware. Install it separately when needed.
 
 ### Bug Fixes
 

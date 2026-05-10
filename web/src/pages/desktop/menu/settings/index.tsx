@@ -158,7 +158,7 @@ export const Settings = () => {
 
           <ScrollArea
             viewportRef={scrollViewportRef}
-            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3"
+            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-scrollbar]]:p-0 [&_[data-slot=scroll-area-thumb]]:bg-neutral-500/30"
           >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
