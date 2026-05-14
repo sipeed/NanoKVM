@@ -10,63 +10,58 @@ import (
 func vmRouter(r *gin.Engine) {
 	service := vm.NewService()
 
-	api := r.Group("/api").Use(middleware.CheckToken())
+	// All authenticated users (viewer, operator, admin) may read basic info
+	anyAPI := r.Group("/api").Use(middleware.CheckToken())
+	anyAPI.GET("/vm/info", service.GetInfo)
+	anyAPI.GET("/vm/hardware", service.GetHardware)
+	anyAPI.GET("/vm/gpio", service.GetGpio)
+	anyAPI.GET("/vm/device/virtual", service.GetVirtualDevice)
+	anyAPI.GET("/vm/memory/limit", service.GetMemoryLimit)
+	anyAPI.GET("/vm/oled", service.GetOLED)
+	anyAPI.GET("/vm/hdmi", service.GetHdmiState)
+	anyAPI.GET("/vm/ssh", service.GetSSHState)
+	anyAPI.GET("/vm/swap", service.GetSwap)
+	anyAPI.GET("/vm/mouse-jiggler", service.GetMouseJiggler)
+	anyAPI.GET("/vm/hostname", service.GetHostname)
+	anyAPI.GET("/vm/web-title", service.GetWebTitle)
+	anyAPI.GET("/vm/mdns", service.GetMdnsState)
+	anyAPI.GET("/vm/autostart", service.GetAutostart)
+	anyAPI.GET("/vm/autostart/:name", service.GetAutostartContent)
 
-	api.GET("/vm/info", service.GetInfo)         // get device information
-	api.GET("/vm/hardware", service.GetHardware) // get hardware version
+	// Operator and admin may interact with the machine
+	opAPI := r.Group("/api").Use(
+		middleware.CheckToken(),
+		middleware.RequireRole(middleware.RoleAdmin, middleware.RoleOperator),
+	)
+	opAPI.POST("/vm/gpio", service.SetGpio)         // power/reset buttons
+	opAPI.GET("/vm/terminal", service.Terminal)     // web terminal
+	opAPI.GET("/vm/script", service.GetScripts)
+	opAPI.POST("/vm/script/run", service.RunScript)
+	opAPI.POST("/vm/mouse-jiggler/", service.SetMouseJiggler)
 
-	api.POST("/vm/gpio", service.SetGpio)     // update gpio
-	api.GET("/vm/gpio", service.GetGpio)      // get gpio
-	api.POST("/vm/screen", service.SetScreen) // update screen
-
-	api.GET("/vm/terminal", service.Terminal) // web terminal
-
-	api.GET("/vm/script", service.GetScripts)           // get script
-	api.POST("/vm/script/upload", service.UploadScript) // upload script
-	api.POST("/vm/script/run", service.RunScript)       // run script
-	api.DELETE("/vm/script", service.DeleteScript)      // delete script
-
-	api.GET("/vm/device/virtual", service.GetVirtualDevice)     // get virtual device
-	api.POST("/vm/device/virtual", service.UpdateVirtualDevice) // update virtual device
-
-	api.GET("/vm/memory/limit", service.GetMemoryLimit)  // get memory limit
-	api.POST("/vm/memory/limit", service.SetMemoryLimit) // set memory limit
-
-	api.GET("/vm/oled", service.GetOLED)  // get OLED configuration
-	api.POST("/vm/oled", service.SetOLED) // set OLED configuration
-
-	// Only supported by PCIe version
-	api.GET("/vm/hdmi", service.GetHdmiState)         // get HDMI state
-	api.POST("/vm/hdmi/reset", service.ResetHdmi)     // reset hdmi
-	api.POST("/vm/hdmi/enable", service.EnableHdmi)   // enable hdmi
-	api.POST("/vm/hdmi/disable", service.DisableHdmi) // disable hdmi
-
-	api.GET("/vm/ssh", service.GetSSHState)         // get SSH state
-	api.POST("/vm/ssh/enable", service.EnableSSH)   // enable SSH
-	api.POST("/vm/ssh/disable", service.DisableSSH) // disable SSH
-
-	api.GET("/vm/swap", service.GetSwap)  // get swap file size
-	api.POST("/vm/swap", service.SetSwap) // set swap file size
-
-	api.GET("/vm/mouse-jiggler", service.GetMouseJiggler)   // get mouse jiggler
-	api.POST("/vm/mouse-jiggler/", service.SetMouseJiggler) // set mouse jiggler
-
-	api.GET("/vm/hostname", service.GetHostname)  // Get Hostname
-	api.POST("/vm/hostname", service.SetHostname) // Set Hostname
-
-	api.GET("/vm/web-title", service.GetWebTitle)  // Get web title
-	api.POST("/vm/web-title", service.SetWebTitle) // Set web title
-
-	api.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state
-	api.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS
-	api.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS
-
-	api.POST("/vm/tls", service.SetTls) // enable/disable TLS
-
-	api.GET("/vm/autostart", service.GetAutostart)              // get autostart list
-	api.GET("/vm/autostart/:name", service.GetAutostartContent) // get autostart content
-	api.DELETE("/vm/autostart/:name", service.DeleteAutostart)  // delete autostart script
-	api.POST("/vm/autostart/:name", service.UploadAutostart)    // upload autostart script
-
-	api.POST("/vm/system/reboot", service.Reboot) // reboot system
+	// Admin only: system configuration
+	adminAPI := r.Group("/api").Use(
+		middleware.CheckToken(),
+		middleware.RequireRole(middleware.RoleAdmin),
+	)
+	adminAPI.POST("/vm/screen", service.SetScreen)
+	adminAPI.POST("/vm/script/upload", service.UploadScript)
+	adminAPI.DELETE("/vm/script", service.DeleteScript)
+	adminAPI.POST("/vm/device/virtual", service.UpdateVirtualDevice)
+	adminAPI.POST("/vm/memory/limit", service.SetMemoryLimit)
+	adminAPI.POST("/vm/oled", service.SetOLED)
+	adminAPI.POST("/vm/hdmi/reset", service.ResetHdmi)
+	adminAPI.POST("/vm/hdmi/enable", service.EnableHdmi)
+	adminAPI.POST("/vm/hdmi/disable", service.DisableHdmi)
+	adminAPI.POST("/vm/ssh/enable", service.EnableSSH)
+	adminAPI.POST("/vm/ssh/disable", service.DisableSSH)
+	adminAPI.POST("/vm/swap", service.SetSwap)
+	adminAPI.POST("/vm/hostname", service.SetHostname)
+	adminAPI.POST("/vm/web-title", service.SetWebTitle)
+	adminAPI.POST("/vm/mdns/enable", service.EnableMdns)
+	adminAPI.POST("/vm/mdns/disable", service.DisableMdns)
+	adminAPI.POST("/vm/tls", service.SetTls)
+	adminAPI.DELETE("/vm/autostart/:name", service.DeleteAutostart)
+	adminAPI.POST("/vm/autostart/:name", service.UploadAutostart)
+	adminAPI.POST("/vm/system/reboot", service.Reboot)
 }
