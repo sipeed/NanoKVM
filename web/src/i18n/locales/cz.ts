@@ -546,6 +546,7 @@ const cz = {
           preparing: 'Příprava',
           downloading: 'Stahování',
           extracting: 'Extrakce',
+          verifying: 'Ověřování',
           installing: 'Instalace probíhá',
           installed: 'Instalováno',
           install_timeout: 'Vypršel časový limit',

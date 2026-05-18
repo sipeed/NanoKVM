@@ -541,6 +541,7 @@ const se = {
           preparing: 'Förbereder',
           downloading: 'Laddar ner',
           extracting: 'Packar upp',
+          verifying: 'Verifierar',
           installing: 'Installerar',
           installed: 'Installerad',
           install_timeout: 'Timeout',

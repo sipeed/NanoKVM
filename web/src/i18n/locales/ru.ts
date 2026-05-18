@@ -547,6 +547,7 @@ const ru = {
           preparing: 'Подготовка',
           downloading: 'Загрузка',
           extracting: 'Распаковка',
+          verifying: 'Проверка',
           installing: 'Установка',
           installed: 'Установлено',
           install_timeout: 'Время ожидания истекло',

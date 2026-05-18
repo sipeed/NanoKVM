@@ -551,6 +551,7 @@ const de = {
           preparing: 'Vorbereiten',
           downloading: 'Wird heruntergeladen',
           extracting: 'Extrahieren',
+          verifying: 'Überprüfen',
           installing: 'Installiere',
           installed: 'Installiert',
           install_timeout: 'Zeitüberschreitung',

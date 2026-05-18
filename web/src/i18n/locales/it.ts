@@ -549,6 +549,7 @@ const it = {
           preparing: 'Preparazione',
           downloading: 'Download in corso',
           extracting: 'Estrazione',
+          verifying: 'Verifica in corso',
           installing: 'Installazione in corso',
           installed: 'Installato',
           install_timeout: 'Timeout',

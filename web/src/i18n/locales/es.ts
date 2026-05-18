@@ -550,6 +550,7 @@ const es = {
           preparing: 'Preparando',
           downloading: 'Descargando',
           extracting: 'Extrayendo',
+          verifying: 'Verificando',
           installing: 'Instalando',
           installed: 'Instalado',
           install_timeout: 'Tiempo de espera agotado',

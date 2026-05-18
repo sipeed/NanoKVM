@@ -32,7 +32,6 @@ type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
 
 type PicoclawSidebarSessionActionOptions = {
   t: TFunction;
-  runtimeStatus: PicoclawRuntimeStatus | null;
   transportState: PicoclawTransportState;
   runState: PicoclawRunState;
   config: PicoclawConfigState;
@@ -59,7 +58,6 @@ type PicoclawSidebarSessionActionOptions = {
 export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSessionActionOptions) {
   const {
     t,
-    runtimeStatus,
     transportState,
     runState,
     config,
@@ -142,7 +140,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
       return;
     }
 
-    closeGateway();
+    const closePromise = closeGateway();
     setIsHistoryOpen(false);
     setIsModelConfigOpen(false);
     setMessages([]);
@@ -159,6 +157,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
     setActiveSessionId(nextSessionId);
     setIsFreshConversation(true);
 
+    await closePromise;
     const nextRuntimeStatus = await refreshState();
     if (!canConnectGateway(nextRuntimeStatus ?? null)) {
       return;
@@ -225,7 +224,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
         })
       );
 
-      closeGateway();
+      const closePromise = closeGateway();
       setMessages(loadedMessages);
       setActiveSessionId(sessionId);
       setIsFreshConversation(false);
@@ -238,6 +237,9 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
       setOverlay(HIDDEN_OVERLAY);
       setTransportState('disconnected');
       setRunState('idle');
+
+      await closePromise;
+      const nextRuntimeStatus = await refreshState();
       setRuntimeStatus((current) =>
         current
           ? {
@@ -247,12 +249,14 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
           : current
       );
 
-      if (canConnectGateway(runtimeStatus ?? null)) {
-        try {
-          await connectGateway(sessionId);
-        } catch {
-          // handled by gateway events
-        }
+      if (!canConnectGateway(nextRuntimeStatus ?? null)) {
+        return;
+      }
+
+      try {
+        await connectGateway(sessionId);
+      } catch {
+        // handled by gateway events
       }
     } catch (error) {
       const errorMessage =

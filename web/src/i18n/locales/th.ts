@@ -538,6 +538,7 @@ const th = {
           preparing: 'กำลังเตรียมการ',
           downloading: 'กำลังดาวน์โหลด',
           extracting: 'กำลังแตกไฟล์',
+          verifying: 'กำลังตรวจสอบ',
           installing: 'กำลังติดตั้ง',
           installed: 'ติดตั้งแล้ว',
           install_timeout: 'หมดเวลา',

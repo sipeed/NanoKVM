@@ -61,8 +61,8 @@ export const SidebarHistory = ({
     }
 
     return (
-      <div className="picoclaw-sidebar-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3">
-        <div className="space-y-2">
+      <div className="picoclaw-sidebar-scrollbar box-border flex min-h-0 w-full flex-1 flex-col overflow-x-hidden overflow-y-auto px-3 py-3">
+        <div className="box-border w-full max-w-full space-y-2">
           {sessions.map((session) => {
             const isActive = session.id === activeSessionId;
             return (
@@ -86,7 +86,7 @@ export const SidebarHistory = ({
                   }
                 }}
                 className={[
-                  'group flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-colors',
+                  'group box-border flex w-full items-start gap-3 rounded-2xl border px-3 py-3 text-left transition-colors',
                   isSwitching ? 'pointer-events-none opacity-60' : '',
                   isActive
                     ? 'border-sky-400/30 bg-sky-400/10'
@@ -98,7 +98,7 @@ export const SidebarHistory = ({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="truncate text-sm font-medium text-neutral-200">
                         {session.title}
                       </div>

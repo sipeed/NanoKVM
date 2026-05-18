@@ -533,6 +533,7 @@ const zh = {
           preparing: '准备中',
           downloading: '下载中',
           extracting: '解压中',
+          verifying: '验证中',
           installing: '安装中',
           installed: '已安装',
           install_timeout: '已超时',

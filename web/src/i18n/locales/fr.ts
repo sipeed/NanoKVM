@@ -551,6 +551,7 @@ const fr = {
           preparing: 'Préparation',
           downloading: 'Téléchargement',
           extracting: 'Extraction',
+          verifying: 'Vérification',
           installing: 'Installation',
           installed: 'Installé',
           install_timeout: 'Délai expiré',

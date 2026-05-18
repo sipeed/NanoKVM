@@ -545,6 +545,7 @@ const tr = {
           preparing: 'Hazırlanıyor',
           downloading: 'İndiriliyor',
           extracting: 'Çıkarılıyor',
+          verifying: 'Doğrulanıyor',
           installing: 'Yükleniyor',
           installed: 'Yüklendi',
           install_timeout: 'Zaman Aşımı',

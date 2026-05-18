@@ -546,6 +546,7 @@ const uk = {
           preparing: 'Підготовка',
           downloading: 'Завантаження',
           extracting: 'Розпакування',
+          verifying: 'Перевірка',
           installing: 'Встановлення',
           installed: 'Встановлено',
           install_timeout: 'Час очікування минув',

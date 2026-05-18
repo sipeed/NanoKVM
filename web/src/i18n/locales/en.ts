@@ -543,6 +543,7 @@ const en = {
           preparing: 'Preparing',
           downloading: 'Downloading',
           extracting: 'Extracting',
+          verifying: 'Verifying',
           installing: 'Installing',
           installed: 'Installed',
           install_timeout: 'Timed Out',

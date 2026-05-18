@@ -545,6 +545,7 @@ const id = {
           preparing: 'Mempersiapkan',
           downloading: 'Mengunduh',
           extracting: 'Mengekstraksi',
+          verifying: 'Memverifikasi',
           installing: 'Memasangkan',
           installed: 'Terpasang',
           install_timeout: 'Waktu Habis',

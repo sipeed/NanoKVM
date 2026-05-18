@@ -545,6 +545,7 @@ const nb = {
           preparing: 'Forbereder',
           downloading: 'Laster ned',
           extracting: 'Pakker ut',
+          verifying: 'Verifiserer',
           installing: 'Installerer',
           installed: 'Installert',
           install_timeout: 'Tidsavbrudd',

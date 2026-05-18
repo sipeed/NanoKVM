@@ -539,6 +539,7 @@ const ko = {
           preparing: '준비 중',
           downloading: '다운로드 중',
           extracting: '압축 해제 중',
+          verifying: '검증 중',
           installing: '설치 중',
           installed: '설치 완료',
           install_timeout: '시간 초과',

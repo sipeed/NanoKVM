@@ -549,6 +549,7 @@ const hu = {
           preparing: 'Felkészülés',
           downloading: 'Letöltés',
           extracting: 'Kibontás',
+          verifying: 'Ellenőrzés',
           installing: 'Telepítés folyamatban',
           installed: 'Telepítve',
           install_timeout: 'Időtúllépés',

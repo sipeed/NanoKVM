@@ -533,6 +533,7 @@ const zh_tw = {
           preparing: '準備中',
           downloading: '下載中',
           extracting: '解壓縮中',
+          verifying: '驗證中',
           installing: '安裝中',
           installed: '已安裝',
           install_timeout: '超時',

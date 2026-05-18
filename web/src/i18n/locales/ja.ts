@@ -549,6 +549,7 @@ const ja = {
           preparing: '準備中',
           downloading: 'ダウンロード中',
           extracting: '展開中',
+          verifying: '検証中',
           installing: 'インストール中',
           installed: 'インストール完了',
           install_timeout: 'タイムアウト',

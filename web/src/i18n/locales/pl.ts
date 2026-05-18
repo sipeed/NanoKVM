@@ -548,6 +548,7 @@ const pl = {
           preparing: 'Przygotowanie',
           downloading: 'Pobieranie',
           extracting: 'Wypakowywanie',
+          verifying: 'Weryfikowanie',
           installing: 'Instalowanie',
           installed: 'Zainstalowano',
           install_timeout: 'Upłynął limit czasu',

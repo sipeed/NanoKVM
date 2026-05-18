@@ -546,6 +546,7 @@ const pt_br = {
           preparing: 'Preparando',
           downloading: 'Baixando',
           extracting: 'Extraindo',
+          verifying: 'Verificando',
           installing: 'Instalando',
           installed: 'Instalado',
           install_timeout: 'Tempo limite esgotado',

@@ -541,6 +541,7 @@ const ca = {
           preparing: 'Preparant',
           downloading: "S'està baixant",
           extracting: 'Extracció',
+          verifying: 'Verificant',
           installing: 'Instal·lant',
           installed: 'Instal·lat',
           install_timeout: 'Temps esgotat',

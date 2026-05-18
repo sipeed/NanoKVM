@@ -549,6 +549,7 @@ const nl = {
           preparing: 'Voorbereiden',
           downloading: 'Downloaden',
           extracting: 'Uitpakken',
+          verifying: 'Verifiëren',
           installing: 'Installeren',
           installed: 'Geïnstalleerd',
           install_timeout: 'Time-out',

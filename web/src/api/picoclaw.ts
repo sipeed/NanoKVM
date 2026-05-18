@@ -109,14 +109,14 @@ export function sendStopMessage() {
   return picoclawGateway.sendStopMessage();
 }
 
-export function closeGateway() {
+export async function closeGateway() {
   const activeSessionId = picoclawGateway.getSessionId();
   picoclawGateway.close();
   if (!activeSessionId) {
     return;
   }
 
-  void releaseRuntimeSession(activeSessionId).catch(() => undefined);
+  await releaseRuntimeSession(activeSessionId).catch(() => undefined);
 }
 
 export function onGatewayConnectionState(listener: (state: GatewayTransportState) => void) {

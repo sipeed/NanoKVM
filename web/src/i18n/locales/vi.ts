@@ -544,6 +544,7 @@ const vi = {
           preparing: 'Đang chuẩn bị',
           downloading: 'Đang tải xuống',
           extracting: 'Đang giải nén',
+          verifying: 'Đang xác minh',
           installing: 'Đang cài đặt',
           installed: 'Đã cài đặt',
           install_timeout: 'Đã hết thời gian',

@@ -545,6 +545,7 @@ const da = {
           preparing: 'Forberedelse',
           downloading: 'Downloader',
           extracting: 'Udpakning',
+          verifying: 'Bekræfter',
           installing: 'Installerer',
           installed: 'Installeret',
           install_timeout: 'Timeout',
