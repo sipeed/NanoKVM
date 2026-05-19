@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtom, useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
@@ -82,12 +83,6 @@ export const H264Webrtc = () => {
         } catch (error) {
           videoOfferSent.current = false;
           console.error('Video negotiation failed:', error);
-        }
-      };
-
-      peer.onconnectionstatechange = () => {
-        if (peer.iceConnectionState === 'connected' || peer.connectionState === 'connected') {
-          setIsLoading(false);
         }
       };
 
@@ -258,10 +253,8 @@ export const H264Webrtc = () => {
       </div>
 
       {isLoading && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
-          <div className="rounded-full bg-neutral-900/85 px-4 py-2 text-sm text-neutral-100 shadow-lg">
-            Loading
-          </div>
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] transition-all duration-300">
+          <Spin size="large" />
         </div>
       )}
     </div>
