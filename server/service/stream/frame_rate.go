@@ -16,9 +16,8 @@ var (
 )
 
 type FrameRateCounter struct {
-	frameCount int32
-	fps        int32
-	mutex      sync.Mutex
+	frameCount atomic.Int32
+	fps        atomic.Int32
 }
 
 func GetFrameRateCounter() *FrameRateCounter {
@@ -30,16 +29,10 @@ func GetFrameRateCounter() *FrameRateCounter {
 			defer ticker.Stop()
 
 			for range ticker.C {
-				counter.mutex.Lock()
+				currentCount := counter.frameCount.Swap(0)
+				counter.fps.Store(currentCount / 3)
 
-				currentCount := atomic.LoadInt32(&counter.frameCount)
-
-				counter.fps = currentCount / 3
-				atomic.StoreInt32(&counter.frameCount, 0)
-
-				counter.mutex.Unlock()
-
-				data := fmt.Sprintf("%d", counter.fps)
+				data := fmt.Sprintf("%d", counter.fps.Load())
 				err := os.WriteFile("/kvmapp/kvm/now_fps", []byte(data), 0o666)
 				if err != nil {
 					log.Errorf("failed to write fps: %s", err)
@@ -52,12 +45,9 @@ func GetFrameRateCounter() *FrameRateCounter {
 }
 
 func (f *FrameRateCounter) Update() {
-	atomic.AddInt32(&f.frameCount, 1)
+	f.frameCount.Add(1)
 }
 
 func (f *FrameRateCounter) GetFPS() int32 {
-	f.mutex.Lock()
-	defer f.mutex.Unlock()
-
-	return f.fps
+	return f.fps.Load()
 }

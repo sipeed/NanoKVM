@@ -11,7 +11,7 @@ func (t *Track) updateExtension() {
 		t.playoutDelayExtensionID = 5
 	}
 
-	if t.playoutDelayExtensionData == nil || len(t.playoutDelayExtensionData) == 0 {
+	if len(t.playoutDelayExtensionData) == 0 {
 		playoutDelay := &rtp.PlayoutDelayExtension{
 			MinDelay: 0,
 			MaxDelay: 0,
@@ -43,11 +43,4 @@ func (t *Track) writeVideoSample(sample media.Sample) error {
 	}
 
 	return nil
-}
-
-func (t *Track) writeVideo(sample media.Sample) {
-	err := t.writeVideoSample(sample)
-	if err != nil {
-		log.Errorf("failed to write h264 video: %s", err)
-	}
 }
