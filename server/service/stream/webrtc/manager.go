@@ -72,6 +72,7 @@ func (m *WebRTCManager) sendVideoStream() {
 		}
 
 		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
+		stream.UpdateCaptureStatus(stream.CaptureModeH264, result)
 		if result < 0 || len(data) == 0 {
 			continue
 		}

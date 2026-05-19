@@ -73,7 +73,17 @@ const zh_tw = {
       qualityLow: '低',
       frameDetect: '影格檢測',
       frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止視訊傳輸串流。',
-      resetHdmi: '重置 HDMI'
+      resetHdmi: '重置 HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI 畫面異常',
+        unsupportedResolution: '目前解析度不支援',
+        retrieving: '正在取得畫面...',
+        changingResolution: '正在切換解析度...',
+        updateFailed: '畫面暫時無法更新',
+        videoError: '影片顯示異常',
+        noHdmi: '未偵測到 HDMI 訊號',
+        unavailable: '畫面暫時無法顯示'
+      }
     },
     keyboard: {
       title: '鍵盤',

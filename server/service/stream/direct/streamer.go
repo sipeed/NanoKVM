@@ -69,6 +69,7 @@ func (s *Streamer) run() {
 		}
 
 		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
+		stream.UpdateCaptureStatus(stream.CaptureModeDirect, result)
 		if result < 0 || len(data) == 0 {
 			continue
 		}

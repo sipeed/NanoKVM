@@ -77,7 +77,17 @@ const vi = {
       frameDetect: 'Phát hiện khung hình',
       frameDetectTip:
         'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.',
-      resetHdmi: 'Đặt lại HDMI'
+      resetHdmi: 'Đặt lại HDMI',
+      captureStatus: {
+        hdmiError: 'Lỗi màn hình HDMI',
+        unsupportedResolution: 'Độ phân giải hiện tại không được hỗ trợ',
+        retrieving: 'Đang lấy màn hình...',
+        changingResolution: 'Đang chuyển độ phân giải...',
+        updateFailed: 'Hiện không thể cập nhật màn hình',
+        videoError: 'Lỗi hiển thị video',
+        noHdmi: 'Không phát hiện tín hiệu HDMI',
+        unavailable: 'Hiện không thể hiển thị màn hình'
+      }
     },
     keyboard: {
       title: 'Bàn phím',

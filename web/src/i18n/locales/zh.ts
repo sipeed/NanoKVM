@@ -73,7 +73,17 @@ const zh = {
       qualityLow: '低',
       frameDetect: '帧差检测',
       frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流',
-      resetHdmi: '重置 HDMI'
+      resetHdmi: '重置 HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI 画面异常',
+        unsupportedResolution: '当前分辨率不支持',
+        retrieving: '正在获取画面...',
+        changingResolution: '正在切换分辨率...',
+        updateFailed: '画面暂时无法更新',
+        videoError: '视频显示异常',
+        noHdmi: '未检测到 HDMI 信号',
+        unavailable: '画面暂时无法显示'
+      }
     },
     keyboard: {
       title: '键盘',

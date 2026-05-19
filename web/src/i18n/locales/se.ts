@@ -75,7 +75,17 @@ const se = {
       frameDetect: 'Ramdetection',
       frameDetectTip:
         'Beräkna skillnaden mellan ramar. Sluta skicka videoström när inga förändringar upptäcks på fjärrvärdens skärm.',
-      resetHdmi: 'Återställ HDMI'
+      resetHdmi: 'Återställ HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI-skärmfel',
+        unsupportedResolution: 'Den aktuella upplösningen stöds inte',
+        retrieving: 'Hämtar skärmen...',
+        changingResolution: 'Byter upplösning...',
+        updateFailed: 'Skärmen kan inte uppdateras just nu',
+        videoError: 'Videovisningsfel',
+        noHdmi: 'Ingen HDMI-signal upptäcktes',
+        unavailable: 'Skärmen kan inte visas just nu'
+      }
     },
     keyboard: {
       title: 'Tangentbord',

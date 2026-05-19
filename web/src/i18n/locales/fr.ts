@@ -80,7 +80,17 @@ const fr = {
       frameDetect: 'Détection de trame',
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
-      resetHdmi: 'Réinitialiser le HDMI'
+      resetHdmi: 'Réinitialiser le HDMI',
+      captureStatus: {
+        hdmiError: 'Erreur d’image HDMI',
+        unsupportedResolution: 'La résolution actuelle n’est pas prise en charge',
+        retrieving: 'Récupération de l’image...',
+        changingResolution: 'Changement de résolution...',
+        updateFailed: 'L’image ne peut pas être mise à jour pour le moment',
+        videoError: 'Erreur d’affichage vidéo',
+        noHdmi: 'Aucun signal HDMI détecté',
+        unavailable: 'L’image ne peut pas être affichée pour le moment'
+      }
     },
     keyboard: {
       title: 'Clavier',

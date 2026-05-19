@@ -78,7 +78,17 @@ const tr = {
       frameDetect: 'Kareleri algıla',
       frameDetectTip:
         'Gönderilen kareler arasındaki farkı hesaplar. Uzak ana bilgisayardan gönderilen yayında bir değişiklik yoksa görüntü yayınını durdurur.',
-      resetHdmi: 'HDMI sıfırla'
+      resetHdmi: 'HDMI sıfırla',
+      captureStatus: {
+        hdmiError: 'HDMI ekran hatası',
+        unsupportedResolution: 'Geçerli çözünürlük desteklenmiyor',
+        retrieving: 'Ekran alınıyor...',
+        changingResolution: 'Çözünürlük değiştiriliyor...',
+        updateFailed: 'Ekran şu anda güncellenemiyor',
+        videoError: 'Video görüntüleme hatası',
+        noHdmi: 'HDMI sinyali algılanmadı',
+        unavailable: 'Ekran şu anda gösterilemiyor'
+      }
     },
     keyboard: {
       title: 'Klavye',

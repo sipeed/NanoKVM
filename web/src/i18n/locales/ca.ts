@@ -77,7 +77,17 @@ const ca = {
       frameDetect: 'Detecció de fotogrames',
       frameDetectTip:
         "Calcula la diferència entre fotogrames. S'atura la transmissió si no hi ha canvis a la pantalla de l'amfitrió remot.",
-      resetHdmi: 'Restablir HDMI'
+      resetHdmi: 'Restablir HDMI',
+      captureStatus: {
+        hdmiError: 'Error a la pantalla HDMI',
+        unsupportedResolution: 'La resolució actual no és compatible',
+        retrieving: "S'està obtenint la pantalla...",
+        changingResolution: "S'està canviant la resolució...",
+        updateFailed: 'La pantalla no es pot actualitzar ara',
+        videoError: 'Error de visualització de vídeo',
+        noHdmi: "No s'ha detectat cap senyal HDMI",
+        unavailable: 'La pantalla no es pot mostrar ara'
+      }
     },
     keyboard: {
       title: 'Teclat',
@@ -532,6 +542,7 @@ const ca = {
         success: 'PicoClaw instal·lat correctament',
         failed: "No s'ha pogut instal·lar PicoClaw",
         uninstalling: "S'està desinstal·lant el temps d'execució...",
+        uninstaling: "S'està desinstal·lant el temps d'execució...",
         uninstalled: "El temps d'execució s'ha desinstal·lat correctament.",
         uninstallFailed: 'La desinstal·lació ha fallat.',
         requiredTitle: 'PicoClaw no està instal·lat',

@@ -10,6 +10,7 @@ import { picoclawChatOpenAtom } from '@/jotai/picoclaw.ts';
 import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
 import { Head } from '@/components/head.tsx';
 
+import { CaptureStatusOverlay, useCaptureStatus } from './capture-status';
 import { Keyboard } from './keyboard';
 import { Menu } from './menu';
 import { Mouse } from './mouse';
@@ -19,10 +20,26 @@ import { ActionOverlay } from './picoclaw/action-overlay.tsx';
 import { Screen } from './screen';
 import { VirtualKeyboard } from './virtual-keyboard';
 
+function getVideoMode() {
+  const defaultVideoMode = window.RTCPeerConnection ? 'h264' : 'mjpeg';
+
+  const cookieVideoMode = storage.getVideoMode();
+  if (cookieVideoMode) {
+    if (cookieVideoMode === 'direct' && !window.VideoDecoder) {
+      return defaultVideoMode;
+    }
+    return cookieVideoMode;
+  }
+
+  return defaultVideoMode;
+}
+
 export const Desktop = () => {
   const { t } = useTranslation();
   const isBigScreen = useMediaQuery({ minWidth: 850 });
+  const [activeVideoMode] = useState(getVideoMode);
   const [picoclawSidebarWidth, setPicoclawSidebarWidth] = useState(420);
+  const captureStatus = useCaptureStatus(activeVideoMode);
 
   const [videoMode, setVideoMode] = useAtom(videoModeAtom);
   const [resolution, setResolution] = useAtom(resolutionAtom);
@@ -31,8 +48,7 @@ export const Desktop = () => {
   useEffect(() => {
     client.connect();
 
-    const mode = getVideoMode();
-    setVideoMode(mode);
+    setVideoMode(activeVideoMode);
 
     const res = storage.getResolution() || { width: 0, height: 0 };
     setResolution(res);
@@ -40,21 +56,7 @@ export const Desktop = () => {
     return () => {
       client.close();
     };
-  }, []);
-
-  function getVideoMode() {
-    const defaultVideoMode = window.RTCPeerConnection ? 'h264' : 'mjpeg';
-
-    const cookieVideoMode = storage.getVideoMode();
-    if (cookieVideoMode) {
-      if (cookieVideoMode === 'direct' && !window.VideoDecoder) {
-        return defaultVideoMode;
-      }
-      return cookieVideoMode;
-    }
-
-    return defaultVideoMode;
-  }
+  }, [activeVideoMode, setResolution, setVideoMode]);
 
   function handleSplitterResize(sizes: number[]) {
     const nextSidebarWidth = sizes[1];
@@ -81,6 +83,7 @@ export const Desktop = () => {
               <Splitter.Panel min="45%">
                 <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden bg-black">
                   <Screen />
+                  <CaptureStatusOverlay status={captureStatus} />
                 </div>
               </Splitter.Panel>
               <Splitter.Panel

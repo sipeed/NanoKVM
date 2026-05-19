@@ -77,7 +77,17 @@ const da = {
       frameDetect: 'Beregn frames',
       frameDetectTip:
         'Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm.',
-      resetHdmi: 'Nulstil HDMI'
+      resetHdmi: 'Nulstil HDMI',
+      captureStatus: {
+        hdmiError: 'Fejl i HDMI-billedet',
+        unsupportedResolution: 'Den aktuelle opløsning understøttes ikke',
+        retrieving: 'Henter skærmbillede...',
+        changingResolution: 'Skifter opløsning...',
+        updateFailed: 'Skærmbilledet kan ikke opdateres lige nu',
+        videoError: 'Fejl i videovisning',
+        noHdmi: 'Intet HDMI-signal registreret',
+        unavailable: 'Skærmbilledet kan ikke vises lige nu'
+      }
     },
     keyboard: {
       title: 'Tastatur',

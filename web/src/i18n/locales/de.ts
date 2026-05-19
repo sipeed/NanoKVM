@@ -80,7 +80,17 @@ const de = {
       frameDetect: 'Bilderkennung',
       frameDetectTip:
         'Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.',
-      resetHdmi: 'HDMI zurücksetzen'
+      resetHdmi: 'HDMI zurücksetzen',
+      captureStatus: {
+        hdmiError: 'HDMI-Bildschirmfehler',
+        unsupportedResolution: 'Die aktuelle Auflösung wird nicht unterstützt',
+        retrieving: 'Bildschirm wird abgerufen...',
+        changingResolution: 'Auflösung wird gewechselt...',
+        updateFailed: 'Der Bildschirm kann derzeit nicht aktualisiert werden',
+        videoError: 'Fehler bei der Videoanzeige',
+        noHdmi: 'Kein HDMI-Signal erkannt',
+        unavailable: 'Der Bildschirm kann derzeit nicht angezeigt werden'
+      }
     },
     keyboard: {
       title: 'Tastatur',

@@ -79,7 +79,17 @@ const nl = {
       frameDetect: 'Frame detectie',
       frameDetectTip:
         'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.',
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Reset HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI-schermfout',
+        unsupportedResolution: 'De huidige resolutie wordt niet ondersteund',
+        retrieving: 'Scherm ophalen...',
+        changingResolution: 'Resolutie wisselen...',
+        updateFailed: 'Het scherm kan nu niet worden bijgewerkt',
+        videoError: 'Fout bij videoweergave',
+        noHdmi: 'Geen HDMI-signaal gedetecteerd',
+        unavailable: 'Het scherm kan nu niet worden weergegeven'
+      }
     },
     keyboard: {
       title: 'Toetsenbord',

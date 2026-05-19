@@ -78,7 +78,17 @@ const es = {
       frameDetect: 'Detectar fotogramas',
       frameDetectTip:
         'Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto.',
-      resetHdmi: 'Reiniciar HDMI'
+      resetHdmi: 'Reiniciar HDMI',
+      captureStatus: {
+        hdmiError: 'Error de imagen HDMI',
+        unsupportedResolution: 'La resolución actual no es compatible',
+        retrieving: 'Obteniendo pantalla...',
+        changingResolution: 'Cambiando resolución...',
+        updateFailed: 'La pantalla no puede actualizarse ahora',
+        videoError: 'Error de visualización de video',
+        noHdmi: 'No se detectó señal HDMI',
+        unavailable: 'La pantalla no puede mostrarse ahora'
+      }
     },
     keyboard: {
       title: 'Teclado',

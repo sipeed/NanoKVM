@@ -78,7 +78,17 @@ const nb = {
       frameDetect: 'Bildefrekvensoppdagelse',
       frameDetectTip:
         'Kalkuler forskjellen mellom bilder. Stopper overføring av video når det ikke oppdages forskjell på den eksterne vertens skjerm.',
-      resetHdmi: 'Tilbakestill HDMI'
+      resetHdmi: 'Tilbakestill HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI-skjermfeil',
+        unsupportedResolution: 'Gjeldende oppløsning støttes ikke',
+        retrieving: 'Henter skjermbilde...',
+        changingResolution: 'Bytter oppløsning...',
+        updateFailed: 'Skjermen kan ikke oppdateres akkurat nå',
+        videoError: 'Feil ved videovisning',
+        noHdmi: 'Ingen HDMI-signal oppdaget',
+        unavailable: 'Skjermen kan ikke vises akkurat nå'
+      }
     },
     keyboard: {
       title: 'Åpne tastatur',

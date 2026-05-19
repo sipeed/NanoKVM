@@ -85,6 +85,7 @@ func (s *Streamer) run() {
 		}
 
 		data, result := vision.ReadMjpeg(screen.Width, screen.Height, screen.Quality)
+		stream.UpdateCaptureStatus(stream.CaptureModeMJPEG, result)
 		if result < 0 || result == 5 || len(data) == 0 {
 			continue
 		}
