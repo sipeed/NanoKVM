@@ -33,7 +33,7 @@ export const Relative = () => {
     screen.addEventListener('mouseup', handleMouseUp);
     screen.addEventListener('mousemove', handleMouseMove);
     screen.addEventListener('wheel', handleMouseWheel, { passive: false });
-    screen.addEventListener('contextmenu', (e) => e.preventDefault());
+    screen.addEventListener('contextmenu', disableEvent);
     document.addEventListener('pointerlockchange', handlePointerLockChange);
 
     // Mouse click event
