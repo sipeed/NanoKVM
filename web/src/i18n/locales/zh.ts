@@ -28,6 +28,8 @@ const zh = {
       ok: '确定',
       cancel: '取消',
       loginButtonText: '登录',
+      rememberPassword: '记住密码',
+      autoLogin: '自动登录',
       tips: {
         reset1: '长按 NanoKVM 上的 BOOT 按键 10 秒钟来重置帐号。',
         reset2: '详细操作步骤可参考此文档：',

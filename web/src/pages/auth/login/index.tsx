@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from 'react';
 import { LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { Button, Checkbox, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,16 +11,46 @@ import { Head } from '@/components/head.tsx';
 
 import { Tips } from './tips.tsx';
 
+const REMEMBER_KEY = 'nano-kvm-remember';
+
+interface SavedCredentials {
+  username: string;
+  password: string;
+  autoLogin: boolean;
+}
+
 export const Login = (): ReactElement => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [form] = Form.useForm();
 
   const [isLoading, setIsloading] = useState(false);
   const [msg, setMsg] = useState('');
+  const [rememberChecked, setRememberChecked] = useState(false);
 
   useEffect(() => {
     if (existToken()) {
       navigate('/', { replace: true });
+      return;
+    }
+
+    try {
+      const saved = localStorage.getItem(REMEMBER_KEY);
+      if (saved) {
+        const creds: SavedCredentials = JSON.parse(saved);
+        form.setFieldsValue({
+          username: creds.username,
+          password: creds.password,
+          remember: true,
+          autoLogin: creds.autoLogin
+        });
+        setRememberChecked(true);
+        if (creds.autoLogin) {
+          doLogin({ username: creds.username, password: creds.password, remember: true, autoLogin: true });
+        }
+      }
+    } catch {
+      localStorage.removeItem(REMEMBER_KEY);
     }
   }, []);
 
@@ -30,7 +60,7 @@ export const Login = (): ReactElement => {
     }
   }, [msg]);
 
-  function login(values: any) {
+  function doLogin(values: any) {
     if (isLoading) return;
     setIsloading(true);
 
@@ -48,6 +78,19 @@ export const Login = (): ReactElement => {
 
           setMsg(errorMsg);
           return;
+        }
+
+        if (values.remember) {
+          localStorage.setItem(
+            REMEMBER_KEY,
+            JSON.stringify({
+              username: values.username,
+              password: values.password,
+              autoLogin: values.autoLogin || false
+            } as SavedCredentials)
+          );
+        } else {
+          localStorage.removeItem(REMEMBER_KEY);
         }
 
         setMsg('');
@@ -70,9 +113,10 @@ export const Login = (): ReactElement => {
 
       <div className="flex h-screen w-screen flex-col items-center justify-center">
         <Form
+          form={form}
           style={{ minWidth: 300, maxWidth: 500 }}
-          initialValues={{ remember: true }}
-          onFinish={login}
+          initialValues={{ remember: false, autoLogin: false }}
+          onFinish={doLogin}
         >
           <div className="flex flex-col items-center justify-center pb-4">
             <img
@@ -105,6 +149,24 @@ export const Login = (): ReactElement => {
               placeholder={t('auth.placeholderPassword')}
             />
           </Form.Item>
+
+          <div className="flex items-center justify-between pb-3">
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox
+                onChange={(e) => {
+                  setRememberChecked(e.target.checked);
+                  if (!e.target.checked) {
+                    form.setFieldValue('autoLogin', false);
+                  }
+                }}
+              >
+                {t('auth.rememberPassword')}
+              </Checkbox>
+            </Form.Item>
+            <Form.Item name="autoLogin" valuePropName="checked" noStyle>
+              <Checkbox disabled={!rememberChecked}>{t('auth.autoLogin')}</Checkbox>
+            </Form.Item>
+          </div>
 
           <div className="pb-1 text-red-500">{msg}</div>
 

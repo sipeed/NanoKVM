@@ -15,11 +15,10 @@ export function useMenuBounds(
   isMenuExpanded: boolean
 ): MenuBounds {
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
-  const [menuBounds, setMenuBounds] = useState<MenuBounds>({
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0
+  const [menuBounds, setMenuBounds] = useState<MenuBounds>(() => {
+    const hw = window.innerWidth / 2;
+    const hh = window.innerHeight;
+    return { left: -hw, right: hw, top: -100, bottom: hh };
   });
 
   const handleResize = useCallback(() => {
