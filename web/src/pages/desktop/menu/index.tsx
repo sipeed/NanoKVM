@@ -94,8 +94,8 @@ export const Menu = () => {
 
             {isEnabled('image') && <Image />}
             {isEnabled('download') && <DownloadImage />}
-            {isEnabled('script') && <Script />}
             {isEnabled('terminal') && <Terminal />}
+            {isEnabled('script') && <Script />}
             {isEnabled('wol') && <Wol />}
 
             {['image', 'download', 'script', 'terminal', 'wol'].some(isEnabled) && (

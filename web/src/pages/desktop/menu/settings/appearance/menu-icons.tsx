@@ -24,8 +24,8 @@ export const MenuIcons = () => {
   const items = [
     { key: 'image', icon: <DiscIcon size={16} /> },
     { key: 'download', icon: <DownloadIcon size={16} /> },
-    { key: 'script', icon: <FileJsonIcon size={16} /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
+    { key: 'script', icon: <FileJsonIcon size={16} /> },
     { key: 'wol', icon: <NetworkIcon size={16} /> },
     { key: 'picoclaw', icon: <Robot size={16} /> },
     { key: 'power', icon: <PowerIcon size={16} /> },
