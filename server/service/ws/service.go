@@ -37,5 +37,7 @@ func (s *Service) Connect(c *gin.Context) {
 	manager.AddClient(ws, client)
 	defer manager.RemoveClient(ws)
 
+	sendCaptureStatusSnapshot(client)
+
 	client.Start()
 }

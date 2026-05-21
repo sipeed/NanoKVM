@@ -61,7 +61,7 @@
     "eslint-plugin-react-refresh": "^0.4.26",
     "globals": "^17.3.0",
     "msw": "^2.12.10",
-    "postcss": "^8.5.6",
+    "postcss": "^8.5.10",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^3.4.19",

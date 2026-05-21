@@ -145,7 +145,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
           ]);
 
           if (isRuntimeReady) {
-            closeGateway();
+            void closeGateway();
             setTakeover({
               active: false,
               sessionId: picoclawGateway.getSessionId(),
@@ -194,7 +194,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
         ]);
 
         if (isRuntimeReady) {
-          closeGateway();
+          void closeGateway();
           setTakeover({
             active: false,
             sessionId: picoclawGateway.getSessionId(),

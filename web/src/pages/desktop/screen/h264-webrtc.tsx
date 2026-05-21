@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtom, useAtomValue } from 'jotai';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
@@ -7,6 +8,19 @@ import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
+
+type SignalingMessage = {
+  event?: string;
+  data?: string;
+};
+
+const parseSignalingData = <T,>(data?: string): T | null => {
+  if (!data) {
+    return null;
+  }
+
+  return JSON.parse(data) as T;
+};
 
 export const H264Webrtc = () => {
   const resolution = useAtomValue(resolutionAtom);
@@ -21,120 +35,11 @@ export const H264Webrtc = () => {
   useEffect(() => {
     const url = `${getBaseUrl('ws')}/api/stream/h264`;
     const ws = new W3cWebSocket(url);
+    const videoElement = videoRef.current;
 
-    const iceServers = [{ urls: ['stun:stun.l.google.com:19302'] }];
-    const video = new RTCPeerConnection({ iceServers });
-
-    // --- Init Video ---
-    video.onnegotiationneeded = async () => {
-      if (videoOfferSent.current || video.signalingState !== 'stable') {
-        console.log('Skipping video negotiation - Waiting for answer or state unstable');
-        return;
-      }
-
-      try {
-        videoOfferSent.current = true;
-        const offer = await video.createOffer({
-          offerToReceiveVideo: true,
-          offerToReceiveAudio: false
-        });
-
-        await video.setLocalDescription(offer);
-
-        sendMsg('video-offer', JSON.stringify(video.localDescription));
-      } catch (error) {
-        videoOfferSent.current = false;
-        console.error('Video negotiation failed:', error);
-      }
-    };
-
-    video.onconnectionstatechange = () => {
-      if (video.iceConnectionState === 'connected') {
-        setIsLoading(false);
-      }
-    };
-
-    video.ontrack = (event) => {
-      if (videoRef.current && event.track.kind === 'video') {
-        videoRef.current.srcObject = new MediaStream([event.track]);
-      }
-    };
-
-    ws.onopen = () => {
-      videoOfferSent.current = false;
-
-      video.onicecandidate = (event) => {
-        if (event.candidate) {
-          sendMsg('video-candidate', JSON.stringify(event.candidate));
-        }
-      };
-
-      video.addTransceiver('video', { direction: 'recvonly' });
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const msg = JSON.parse(event.data as string);
-        if (!msg?.data) return;
-
-        const data = JSON.parse(msg.data);
-        if (!data) return;
-
-        switch (msg.event) {
-          case 'video-answer':
-            handleVideoAnswer(data);
-            break;
-          case 'video-candidate':
-            handleVideoCandidate(data);
-            break;
-          case 'heartbeat':
-            break;
-          default:
-            console.log('Unhandled event:', msg.event);
-        }
-      } catch (err) {
-        console.error('Message processing error:', err);
-      }
-    };
-
-    const handleVideoAnswer = (data: any) => {
-      if (video.signalingState !== 'have-local-offer') {
-        videoOfferSent.current = false;
-        console.warn(`Video signaling state incorrect for answer: ${video.signalingState}`);
-        return;
-      }
-
-      video
-        .setRemoteDescription(new RTCSessionDescription(data))
-        .then(() => {
-          videoOfferSent.current = false;
-          videoIceCandidates.current.forEach((candidate) => {
-            video
-              .addIceCandidate(candidate)
-              .catch((e) => console.error('Video candidate failed to add:', e.message));
-          });
-          videoIceCandidates.current = [];
-        })
-        .catch((error) => {
-          console.error('Video answer set failed:', error);
-          videoOfferSent.current = false;
-        });
-    };
-
-    const handleVideoCandidate = (data: any) => {
-      if (!data.candidate) {
-        return;
-      }
-
-      const candidate = new RTCIceCandidate(data);
-      if (video.remoteDescription) {
-        video
-          .addIceCandidate(candidate)
-          .catch((e) => console.error('Video candidate failed to add:', e.message));
-      } else {
-        videoIceCandidates.current.push(candidate);
-      }
-    };
+    let video: RTCPeerConnection | null = null;
+    let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+    let disposed = false;
 
     const sendMsg = (event: string, data: string) => {
       if (ws.readyState !== WebSocket.OPEN) {
@@ -148,25 +53,167 @@ export const H264Webrtc = () => {
       }
     };
 
-    const heartbeatTimer = setInterval(() => {
-      sendMsg('heartbeat', '');
-    }, 60 * 1000);
+    const startVideo = (iceServers: RTCIceServer[]) => {
+      if (video || disposed) {
+        return;
+      }
 
-    setTimeout(() => {
+      const peer = new RTCPeerConnection({ iceServers });
+      video = peer;
+      videoOfferSent.current = false;
+      videoIceCandidates.current = [];
+
+      // --- Init Video ---
+      peer.onnegotiationneeded = async () => {
+        if (videoOfferSent.current || peer.signalingState !== 'stable') {
+          console.log('Skipping video negotiation - Waiting for answer or state unstable');
+          return;
+        }
+
+        try {
+          videoOfferSent.current = true;
+          const offer = await peer.createOffer({
+            offerToReceiveVideo: true,
+            offerToReceiveAudio: false
+          });
+
+          await peer.setLocalDescription(offer);
+
+          sendMsg('video-offer', JSON.stringify(peer.localDescription));
+        } catch (error) {
+          videoOfferSent.current = false;
+          console.error('Video negotiation failed:', error);
+        }
+      };
+
+      peer.ontrack = (event) => {
+        if (videoElement && event.track.kind === 'video') {
+          videoElement.srcObject = new MediaStream([event.track]);
+        }
+      };
+
+      peer.onicecandidate = (event) => {
+        if (event.candidate) {
+          sendMsg('video-candidate', JSON.stringify(event.candidate));
+        }
+      };
+
+      peer.addTransceiver('video', { direction: 'recvonly' });
+    };
+
+    const handleVideoAnswer = (data: RTCSessionDescriptionInit) => {
+      const peer = video;
+      if (!peer) {
+        return;
+      }
+
+      if (peer.signalingState !== 'have-local-offer') {
+        videoOfferSent.current = false;
+        console.warn(`Video signaling state incorrect for answer: ${peer.signalingState}`);
+        return;
+      }
+
+      peer
+        .setRemoteDescription(new RTCSessionDescription(data))
+        .then(() => {
+          videoOfferSent.current = false;
+          videoIceCandidates.current.forEach((candidate) => {
+            peer
+              .addIceCandidate(candidate)
+              .catch((e) => console.error('Video candidate failed to add:', e.message));
+          });
+          videoIceCandidates.current = [];
+        })
+        .catch((error) => {
+          console.error('Video answer set failed:', error);
+          videoOfferSent.current = false;
+        });
+    };
+
+    const handleVideoCandidate = (data: RTCIceCandidateInit) => {
+      const peer = video;
+      if (!peer || !data.candidate) {
+        return;
+      }
+
+      const candidate = new RTCIceCandidate(data);
+      if (peer.remoteDescription) {
+        peer
+          .addIceCandidate(candidate)
+          .catch((e) => console.error('Video candidate failed to add:', e.message));
+      } else {
+        videoIceCandidates.current.push(candidate);
+      }
+    };
+
+    ws.onopen = () => {
+      if (disposed) {
+        ws.close();
+        return;
+      }
+
+      heartbeatTimer = setInterval(() => {
+        sendMsg('heartbeat', '');
+      }, 60 * 1000);
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data as string) as SignalingMessage;
+
+        switch (msg.event) {
+          case 'ice-servers': {
+            const iceServers = parseSignalingData<RTCIceServer[]>(msg.data);
+            startVideo(Array.isArray(iceServers) ? iceServers : []);
+            break;
+          }
+          case 'video-answer': {
+            const data = parseSignalingData<RTCSessionDescriptionInit>(msg.data);
+            if (data) {
+              handleVideoAnswer(data);
+            }
+            break;
+          }
+          case 'video-candidate': {
+            const data = parseSignalingData<RTCIceCandidateInit>(msg.data);
+            if (data) {
+              handleVideoCandidate(data);
+            }
+            break;
+          }
+          case 'heartbeat':
+            break;
+          default:
+            console.log('Unhandled event:', msg.event);
+        }
+      } catch (err) {
+        console.error('Message processing error:', err);
+      }
+    };
+
+    const loadingTimer = setTimeout(() => {
       setIsLoading(false);
     }, 5 * 1000);
 
     return () => {
-      if (ws.readyState === WebSocket.OPEN) {
+      disposed = true;
+
+      if (ws.readyState !== WebSocket.CLOSING && ws.readyState !== WebSocket.CLOSED) {
         ws.close();
       }
 
-      video.close();
+      video?.close();
+      video = null;
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
       videoOfferSent.current = false;
+      videoIceCandidates.current = [];
 
       if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
       }
+      clearTimeout(loadingTimer);
     };
   }, []);
 
@@ -206,10 +253,8 @@ export const H264Webrtc = () => {
       </div>
 
       {isLoading && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
-          <div className="rounded-full bg-neutral-900/85 px-4 py-2 text-sm text-neutral-100 shadow-lg">
-            Loading
-          </div>
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] transition-all duration-300">
+          <Spin size="large" />
         </div>
       )}
     </div>

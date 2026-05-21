@@ -32,11 +32,12 @@ var picoclawNanoKVMDefaults = []picoclawConfigDefault{
 	{path: []string{"tools", "cron", "allow_command"}, value: true},
 	{path: []string{"tools", "exec", "allow_remote"}, value: true},
 	{path: []string{"tools", "exec", "enable_deny_patterns"}, value: false},
-	{path: []string{"channels", "pico", "allow_token_query"}, value: false},
-	{path: []string{"channels", "pico", "ping_interval"}, value: defaultPicoclawPingSec},
-	{path: []string{"channels", "pico", "read_timeout"}, value: defaultPicoclawReadSec},
-	{path: []string{"channels", "pico", "write_timeout"}, value: defaultPicoclawWriteSec},
-	{path: []string{"channels", "pico", "max_connections"}, value: defaultPicoclawMaxConns},
+	{path: []string{"channel_list", "pico", "type"}, value: "pico"},
+	{path: []string{"channel_list", "pico", "settings", "allow_token_query"}, value: false},
+	{path: []string{"channel_list", "pico", "settings", "ping_interval"}, value: defaultPicoclawPingSec},
+	{path: []string{"channel_list", "pico", "settings", "read_timeout"}, value: defaultPicoclawReadSec},
+	{path: []string{"channel_list", "pico", "settings", "write_timeout"}, value: defaultPicoclawWriteSec},
+	{path: []string{"channel_list", "pico", "settings", "max_connections"}, value: defaultPicoclawMaxConns},
 	{path: []string{"tools", "mcp", "enabled"}, value: true},
 }
 
@@ -72,7 +73,10 @@ func ensurePicoclawStartupDefaults() error {
 }
 
 func ensurePicoclawPicoChannelEnabled(doc *picoclawConfigDocument) error {
-	if doc == nil || doc.config.Channels.Pico.Enabled {
+	if doc == nil {
+		return nil
+	}
+	if pico, ok := doc.config.Channels["pico"]; ok && pico.Enabled {
 		return nil
 	}
 
@@ -98,12 +102,20 @@ func applyPicoclawStartupDefaults(editor *picoclawConfigEditor) error {
 }
 
 func forceEnablePicoclawPicoChannel(doc *picoclawConfigDocument, editor *picoclawConfigEditor) {
-	if doc == nil || editor == nil || doc.config.Channels.Pico.Enabled {
+	if doc == nil || editor == nil {
+		return
+	}
+	if pico, ok := doc.config.Channels["pico"]; ok && pico.Enabled {
 		return
 	}
 
-	editor.setValue(true, "channels", "pico", "enabled")
-	doc.config.Channels.Pico.Enabled = true
+	editor.setValue(true, "channel_list", "pico", "enabled")
+	if doc.config.Channels == nil {
+		doc.config.Channels = make(map[string]picoclawChannelEntry)
+	}
+	pico := doc.config.Channels["pico"]
+	pico.Enabled = true
+	doc.config.Channels["pico"] = pico
 }
 
 func defaultPicoclawMCPServer() (map[string]any, error) {
@@ -197,14 +209,19 @@ func ensurePicoclawPicoToken(doc *picoclawConfigDocument) (bool, error) {
 		return false, err
 	}
 
-	if doc.security.Channels.Pico == nil {
-		doc.security.Channels.Pico = &picoclawPicoSecurity{}
+	if doc.security.ChannelList == nil {
+		doc.security.ChannelList = make(map[string]picoclawChannelSecurityEntry)
 	}
-	if strings.TrimSpace(doc.security.Channels.Pico.Token) == token {
+	entry := doc.security.ChannelList["pico"]
+	if entry.Settings == nil {
+		entry.Settings = &picoclawChannelSecuritySettings{}
+	}
+	if strings.TrimSpace(entry.Settings.Token) == token {
 		return false, nil
 	}
 
-	doc.security.Channels.Pico.Token = token
+	entry.Settings.Token = token
+	doc.security.ChannelList["pico"] = entry
 	return true, nil
 }
 
@@ -213,14 +230,23 @@ func picoSecurityToken(doc *picoclawConfigDocument) (string, error) {
 		return "", nil
 	}
 
-	if doc.security.Channels.Pico != nil {
-		if token := strings.TrimSpace(doc.security.Channels.Pico.Token); token != "" {
+	// Check security channel_list.pico.settings.token
+	if entry, ok := doc.security.ChannelList["pico"]; ok {
+		if entry.Settings != nil {
+			if token := strings.TrimSpace(entry.Settings.Token); token != "" {
+				return token, nil
+			}
+		}
+		if token := strings.TrimSpace(entry.Token); token != "" {
 			return token, nil
 		}
 	}
 
-	if token := strings.TrimSpace(doc.config.Channels.Pico.Token); token != "" {
-		return token, nil
+	// Fall back to config channel_list.pico.settings.token
+	if pico, ok := doc.config.Channels["pico"]; ok {
+		if token := strings.TrimSpace(pico.Settings.Token); token != "" {
+			return token, nil
+		}
 	}
 
 	return generatePicoclawToken()

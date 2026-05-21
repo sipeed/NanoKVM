@@ -10,9 +10,6 @@ type MessageProps = {
   message: PicoclawChatMessage;
 };
 
-const hiddenAssistantMessagePrefix = '🔧 `message`';
-const nullToolFeedbackPattern = /^🔧\s*`[^`]+`\s*```(?:[\w-]+)?\s*null\s*```$/s;
-
 function extractDisplayText(value: unknown): string {
   if (typeof value === 'string') {
     const normalized = normalizeLiteralEmptyText(value);
@@ -77,15 +74,17 @@ function normalizeLiteralEmptyText(value: string): string {
   return trimmed;
 }
 
-function shouldHideAssistantMessage(value?: string): boolean {
-  const normalized = normalizeLiteralEmptyText(value || '');
-  if (!normalized) {
+function isThoughtMessage(raw: unknown): boolean {
+  if (!raw || typeof raw !== 'object') {
     return false;
   }
 
-  return (
-    normalized.startsWith(hiddenAssistantMessagePrefix) || nullToolFeedbackPattern.test(normalized)
-  );
+  const payload = (raw as Record<string, unknown>).payload;
+  if (!payload || typeof payload !== 'object') {
+    return false;
+  }
+
+  return (payload as Record<string, unknown>).kind === 'thought';
 }
 
 export const Message = ({ message }: MessageProps) => {
@@ -153,8 +152,17 @@ export const Message = ({ message }: MessageProps) => {
     );
   }
 
-  if (message.kind === 'assistant' && shouldHideAssistantMessage(message.text)) {
-    return null;
+  if (message.kind === 'assistant' && isThoughtMessage(message.raw)) {
+    const thoughtText = extractDisplayText(message.text);
+    if (!thoughtText) {
+      return null;
+    }
+
+    return (
+      <div className="border-white/5 rounded-xl border bg-white/[0.02] px-3 py-2 text-xs text-neutral-400">
+        <MarkdownContent content={thoughtText} className="break-words" />
+      </div>
+    );
   }
 
   const isUser = message.kind === 'user';

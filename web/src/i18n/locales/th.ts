@@ -75,7 +75,17 @@ const th = {
       frameDetect: 'ตรวจจับเฟรม',
       frameDetectTip:
         'ระบบจะคำนวณความแตกต่างระหว่างเฟรม และหยุดส่งสตรีมวิดีโอเมื่อไม่พบการเปลี่ยนแปลงบนหน้าจอของคอมพิวเตอร์ต้นทาง',
-      resetHdmi: 'รีเช็ท HDMI'
+      resetHdmi: 'รีเช็ท HDMI',
+      captureStatus: {
+        hdmiError: 'ข้อผิดพลาดหน้าจอ HDMI',
+        unsupportedResolution: 'ไม่รองรับความละเอียดปัจจุบัน',
+        retrieving: 'กำลังดึงหน้าจอ...',
+        changingResolution: 'กำลังเปลี่ยนความละเอียด...',
+        updateFailed: 'ไม่สามารถอัปเดตหน้าจอได้ในขณะนี้',
+        videoError: 'ข้อผิดพลาดในการแสดงวิดีโอ',
+        noHdmi: 'ไม่พบสัญญาณ HDMI',
+        unavailable: 'ไม่สามารถแสดงหน้าจอได้ในขณะนี้'
+      }
     },
     keyboard: {
       title: 'คีบอร์ด',
@@ -570,6 +580,7 @@ const th = {
           preparing: 'กำลังเตรียมการ',
           downloading: 'กำลังดาวน์โหลด',
           extracting: 'กำลังแตกไฟล์',
+          verifying: 'กำลังตรวจสอบ',
           installing: 'กำลังติดตั้ง',
           installed: 'ติดตั้งแล้ว',
           install_timeout: 'หมดเวลา',

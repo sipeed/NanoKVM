@@ -78,7 +78,17 @@ const uk = {
       frameDetect: 'Виявлення кадрів',
       frameDetectTip:
         'Обчислює різницю між кадрами. Зупиняє передачу відеопотоку, коли на екрані віддаленого хоста не виявлено змін.',
-      resetHdmi: 'Перезавантажити HDMI підсистему'
+      resetHdmi: 'Перезавантажити HDMI підсистему',
+      captureStatus: {
+        hdmiError: 'Помилка зображення HDMI',
+        unsupportedResolution: 'Поточна роздільна здатність не підтримується',
+        retrieving: 'Отримання зображення...',
+        changingResolution: 'Перемикання роздільної здатності...',
+        updateFailed: 'Зараз неможливо оновити зображення',
+        videoError: 'Помилка відображення відео',
+        noHdmi: 'Сигнал HDMI не виявлено',
+        unavailable: 'Зараз неможливо показати зображення'
+      }
     },
     keyboard: {
       title: 'Клавіатура',
@@ -578,6 +588,7 @@ const uk = {
           preparing: 'Підготовка',
           downloading: 'Завантаження',
           extracting: 'Розпакування',
+          verifying: 'Перевірка',
           installing: 'Встановлення',
           installed: 'Встановлено',
           install_timeout: 'Час очікування минув',

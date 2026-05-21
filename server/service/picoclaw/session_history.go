@@ -18,6 +18,7 @@ import (
 const (
 	picoSessionPrefix          = "agent:main:pico:direct:pico:"
 	sanitizedPicoSessionPrefix = "agent_main_pico_direct_pico_"
+	opaqueSessionKeyPrefix     = "sk_v1_"
 	maxSessionJSONLLineSize    = 10 * 1024 * 1024
 	maxSessionPreviewRunes     = 60
 	defaultSessionLimit        = 20
@@ -109,6 +110,21 @@ func extractPicoSessionIDFromSanitizedKey(key string) (string, bool) {
 	return "", false
 }
 
+func isOpaqueSessionKey(key string) bool {
+	return strings.HasPrefix(key, opaqueSessionKeyPrefix)
+}
+
+func extractOpaqueSessionID(fileName string) (string, bool) {
+	base := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	if strings.HasSuffix(fileName, ".meta.json") {
+		base = strings.TrimSuffix(fileName, ".meta.json")
+	}
+	if isOpaqueSessionKey(base) {
+		return base, true
+	}
+	return "", false
+}
+
 func (s *Service) ListSessions(c *gin.Context) {
 	dir, err := resolvePicoclawSessionsPath()
 	if err != nil {
@@ -144,11 +160,17 @@ func (s *Service) ListSessions(c *gin.Context) {
 
 		switch {
 		case strings.HasSuffix(name, ".jsonl"):
-			sessionID, ok = extractPicoSessionIDFromSanitizedKey(strings.TrimSuffix(name, ".jsonl"))
-			if !ok {
-				continue
+			baseName := strings.TrimSuffix(name, ".jsonl")
+			if opaqueID, found := extractOpaqueSessionID(name); found {
+				sessionID = opaqueID
+				sess, loadErr = readOpaqueJSONLSession(dir, sessionID)
+			} else {
+				sessionID, ok = extractPicoSessionIDFromSanitizedKey(baseName)
+				if !ok {
+					continue
+				}
+				sess, loadErr = readJSONLSession(dir, sessionID)
 			}
-			sess, loadErr = readJSONLSession(dir, sessionID)
 			if loadErr == nil && isEmptySession(sess) {
 				continue
 			}
@@ -228,12 +250,17 @@ func (s *Service) GetSession(c *gin.Context) {
 		return
 	}
 
-	sess, err := readJSONLSession(dir, sessionID)
+	var sess sessionStoredFile
+	if isOpaqueSessionKey(sessionID) {
+		sess, err = readOpaqueJSONLSession(dir, sessionID)
+	} else {
+		sess, err = readJSONLSession(dir, sessionID)
+	}
 	if err == nil && isEmptySession(sess) {
 		err = os.ErrNotExist
 	}
 	if err != nil {
-		if errors.Is(err, os.ErrNotExist) {
+		if errors.Is(err, os.ErrNotExist) && !isOpaqueSessionKey(sessionID) {
 			sess, err = readLegacySession(dir, sanitizeSessionKey(picoSessionPrefix+sessionID)+".json")
 			if err == nil && isEmptySession(sess) {
 				err = os.ErrNotExist
@@ -279,7 +306,12 @@ func (s *Service) DeleteSession(c *gin.Context) {
 		return
 	}
 
-	base := filepath.Join(dir, sanitizeSessionKey(picoSessionPrefix+sessionID))
+	var base string
+	if isOpaqueSessionKey(sessionID) {
+		base = filepath.Join(dir, sessionID)
+	} else {
+		base = filepath.Join(dir, sanitizeSessionKey(picoSessionPrefix+sessionID))
+	}
 	paths := []string{base + ".jsonl", base + ".meta.json", base + ".json"}
 	removed := false
 
@@ -376,6 +408,43 @@ func readSessionMessages(path string, skip int) ([]sessionStoredMessage, error) 
 	}
 
 	return messages, nil
+}
+
+func readOpaqueJSONLSession(dir, opaqueKey string) (sessionStoredFile, error) {
+	base := filepath.Join(dir, opaqueKey)
+	jsonlPath := base + ".jsonl"
+	metaPath := base + ".meta.json"
+
+	meta, err := readSessionMeta(metaPath, opaqueKey)
+	if err != nil {
+		return sessionStoredFile{}, err
+	}
+
+	messages, err := readSessionMessages(jsonlPath, meta.Skip)
+	if err != nil {
+		return sessionStoredFile{}, err
+	}
+
+	created := meta.CreatedAt
+	updated := meta.UpdatedAt
+	if created.IsZero() || updated.IsZero() {
+		if info, statErr := os.Stat(jsonlPath); statErr == nil {
+			if created.IsZero() {
+				created = info.ModTime()
+			}
+			if updated.IsZero() {
+				updated = info.ModTime()
+			}
+		}
+	}
+
+	return sessionStoredFile{
+		Key:      meta.Key,
+		Messages: messages,
+		Summary:  meta.Summary,
+		Created:  created,
+		Updated:  updated,
+	}, nil
 }
 
 func readJSONLSession(dir, sessionID string) (sessionStoredFile, error) {

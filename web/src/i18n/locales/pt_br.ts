@@ -77,7 +77,17 @@ const pt_br = {
       frameDetect: 'Detecção de Quadros',
       frameDetectTip:
         'Calcular a diferença entre os quadros. Parar a transmissão de vídeo quando nenhuma alteração for detectada na tela do host remoto.',
-      resetHdmi: 'Redefinir HDMI'
+      resetHdmi: 'Redefinir HDMI',
+      captureStatus: {
+        hdmiError: 'Erro na imagem HDMI',
+        unsupportedResolution: 'A resolução atual não é compatível',
+        retrieving: 'Obtendo tela...',
+        changingResolution: 'Alterando resolução...',
+        updateFailed: 'A tela não pode ser atualizada agora',
+        videoError: 'Erro na exibição de vídeo',
+        noHdmi: 'Nenhum sinal HDMI detectado',
+        unavailable: 'A tela não pode ser exibida agora'
+      }
     },
     keyboard: {
       title: 'Teclado',
@@ -578,6 +588,7 @@ const pt_br = {
           preparing: 'Preparando',
           downloading: 'Baixando',
           extracting: 'Extraindo',
+          verifying: 'Verificando',
           installing: 'Instalando',
           installed: 'Instalado',
           install_timeout: 'Tempo limite esgotado',

@@ -76,7 +76,17 @@ const ko = {
       frameDetect: '프레임 탐지',
       frameDetectTip:
         '프레임 간의 차이를 계산합니다. 원격 호스트 화면에 변경 사항이 감지되지 않으면 비디오 스트림 전송을 중지합니다.',
-      resetHdmi: 'HDMI 초기화'
+      resetHdmi: 'HDMI 초기화',
+      captureStatus: {
+        hdmiError: 'HDMI 화면 오류',
+        unsupportedResolution: '현재 해상도는 지원되지 않습니다',
+        retrieving: '화면을 가져오는 중...',
+        changingResolution: '해상도를 전환하는 중...',
+        updateFailed: '지금은 화면을 업데이트할 수 없습니다',
+        videoError: '비디오 표시 오류',
+        noHdmi: 'HDMI 신호가 감지되지 않았습니다',
+        unavailable: '지금은 화면을 표시할 수 없습니다'
+      }
     },
     keyboard: {
       title: '키보드',
@@ -571,6 +581,7 @@ const ko = {
           preparing: '준비 중',
           downloading: '다운로드 중',
           extracting: '압축 해제 중',
+          verifying: '검증 중',
           installing: '설치 중',
           installed: '설치 완료',
           install_timeout: '시간 초과',

@@ -79,7 +79,17 @@ const it = {
       frameDetect: 'Rilevamento Frame',
       frameDetectTip:
         'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.',
-      resetHdmi: 'Reimposta HDMI'
+      resetHdmi: 'Reimposta HDMI',
+      captureStatus: {
+        hdmiError: 'Errore schermata HDMI',
+        unsupportedResolution: 'La risoluzione attuale non è supportata',
+        retrieving: 'Acquisizione schermata...',
+        changingResolution: 'Cambio risoluzione...',
+        updateFailed: 'Lo schermo non può aggiornarsi al momento',
+        videoError: 'Errore di visualizzazione video',
+        noHdmi: 'Nessun segnale HDMI rilevato',
+        unavailable: 'Lo schermo non può essere visualizzato al momento'
+      }
     },
     keyboard: {
       title: 'Tastiera',
@@ -581,6 +591,7 @@ const it = {
           preparing: 'Preparazione',
           downloading: 'Download in corso',
           extracting: 'Estrazione',
+          verifying: 'Verifica in corso',
           installing: 'Installazione in corso',
           installed: 'Installato',
           install_timeout: 'Timeout',

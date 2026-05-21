@@ -79,7 +79,17 @@ const hu = {
       frameDetect: 'Képkocka-figyelés',
       frameDetectTip:
         'Elemzi a képkockák közötti különbségeket. A videó stream küldése leáll, ha a távoli gép képernyőjén nem történik változás.',
-      resetHdmi: 'HDMI visszaállítása'
+      resetHdmi: 'HDMI visszaállítása',
+      captureStatus: {
+        hdmiError: 'HDMI-képernyőhiba',
+        unsupportedResolution: 'A jelenlegi felbontás nem támogatott',
+        retrieving: 'Kép lekérése...',
+        changingResolution: 'Felbontás váltása...',
+        updateFailed: 'A kép jelenleg nem frissíthető',
+        videoError: 'Videómegjelenítési hiba',
+        noHdmi: 'Nem észlelhető HDMI-jel',
+        unavailable: 'A kép jelenleg nem jeleníthető meg'
+      }
     },
     keyboard: {
       title: 'Billentyűzet',
@@ -581,6 +591,7 @@ const hu = {
           preparing: 'Felkészülés',
           downloading: 'Letöltés',
           extracting: 'Kibontás',
+          verifying: 'Ellenőrzés',
           installing: 'Telepítés folyamatban',
           installed: 'Telepítve',
           install_timeout: 'Időtúllépés',

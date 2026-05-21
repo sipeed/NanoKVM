@@ -234,7 +234,7 @@ export const Absolute = () => {
         longPressTimerRef.current = null;
       }
 
-      if (pressedButtonRef.current) {
+      if (pressedButtonRef.current !== null) {
         handleMouseEvent({ type: 'mouseup', button: pressedButtonRef.current! });
       }
 

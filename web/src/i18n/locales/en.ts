@@ -76,7 +76,17 @@ const en = {
       frameDetect: 'Frame Detect',
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
-      resetHdmi: 'Reset HDMI'
+      resetHdmi: 'Reset HDMI',
+      captureStatus: {
+        hdmiError: 'HDMI screen error',
+        unsupportedResolution: 'Current resolution is not supported',
+        retrieving: 'Getting screen...',
+        changingResolution: 'Switching resolution...',
+        updateFailed: 'Screen cannot update right now',
+        videoError: 'Video display error',
+        noHdmi: 'No HDMI signal detected',
+        unavailable: 'Screen cannot be displayed right now'
+      }
     },
     keyboard: {
       title: 'Keyboard',
@@ -575,6 +585,7 @@ const en = {
           preparing: 'Preparing',
           downloading: 'Downloading',
           extracting: 'Extracting',
+          verifying: 'Verifying',
           installing: 'Installing',
           installed: 'Installed',
           install_timeout: 'Timed Out',

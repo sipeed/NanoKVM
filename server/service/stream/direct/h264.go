@@ -12,6 +12,7 @@ import (
 var (
 	streamer = newStreamer()
 	upgrader = websocket.Upgrader{
+		WriteBufferSize: 256 * 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -36,7 +37,7 @@ func Connect(c *gin.Context) {
 	defer streamer.removeClient(ws)
 
 	for {
-		if _, _, err := ws.ReadMessage(); err != nil {
+		if _, _, err := ws.NextReader(); err != nil {
 			log.Debugf("failed to read message (client disconnected): %s", err)
 			return
 		}

@@ -13,24 +13,31 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var crlf = []byte("\r\n")
+
 type Streamer struct {
-	mutex       sync.RWMutex
-	clients     map[*gin.Context]bool
-	running     int32
-	frameMutex  sync.RWMutex
-	latestFrame LatestFrame
-	cacheRefs   int32
+	mutex          sync.Mutex
+	clients        map[*gin.Context]bool
+	clientSnapshot atomic.Pointer[[]*gin.Context]
+	running        int32
+	frameMutex     sync.RWMutex
+	latestFrame    LatestFrame
+	cacheRefs      int32
 }
 
 func NewStreamer() *Streamer {
-	return &Streamer{
+	s := &Streamer{
 		clients: make(map[*gin.Context]bool),
 	}
+	s.updateClientSnapshotLocked()
+
+	return s
 }
 
 func (s *Streamer) AddClient(c *gin.Context) {
 	s.mutex.Lock()
 	s.clients[c] = true
+	s.updateClientSnapshotLocked()
 	s.mutex.Unlock()
 
 	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
@@ -42,28 +49,29 @@ func (s *Streamer) AddClient(c *gin.Context) {
 func (s *Streamer) RemoveClient(c *gin.Context) {
 	s.mutex.Lock()
 	delete(s.clients, c)
+	count := s.updateClientSnapshotLocked()
 	s.mutex.Unlock()
 
-	log.Debugf("mjpeg connection removed, remaining clients: %d", len(s.clients))
+	log.Debugf("mjpeg connection removed, remaining clients: %d", count)
 }
 
-func (s *Streamer) getClients() []*gin.Context {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
-
+func (s *Streamer) updateClientSnapshotLocked() int {
 	clients := make([]*gin.Context, 0, len(s.clients))
 	for c := range s.clients {
 		clients = append(clients, c)
 	}
+	s.clientSnapshot.Store(&clients)
 
-	return clients
+	return len(clients)
 }
 
-func (s *Streamer) getClientCount() int {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+func (s *Streamer) getClients() []*gin.Context {
+	clients := s.clientSnapshot.Load()
+	if clients == nil {
+		return nil
+	}
 
-	return len(s.clients)
+	return *clients
 }
 
 func (s *Streamer) run() {
@@ -79,12 +87,14 @@ func (s *Streamer) run() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		if s.getClientCount() == 0 {
+		clients := s.getClients()
+		if len(clients) == 0 {
 			log.Debug("mjpeg stream stopped due to no clients")
 			return
 		}
 
 		data, result := vision.ReadMjpeg(screen.Width, screen.Height, screen.Quality)
+		stream.UpdateCaptureStatus(stream.CaptureModeMJPEG, result)
 		if result < 0 || result == 5 || len(data) == 0 {
 			continue
 		}
@@ -93,7 +103,6 @@ func (s *Streamer) run() {
 			s.setLatestFrame(data, screen.Width, screen.Height)
 		}
 
-		clients := s.getClients()
 		for _, client := range clients {
 			if err := writeFrame(client, data); err != nil {
 				log.Errorf("failed to write mjpeg frame for client %s: %s", client.Request.RemoteAddr, err)
@@ -194,7 +203,7 @@ func writeFrame(c *gin.Context, data []byte) (err error) {
 		return err
 	}
 
-	if _, err = c.Writer.Write([]byte("\r\n")); err != nil {
+	if _, err = c.Writer.Write(crlf); err != nil {
 		return err
 	}
 

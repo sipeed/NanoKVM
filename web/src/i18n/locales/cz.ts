@@ -78,7 +78,17 @@ const cz = {
       frameDetect: 'Detekce snímků',
       frameDetectTip:
         'Vypočítá rozdíl mezi snímky. Přenos video streamu se zastaví, pokud nejsou detekovány změny na obrazovce vzdáleného hostitele.',
-      resetHdmi: 'Resetovat HDMI'
+      resetHdmi: 'Resetovat HDMI',
+      captureStatus: {
+        hdmiError: 'Chyba obrazu HDMI',
+        unsupportedResolution: 'Aktuální rozlišení není podporováno',
+        retrieving: 'Načítá se obraz...',
+        changingResolution: 'Přepíná se rozlišení...',
+        updateFailed: 'Obraz se teď nemůže aktualizovat',
+        videoError: 'Chyba zobrazení videa',
+        noHdmi: 'Nebyl zjištěn signál HDMI',
+        unavailable: 'Obraz teď nelze zobrazit'
+      }
     },
     keyboard: {
       title: 'Klávesnice',
@@ -578,6 +588,7 @@ const cz = {
           preparing: 'Příprava',
           downloading: 'Stahování',
           extracting: 'Extrakce',
+          verifying: 'Ověřování',
           installing: 'Instalace probíhá',
           installed: 'Instalováno',
           install_timeout: 'Vypršel časový limit',

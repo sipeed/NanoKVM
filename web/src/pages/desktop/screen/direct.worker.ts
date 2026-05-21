@@ -3,9 +3,17 @@ import Queue from 'yocto-queue';
 let canvas: OffscreenCanvas | null = null;
 let ctx: OffscreenCanvasRenderingContext2D | null = null;
 let rendering: boolean = false;
+let flushScheduled: boolean = false;
 let decoder: VideoDecoder | null = null;
 
+const maxQueuedFrames = 3;
 const frameQueue = new Queue<VideoFrame>();
+const frameChannel = new MessageChannel();
+
+frameChannel.port1.onmessage = () => {
+  flushScheduled = false;
+  processFrameQueue();
+};
 
 self.onmessage = (event: MessageEvent) => {
   const { type, data, canvas: offscreenCanvas } = event.data;
@@ -61,13 +69,13 @@ function initializeDecoder() {
   const init = {
     output: (frame: VideoFrame) => {
       frameQueue.enqueue(frame);
-      if (frameQueue.size >= 10) {
+      while (frameQueue.size > maxQueuedFrames) {
         frameQueue.dequeue()?.close();
       }
 
       if (!rendering) {
         rendering = true;
-        processFrameQueue();
+        scheduleFrameQueue();
       }
     },
     error: () => {
@@ -110,10 +118,19 @@ function processFrameQueue() {
   }
 
   if (frameQueue.size > 0) {
-    setTimeout(processFrameQueue, 0);
+    scheduleFrameQueue();
   } else {
     rendering = false;
   }
+}
+
+function scheduleFrameQueue() {
+  if (flushScheduled) {
+    return;
+  }
+
+  flushScheduled = true;
+  frameChannel.port2.postMessage(null);
 }
 
 function renderFrame(frame: VideoFrame) {
@@ -142,6 +159,7 @@ function resetDecoder() {
 
   decoder = null;
   rendering = false;
+  flushScheduled = false;
 
   Array.from(frameQueue.drain()).forEach((frame) => frame.close());
 }

@@ -77,7 +77,17 @@ const id = {
       frameDetect: 'Deteksi bingkai',
       frameDetectTip:
         'Hitung selisih antar frame. Hentikan transmisi aliran video saat tidak ada perubahan yang terdeteksi di layar host jarak jauh.',
-      resetHdmi: 'Atur ulang HDMI'
+      resetHdmi: 'Atur ulang HDMI',
+      captureStatus: {
+        hdmiError: 'Kesalahan layar HDMI',
+        unsupportedResolution: 'Resolusi saat ini tidak didukung',
+        retrieving: 'Mengambil layar...',
+        changingResolution: 'Mengganti resolusi...',
+        updateFailed: 'Layar tidak dapat diperbarui saat ini',
+        videoError: 'Kesalahan tampilan video',
+        noHdmi: 'Sinyal HDMI tidak terdeteksi',
+        unavailable: 'Layar tidak dapat ditampilkan saat ini'
+      }
     },
     keyboard: {
       title: 'Keyboard',
@@ -577,6 +587,7 @@ const id = {
           preparing: 'Mempersiapkan',
           downloading: 'Mengunduh',
           extracting: 'Mengekstraksi',
+          verifying: 'Memverifikasi',
           installing: 'Memasangkan',
           installed: 'Terpasang',
           install_timeout: 'Waktu Habis',

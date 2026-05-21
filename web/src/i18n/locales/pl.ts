@@ -78,7 +78,17 @@ const pl = {
       frameDetect: 'Wykrywanie klatek',
       frameDetectTip:
         'Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany.',
-      resetHdmi: 'Resetuj HDMI'
+      resetHdmi: 'Resetuj HDMI',
+      captureStatus: {
+        hdmiError: 'Błąd obrazu HDMI',
+        unsupportedResolution: 'Bieżąca rozdzielczość nie jest obsługiwana',
+        retrieving: 'Pobieranie obrazu...',
+        changingResolution: 'Przełączanie rozdzielczości...',
+        updateFailed: 'Nie można teraz zaktualizować obrazu',
+        videoError: 'Błąd wyświetlania wideo',
+        noHdmi: 'Nie wykryto sygnału HDMI',
+        unavailable: 'Nie można teraz wyświetlić obrazu'
+      }
     },
     keyboard: {
       title: 'Klawiatura',
@@ -580,6 +590,7 @@ const pl = {
           preparing: 'Przygotowanie',
           downloading: 'Pobieranie',
           extracting: 'Wypakowywanie',
+          verifying: 'Weryfikowanie',
           installing: 'Instalowanie',
           installed: 'Zainstalowano',
           install_timeout: 'Upłynął limit czasu',

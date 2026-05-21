@@ -77,7 +77,17 @@ const ja = {
       frameDetect: 'フレーム差分検出',
       frameDetectTip:
         'フレーム間の差異を計算し、リモートホストの画面が変更されない場合はビデオストリームの送信を停止します',
-      resetHdmi: 'HDMI をリセット'
+      resetHdmi: 'HDMI をリセット',
+      captureStatus: {
+        hdmiError: 'HDMI 画面エラー',
+        unsupportedResolution: '現在の解像度はサポートされていません',
+        retrieving: '画面を取得中...',
+        changingResolution: '解像度を切り替え中...',
+        updateFailed: '現在、画面を更新できません',
+        videoError: '映像表示エラー',
+        noHdmi: 'HDMI 信号が検出されません',
+        unavailable: '現在、画面を表示できません'
+      }
     },
     keyboard: {
       title: 'キーボード',
@@ -581,6 +591,7 @@ const ja = {
           preparing: '準備中',
           downloading: 'ダウンロード中',
           extracting: '展開中',
+          verifying: '検証中',
           installing: 'インストール中',
           installed: 'インストール完了',
           install_timeout: 'タイムアウト',

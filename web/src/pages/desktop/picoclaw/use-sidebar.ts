@@ -107,7 +107,6 @@ export const useSidebar = () => {
   refreshStateRef.current = actions.refreshState;
   const sessionActions = createPicoclawSidebarSessionActions({
     t,
-    runtimeStatus,
     transportState,
     runState,
     config,

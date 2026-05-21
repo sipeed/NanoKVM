@@ -1,4 +1,3 @@
-import { Divider } from 'antd';
 import { KeyboardIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -17,9 +16,6 @@ export const Keyboard = () => {
       <Paste />
       <VirtualKeyboard />
       <Shortcuts />
-
-      <Divider style={{ margin: '5px 0', opacity: 0.5 }} />
-
       <LeaderKey />
     </div>
   );

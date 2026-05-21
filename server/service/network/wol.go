@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -33,8 +34,7 @@ func (s *Service) WakeOnLAN(c *gin.Context) {
 		return
 	}
 
-	command := fmt.Sprintf("ether-wake -b %s", mac)
-	cmd := exec.Command("sh", "-c", command)
+	cmd := exec.Command("ether-wake", "-b", mac)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *Service) WakeOnLAN(c *gin.Context) {
 		return
 	}
 
-	go saveMac(mac)
+	saveMac(mac)
 
 	rsp.OkRsp(c)
 	log.Debugf("wake on lan: %s", mac)
@@ -52,14 +52,19 @@ func (s *Service) WakeOnLAN(c *gin.Context) {
 func (s *Service) GetMac(c *gin.Context) {
 	var rsp proto.Response
 
-	content, err := os.ReadFile(WolMacFile)
+	macs, err := readWolMacs()
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			rsp.OkRspWithData(c, &proto.GetMacRsp{Macs: []string{}})
+			return
+		}
+
 		rsp.ErrRsp(c, -2, "open file error")
 		return
 	}
 
 	data := &proto.GetMacRsp{
-		Macs: strings.Split(string(content), "\n"),
+		Macs: macs,
 	}
 
 	rsp.OkRspWithData(c, data)
@@ -74,36 +79,54 @@ func (s *Service) SetMacName(c *gin.Context) {
 		return
 	}
 
-	content, err := os.ReadFile(WolMacFile)
+	mac, err := parseMAC(req.Mac)
+	if err != nil {
+		rsp.ErrRsp(c, -2, "invalid MAC address")
+		return
+	}
+
+	name := sanitizeWolMacName(req.Name)
+	if name == "" {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	macs, err := readWolMacs()
 	if err != nil {
 		log.Errorf("failed to open %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -2, "read failed")
 		return
 	}
 
-	macs := strings.Split(string(content), "\n")
 	var newLines []string
 	macFound := false
 
 	for _, line := range macs {
-		parts := strings.Split(line, " ")
-		if req.Mac != parts[0] {
-			newLines = append(newLines, line)
+		itemMac, itemName, ok := splitWolMacLine(line)
+		if !ok {
 			continue
 		}
-		newLines = append(newLines, parts[0]+" "+req.Name)
+		normalizedMac, err := parseMAC(itemMac)
+		if err != nil {
+			newLines = append(newLines, formatWolMacLine(itemMac, itemName))
+			continue
+		}
+		if mac != normalizedMac {
+			newLines = append(newLines, formatWolMacLine(normalizedMac, itemName))
+			continue
+		}
+
+		newLines = append(newLines, formatWolMacLine(normalizedMac, name))
 		macFound = true
 	}
 
 	if !macFound {
-		log.Errorf("failed to found mac %s: %s", req.Mac, err)
+		log.Errorf("failed to find mac %s", req.Mac)
 		rsp.ErrRsp(c, -3, "write failed")
 		return
 	}
 
-	data := strings.Join(newLines, "\n")
-	err = os.WriteFile(WolMacFile, []byte(data), 0o644)
-	if err != nil {
+	if err = writeWolMacs(newLines); err != nil {
 		log.Errorf("failed to write %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -3, "write failed")
 		return
@@ -122,26 +145,37 @@ func (s *Service) DeleteMac(c *gin.Context) {
 		return
 	}
 
-	content, err := os.ReadFile(WolMacFile)
+	mac, err := parseMAC(req.Mac)
+	if err != nil {
+		rsp.ErrRsp(c, -2, "invalid MAC address")
+		return
+	}
+
+	macs, err := readWolMacs()
 	if err != nil {
 		log.Errorf("failed to open %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -2, "read failed")
 		return
 	}
 
-	macs := strings.Split(string(content), "\n")
 	var newMacs []string
 
-	for _, mac := range macs {
-		parts := strings.Split(mac, " ")
-		if req.Mac != parts[0] {
-			newMacs = append(newMacs, mac)
+	for _, line := range macs {
+		itemMac, itemName, ok := splitWolMacLine(line)
+		if !ok {
+			continue
+		}
+		normalizedMac, err := parseMAC(itemMac)
+		if err != nil {
+			newMacs = append(newMacs, formatWolMacLine(itemMac, itemName))
+			continue
+		}
+		if mac != normalizedMac {
+			newMacs = append(newMacs, formatWolMacLine(normalizedMac, itemName))
 		}
 	}
 
-	data := strings.Join(newMacs, "\n")
-	err = os.WriteFile(WolMacFile, []byte(data), 0o644)
-	if err != nil {
+	if err = writeWolMacs(newMacs); err != nil {
 		log.Errorf("failed to write %s: %s", WolMacFile, err)
 		rsp.ErrRsp(c, -3, "write failed")
 		return
@@ -182,7 +216,7 @@ func saveMac(mac string) {
 		return
 	}
 
-	err := os.MkdirAll(filepath.Dir(WolMacFile), 0o644)
+	err := os.MkdirAll(filepath.Dir(WolMacFile), 0o755)
 	if err != nil {
 		log.Errorf("failed to create dir: %s", err)
 		return
@@ -206,18 +240,85 @@ func saveMac(mac string) {
 }
 
 func isMacExist(mac string) bool {
-	content, err := os.ReadFile(WolMacFile)
+	macs, err := readWolMacs()
 	if err != nil {
 		return false
 	}
 
-	macs := strings.Split(string(content), "\n")
 	for _, item := range macs {
-		parts := strings.Split(item, " ")
-		if mac == parts[0] {
+		itemMac, _, ok := splitWolMacLine(item)
+		if !ok {
+			continue
+		}
+		normalizedMac, err := parseMAC(itemMac)
+		if err != nil {
+			continue
+		}
+		if mac == normalizedMac {
 			return true
 		}
 	}
 
 	return false
+}
+
+func readWolMacs() ([]string, error) {
+	content, err := os.ReadFile(WolMacFile)
+	if err != nil {
+		return nil, err
+	}
+
+	lines := strings.Split(string(content), "\n")
+	macs := make([]string, 0, len(lines))
+	for _, line := range lines {
+		mac, name, ok := splitWolMacLine(line)
+		if !ok {
+			continue
+		}
+
+		macs = append(macs, formatWolMacLine(mac, name))
+	}
+
+	return macs, nil
+}
+
+func writeWolMacs(macs []string) error {
+	data := ""
+	if len(macs) > 0 {
+		data = strings.Join(macs, "\n") + "\n"
+	}
+
+	return os.WriteFile(WolMacFile, []byte(data), 0o644)
+}
+
+func splitWolMacLine(line string) (string, string, bool) {
+	line = strings.TrimSpace(line)
+	if line == "" {
+		return "", "", false
+	}
+
+	fields := strings.Fields(line)
+	if len(fields) == 0 {
+		return "", "", false
+	}
+
+	mac := fields[0]
+	if len(line) == len(mac) {
+		return mac, "", true
+	}
+
+	name := line[len(mac):]
+	return mac, strings.TrimSpace(name), true
+}
+
+func formatWolMacLine(mac string, name string) string {
+	if name == "" {
+		return mac
+	}
+
+	return mac + " " + name
+}
+
+func sanitizeWolMacName(name string) string {
+	return strings.Join(strings.Fields(name), " ")
 }

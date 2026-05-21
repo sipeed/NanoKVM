@@ -1,3 +1,30 @@
+## 2.4.2 (2026-05-20)
+
+### Features
+
+* Added HDMI capture status detection with localized warning and error overlays on the desktop screen
+
+### Bug Fixes
+
+* Fixed left-button touch cancellation and context menu cleanup for mouse input
+* Improved the WebRTC loading indicator
+* Added Wi-Fi password field validation
+* Hardened Wake-on-LAN MAC handling by normalizing stored addresses, avoiding shell execution, handling missing history gracefully, and improving named MAC display
+* Stabilized PicoClaw session switching by waiting for gateway release, refreshing runtime status before reconnecting, rendering structured thought messages, and preventing history row overflow
+
+### Performance
+
+* Improved H.264 streaming client handling by reducing frame queue latency, using client snapshots for fanout, applying backend ICE server configuration, and cleaning up disconnected WebRTC clients more aggressively
+
+### UI Improvements
+
+* Refreshed desktop menu ordering and community links, including replacing the Discussion link with Discord
+
+### Chores
+
+* Removed the legacy H.264 stream package
+* Updated PostCSS, refreshed the MSW worker, and added pnpm workspace build approvals
+
 ## 2.4.1 (2026-05-08)
 
 ### Features

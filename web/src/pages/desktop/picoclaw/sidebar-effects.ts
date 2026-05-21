@@ -228,7 +228,7 @@ export function usePicoclawSidebarLifecycle({
 
     return () => {
       cancelled = true;
-      closeGateway();
+      void closeGateway();
       setTakeover((current) => ({
         ...current,
         active: false,

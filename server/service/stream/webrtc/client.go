@@ -21,6 +21,20 @@ func NewClient(ws *websocket.Conn, videoConn *webrtc.PeerConnection) *Client {
 	}
 }
 
+func (c *Client) Close() {
+	if c.video != nil {
+		if err := c.video.Close(); err != nil {
+			log.Debugf("failed to close video peer connection: %s", err)
+		}
+	}
+
+	if c.ws != nil {
+		if err := c.ws.Close(); err != nil {
+			log.Debugf("failed to close websocket: %s", err)
+		}
+	}
+}
+
 func (c *Client) WriteMessage(event string, data string) error {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
