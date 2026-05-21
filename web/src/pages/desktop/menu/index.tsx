@@ -100,8 +100,8 @@ export const Menu = () => {
             {isEnabled('download') && <DownloadImage />}
 
             {/* Script & Terminal: nur operator+ */}
-            {isOperator && isEnabled('script') && <Script />}
             {isOperator && isEnabled('terminal') && <Terminal />}
+            {isOperator && isEnabled('script') && <Script />}
 
             {/* WoL: nur admin */}
             {isAdmin && isEnabled('wol') && <Wol />}

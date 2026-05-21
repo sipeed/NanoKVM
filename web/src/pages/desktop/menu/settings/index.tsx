@@ -16,13 +16,13 @@ import { useTranslation } from 'react-i18next';
 import semver from 'semver';
 
 import * as api from '@/api/application.ts';
+import { useRole } from '@/hooks/useRole.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { useRole } from '@/hooks/useRole.ts';
 import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
@@ -38,22 +38,34 @@ export const Settings = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [currentTab, setCurrentTab] = useState('about');
-  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const scrollViewportRef = useRef<HTMLDivElement>(null);
+
+  const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
   const { isAdmin, isOperator } = useRole();
 
-  // Tabs basierend auf Rolle
+  // Tabs based on role: viewer can only see read-only stuff;
+  // operator can also use the KVM; admin sees everything including network and user management.
   const allTabs = [
-    { id: 'about',      roles: ['admin', 'operator', 'viewer'], icon: <BadgeInfoIcon size={16} />,     component: <About /> },
-    { id: 'appearance', roles: ['admin', 'operator', 'viewer'], icon: <PaletteIcon size={16} />,       component: <Appearance /> },
-    { id: 'device',     roles: ['admin'],                       icon: <SmartphoneIcon size={16} />,    component: <Device /> },
-    { id: 'network',    roles: ['admin'],                       icon: <NetworkIcon size={16} />,       component: <Network /> },
-    { id: 'tailscale',  roles: ['admin'],                       icon: <TailscaleIcon />,               component: <Tailscale setIsLocked={setIsLocked} /> },
-    { id: 'update',     roles: ['admin'],                       icon: <CircleArrowUpIcon size={16} />, component: <Update setIsLocked={setIsLocked} /> },
-    { id: 'account',    roles: ['admin', 'operator', 'viewer'], icon: <UserRoundIcon size={18} />,     component: <Account /> },
-    { id: 'users',      roles: ['admin'],                       icon: <ShieldIcon size={16} />,        component: <Users /> }
+    { id: 'about', roles: ['admin', 'operator', 'viewer'], icon: <BadgeInfoIcon size={16} />, component: <About /> },
+    { id: 'appearance', roles: ['admin', 'operator', 'viewer'], icon: <PaletteIcon size={16} />, component: <Appearance /> },
+    { id: 'device', roles: ['admin'], icon: <SmartphoneIcon size={16} />, component: <Device /> },
+    { id: 'network', roles: ['admin'], icon: <NetworkIcon size={16} />, component: <Network /> },
+    {
+      id: 'tailscale',
+      roles: ['admin'],
+      icon: <TailscaleIcon />,
+      component: <Tailscale setIsLocked={setIsLocked} />
+    },
+    {
+      id: 'update',
+      roles: ['admin'],
+      icon: <CircleArrowUpIcon size={16} />,
+      component: <Update setIsLocked={setIsLocked} />
+    },
+    { id: 'account', roles: ['admin', 'operator', 'viewer'], icon: <UserRoundIcon size={18} />, component: <Account /> },
+    { id: 'users', roles: ['admin'], icon: <ShieldIcon size={16} />, component: <Users /> }
   ];
 
   const currentRole = isAdmin ? 'admin' : isOperator ? 'operator' : 'viewer';
@@ -61,7 +73,9 @@ export const Settings = () => {
 
   useEffect(() => {
     const skip = ls.getSkipUpdate();
-    if (!skip) checkForUpdates();
+    if (!skip) {
+      checkForUpdates();
+    }
   }, []);
 
   useEffect(() => {
@@ -70,8 +84,13 @@ export const Settings = () => {
 
   function checkForUpdates() {
     api.getVersion().then((rsp: any) => {
-      if (rsp.code !== 0) return;
-      if (!rsp.data?.current || !rsp.data?.latest) return;
+      if (rsp.code !== 0) {
+        return;
+      }
+      if (!rsp.data?.current || !rsp.data?.latest) {
+        return;
+      }
+
       if (semver.gt(rsp.data.latest, rsp.data.current)) {
         setIsUpdateAvailable(true);
       }
@@ -79,8 +98,12 @@ export const Settings = () => {
   }
 
   function changeTab(tab: string) {
-    if (isLocked) return;
+    if (isLocked) {
+      return;
+    }
+
     setCurrentTab(tab);
+
     if (isUpdateAvailable && tab === 'update') {
       setIsUpdateAvailable(false);
       ls.setSkipUpdate(true);
@@ -94,7 +117,10 @@ export const Settings = () => {
   }
 
   function closeModal() {
-    if (isLocked) return;
+    if (isLocked) {
+      return;
+    }
+
     setIsKeyboardEnable(true);
     setIsModalOpen(false);
     setCurrentTab('about');

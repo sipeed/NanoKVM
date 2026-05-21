@@ -33,8 +33,8 @@ func vmRouter(r *gin.Engine) {
 		middleware.CheckToken(),
 		middleware.RequireRole(middleware.RoleAdmin, middleware.RoleOperator),
 	)
-	opAPI.POST("/vm/gpio", service.SetGpio)         // power/reset buttons
-	opAPI.GET("/vm/terminal", service.Terminal)     // web terminal
+	opAPI.POST("/vm/gpio", service.SetGpio)     // power/reset buttons
+	opAPI.GET("/vm/terminal", service.Terminal) // web terminal
 	opAPI.GET("/vm/script", service.GetScripts)
 	opAPI.POST("/vm/script/run", service.RunScript)
 	opAPI.POST("/vm/mouse-jiggler/", service.SetMouseJiggler)

@@ -67,6 +67,15 @@ class Http {
     });
   }
 
+  public put(url: string, data?: any, config?: AxiosRequestConfig): Promise<Response> {
+    return this.instance.request({
+      method: 'put',
+      url,
+      data,
+      ...config
+    });
+  }
+
   public delete(url: string, data?: any): Promise<Response> {
     return this.instance.request({
       method: 'delete',
