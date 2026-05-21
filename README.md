@@ -52,6 +52,7 @@ Read-only endpoints (info, hardware, mDNS state, hostname, web title, autostart 
 
 - New settings pages: `Settings → Users` (list / add / edit / disable / delete) and `Settings → Account` (change own password).
 - Login and password pages reused from upstream, extended for the new account model.
+- User-management strings are translated for **all 24 supported UI languages**; any locale not explicitly translated falls back to English via i18next.
 
 ## 📥 Installation
 
@@ -69,41 +70,49 @@ The official firmware images from Sipeed are GPL-3.0 and can be re-flashed (or a
 
 ## 🏗️ Building from source
 
-The repository contains a PowerShell helper (`build_nanokvm_multiuser.ps1`) that builds the modified backend in Docker and repacks it as an offline-update `.tar.gz`.
+All sources of this fork (Go backend + React frontend + RBAC patches) are
+in this repository under **GPL-3.0**. For most users, the pre-built
+`.tar.gz` on the [Releases](https://github.com/Schattenwelt/NanoKVM/releases)
+page is the recommended install path; the section below is for people who
+want to rebuild themselves.
 
-### Prerequisites
+### What needs to happen
 
-- Windows with **PowerShell 5+**
-- **Docker Desktop** (running)
-- `tar.exe` on PATH (ships with Windows 10/11)
-- A working internet connection (downloads musl cross-compiler and Go modules)
+A working build produces a Sipeed offline-update `.tar.gz` containing:
 
-### Inputs
+1. The fork's `NanoKVM-Server` binary, cross-compiled for the device.
+2. The fork's `web/` bundle (built with Vite).
+3. The unchanged upstream `kvm_system`, init scripts (with
+   `LD_LIBRARY_PATH=/tmp/server/dl_lib`), and helper utilities.
 
-Place these two files next to the build script:
+### Toolchain
 
-1. The **original Sipeed update package** for the NanoKVM version you want to target (`.tar.gz` containing the compiled `NanoKVM-Server` binary and `kvm_system`).
-2. The **source package** of this fork (`.tar.gz` containing `go.mod` and the modified Go sources).
+- Go **1.22** with `GOOS=linux GOARCH=riscv64 CGO_ENABLED=1`
+- A RISC-V musl cross-toolchain — e.g. `riscv64-linux-musl-cross`
+  from [musl.cc](https://musl.cc/)
+- The Sipeed `libkvm.so` (extract `server/dl_lib/` from any official
+  Sipeed offline-update tarball)
+- Node **20+** and **pnpm** for the React frontend
+- Standard `tar` to repack the result into the Sipeed update format
 
-### Run it
+### High-level steps
 
-```powershell
-.\build_nanokvm_multiuser.ps1
-```
+1. Build the frontend: `cd web && pnpm install && pnpm build` → `web/dist/`.
+2. Build the backend against `libkvm.so` using the musl cross-compiler.
+3. Take an official Sipeed offline-update `.tar.gz` of the matching
+   upstream version as a "host package" and replace inside it:
+   - `server/NanoKVM-Server` with your rebuild
+   - `server/web/` with `web/dist/`
+   - `etc/init.d/S95nanokvm` patched to set `LD_LIBRARY_PATH=/tmp/server/dl_lib`
+4. Repack as `nanokvm_<version>.tar.gz`. Apply via the device's
+   **Settings → Check for updates → Offline update**.
 
-The script will:
+> The exact build orchestration used to produce the official releases of
+> this fork is not distributed publicly. If you intend to rebuild and
+> are stuck, please open an issue.
 
-1. Auto-detect the two input archives.
-2. Spin up a `golang:1.22-bookworm` container.
-3. Download the **`riscv64-linux-musl-cross`** toolchain (with fallback mirrors).
-4. Patch `go.mod` to pinned dependency versions and build `NanoKVM-Server` for `GOOS=linux GOARCH=riscv64 CGO_ENABLED=1` against the Sipeed `libkvm` shared library.
-5. Replace the binary and `web/` assets in the original package (preserving `sipeed.ico`).
-6. Patch `S95nanokvm` init scripts to set `LD_LIBRARY_PATH=/tmp/server/dl_lib`.
-7. Output `NanoKVM-Output/nanokvm_<version>.tar.gz`.
-
-> The script keeps the upstream package layout intact; only the server binary, web bundle, and init script are touched.
-
-For frontend-only changes, see [`web/README.md`](web/README.md) — `pnpm dev` against a NanoKVM device on the LAN.
+For frontend-only iteration, see [`web/README.md`](web/README.md) —
+`pnpm dev` against a NanoKVM device on the LAN.
 
 ## 🌟 What is NanoKVM?
 
@@ -137,8 +146,7 @@ If you are looking for a USB-based KVM solution, check out [NanoKVM-USB](https:/
 │   ├── src/pages/desktop/menu/settings/users/    # admin user management UI
 │   └── src/pages/desktop/menu/settings/account/  # own account / password UI
 ├── kvmapp                              # unchanged from upstream (kvm_system, system, …)
-├── support                             # unchanged from upstream (sg2002 modules)
-└── build_nanokvm_multiuser.ps1         # Docker-based build wrapper (Windows)
+└── support                             # unchanged from upstream (sg2002 modules)
 ```
 
 ## 💻 Development
