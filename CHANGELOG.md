@@ -1,3 +1,40 @@
+# Changelog
+
+This changelog tracks releases of the **Schattenwelt/NanoKVM fork**.
+Each entry marked `[Fork]` describes changes added on top of the
+upstream Sipeed/NanoKVM release of the same version.
+Unmarked entries below are the verbatim upstream history for context.
+
+---
+
+## [Fork] 2.4.2 — 2026-05-21
+
+Initial Schattenwelt-fork release based on upstream 2.4.2.
+
+### Added
+
+* **Multi-user support with role-based access control (RBAC)** — three built-in roles (`viewer`, `operator`, `admin`) on the backend, matching frontend UI under `Settings → Users` and `Settings → Account`. See [README](README.md#-whats-different-in-this-fork) for the full permission matrix.
+* **bcrypt** password hashing, **JWT** session cookies, and **brute-force protection** on the login endpoint.
+* Last-admin protection (cannot delete the only enabled admin) and self-delete protection.
+* Internal loopback endpoints (used by `kvm_system` / picoclaw) gated by a separate loopback token instead of JWT.
+* Localized strings for the user-management UI in **all 24 supported languages** (was only `de` / `en` in the previous 2.4.1-multiuser snapshot).
+
+### Changed
+
+* **Update channel switched** from `https://cdn.sipeed.com/nanokvm` to this fork's GitHub Releases (`https://github.com/Schattenwelt/NanoKVM/releases/latest/download`). After the first manual offline-update, further updates are pulled automatically from this fork via *Settings → Check for updates*.
+* Migrated accounts file: existing single-user setup in `/etc/kvm/pwd` is automatically converted to `/etc/kvm/accounts.json` on first start. The existing user becomes the initial `admin`; legacy file is removed.
+
+### Notes
+
+* Built against upstream commit corresponding to Sipeed release **2.4.2**.
+* No changes to `kvmapp/`, `support/`, or any hardware-related code — the fork only modifies the Go backend and the React frontend.
+
+### Inherited from upstream 2.4.2
+
+See the [upstream changelog](#242-2026-05-20) below for the full list — short summary: HDMI capture-status overlays, WebRTC streaming improvements, PicoClaw session stabilization, WoL hardening, mouse / touch input fixes.
+
+---
+
 ## 2.4.2 (2026-05-20)
 
 ### Features
