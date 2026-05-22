@@ -39,7 +39,7 @@ start_usb_dev(){
     # keyboard
     mkdir functions/hid.GS0
     echo 1 > functions/hid.GS0/subclass
-    if [ ! -e /boot/usb.notwakeup ]
+    if [ -e /boot/usb.wakeup ]
     then
         echo 1 > functions/hid.GS0/wakeup_on_write
     fi
@@ -51,7 +51,7 @@ start_usb_dev(){
     # mouse
     mkdir functions/hid.GS1
     echo 1 > functions/hid.GS1/subclass
-    if [ ! -e /boot/usb.notwakeup ]
+    if [ -e /boot/usb.wakeup ]
     then
         echo 1 > functions/hid.GS1/wakeup_on_write
     fi
@@ -63,7 +63,7 @@ start_usb_dev(){
     # touchpad
     mkdir functions/hid.GS2
     echo 1 > functions/hid.GS2/subclass
-    if [ ! -e /boot/usb.notwakeup ]
+    if [ -e /boot/usb.wakeup ]
     then
         echo 1 > functions/hid.GS2/wakeup_on_write
     fi
