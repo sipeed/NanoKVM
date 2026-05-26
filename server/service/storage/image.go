@@ -18,7 +18,6 @@ import (
 
 const (
 	imageDirectory = "/data"
-	imageNone      = "/dev/mmcblk0p3"
 	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
 	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
 	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
@@ -109,16 +108,17 @@ func (s *Service) MountImage(c *gin.Context) {
 	}
 
 	// mount
-	image := req.File
-	if image == "" {
-		image = imageNone
+	if req.File != "" {
+		if err := os.WriteFile(mountDevice, []byte(req.File), 0o666); err != nil {
+			log.Errorf("mount file %s failed: %s", req.File, err)
+			rsp.ErrRsp(c, -2, "mount image failed")
+			return
+		}
 	}
-
-	if err := os.WriteFile(mountDevice, []byte(image), 0o666); err != nil {
-		log.Errorf("mount file %s failed: %s", image, err)
-		rsp.ErrRsp(c, -2, "mount image failed")
-		return
-	}
+	// When req.File is empty the device stays unmounted (no media).
+	// Previously this wrote /dev/mmcblk0p3, exposing the NanoKVM's raw
+	// eMMC partition as a USB disk — causing Legacy BIOS boot hangs.
+	// See: https://github.com/sipeed/NanoKVM/issues/633
 
 	h := hid.GetHid()
 	h.Lock()
@@ -156,8 +156,9 @@ func (s *Service) GetMountedImage(c *gin.Context) {
 		return
 	}
 
-	image := strings.ReplaceAll(string(content), "\n", "")
-	if image == imageNone {
+	image := strings.TrimSpace(string(content))
+	if image == "/dev/mmcblk0p3" {
+		// Backward compat: treat eMMC partition as "no image mounted"
 		image = ""
 	}
 

@@ -106,17 +106,15 @@ start_usb_dev(){
             fi
             echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
             disk=$(cat /boot/usb.disk0)
-            if [ -z "${disk}" ]
+            if [ -n "${disk}" ]
             then
-                    # if [ ! -e /mnt/usbdisk.img ]
-                    # then
-                    #         fallocate -l 8G /mnt/usbdisk.img
-                    #         mkfs.vfat /mnt/usbdisk.img
-                    # fi
-                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
-            else
                     cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
             fi
+            # When usb.disk0 is empty, no backing file is set. The device
+            # reports "no media" (removable=1). Previously this defaulted to
+            # /dev/mmcblk0p3, exposing the NanoKVM's raw eMMC partition as a
+            # USB disk — causing Legacy BIOS systems to hang during boot.
+            # See: https://github.com/sipeed/NanoKVM/issues/633
     fi
 
     ls /sys/class/udc/ | cat > UDC
