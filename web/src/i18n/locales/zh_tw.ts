@@ -446,7 +446,7 @@ const zh_tw = {
           wireless: '無線',
           ipAddress: 'IP 位址',
           subnetMask: '子網路遮罩',
-          router: '路由器',
+          router: '路由',
           signalStrength: '訊號強度',
           rxRate: '接收速率',
           txRate: '傳送速率',
