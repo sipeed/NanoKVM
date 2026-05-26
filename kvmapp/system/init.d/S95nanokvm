@@ -49,8 +49,7 @@ case "$1" in
     /tmp/kvm_system/kvm_system &
 
     cp -r /kvmapp/server /tmp/
-    chmod -R a+rX /tmp/server/web
-    (cd /tmp/server && LD_LIBRARY_PATH=/tmp/server/dl_lib ./NanoKVM-Server >/tmp/nanokvm-server.log 2>&1) &
+    /tmp/server/NanoKVM-Server &
    ;;
 
   stop)
@@ -69,8 +68,7 @@ case "$1" in
     /tmp/kvm_system/kvm_system &
 
     cp -r /kvmapp/server /tmp/
-    chmod -R a+rX /tmp/server/web
-    (cd /tmp/server && LD_LIBRARY_PATH=/tmp/server/dl_lib ./NanoKVM-Server >/tmp/nanokvm-server.log 2>&1) &
+    /tmp/server/NanoKVM-Server &
 
     sync
     echo "OK"

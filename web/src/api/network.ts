@@ -2,14 +2,42 @@ import { http } from '@/lib/http.ts';
 
 export type DNSMode = 'manual' | 'dhcp';
 export type WiFiSecurityMode = 'psk' | 'enterprise';
+export type EthernetSecurityMode = 'off' | 'enterprise';
+export type EthernetIPMode = 'manual' | 'dhcp';
+export type WiFiIPMode = EthernetIPMode;
 
 export type ConnectWifiOptions = {
   mode?: WiFiSecurityMode;
+  ipMode?: WiFiIPMode;
+  address?: string;
+  subnetMask?: string;
+  gateway?: string;
   identity?: string;
   eap?: string;
   phase2?: string;
   anonymousIdentity?: string;
   caCert?: string;
+  clientCert?: string;
+  privateKey?: string;
+  privateKeyPasswd?: string;
+  domainSuffixMatch?: string;
+};
+
+export type Ethernet8021XOptions = {
+  mode?: EthernetSecurityMode;
+  ipMode?: EthernetIPMode;
+  address?: string;
+  subnetMask?: string;
+  gateway?: string;
+  password?: string;
+  identity?: string;
+  eap?: string;
+  phase2?: string;
+  anonymousIdentity?: string;
+  caCert?: string;
+  clientCert?: string;
+  privateKey?: string;
+  privateKeyPasswd?: string;
   domainSuffixMatch?: string;
 };
 
@@ -88,6 +116,14 @@ export function connectWifi(ssid: string, password: string, options: ConnectWifi
 // disconnect wifi
 export function disconnectWifi() {
   return http.post('/api/network/wifi/disconnect');
+}
+
+export function getEthernet() {
+  return http.get('/api/network/ethernet');
+}
+
+export function setEthernet(options: Ethernet8021XOptions = {}) {
+  return http.post('/api/network/ethernet', options);
 }
 
 export function getDNS() {

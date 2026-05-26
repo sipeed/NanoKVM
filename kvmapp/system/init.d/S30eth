@@ -1,9 +1,123 @@
 #!/bin/sh
 
 RESERVE_INET="192.168.90.1/22"
+ETH_MODE_FILE="/etc/kvm/eth.mode"
+ETH_PASS_FILE="/etc/kvm/eth.pass"
+ETH_IDENTITY_FILE="/etc/kvm/eth.identity"
+ETH_EAP_FILE="/etc/kvm/eth.eap"
+ETH_PHASE2_FILE="/etc/kvm/eth.phase2"
+ETH_ANON_IDENTITY_FILE="/etc/kvm/eth.anonymous_identity"
+ETH_CA_CERT_FILE="/etc/kvm/eth.ca_cert"
+ETH_CLIENT_CERT_FILE="/etc/kvm/eth.client_cert"
+ETH_PRIVATE_KEY_FILE="/etc/kvm/eth.private_key"
+ETH_PRIVATE_KEY_PASSWD_FILE="/etc/kvm/eth.private_key_passwd"
+ETH_DOMAIN_SUFFIX_MATCH_FILE="/etc/kvm/eth.domain_suffix_match"
+ETH_WPA_CONF="/etc/wpa_supplicant-wired.conf"
+ETH_WPA_PID="/run/wpa_supplicant.eth0.pid"
+ETH_DHCP_PID="/run/udhcpc.eth0.pid"
+ETH_WPA_BIN="/usr/sbin/wpa_supplicant-wired"
 
 clean_line() {
     echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//g'
+}
+
+read_file_trimmed() {
+    file="$1"
+    [ -e "$file" ] || return 0
+    tr -d '\r' <"$file" | sed 's/[[:space:]]*$//'
+}
+
+append_quoted_value() {
+    key="$1"
+    value="$2"
+    [ -n "$value" ] || return 0
+    escaped=$(printf '%s' "$value" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    printf '    %s="%s"\n' "$key" "$escaped"
+}
+
+supports_wired_driver() {
+    if [ -x "$ETH_WPA_BIN" ]; then
+        return 0
+    fi
+    wpa_supplicant -h 2>&1 | grep -q "wired = Wired Ethernet driver"
+}
+
+get_wpa_bin() {
+    if [ -x "$ETH_WPA_BIN" ]; then
+        echo "$ETH_WPA_BIN"
+        return 0
+    fi
+    command -v wpa_supplicant
+}
+
+gen_wired_enterprise_conf() {
+    pass="$1"
+    identity="$2"
+    eap="$3"
+    phase2="$4"
+    anonymous_identity="$5"
+    ca_cert="$6"
+    domain_suffix_match="$7"
+    client_cert="$8"
+    private_key="$9"
+    private_key_passwd="${10}"
+
+    echo "ctrl_interface=/var/run/wpa_supplicant"
+    echo "ap_scan=0"
+    echo "fast_reauth=1"
+    echo
+    echo "network={"
+    echo "    key_mgmt=IEEE8021X"
+    [ -n "$eap" ] && echo "    eap=$eap"
+    append_quoted_value "identity" "$identity"
+    append_quoted_value "password" "$pass"
+    append_quoted_value "phase2" "$phase2"
+    append_quoted_value "anonymous_identity" "$anonymous_identity"
+    append_quoted_value "ca_cert" "$ca_cert"
+    append_quoted_value "domain_suffix_match" "$domain_suffix_match"
+    append_quoted_value "client_cert" "$client_cert"
+    append_quoted_value "private_key" "$private_key"
+    append_quoted_value "private_key_passwd" "$private_key_passwd"
+    echo "}"
+}
+
+stop_wired_auth() {
+    if [ -e "$ETH_WPA_PID" ]; then
+        kill "$(cat "$ETH_WPA_PID")" 2>/dev/null || true
+        rm -f "$ETH_WPA_PID"
+    fi
+}
+
+start_wired_auth() {
+    mode=$(read_file_trimmed "$ETH_MODE_FILE")
+    case "$mode" in
+        enterprise|8021x|wpa-eap)
+            if ! supports_wired_driver; then
+                echo "S30eth: wired 802.1X driver is unavailable; skipping wpa_supplicant startup" >&2
+                return 0
+            fi
+            pass=$(read_file_trimmed "$ETH_PASS_FILE")
+            identity=$(read_file_trimmed "$ETH_IDENTITY_FILE")
+            eap=$(read_file_trimmed "$ETH_EAP_FILE")
+            phase2=$(read_file_trimmed "$ETH_PHASE2_FILE")
+            anonymous_identity=$(read_file_trimmed "$ETH_ANON_IDENTITY_FILE")
+            ca_cert=$(read_file_trimmed "$ETH_CA_CERT_FILE")
+            domain_suffix_match=$(read_file_trimmed "$ETH_DOMAIN_SUFFIX_MATCH_FILE")
+            client_cert=$(read_file_trimmed "$ETH_CLIENT_CERT_FILE")
+            private_key=$(read_file_trimmed "$ETH_PRIVATE_KEY_FILE")
+            private_key_passwd=$(read_file_trimmed "$ETH_PRIVATE_KEY_PASSWD_FILE")
+
+            [ -n "$eap" ] || eap="PEAP"
+
+            gen_wired_enterprise_conf "$pass" "$identity" "$eap" "$phase2" \
+                "$anonymous_identity" "$ca_cert" "$domain_suffix_match" \
+                "$client_cert" "$private_key" "$private_key_passwd" >"$ETH_WPA_CONF"
+            chmod 600 "$ETH_WPA_CONF"
+            ip link set eth0 up
+            stop_wired_auth
+            "$(get_wpa_bin)" -B -D wired -i eth0 -c "$ETH_WPA_CONF" -P "$ETH_WPA_PID"
+            ;;
+    esac
 }
 
 calc_gw() {
@@ -23,7 +137,9 @@ EOF
 }
 
 start() {
+    stop_wired_auth
     ip addr flush dev eth0
+    start_wired_auth
     if [ -e /boot/eth.nodhcp ]; then
         while IFS= read -r line || [ -n "$line" ]; do
             line=$(clean_line "$line")
@@ -57,7 +173,7 @@ start() {
         done < /boot/eth.nodhcp
 
         ip a show dev eth0 | grep inet > /dev/null || {
-            udhcpc -i eth0 -t 3 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid &>/dev/null
+            udhcpc -i eth0 -t 3 -T 1 -A 5 -b -p "$ETH_DHCP_PID" &>/dev/null
             ip a show dev eth0 | grep inet > /dev/null
         } || {
             inet=$RESERVE_INET
@@ -65,14 +181,16 @@ start() {
             ip a add "$inet" brd + dev eth0
         } || exit 1
     else
-        udhcpc -i eth0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.eth0.pid &
+        udhcpc -i eth0 -t 10 -T 1 -A 5 -b -p "$ETH_DHCP_PID" &
     fi
 }
 
 stop() {
-    [ ! -e "/run/udhcpc.eth0.pid" ] && exit 1
-    kill "$(cat /run/udhcpc.eth0.pid)"
-    rm /run/udhcpc.eth0.pid
+    if [ -e "$ETH_DHCP_PID" ]; then
+        kill "$(cat "$ETH_DHCP_PID")" 2>/dev/null || true
+        rm -f "$ETH_DHCP_PID"
+    fi
+    stop_wired_auth
 }
 
 case "$1" in
