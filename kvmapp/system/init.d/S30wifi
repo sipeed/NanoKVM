@@ -4,6 +4,50 @@
 
 APFLAG_FILE=/tmp/wifiap
 
+escape_wpa_value() {
+    printf "%s" "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+sanitize_wpa_token() {
+    printf "%s" "$1" | tr -cd 'A-Za-z0-9_-'
+}
+
+append_wpa_field() {
+    key="${1}"
+    value="${2}"
+    if [ -n "$value" ]; then
+        printf '    %s="%s"\n' "$key" "$(escape_wpa_value "$value")"
+    fi
+}
+
+gen_wpa_enterprise_conf() {
+    ssid="${1}"
+    pass="${2}"
+    identity="${3}"
+    eap="${4:-PEAP}"
+    phase2="${5:-auth=MSCHAPV2}"
+    anonymous_identity="${6}"
+    ca_cert="${7}"
+    domain_suffix_match="${8}"
+    eap=$(sanitize_wpa_token "$eap")
+
+    echo "ctrl_interface=/var/run/wpa_supplicant"
+    echo "ap_scan=1"
+    echo "fast_reauth=1"
+    echo ""
+    echo "network={"
+    append_wpa_field "ssid" "$ssid"
+    echo "    key_mgmt=WPA-EAP"
+    echo "    eap=${eap}"
+    append_wpa_field "identity" "$identity"
+    append_wpa_field "password" "$pass"
+    append_wpa_field "phase2" "$phase2"
+    append_wpa_field "anonymous_identity" "$anonymous_identity"
+    append_wpa_field "ca_cert" "$ca_cert"
+    append_wpa_field "domain_suffix_match" "$domain_suffix_match"
+    echo "}"
+}
+
 gen_hostapd_conf() {
     ssid="${1}"
     pass="${2}"
@@ -52,16 +96,24 @@ start() {
     echo "wifi mode: sta"
     ssid=""
     pass=""
+    mode="psk"
+    identity=""
+    eap="PEAP"
+    phase2="auth=MSCHAPV2"
+    anonymous_identity=""
+    ca_cert=""
+    domain_suffix_match=""
     if [ -e /boot/wifi.ssid ] && [ -e /boot/wifi.pass ]; then
         echo "Updating WiFi credentials from /boot to /etc/kvm/"
 
-        rm -f /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
+        rm -f /etc/kvm/wifi.ssid /etc/kvm/wifi.pass /etc/kvm/wifi.mode
 
         mv /boot/wifi.ssid /etc/kvm/wifi.ssid
         mv /boot/wifi.pass /etc/kvm/wifi.pass
 
         chown root:root /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
-        chmod 644 /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
+        chmod 644 /etc/kvm/wifi.ssid
+        chmod 600 /etc/kvm/wifi.pass
     fi
     if [ -e /etc/kvm/wifi.ssid ]; then
         ssid=$(cat /etc/kvm/wifi.ssid)
@@ -69,8 +121,38 @@ start() {
     if [ -e /etc/kvm/wifi.pass ]; then
         pass=$(cat /etc/kvm/wifi.pass)
     fi
-    echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
-    wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
+    if [ -e /etc/kvm/wifi.mode ]; then
+        mode=$(cat /etc/kvm/wifi.mode)
+    fi
+    if [ -e /etc/kvm/wifi.identity ]; then
+        identity=$(cat /etc/kvm/wifi.identity)
+    fi
+    if [ -e /etc/kvm/wifi.eap ]; then
+        eap=$(cat /etc/kvm/wifi.eap)
+    fi
+    if [ -e /etc/kvm/wifi.phase2 ]; then
+        phase2=$(cat /etc/kvm/wifi.phase2)
+    fi
+    if [ -e /etc/kvm/wifi.anonymous_identity ]; then
+        anonymous_identity=$(cat /etc/kvm/wifi.anonymous_identity)
+    fi
+    if [ -e /etc/kvm/wifi.ca_cert ]; then
+        ca_cert=$(cat /etc/kvm/wifi.ca_cert)
+    fi
+    if [ -e /etc/kvm/wifi.domain_suffix_match ]; then
+        domain_suffix_match=$(cat /etc/kvm/wifi.domain_suffix_match)
+    fi
+
+    case "$mode" in
+    enterprise | 8021x | wpa-eap)
+        gen_wpa_enterprise_conf "$ssid" "$pass" "$identity" "$eap" "$phase2" "$anonymous_identity" "$ca_cert" "$domain_suffix_match" >/etc/wpa_supplicant.conf
+        ;;
+    *)
+        echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
+        wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
+        ;;
+    esac
+    chmod 600 /etc/wpa_supplicant.conf
     wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
     if [ ! -e /boot/wifi.nodhcp ]; then
         (udhcpc -i wlan0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.wlan0.pid) &

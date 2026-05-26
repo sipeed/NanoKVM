@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CheckOutlined, KeyOutlined, LockOutlined, WifiOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
@@ -19,6 +19,8 @@ export const Wifi = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [verifying, setVerifying] = useState<boolean>(false);
   const [verifyState, setVerifyState] = useState<VerifyState>('');
+  const [form] = Form.useForm();
+  const mode = Form.useWatch('mode', form);
 
   useEffect(() => {
     const pass = searchParams.get('p') || searchParams.get('P');
@@ -54,12 +56,21 @@ export const Wifi = () => {
 
   async function connect(values: any) {
     if (!values.ssid || !values.password) return;
+    if (values.mode === 'enterprise' && !values.identity) return;
 
     if (state === 'loading') return;
     setState('loading');
 
     try {
-      const rsp = await api.connectWifiNoAuth(values.ssid, values.password, apPassword);
+      const rsp = await api.connectWifiNoAuth(values.ssid, values.password, apPassword, {
+        mode: values.mode || 'psk',
+        identity: values.identity,
+        eap: values.eap,
+        phase2: values.phase2,
+        anonymousIdentity: values.anonymousIdentity,
+        caCert: values.caCert,
+        domainSuffixMatch: values.domainSuffixMatch
+      });
 
       switch (rsp?.code) {
         case 0:
@@ -129,8 +140,9 @@ export const Wifi = () => {
 
       <div className="flex h-screen w-screen flex-col items-center justify-center">
         <Form
+          form={form}
           style={{ minWidth: 300, maxWidth: 500 }}
-          initialValues={{ remember: true }}
+          initialValues={{ remember: true, mode: 'psk', eap: 'PEAP', phase2: 'auth=MSCHAPV2' }}
           onFinish={connect}
         >
           <div className="flex flex-col space-y-1 pb-5">
@@ -140,6 +152,15 @@ export const Wifi = () => {
             <span className="text-center text-neutral-400">{t('wifi.description')}</span>
           </div>
 
+          <Form.Item name="mode">
+            <Select
+              options={[
+                { value: 'psk', label: 'Personal / WPA-PSK' },
+                { value: 'enterprise', label: 'Enterprise / 802.1X' }
+              ]}
+            />
+          </Form.Item>
+
           <Form.Item name="ssid">
             <Input prefix={<WifiOutlined />} placeholder="SSID" />
           </Form.Item>
@@ -147,6 +168,40 @@ export const Wifi = () => {
           <Form.Item name="password">
             <Input.Password prefix={<LockOutlined />} placeholder="Password" />
           </Form.Item>
+
+          {mode === 'enterprise' && (
+            <>
+              <Form.Item name="identity">
+                <Input placeholder="Identity / Username" />
+              </Form.Item>
+
+              <Form.Item name="eap">
+                <Select
+                  options={[
+                    { value: 'PEAP', label: 'EAP: PEAP' },
+                    { value: 'TTLS', label: 'EAP: TTLS' },
+                    { value: 'TLS', label: 'EAP: TLS' }
+                  ]}
+                />
+              </Form.Item>
+
+              <Form.Item name="phase2">
+                <Input placeholder="Phase 2 auth" />
+              </Form.Item>
+
+              <Form.Item name="anonymousIdentity">
+                <Input placeholder="Anonymous identity (optional)" />
+              </Form.Item>
+
+              <Form.Item name="caCert">
+                <Input placeholder="CA certificate path (optional)" />
+              </Form.Item>
+
+              <Form.Item name="domainSuffixMatch">
+                <Input placeholder="Domain suffix match (optional)" />
+              </Form.Item>
+            </>
+          )}
 
           <Form.Item>
             {state === 'success' ? (

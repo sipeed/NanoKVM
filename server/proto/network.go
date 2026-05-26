@@ -25,8 +25,15 @@ type GetWifiRsp struct {
 }
 
 type ConnectWifiReq struct {
-	Ssid     string `validate:"required"`
-	Password string `validate:"required"`
+	Ssid              string `json:"ssid" form:"ssid"`
+	Password          string `json:"password" form:"password"`
+	Mode              string `json:"mode" form:"mode"`
+	Identity          string `json:"identity" form:"identity"`
+	EAP               string `json:"eap" form:"eap"`
+	Phase2            string `json:"phase2" form:"phase2"`
+	AnonymousIdentity string `json:"anonymousIdentity" form:"anonymousIdentity"`
+	CACert            string `json:"caCert" form:"caCert"`
+	DomainSuffixMatch string `json:"domainSuffixMatch" form:"domainSuffixMatch"`
 }
 
 type GetDNSRsp struct {

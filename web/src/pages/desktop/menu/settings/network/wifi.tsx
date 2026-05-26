@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { LockOutlined, WifiOutlined } from '@ant-design/icons';
-import { Button, Input, Modal, Switch } from 'antd';
+import { Button, Input, Modal, Select, Switch } from 'antd';
 import { WifiIcon, WifiPenIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/network.ts';
+import type { WiFiSecurityMode } from '@/api/network.ts';
 
 export const Wifi = () => {
   const { t } = useTranslation();
@@ -14,8 +15,15 @@ export const Wifi = () => {
   const [connectedWiFi, setConnectedWifi] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mode, setMode] = useState<WiFiSecurityMode>('psk');
   const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
+  const [identity, setIdentity] = useState('');
+  const [eap, setEap] = useState('PEAP');
+  const [phase2, setPhase2] = useState('auth=MSCHAPV2');
+  const [anonymousIdentity, setAnonymousIdentity] = useState('');
+  const [caCert, setCaCert] = useState('');
+  const [domainSuffixMatch, setDomainSuffixMatch] = useState('');
   const [status, setStatus] = useState<'' | 'connecting' | 'disconnecting'>('');
   const [message, setMessage] = useState('');
 
@@ -47,13 +55,21 @@ export const Wifi = () => {
   async function connect() {
     setMessage('');
 
-    if (!ssid || !password) return;
+    if (!ssid || !password || (mode === 'enterprise' && !identity)) return;
 
     if (status !== '') return;
     setStatus('connecting');
 
     try {
-      const rsp = await api.connectWifi(ssid, password);
+      const rsp = await api.connectWifi(ssid, password, {
+        mode,
+        identity,
+        eap,
+        phase2,
+        anonymousIdentity,
+        caCert,
+        domainSuffixMatch
+      });
       if (rsp.code !== 0) {
         console.log(rsp.msg);
         setMessage(t('settings.network.wifi.failed'));
@@ -91,8 +107,15 @@ export const Wifi = () => {
   }
 
   function openModal() {
+    setMode('psk');
     setSsid('');
     setPassword('');
+    setIdentity('');
+    setEap('PEAP');
+    setPhase2('auth=MSCHAPV2');
+    setAnonymousIdentity('');
+    setCaCert('');
+    setDomainSuffixMatch('');
     setMessage('');
     setIsModalOpen(true);
   }
@@ -186,6 +209,15 @@ export const Wifi = () => {
 
         {/* form */}
         <div className="flex flex-col items-center space-y-3 py-6">
+          <Select
+            value={mode}
+            style={{ width: '300px' }}
+            options={[
+              { value: 'psk', label: 'Personal / WPA-PSK' },
+              { value: 'enterprise', label: 'Enterprise / 802.1X' }
+            ]}
+            onChange={setMode}
+          />
           <Input
             value={ssid}
             style={{ width: '300px' }}
@@ -200,6 +232,50 @@ export const Wifi = () => {
             placeholder={t('settings.network.wifi.password')}
             onChange={(e) => setPassword(e.target.value)}
           />
+          {mode === 'enterprise' && (
+            <>
+              <Input
+                value={identity}
+                style={{ width: '300px' }}
+                placeholder="Identity / Username"
+                onChange={(e) => setIdentity(e.target.value)}
+              />
+              <Select
+                value={eap}
+                style={{ width: '300px' }}
+                options={[
+                  { value: 'PEAP', label: 'EAP: PEAP' },
+                  { value: 'TTLS', label: 'EAP: TTLS' },
+                  { value: 'TLS', label: 'EAP: TLS' }
+                ]}
+                onChange={setEap}
+              />
+              <Input
+                value={phase2}
+                style={{ width: '300px' }}
+                placeholder="Phase 2 auth"
+                onChange={(e) => setPhase2(e.target.value)}
+              />
+              <Input
+                value={anonymousIdentity}
+                style={{ width: '300px' }}
+                placeholder="Anonymous identity (optional)"
+                onChange={(e) => setAnonymousIdentity(e.target.value)}
+              />
+              <Input
+                value={caCert}
+                style={{ width: '300px' }}
+                placeholder="CA certificate path (optional)"
+                onChange={(e) => setCaCert(e.target.value)}
+              />
+              <Input
+                value={domainSuffixMatch}
+                style={{ width: '300px' }}
+                placeholder="Domain suffix match (optional)"
+                onChange={(e) => setDomainSuffixMatch(e.target.value)}
+              />
+            </>
+          )}
 
           {!!message && <span className="text-sm text-red-500">{message}</span>}
         </div>
