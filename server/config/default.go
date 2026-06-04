@@ -31,7 +31,14 @@ var defaultConfig = &Config{
 		LoginLockoutDuration: 0,
 		LoginMaxFailures:     5,
 	},
+	Audit: Audit{
+		Enabled:   boolPtr(true),
+		File:      "/etc/kvm/audit.log",
+		MaxSizeMB: 10,
+	},
 }
+
+func boolPtr(b bool) *bool { return &b }
 
 func checkDefaultValue() {
 	if instance.JWT.SecretKey == "" {
@@ -49,6 +56,18 @@ func checkDefaultValue() {
 
 	if instance.Authentication == "" {
 		instance.Authentication = "enable"
+	}
+
+	// Audit: default to enabled when the key is absent (existing installs whose
+	// config predates this feature); honour an explicit `enabled: false`.
+	if instance.Audit.Enabled == nil {
+		instance.Audit.Enabled = boolPtr(true)
+	}
+	if instance.Audit.File == "" {
+		instance.Audit.File = "/etc/kvm/audit.log"
+	}
+	if instance.Audit.MaxSizeMB == 0 {
+		instance.Audit.MaxSizeMB = 10
 	}
 
 	instance.Hardware = getHardware()

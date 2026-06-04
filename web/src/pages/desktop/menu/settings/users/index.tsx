@@ -25,12 +25,6 @@ type User = {
   enabled: boolean;
 };
 
-const roleColor: Record<string, string> = {
-  admin: 'red',
-  operator: 'blue',
-  viewer: 'default'
-};
-
 export const Users = () => {
   const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);

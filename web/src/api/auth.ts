@@ -42,3 +42,16 @@ export function deleteUser(username: string) {
 export function changeUserPassword(username: string, password: string) {
   return http.post(`/api/auth/users/${username}/password`, { username, password });
 }
+
+// Audit log (admin only): who did what
+export function getAuditLog(limit = 200) {
+  return http.get(`/api/auth/audit?limit=${limit}`);
+}
+
+export function getAuditConfig() {
+  return http.get('/api/auth/audit/config');
+}
+
+export function setAuditConfig(enabled: boolean) {
+  return http.post('/api/auth/audit/config', { enabled });
+}

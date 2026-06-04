@@ -33,4 +33,9 @@ func authRouter(r *gin.Engine) {
 	adminAPI.POST("/auth/users", service.CreateUser)
 	adminAPI.PUT("/auth/users/:username", service.UpdateUser)
 	adminAPI.DELETE("/auth/users/:username", service.DeleteUser)
+
+	// Admin-only: read the audit log (who did what) and toggle it on/off
+	adminAPI.GET("/auth/audit", service.GetAuditLog)
+	adminAPI.GET("/auth/audit/config", service.GetAuditConfig)
+	adminAPI.POST("/auth/audit/config", service.SetAuditConfig)
 }

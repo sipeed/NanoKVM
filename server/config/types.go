@@ -11,8 +11,17 @@ type Config struct {
 	Stun           string   `yaml:"stun"`
 	Turn           Turn     `yaml:"turn"`
 	Security       Security `yaml:"security"`
+	Audit          Audit    `yaml:"audit"`
 
 	Hardware Hardware `yaml:"-"`
+}
+
+type Audit struct {
+	// Enabled is a pointer so an absent config key can default to "on" while
+	// still allowing an explicit `enabled: false` to turn auditing off.
+	Enabled   *bool  `yaml:"enabled"`
+	File      string `yaml:"file"`
+	MaxSizeMB int    `yaml:"maxSizeMB"`
 }
 
 type Logger struct {

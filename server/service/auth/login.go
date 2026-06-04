@@ -36,6 +36,8 @@ func (s *Service) Login(c *gin.Context) {
 
 	account, ok := CompareAccount(req.Username, req.Password)
 	if !ok {
+		c.Set("audit_user", req.Username)
+		c.Set("audit_result", "failure")
 		time.Sleep(2 * time.Second)
 		if locked, code, msg := RecordLoginFailure(clientIP); locked {
 			rsp.ErrRsp(c, code, msg)
@@ -55,6 +57,9 @@ func (s *Service) Login(c *gin.Context) {
 	}
 
 	rsp.OkRspWithData(c, &proto.LoginRsp{Token: token})
+	c.Set("audit_user", account.Username)
+	c.Set("audit_role", string(account.Role))
+	c.Set("audit_result", "success")
 	log.Debugf("login success, username: %s, role: %s", account.Username, account.Role)
 }
 

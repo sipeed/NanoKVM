@@ -7,6 +7,7 @@ import {
   CircleArrowUpIcon,
   NetworkIcon,
   PaletteIcon,
+  ScrollTextIcon,
   SettingsIcon,
   ShieldIcon,
   SmartphoneIcon,
@@ -26,6 +27,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
+import { Audit } from './audit';
 import { Device } from './device';
 import { Network } from './network';
 import { Tailscale } from './tailscale';
@@ -65,7 +67,8 @@ export const Settings = () => {
       component: <Update setIsLocked={setIsLocked} />
     },
     { id: 'account', roles: ['admin', 'operator', 'viewer'], icon: <UserRoundIcon size={18} />, component: <Account /> },
-    { id: 'users', roles: ['admin'], icon: <ShieldIcon size={16} />, component: <Users /> }
+    { id: 'users', roles: ['admin'], icon: <ShieldIcon size={16} />, component: <Users /> },
+    { id: 'audit', roles: ['admin'], icon: <ScrollTextIcon size={16} />, component: <Audit /> }
   ];
 
   const currentRole = isAdmin ? 'admin' : isOperator ? 'operator' : 'viewer';

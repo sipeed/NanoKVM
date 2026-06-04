@@ -45,3 +45,13 @@ type UpdateUserReq struct {
 	Role    string `json:"role"`
 	Enabled *bool  `json:"enabled"`
 }
+
+// --- Audit log ---
+
+type GetAuditConfigRsp struct {
+	Enabled bool `json:"enabled"`
+}
+
+type SetAuditConfigReq struct {
+	Enabled *bool `json:"enabled" validate:"required"`
+}

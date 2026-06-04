@@ -13,6 +13,7 @@ import (
 	"NanoKVM-Server/logger"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
+	"NanoKVM-Server/service/audit"
 	"NanoKVM-Server/service/vm/jiggler"
 	"NanoKVM-Server/utils"
 
@@ -33,6 +34,9 @@ func initialize() {
 	}
 
 	logger.Init()
+
+	conf := config.GetInstance()
+	audit.Init(conf.Audit.File, *conf.Audit.Enabled, conf.Audit.MaxSizeMB)
 
 	// init screen parameters
 	_ = common.GetScreen()
@@ -65,6 +69,7 @@ func run() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
+	r.Use(middleware.Audit())
 	if conf.Authentication == "disable" {
 		r.Use(cors.AllowAll())
 	}
@@ -122,5 +127,6 @@ func run() {
 }
 
 func dispose() {
+	audit.Close()
 	common.GetKvmVision().Close()
 }
