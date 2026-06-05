@@ -24,10 +24,22 @@ VISION_BUILD_CMD := . ./home/build/MaixCDK/bin/activate && cd /home/build/NanoKV
 RELEASE_BUILD_CMD := /home/build/NanoKVM/scripts/build-in-container.sh
 
 .PHONY: help check-root builder-image rebuild-image check-image shell app support vision \
-        web release-build package release all clean
+        web release-build package release all test test-s01fs-data-disk \
+        test-go-storage test-go-vm clean
 
 # Default target
 all: app support
+
+test: test-s01fs-data-disk test-go-storage test-go-vm
+
+test-s01fs-data-disk:
+	@bash tools/test-s01fs-data-disk.sh
+
+test-go-storage:
+	@cd server && go test ./service/storage
+
+test-go-vm:
+	@cd server && go test ./service/vm/virtualdisk
 
 # Help target
 help:
@@ -47,6 +59,7 @@ help:
 	@echo "  release-build - Build every riscv64 release artifact in one pass"
 	@echo "  package       - Assemble nanokvm_<VERSION>.tar.gz + latest.json"
 	@echo "  release       - release-build + web + package (needs VERSION=x.y.z)"
+	@echo "  test          - Run repository tests"
 	@echo "  clean         - Clean build artifacts"
 	@echo ""
 	@echo "Prerequisites:"
