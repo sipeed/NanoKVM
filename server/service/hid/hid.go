@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -245,6 +246,24 @@ func (h *Hid) closeKeyboardLedReaderNoLock() {
 	}
 }
 
+func (h *Hid) closeDeletedDeviceNoLock(device hidDevice) {
+	file := device.get()
+	if file == nil || !hidFileWasDeleted(file) {
+		return
+	}
+
+	log.Debugf("close %s because the cached HID handle was deleted", device.path)
+	h.closeDeviceForWriteNoLock(device)
+}
+
+func hidFileWasDeleted(file *os.File) bool {
+	target, err := os.Readlink(fmt.Sprintf("/proc/self/fd/%d", file.Fd()))
+	if err != nil {
+		return false
+	}
+	return strings.HasSuffix(target, " (deleted)")
+}
+
 // writeWithTimeout bounds how long callers hold HID locks when writing to a
 // nonblocking descriptor. EAGAIN means the host is not accepting HID reports
 // yet, so retry until the caller's deadline expires.
@@ -280,6 +299,15 @@ func writeWithTimeout(writer hidWriter, data []byte, timeout time.Duration) erro
 
 func isRetryableWriteError(err error) bool {
 	return errors.Is(err, syscall.EAGAIN) || errors.Is(err, syscall.EWOULDBLOCK)
+}
+
+func isStaleHIDWriteError(err error) bool {
+	return errors.Is(err, os.ErrClosed) ||
+		errors.Is(err, syscall.EIO) ||
+		errors.Is(err, syscall.ENODEV) ||
+		errors.Is(err, syscall.ENXIO) ||
+		errors.Is(err, syscall.EPIPE) ||
+		errors.Is(err, syscall.ESHUTDOWN)
 }
 
 func (h *Hid) Open() {
@@ -347,10 +375,7 @@ func (h *Hid) writeHIDReport(device hidDevice, data []byte) bool {
 	return true
 }
 
-func (h *Hid) writeHID(device hidDevice, data []byte) error {
-	device.mu.Lock()
-	defer device.mu.Unlock()
-
+func (h *Hid) openDeviceForWriteNoLock(device hidDevice) error {
 	if err := h.openDeviceNoLock(device); err != nil {
 		return err
 	}
@@ -361,7 +386,45 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 			h.startKeyboardLedReader()
 		}
 	}
+	return nil
+}
 
+func (h *Hid) closeDeviceForWriteNoLock(device hidDevice) {
+	if device.path == HID0 {
+		h.closeKeyboardLedReaderNoLock()
+	}
+	h.closeDeviceNoLock(device)
+}
+
+func (h *Hid) writeHID(device hidDevice, data []byte) error {
+	device.mu.Lock()
+	defer device.mu.Unlock()
+
+	h.closeDeletedDeviceNoLock(device)
+	if err := h.openDeviceForWriteNoLock(device); err != nil {
+		return err
+	}
+
+	if err := h.writeHIDNoLock(device, data); err != nil {
+		h.closeDeviceForWriteNoLock(device)
+		if !isStaleHIDWriteError(err) {
+			return formatHIDWriteError(err)
+		}
+
+		if reopenErr := h.openDeviceForWriteNoLock(device); reopenErr != nil {
+			return fmt.Errorf("reopen %s after stale HID write: %w", device.path, reopenErr)
+		}
+		if retryErr := h.writeHIDNoLock(device, data); retryErr != nil {
+			h.closeDeviceForWriteNoLock(device)
+			return formatHIDWriteError(retryErr)
+		}
+	}
+
+	log.Debugf("write to %s: %v", device.path, data)
+	return nil
+}
+
+func (h *Hid) writeHIDNoLock(device hidDevice, data []byte) error {
 	file := device.get()
 	if file == nil {
 		return fmt.Errorf("%s: hid handle is nil", device.path)
@@ -373,20 +436,19 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 	}
 
 	if err := writeWithTimeout(file, data, hidWriteTimeout); err != nil {
-		if device.path == HID0 {
-			h.closeKeyboardLedReaderNoLock()
-		}
-		h.closeDeviceNoLock(device)
-		switch {
-		case errors.Is(err, os.ErrClosed):
-			return fmt.Errorf("hid already closed: %w", err)
-		case errors.Is(err, os.ErrDeadlineExceeded):
-			return fmt.Errorf("timeout after %s: %w", hidWriteTimeout, err)
-		default:
-			return err
-		}
+		return err
 	}
 
-	log.Debugf("write to %s: %v", device.path, data)
 	return nil
+}
+
+func formatHIDWriteError(err error) error {
+	switch {
+	case errors.Is(err, os.ErrClosed):
+		return fmt.Errorf("hid already closed: %w", err)
+	case errors.Is(err, os.ErrDeadlineExceeded):
+		return fmt.Errorf("timeout after %s: %w", hidWriteTimeout, err)
+	default:
+		return err
+	}
 }
