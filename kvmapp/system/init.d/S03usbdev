@@ -1,179 +1,77 @@
 #!/bin/sh
 # kvmhwd Rev2.2
 
+# shellcheck source=/kvmapp/system/init.d/S03usb-common
+. "${USB_COMMON:-/kvmapp/system/init.d/S03usb-common}"
+
+USB_NCM_FUNC='ncm.usb0'
+USB_RNDIS_FUNC='rndis.usb0'
+USB_MASS_STORAGE_FUNC='mass_storage.disk0'
+USB_MASS_STORAGE_INQUIRY='NanoKVM USB Mass Storage0520'
+USB_LEGACY_EMPTY_DISK_BACKING='/dev/mmcblk0p3'
+
 start_usb_dev(){
-    . /etc/profile
-    echo "usb mode: device"
-    cd /sys/kernel/config/usb_gadget
-
-    mkdir g0
-    cd g0
-
-    # echo 0x3346 > idVendor
-    # echo 0x1009 > idProduct
-    if [ -e /boot/usb.vid ]
-    then
-        cat /boot/usb.vid > idVendor
-    else
-        echo 0x3346 > idVendor
-    fi
-    if [ -e /boot/usb.pid ]
-    then
-        cat /boot/usb.pid > idProduct
-    else
-        echo 0x1009 > idProduct
-    fi
+    prepare_usb_gadget "${USB_NORMAL_BCD_USB}" "${USB_NORMAL_BCD_DEVICE}" "${USB_NORMAL_CONFIG_ATTRIBUTES}" "${USB_NORMAL_MAX_POWER}"
 
     echo 0xEF > bDeviceClass
     echo 0x02 > bDeviceSubClass
     echo 0x01 > bDeviceProtocol
 
-    mkdir strings/0x409
-    echo '0123456789ABCDEF' > strings/0x409/serialnumber
-    echo 'sipeed' > strings/0x409/manufacturer
-    echo 'NanoKVM' > strings/0x409/product
-
-    mkdir configs/c.1
-    echo 0xE0 > configs/c.1/bmAttributes
-    echo 120 > configs/c.1/MaxPower
-    mkdir configs/c.1/strings/0x409
-    echo "NanoKVM" >  configs/c.1/strings/0x409/configuration
-
-    if [ -e /boot/usb.ncm ]
+    if [ -e "${USB_BOOT_DIR}/usb.ncm" ]
     then
-        mkdir functions/ncm.usb0
-        echo WINNCM > functions/ncm.usb0/os_desc/interface.ncm/compatible_id
-        ln -s functions/ncm.usb0 configs/c.1/
-    else
-        if [ -e /boot/usb.rndis0 ]
-        then
-                mkdir functions/rndis.usb0
-                echo e0 > functions/rndis.usb0/class
-                echo 01 > functions/rndis.usb0/subclass
-                echo 03 > functions/rndis.usb0/protocol
-                echo RNDIS > functions/rndis.usb0/os_desc/interface.rndis/compatible_id
-                echo 5162001 > functions/rndis.usb0/os_desc/interface.rndis/sub_compatible_id
-                ln -s functions/rndis.usb0 configs/c.1/
-        fi
+        mkdir "functions/${USB_NCM_FUNC}"
+        echo WINNCM > "functions/${USB_NCM_FUNC}/os_desc/interface.ncm/compatible_id"
+        ln -s "functions/${USB_NCM_FUNC}" configs/c.1/
+    elif [ -e "${USB_BOOT_DIR}/usb.rndis0" ]
+    then
+        mkdir "functions/${USB_RNDIS_FUNC}"
+        echo e0 > "functions/${USB_RNDIS_FUNC}/class"
+        echo 01 > "functions/${USB_RNDIS_FUNC}/subclass"
+        echo 03 > "functions/${USB_RNDIS_FUNC}/protocol"
+        echo RNDIS > "functions/${USB_RNDIS_FUNC}/os_desc/interface.rndis/compatible_id"
+        echo 5162001 > "functions/${USB_RNDIS_FUNC}/os_desc/interface.rndis/sub_compatible_id"
+        ln -s "functions/${USB_RNDIS_FUNC}" configs/c.1/
     fi
 
-    if [ -e /boot/usb.ncm ] || [ -e /boot/usb.rndis0 ]
+    if [ -e "${USB_BOOT_DIR}/usb.ncm" ] || [ -e "${USB_BOOT_DIR}/usb.rndis0" ]
     then
-        # Microsoft OS 2.0 Descriptor
         echo 1 > os_desc/use
         echo 0xCD > os_desc/b_vendor_code
         echo MSFT100 > os_desc/qw_sign
         ln -s configs/c.1 os_desc
     fi
 
-    if [ ! -e /boot/disable_hid ]
+    if [ ! -e "${USB_BOOT_DIR}/disable_hid" ]
     then
-        # keyboard
-        mkdir functions/hid.GS0
-        if [ -e /boot/BIOS ]
-        then
-            echo 1 > functions/hid.GS0/subclass
-        fi
-        if [ ! -e /boot/usb.notwakeup ]
-        then
-            echo 1 > functions/hid.GS0/wakeup_on_write
-        fi
-        echo 1 > functions/hid.GS0/protocol
-        echo 8 > functions/hid.GS0/report_length
-        echo -ne \\x05\\x01\\x09\\x06\\xa1\\x01\\x05\\x07\\x19\\xe0\\x29\\xe7\\x15\\x00\\x25\\x01\\x75\\x01\\x95\\x08\\x81\\x02\\x95\\x01\\x75\\x08\\x81\\x03\\x95\\x05\\x75\\x01\\x05\\x08\\x19\\x01\\x29\\x05\\x91\\x02\\x95\\x01\\x75\\x03\\x91\\x03\\x95\\x06\\x75\\x08\\x15\\x00\\x25\\xE7\\x05\\x07\\x19\\x00\\x29\\xE7\\x81\\x00\\xc0 > functions/hid.GS0/report_desc
-        ln -s functions/hid.GS0 configs/c.1
-
-        # mouse
-        mkdir functions/hid.GS1
-        if [ -e /boot/BIOS ]
-        then
-            echo 1 > functions/hid.GS1/subclass
-        fi
-        if [ ! -e /boot/usb.notwakeup ]
-        then
-            echo 1 > functions/hid.GS1/wakeup_on_write
-        fi
-        echo 2 > functions/hid.GS1/protocol
-        echo 4 > functions/hid.GS1/report_length
-        echo -ne \\x5\\x1\\x9\\x2\\xa1\\x1\\x9\\x1\\xa1\\x0\\x5\\x9\\x19\\x1\\x29\\x3\\x15\\x0\\x25\\x1\\x95\\x3\\x75\\x1\\x81\\x2\\x95\\x1\\x75\\x5\\x81\\x3\\x5\\x1\\x9\\x30\\x9\\x31\\x9\\x38\\x15\\x81\\x25\\x7f\\x75\\x8\\x95\\x3\\x81\\x6\\xc0\\xc0 > functions/hid.GS1/report_desc
-        ln -s functions/hid.GS1 configs/c.1
-
-        # touchpad
-        mkdir functions/hid.GS2
-        if [ -e /boot/BIOS ]
-        then
-            echo 1 > functions/hid.GS2/subclass
-        fi
-        if [ ! -e /boot/usb.notwakeup ]
-        then
-            echo 1 > functions/hid.GS2/wakeup_on_write
-        fi
-        echo 2 > functions/hid.GS2/protocol
-        echo 6 > functions/hid.GS2/report_length
-        echo -ne \\x05\\x01\\x09\\x02\\xa1\\x01\\x09\\x01\\xa1\\x00\\x05\\x09\\x19\\x01\\x29\\x05\\x15\\x00\\x25\\x01\\x95\\x05\\x75\\x01\\x81\\x02\\x95\\x01\\x75\\x03\\x81\\x01\\x05\\x01\\x09\\x30\\x09\\x31\\x15\\x00\\x26\\xff\\x7f\\x35\\x00\\x46\\xff\\x7f\\x75\\x10\\x95\\x02\\x81\\x02\\x05\\x01\\x09\\x38\\x15\\x81\\x25\\x7f\\x35\\x00\\x45\\x00\\x75\\x08\\x95\\x01\\x81\\x06\\xc0\\xc0 > functions/hid.GS2/report_desc
-        ln -s functions/hid.GS2 configs/c.1
+        add_hid_functions "${USB_HID_REPORT_NORMAL_KEYBOARD}" "${USB_HID_REPORT_NORMAL_ABSOLUTE_MOUSE}"
     fi
 
-    if [ -e /boot/usb.disk0 ]
+    if [ -e "${USB_BOOT_DIR}/usb.disk0" ]
     then
-            mkdir functions/mass_storage.disk0
-            ln -s functions/mass_storage.disk0 configs/c.1/
-            echo 1 > functions/mass_storage.disk0/lun.0/removable
-            if [ -e /boot/usb.disk0.ro ]
-            then
-                    echo 1 > functions/mass_storage.disk0/lun.0/ro
-                    echo 0 > functions/mass_storage.disk0/lun.0/cdrom
-            fi
-            echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
-            disk=$(cat /boot/usb.disk0)
-            if [ -z "${disk}" ]
-            then
-                    # if [ ! -e /mnt/usbdisk.img ]
-                    # then
-                    #         fallocate -l 8G /mnt/usbdisk.img
-                    #         mkfs.vfat /mnt/usbdisk.img
-                    # fi
-                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
-            else
-                    cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
-            fi
+        mkdir "functions/${USB_MASS_STORAGE_FUNC}"
+        ln -s "functions/${USB_MASS_STORAGE_FUNC}" configs/c.1/
+        echo 1 > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/removable"
+        if [ -e "${USB_BOOT_DIR}/usb.disk0.ro" ]
+        then
+            echo 1 > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/ro"
+            echo 0 > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/cdrom"
+        fi
+        echo "${USB_MASS_STORAGE_INQUIRY}" > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/inquiry_string"
+        disk=$(cat "${USB_BOOT_DIR}/usb.disk0")
+        if [ -z "${disk}" ]
+        then
+            # if [ ! -e /mnt/usbdisk.img ]
+            # then
+            #         fallocate -l 8G /mnt/usbdisk.img
+            #         mkfs.vfat /mnt/usbdisk.img
+            # fi
+            echo "${USB_LEGACY_EMPTY_DISK_BACKING}" > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/file"
+        else
+            printf '%s' "${disk}" > "functions/${USB_MASS_STORAGE_FUNC}/lun.0/file"
+        fi
     fi
 
-    ls /sys/class/udc/ | cat > UDC
-    echo device > /proc/cviusb/otg_role
+    bind_first_udc
 }
 
-start_usb_host(){
-    echo '' > /sys/kernel/config/usb_gadget/g0/UDC
-    echo host > /proc/cviusb/otg_role
-}
-
-restart_usb_dev(){
-    echo > /sys/kernel/config/usb_gadget/g0/UDC
-    sleep 1
-    ls /sys/class/udc/ | cat > /sys/kernel/config/usb_gadget/g0/UDC
-    echo "USB Restart OK!"
-}
-
-case "$1" in
-  start)
-    start_usb_dev
-  ;;
-  restart)
-    restart_usb_dev
-  ;;
-  stop)
-    start_usb_host
-  ;;
-  stop_start)
-    start_usb_host
-    start_usb_dev
-  ;;
-   restart_phy)
-    echo "4340000.usb" > /sys/bus/platform/drivers/dwc2/unbind
-    sleep 1
-    echo "4340000.usb" > /sys/bus/platform/drivers/dwc2/bind
-    start_usb_host
-    start_usb_dev
-  ;;
-esac
+run_usb_action "$1"

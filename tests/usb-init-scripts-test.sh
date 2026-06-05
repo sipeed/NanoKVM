@@ -8,12 +8,16 @@ HID_ONLY_SCRIPT="${ROOT_DIR}/kvmapp/system/init.d/S03usbhid"
 TMP_DIRS=""
 TEST_COMMON_SCRIPT=""
 
-CONFIGFS_GADGET_ATTRS="UDC bcdUSB bcdDevice idVendor idProduct"
+CONFIGFS_GADGET_ATTRS="UDC bcdUSB bcdDevice idVendor idProduct bDeviceClass bDeviceSubClass bDeviceProtocol"
 CONFIGFS_STRING_ATTRS="serialnumber manufacturer product"
 CONFIGFS_CONFIG_ATTRS="bmAttributes MaxPower"
 CONFIGFS_CONFIG_STRING_ATTRS="configuration"
 CONFIGFS_HID_ATTRS="subclass protocol report_length report_desc wakeup_on_write"
 CONFIGFS_LUN_ATTRS="removable ro cdrom inquiry_string file"
+CONFIGFS_OS_DESC_ATTRS="use b_vendor_code qw_sign"
+CONFIGFS_RNDIS_ATTRS="class subclass protocol"
+CONFIGFS_RNDIS_OS_DESC_ATTRS="compatible_id sub_compatible_id"
+CONFIGFS_NCM_OS_DESC_ATTRS="compatible_id"
 
 cleanup(){
     for dir in ${TMP_DIRS}
@@ -106,8 +110,9 @@ prepare_fake_configfs_dir(){
     dir="\$1"
     case "\${dir}" in
       g0|*/g0)
-        "${real_mkdir}" -p "\${dir}/strings" "\${dir}/configs" "\${dir}/functions"
+        "${real_mkdir}" -p "\${dir}/strings" "\${dir}/configs" "\${dir}/functions" "\${dir}/os_desc"
         touch_attrs "\${dir}" ${CONFIGFS_GADGET_ATTRS}
+        touch_attrs "\${dir}/os_desc" ${CONFIGFS_OS_DESC_ATTRS}
         ;;
       strings/0x409|*/strings/0x409)
         touch_attrs "\${dir}" ${CONFIGFS_STRING_ATTRS}
@@ -121,6 +126,15 @@ prepare_fake_configfs_dir(){
       functions/hid.GS*|*/functions/hid.GS*)
         printf '%s' '0' > "\${dir}/subclass"
         touch_attrs "\${dir}" ${CONFIGFS_HID_ATTRS}
+        ;;
+      functions/rndis.*|*/functions/rndis.*)
+        "${real_mkdir}" -p "\${dir}/os_desc/interface.rndis"
+        touch_attrs "\${dir}" ${CONFIGFS_RNDIS_ATTRS}
+        touch_attrs "\${dir}/os_desc/interface.rndis" ${CONFIGFS_RNDIS_OS_DESC_ATTRS}
+        ;;
+      functions/ncm.*|*/functions/ncm.*)
+        "${real_mkdir}" -p "\${dir}/os_desc/interface.ncm"
+        touch_attrs "\${dir}/os_desc/interface.ncm" ${CONFIGFS_NCM_OS_DESC_ATTRS}
         ;;
       functions/mass_storage.*/lun.0|*/functions/mass_storage.*/lun.0)
         touch_attrs "\${dir}" ${CONFIGFS_LUN_ATTRS}
@@ -146,7 +160,7 @@ remove_fake_configfs_attrs(){
     dir="\$1"
     case "\${dir}" in
       g0|*/g0)
-        rm -f "\${dir}/UDC" "\${dir}/bcdUSB" "\${dir}/bcdDevice" "\${dir}/idVendor" "\${dir}/idProduct"
+        rm -f "\${dir}/UDC" "\${dir}/bcdUSB" "\${dir}/bcdDevice" "\${dir}/idVendor" "\${dir}/idProduct" "\${dir}/bDeviceClass" "\${dir}/bDeviceSubClass" "\${dir}/bDeviceProtocol"
         ;;
       strings/0x409|*/strings/0x409)
         rm -f "\${dir}/serialnumber" "\${dir}/manufacturer" "\${dir}/product"
