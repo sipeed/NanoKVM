@@ -1,5 +1,61 @@
 #!/bin/sh
+# shellcheck disable=SC1091,SC2012,SC2164,SC3037
 # kvmhwd Rev2.2
+
+: "${NANOKVM_DISK0_MARKER:=/etc/kvm.disk0}"
+: "${NANOKVM_DATA_FORMAT_PENDING:=/etc/kvm.disk0.formatting}"
+: "${NANOKVM_DATA_PART:=/dev/mmcblk0p3}"
+: "${NANOKVM_BOOT_DIR:=/boot}"
+
+data_disk_ready(){
+    [ -e "$NANOKVM_DISK0_MARKER" ] && [ ! -e "$NANOKVM_DATA_FORMAT_PENDING" ] && [ -e "$NANOKVM_DATA_PART" ]
+}
+
+default_data_disk_file(){
+    if data_disk_ready
+    then
+            printf '%s\n' "$NANOKVM_DATA_PART"
+    fi
+}
+
+normalize_disk_file(){
+    printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+resolve_disk_file(){
+    disk_file="$(normalize_disk_file "$1")"
+    if [ -z "$disk_file" ] || [ "$disk_file" = "$NANOKVM_DATA_PART" ]
+    then
+            default_data_disk_file
+    else
+            printf '%s\n' "$disk_file"
+    fi
+}
+
+configure_mass_storage(){
+    if [ ! -e "$NANOKVM_BOOT_DIR/usb.disk0" ]
+    then
+            return
+    fi
+
+    disk=$(cat "$NANOKVM_BOOT_DIR/usb.disk0")
+    data_file="$(resolve_disk_file "$disk")"
+    if [ -z "$data_file" ]
+    then
+            return
+    fi
+
+    mkdir functions/mass_storage.disk0
+    ln -s functions/mass_storage.disk0 configs/c.1/
+    echo 1 > functions/mass_storage.disk0/lun.0/removable
+    if [ -e "$NANOKVM_BOOT_DIR/usb.disk0.ro" ]
+    then
+            echo 1 > functions/mass_storage.disk0/lun.0/ro
+            echo 0 > functions/mass_storage.disk0/lun.0/cdrom
+    fi
+    echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
+    printf '%s\n' "$data_file" > functions/mass_storage.disk0/lun.0/file
+}
 
 start_usb_dev(){
     . /etc/profile
@@ -114,30 +170,7 @@ start_usb_dev(){
         ln -s functions/hid.GS2 configs/c.1
     fi
 
-    if [ -e /boot/usb.disk0 ]
-    then
-            mkdir functions/mass_storage.disk0
-            ln -s functions/mass_storage.disk0 configs/c.1/
-            echo 1 > functions/mass_storage.disk0/lun.0/removable
-            if [ -e /boot/usb.disk0.ro ]
-            then
-                    echo 1 > functions/mass_storage.disk0/lun.0/ro
-                    echo 0 > functions/mass_storage.disk0/lun.0/cdrom
-            fi
-            echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
-            disk=$(cat /boot/usb.disk0)
-            if [ -z "${disk}" ]
-            then
-                    # if [ ! -e /mnt/usbdisk.img ]
-                    # then
-                    #         fallocate -l 8G /mnt/usbdisk.img
-                    #         mkfs.vfat /mnt/usbdisk.img
-                    # fi
-                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
-            else
-                    cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
-            fi
-    fi
+    configure_mass_storage
 
     ls /sys/class/udc/ | cat > UDC
     echo device > /proc/cviusb/otg_role
