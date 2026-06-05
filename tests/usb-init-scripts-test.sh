@@ -8,12 +8,17 @@ HID_ONLY_SCRIPT="${ROOT_DIR}/kvmapp/system/init.d/S03usbhid"
 TMP_DIRS=""
 TEST_COMMON_SCRIPT=""
 
-CONFIGFS_GADGET_ATTRS="UDC bcdUSB bcdDevice idVendor idProduct"
+CONFIGFS_GADGET_ATTRS="UDC bcdUSB bcdDevice idVendor idProduct bDeviceClass bDeviceSubClass bDeviceProtocol"
 CONFIGFS_STRING_ATTRS="serialnumber manufacturer product"
 CONFIGFS_CONFIG_ATTRS="bmAttributes MaxPower"
 CONFIGFS_CONFIG_STRING_ATTRS="configuration"
 CONFIGFS_HID_ATTRS="subclass protocol report_length report_desc wakeup_on_write"
 CONFIGFS_LUN_ATTRS="removable ro cdrom inquiry_string file"
+CONFIGFS_OS_DESC_ATTRS="use b_vendor_code qw_sign"
+CONFIGFS_RNDIS_ATTRS="class subclass protocol dev_addr host_addr"
+CONFIGFS_RNDIS_OS_DESC_ATTRS="compatible_id sub_compatible_id"
+CONFIGFS_NCM_ATTRS="dev_addr host_addr"
+CONFIGFS_NCM_OS_DESC_ATTRS="compatible_id"
 
 cleanup(){
     for dir in ${TMP_DIRS}
@@ -75,6 +80,7 @@ USB_MASS_STORAGE_FUNC="mass_storage.disk0"
 USB_RNDIS_FUNC="rndis.usb0"
 USB_LEGACY_EMPTY_DISK_BACKING="/dev/mmcblk0p3"
 USB_TEST_IMAGE="/data/install.iso"
+USB_TEST_BASE_UID="nanokvm-test-uid"
 
 KEYBOARD_REPORT_DESC="05010906a101050719e029e71500250175019508810295017508810395057501050819012905910295017503910395067508150025e70507190029e78100c0"
 HID_ONLY_KEYBOARD_REPORT_DESC="05010906a101050719e029e71500250175019508810295017508810395057501050819012905910295017503910395067508150025650507190029658100c0"
@@ -106,8 +112,9 @@ prepare_fake_configfs_dir(){
     dir="\$1"
     case "\${dir}" in
       g0|*/g0)
-        "${real_mkdir}" -p "\${dir}/strings" "\${dir}/configs" "\${dir}/functions"
+        "${real_mkdir}" -p "\${dir}/strings" "\${dir}/configs" "\${dir}/functions" "\${dir}/os_desc"
         touch_attrs "\${dir}" ${CONFIGFS_GADGET_ATTRS}
+        touch_attrs "\${dir}/os_desc" ${CONFIGFS_OS_DESC_ATTRS}
         ;;
       strings/0x409|*/strings/0x409)
         touch_attrs "\${dir}" ${CONFIGFS_STRING_ATTRS}
@@ -121,6 +128,16 @@ prepare_fake_configfs_dir(){
       functions/hid.GS*|*/functions/hid.GS*)
         printf '%s' '0' > "\${dir}/subclass"
         touch_attrs "\${dir}" ${CONFIGFS_HID_ATTRS}
+        ;;
+      functions/rndis.*|*/functions/rndis.*)
+        "${real_mkdir}" -p "\${dir}/os_desc/interface.rndis"
+        touch_attrs "\${dir}" ${CONFIGFS_RNDIS_ATTRS}
+        touch_attrs "\${dir}/os_desc/interface.rndis" ${CONFIGFS_RNDIS_OS_DESC_ATTRS}
+        ;;
+      functions/ncm.*|*/functions/ncm.*)
+        "${real_mkdir}" -p "\${dir}/os_desc/interface.ncm"
+        touch_attrs "\${dir}" ${CONFIGFS_NCM_ATTRS}
+        touch_attrs "\${dir}/os_desc/interface.ncm" ${CONFIGFS_NCM_OS_DESC_ATTRS}
         ;;
       functions/mass_storage.*/lun.0|*/functions/mass_storage.*/lun.0)
         touch_attrs "\${dir}" ${CONFIGFS_LUN_ATTRS}
@@ -146,7 +163,7 @@ remove_fake_configfs_attrs(){
     dir="\$1"
     case "\${dir}" in
       g0|*/g0)
-        rm -f "\${dir}/UDC" "\${dir}/bcdUSB" "\${dir}/bcdDevice" "\${dir}/idVendor" "\${dir}/idProduct"
+        rm -f "\${dir}/UDC" "\${dir}/bcdUSB" "\${dir}/bcdDevice" "\${dir}/idVendor" "\${dir}/idProduct" "\${dir}/bDeviceClass" "\${dir}/bDeviceSubClass" "\${dir}/bDeviceProtocol"
         ;;
       strings/0x409|*/strings/0x409)
         rm -f "\${dir}/serialnumber" "\${dir}/manufacturer" "\${dir}/product"
@@ -225,6 +242,14 @@ assert_hid_functions(){
     assert_hid_function "$1" "${USB_HID_ABSOLUTE_MOUSE_FUNC}" "$2 touch" 0 2 6 "$4" "$5"
 }
 
+assert_network_macs(){
+    g="$1"
+    func="$2"
+    label="$3"
+    usb_uid=$(printf '%s' "${USB_TEST_BASE_UID}" | sha512sum | head -c 4)
+    assert_eq "$(cat "${g}/functions/${func}/dev_addr")" "48:da:35:6e:${usb_uid%??}:${usb_uid#??}" "${label} device MAC"
+    assert_eq "$(cat "${g}/functions/${func}/host_addr")" "48:da:35:6d:${usb_uid%??}:${usb_uid#??}" "${label} host MAC"
+}
 assert_no_hid_functions(){
     g="$1"
     for func in "${USB_HID_KEYBOARD_FUNC}" "${USB_HID_RELATIVE_MOUSE_FUNC}" "${USB_HID_ABSOLUTE_MOUSE_FUNC}"
@@ -241,6 +266,7 @@ new_env(){
     touch "${base}/dwc2/bind" "${base}/dwc2/unbind"
     touch "${base}/udc/${USB_DEFAULT_UDC}"
     touch "${base}/proc/cviusb/otg_role"
+    printf '%s' "${USB_TEST_BASE_UID}" > "${base}/base_uid"
     echo "${base}"
 }
 
@@ -256,6 +282,7 @@ run_script_action(){
     USB_PHY_DEVICE="${USB_PHY_DEVICE}" \
     USB_DWC2_BIND="${base}/dwc2/bind" \
     USB_DWC2_UNBIND="${base}/dwc2/unbind" \
+    USB_BASE_UID="${base}/base_uid" \
     sh "${script}" "${action}" >/dev/null
 }
 
@@ -320,6 +347,7 @@ test_normal_mounted_image_and_network(){
     g="${base}/gadget/g0"
 
     assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_network_macs "${g}" "${USB_RNDIS_FUNC}" normal-network
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/file")" "${USB_TEST_IMAGE}" "mounted image"
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/ro")" "1" "media ro flag"
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/cdrom")" "0" "media cdrom flag"
