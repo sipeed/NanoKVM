@@ -2,6 +2,8 @@ import { http } from '@/lib/http.ts';
 
 export type DNSMode = 'manual' | 'dhcp';
 
+export type IPv4Mode = 'static' | 'dhcp';
+
 // wake on lan
 export function wol(mac: string) {
   const data = {
@@ -78,4 +80,12 @@ export function getDNS() {
 
 export function setDNS(mode: DNSMode, servers: string[]) {
   return http.post('/api/network/dns', { mode, servers });
+}
+
+export function getIPv4() {
+  return http.get('/api/network/ip');
+}
+
+export function setIPv4(mode: IPv4Mode, address: string, subnetMask: string, gateway: string) {
+  return http.post('/api/network/ip', { mode, address, subnetMask, gateway });
 }

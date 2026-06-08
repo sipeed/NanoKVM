@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Button, Input, Select, Switch, Table, Tag, Tooltip, message } from 'antd';
-import { RefreshCwIcon, ScrollTextIcon } from 'lucide-react';
+import { Button, Input, Modal, Select, Switch, Table, Tag, Tooltip, message } from 'antd';
+import { RefreshCwIcon, ScrollTextIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/auth.ts';
@@ -24,6 +24,90 @@ const roleColor: Record<string, string> = {
   viewer: 'default'
 };
 
+// Collapse dynamic path segments (e.g. /api/auth/users/alice) back to their
+// route pattern so they can be looked up in actionKeys below.
+function normalizePath(path: string): string {
+  return path
+    .replace(/^\/api\/auth\/users\/[^/]+\/password$/, '/api/auth/users/:username/password')
+    .replace(/^\/api\/auth\/users\/[^/]+$/, '/api/auth/users/:username')
+    .replace(/^\/api\/vm\/autostart\/[^/]+$/, '/api/vm/autostart/:name')
+    .replace(/\/$/, ''); // tolerate trailing slashes (e.g. /vm/mouse-jiggler/)
+}
+
+// Map "METHOD path" to a short i18n key under settings.audit.actions. Method is
+// part of the key because some paths serve several verbs (PUT vs DELETE on a
+// user, POST vs DELETE on a shortcut/autostart). Paths not listed here fall back
+// to the raw request path in the UI.
+const actionKeys: Record<string, string> = {
+  'POST /api/auth/login': 'login',
+  'POST /api/auth/logout': 'logout',
+  'POST /api/auth/password': 'changePassword',
+  'POST /api/auth/users': 'createUser',
+  'PUT /api/auth/users/:username': 'updateUser',
+  'DELETE /api/auth/users/:username': 'deleteUser',
+  'POST /api/auth/users/:username/password': 'changeUserPassword',
+  'POST /api/auth/audit/config': 'auditConfig',
+  'DELETE /api/auth/audit/logs': 'clearAudit',
+  'POST /api/vm/gpio': 'gpio',
+  'POST /api/vm/system/reboot': 'reboot',
+  'POST /api/usb/recover': 'usbRecover',
+  'POST /api/vm/ssh/enable': 'sshEnable',
+  'POST /api/vm/ssh/disable': 'sshDisable',
+  'POST /api/vm/hdmi/enable': 'hdmiEnable',
+  'POST /api/vm/hdmi/disable': 'hdmiDisable',
+  'POST /api/vm/hdmi/reset': 'hdmiReset',
+  'POST /api/vm/mdns/enable': 'mdnsEnable',
+  'POST /api/vm/mdns/disable': 'mdnsDisable',
+  'POST /api/vm/hostname': 'hostname',
+  'POST /api/vm/web-title': 'webTitle',
+  'POST /api/vm/tls': 'tls',
+  'POST /api/vm/oled': 'oled',
+  'POST /api/vm/swap': 'swap',
+  'POST /api/vm/memory/limit': 'memoryLimit',
+  'POST /api/vm/device/virtual': 'virtualDevice',
+  'POST /api/vm/mouse-jiggler': 'mouseJiggler',
+  'POST /api/vm/script/run': 'runScript',
+  'POST /api/vm/script/upload': 'uploadScript',
+  'DELETE /api/vm/script': 'deleteScript',
+  'POST /api/vm/autostart/:name': 'autostartSet',
+  'DELETE /api/vm/autostart/:name': 'autostartDelete',
+  'POST /api/vm/terminal': 'terminal',
+  'POST /api/hid/paste': 'hidPaste',
+  'POST /api/hid/mode': 'hidMode',
+  'POST /api/hid/reset': 'hidReset',
+  'POST /api/hid/shortcut': 'shortcutAdd',
+  'DELETE /api/hid/shortcut': 'shortcutDelete',
+  'POST /api/hid/shortcut/leader-key': 'leaderKey',
+  'POST /api/network/dns': 'setDns',
+  'POST /api/network/ip': 'setIp',
+  'POST /api/network/wifi/connect': 'wifiConnect',
+  'POST /api/network/wifi/disconnect': 'wifiDisconnect',
+  'POST /api/network/wifi': 'wifiConnect',
+  'POST /api/network/wol': 'wol',
+  'POST /api/network/wol/mac/name': 'wolMacName',
+  'DELETE /api/network/wol/mac': 'wolMacDelete',
+  'POST /api/storage/image/mount': 'imageMount',
+  'POST /api/storage/image/delete': 'imageDelete',
+  'POST /api/download/image': 'imageDownload',
+  'POST /api/download/file': 'imageDownload',
+  'POST /api/application/update': 'firmwareUpdate',
+  'POST /api/application/update/offline': 'firmwareUpdateOffline',
+  'POST /api/application/preview': 'firmwarePreview',
+  'POST /api/tailscale/up': 'tsUp',
+  'POST /api/tailscale/down': 'tsDown',
+  'POST /api/tailscale/start': 'tsStart',
+  'POST /api/tailscale/stop': 'tsStop',
+  'POST /api/tailscale/restart': 'tsRestart',
+  'POST /api/tailscale/install': 'tsInstall',
+  'POST /api/tailscale/uninstall': 'tsUninstall',
+  'POST /api/tailscale/login': 'tsLogin',
+  'POST /api/tailscale/logout': 'tsLogout'
+};
+
+function resolveActionKey(method: string, path: string): string | null {
+  return actionKeys[`${method} ${normalizePath(path)}`] ?? null;
+}
+
 function formatTime(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) {
@@ -41,6 +125,7 @@ export const Audit = () => {
   const [resultFilter, setResultFilter] = useState<string>('all');
   const [enabled, setEnabled] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -100,6 +185,38 @@ export const Audit = () => {
       });
   }
 
+  function clearLogs() {
+    if (clearing) return;
+
+    Modal.confirm({
+      title: t('settings.audit.clearConfirmTitle'),
+      icon: <Trash2Icon size={20} className="mr-2 text-red-400" />,
+      content: t('settings.audit.clearConfirmText'),
+      okText: t('settings.audit.clearConfirmOk'),
+      cancelText: t('settings.audit.clearConfirmCancel'),
+      okButtonProps: { danger: true },
+      onOk: () => {
+        setClearing(true);
+        return api
+          .clearAuditLog()
+          .then((rsp: any) => {
+            if (rsp.code === 0) {
+              message.success(t('settings.audit.clearSuccess'));
+              load();
+            } else {
+              message.error(t('settings.audit.clearFailed'));
+            }
+          })
+          .catch(() => {
+            message.error(t('settings.audit.clearFailed'));
+          })
+          .finally(() => {
+            setClearing(false);
+          });
+      }
+    });
+  }
+
   const filtered = useMemo(() => {
     return entries.filter((e) => {
       if (userFilter && !e.user?.toLowerCase().includes(userFilter.toLowerCase())) {
@@ -139,11 +256,15 @@ export const Audit = () => {
     {
       title: t('settings.audit.colAction'),
       key: 'action',
-      render: (_: any, r: Entry) => (
-        <Tooltip title={`${r.method} ${r.path}`}>
-          <span>{r.action || r.path}</span>
-        </Tooltip>
-      )
+      render: (_: any, r: Entry) => {
+        const key = resolveActionKey(r.method, r.path);
+        const label = key ? t(`settings.audit.actions.${key}`) : r.action || r.path;
+        return (
+          <Tooltip title={`${r.method} ${r.path}`}>
+            <span>{label}</span>
+          </Tooltip>
+        );
+      }
     },
     {
       title: t('settings.audit.colIp'),
@@ -189,6 +310,15 @@ export const Audit = () => {
             disabled={!enabled}
           >
             {t('settings.audit.refresh')}
+          </Button>
+          <Button
+            size="small"
+            danger
+            icon={<Trash2Icon size={14} />}
+            onClick={clearLogs}
+            loading={clearing}
+          >
+            {t('settings.audit.clearLog')}
           </Button>
         </div>
       </div>

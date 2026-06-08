@@ -174,6 +174,34 @@ func rotateIfNeeded() {
 	file = f
 }
 
+// Clear empties the audit history, including any rotated generation
+// (audit.log.1). Safe for concurrent use. If auditing is enabled, the clear
+// action itself is still recorded afterwards by the audit middleware, so the
+// log will contain a single "cleared" entry rather than being truly empty.
+func Clear() error {
+	mu.Lock()
+	defer mu.Unlock()
+
+	if logPath == "" {
+		return nil
+	}
+
+	// Drop the rotated previous generation, if present.
+	_ = os.Remove(logPath + ".1")
+
+	if file != nil {
+		// File is open (opened with O_APPEND, so the next write lands at the
+		// new end, i.e. offset 0 after truncation).
+		return file.Truncate(0)
+	}
+
+	// Auditing disabled / file not open: truncate on disk if it exists.
+	if _, err := os.Stat(logPath); err == nil {
+		return os.Truncate(logPath, 0)
+	}
+	return nil
+}
+
 // Close flushes and closes the audit log file.
 func Close() {
 	mu.Lock()

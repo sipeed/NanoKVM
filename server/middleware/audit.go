@@ -17,6 +17,7 @@ var auditActions = map[string]string{
 	"/api/auth/logout":         "logout",
 	"/api/auth/password":       "change own password",
 	"/api/auth/users":          "create user",
+	"/api/auth/audit/logs":     "clear audit log",
 	"/api/vm/gpio":             "power / reset button",
 	"/api/vm/system/reboot":    "reboot device",
 	"/api/vm/script/run":       "run script",
@@ -31,6 +32,17 @@ var auditActions = map[string]string{
 	"/api/hid/reset":           "reset HID",
 	"/api/application/update":  "update firmware",
 	"/api/storage/image/mount": "mount virtual media",
+}
+
+// auditSkip lists API paths that are never written to the audit log, even
+// though they change state. These are high-frequency polling endpoints the web
+// UI calls repeatedly (screen capture, MJPEG frame detection); logging them
+// would flood the log with dozens of identical entries per second and bury the
+// actions that actually matter.
+var auditSkip = map[string]bool{
+	"/api/vm/screen":                true, // screenshot / screen polling
+	"/api/stream/mjpeg/detect":      true, // continuous frame-detect updates
+	"/api/stream/mjpeg/detect/stop": true, // frame-detect stop pings
 }
 
 // Audit records who did what. Register it as a global middleware (r.Use) so it
@@ -52,6 +64,10 @@ func Audit() gin.HandlerFunc {
 
 		// Only audit API calls.
 		if len(path) < 5 || path[:5] != "/api/" {
+			return
+		}
+		// Skip high-frequency polling endpoints (see auditSkip).
+		if auditSkip[path] {
 			return
 		}
 		// Skip read-only methods (the action log is about changes, not views).

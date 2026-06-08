@@ -1,9 +1,29 @@
 # Changelog
 
 This changelog tracks releases of the **Schattenwelt/NanoKVM fork**.
-Each entry marked `[Fork]` describes changes added on top of the
-upstream Sipeed/NanoKVM release of the same version.
+Each entry marked `[Fork]` describes the changes this fork adds on top of
+upstream Sipeed/NanoKVM. The fork keeps its own version line, which can run
+ahead of the matching upstream release (e.g. `[Fork] 2.4.3` is still based on
+upstream 2.4.2).
 Unmarked entries below are the verbatim upstream history for context.
+
+---
+
+## [Fork] 2.4.3 — 2026-06-08
+
+Second Schattenwelt-fork release. Still based on upstream 2.4.2; the version is
+bumped to 2.4.3 only so the fork's own update channel detects it as newer than
+[Fork] 2.4.2.
+
+### Added
+
+* **Activity / audit log** — records user actions via backend (Gin) middleware, reading the authenticated user from the JWT context, with admin-only viewing endpoints, an enable/disable toggle, and automatic log rotation. High-frequency polling endpoints (e.g. `/api/vm/screen`) are excluded to prevent log flooding. Actions are shown as human-readable, localized labels in all 24 supported languages. The "clear log" action intentionally retains a single entry documenting who cleared the log and when.
+* **Static IPv4 configuration UI** — set a static IPv4 address directly from the web interface, wired to a dedicated backend endpoint.
+
+### Notes
+
+* No new upstream changes: still built against the commit corresponding to Sipeed release 2.4.2.
+* The `version` file and `latest.json` are both stamped `2.4.3` so `semver.gte` reliably surfaces the update on devices running [Fork] 2.4.2.
 
 ---
 

@@ -55,3 +55,7 @@ export function getAuditConfig() {
 export function setAuditConfig(enabled: boolean) {
   return http.post('/api/auth/audit/config', { enabled });
 }
+
+export function clearAuditLog() {
+  return http.delete('/api/auth/audit/logs');
+}

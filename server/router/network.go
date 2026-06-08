@@ -23,6 +23,7 @@ func networkRouter(r *gin.Engine) {
 	opAPI.GET("/network/wol/mac", service.GetMac) // get mac list
 	opAPI.GET("/network/wifi", service.GetWifi)   // get Wi-Fi information
 	opAPI.GET("/network/dns", service.GetDNS)     // get DNS configuration
+	opAPI.GET("/network/ip", service.GetIPv4)     // get IPv4 configuration
 
 	// Admin only: network configuration
 	adminAPI := r.Group("/api").Use(
@@ -34,4 +35,5 @@ func networkRouter(r *gin.Engine) {
 	adminAPI.POST("/network/wifi/connect", service.ConnectWifi)       // connect Wi-Fi
 	adminAPI.POST("/network/wifi/disconnect", service.DisconnectWifi) // disconnect Wi-Fi
 	adminAPI.POST("/network/dns", service.SetDNS)                     // set DNS configuration
+	adminAPI.POST("/network/ip", service.SetIPv4)                     // set IPv4 configuration
 }

@@ -32,6 +32,23 @@ func (s *Service) GetAuditLog(c *gin.Context) {
 	rsp.OkRspWithData(c, gin.H{"entries": entries})
 }
 
+// ClearAuditLog deletes the entire audit history (admin only; the route is
+// guarded by RequireRole(admin)). When auditing is enabled, this clear action
+// is itself recorded afterwards by the audit middleware, leaving a single entry
+// documenting who cleared the log and when.
+func (s *Service) ClearAuditLog(c *gin.Context) {
+	var rsp proto.Response
+
+	if err := audit.Clear(); err != nil {
+		log.Errorf("audit: failed to clear log: %v", err)
+		rsp.ErrRsp(c, -1, "failed to clear audit log")
+		return
+	}
+
+	rsp.OkRsp(c)
+	log.Debug("audit log cleared")
+}
+
 // GetAuditConfig reports whether the audit log is currently enabled (admin only).
 func (s *Service) GetAuditConfig(c *gin.Context) {
 	var rsp proto.Response

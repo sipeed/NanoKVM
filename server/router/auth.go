@@ -36,6 +36,7 @@ func authRouter(r *gin.Engine) {
 
 	// Admin-only: read the audit log (who did what) and toggle it on/off
 	adminAPI.GET("/auth/audit", service.GetAuditLog)
+	adminAPI.DELETE("/auth/audit/logs", service.ClearAuditLog)
 	adminAPI.GET("/auth/audit/config", service.GetAuditConfig)
 	adminAPI.POST("/auth/audit/config", service.SetAuditConfig)
 }
