@@ -17,7 +17,7 @@ uint8_t get_hdmi_version()
         fread(RW_Data, sizeof(char), 2, fp);
         fclose(fp);
         if(RW_Data[0] == 'u'){
-            // 6911uxc
+            // 6911uxc / 6911uxe
             if(RW_Data[1] == 'e'){
                 return 2;
             } else if(RW_Data[1] == 'x') {
@@ -25,6 +25,9 @@ uint8_t get_hdmi_version()
             } else {
                 return 1;
             }
+        } else if(RW_Data[0] == 'd'){
+            // 6911d
+            return 3;
         } else {
             // 6911c
             return 0;
@@ -139,6 +142,7 @@ void new_app_init(void)
 		fclose(fp);
 		if(RW_Data[0] == 'c') hdmi_ver = 1;
 		else if(RW_Data[0] == 'u') hdmi_ver = 2;
+		else if(RW_Data[0] == 'd') hdmi_ver = 2;
 	}
 
 	// system("/etc/init.d/S03usbdev stop_start");
