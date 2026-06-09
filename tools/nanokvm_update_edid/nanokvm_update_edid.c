@@ -47,9 +47,9 @@ int check_edid(uint8_t *edid_data, uint16_t edid_size)
     }
 
     // Check EDID header
-    if (edid_data[0] != 0x00 || edid_data[1] != 0xFF || 
-        edid_data[2] != 0xFF || edid_data[3] != 0xFF || 
-        edid_data[4] != 0xFF || edid_data[5] != 0xFF || 
+    if (edid_data[0] != 0x00 || edid_data[1] != 0xFF ||
+        edid_data[2] != 0xFF || edid_data[3] != 0xFF ||
+        edid_data[4] != 0xFF || edid_data[5] != 0xFF ||
         edid_data[6] != 0xFF || edid_data[7] != 0x00) {
         fprintf(stderr, "EDID header is invalid\n");
         return -1; // EDID header is invalid
@@ -64,7 +64,7 @@ int check_edid(uint8_t *edid_data, uint16_t edid_size)
     if (checksum1 != edid_data[127]) {
         // Checksum for first 128 bytes is incorrect
         fprintf(stderr, "Checksum for first 128 bytes is incorrect\n");
-        return -1; 
+        return -1;
     }
 
     // Second 128 Bytes checksum
@@ -95,7 +95,7 @@ void NanoKVM_PCIe_HDMI_Reset(void)
 // =======================================================================================================
 
 // I2C write function
-int i2c_write_byte(uint8_t offset, uint8_t reg, uint8_t data) 
+int i2c_write_byte(uint8_t offset, uint8_t reg, uint8_t data)
 {
     // reg buffer
     uint8_t reg_buf[2] = {0};
@@ -121,7 +121,7 @@ int i2c_write_byte(uint8_t offset, uint8_t reg, uint8_t data)
     return 0;
 }
 
-int i2c_write_bytes(uint8_t offset, uint8_t reg, const uint8_t *data, size_t len) 
+int i2c_write_bytes(uint8_t offset, uint8_t reg, const uint8_t *data, size_t len)
 {
     // check len
     if (len == 0) {
@@ -159,7 +159,7 @@ int i2c_write_bytes(uint8_t offset, uint8_t reg, const uint8_t *data, size_t len
 }
 
 // I2C read function
-int i2c_read_byte(uint8_t offset, uint8_t reg, uint8_t *data) 
+int i2c_read_byte(uint8_t offset, uint8_t reg, uint8_t *data)
 {
     // reg buffer
     uint8_t reg_buf[2] = {0};
@@ -191,7 +191,7 @@ int i2c_read_byte(uint8_t offset, uint8_t reg, uint8_t *data)
     return 0;
 }
 
-int i2c_read_bytes(uint8_t offset, uint8_t reg, uint8_t *data, size_t len) 
+int i2c_read_bytes(uint8_t offset, uint8_t reg, uint8_t *data, size_t len)
 {
     // 检查数据长度
     if (len == 0) {
@@ -259,7 +259,7 @@ int lt6911uxc_edid_write(uint8_t *edid_data, uint16_t edid_size)
     uint8_t version_str[32] = {0};
 
     fprintf(stdout, "Writing EDID....\n");
-    
+
     // Start
     if (i2c_write_byte(LT6911_SYS_OFFSET, 0xFF, 0x80) != 0) return -1;
     lt6911_enable();
@@ -286,7 +286,7 @@ int lt6911uxc_edid_write(uint8_t *edid_data, uint16_t edid_size)
     if (chip_data[0] != 0xEE) {
         fprintf(stderr, "Unsupported chip version\n");
         return -1;
-    } 
+    }
     if (i2c_write_byte(LT6911_SYS3_OFFSET, 0x08, 0xAE) != 0) return -1;
     if (i2c_write_byte(LT6911_SYS3_OFFSET, 0x08, 0xEE) != 0) return -1;
     // Write
@@ -373,7 +373,7 @@ int lt6911c_edid_write(uint8_t *edid_data, uint16_t edid_size)
     uint8_t version_str[32] = {0};
 
     fprintf(stdout, "Writing EDID....\n");
-    
+
     // Start
     lt6911_enable();
     if (i2c_read_bytes(LT6911_SYS4_OFFSET, 0x00, chip_data, 2) != 0) return -1;
@@ -487,9 +487,161 @@ int lt6911c_edid_read(uint8_t *edid_data, uint16_t edid_size)
     return 0;
 }
 
+int lt6911d_str_read(uint8_t *str)
+{
+    fprintf(stdout, "Reading LT6911D version data...\n");
+
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0xEE, 0x01) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0xDF) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x59, 0x50) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x21) != 0) return -1;
+    if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xBF) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xFF) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x04) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0x5F) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x20) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5B, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5C, 0x81) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5D, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_read_bytes(LT6911D_MANAGE_OFFSET, 0x5F, str, LT6911D_WR_SIZE) != 0) return -1;
+    usleep(10000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x08) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+
+    return 0;
+}
+
+int lt6911d_edid_write(uint8_t *edid_data, uint16_t edid_size)
+{
+    uint8_t i;
+    uint8_t wr_count = edid_size / LT6911D_WR_SIZE + 1;
+    uint8_t version_str[LT6911D_WR_SIZE] = {0};
+
+    if (lt6911d_str_read(version_str) != 0) {
+        fprintf(stderr, "Failed to read LT6911D version data\n");
+        return -1;
+    }
+
+    fprintf(stdout, "Writing EDID....\n");
+
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0xEE, 0x01) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0xDF) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x59, 0x50) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x21) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x04) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5B, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5C, 0x80) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5D, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x01) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    usleep(600000);
+
+    for (i = 0; i < wr_count; i++) {
+        if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xBF) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xFF) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x04) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0xDF) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x20) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x21) != 0) return -1;
+        if (i != wr_count - 1) {
+            if (i2c_write_bytes(LT6911D_MANAGE_OFFSET, 0x59, edid_data + (LT6911D_WR_SIZE * i), LT6911D_WR_SIZE) != 0) return -1;
+        } else {
+            if (i2c_write_bytes(LT6911D_MANAGE_OFFSET, 0x59, version_str, LT6911D_WR_SIZE) != 0) return -1;
+        }
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5B, 0x00) != 0) return -1;
+        if (i != wr_count - 1) {
+            if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5C, 0x80) != 0) return -1;
+        } else {
+            if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5C, 0x81) != 0) return -1;
+        }
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5D, 0x00 + (LT6911D_WR_SIZE * i)) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+        usleep(5000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        usleep(10000);
+    }
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x08) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+
+    fprintf(stdout, "EDID write completed\n");
+
+    return 0;
+}
+
+int lt6911d_edid_read(uint8_t *edid_data, uint16_t edid_size)
+{
+    uint8_t i;
+    uint8_t wr_count = edid_size / LT6911D_WR_SIZE;
+
+    fprintf(stdout, "Reading EDID...\n");
+
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0xEE, 0x01) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0xDF) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x59, 0x50) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x21) != 0) return -1;
+    for (i = 0; i < wr_count; i++) {
+        if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xBF) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_DATA_OFFSET, 0x03, 0xFF) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x04) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5E, 0x5F) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x20) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5B, 0x00) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5C, 0x80) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5D, 0x00 + (LT6911D_WR_SIZE * i)) != 0) return -1;
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x10) != 0) return -1;
+        usleep(1000);
+        if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+        if (i2c_read_bytes(LT6911D_MANAGE_OFFSET, 0x5F, edid_data + (LT6911D_WR_SIZE * i), LT6911D_WR_SIZE) != 0) return -1;
+        usleep(10000);
+    }
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x08) != 0) return -1;
+    usleep(1000);
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x5A, 0x00) != 0) return -1;
+    if (i2c_write_byte(LT6911D_MANAGE_OFFSET, 0x58, 0x00) != 0) return -1;
+
+    return 0;
+}
+
 // =======================================================================================================
 
-int lt6911_edid_config(chip_version_t chip_version, uint8_t *edid_data, uint16_t edid_size) 
+int lt6911_edid_config(chip_version_t chip_version, uint8_t *edid_data, uint16_t edid_size)
 {
     if (chip_version == CHIP_UNKNOWN)
     {
@@ -523,6 +675,12 @@ int lt6911_edid_config(chip_version_t chip_version, uint8_t *edid_data, uint16_t
             close(client);
             return -1;
         }
+    } else if (chip_version == CHIP_LT6911D) {
+        if (lt6911d_edid_write(edid_data, edid_size) != 0) {
+            fprintf(stderr, "Failed to write EDID data to LT6911D\n");
+            close(client);
+            return -1;
+        }
     } else {
         fprintf(stderr, "Unknown chip version\n");
         close(client);
@@ -542,6 +700,12 @@ int lt6911_edid_config(chip_version_t chip_version, uint8_t *edid_data, uint16_t
     } else if (chip_version == CHIP_LT6911C) {
         if (lt6911c_edid_read(edid_read_data, EDID_BUFFER_SIZE) != 0) {
             fprintf(stderr, "Failed to read EDID data from LT6911C\n");
+            close(client);
+            return -1;
+        }
+    } else if (chip_version == CHIP_LT6911D) {
+        if (lt6911d_edid_read(edid_read_data, EDID_BUFFER_SIZE) != 0) {
+            fprintf(stderr, "Failed to read EDID data from LT6911D\n");
             close(client);
             return -1;
         }
@@ -596,7 +760,7 @@ void print_warning(product_version_t product_version) {
         printf("Please ensure you can physically disconnect its power,\n");
         printf("NOT just remotely reboot it!!\n");
         printf("==========================================================\n\n");
-    } 
+    }
 }
 
 void print_success(product_version_t product_version) {
@@ -604,31 +768,31 @@ void print_success(product_version_t product_version) {
     printf("✅  EDID update successful!\n");
     if (product_version == PRODUCT_CUBE_A || product_version == PRODUCT_CUBE_B) {
         printf("Please manually power cycle the device to apply changes.\n");
-    } 
+    }
     printf("=========================================================\n\n");
 }
 
 int get_user_confirmation() {
     char input[256];
     printf("Do you want to continue? (Y/N): \n");
-    
+
     while (1) {
-        
+
         if (fgets(input, sizeof(input), stdin) == NULL) {
             printf("\nInput error. Exiting.\n");
             return 0;
         }
-        
+
         // 去除换行符
         input[strcspn(input, "\n")] = '\0';
-        
+
         if (strlen(input) == 0) {
             continue; // 空输入，重新提示
         }
-        
+
         // 转换为小写方便比较
         char choice = tolower(input[0]);
-        
+
         if (choice == 'y') {
             return 1;
         } else if (choice == 'n') {
@@ -656,7 +820,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Please upgrade to the latest system\n");
         return 1;
     }
-    
+
     if (fgets(chip_version_str, sizeof(chip_version_str), file) == NULL) {
         fprintf(stderr, "Failed to read chip version\n");
         fclose(file);
@@ -669,23 +833,26 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Please upgrade to the latest system\n");
         return 1;
     }
-    
+
     if (fgets(product_version_str, sizeof(product_version_str), file) == NULL) {
         fprintf(stderr, "Failed to read product version\n");
         fclose(file);
         return 1;
     }
     fclose(file);
-    
+
     chip_version_str[strcspn(chip_version_str, "\n")] = '\0';
     product_version_str[strcspn(product_version_str, "\n")] = '\0';
-    
+
     if (strcmp(chip_version_str, "c") == 0) {
         fprintf(stdout, "Chip Version: LT6911C\n");
         chip_version = CHIP_LT6911C;
     } else if (strcmp(chip_version_str, "ux") == 0) {
         fprintf(stdout, "Chip Version: LT6911UXC\n");
         chip_version = CHIP_LT6911UXC;
+    } else if (strcmp(chip_version_str, "d") == 0) {
+        fprintf(stdout, "Chip Version: LT6911D\n");
+        chip_version = CHIP_LT6911D;
     } else if (strcmp(chip_version_str, "ue") == 0) {
         fprintf(stderr, "Chip Version Error: UE version's edid can't be updated\n");
         return 1;
@@ -693,7 +860,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Chip Version Error: Unknown version\n");
         return 1;
     }
-        
+
     if (strcmp(product_version_str, "alpha") == 0) {
         fprintf(stdout, "Product Version: CUBE_A\n");
         product_version = PRODUCT_CUBE_A;
