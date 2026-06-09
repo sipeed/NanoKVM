@@ -36,4 +36,5 @@ func networkRouter(r *gin.Engine) {
 	adminAPI.POST("/network/wifi/disconnect", service.DisconnectWifi) // disconnect Wi-Fi
 	adminAPI.POST("/network/dns", service.SetDNS)                     // set DNS configuration
 	adminAPI.POST("/network/ip", service.SetIPv4)                     // set IPv4 configuration
+	adminAPI.POST("/network/ip/confirm", service.ConfirmIPv4)         // confirm pending static IP
 }

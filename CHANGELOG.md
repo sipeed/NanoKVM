@@ -1,207 +1,291 @@
+# Changelog
+
+This changelog tracks releases of the **Schattenwelt/NanoKVM fork**.
+Each entry marked `[Fork]` describes the changes this fork adds on top of
+upstream Sipeed/NanoKVM. The fork keeps its own version line, which can run
+ahead of the matching upstream release (e.g. `[Fork] 2.4.4` is based on
+upstream 2.4.3).
+Unmarked entries below are the verbatim upstream history for context.
+
+---
+
+## [Fork] 2.4.4 — 2026-06-09
+
+Third Schattenwelt-fork release. Rebased onto upstream 2.4.3. No fork-side
+feature changes — the version is bumped to 2.4.4 so the fork's own update
+channel detects it as newer than both [Fork] 2.4.3 and upstream 2.4.3.
+
+### Changed
+
+* Rebased onto upstream Sipeed/NanoKVM **2.4.3**. Upstream changed no Go backend or React frontend *source* between 2.4.2 and 2.4.3, so all multi-user RBAC patches carry over without conflict; the build now uses the 2.4.3 deployment package as its base.
+* `web/package.json`: bumped `js-cookie` `^3.0.5` → `^3.0.7` to match upstream 2.4.3.
+
+### Notes
+
+* No changes to the multi-user RBAC, activity/audit log, or static IPv4 configuration introduced in [Fork] 2.4.2 / [Fork] 2.4.3.
+* The `version` file and `latest.json` are both stamped `2.4.4` so `semver.gte` reliably surfaces the update on devices running [Fork] 2.4.3.
+
+### Inherited from upstream 2.4.3
+
+* LT6911D HDMI capture chip support.
+* Improved USB network adapter compatibility on Windows.
+
+These ship via the precompiled hardware components (`kvm`, `kvm_system`, EDID tool) and init scripts (`S03usbdev`, `S15kvmhwd`) of the 2.4.3 base — see the [upstream changelog](#243-2026-06-09) below.
+
+---
+
 ## [Fork] 2.4.3 — 2026-06-08
- 
+
 Second Schattenwelt-fork release. Still based on upstream 2.4.2; the version is
 bumped to 2.4.3 only so the fork's own update channel detects it as newer than
 [Fork] 2.4.2.
- 
+
 ### Added
- 
+
 * **Activity / audit log** — records user actions via backend (Gin) middleware, reading the authenticated user from the JWT context, with admin-only viewing endpoints, an enable/disable toggle, and automatic log rotation. High-frequency polling endpoints (e.g. `/api/vm/screen`) are excluded to prevent log flooding. Actions are shown as human-readable, localized labels in all 24 supported languages. The "clear log" action intentionally retains a single entry documenting who cleared the log and when.
 * **Static IPv4 configuration UI** — set a static IPv4 address directly from the web interface, wired to a dedicated backend endpoint.
+
 ### Notes
- 
+
 * No new upstream changes: still built against the commit corresponding to Sipeed release 2.4.2.
 * The `version` file and `latest.json` are both stamped `2.4.3` so `semver.gte` reliably surfaces the update on devices running [Fork] 2.4.2.
+
 ---
- 
+
 ## [Fork] 2.4.2 — 2026-05-21
- 
+
 Initial Schattenwelt-fork release based on upstream 2.4.2.
- 
+
 ### Added
- 
+
 * **Multi-user support with role-based access control (RBAC)** — three built-in roles (`viewer`, `operator`, `admin`) on the backend, matching frontend UI under `Settings → Users` and `Settings → Account`. See [README](README.md#-whats-different-in-this-fork) for the full permission matrix.
 * **bcrypt** password hashing, **JWT** session cookies, and **brute-force protection** on the login endpoint.
 * Last-admin protection (cannot delete the only enabled admin) and self-delete protection.
 * Internal loopback endpoints (used by `kvm_system` / picoclaw) gated by a separate loopback token instead of JWT.
 * Localized strings for the user-management UI in **all 24 supported languages** (was only `de` / `en` in the previous 2.4.1-multiuser snapshot).
+
 ### Changed
- 
+
 * **Update channel switched** from `https://cdn.sipeed.com/nanokvm` to this fork's GitHub Releases (`https://github.com/Schattenwelt/NanoKVM/releases/latest/download`). After the first manual offline-update, further updates are pulled automatically from this fork via *Settings → Check for updates*.
 * Migrated accounts file: existing single-user setup in `/etc/kvm/pwd` is automatically converted to `/etc/kvm/accounts.json` on first start. The existing user becomes the initial `admin`; legacy file is removed.
+
 ### Notes
- 
+
 * Built against upstream commit corresponding to Sipeed release **2.4.2**.
 * No changes to `kvmapp/`, `support/`, or any hardware-related code — the fork only modifies the Go backend and the React frontend.
+
 ### Inherited from upstream 2.4.2
- 
+
 See the [upstream changelog](#242-2026-05-20) below for the full list — short summary: HDMI capture-status overlays, WebRTC streaming improvements, PicoClaw session stabilization, WoL hardening, mouse / touch input fixes.
- 
+
 ---
- 
-## 2.4.2 (2026-05-20)
- 
+
+## 2.4.3 (2026-06-09)
+
 ### Features
- 
-* Added HDMI capture status detection with localized warning and error overlays on the desktop screen
+
+* Added LT6911D support
+
 ### Bug Fixes
- 
+
+* Improved USB network adapter compatibility on Windows
+
+## 2.4.2 (2026-05-20)
+
+### Features
+
+* Added HDMI capture status detection with localized warning and error overlays on the desktop screen
+
+### Bug Fixes
+
 * Fixed left-button touch cancellation and context menu cleanup for mouse input
 * Improved the WebRTC loading indicator
 * Added Wi-Fi password field validation
 * Hardened Wake-on-LAN MAC handling by normalizing stored addresses, avoiding shell execution, handling missing history gracefully, and improving named MAC display
 * Stabilized PicoClaw session switching by waiting for gateway release, refreshing runtime status before reconnecting, rendering structured thought messages, and preventing history row overflow
+
 ### Performance
- 
+
 * Improved H.264 streaming client handling by reducing frame queue latency, using client snapshots for fanout, applying backend ICE server configuration, and cleaning up disconnected WebRTC clients more aggressively
+
 ### UI Improvements
- 
+
 * Refreshed desktop menu ordering and community links, including replacing the Discussion link with Discord
+
 ### Chores
- 
+
 * Removed the legacy H.264 stream package
 * Updated PostCSS, refreshed the MSW worker, and added pnpm workspace build approvals
+
 ## 2.4.1 (2026-05-08)
- 
+
 ### Features
- 
+
 * Added DNS management to Network settings, including DHCP/manual modes, effective DNS display, network details, IPv4/IPv6 server validation, and persistent udhcpc hook support
 * Added a configurable server `host` option for binding NanoKVM to a specific listen address (thanks to [@allmazz](https://github.com/allmazz))
 * Added French keyboard layout support and language options (thanks to [@ilyesAj](https://github.com/ilyesAj))
+
 ### Bug Fixes
- 
+
 * Hardened HID recovery and cleanup by adding non-blocking HID writes, bounded reopen retries, stale event draining, and release reports after write failures
 * Fixed the `kvm_vision` project name and build output message in the SG2002 build script (thanks to [@Voranto](https://github.com/Voranto))
+
 ### UI Improvements
- 
+
 * Moved TLS and Wi-Fi settings into the Network settings section
 * Optimized the Settings scrollbar style
+
 ### Localization
- 
+
 * Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
 * Synchronized translations of other languages according to English
+
 ### Security
- 
+
 * Upgraded vulnerable web dependencies
+
 ## 2.4.0 (2026-04-10)
- 
+
 ### Features
- 
+
 * **Introduced [PicoClaw](https://github.com/sipeed/picoclaw) support** — an AI-powered remote desktop assistant for NanoKVM. PicoClaw seamlessly integrates a lightweight AI agent with NanoKVM's underlying hardware capabilities. Key highlights include:
   * **Zero-Agent Architecture:** Operates entirely through HDMI video capture (vision) and USB HID emulation (keyboard/mouse). No SSH access, network connection to the host, or OS-level software installation is required.
   * **Natural Language Control:** Features a built-in chat interface allowing users to issue complex instructions in plain text.
   * **Autonomous GUI Operation:** The AI agent can autonomously observe the remote host's screen, understand UI elements, reason about the task, and execute operations mimicking human behavior.
   * **Installation Note:** PicoClaw is not built into the NanoKVM device or firmware. Install it separately when needed.
+
 ### Bug Fixes
- 
+
 * Added a default subnet mask for static IP configurations
 * Fixed an issue where the IP address would occasionally not display
+
 ## 2.3.6 (2026-03-12)
- 
+
 ### Features
- 
+
 * Implemented AP password authentication for the WiFi configuration page
 * Added Korean and Japanese virtual keyboard layouts (thanks to [@klim4-bot](https://github.com/klim4-bot))
 * Enabled support for 640x480 resolution (thanks to [@Voranto](https://github.com/Voranto))
 * Added encryption parameters for OLED distribution network
 * Added custom logo function and logo generation tools
 * Added update mechanism for tailscale startup script
+
 ### Localization
- 
+
 * Updated Japanese translation (thanks to [@tkmsst](https://github.com/tkmsst))
+
 ## 2.3.5 (2026-02-28)
- 
+
 ### Features
- 
+
 * Implemented login brute-force protection with lockout mechanism
+
 ### Bug Fixes
- 
+
 * Improved Tailscale error handling in UI components and refined backend state mapping
+
 ### Chores
- 
+
 * Updated server and web dependencies
+
 ## 2.3.4 (2026-01-26)
- 
+
 ### Features
- 
+
 * Introduced `Leader Key` functionality to bypass local browser shortcut interception
+
 ### Bug Fixes
- 
+
 * Fixed an issue where the Right Shift key was not being recognized on Windows system
 * Fixed a bug where the menu bar would fail to close correctly
+
 ### Localization
- 
+
 * Updated Traditional Chinese translations (thanks to [@j796160836](https://github.com/j796160836))
 * Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
+
 ## 2.3.3 (2026-01-16)
- 
+
 ### Features
- 
+
 * Added support for setting the display mode of the menu bar
+
 ### Bug Fixes
- 
+
 * Fixed a keyboard issue where IME composition events were not handled correctly
 * Resolved an issue where the `AltGr` key was not recognized on the Windows system
 * Fixed a bug where `Command` key combinations were not fully released on the macOS system
 * Fixed input issues with the `IntlBackslash` key on the German virtual keyboard
+
 ### Localization
- 
+
 * Updated Korean translations (thanks to [@kmw0410](https://github.com/kmw0410))
+
 ### Chores
- 
+
 * Bump react-router-dom from 6.27.0 to 6.30.3
 * Updated eslint
+
 ## 2.3.2 (2026-01-08)
- 
+
 ### Features
- 
+
 * Added support for custom keyboard shortcuts
 * Added support for mouse Forward and Back buttons (reboot required)
 * Added support for touchscreen mouse operation
 * The menu bar now supports auto-hide and drag
+
 ### Bug Fixes
- 
+
 * Fixed an issue where the previous IP address was not released after configuring a static IP
+
 ### Performance
- 
+
 * Refactored the keyboard to support simultaneous keystrokes and a wider range of international layouts (reboot required)
 * Refactored the mouse to improve response latency
 * Refactored the WebSocket module to transmit keyboard and mouse data using the standard HID format
+
 ## 2.3.1 (2025-12-26)
- 
+
 ### Features
- 
+
 * Added support for offline application updates (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
 * Implemented support for uploading ISO images (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
 * Extended clipboard compatibility to support Russian characters (thanks to [@pekishev](https://github.com/pekishev))
 * Added configuration options for video scaling
 * Added support for configuring mouse scroll wheel direction
+
 ### Bug Fixes
- 
+
 * Resolved an issue where custom port may not be accessible
 * Fixed a bug where Web Terminal and Serial Terminal may not disconnect when the page is closed
+
 ### Security
- 
+
 * Enhanced validation logic on the Wi-Fi configuration page. Requests are now rejected when the device is not in AP mode to prevent unauthorized changes
+
 ### Chore
- 
+
 * Added a Docker image environment to support building `libkvm.so` and `NanoKVM-Server` (thanks to [@lowtech-guy](https://github.com/lowtech-guy))
 * Optimized the Settings UI
+
 ### Localization
- 
+
 * Updated Korean translation (thanks to [@kmw0410](https://github.com/kmw0410))
 * Updated Swedish translation (thanks to [@acidflash](https://github.com/acidflash))
 * Updated Spanish translation (thanks to [@Deses](https://github.com/Deses))
+
 ## 2.3.0 [0e30a26](https://github.com/sipeed/NanoKVM/commit/0e30a26db42cbc08416662b49a88a5d16ad93424) (2025-11-26)
- 
+
 ### Features
- 
+
 * Added an EDID editor in the terminal with a built-in 1080P EDID template
 * Added German virtual keyboard and German clipboard support (thanks to [@Alexander-Ger-Reich](https://github.com/Alexander-Ger-Reich))
 * Resetting the HID also resets the USB hardware
 * Added support for deleting ISO images
+
 ### Refactoring & Improvements
- 
+
 * Video (H.264 WebRTC): Refactored the module to significantly reduce video latency
 * Video (H.264 Direct): Refactored to optimize data transmission and support data parsing even when the page is in the background
 * Video (MJPEG): Refactored and ensure correct data length transmission
@@ -215,31 +299,36 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
 * Optimized the web page title update logic
 * Added a confirmation dialog when uninstalling Tailscale
 * Improved UI for Clipboard, Image Mounting, and settings pages
+
 ### Bug Fixes
- 
+
 * Tailscale: Fixed an issue where Tailscale would turn the device into a router
 * Tailscale: Fixed an issue where Tailscale would disable IPv6
 * Tailscale: Added a swap memory option to prevent Tailscale Out-Of-Memory errors
 * Tailscale: Fixed Tailscale accept-dns configuration (thanks to [@lazydba247](https://github.com/lazydba247))
 * Fixed an issue where certain modifier keys were not recognized
 * Fixed vertical mouse drift when the page is zoomed in or out
+
 ### Localization
- 
+
 * Update Korean translation (thanks to [@xenix4845](https://github.com/xenix4845))
 * Update Traditional Chinese translation (thanks to [@protonchang](https://github.com/protonchang))
 * Add Brazilian Portuguese translation (thanks to [@chiconws](https://github.com/chiconws) and [@Luccas-LF](https://github.com/Luccas-LF))
 * Add Swedish translation (thanks to [@acidflash](https://github.com/acidflash))
 * Add Catalan translation (thanks to [@Zagur](https://github.com/Zagur))
 * Add Turkish translation (thanks to [@Keylem](https://github.com/Keylem))
+
 ### Security
- 
+
 * Implemented a delay after failed login attempts to mitigate brute-force attacks
 * Upgraded dependencies to fix known security vulnerabilities
+
 ## 2.2.9 [c77981c](https://github.com/sipeed/NanoKVM/commit/c77981cc0ceebd8f6705b6c5d8c3cf4edf4f6717) (2025-06-13)
- 
+
 * fix(security): resolve parameter injection in serial port terminal
+
 ## 2.2.8 [01e28f1](https://github.com/sipeed/NanoKVM/commit/01e28f10ae8b581d484bb6077ddfe7bbe4e57919) (2025-05-22)
- 
+
 * feat: add AZERTY virtual keyboard Layout (thanks to [@felix068](https://github.com/felix068))
 * feat: add support for enabling/disabling HDMI output (PCIe version only) (thanks to [@tpretz](https://github.com/tpretz))
 * feat: add support for custom mouse wheel speed
@@ -249,8 +338,9 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
   * update Korean translation (thanks to [@kmw0410](https://github.com/kmw0410))
   * update Ukrainian translation (thanks to [@arbdevml](https://github.com/arbdevml))
   * update Russian translation (thanks to [@arbdevml](https://github.com/arbdevml))
+
 ## 2.2.7 [e18ec22](https://github.com/sipeed/NanoKVM/commit/e18ec2219d22886529575d1fdaad5c320e05f5b2) (2025-05-08)
- 
+
 * feat: add HTTPS support
 * feat: support direct H.264 streaming over HTTP
 * Localization
@@ -258,8 +348,9 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
   * update Dutch translation (thanks to [LeonStraathof](https://github.com/LeonStraathof))
   * update Ukrainian translation (thanks to [click0](https://github.com/click0))
   * update German translation (thanks to [3limin4tor](https://github.com/3limin4tor))
+
 ## 2.2.6 [c83dc55](https://github.com/sipeed/NanoKVM/commit/c83dc5565c9dbed22336661a8832edbd93a06d11) (2025-04-17)
- 
+
 * feat: add mouse jiggler to prevent system sleep
 * feat: add support for swap memory
 * feat: add support for customizing the device hostname
@@ -278,19 +369,22 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
 * chore: bump axios to 1.8.4
 * chore: bump golang.org/x/net to v0.39.0
 * chore: bump github.com/golang-jwt/jwt/v5 to to v5.2.2
+
 ## 2.2.5 [3286cc2](https://github.com/sipeed/NanoKVM/commit/3286cc2f85a14133d65935cb476c833dcf151459) (2025-03-26)
- 
+
 * fix: server crash caused by MJPEG frame detection error
 * feat: add HID-Only mode
 * feat: support preview updates
 * perf: improve image reading performance by optimizing screen parameters
+
 ## 2.2.4 [1bf986d](https://github.com/sipeed/NanoKVM/commit/1bf986d41b34d568c1ffee5df90ce61b6b08456b) (2025-03-21)
- 
+
 * fix: resolve USB initialization issue
 * fix: correct abnormal updates in certain models
 * perf: add version restrictions for production testing
+
 ## 2.2.3 [6ef83cb](https://github.com/sipeed/NanoKVM/commit/6ef83cb22fcd77f721d32c97c85d12f2bfc3035a) (2025-03-21)
- 
+
 * feat: add support for setting H.264 GOP
 * fix: resolve deadlock caused by HDMI resolution errors
 * perf: merge H.264 SPS and PPS into I-frame
@@ -301,8 +395,9 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
 * perf: update log timestamp to millisecond precision
 * chore: bump Go to 1.23
 * chore: bump `golang.org/x/net` to v0.37.0
+
 ## 2.2.2 [58d5ab2](https://github.com/sipeed/NanoKVM/commit/58d5ab2d37244b1e1a68b925a5c23c324c489ad3) (2025-03-11)
- 
+
 * feat: add watchdog for NanoKVM-Server
 * feat: add support for UE chip
 * feat: support system reboot
@@ -317,26 +412,29 @@ See the [upstream changelog](#242-2026-05-20) below for the full list — short 
 * perf: menu bar is now draggable (thanks to [@forumi0721](https://github.com/forumi0721))
 * perf: image list support auto-refresh (thanks to [@forumi0721](https://github.com/forumi0721))
 * perf: update translations
+
 ## 2.2.1 [b5e48a0](https://github.com/sipeed/NanoKVM/commit/b5e48a07e82df3aedd60442342ae50b95684a697) (2025-02-21)
- 
+
 * fix: mounted image were not being detected correctly
 * perf: add support for CD-ROM mode when mounting image (thanks to [@scpcom](https://github.com/scpcom))
 * perf: add a loading state during login
 * perf: add changelog link in settings
 * perf: update translation and cleanup the code (thanks to [@ChokunPlayZ](https://github.com/ChokunPlayZ) [@Stoufiler](https://github.com/Stoufiler) [@polyzium](https://github.com/polyzium) [@Jonher937](https://github.com/Jonher937) [@S33G](https://github.com/S33G))
+
 ## 2.2.0 [0dbf8c0](https://github.com/sipeed/NanoKVM/commit/0dbf8c007f2d0183d0f0601c3da6d3c3fccd8b31) (2025-02-17)
- 
+
 NanoKVM [Image v1.4.0](https://github.com/sipeed/NanoKVM/releases/tag/v1.4.0) has been released!
- 
+
 > Please refer to the [wiki](https://wiki.sipeed.com/hardware/en/kvm/NanoKVM/system/introduction.html) for more details about the image and application.
- 
+
 * fix: improve password update notification logic (thanks to [@li20034](https://github.com/li20034))
 * perf: increase update wait time to 10s (from 6s)
 * perf: update Korean translation (thanks to [@forumi0721](https://github.com/forumi0721))
 * perf: update Traditional Chinese translation (thanks to [@protonchang](https://github.com/protonchang))
 * refactor: update `libkvm.so` and `libkvm_mmf.so` libraries
+
 ## 2.1.6 [6eb4a4e](https://github.com/sipeed/NanoKVM/commit/6eb4a4ea6254f465a47f9881d13934c686649061) (2025-02-14)
- 
+
 * feat: support downloading image from online URL (thanks to [@Itxaka](https://github.com/Itxaka))
 * feat: add keyboard shortcut `Ctrl+Alt+Del` (thanks to [@CaffeeLake](https://github.com/CaffeeLake))
 * fix: fix the CSRF issue
@@ -355,13 +453,15 @@ NanoKVM [Image v1.4.0](https://github.com/sipeed/NanoKVM/releases/tag/v1.4.0) ha
 * refactor: refactor HDMI module and remove the dependency `libmaixcam_lib.so`
 * refactor: web terminal use pty instead of SSH
 * refactor: move Tailscale APIs from the `network` module to the `extensions` module
+
 ## 2.1.5 [85f6447](https://github.com/sipeed/NanoKVM/commit/85f6447a16cc2591c6459b7d3dfda4d4cb75e98c) (2025-01-14)
- 
+
 * feat: add HDMI reset for NanoKVM-PCIe
 * fix: remove unnecessary lock acquisition during HID reset
 * refactor: refactor Tailscale
+
 ## 2.1.4 [d7ca7c4](https://github.com/sipeed/NanoKVM/commit/d7ca7c453d821ad099bf79b463969419041279cb) (2025-01-10)
- 
+
 * feat: support configuring OLED sleep settings
 * feat: support setting the `GOMEMLIMIT` environment variable
 * fix: fix Wi-Fi configuration
@@ -369,18 +469,21 @@ NanoKVM [Image v1.4.0](https://github.com/sipeed/NanoKVM/releases/tag/v1.4.0) ha
 * perf: add MAC address verification for Wake-on-LAN
 * refactor: a lot update to web UI
 * refactor: refactor Tailscale
+
 ## 2.1.3 [26078fe](https://github.com/sipeed/NanoKVM/commit/26078fe46e43d4543d7b09901b4992e4fbe4f01f) (2024-12-27)
- 
+
 * feat: add API to retrieve Wi-Fi information
 * fix: fix keyboard modifier keys
 * fix: update keyboard and mouse HID codes
 * fix: update hardware version information
+
 ## 2.1.2 [5a39562](https://github.com/sipeed/NanoKVM/commit/5a39562f2d32695933f4e7e86866136236cc9903) (2024-12-04)
- 
+
 * feat: add hardware version to configuration
 * feat: add Wi-Fi configuration support for NanoKVM-PCIe
 * perf: update web UI
 * chore: add dependency libraries
+
 ## 2.1.1 [74a303b](https://github.com/sipeed/NanoKVM/commit/74a303bd5cbb58f9d8ddd81abaaf4919dbbfb71b) （2024-11-06）
- 
+
 * feat: support h264

@@ -437,13 +437,16 @@ const de = {
           gatewaySubnet: 'Das Gateway muss im selben Subnetz wie die IP-Adresse liegen',
           saveFailed: 'IP-Einstellungen konnten nicht gespeichert werden',
           savedDhcp: 'Auf DHCP umgestellt. Die IP-Adresse kann sich gleich ändern.',
-          savedReconnect:
-            'Gespeichert. Die Verbindung wird jetzt getrennt — NanoKVM neu öffnen unter {{url}}',
-          warning:
-            'Das Ändern der IP-Adresse trennt die aktuelle Sitzung. Ein falscher Wert kann Sie aus der Weboberfläche aussperren (Wiederherstellung dann nur per SD-Karte/physischem Zugriff). Stellen Sie sicher, dass Adresse, Maske und Gateway korrekt sind.',
+          savedReconnect: 'Gespeichert. Die Verbindung wird jetzt getrennt — NanoKVM unter {{url}} erneut öffnen und dort innerhalb von 5 Minuten bestätigen, sonst wird zurückgesetzt.',
+          confirmPendingTitle: 'Neue IP-Adresse bestätigen',
+          confirmPendingText: 'Rückkehr zur vorherigen Konfiguration in {{time}}, falls du nicht bestätigst.',
+          confirmKeep: 'Konfiguration behalten',
+          confirmed: 'IP-Konfiguration bestätigt',
+          confirmFailed: 'Bestätigung fehlgeschlagen',
+          reverted: 'Nicht bestätigt — zurück zur vorherigen Konfiguration',
+          warning: 'Das Ändern der IP-Adresse trennt diese Sitzung. Danach hast du 5 Minuten Zeit, dich unter der neuen Adresse erneut zu verbinden und zu bestätigen — andernfalls kehrt das Gerät automatisch zur vorherigen Konfiguration zurück. Stelle sicher, dass Adresse, Maske und Gateway korrekt sind.',
           confirmTitle: 'IP-Adresse ändern?',
-          confirmStatic:
-            'Die Kabelverbindung wird sofort neu konfiguriert und diese Sitzung getrennt. Öffnen Sie NanoKVM anschließend unter {{url}}. Fortfahren?',
+          confirmStatic: 'Die Kabelverbindung wird sofort neu konfiguriert und diese Sitzung getrennt. Verbinde dich unter {{url}} neu und bestätige innerhalb von 5 Minuten, sonst wird automatisch zurückgesetzt. Fortfahren?',
           confirmDhcp:
             'Die Kabelverbindung wird sofort auf DHCP umgestellt und diese Sitzung kann getrennt werden. Fortfahren?',
           confirmOk: 'Anwenden',

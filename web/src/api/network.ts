@@ -89,3 +89,7 @@ export function getIPv4() {
 export function setIPv4(mode: IPv4Mode, address: string, subnetMask: string, gateway: string) {
   return http.post('/api/network/ip', { mode, address, subnetMask, gateway });
 }
+
+export function confirmIPv4() {
+  return http.post('/api/network/ip/confirm');
+}

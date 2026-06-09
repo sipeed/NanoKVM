@@ -430,12 +430,16 @@ const en = {
           gatewaySubnet: 'Gateway must be in the same subnet as the IP address',
           saveFailed: 'Failed to save IP settings',
           savedDhcp: 'Switched to DHCP. The IP address may change shortly.',
-          savedReconnect: 'Saved. The connection will drop now — reopen NanoKVM at {{url}}',
-          warning:
-            'Changing the IP address disconnects your current session. A wrong value can lock you out of the web interface (recovery then requires SD-card/physical access). Make sure address, mask and gateway are correct.',
+          savedReconnect: 'Saved. The connection will drop now — reopen NanoKVM at {{url}} and confirm there within 5 minutes, otherwise it reverts.',
+          confirmPendingTitle: 'Confirm new IP address',
+          confirmPendingText: 'Returning to the previous configuration in {{time}} unless you confirm.',
+          confirmKeep: 'Keep configuration',
+          confirmed: 'IP configuration confirmed',
+          confirmFailed: 'Confirmation failed',
+          reverted: 'Not confirmed — returned to the previous configuration',
+          warning: 'Changing the IP address disconnects this session. You then have 5 minutes to reconnect at the new address and confirm it — otherwise the device automatically returns to the previous configuration. Make sure address, mask and gateway are correct.',
           confirmTitle: 'Change IP address?',
-          confirmStatic:
-            'The wired connection will be reconfigured immediately and this session will drop. Afterwards open NanoKVM at {{url}}. Continue?',
+          confirmStatic: 'The wired connection will be reconfigured immediately and this session will drop. Reconnect at {{url}} and confirm within 5 minutes, otherwise it reverts automatically. Continue?',
           confirmDhcp:
             'The wired connection will switch to DHCP immediately and this session may drop. Continue?',
           confirmOk: 'Apply',

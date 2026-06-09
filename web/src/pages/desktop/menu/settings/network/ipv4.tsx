@@ -21,6 +21,8 @@ type IPv4State = {
   subnetMask: string;
   gateway: string;
   info: IPv4Info;
+  pending?: boolean;
+  remainingSeconds?: number;
 };
 
 function formatInterface(info: IPv4Info) {
@@ -165,9 +167,64 @@ export const IPv4 = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const [pending, setPending] = useState(false);
+  const [remaining, setRemaining] = useState(0);
+  const [confirming, setConfirming] = useState(false);
+
   useEffect(() => {
     getIPv4();
   }, []);
+
+  // Countdown while a static change awaits confirmation. On reaching zero the
+  // server has reverted on its own, so reload to reflect the restored config.
+  useEffect(() => {
+    if (!pending) return;
+
+    const timer = setInterval(() => {
+      setRemaining((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setPending(false);
+          setMessage(t('settings.network.ip.reverted'));
+          getIPv4(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pending]);
+
+  async function confirmChange() {
+    if (confirming) return;
+    setConfirming(true);
+    setError('');
+
+    try {
+      const rsp = await api.confirmIPv4();
+      if (rsp.code === 0) {
+        setPending(false);
+        setRemaining(0);
+        setMessage(t('settings.network.ip.confirmed'));
+        getIPv4(false);
+      } else {
+        setError(rsp.msg || t('settings.network.ip.confirmFailed'));
+      }
+    } catch (err) {
+      console.log(err);
+      setError(t('settings.network.ip.confirmFailed'));
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  function formatRemaining(total: number) {
+    const m = Math.floor(total / 60);
+    const s = total % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
 
   async function getIPv4(showLoading = true) {
     if (showLoading) setIsLoading(true);
@@ -196,6 +253,10 @@ export const IPv4 = () => {
       setGateway(gw);
       setOriginal({ address: data.address || '', subnetMask: data.subnetMask || '', gateway: data.gateway || '' });
       setInfo(data.info || {});
+
+      const isPending = !!data.pending;
+      setPending(isPending);
+      setRemaining(isPending ? data.remainingSeconds || 0 : 0);
     } catch (err) {
       console.log(err);
     } finally {
@@ -315,6 +376,32 @@ export const IPv4 = () => {
 
   return (
     <div className="flex flex-col space-y-5">
+      {/* Confirmation banner: a static change is on trial and must be confirmed */}
+      {pending && (
+        <div className="flex flex-col gap-3 rounded-lg border border-yellow-500/40 bg-yellow-500/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <TriangleAlertIcon size={18} className="mt-0.5 shrink-0 text-yellow-400" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium text-yellow-100">
+                {t('settings.network.ip.confirmPendingTitle')}
+              </span>
+              <span className="text-xs leading-snug text-yellow-200/80">
+                {t('settings.network.ip.confirmPendingText', { time: formatRemaining(remaining) })}
+              </span>
+            </div>
+          </div>
+          <Button
+            type="primary"
+            icon={<CheckIcon size={14} />}
+            loading={confirming}
+            onClick={confirmChange}
+            className="shrink-0"
+          >
+            {t('settings.network.ip.confirmKeep')}
+          </Button>
+        </div>
+      )}
+
       {/* Header row: title + segmented control */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col space-y-1">

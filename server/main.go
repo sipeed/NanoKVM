@@ -14,6 +14,7 @@ import (
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
 	"NanoKVM-Server/service/audit"
+	"NanoKVM-Server/service/network"
 	"NanoKVM-Server/service/vm/jiggler"
 	"NanoKVM-Server/utils"
 
@@ -37,6 +38,9 @@ func initialize() {
 
 	conf := config.GetInstance()
 	audit.Init(conf.Audit.File, *conf.Audit.Enabled, conf.Audit.MaxSizeMB)
+
+	// Restore a pending (unconfirmed) static-IP change that survived a restart.
+	network.InitIPv4Recovery()
 
 	// init screen parameters
 	_ = common.GetScreen()
