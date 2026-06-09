@@ -1,3 +1,85 @@
+# Changelog
+
+This changelog tracks releases of the **Schattenwelt/NanoKVM fork**.
+Each entry marked `[Fork]` describes the changes this fork adds on top of
+upstream Sipeed/NanoKVM. The fork keeps its own version line, which can run
+ahead of the matching upstream release (e.g. `[Fork] 2.4.4` is based on
+upstream 2.4.3).
+Unmarked entries below are the verbatim upstream history for context.
+
+---
+
+## [Fork] 2.4.4 — 2026-06-09
+
+Third Schattenwelt-fork release. Rebased onto upstream 2.4.3. No fork-side
+feature changes — the version is bumped to 2.4.4 so the fork's own update
+channel detects it as newer than both [Fork] 2.4.3 and upstream 2.4.3.
+
+### Changed
+
+* Rebased onto upstream Sipeed/NanoKVM **2.4.3**. Upstream changed no Go backend or React frontend *source* between 2.4.2 and 2.4.3, so all multi-user RBAC patches carry over without conflict; the build now uses the 2.4.3 deployment package as its base.
+* `web/package.json`: bumped `js-cookie` `^3.0.5` → `^3.0.7` to match upstream 2.4.3.
+
+### Notes
+
+* No changes to the multi-user RBAC, activity/audit log, or static IPv4 configuration introduced in [Fork] 2.4.2 / [Fork] 2.4.3.
+* The `version` file and `latest.json` are both stamped `2.4.4` so `semver.gte` reliably surfaces the update on devices running [Fork] 2.4.3.
+
+### Inherited from upstream 2.4.3
+
+* LT6911D HDMI capture chip support.
+* Improved USB network adapter compatibility on Windows.
+
+These ship via the precompiled hardware components (`kvm`, `kvm_system`, EDID tool) and init scripts (`S03usbdev`, `S15kvmhwd`) of the 2.4.3 base — see the [upstream changelog](#243-2026-06-09) below.
+
+---
+
+## [Fork] 2.4.3 — 2026-06-08
+
+Second Schattenwelt-fork release. Still based on upstream 2.4.2; the version is
+bumped to 2.4.3 only so the fork's own update channel detects it as newer than
+[Fork] 2.4.2.
+
+### Added
+
+* **Activity / audit log** — records user actions via backend (Gin) middleware, reading the authenticated user from the JWT context, with admin-only viewing endpoints, an enable/disable toggle, and automatic log rotation. High-frequency polling endpoints (e.g. `/api/vm/screen`) are excluded to prevent log flooding. Actions are shown as human-readable, localized labels in all 24 supported languages. The "clear log" action intentionally retains a single entry documenting who cleared the log and when.
+* **Static IPv4 configuration UI** — set a static IPv4 address directly from the web interface, wired to a dedicated backend endpoint.
+
+### Notes
+
+* No new upstream changes: still built against the commit corresponding to Sipeed release 2.4.2.
+* The `version` file and `latest.json` are both stamped `2.4.3` so `semver.gte` reliably surfaces the update on devices running [Fork] 2.4.2.
+
+---
+
+## [Fork] 2.4.2 — 2026-05-21
+
+Initial Schattenwelt-fork release based on upstream 2.4.2.
+
+### Added
+
+* **Multi-user support with role-based access control (RBAC)** — three built-in roles (`viewer`, `operator`, `admin`) on the backend, matching frontend UI under `Settings → Users` and `Settings → Account`. See [README](README.md#-whats-different-in-this-fork) for the full permission matrix.
+* **bcrypt** password hashing, **JWT** session cookies, and **brute-force protection** on the login endpoint.
+* Last-admin protection (cannot delete the only enabled admin) and self-delete protection.
+* Internal loopback endpoints (used by `kvm_system` / picoclaw) gated by a separate loopback token instead of JWT.
+* Localized strings for the user-management UI in **all 24 supported languages** (was only `de` / `en` in the previous 2.4.1-multiuser snapshot).
+
+### Changed
+
+* **Update channel switched** from `https://cdn.sipeed.com/nanokvm` to this fork's GitHub Releases (`https://github.com/Schattenwelt/NanoKVM/releases/latest/download`). After the first manual offline-update, further updates are pulled automatically from this fork via *Settings → Check for updates*.
+* Migrated accounts file: existing single-user setup in `/etc/kvm/pwd` is automatically converted to `/etc/kvm/accounts.json` on first start. The existing user becomes the initial `admin`; legacy file is removed.
+
+### Notes
+
+* Built against upstream commit corresponding to Sipeed release **2.4.2**.
+* No changes to `kvmapp/`, `support/`, or any hardware-related code — the fork only modifies the Go backend and the React frontend.
+
+### Inherited from upstream 2.4.2
+
+See the [upstream changelog](#242-2026-05-20) below for the full list — short summary: HDMI capture-status overlays, WebRTC streaming improvements, PicoClaw session stabilization, WoL hardening, mouse / touch input fixes.
+
+---
+
 ## 2.4.3 (2026-06-09)
 
 ### Features

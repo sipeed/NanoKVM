@@ -50,3 +50,20 @@ type DNSInfo struct {
 	Gateway       string   `json:"gateway"`
 	SearchDomains []string `json:"searchDomains"`
 }
+
+type GetIPv4Rsp struct {
+	Mode             string  `json:"mode"`             // "dhcp" or "static"
+	Address          string  `json:"address"`          // configured static address (without prefix), empty in dhcp mode
+	SubnetMask       string  `json:"subnetMask"`       // configured static subnet mask, empty in dhcp mode
+	Gateway          string  `json:"gateway"`          // configured static gateway, empty in dhcp mode
+	Info             DNSInfo `json:"info"`             // currently effective network details
+	Pending          bool    `json:"pending"`          // a static change is awaiting confirmation
+	RemainingSeconds int     `json:"remainingSeconds"` // seconds left to confirm before auto-revert
+}
+
+type SetIPv4Req struct {
+	Mode       string `json:"mode" validate:"required,oneof=static dhcp"`
+	Address    string `json:"address"`
+	SubnetMask string `json:"subnetMask"`
+	Gateway    string `json:"gateway"`
+}

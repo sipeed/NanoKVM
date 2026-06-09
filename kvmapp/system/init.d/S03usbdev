@@ -1,5 +1,5 @@
 #!/bin/sh
-# kvmhwd Rev2.2
+# kvmhwd Rev2.1
 
 start_usb_dev(){
     . /etc/profile
@@ -23,11 +23,6 @@ start_usb_dev(){
     else
         echo 0x1009 > idProduct
     fi
-
-    echo 0xEF > bDeviceClass
-    echo 0x02 > bDeviceSubClass
-    echo 0x01 > bDeviceProtocol
-
     mkdir strings/0x409
     echo '0123456789ABCDEF' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer
@@ -42,28 +37,13 @@ start_usb_dev(){
     if [ -e /boot/usb.ncm ]
     then
         mkdir functions/ncm.usb0
-        echo WINNCM > functions/ncm.usb0/os_desc/interface.ncm/compatible_id
         ln -s functions/ncm.usb0 configs/c.1/
     else
         if [ -e /boot/usb.rndis0 ]
         then
                 mkdir functions/rndis.usb0
-                echo e0 > functions/rndis.usb0/class
-                echo 01 > functions/rndis.usb0/subclass
-                echo 03 > functions/rndis.usb0/protocol
-                echo RNDIS > functions/rndis.usb0/os_desc/interface.rndis/compatible_id
-                echo 5162001 > functions/rndis.usb0/os_desc/interface.rndis/sub_compatible_id
                 ln -s functions/rndis.usb0 configs/c.1/
         fi
-    fi
-
-    if [ -e /boot/usb.ncm ] || [ -e /boot/usb.rndis0 ]
-    then
-        # Microsoft OS 2.0 Descriptor
-        echo 1 > os_desc/use
-        echo 0xCD > os_desc/b_vendor_code
-        echo MSFT100 > os_desc/qw_sign
-        ln -s configs/c.1 os_desc
     fi
 
     if [ ! -e /boot/disable_hid ]

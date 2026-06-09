@@ -24,13 +24,6 @@ type DNSInfo = {
 
 const maxServers = 6;
 
-function formatInterface(info: DNSInfo) {
-  if (!info.interface) return '';
-  if (!info.type) return info.interface;
-
-  return `${info.type} (${info.interface})`;
-}
-
 function normalizeServers(servers: string[]) {
   const seen = new Set<string>();
   const normalized: string[] = [];
@@ -96,31 +89,6 @@ const Panel = ({
         )}
       </div>
       <div>{children}</div>
-    </div>
-  );
-};
-
-const InfoRow = ({
-  label,
-  value,
-  isLast = false
-}: {
-  label: string;
-  value?: string;
-  isLast?: boolean;
-}) => {
-  return (
-    <div className="px-4">
-      <div
-        className={`flex min-h-[44px] items-center justify-between ${
-          isLast ? '' : 'border-b border-neutral-700/50'
-        }`}
-      >
-        <span className="text-sm text-neutral-300">{label}</span>
-        <span className="max-w-[330px] break-all text-right text-sm text-neutral-500">
-          {value || '-'}
-        </span>
-      </div>
     </div>
   );
 };
@@ -202,7 +170,6 @@ export const DNS = () => {
   const [servers, setServers] = useState<string[]>([]);
   const [originalServers, setOriginalServers] = useState<string[]>([]);
   const [dhcp, setDHCP] = useState<string[]>([]);
-  const [info, setInfo] = useState<DNSInfo>({});
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -233,7 +200,6 @@ export const DNS = () => {
       setServers(fetchedServers);
       setOriginalServers(fetchedServers);
       setDHCP(data.dhcp || []);
-      setInfo(data.info || {});
     } catch (err) {
       console.log(err);
     } finally {
@@ -348,13 +314,6 @@ export const DNS = () => {
       </div>
 
       <div className="space-y-5">
-        <Panel title={t('settings.network.dns.networkDetails')}>
-          <InfoRow label={t('settings.network.dns.interface')} value={formatInterface(info)} />
-          <InfoRow label={t('settings.network.dns.ipAddress')} value={info.address} />
-          <InfoRow label={t('settings.network.dns.subnetMask')} value={info.subnetMask} />
-          <InfoRow label={t('settings.network.dns.router')} value={info.gateway} isLast />
-        </Panel>
-
         <Panel title={t('settings.network.dns.dnsServers')} description={serversDescription}>
           {mode === 'manual' ? (
             <div>

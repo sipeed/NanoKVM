@@ -1,0 +1,311 @@
+# =============================================================================
+# NanoKVM Multi-User RBAC Fork – Release Workflow
+#
+# Wird durch einen Tag im Format  v<UPSTREAM>-rbac.<N>  ausgelöst, z.B.:
+#     git tag v2.4.1-rbac.1
+#     git push origin v2.4.1-rbac.1
+#
+# Baut ein nanokvm_<VERSION>.tar.gz, generiert latest.json und veröffentlicht
+# beides als GitHub Release.
+# =============================================================================
+
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*-rbac.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Manueller Tag, z.B. v2.4.1-rbac.1'
+        required: true
+        type: string
+
+env:
+  # Auf welchen Fork zeigen die Auto-Updates? Wird in service.go gepatcht.
+  FORK_REPO: Schattenwelt/NanoKVM
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write    # nötig für softprops/action-gh-release
+
+    steps:
+      # -----------------------------------------------------------------------
+      # 0. Setup
+      # -----------------------------------------------------------------------
+      - name: Checkout fork
+        uses: actions/checkout@v4
+
+      - name: Parse version from tag
+        id: ver
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          # TAG: v2.4.1-rbac.1
+          VERSION="${TAG#v}"                  # 2.4.1-rbac.1
+          UPSTREAM="${VERSION%%-*}"           # 2.4.1
+          echo "tag=$TAG"           >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION"   >> "$GITHUB_OUTPUT"
+          echo "upstream=$UPSTREAM" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "Tag:      $TAG"
+          echo "Version:  $VERSION"
+          echo "Upstream: $UPSTREAM"
+
+      # -----------------------------------------------------------------------
+      # 1. Upstream-Paket herunterladen und auspacken
+      # -----------------------------------------------------------------------
+      - name: Download upstream Sipeed package
+        run: |
+          UPSTREAM="${{ steps.ver.outputs.upstream }}"
+          URL="https://github.com/sipeed/NanoKVM/releases/download/${UPSTREAM}/nanokvm_${UPSTREAM}.tar.gz"
+          echo "Downloading: $URL"
+          curl -fL -o /tmp/upstream.tar.gz "$URL"
+          ls -la /tmp/upstream.tar.gz
+
+      - name: Extract upstream package
+        run: |
+          mkdir -p _build/upstream
+          tar -xzf /tmp/upstream.tar.gz -C _build/upstream
+
+          # Top-Level-Ordner finden (z.B. "nanokvm_2.4.1")
+          DEPLOY_DIR="_build/upstream/$(ls _build/upstream | head -n1)"
+          echo "DEPLOY_DIR=$DEPLOY_DIR" >> "$GITHUB_ENV"
+
+          # server/ im Original finden (wo NanoKVM-Server-Binary liegt)
+          ORIG_SERVER_DIR="$(dirname "$(find "$DEPLOY_DIR" -name NanoKVM-Server -type f | head -n1)")"
+          echo "ORIG_SERVER_DIR=$ORIG_SERVER_DIR" >> "$GITHUB_ENV"
+
+          echo "Deploy dir: $DEPLOY_DIR"
+          echo "Server dir: $ORIG_SERVER_DIR"
+
+      # -----------------------------------------------------------------------
+      # 2. Frontend bauen
+      # -----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+
+      - name: Build frontend
+        working-directory: web
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          npm run build
+          ls -la dist/
+
+      # -----------------------------------------------------------------------
+      # 3. Go + RISC-V musl Cross-Compiler
+      # -----------------------------------------------------------------------
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install RISC-V musl cross-compiler
+        run: |
+          # Fallback-Liste wie in deinem Skript
+          URLS=(
+            "https://musl.cc/riscv64-linux-musl-cross.tgz"
+            "https://more.musl.cc/11.2.1/x86_64-linux-musl/riscv64-linux-musl-cross.tgz"
+            "https://github.com/dockcross/dockcross/releases/download/20240418-88c04a4/riscv64-linux-musl-cross.tgz"
+          )
+          OK=0
+          for URL in "${URLS[@]}"; do
+            echo "Trying $URL ..."
+            if wget -q --tries=2 --timeout=60 "$URL" -O /tmp/mc.tgz && [ "$(stat -c%s /tmp/mc.tgz)" -gt 1000000 ]; then
+              OK=1; break
+            fi
+          done
+          [ "$OK" = "1" ] || { echo "Failed to fetch musl cross-compiler"; exit 1; }
+
+          sudo tar -xf /tmp/mc.tgz -C /opt
+          GCC_BIN="$(find /opt -name riscv64-linux-musl-gcc -type f | head -n1)"
+          GCC_DIR="$(dirname "$GCC_BIN")"
+
+          # Wrapper damit "riscv64-musl-gcc" als Name funktioniert (wie dein Skript)
+          echo '#!/bin/sh' | sudo tee /usr/local/bin/riscv64-musl-gcc > /dev/null
+          echo "exec $GCC_BIN \"\$@\"" | sudo tee -a /usr/local/bin/riscv64-musl-gcc > /dev/null
+          sudo chmod +x /usr/local/bin/riscv64-musl-gcc
+
+          # PATH erweitern für nachfolgende Steps
+          echo "$GCC_DIR" >> "$GITHUB_PATH"
+          riscv64-musl-gcc --version
+
+      # -----------------------------------------------------------------------
+      # 4. Pre-Build: dl_lib aus dem Original holen, service.go umbiegen,
+      #    go.mod patchen
+      # -----------------------------------------------------------------------
+      - name: Copy dl_lib from upstream into source
+        run: |
+          cp -r "${ORIG_SERVER_DIR}/dl_lib" server/dl_lib
+          ls server/dl_lib | head
+
+      - name: Patch service.go (Update-URLs auf den Fork umbiegen)
+        run: |
+          FILE=server/service/application/service.go
+          sed -i \
+            -e "s|https://cdn.sipeed.com/nanokvm/preview|https://github.com/${FORK_REPO}/releases/latest/download|g" \
+            -e "s|https://cdn.sipeed.com/nanokvm|https://github.com/${FORK_REPO}/releases/latest/download|g" \
+            "$FILE"
+          echo "--- gepatchte URLs ---"
+          grep -E "StableURL|PreviewURL" "$FILE"
+
+      - name: Patch go.mod (1:1 wie das Build-Skript)
+        working-directory: server
+        run: |
+          # Falls dein Fork das schon committed hat, ist das hier idempotent.
+          sed -i -E \
+            -e 's|^go 1\.[0-9]+|go 1.22|' \
+            -e 's|golang\.org/x/net v[0-9.]+|golang.org/x/net v0.33.0|' \
+            -e 's|golang\.org/x/sys v[0-9.]+|golang.org/x/sys v0.28.0|' \
+            -e 's|golang\.org/x/crypto v[0-9.]+|golang.org/x/crypto v0.31.0|' \
+            -e 's|golang\.org/x/text v[0-9.]+|golang.org/x/text v0.21.0|' \
+            -e 's|github\.com/pion/dtls/v3 v[0-9.]+|github.com/pion/dtls/v3 v3.0.4|' \
+            -e 's|github\.com/pion/webrtc/v4 v[0-9.]+|github.com/pion/webrtc/v4 v4.0.0|' \
+            go.mod
+          rm -f go.sum
+          echo "--- go.mod (Head) ---"
+          head -30 go.mod
+
+      # -----------------------------------------------------------------------
+      # 5. Server bauen
+      # -----------------------------------------------------------------------
+      - name: Build NanoKVM-Server (riscv64 + musl + CGO)
+        working-directory: server
+        env:
+          GOOS: linux
+          GOARCH: riscv64
+          CGO_ENABLED: '1'
+          CC: riscv64-musl-gcc
+          CGO_CFLAGS: '-I./include'
+          CGO_LDFLAGS: '-L./dl_lib -lkvm -Wl,-rpath,$ORIGIN/dl_lib -Wl,--allow-shlib-undefined'
+          GOPROXY: 'https://goproxy.io|direct'
+          GOFLAGS: '-mod=mod'
+          GONOSUMCHECK: '*'
+          GOTOOLCHAIN: 'local'
+        run: |
+          go mod download || true   # nicht fatal, fehlende Pakete werden beim Build nachgezogen
+          go build -ldflags="-s -w" -o /tmp/NanoKVM-Server .
+          ls -la /tmp/NanoKVM-Server
+          file /tmp/NanoKVM-Server
+
+      # -----------------------------------------------------------------------
+      # 6. Binary + Frontend einsetzen, S95nanokvm patchen
+      # -----------------------------------------------------------------------
+      - name: Swap binary into upstream package
+        run: |
+          cp /tmp/NanoKVM-Server "${ORIG_SERVER_DIR}/NanoKVM-Server"
+          chmod +x "${ORIG_SERVER_DIR}/NanoKVM-Server"
+
+      - name: Replace web assets (Frontend mit Benutzerverwaltung)
+        run: |
+          WEB_DST="${ORIG_SERVER_DIR}/web"
+
+          # sipeed.ico aus dem Original sichern
+          ICO_BAK=""
+          if [ -f "$WEB_DST/sipeed.ico" ]; then
+            cp "$WEB_DST/sipeed.ico" /tmp/sipeed.ico.bak
+            ICO_BAK=1
+          fi
+
+          rm -rf "$WEB_DST"
+          mkdir -p "$WEB_DST"
+          cp -r web/dist/* "$WEB_DST/"
+
+          # versehentlich kopierter dist-Unterordner raus
+          rm -rf "$WEB_DST/dist"
+
+          # sipeed.ico zurück
+          if [ -n "$ICO_BAK" ]; then
+            cp /tmp/sipeed.ico.bak "$WEB_DST/sipeed.ico"
+          fi
+
+          echo "Web-Assets: $(find "$WEB_DST" -type f | wc -l) Dateien"
+
+      - name: Patch S95nanokvm init scripts (LD_LIBRARY_PATH)
+        run: |
+          PATCHED=0
+          while IFS= read -r script; do
+            if ! grep -q "LD_LIBRARY_PATH=/tmp/server/dl_lib" "$script"; then
+              sed -i 's|^    /tmp/server/NanoKVM-Server &|    LD_LIBRARY_PATH=/tmp/server/dl_lib /tmp/server/NanoKVM-Server \&|' "$script"
+              echo "Patched: $script"
+              PATCHED=$((PATCHED+1))
+            fi
+          done < <(find "$DEPLOY_DIR" -name S95nanokvm -type f)
+          echo "Insgesamt gepatcht: $PATCHED"
+
+      # -----------------------------------------------------------------------
+      # 7. tar.gz packen
+      # -----------------------------------------------------------------------
+      - name: Repackage as nanokvm_<VERSION>.tar.gz
+        id: pack
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          PKG_NAME="nanokvm_${VERSION}.tar.gz"
+
+          # innerer Ordnername soll die neue Version tragen
+          cd _build/upstream
+          OLD_NAME="$(ls | head -n1)"
+          mv "$OLD_NAME" "nanokvm_${VERSION}"
+          tar -czf "/tmp/${PKG_NAME}" "nanokvm_${VERSION}"
+
+          ls -la "/tmp/${PKG_NAME}"
+          echo "pkg_path=/tmp/${PKG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "pkg_name=${PKG_NAME}"      >> "$GITHUB_OUTPUT"
+
+      # -----------------------------------------------------------------------
+      # 8. latest.json für Online-Update generieren
+      # -----------------------------------------------------------------------
+      - name: Generate latest.json
+        run: |
+          PKG="${{ steps.pack.outputs.pkg_path }}"
+          NAME="${{ steps.pack.outputs.pkg_name }}"
+          VERSION="${{ steps.ver.outputs.version }}"
+
+          SHA=$(openssl dgst -sha512 -binary "$PKG" | base64 -w0)
+          SIZE=$(stat -c%s "$PKG")
+
+          cat > /tmp/latest.json <<EOF
+          {
+            "version": "${VERSION}",
+            "name":    "${NAME}",
+            "sha512":  "${SHA}",
+            "size":    ${SIZE}
+          }
+          EOF
+
+          echo "--- latest.json ---"
+          cat /tmp/latest.json
+
+      # -----------------------------------------------------------------------
+      # 9. GitHub Release erstellen
+      # -----------------------------------------------------------------------
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: NanoKVM ${{ steps.ver.outputs.version }}
+          body: |
+            **Upstream-Basis:** sipeed/NanoKVM ${{ steps.ver.outputs.upstream }}
+            **Fork-Version:**   ${{ steps.ver.outputs.version }}
+
+            ### Installation
+            - **Online-Update:** Settings → Update (zieht automatisch von diesem Release)
+            - **Offline-Update:** `nanokvm_${{ steps.ver.outputs.version }}.tar.gz` herunterladen, in der Web-UI unter *Offline Aktualisierung* hochladen
+          generate_release_notes: true
+          files: |
+            ${{ steps.pack.outputs.pkg_path }}
+            /tmp/latest.json
