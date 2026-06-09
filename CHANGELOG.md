@@ -1,3 +1,13 @@
+## 2.4.3 (2026-06-09)
+
+### Features
+
+* Added LT6911D support
+
+### Bug Fixes
+
+* Improved USB network adapter compatibility on Windows
+
 ## 2.4.2 (2026-05-20)
 
 ### Features
