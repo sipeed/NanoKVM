@@ -23,6 +23,8 @@ func networkRouter(r *gin.Engine) {
 	api.GET("/network/wifi", service.GetWifi)                    // get Wi-Fi information
 	api.POST("/network/wifi/connect", service.ConnectWifi)       // connect Wi-Fi
 	api.POST("/network/wifi/disconnect", service.DisconnectWifi) // disconnect Wi-Fi
+	api.GET("/network/ethernet", service.GetEthernet)            // get Ethernet 802.1X information
+	api.POST("/network/ethernet", service.SetEthernet)           // set Ethernet 802.1X configuration
 
 	api.GET("/network/dns", service.GetDNS)  // get DNS configuration
 	api.POST("/network/dns", service.SetDNS) // set DNS configuration

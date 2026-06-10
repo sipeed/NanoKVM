@@ -3,6 +3,87 @@
 . /etc/profile
 
 APFLAG_FILE=/tmp/wifiap
+WIFI_STATIC_CONFIG=/boot/wifi.nodhcp
+
+escape_wpa_value() {
+    printf "%s" "$1" | tr -d '\r\n' | sed 's/\\/\\\\/g; s/"/\\"/g'
+}
+
+sanitize_wpa_token() {
+    printf "%s" "$1" | tr -cd 'A-Za-z0-9_-'
+}
+
+clean_line() {
+    echo "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s/\r//g'
+}
+
+append_wpa_field() {
+    key="${1}"
+    value="${2}"
+    if [ -n "$value" ]; then
+        printf '    %s="%s"\n' "$key" "$(escape_wpa_value "$value")"
+    fi
+}
+
+calc_gw() {
+    addr="$1"
+    netid="$2"
+    IFS=. read a b c d <<EOF
+$addr
+EOF
+    ipnum=$(( (a<<24) + (b<<16) + (c<<8) + d ))
+    mask=$(( 0xFFFFFFFF << (32-netid) & 0xFFFFFFFF ))
+    gwnum=$(( (ipnum & mask) | 1 ))
+    if [ $gwnum -eq $ipnum ]; then
+        broadcast=$(( (ipnum & mask) | (0xFFFFFFFF & ~mask) ))
+        gwnum=$(( broadcast - 1 ))
+    fi
+    echo "$(( (gwnum>>24)&255 )).$(( (gwnum>>16)&255 )).$(( (gwnum>>8)&255 )).$(( gwnum&255 ))"
+}
+
+gen_wpa_enterprise_conf() {
+    ssid="${1}"
+    pass="${2}"
+    identity="${3}"
+    eap="${4:-PEAP}"
+    phase2="${5}"
+    anonymous_identity="${6}"
+    ca_cert="${7}"
+    domain_suffix_match="${8}"
+    client_cert="${9}"
+    private_key="${10}"
+    private_key_passwd="${11}"
+    eap=$(sanitize_wpa_token "$eap")
+    case "$eap" in
+    PEAP | TTLS)
+        if [ -z "$phase2" ]; then
+            phase2="auth=MSCHAPV2"
+        fi
+        ;;
+    *)
+        phase2=""
+        ;;
+    esac
+
+    echo "ctrl_interface=/var/run/wpa_supplicant"
+    echo "ap_scan=1"
+    echo "fast_reauth=1"
+    echo ""
+    echo "network={"
+    append_wpa_field "ssid" "$ssid"
+    echo "    key_mgmt=WPA-EAP"
+    echo "    eap=${eap}"
+    append_wpa_field "identity" "$identity"
+    append_wpa_field "password" "$pass"
+    append_wpa_field "phase2" "$phase2"
+    append_wpa_field "anonymous_identity" "$anonymous_identity"
+    append_wpa_field "ca_cert" "$ca_cert"
+    append_wpa_field "client_cert" "$client_cert"
+    append_wpa_field "private_key" "$private_key"
+    append_wpa_field "private_key_passwd" "$private_key_passwd"
+    append_wpa_field "domain_suffix_match" "$domain_suffix_match"
+    echo "}"
+}
 
 gen_hostapd_conf() {
     ssid="${1}"
@@ -52,16 +133,27 @@ start() {
     echo "wifi mode: sta"
     ssid=""
     pass=""
+    mode="psk"
+    identity=""
+    eap="PEAP"
+    phase2="auth=MSCHAPV2"
+    anonymous_identity=""
+    ca_cert=""
+    client_cert=""
+    private_key=""
+    private_key_passwd=""
+    domain_suffix_match=""
     if [ -e /boot/wifi.ssid ] && [ -e /boot/wifi.pass ]; then
         echo "Updating WiFi credentials from /boot to /etc/kvm/"
 
-        rm -f /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
+        rm -f /etc/kvm/wifi.ssid /etc/kvm/wifi.pass /etc/kvm/wifi.mode
 
         mv /boot/wifi.ssid /etc/kvm/wifi.ssid
         mv /boot/wifi.pass /etc/kvm/wifi.pass
 
         chown root:root /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
-        chmod 644 /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
+        chmod 644 /etc/kvm/wifi.ssid
+        chmod 600 /etc/kvm/wifi.pass
     fi
     if [ -e /etc/kvm/wifi.ssid ]; then
         ssid=$(cat /etc/kvm/wifi.ssid)
@@ -69,10 +161,89 @@ start() {
     if [ -e /etc/kvm/wifi.pass ]; then
         pass=$(cat /etc/kvm/wifi.pass)
     fi
-    echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
-    wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
+    if [ -e /etc/kvm/wifi.mode ]; then
+        mode=$(cat /etc/kvm/wifi.mode)
+    fi
+    if [ -e /etc/kvm/wifi.identity ]; then
+        identity=$(cat /etc/kvm/wifi.identity)
+    fi
+    if [ -e /etc/kvm/wifi.eap ]; then
+        eap=$(cat /etc/kvm/wifi.eap)
+    fi
+    if [ -e /etc/kvm/wifi.phase2 ]; then
+        phase2=$(cat /etc/kvm/wifi.phase2)
+    fi
+    if [ -e /etc/kvm/wifi.anonymous_identity ]; then
+        anonymous_identity=$(cat /etc/kvm/wifi.anonymous_identity)
+    fi
+    if [ -e /etc/kvm/wifi.ca_cert ]; then
+        ca_cert=$(cat /etc/kvm/wifi.ca_cert)
+    fi
+    if [ -e /etc/kvm/wifi.client_cert ]; then
+        client_cert=$(cat /etc/kvm/wifi.client_cert)
+    fi
+    if [ -e /etc/kvm/wifi.private_key ]; then
+        private_key=$(cat /etc/kvm/wifi.private_key)
+    fi
+    if [ -e /etc/kvm/wifi.private_key_passwd ]; then
+        private_key_passwd=$(cat /etc/kvm/wifi.private_key_passwd)
+    fi
+    if [ -e /etc/kvm/wifi.domain_suffix_match ]; then
+        domain_suffix_match=$(cat /etc/kvm/wifi.domain_suffix_match)
+    fi
+
+    case "$mode" in
+    enterprise | 8021x | wpa-eap)
+        gen_wpa_enterprise_conf "$ssid" "$pass" "$identity" "$eap" "$phase2" "$anonymous_identity" "$ca_cert" "$domain_suffix_match" "$client_cert" "$private_key" "$private_key_passwd" >/etc/wpa_supplicant.conf
+        ;;
+    *)
+        echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
+        wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
+        ;;
+    esac
+    chmod 600 /etc/wpa_supplicant.conf
     wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-    if [ ! -e /boot/wifi.nodhcp ]; then
+    ifconfig wlan0 up
+    ip route del default || true
+    ip addr flush dev wlan0
+    if [ -e "$WIFI_STATIC_CONFIG" ]; then
+        while IFS= read -r line || [ -n "$line" ]; do
+            line=$(clean_line "$line")
+            [ -z "$line" ] && continue
+            set -- $line
+            inet="$1"
+            gw="$2"
+            [ -z "$inet" ] && continue
+            case "$inet" in
+                */*)
+                    netid_check=${inet#*/}
+                    if ! echo "$netid_check" | grep -qE '^[0-9]+$' || [ $netid_check -lt 1 ] 2>/dev/null || [ $netid_check -gt 32 ] 2>/dev/null; then
+                        inet="${inet%/*}/16"
+                    fi
+                    ;;
+                *)
+                    inet="$inet/16"
+                    ;;
+            esac
+            addr=${inet%/*}
+            netid=${inet#*/}
+            [ -z "$gw" ] && gw=$(calc_gw "$addr" "$netid")
+            arping -Dqc2 -Iwlan0 "$addr" || continue
+            ip a add "$inet" brd + dev wlan0
+            ip r add default via "$gw" dev wlan0
+            echo -e "nameserver $gw" >> /etc/resolv.conf
+            break
+        done < "$WIFI_STATIC_CONFIG"
+
+        ip a show dev wlan0 | grep inet > /dev/null || {
+            udhcpc -i wlan0 -t 3 -T 1 -A 5 -b -p /run/udhcpc.wlan0.pid &>/dev/null
+            ip a show dev wlan0 | grep inet > /dev/null
+        } || {
+            inet=192.168.90.1/22
+            addr=${inet%/*}
+            ip a add "$inet" brd + dev wlan0
+        } || exit 1
+    else
         (udhcpc -i wlan0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.wlan0.pid) &
     fi
 }

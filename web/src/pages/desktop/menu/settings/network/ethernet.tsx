@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { LockOutlined, UserOutlined, WifiOutlined } from '@ant-design/icons';
-import { Button, Input, Modal, Select, Segmented, Switch } from 'antd';
-import { WifiIcon, WifiPenIcon } from 'lucide-react';
+import { ApiOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
+import { Button, Input, Modal, Segmented, Select, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/network.ts';
-import type { WiFiIPMode, WiFiSecurityMode } from '@/api/network.ts';
+import type { EthernetIPMode, EthernetSecurityMode } from '@/api/network.ts';
 
 type EAPMethod = 'PEAP' | 'TTLS' | 'TLS' | 'PWD' | 'LEAP';
 
@@ -67,27 +66,28 @@ function isValidSubnetMask(value: string) {
   });
   if (bytes.some(Number.isNaN)) return false;
 
-  const mask = bytes.map((byte) => byte.toString(2).padStart(8, '0')).join('');
+  const mask = bytes
+    .map((byte) => byte.toString(2).padStart(8, '0'))
+    .join('');
   if (!/^1*0*$/.test(mask)) return false;
 
   const ones = mask.indexOf('0') === -1 ? 32 : mask.indexOf('0');
   return ones >= 1 && ones <= 32;
 }
 
-export const Wifi = () => {
+export const Ethernet = () => {
   const { t } = useTranslation();
 
-  const [isSupported, setIsSupported] = useState(false);
-  const [isAPMode, setIsAPMode] = useState(false);
-  const [connectedWiFi, setConnectedWifi] = useState('');
+  const [configured, setConfigured] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [iface, setIface] = useState('eth0');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mode, setMode] = useState<WiFiSecurityMode>('psk');
-  const [ipMode, setIPMode] = useState<WiFiIPMode>('dhcp');
+  const [mode, setMode] = useState<EthernetSecurityMode>('off');
+  const [ipMode, setIPMode] = useState<EthernetIPMode>('dhcp');
   const [address, setAddress] = useState('');
   const [subnetMask, setSubnetMask] = useState('');
   const [gateway, setGateway] = useState('');
-  const [ssid, setSsid] = useState('');
   const [password, setPassword] = useState('');
   const [passwordSet, setPasswordSet] = useState(false);
   const [identity, setIdentity] = useState('');
@@ -100,29 +100,26 @@ export const Wifi = () => {
   const [privateKeyPasswd, setPrivateKeyPasswd] = useState('');
   const [privateKeyPasswdSet, setPrivateKeyPasswdSet] = useState(false);
   const [domainSuffixMatch, setDomainSuffixMatch] = useState('');
-  const [status, setStatus] = useState<'' | 'connecting' | 'disconnecting'>('');
+  const [status, setStatus] = useState<'' | 'saving'>('');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    getWiFi();
+    getEthernet();
   }, []);
 
-  async function getWiFi() {
+  async function getEthernet() {
     try {
-      const rsp = await api.getWiFi();
-      if (rsp.code !== 0) {
-        console.log(rsp.msg);
-        return;
-      }
+      const rsp = await api.getEthernet();
+      if (rsp.code !== 0) return;
 
-      setIsSupported(!!rsp.data?.supported);
-      setIsAPMode(!!rsp.data?.apMode);
-      setMode(rsp.data?.mode === 'enterprise' ? 'enterprise' : 'psk');
+      setConfigured(!!rsp.data?.configured);
+      setConnected(!!rsp.data?.connected);
+      setIface(rsp.data?.interface || 'eth0');
+      setMode(rsp.data?.mode === 'enterprise' ? 'enterprise' : 'off');
       setIPMode(rsp.data?.ipMode === 'manual' ? 'manual' : 'dhcp');
       setAddress(rsp.data?.address || '');
       setSubnetMask(rsp.data?.subnetMask || '');
       setGateway(rsp.data?.gateway || '');
-      setSsid(rsp.data?.ssid || '');
       setPassword('');
       setPasswordSet(!!rsp.data?.passwordSet);
       setIdentity(rsp.data?.identity || '');
@@ -135,39 +132,33 @@ export const Wifi = () => {
       setPrivateKeyPasswd('');
       setPrivateKeyPasswdSet(!!rsp.data?.privateKeyPasswdSet);
       setDomainSuffixMatch(rsp.data?.domainSuffixMatch || '');
-
-      if (rsp.data?.connected && rsp.data?.ssid) {
-        setConnectedWifi(rsp.data.ssid);
-      } else {
-        setConnectedWifi('');
-      }
     } catch {
       /* empty */
     }
   }
 
-  async function connect() {
+  async function save() {
     setMessage('');
 
-    if (!ssid || (mode === 'psk' && !password && !passwordSet)) return;
-    if (mode === 'enterprise' && (!identity || (usesPassword(eap) && !password && !passwordSet)))
-      return;
+    if (mode === 'enterprise' && !identity) return;
+    if (mode === 'enterprise' && usesPassword(eap) && !password && !passwordSet) return;
     if (mode === 'enterprise' && eap === 'TLS' && (!clientCert || !privateKey)) return;
     if (ipMode === 'manual' && !isValidIPv4(address)) return;
     if (ipMode === 'manual' && !subnetMask) return;
     if (ipMode === 'manual' && !isValidSubnetMask(subnetMask)) return;
     if (ipMode === 'manual' && gateway && !isValidIPv4(gateway)) return;
-
     if (status !== '') return;
-    setStatus('connecting');
+
+    setStatus('saving');
 
     try {
-      const rsp = await api.connectWifi(ssid, password, {
+      const rsp = await api.setEthernet({
         mode,
         ipMode,
         address,
         subnetMask,
         gateway,
+        password,
         identity,
         eap,
         phase2,
@@ -179,43 +170,20 @@ export const Wifi = () => {
         domainSuffixMatch
       });
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
-        setMessage(t('settings.network.wifi.failed'));
-        getWiFi();
+        setMessage(t('settings.network.ethernet.failed'));
+        await getEthernet();
         return;
       }
 
-      setConnectedWifi(ssid);
+      setConfigured(mode === 'enterprise');
       setIsModalOpen(false);
-    } catch (err) {
-      console.log(err);
+      await getEthernet();
     } finally {
       setStatus('');
     }
   }
 
-  async function disconnect(enable: boolean) {
-    if (enable || status !== '') return;
-
-    setStatus('disconnecting');
-
-    try {
-      const rsp = await api.disconnectWifi();
-      if (rsp.code !== 0) {
-        console.log(rsp.msg);
-        return;
-      }
-
-      setConnectedWifi('');
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setStatus('');
-    }
-  }
-
-  async function openModal() {
-    await getWiFi();
+  function openModal() {
     setPassword('');
     setPrivateKeyPasswd('');
     setMessage('');
@@ -235,35 +203,19 @@ export const Wifi = () => {
     }
   }
 
-  if (!isSupported) {
-    return <></>;
-  }
-
-  if (isAPMode) {
-    return (
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col space-y-1">
-          <span>{t('settings.network.wifi.title')}</span>
-          <span className="text-xs text-neutral-500">{t('settings.network.wifi.apMode')}</span>
-        </div>
-
-        <Button shape="round" size="small" disabled>
-          <div className="flex items-center justify-center px-1.5">
-            <WifiIcon size={16} />
-          </div>
-        </Button>
-      </div>
-    );
-  }
+  const statusText = configured
+    ? connected
+      ? t('settings.network.ethernet.active')
+      : t('settings.network.ethernet.inactive')
+    : t('settings.network.ethernet.description');
+  const enterpriseEnabled = mode === 'enterprise';
 
   return (
     <>
       <div className="flex items-center justify-between">
         <div className="flex flex-col space-y-1">
-          <span>{t('settings.network.wifi.title')}</span>
-          <span className="text-xs text-neutral-500">
-            {connectedWiFi ? connectedWiFi : t('settings.network.wifi.description')}
-          </span>
+          <span>{t('settings.network.ethernet.title')}</span>
+          <span className="text-xs text-neutral-500">{statusText}</span>
         </div>
 
         <Button
@@ -272,12 +224,8 @@ export const Wifi = () => {
           size="small"
           onClick={openModal}
         >
-          <div
-            className={`flex items-center justify-center px-1.5 ${
-              connectedWiFi ? 'text-blue-400' : ''
-            }`}
-          >
-            <WifiIcon size={16} />
+          <div className={`flex items-center justify-center px-1.5 ${connected ? 'text-blue-400' : ''}`}>
+            <ApiOutlined />
           </div>
         </Button>
       </div>
@@ -286,46 +234,32 @@ export const Wifi = () => {
         closable={false}
         open={isModalOpen}
         centered={true}
-        onOk={connect}
+        onOk={save}
         onCancel={closeModal}
         okText={t('settings.network.wifi.joinBtn')}
         cancelText={t('settings.network.wifi.cancelBtn')}
-        confirmLoading={status === 'connecting'}
+        confirmLoading={status === 'saving'}
       >
-        {/* title */}
         <div className="flex items-center space-x-5">
-          <div className="h-[64px] w-[64px]">
-            <WifiPenIcon size={64} className="text-blue-400" />
+          <div className="flex h-[64px] w-[64px] items-center justify-center text-[56px] text-blue-400">
+            <ApiOutlined />
           </div>
 
-          {!connectedWiFi ? (
-            <div className="flex flex-col">
-              <span className="text-lg font-bold">{t('settings.network.wifi.connect')}</span>
-              <span className="text-xs text-neutral-400">
-                {t('settings.network.wifi.connectDesc1')}
-              </span>
-            </div>
-          ) : (
-            <div className="flex justify-center">
-              <div className="flex w-[300px] justify-between rounded-lg bg-neutral-800">
-                <div className="flex w-full justify-between p-3">
-                  <span>{connectedWiFi}</span>
-                  <Switch
-                    value={!!connectedWiFi}
-                    loading={status === 'disconnecting'}
-                    onChange={disconnect}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
+          <div className="flex flex-col">
+            <span className="text-lg font-bold">{t('settings.network.ethernet.connect')}</span>
+            <span className="text-xs text-neutral-400">
+              {t('settings.network.ethernet.connectDesc', { iface })}
+            </span>
+          </div>
         </div>
 
-        {/* form */}
-        <div className="flex flex-col items-center space-y-3 py-6">
+        <div className="flex flex-col items-center space-y-4 py-6">
           <div className="flex w-[300px] flex-col gap-3">
             <div className="flex flex-col gap-0.5">
-              <span className="text-sm font-medium">{t('settings.network.wifi.ipConfig')}</span>
+              <span className="text-sm font-medium">{t('settings.network.ethernet.ipConfig')}</span>
+              <span className="text-xs text-neutral-500">
+                {t('settings.network.ethernet.ipConfigDescription')}
+              </span>
             </div>
             <Segmented
               block
@@ -334,74 +268,59 @@ export const Wifi = () => {
                 { label: t('settings.network.dns.dhcp'), value: 'dhcp' },
                 { label: t('settings.network.dns.manual'), value: 'manual' }
               ]}
-              onChange={(value) => setIPMode(value as WiFiIPMode)}
+              onChange={(value) => setIPMode(value as EthernetIPMode)}
             />
 
             {ipMode === 'manual' && (
               <div className="space-y-3 pt-1">
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-neutral-500">{t('settings.network.dns.ipAddress')}</span>
-                  <Input
-                    value={address}
-                    placeholder="192.168.1.10"
-                    onChange={(e) => setAddress(e.target.value)}
-                    status={address !== '' && !isValidIPv4(address) ? 'error' : undefined}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-neutral-500">{t('settings.network.dns.subnetMask')}</span>
-                  <Input
-                    value={subnetMask}
-                    placeholder="255.255.255.0"
-                    onChange={(e) => setSubnetMask(e.target.value)}
-                    status={subnetMask !== '' && !isValidSubnetMask(subnetMask) ? 'error' : undefined}
-                  />
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-xs text-neutral-500">{t('settings.network.dns.router')}</span>
-                  <Input
-                    value={gateway}
-                    placeholder="192.168.1.1"
-                    onChange={(e) => setGateway(e.target.value)}
-                    status={gateway !== '' && !isValidIPv4(gateway) ? 'error' : undefined}
-                  />
-                </div>
+                <Input
+                  value={address}
+                  placeholder={t('settings.network.ethernet.addressPlaceholder')}
+                  onChange={(e) => setAddress(e.target.value)}
+                  status={address !== '' && !isValidIPv4(address) ? 'error' : undefined}
+                />
+                <Input
+                  value={subnetMask}
+                  placeholder="255.255.255.0"
+                  onChange={(e) => setSubnetMask(e.target.value)}
+                  status={subnetMask !== '' && !isValidSubnetMask(subnetMask) ? 'error' : undefined}
+                />
+                <Input
+                  value={gateway}
+                  placeholder={t('settings.network.ethernet.gatewayPlaceholder')}
+                  onChange={(e) => setGateway(e.target.value)}
+                  status={gateway !== '' && !isValidIPv4(gateway) ? 'error' : undefined}
+                />
               </div>
             )}
           </div>
 
           <div className="h-px w-[300px] bg-neutral-800/80" />
 
-          <Select
-            value={mode}
-            style={{ width: '300px' }}
-            options={[
-              { value: 'psk', label: t('settings.network.wifi.personal') },
-              { value: 'enterprise', label: t('settings.network.wifi.enterprise') }
-            ]}
-            onChange={setMode}
-          />
-          <Input
-            value={ssid}
-            style={{ width: '300px' }}
-            prefix={<WifiOutlined />}
-            placeholder={t('settings.network.wifi.ssid')}
-            onChange={(e) => setSsid(e.target.value)}
-          />
-          {mode === 'psk' && (
-            <Input.Password
-              value={password}
-              style={{ width: '300px' }}
-              prefix={<LockOutlined />}
-              placeholder={
-                passwordSet
-                  ? t('settings.network.ethernet.passwordUnchanged')
-                  : t('settings.network.wifi.password')
-              }
-              onChange={(e) => setPassword(e.target.value)}
+          <div className="flex w-[300px] items-center justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <span className="text-sm font-medium">{t('settings.network.ethernet.authTitle')}</span>
+              <span className="text-xs text-neutral-500">
+                {t('settings.network.ethernet.authDescription')}
+              </span>
+            </div>
+            <Switch
+              checked={enterpriseEnabled}
+              loading={status === 'saving'}
+              onChange={(enabled) => {
+                if (!enabled) {
+                  setMode('off');
+                  return;
+                }
+                setMode('enterprise');
+                if (!identity) setIdentity('');
+                if (!eap) setEap('PEAP');
+                if (!phase2) setPhase2('auth=MSCHAPV2');
+              }}
             />
-          )}
-          {mode === 'enterprise' && (
+          </div>
+
+          {enterpriseEnabled && (
             <>
               <Input
                 value={identity}
