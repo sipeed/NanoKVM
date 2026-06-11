@@ -241,6 +241,34 @@ assert_hid_functions(){
     assert_hid_function "$1" "${USB_HID_ABSOLUTE_MOUSE_FUNC}" "$2 touch" 0 2 6 "$4" "$5"
 }
 
+assert_normal_composite_descriptors(){
+    g="$1"
+    label="$2"
+    assert_eq "$(cat "${g}/bDeviceClass")" "0xEF" "${label} device class"
+    assert_eq "$(cat "${g}/bDeviceSubClass")" "0x02" "${label} device subclass"
+    assert_eq "$(cat "${g}/bDeviceProtocol")" "0x01" "${label} device protocol"
+}
+
+assert_os_descriptors(){
+    g="$1"
+    label="$2"
+    assert_link "${g}/os_desc/c.1" "configs/c.1"
+    assert_eq "$(cat "${g}/os_desc/use")" "1" "${label} OS descriptor enabled"
+    assert_eq "$(cat "${g}/os_desc/b_vendor_code")" "0xCD" "${label} vendor code"
+    assert_eq "$(cat "${g}/os_desc/qw_sign")" "MSFT100" "${label} OS descriptor signature"
+}
+
+assert_rndis_function(){
+    g="$1"
+    label="$2"
+    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_eq "$(cat "${g}/functions/${USB_RNDIS_FUNC}/class")" "e0" "${label} RNDIS class"
+    assert_eq "$(cat "${g}/functions/${USB_RNDIS_FUNC}/subclass")" "01" "${label} RNDIS subclass"
+    assert_eq "$(cat "${g}/functions/${USB_RNDIS_FUNC}/protocol")" "03" "${label} RNDIS protocol"
+    assert_eq "$(cat "${g}/functions/${USB_RNDIS_FUNC}/os_desc/interface.rndis/compatible_id")" "RNDIS" "${label} RNDIS compatible id"
+    assert_eq "$(cat "${g}/functions/${USB_RNDIS_FUNC}/os_desc/interface.rndis/sub_compatible_id")" "5162001" "${label} RNDIS sub-compatible id"
+}
+
 assert_no_hid_functions(){
     g="$1"
     for func in "${USB_HID_KEYBOARD_FUNC}" "${USB_HID_RELATIVE_MOUSE_FUNC}" "${USB_HID_ABSOLUTE_MOUSE_FUNC}"
@@ -288,6 +316,7 @@ test_normal_hid_descriptors(){
 
     assert_eq "$(cat "${g}/bcdUSB")" "${USB_NORMAL_BCD_USB}" "normal bcdUSB"
     assert_eq "$(cat "${g}/bcdDevice")" "${USB_NORMAL_BCD_DEVICE}" "normal bcdDevice"
+    assert_normal_composite_descriptors "${g}" normal
     assert_text_bytes "${g}/strings/0x409/manufacturer" "${USB_MANUFACTURER}"
     assert_text_bytes "${g}/strings/0x409/product" "${USB_PRODUCT}"
     assert_text_bytes "${g}/strings/0x409/serialnumber" "${USB_SERIAL_NUMBER}"
@@ -335,7 +364,9 @@ test_normal_mounted_image_and_network(){
     run_start "${NORMAL_SCRIPT}" "${base}"
     g="${base}/gadget/g0"
 
-    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_normal_composite_descriptors "${g}" normal-network
+    assert_rndis_function "${g}" normal-network
+    assert_os_descriptors "${g}" normal-network
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/file")" "${USB_TEST_IMAGE}" "mounted image"
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/ro")" "1" "media ro flag"
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/cdrom")" "0" "media cdrom flag"
@@ -348,8 +379,8 @@ test_network_restart_removes_os_desc_link(){
     run_start "${NORMAL_SCRIPT}" "${base}"
     g="${base}/gadget/g0"
 
-    assert_link "${g}/os_desc/c.1" "configs/c.1"
-    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_os_descriptors "${g}" network-restart
+    assert_rndis_function "${g}" network-restart
     assert_hid_functions "${g}" network-restart "${KEYBOARD_REPORT_DESC}" "${ABSOLUTE_MOUSE_REPORT_DESC}" 1
 }
 
@@ -363,10 +394,8 @@ test_ncm_network_descriptors(){
     assert_link "${g}/configs/c.1/${USB_NCM_FUNC}" "functions/${USB_NCM_FUNC}"
     assert_no_file "${g}/configs/c.1/${USB_RNDIS_FUNC}"
     assert_eq "$(cat "${g}/functions/${USB_NCM_FUNC}/os_desc/interface.ncm/compatible_id")" "WINNCM" "NCM compatible id"
-    assert_link "${g}/os_desc/c.1" "configs/c.1"
-    assert_eq "$(cat "${g}/os_desc/use")" "1" "NCM OS descriptor enabled"
-    assert_eq "$(cat "${g}/os_desc/b_vendor_code")" "0xCD" "NCM vendor code"
-    assert_eq "$(cat "${g}/os_desc/qw_sign")" "MSFT100" "NCM OS descriptor signature"
+    assert_normal_composite_descriptors "${g}" ncm
+    assert_os_descriptors "${g}" ncm
 }
 
 test_mode_switches_rebuild_gadget_contents(){
@@ -378,11 +407,15 @@ test_mode_switches_rebuild_gadget_contents(){
     g="${base}/gadget/g0"
     assert_eq "$(cat "${g}/bcdDevice")" "${USB_NORMAL_BCD_DEVICE}" "normal mode bcdDevice"
     assert_link "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}" "functions/${USB_MASS_STORAGE_FUNC}"
-    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_rndis_function "${g}" mode-switch-normal
+    assert_os_descriptors "${g}" mode-switch-normal
 
     run_start "${HID_ONLY_SCRIPT}" "${base}"
     g="${base}/gadget/g0"
     assert_eq "$(cat "${g}/bcdDevice")" "${USB_HID_ONLY_BCD_DEVICE}" "hid-only mode bcdDevice"
+    assert_eq "$(cat "${g}/bDeviceClass")" "" "hid-only device class"
+    assert_eq "$(cat "${g}/bDeviceSubClass")" "" "hid-only device subclass"
+    assert_eq "$(cat "${g}/bDeviceProtocol")" "" "hid-only device protocol"
     assert_hid_functions "${g}" switched-hid-only "${HID_ONLY_KEYBOARD_REPORT_DESC}" "${HID_ONLY_ABSOLUTE_MOUSE_REPORT_DESC}" 1
     assert_no_file "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}"
     assert_no_file "${g}/configs/c.1/${USB_RNDIS_FUNC}"
@@ -391,9 +424,11 @@ test_mode_switches_rebuild_gadget_contents(){
     run_start "${NORMAL_SCRIPT}" "${base}"
     g="${base}/gadget/g0"
     assert_eq "$(cat "${g}/bcdDevice")" "${USB_NORMAL_BCD_DEVICE}" "switched-back normal bcdDevice"
+    assert_normal_composite_descriptors "${g}" switched-normal
     assert_hid_functions "${g}" switched-normal "${KEYBOARD_REPORT_DESC}" "${ABSOLUTE_MOUSE_REPORT_DESC}" 1
     assert_link "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}" "functions/${USB_MASS_STORAGE_FUNC}"
-    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_rndis_function "${g}" switched-normal
+    assert_os_descriptors "${g}" switched-normal
 }
 
 test_hid_only_descriptors_and_no_wake(){
