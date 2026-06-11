@@ -187,6 +187,7 @@ do
         [ -d "\${arg}" ] && remove_fake_configfs_attrs "\${arg}"
         case "\${arg}" in
           g0|*/g0)
+            [ ! -L "\${arg}/os_desc/c.1" ] || exit 1
             rm -rf "\${arg}"
             exit 0
             ;;
@@ -339,6 +340,18 @@ test_normal_mounted_image_and_network(){
     assert_eq "$(cat "${g}/functions/${USB_MASS_STORAGE_FUNC}/lun.0/cdrom")" "0" "media cdrom flag"
 }
 
+test_network_restart_removes_os_desc_link(){
+    base=$(new_env)
+    touch "${base}/boot/usb.rndis0"
+    run_start "${NORMAL_SCRIPT}" "${base}"
+    run_start "${NORMAL_SCRIPT}" "${base}"
+    g="${base}/gadget/g0"
+
+    assert_link "${g}/os_desc/c.1" "configs/c.1"
+    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+    assert_hid_functions "${g}" network-restart "${KEYBOARD_REPORT_DESC}" "${ABSOLUTE_MOUSE_REPORT_DESC}" 1
+}
+
 test_hid_only_descriptors_and_no_wake(){
     base=$(new_env)
     touch "${base}/boot/usb.notwakeup"
@@ -415,6 +428,7 @@ test_normal_bios_flag_keeps_only_boot_hid_interfaces
 test_normal_disable_hid_removes_hid_functions
 test_normal_legacy_mass_storage
 test_normal_mounted_image_and_network
+test_network_restart_removes_os_desc_link
 test_hid_only_descriptors_and_no_wake
 test_uses_one_udc
 test_stop_unbinds_and_sets_host_role

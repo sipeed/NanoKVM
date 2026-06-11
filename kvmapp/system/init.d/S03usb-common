@@ -50,6 +50,10 @@ remove_existing_gadget(){
     [ -d "${gadget}" ] || return 0
 
     echo '' > "${gadget}/UDC" 2>/dev/null || true
+    if [ -d "${gadget}/os_desc" ]
+    then
+        find "${gadget}/os_desc" -mindepth 1 -maxdepth 1 -type l -exec rm {} \;
+    fi
     if [ -d "${gadget}/configs/c.1" ]
     then
         find "${gadget}/configs/c.1" -mindepth 1 -maxdepth 1 -type l -exec rm {} \;
