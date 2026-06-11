@@ -237,8 +237,8 @@ void kvm_update_usb_state()
 			path_exists(USB_HID0_LINK) ||
 			path_exists(USB_HID1_LINK) ||
 			path_exists(USB_HID2_LINK);
-		if(access("/sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0", F_OK) == 0) 
-			kvm_sys_state.udisk_state = 1;
+		kvm_sys_state.udisk_state =
+			path_exists("/sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0");
 	} else {
 		kvm_sys_state.hid_state = 0;
 		kvm_sys_state.udisk_state = 0;

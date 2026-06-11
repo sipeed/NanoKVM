@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -158,7 +159,7 @@ func copyModeFile(srcScript string) error {
 	}
 
 	// create and copy to temporary file
-	tmpFile, err := os.CreateTemp("/etc/init.d/", ".S03usbdev-")
+	tmpFile, err := os.CreateTemp(filepath.Dir(USBDevScript), ".S03usbdev-")
 	if err != nil {
 		log.Errorf("failed to create temp %s: %s", USBDevScript, err)
 		return err

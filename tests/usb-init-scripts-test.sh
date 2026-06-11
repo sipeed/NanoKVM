@@ -77,6 +77,7 @@ USB_HID_RELATIVE_MOUSE_FUNC="hid.GS1"
 USB_HID_ABSOLUTE_MOUSE_FUNC="hid.GS2"
 USB_MASS_STORAGE_FUNC="mass_storage.disk0"
 USB_RNDIS_FUNC="rndis.usb0"
+USB_NCM_FUNC="ncm.usb0"
 USB_LEGACY_EMPTY_DISK_BACKING="/dev/mmcblk0p3"
 USB_TEST_IMAGE="/data/install.iso"
 
@@ -352,6 +353,49 @@ test_network_restart_removes_os_desc_link(){
     assert_hid_functions "${g}" network-restart "${KEYBOARD_REPORT_DESC}" "${ABSOLUTE_MOUSE_REPORT_DESC}" 1
 }
 
+test_ncm_network_descriptors(){
+    base=$(new_env)
+    touch "${base}/boot/usb.ncm"
+    touch "${base}/boot/usb.rndis0"
+    run_start "${NORMAL_SCRIPT}" "${base}"
+    g="${base}/gadget/g0"
+
+    assert_link "${g}/configs/c.1/${USB_NCM_FUNC}" "functions/${USB_NCM_FUNC}"
+    assert_no_file "${g}/configs/c.1/${USB_RNDIS_FUNC}"
+    assert_eq "$(cat "${g}/functions/${USB_NCM_FUNC}/os_desc/interface.ncm/compatible_id")" "WINNCM" "NCM compatible id"
+    assert_link "${g}/os_desc/c.1" "configs/c.1"
+    assert_eq "$(cat "${g}/os_desc/use")" "1" "NCM OS descriptor enabled"
+    assert_eq "$(cat "${g}/os_desc/b_vendor_code")" "0xCD" "NCM vendor code"
+    assert_eq "$(cat "${g}/os_desc/qw_sign")" "MSFT100" "NCM OS descriptor signature"
+}
+
+test_mode_switches_rebuild_gadget_contents(){
+    base=$(new_env)
+    touch "${base}/boot/usb.disk0"
+    touch "${base}/boot/usb.rndis0"
+
+    run_start "${NORMAL_SCRIPT}" "${base}"
+    g="${base}/gadget/g0"
+    assert_eq "$(cat "${g}/bcdDevice")" "${USB_NORMAL_BCD_DEVICE}" "normal mode bcdDevice"
+    assert_link "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}" "functions/${USB_MASS_STORAGE_FUNC}"
+    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+
+    run_start "${HID_ONLY_SCRIPT}" "${base}"
+    g="${base}/gadget/g0"
+    assert_eq "$(cat "${g}/bcdDevice")" "${USB_HID_ONLY_BCD_DEVICE}" "hid-only mode bcdDevice"
+    assert_hid_functions "${g}" switched-hid-only "${HID_ONLY_KEYBOARD_REPORT_DESC}" "${HID_ONLY_ABSOLUTE_MOUSE_REPORT_DESC}" 1
+    assert_no_file "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}"
+    assert_no_file "${g}/configs/c.1/${USB_RNDIS_FUNC}"
+    assert_no_file "${g}/os_desc/c.1"
+
+    run_start "${NORMAL_SCRIPT}" "${base}"
+    g="${base}/gadget/g0"
+    assert_eq "$(cat "${g}/bcdDevice")" "${USB_NORMAL_BCD_DEVICE}" "switched-back normal bcdDevice"
+    assert_hid_functions "${g}" switched-normal "${KEYBOARD_REPORT_DESC}" "${ABSOLUTE_MOUSE_REPORT_DESC}" 1
+    assert_link "${g}/configs/c.1/${USB_MASS_STORAGE_FUNC}" "functions/${USB_MASS_STORAGE_FUNC}"
+    assert_link "${g}/configs/c.1/${USB_RNDIS_FUNC}" "functions/${USB_RNDIS_FUNC}"
+}
+
 test_hid_only_descriptors_and_no_wake(){
     base=$(new_env)
     touch "${base}/boot/usb.notwakeup"
@@ -429,6 +473,8 @@ test_normal_disable_hid_removes_hid_functions
 test_normal_legacy_mass_storage
 test_normal_mounted_image_and_network
 test_network_restart_removes_os_desc_link
+test_ncm_network_descriptors
+test_mode_switches_rebuild_gadget_contents
 test_hid_only_descriptors_and_no_wake
 test_uses_one_udc
 test_stop_unbinds_and_sets_host_role
