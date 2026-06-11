@@ -1,41 +1,142 @@
 #!/bin/sh
 
+: "${NANOKVM_DISK:=/dev/mmcblk0}"
+: "${NANOKVM_BOOT_PART:=/dev/mmcblk0p1}"
+: "${NANOKVM_ROOT_PART:=/dev/mmcblk0p2}"
+: "${NANOKVM_DATA_PART:=/dev/mmcblk0p3}"
+: "${NANOKVM_BOOT_DIR:=/boot}"
+: "${NANOKVM_DATA_DIR:=/data}"
+: "${NANOKVM_DISK0_MARKER:=/etc/kvm.disk0}"
+: "${NANOKVM_DATA_FORMAT_PENDING:=/etc/kvm.disk0.formatting}"
+: "${NANOKVM_PROFILE:=/etc/profile}"
+
+is_empty_partition() (
+        tmp="$(mktemp "${TMPDIR:-/tmp}/s01fs-data-head.XXXXXX")" || return 1
+        trap 'rm -f "$tmp"' EXIT
+
+        # Conservative recovery for devices stranded by older boots that marked
+        # disk0 complete before formatting finished.
+        if ! dd if="$1" of="$tmp" bs=1M count=4 2>/dev/null
+        then
+                return 1
+        fi
+
+        if [ "$(wc -c < "$tmp")" = "0" ]
+        then
+                return 0
+        fi
+
+        if ! od -An -tx1 "$tmp" | grep -q '[1-9a-fA-F]'
+        then
+                return 0
+        fi
+
+        return 1
+)
+
+format_and_mount_data_partition() {
+        if mkfs.exfat "$NANOKVM_DATA_PART"
+        then
+                rm -f "$NANOKVM_DATA_FORMAT_PENDING"
+                mkdir -p "$NANOKVM_DATA_DIR"
+                if mount "$NANOKVM_DATA_PART" "$NANOKVM_DATA_DIR"
+                then
+                        touch "$NANOKVM_DISK0_MARKER"
+                else
+                        rm -f "$NANOKVM_DISK0_MARKER"
+                fi
+        else
+                rm -f "$NANOKVM_DISK0_MARKER"
+        fi
+}
+
+normalize_disk_file() {
+        printf '%s' "$1" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
 if [ "$1" = "start" ]
 then
+        data_mount_handled=0
+        data_marker_after_mount=0
+
                 # use all sdcard free space for data
-                parted -s /dev/mmcblk0 "resizepart 2 -0"
+                parted -s "$NANOKVM_DISK" "resizepart 2 -0"
                 echo "yes
                 8192MB
-                " | parted ---pretend-input-tty /dev/mmcblk0 "resizepart 2 8192MB"
+                " | parted ---pretend-input-tty "$NANOKVM_DISK" "resizepart 2 8192MB"
                 # resize data filesystem
-                (resize2fs /dev/mmcblk0p2) &
+                (resize2fs "$NANOKVM_ROOT_PART") &
 
 
-        . /etc/profile
+        if [ -r "$NANOKVM_PROFILE" ]
+        then
+                # shellcheck disable=SC1090
+                . "$NANOKVM_PROFILE"
+        fi
         printf "mounting filesystem : "
-        mkdir -p /boot
-        mount -t vfat /dev/mmcblk0p1 /boot
+        mkdir -p "$NANOKVM_BOOT_DIR"
+        mount -t vfat "$NANOKVM_BOOT_PART" "$NANOKVM_BOOT_DIR"
         mount -t configfs configfs /sys/kernel/config
         mount -t debugfs debugfs /sys/kernel/debug
 
-        if [ -e /boot/usb.disk0 ]
+        disk0_file=""
+        if [ -e "$NANOKVM_BOOT_DIR/usb.disk0" ]
         then
-                if [ ! -e /etc/kvm.disk0 ]
+                disk0_file="$(normalize_disk_file "$(cat "$NANOKVM_BOOT_DIR/usb.disk0")")"
+        fi
+
+        if [ -e "$NANOKVM_BOOT_DIR/usb.disk0" ] && { [ -z "$disk0_file" ] || [ "$disk0_file" = "$NANOKVM_DATA_PART" ]; }
+        then
+                if [ ! -e "$NANOKVM_DATA_PART" ]
                 then
-                        touch /etc/kvm.disk0
                         # use all sdcard free space for data
-                        parted -s /dev/mmcblk0 "mkpart primary 8193MB 100%"
+                        if parted -s "$NANOKVM_DISK" "mkpart primary 8193MB 100%"
+                        then
+                                touch "$NANOKVM_DATA_FORMAT_PENDING"
+                        fi
                         sleep 1
-                        # resize data filesystem
-                        (mkfs.exfat /dev/mmcblk0p3) &
-                        sleep 1
+                fi
+
+        fi
+
+        if [ -e "$NANOKVM_DATA_PART" ] && [ -e "$NANOKVM_DATA_FORMAT_PENDING" ] && [ "$data_mount_handled" = "0" ]
+        then
+                format_and_mount_data_partition
+                data_mount_handled=1
+        fi
+
+        if [ -e "$NANOKVM_DATA_PART" ] && [ "$data_mount_handled" = "0" ]
+        then
+                if [ -n "$(blkid "$NANOKVM_DATA_PART" 2>/dev/null)" ]
+                then
+                        data_marker_after_mount=1
+                elif [ -e "$NANOKVM_DISK0_MARKER" ] && is_empty_partition "$NANOKVM_DATA_PART"
+                then
+                        touch "$NANOKVM_DATA_FORMAT_PENDING"
+                        format_and_mount_data_partition
+                        data_mount_handled=1
+                else
+                        # Existing unrecognized partitions may contain data. Only
+                        # format partitions this script created, marked pending, or
+                        # legacy-marked as complete while still empty.
+                        rm -f "$NANOKVM_DISK0_MARKER"
+                        data_mount_handled=1
                 fi
         fi
 
-        if [ -e /dev/mmcblk0p3 ]
+        if [ -e "$NANOKVM_DATA_PART" ] && [ "$data_mount_handled" = "0" ]
         then
-                mkdir -p /data
-                mount /dev/mmcblk0p3 /data
+                mkdir -p "$NANOKVM_DATA_DIR"
+                if mount "$NANOKVM_DATA_PART" "$NANOKVM_DATA_DIR"
+                then
+                        if [ "$data_marker_after_mount" = "1" ]
+                        then
+                                touch "$NANOKVM_DISK0_MARKER"
+                        fi
+                elif [ "$data_marker_after_mount" = "1" ]
+                then
+                        rm -f "$NANOKVM_DISK0_MARKER"
+                fi
         fi
 
         echo "OK"
