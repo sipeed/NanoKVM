@@ -1,23 +1,30 @@
 package hid
 
 import (
-	"NanoKVM-Server/proto"
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/proto"
 )
 
 const (
-	ModeNormal  = "normal"
-	ModeHidOnly = "hid-only"
-	ModeFlag    = "/sys/kernel/config/usb_gadget/g0/bcdDevice"
+	ModeNormal      = "normal"
+	ModeHidOnly     = "hid-only"
+	DefaultModeFlag = "/sys/kernel/config/usb_gadget/g0/bcdDevice"
+)
+
+var (
+	modeFlag = DefaultModeFlag
 
 	ModeNormalScript  = "/kvmapp/system/init.d/S03usbdev"
 	ModeHidOnlyScript = "/kvmapp/system/init.d/S03usbhid"
@@ -120,8 +127,10 @@ func ResetUSBPHY() error {
 	h.CloseNoLock()
 	defer h.Unlock()
 
-	command := fmt.Sprintf("%s restart_phy", USBDevScript)
-	if err := exec.Command("sh", "-c", command).Run(); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := exec.CommandContext(ctx, "sh", USBDevScript, "restart_phy").Run(); err != nil {
 		return fmt.Errorf("restart usb phy: %w", err)
 	}
 
@@ -150,7 +159,7 @@ func copyModeFile(srcScript string) error {
 	}
 
 	// create and copy to temporary file
-	tmpFile, err := os.CreateTemp("/etc/init.d/", ".S03usbdev-")
+	tmpFile, err := os.CreateTemp(filepath.Dir(USBDevScript), ".S03usbdev-")
 	if err != nil {
 		log.Errorf("failed to create temp %s: %s", USBDevScript, err)
 		return err
@@ -195,9 +204,9 @@ func copyModeFile(srcScript string) error {
 }
 
 func getHidMode() (string, error) {
-	data, err := os.ReadFile(ModeFlag)
+	data, err := os.ReadFile(modeFlag)
 	if err != nil {
-		log.Errorf("failed to read %s: %s", ModeFlag, err)
+		log.Errorf("failed to read %s: %s", modeFlag, err)
 		return "", err
 	}
 
