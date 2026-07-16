@@ -241,7 +241,7 @@ const zh = {
       ok: '确定',
       disabled: '/data 是只读分区，无法下载镜像',
       uploadbox: '将文件拖放到此处或单击选择',
-      inputfile: '请输入图片文件',
+      inputfile: '请输入镜像文件',
       NoISO: '无 ISO',
       sha256: 'SHA-256（可选）',
       sha256Placeholder: '请输入 64 位 SHA-256 校验和',

@@ -317,18 +317,20 @@ export const DownloadImage = () => {
       {!diskEnabled ? (
         <div className="text-red-500">{t('download.disabled')}</div>
       ) : (
-        <>
+        <div className="space-y-2">
           <div>
-            <div className="pb-1 text-neutral-500">{t('download.input')}</div>
-            <div className="flex items-center space-x-1">
+            <div className="mb-1 text-neutral-500">{t('download.input')}</div>
+            <div className="flex items-center gap-1">
               <Input
                 ref={inputRef}
                 value={input}
                 onChange={handleChange}
                 disabled={status === 'in_progress'}
+                className="min-w-0 flex-1"
               />
               <Button
                 type="primary"
+                className="h-10 w-16 shrink-0 px-0"
                 danger={isRemoteDownloading && status === 'in_progress'}
                 onClick={() =>
                   isRemoteDownloading && status === 'in_progress'
@@ -345,8 +347,8 @@ export const DownloadImage = () => {
               </Button>
             </div>
           </div>
-          <div className="mt-2">
-            <div className="pb-1 text-neutral-500">{t('download.sha256')}</div>
+          <div>
+            <div className="mb-1 text-neutral-500">{t('download.sha256')}</div>
             <Input
               value={sha256sum}
               onChange={handleSha256Change}
@@ -356,14 +358,16 @@ export const DownloadImage = () => {
             />
           </div>
           <div>
-            <div className="pb-1 text-neutral-500">{t('download.inputfile')}</div>
-            <div className="flex items-center space-x-1">
+            <div className="mb-1 text-neutral-500">{t('download.inputfile')}</div>
+            <div className="flex items-center gap-1">
               <div
-                  className={clsx(
-                    "flex flex-col items-center justify-center w-full h-10 border-2 border-solid rounded-xl transition css-9118ya ant-input-outlined",
-                    isDragging ? "bg-neutral-500 border-blue-500" : "",
-                    status === "in_progress" ? "opacity-50 cursor-not-allowed pointer-events-none border-neutral-600 bg-neutral-700" : "cursor-pointer hover:bg-neutral-500"
-                  )}
+                className={clsx(
+                  'flex h-10 min-w-0 flex-1 flex-col items-center justify-center rounded-xl border-2 border-solid transition',
+                  isDragging ? 'border-blue-500 bg-neutral-500' : 'border-neutral-600',
+                  status === 'in_progress'
+                    ? 'cursor-not-allowed bg-neutral-700 opacity-50'
+                    : 'cursor-pointer hover:bg-neutral-500'
+                )}
                   onDrop={(e) => {
                     if (status === "in_progress") return; // deaktiviert
                     e.preventDefault();
@@ -393,7 +397,7 @@ export const DownloadImage = () => {
                     document.getElementById("file-upload")?.click()
                   }}
                 >
-                <span className="text-neutral-100 text-sm p-1">
+                <span className="w-full truncate px-2 text-center text-sm text-neutral-100">
                   {selectedFile ? selectedFile.name : t('download.uploadbox')}
                 </span>
 
@@ -407,7 +411,7 @@ export const DownloadImage = () => {
               </div>
               <Button
                 type="primary"
-                className="h-10 border-2"
+                className="h-10 w-16 shrink-0 border-2 px-0"
                 onClick={() => upload(selectedFile)}
                 disabled={status === 'in_progress' || !selectedFile}
               >
@@ -415,9 +419,9 @@ export const DownloadImage = () => {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
-      <div className={clsx('py-2')}>
+      <div className={clsx('min-h-8 pt-2')}>
         {status && (
           <div
             className={clsx(

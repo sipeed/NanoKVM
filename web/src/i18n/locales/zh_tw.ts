@@ -241,7 +241,7 @@ const zh_tw = {
       ok: '確定',
       disabled: '/data 為唯讀目錄，無法下載映像檔',
       uploadbox: '將檔案拖曳到此處或按一下選擇',
-      inputfile: '請輸入圖片檔案',
+      inputfile: '請輸入映像檔案',
       NoISO: '無 ISO'
     },
     power: {
