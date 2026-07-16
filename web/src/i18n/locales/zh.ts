@@ -242,7 +242,15 @@ const zh = {
       disabled: '/data 是只读分区，无法下载镜像',
       uploadbox: '将文件拖放到此处或单击选择',
       inputfile: '请输入图片文件',
-      NoISO: '无 ISO'
+      NoISO: '无 ISO',
+      sha256: 'SHA-256（可选）',
+      sha256Placeholder: '请输入 64 位 SHA-256 校验和',
+      invalidSHA256: 'SHA-256 必须是 64 位十六进制字符串',
+      failed: '下载失败',
+      success: '下载成功',
+      checksumFailed: '下载失败：SHA-256 校验失败',
+      cancel: '取消',
+      cancelFailed: '取消下载失败'
     },
     power: {
       title: '电源',
