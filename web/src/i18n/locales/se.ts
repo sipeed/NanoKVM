@@ -249,7 +249,15 @@ const se = {
       disabled: '/data partitionen är skrivskyddad, kan inte hämta avbildning',
       uploadbox: 'Släpp filen här eller klicka för att välja',
       inputfile: 'Vänligen ange bildfilen',
-      NoISO: 'Ingen ISO'
+      NoISO: 'Ingen ISO',
+      sha256: 'SHA-256 (valfrie)',
+      sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
+      invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',
+      failed: 'Nedlasting mislyktes',
+      success: 'Nedlasting fullført',
+      checksumFailed: 'Nedlasting mislyktes: SHA-256-verifisering mislyktes',
+      cancel: 'Avbryt',
+      cancelFailed: 'Kunne ikke avbryte nedlastingen'
     },
     power: {
       title: 'Ström',

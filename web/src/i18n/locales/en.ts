@@ -250,7 +250,15 @@ const en = {
       disabled: '/data partition is RO, so we cannot download the image',
       uploadbox: 'Drop file here or click to select',
       inputfile: 'Please enter the image File',
-      NoISO: 'No ISO'
+      NoISO: 'No ISO',
+      sha256: 'SHA-256 (optional)',
+      sha256Placeholder: 'Enter a 64-character SHA-256 checksum',
+      invalidSHA256: 'SHA-256 must be a 64-character hexadecimal string',
+      failed: 'Download failed',
+      success: 'Download successful',
+      checksumFailed: 'Download failed: SHA-256 verification failed',
+      cancel: 'Cancel',
+      cancelFailed: 'Failed to cancel download'
     },
     power: {
       title: 'Power',

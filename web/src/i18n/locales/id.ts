@@ -252,7 +252,15 @@ const id = {
       disabled: 'Partisi /data adalah RO, jadi kami tidak dapat mengunduh gambarnya',
       uploadbox: 'Letakkan file di sini atau klik untuk memilih',
       inputfile: 'Silakan masukkan File gambar',
-      NoISO: 'Tidak ada ISO'
+      NoISO: 'Tidak ada ISO',
+      sha256: 'SHA-256 (opsional)',
+      sha256Placeholder: 'Masukkan checksum SHA-256 64 karakter',
+      invalidSHA256: 'SHA-256 harus berupa string heksadesimal 64 karakter',
+      failed: 'Unduhan gagal',
+      success: 'Unduhan berhasil',
+      checksumFailed: 'Unduhan gagal: verifikasi SHA-256 gagal',
+      cancel: 'Batal',
+      cancelFailed: 'Gagal membatalkan unduhan'
     },
     power: {
       title: 'Daya',

@@ -255,7 +255,15 @@ const fr = {
       disabled: 'La partition /data est en lecture seule, impossible de télécharger l’image',
       uploadbox: 'Déposez le fichier ici ou cliquez pour sélectionner',
       inputfile: 'Veuillez saisir le fichier image',
-      NoISO: 'Aucun ISO'
+      NoISO: 'Aucun ISO',
+      sha256: 'SHA-256 (facultatif)',
+      sha256Placeholder: 'Saisissez une somme de contrôle SHA-256 de 64 caractères',
+      invalidSHA256: 'SHA-256 doit être une chaîne hexadécimale de 64 caractères',
+      failed: 'Échec du téléchargement',
+      success: 'Téléchargement réussi',
+      checksumFailed: 'Échec du téléchargement : échec de la vérification SHA-256',
+      cancel: 'Annuler',
+      cancelFailed: 'Impossible d’annuler le téléchargement'
     },
     power: {
       title: 'Power',

@@ -250,7 +250,15 @@ const vi = {
       disabled: '/data phân vùng là RO nên không tải được image',
       uploadbox: 'Thả file vào đây hoặc bấm vào để chọn',
       inputfile: 'Vui lòng nhập File hình ảnh',
-      NoISO: 'Không có ISO'
+      NoISO: 'Không có ISO',
+      sha256: 'SHA-256 (tùy chọn)',
+      sha256Placeholder: 'Nhập mã kiểm tra SHA-256 gồm 64 ký tự',
+      invalidSHA256: 'SHA-256 phải là chuỗi thập lục phân gồm 64 ký tự',
+      failed: 'Tải xuống thất bại',
+      success: 'Tải xuống thành công',
+      checksumFailed: 'Tải xuống thất bại: xác minh SHA-256 không thành công',
+      cancel: 'Hủy',
+      cancelFailed: 'Không thể hủy tải xuống'
     },
     power: {
       title: 'Nguồn',

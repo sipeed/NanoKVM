@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next';
 import * as api from '@/api/storage.ts';
 import { client } from '@/lib/websocket.ts';
 
+const imageUpdatedEvent = 'nanokvm:image-updated';
+
 type ImagesProps = {
   isOpen: boolean;
   cdrom: boolean;
@@ -33,9 +35,18 @@ export const Images = ({ isOpen, cdrom, setIsMounted }: ImagesProps) => {
   const [deletingImage, setDeletingImage] = useState('');
 
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    getImages();
+
+    const handleImageUpdated = () => {
       getImages();
-    }
+    };
+    window.addEventListener(imageUpdatedEvent, handleImageUpdated);
+
+    return () => {
+      window.removeEventListener(imageUpdatedEvent, handleImageUpdated);
+    };
   }, [isOpen]);
 
   // get image list

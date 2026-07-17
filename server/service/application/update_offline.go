@@ -46,10 +46,6 @@ func offlineUpdate(c *gin.Context) error {
 		_ = os.RemoveAll(CacheDir)
 	}()
 
-	if err := checkDownloadInProgress(); err != nil {
-		return err
-	}
-
 	if err := createSentinelFile(); err != nil {
 		return err
 	}
@@ -75,19 +71,30 @@ func offlineUpdate(c *gin.Context) error {
 	return nil
 }
 
-func checkDownloadInProgress() error {
-	if _, err := os.Stat(sentinelPath); err == nil {
-		log.Debug("Download in progress")
-		return fmt.Errorf("download already in progress")
-	}
-	return nil
-}
-
 func createSentinelFile() error {
-	if err := os.WriteFile(sentinelPath, []byte("downloading"), sentinelPermission); err != nil {
+	file, err := os.OpenFile(
+		sentinelPath,
+		os.O_WRONLY|os.O_CREATE|os.O_EXCL,
+		sentinelPermission,
+	)
+	if err != nil {
+		if os.IsExist(err) {
+			return fmt.Errorf("download already in progress")
+		}
 		log.Errorf("Failed to create sentinel file: %v", err)
 		return fmt.Errorf("failed to create sentinel file: %w", err)
 	}
+
+	if _, err := file.WriteString("downloading"); err != nil {
+		_ = file.Close()
+		_ = os.Remove(sentinelPath)
+		return fmt.Errorf("failed to initialize sentinel file: %w", err)
+	}
+	if err := file.Close(); err != nil {
+		_ = os.Remove(sentinelPath)
+		return fmt.Errorf("failed to close sentinel file: %w", err)
+	}
+
 	return nil
 }
 

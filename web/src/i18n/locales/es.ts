@@ -253,7 +253,15 @@ const es = {
       disabled: 'La partición /data es de sólo lectura, no se puede descargar la imagen',
       uploadbox: 'Suelte el archivo aquí o haga clic para seleccionar',
       inputfile: 'Por favor ingrese el archivo de imagen',
-      NoISO: 'Sin ISO'
+      NoISO: 'Sin ISO',
+      sha256: 'SHA-256 (opcional)',
+      sha256Placeholder: 'Introduzca una suma de comprobación SHA-256 de 64 caracteres',
+      invalidSHA256: 'SHA-256 debe ser una cadena hexadecimal de 64 caracteres',
+      failed: 'Descarga fallida',
+      success: 'Descarga correcta',
+      checksumFailed: 'Descarga fallida: error en la verificación SHA-256',
+      cancel: 'Cancelar',
+      cancelFailed: 'No se pudo cancelar la descarga'
     },
     power: {
       title: 'Encender / Apagar',
