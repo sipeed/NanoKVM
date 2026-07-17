@@ -33,7 +33,7 @@ var modeMap = map[string]string{
 func (s *Service) GetHidMode(c *gin.Context) {
 	var rsp proto.Response
 
-	mode, err := getHidMode()
+	mode, err := GetMode()
 	if err != nil {
 		rsp.ErrRsp(c, -1, "get HID mode failed")
 		return
@@ -58,7 +58,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	if mode, _ := getHidMode(); req.Mode == mode {
+	if mode, _ := GetMode(); req.Mode == mode {
 		rsp.OkRsp(c)
 		return
 	}
@@ -194,7 +194,7 @@ func copyModeFile(srcScript string) error {
 	return nil
 }
 
-func getHidMode() (string, error) {
+func GetMode() (string, error) {
 	data, err := os.ReadFile(ModeFlag)
 	if err != nil {
 		log.Errorf("failed to read %s: %s", ModeFlag, err)
