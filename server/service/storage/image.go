@@ -150,6 +150,19 @@ func (s *Service) MountImage(c *gin.Context) {
 func (s *Service) GetMountedImage(c *gin.Context) {
 	var rsp proto.Response
 
+	mode, err := hid.GetMode()
+	if err != nil {
+		rsp.ErrRsp(c, -2, "get HID mode failed")
+		return
+	}
+
+	if mode == hid.ModeHidOnly {
+		rsp.OkRspWithData(c, &proto.GetMountedImageRsp{
+			File: "",
+		})
+		return
+	}
+
 	content, err := os.ReadFile(mountDevice)
 	if err != nil {
 		rsp.ErrRsp(c, -2, "read failed")
