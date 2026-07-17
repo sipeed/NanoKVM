@@ -253,7 +253,15 @@ const pl = {
       disabled: '/data partycja to RO, więc nie możemy pobrać obrazu',
       uploadbox: 'Upuść plik tutaj lub kliknij, aby wybrać',
       inputfile: 'Proszę wprowadzić plik obrazu',
-      NoISO: 'Brak ISO'
+      NoISO: 'Brak ISO',
+      sha256: 'SHA-256 (opcjonalnie)',
+      sha256Placeholder: 'Wprowadź 64-znakową sumę kontrolną SHA-256',
+      invalidSHA256: 'SHA-256 musi być 64-znakowym ciągiem szesnastkowym',
+      failed: 'Pobieranie nie powiodło się',
+      success: 'Pobieranie zakończone pomyślnie',
+      checksumFailed: 'Pobieranie nie powiodło się: weryfikacja SHA-256 nie powiodła się',
+      cancel: 'Anuluj',
+      cancelFailed: 'Nie udało się anulować pobierania'
     },
     power: {
       title: 'Zasilanie',

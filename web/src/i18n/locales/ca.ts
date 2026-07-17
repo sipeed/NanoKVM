@@ -250,7 +250,15 @@ const ca = {
       disabled: 'La partició /data és només lectura. No es pot descarregar la imatge.',
       uploadbox: 'Deixeu anar el fitxer aquí o feu clic per seleccionar-lo',
       inputfile: "Introduïu el fitxer d'imatge",
-      NoISO: 'Cap ISO'
+      NoISO: 'Cap ISO',
+      sha256: 'SHA-256 (opcional)',
+      sha256Placeholder: 'Introduïu una suma de verificació SHA-256 de 64 caràcters',
+      invalidSHA256: 'SHA-256 ha de ser una cadena hexadecimal de 64 caràcters',
+      failed: 'Descàrrega fallida',
+      success: 'Descàrrega correcta',
+      checksumFailed: 'Descàrrega fallida: ha fallat la verificació SHA-256',
+      cancel: 'Cancel·la',
+      cancelFailed: 'No sha pogut cancel·lar la descàrrega'
     },
     power: {
       title: 'Alimentació',

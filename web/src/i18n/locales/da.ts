@@ -251,7 +251,15 @@ const da = {
       disabled: '/data partitionen er RO, så vi kan ikke downloade billedet',
       uploadbox: 'Slip filen her, eller klik for at vælge',
       inputfile: 'Indtast venligst billedfilen',
-      NoISO: 'Ingen ISO'
+      NoISO: 'Ingen ISO',
+      sha256: 'SHA-256 (valgfri)',
+      sha256Placeholder: 'Indtast en SHA-256-kontrolsum på 64 tegn',
+      invalidSHA256: 'SHA-256 skal være en hexadecimal streng på 64 tegn',
+      failed: 'Download mislykkedes',
+      success: 'Download gennemført',
+      checksumFailed: 'Download mislykkedes: SHA-256-verifikation mislykkedes',
+      cancel: 'Annuller',
+      cancelFailed: 'Kunne ikke annullere download'
     },
     power: {
       title: 'Tænd/sluk-knap',

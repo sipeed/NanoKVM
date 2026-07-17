@@ -253,7 +253,15 @@ const ja = {
         '/data パーティションは読み取り専用であり、イメージのダウンロードには使用できません',
       uploadbox: 'ここにファイルをドロップするか、クリックして選択してください',
       inputfile: '画像ファイルを入力してください',
-      NoISO: 'ISO なし'
+      NoISO: 'ISO なし',
+      sha256: 'SHA-256（任意）',
+      sha256Placeholder: '64 文字の SHA-256 チェックサムを入力してください',
+      invalidSHA256: 'SHA-256 は 64 文字の 16 進数文字列である必要があります',
+      failed: 'ダウンロードに失敗しました',
+      success: 'ダウンロードに成功しました',
+      checksumFailed: 'ダウンロードに失敗しました：SHA-256 検証に失敗しました',
+      cancel: 'キャンセル',
+      cancelFailed: 'ダウンロードのキャンセルに失敗しました'
     },
     power: {
       title: '電源',

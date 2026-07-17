@@ -242,7 +242,15 @@ const zh_tw = {
       disabled: '/data 為唯讀目錄，無法下載映像檔',
       uploadbox: '將檔案拖曳到此處或按一下選擇',
       inputfile: '請輸入映像檔案',
-      NoISO: '無 ISO'
+      NoISO: '無 ISO',
+      sha256: 'SHA-256（可選）',
+      sha256Placeholder: '請輸入 64 位元 SHA-256 校驗和',
+      invalidSHA256: 'SHA-256 必須是 64 位元十六進位字串',
+      failed: '下載失敗',
+      success: '下載成功',
+      checksumFailed: '下載失敗：SHA-256 校驗失敗',
+      cancel: '取消',
+      cancelFailed: '取消下載失敗'
     },
     power: {
       title: '電源控制',

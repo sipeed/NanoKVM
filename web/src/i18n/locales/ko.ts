@@ -248,7 +248,15 @@ const ko = {
       disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.',
       uploadbox: '여기에 파일을 놓거나 클릭하여 선택하세요.',
       inputfile: '이미지 파일을 입력해주세요',
-      NoISO: 'ISO 없음'
+      NoISO: 'ISO 없음',
+      sha256: 'SHA-256 (선택 사항)',
+      sha256Placeholder: '64자 SHA-256 체크섬을 입력하세요',
+      invalidSHA256: 'SHA-256은 64자의 16진수 문자열이어야 합니다',
+      failed: '다운로드 실패',
+      success: '다운로드 성공',
+      checksumFailed: '다운로드 실패: SHA-256 검증 실패',
+      cancel: '취소',
+      cancelFailed: '다운로드 취소 실패'
     },
     power: {
       title: '전원',

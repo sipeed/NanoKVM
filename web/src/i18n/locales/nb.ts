@@ -252,7 +252,15 @@ const nb = {
       disabled: '/data partisjonen er RO, så vi kan ikke laste ned bildet',
       uploadbox: 'Slipp filen her eller klikk for å velge',
       inputfile: 'Vennligst skriv inn bildefilen',
-      NoISO: 'Ingen ISO'
+      NoISO: 'Ingen ISO',
+      sha256: 'SHA-256 (valgfritt)',
+      sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
+      invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',
+      failed: 'Nedlasting mislyktes',
+      success: 'Nedlasting fullført',
+      checksumFailed: 'Nedlasting mislyktes: SHA-256-verifisering mislyktes',
+      cancel: 'Avbryt',
+      cancelFailed: 'Kunne ikke avbryte nedlastingen'
     },
     power: {
       title: 'På-knapp',

@@ -252,7 +252,15 @@ const pt_br = {
       disabled: 'A partição /data é RO, então não podemos baixar a imagem',
       uploadbox: 'Solte o arquivo aqui ou clique para selecionar',
       inputfile: 'Por favor insira o arquivo de imagem',
-      NoISO: 'Sem ISO'
+      NoISO: 'Sem ISO',
+      sha256: 'SHA-256 (opcional)',
+      sha256Placeholder: 'Digite um checksum SHA-256 de 64 caracteres',
+      invalidSHA256: 'SHA-256 deve ser uma sequência hexadecimal de 64 caracteres',
+      failed: 'Falha no download',
+      success: 'Download concluído',
+      checksumFailed: 'Falha no download: a verificação SHA-256 falhou',
+      cancel: 'Cancelar',
+      cancelFailed: 'Falha ao cancelar o download'
     },
     power: {
       title: 'Energia',

@@ -254,7 +254,15 @@ const nl = {
       disabled: '/data partitie is RO, dus we kunnen de afbeelding niet downloaden',
       uploadbox: 'Zet het bestand hier neer of klik om te selecteren',
       inputfile: 'Voer het afbeeldingsbestand in',
-      NoISO: 'Geen ISO'
+      NoISO: 'Geen ISO',
+      sha256: 'SHA-256 (optioneel)',
+      sha256Placeholder: 'Voer een SHA-256-controlesom van 64 tekens in',
+      invalidSHA256: 'SHA-256 moet een hexadecimale tekenreeks van 64 tekens zijn',
+      failed: 'Download mislukt',
+      success: 'Download geslaagd',
+      checksumFailed: 'Download mislukt: SHA-256-verificatie mislukt',
+      cancel: 'Annuleren',
+      cancelFailed: 'Download annuleren mislukt'
     },
     power: {
       title: 'Aan/uit',

@@ -251,7 +251,15 @@ const tr = {
       disabled: '/data bölüntüsü salt okunur modda, disk imajı indirilemiyor.',
       uploadbox: 'Dosyayı buraya bırakın veya seçmek için tıklayın',
       inputfile: 'Lütfen resim dosyasını giriniz',
-      NoISO: 'ISO yok'
+      NoISO: 'ISO yok',
+      sha256: 'SHA-256 (isteğe bağlı)',
+      sha256Placeholder: '64 karakterlik SHA-256 sağlama toplamını girin',
+      invalidSHA256: 'SHA-256, 64 karakterlik bir onaltılık dize olmalıdır',
+      failed: 'İndirme başarısız',
+      success: 'İndirme başarılı',
+      checksumFailed: 'İndirme başarısız: SHA-256 doğrulaması başarısız',
+      cancel: 'İptal',
+      cancelFailed: 'İndirme iptal edilemedi'
     },
     power: {
       title: 'Güç',
