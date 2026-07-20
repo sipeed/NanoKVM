@@ -294,6 +294,7 @@ const nl = {
         enableConfirmDesc:
           'Als MCP wordt ingeschakeld, stopt PicoClaw en worden alle actieve PicoClaw-sessies gesloten.',
         failed: 'MCP-bewerking mislukt',
+        copyFailed: 'Kopiëren mislukt. Kopieer handmatig.',
         okBtn: 'Bevestigen',
         cancelBtn: 'Annuleren'
       },

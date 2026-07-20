@@ -290,6 +290,7 @@ const da = {
         enableConfirmDesc:
           'Aktivering af MCP stopper PicoClaw og lukker alle aktive PicoClaw-sessioner.',
         failed: 'MCP-handlingen mislykkedes',
+        copyFailed: 'Kopiering mislykkedes. Kopiér manuelt.',
         okBtn: 'Bekræft',
         cancelBtn: 'Annuller'
       },

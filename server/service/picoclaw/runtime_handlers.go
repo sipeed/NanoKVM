@@ -35,8 +35,16 @@ func (s *Service) StartRuntime(c *gin.Context) {
 	}
 	defer releaseControl()
 
+	operationCtx, releaseOperation := s.beginRuntimeLifecycleOperation(c.Request.Context())
+	defer releaseOperation()
+
 	unlockLifecycle := s.lockRuntimeLifecycle()
 	defer unlockLifecycle()
+
+	if lifecycleErr := runtimeLifecycleOperationError(operationCtx); lifecycleErr != nil {
+		writePicoclawErrorWithData(c, lifecycleErr, gin.H{"status": s.runtimeStatus()})
+		return
+	}
 
 	if currentStatus := s.runtime.Get(); currentStatus.Installing {
 		runtimeErr := newPicoclawError(CodeRuntimeUnavailable, "picoclaw installation is in progress")
@@ -44,7 +52,7 @@ func (s *Service) StartRuntime(c *gin.Context) {
 		return
 	}
 
-	if readyErr := s.ensureRuntimeReadyForLifecycle(); readyErr == nil {
+	if readyErr := s.ensureRuntimeReadyForLifecycleContext(operationCtx); readyErr == nil {
 		s.setRuntimeIntentDesired(true, "web")
 		status := s.runtimeStatus()
 		log.WithFields(log.Fields{
@@ -67,8 +75,9 @@ func (s *Service) StartRuntime(c *gin.Context) {
 		status.CheckedAt = time.Now()
 	})
 
-	command, output, startErr := s.startRuntime()
+	command, output, startErr := s.startRuntimeContext(operationCtx)
 	if startErr != nil {
+		s.markRuntimeLifecycleCanceled(startErr)
 		s.setRuntimeIntentError(startErr.Message)
 		status := s.runtimeStatus()
 		log.WithFields(log.Fields{

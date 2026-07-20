@@ -23,7 +23,7 @@ type PasteReq struct {
 
 const (
 	defaultPasteDelay    = 30 * time.Millisecond
-	maxPasteDuration     = 30 * time.Second
+	maxPasteDuration     = 25 * time.Second
 	maxPasteContentRunes = int(maxPasteDuration / defaultPasteDelay)
 )
 
@@ -193,7 +193,7 @@ func (s *Service) Paste(c *gin.Context) {
 		}
 	}
 	if time.Duration(typeableRunes)*defaultPasteDelay > maxPasteDuration {
-		rsp.ErrRsp(c, -2, "paste duration exceeds 30s")
+		rsp.ErrRsp(c, -2, "paste duration exceeds 25s")
 		return
 	}
 

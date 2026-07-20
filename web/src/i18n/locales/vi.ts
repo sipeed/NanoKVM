@@ -289,6 +289,7 @@ const vi = {
         enableConfirmTitle: 'Bật điều khiển MCP bên ngoài?',
         enableConfirmDesc: 'Bật MCP sẽ dừng PicoClaw và đóng tất cả phiên PicoClaw đang hoạt động.',
         failed: 'Thao tác MCP không thành công',
+        copyFailed: 'Sao chép thất bại. Vui lòng sao chép thủ công.',
         okBtn: 'Xác nhận',
         cancelBtn: 'Hủy'
       },

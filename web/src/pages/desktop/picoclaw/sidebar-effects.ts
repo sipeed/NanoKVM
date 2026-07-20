@@ -379,6 +379,12 @@ export function usePicoclawSidebarLifecycle({
   setTransportState,
   setRunState
 }: LifecycleOptions) {
+  const tRef = useRef(t);
+
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -396,7 +402,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.installing) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.install.installing'))
+            createStatusMessage(tRef.current('picoclaw.install.installing'))
           ]);
           return;
         }
@@ -404,7 +410,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.installed === false) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.install.requiredDescription'))
+            createStatusMessage(tRef.current('picoclaw.install.requiredDescription'))
           ]);
           return;
         }
@@ -412,7 +418,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.model_configured === false) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.model.requiredDescription'))
+            createStatusMessage(tRef.current('picoclaw.model.requiredDescription'))
           ]);
           return;
         }
@@ -423,7 +429,7 @@ export function usePicoclawSidebarLifecycle({
 
         setMessages((current) => [
           ...current,
-          createStatusMessage(t('picoclaw.status.connecting'))
+          createStatusMessage(tRef.current('picoclaw.status.connecting'))
         ]);
         try {
           await connectGateway(nextSessionId);
@@ -460,8 +466,7 @@ export function usePicoclawSidebarLifecycle({
     setOverlay,
     setRunState,
     setTakeover,
-    setTransportState,
-    t
+    setTransportState
   ]);
 }
 

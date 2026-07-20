@@ -292,6 +292,7 @@ const id = {
         enableConfirmDesc:
           'Mengaktifkan MCP akan menghentikan PicoClaw dan menutup semua sesi PicoClaw yang aktif.',
         failed: 'Operasi MCP gagal',
+        copyFailed: 'Gagal menyalin. Salin secara manual.',
         okBtn: 'Konfirmasi',
         cancelBtn: 'Batal'
       },

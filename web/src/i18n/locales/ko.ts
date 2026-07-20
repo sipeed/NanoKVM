@@ -288,6 +288,7 @@ const ko = {
         enableConfirmDesc:
           'MCP를 활성화하면 PicoClaw가 중지되고 활성 PicoClaw 세션이 모두 닫힙니다.',
         failed: 'MCP 작업에 실패했습니다',
+        copyFailed: '복사에 실패했습니다. 수동으로 복사하세요.',
         okBtn: '확인',
         cancelBtn: '취소'
       },

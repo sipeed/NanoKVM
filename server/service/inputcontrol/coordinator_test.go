@@ -162,6 +162,49 @@ func TestFailedHeldManualInputDoesNotRemainHeld(t *testing.T) {
 	release()
 }
 
+func TestFailedReleaseReportClearsHeldManualInput(t *testing.T) {
+	tests := []struct {
+		name string
+		kind ManualReportKind
+	}{
+		{name: "keyboard", kind: ManualKeyboard},
+		{name: "relative mouse", kind: ManualRelativeMouse},
+		{name: "absolute mouse", kind: ManualAbsoluteMouse},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			now := time.Unix(260, 0)
+			coordinator := newCoordinator(time.Second, func() time.Time { return now })
+			control := controlmode.NewManager(filepath.Join(t.TempDir(), "mode"), controlmode.ModeMCP)
+			manual := NewManualSession(control, coordinator)
+			defer manual.Close()
+
+			down, err := manual.Reserve(context.Background(), tc.kind, true, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			down.Complete(true)
+
+			up, err := manual.Reserve(context.Background(), tc.kind, false, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			up.Complete(false)
+
+			if _, _, err := coordinator.BeginMCP(context.Background(), OperationHID); !errors.Is(err, ErrManualControlActive) {
+				t.Fatalf("cooldown error = %v, want %v", err, ErrManualControlActive)
+			}
+			now = now.Add(2 * time.Second)
+			_, release, err := coordinator.BeginMCP(context.Background(), OperationHID)
+			if err != nil {
+				t.Fatalf("failed release report left held input active: %v", err)
+			}
+			release()
+		})
+	}
+}
+
 func TestPointerMoveWithoutButtonsDoesNotStartCooldown(t *testing.T) {
 	coordinator := newCoordinator(time.Second, time.Now)
 	control := controlmode.NewManager(filepath.Join(t.TempDir(), "mode"), controlmode.ModeMCP)
@@ -325,6 +368,40 @@ func TestBlockedActiveSessionStillAllowsReleaseReport(t *testing.T) {
 		t.Fatalf("release report was blocked: %v", err)
 	}
 	up.Complete(true)
+}
+
+func TestBlockedActiveSessionFailedReleaseClearsHeldReport(t *testing.T) {
+	now := time.Unix(325, 0)
+	coordinator := newCoordinator(time.Second, func() time.Time { return now })
+	control := controlmode.NewManager(filepath.Join(t.TempDir(), "mode"), controlmode.ModePicoclaw)
+	manual := NewManualSession(control, coordinator)
+	defer manual.Close()
+
+	down, err := manual.Reserve(context.Background(), ManualKeyboard, true, func(controlmode.Mode) bool { return true })
+	if err != nil {
+		t.Fatal(err)
+	}
+	down.Complete(true)
+
+	if _, err := manual.Reserve(context.Background(), ManualKeyboard, true, func(controlmode.Mode) bool { return false }); !errors.Is(err, ErrManualInputBlocked) {
+		t.Fatalf("new held report error = %v, want %v", err, ErrManualInputBlocked)
+	}
+
+	up, err := manual.Reserve(context.Background(), ManualKeyboard, false, func(controlmode.Mode) bool { return false })
+	if err != nil {
+		t.Fatalf("release report was blocked: %v", err)
+	}
+	up.Complete(false)
+
+	if _, _, err := coordinator.BeginMCP(context.Background(), OperationHID); !errors.Is(err, ErrManualControlActive) {
+		t.Fatalf("cooldown error = %v, want %v", err, ErrManualControlActive)
+	}
+	now = now.Add(2 * time.Second)
+	_, release, err := coordinator.BeginMCP(context.Background(), OperationHID)
+	if err != nil {
+		t.Fatalf("failed blocked release report left held input active: %v", err)
+	}
+	release()
 }
 
 func TestReadOnlyMCPAllowedDuringManualControl(t *testing.T) {

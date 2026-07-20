@@ -291,6 +291,7 @@ const nb = {
         enableConfirmDesc:
           'Aktivering av MCP stopper PicoClaw og lukker alle aktive PicoClaw-økter.',
         failed: 'MCP-operasjonen mislyktes',
+        copyFailed: 'Kopiering mislyktes. Kopier manuelt.',
         okBtn: 'Bekreft',
         cancelBtn: 'Avbryt'
       },

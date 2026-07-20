@@ -293,6 +293,7 @@ const ja = {
         enableConfirmDesc:
           'MCP を有効にすると PicoClaw が停止し、アクティブな PicoClaw セッションがすべて終了します。',
         failed: 'MCP 操作に失敗しました',
+        copyFailed: 'コピーに失敗しました。手動でコピーしてください。',
         okBtn: '確認',
         cancelBtn: 'キャンセル'
       },

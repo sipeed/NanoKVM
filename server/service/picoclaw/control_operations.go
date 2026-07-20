@@ -104,6 +104,17 @@ func (s *Service) beginControlOperation(parent context.Context) (context.Context
 	}
 }
 
+func (s *Service) beginRuntimeLifecycleOperation(parent context.Context) (context.Context, func()) {
+	if parent == nil {
+		parent = context.Background()
+	}
+	if s == nil || s.operations == nil {
+		ctx, cancel := context.WithCancelCause(parent)
+		return ctx, func() { cancel(context.Canceled) }
+	}
+	return s.operations.begin(parent)
+}
+
 func (s *Service) CancelActiveControlOperations() int {
 	if s == nil || s.operations == nil {
 		return 0
@@ -113,6 +124,22 @@ func (s *Service) CancelActiveControlOperations() int {
 		"active_operations": count,
 	}).Info("picoclaw control operations canceled for control mode switch")
 	return count
+}
+
+func runtimeLifecycleOperationError(ctx context.Context) *PicoclawError {
+	if ctx == nil || ctx.Err() == nil {
+		return nil
+	}
+
+	cause := context.Cause(ctx)
+	switch {
+	case errors.Is(cause, errControlModeSwitch):
+		return newPicoclawError(CodeControlModeConflict, "PicoClaw runtime lifecycle canceled because the control mode is switching")
+	case errors.Is(cause, context.DeadlineExceeded):
+		return newPicoclawError(CodeRuntimeUnavailable, "PicoClaw runtime lifecycle timed out")
+	default:
+		return newPicoclawError(CodeRuntimeUnavailable, "PicoClaw runtime lifecycle was canceled")
+	}
 }
 
 func controlOperationError(ctx context.Context) *PicoclawError {

@@ -14,8 +14,18 @@ import (
 )
 
 func (s *Service) startRuntime() (string, string, *PicoclawError) {
+	return s.startRuntimeContext(context.Background())
+}
+
+func (s *Service) startRuntimeContext(ctx context.Context) (string, string, *PicoclawError) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	if s == nil {
 		return "", "", newPicoclawError(CodeRuntimeStartFailed, "picoclaw service is unavailable")
+	}
+	if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+		return "", "", lifecycleErr
 	}
 	s.ensureDependencies()
 
@@ -77,12 +87,15 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 	}
 
 	command := scriptPath + " start"
-	ctx, cancel := context.WithTimeout(context.Background(), picoclawStartTimeout)
+	startCtx, cancel := context.WithTimeout(ctx, picoclawStartTimeout)
 	defer cancel()
 
-	output, execErr := exec.CommandContext(ctx, "sh", "-c", command).CombinedOutput()
+	output, execErr := exec.CommandContext(startCtx, "sh", "-c", command).CombinedOutput()
 	trimmedOutput := strings.TrimSpace(string(output))
 	if execErr != nil {
+		if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+			return command, trimmedOutput, lifecycleErr
+		}
 		s.runtime.Update(func(status *RuntimeStatus) {
 			status.Ready = false
 			status.Installed = true
@@ -96,17 +109,24 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 		return command, trimmedOutput, newPicoclawError(CodeRuntimeStartFailed, "failed to start picoclaw runtime")
 	}
 
-	time.Sleep(picoclawStartWaitPeriod)
-	if runtimeErr := s.waitForRuntimeReady(picoclawStartTimeout); runtimeErr != nil {
+	if lifecycleErr := sleepRuntimeLifecycleContext(ctx, picoclawStartWaitPeriod); lifecycleErr != nil {
+		return command, trimmedOutput, lifecycleErr
+	}
+	if runtimeErr := s.waitForRuntimeReadyContext(ctx, picoclawStartTimeout); runtimeErr != nil {
 		startErr := newPicoclawError(CodeRuntimeStartFailed, runtimeErr.Message)
 		failureStatus := "unavailable"
-		if cleanupErr := s.stopRuntimeAndVerify(true); cleanupErr != nil {
-			failureStatus = "error"
-			startErr.Message = fmt.Sprintf(
-				"%s; failed to stop partially started runtime: %v",
-				startErr.Message,
-				cleanupErr,
-			)
+		if runtimeErr.Code == CodeControlModeConflict {
+			startErr = runtimeErr
+			failureStatus = "starting"
+		} else {
+			if cleanupErr := s.stopRuntimeAndVerify(true); cleanupErr != nil {
+				failureStatus = "error"
+				startErr.Message = fmt.Sprintf(
+					"%s; failed to stop partially started runtime: %v",
+					startErr.Message,
+					cleanupErr,
+				)
+			}
 		}
 		s.runtime.Update(func(status *RuntimeStatus) {
 			status.Ready = false
@@ -119,6 +139,23 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 	}
 
 	return command, trimmedOutput, nil
+}
+
+func (s *Service) markRuntimeLifecycleCanceled(err *PicoclawError) {
+	if s == nil || err == nil || err.Code != CodeControlModeConflict {
+		return
+	}
+	s.ensureDependencies()
+	s.runtime.Update(func(status *RuntimeStatus) {
+		status.Ready = false
+		status.Restoring = false
+		if isRuntimeLifecycleStatusPending(*status) {
+			status.Status = "stopped"
+		}
+		status.LastError = err.Message
+		status.CurrentSession = ""
+		status.CheckedAt = time.Now()
+	})
 }
 
 func (s *Service) stopRuntime() (string, string, *PicoclawError) {
@@ -183,11 +220,22 @@ func (s *Service) stopRuntime() (string, string, *PicoclawError) {
 }
 
 func (s *Service) waitForRuntimeReady(timeout time.Duration) *PicoclawError {
+	return s.waitForRuntimeReadyContext(context.Background(), timeout)
+}
+
+func (s *Service) waitForRuntimeReadyContext(ctx context.Context, timeout time.Duration) *PicoclawError {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	deadline := time.Now().Add(timeout)
 	var lastErr *PicoclawError
 
 	for {
-		runtimeErr := s.ensureRuntimeReadyForLifecycle()
+		if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+			return lifecycleErr
+		}
+
+		runtimeErr := s.ensureRuntimeReadyForLifecycleContext(ctx)
 		if runtimeErr == nil {
 			return nil
 		} else {
@@ -198,7 +246,9 @@ func (s *Service) waitForRuntimeReady(timeout time.Duration) *PicoclawError {
 			break
 		}
 
-		time.Sleep(picoclawReadyPollPeriod)
+		if lifecycleErr := sleepRuntimeLifecycleContext(ctx, picoclawReadyPollPeriod); lifecycleErr != nil {
+			return lifecycleErr
+		}
 	}
 
 	if lastErr != nil {
@@ -218,18 +268,31 @@ func resolvePicoclawStartScript() (string, error) {
 }
 
 func runPicoclawOnboard() (string, *PicoclawError) {
+	return runPicoclawOnboardContext(context.Background())
+}
+
+func runPicoclawOnboardContext(ctx context.Context) (string, *PicoclawError) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
 	scriptPath, err := resolvePicoclawStartScript()
 	if err != nil {
 		return "", newPicoclawError(CodeRuntimeUnavailable, err.Error())
 	}
+	if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+		return "", lifecycleErr
+	}
 
 	command := scriptPath + " onboard"
-	ctx, cancel := context.WithTimeout(context.Background(), picoclawOnboardTimeout)
+	onboardCtx, cancel := context.WithTimeout(ctx, picoclawOnboardTimeout)
 	defer cancel()
 
-	output, execErr := exec.CommandContext(ctx, "sh", "-c", command).CombinedOutput()
+	output, execErr := exec.CommandContext(onboardCtx, "sh", "-c", command).CombinedOutput()
 	trimmedOutput := strings.TrimSpace(string(output))
 	if execErr != nil {
+		if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+			return trimmedOutput, lifecycleErr
+		}
 		if trimmedOutput == "" {
 			trimmedOutput = execErr.Error()
 		}
@@ -237,6 +300,23 @@ func runPicoclawOnboard() (string, *PicoclawError) {
 	}
 
 	return trimmedOutput, nil
+}
+
+func sleepRuntimeLifecycleContext(ctx context.Context, delay time.Duration) *PicoclawError {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if delay <= 0 {
+		return runtimeLifecycleOperationError(ctx)
+	}
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return runtimeLifecycleOperationError(ctx)
+	case <-timer.C:
+		return nil
+	}
 }
 
 func isPicoclawInstalled() (bool, error) {

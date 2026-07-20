@@ -429,6 +429,10 @@ func (s *ManualSession) complete(generation uint64, kind ManualReportKind, held 
 		case ManualAbsoluteMouse:
 			s.absoluteMouseHeld = held
 		}
+	} else {
+		s.keyboardHeld = false
+		s.relativeMouseHeld = false
+		s.absoluteMouseHeld = false
 	}
 	releaseControl, end, startCooldown := s.finishIfIdleLocked()
 	s.mu.Unlock()
