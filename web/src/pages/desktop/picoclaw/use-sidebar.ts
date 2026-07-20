@@ -7,6 +7,8 @@ import {
   getPicoclawRuntimeInstallSnapshot,
   type PicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
+import { aiControlStatusAtom } from '@/jotai/ai-control.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import {
   picoclawConfigAtom,
   picoclawMessagesAtom,
@@ -23,12 +25,17 @@ import {
   getPicoclawSidebarStatusColor,
   isPicoclawRuntimeInstalling
 } from './runtime-view.ts';
-import { createPicoclawSidebarActions } from './sidebar-actions.ts';
 import {
+  createPicoclawSidebarActions,
+  type PicoclawMutation
+} from './sidebar-actions.ts';
+import {
+  usePicoclawGatewayAutoConnect,
   usePicoclawGatewayEvents,
   usePicoclawInstallRefresh,
   usePicoclawInstallSnapshotSync,
-  usePicoclawSidebarLifecycle
+  usePicoclawSidebarLifecycle,
+  usePicoclawStatusRefresh
 } from './sidebar-effects.ts';
 import { createPicoclawSidebarSessionActions } from './sidebar-session-actions.ts';
 
@@ -39,9 +46,11 @@ export const useSidebar = () => {
   const [transportState, setTransportState] = useAtom(picoclawTransportStateAtom);
   const [runState, setRunState] = useAtom(picoclawRunStateAtom);
   const [runtimeStatus, setRuntimeStatus] = useAtom(picoclawRuntimeStatusAtom);
+  const [aiControlStatus, setAIControlStatus] = useAtom(aiControlStatusAtom);
   const [config] = useAtom(picoclawConfigAtom);
   const [, setTakeover] = useAtom(picoclawTakeoverStateAtom);
   const setOverlay = useSetAtom(picoclawOverlayAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
   const previousInstallStateRef = useRef<{ installing: boolean; status: string }>({
     installing: false,
     status: ''
@@ -59,6 +68,12 @@ export const useSidebar = () => {
   const [isSwitchingAgent, setIsSwitchingAgent] = useState(false);
   const [isSwitchingSession, setIsSwitchingSession] = useState(false);
   const [isTogglingRuntime, setIsTogglingRuntime] = useState(false);
+  const isTogglingRuntimeRef = useRef(false);
+  const [isReleasingControl, setIsReleasingControl] = useState(false);
+  const [picoclawMutation, setPicoclawMutation] = useState<PicoclawMutation>('none');
+  const mutationRef = useRef<PicoclawMutation>('none');
+  const mutationEpochRef = useRef(0);
+  const refreshRequestSeqRef = useRef(0);
   const [isFreshConversation, setIsFreshConversation] = useState(true);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isDeletingSession, setIsDeletingSession] = useState(false);
@@ -67,17 +82,28 @@ export const useSidebar = () => {
   const [installSnapshot, setInstallSnapshot] = useState<PicoclawRuntimeInstallSnapshot | null>(
     () => getPicoclawRuntimeInstallSnapshot()
   );
+  const refreshStatePromiseRef = useRef<Promise<NonNullable<typeof runtimeStatus> | null> | null>(
+    null
+  );
+  const isRuntimeMutationPending =
+    picoclawMutation === 'runtime_start' ||
+    picoclawMutation === 'runtime_stop' ||
+    picoclawMutation === 'runtime_install' ||
+    picoclawMutation === 'runtime_uninstall';
+  const isControlMutationPending =
+    picoclawMutation === 'control_grant' || picoclawMutation === 'control_release';
+  const isSidebarMutationPending = picoclawMutation !== 'none';
   const isRuntimeStatusInstalling = isPicoclawRuntimeInstalling(runtimeStatus);
   const isSnapshotInstalling = !runtimeStatus && installSnapshot?.installing === true;
   const isRuntimeInstallActive = isRuntimeStatusInstalling || isSnapshotInstalling;
   const isInstallingRuntime = isInstallRequestPending || isRuntimeInstallActive;
   const installProgress = isRuntimeStatusInstalling
-    ? runtimeStatus?.install_progress ?? installSnapshot?.installProgress
+    ? (runtimeStatus?.install_progress ?? installSnapshot?.installProgress)
     : isSnapshotInstalling
       ? installSnapshot?.installProgress
       : undefined;
   const installStage = isRuntimeStatusInstalling
-    ? runtimeStatus?.install_stage ?? installSnapshot?.installStage
+    ? (runtimeStatus?.install_stage ?? installSnapshot?.installStage)
     : isSnapshotInstalling
       ? installSnapshot?.installStage
       : undefined;
@@ -89,7 +115,12 @@ export const useSidebar = () => {
     modelApiBase,
     modelApiKey,
     modelIdentifier,
+    refreshStatePromiseRef,
+    mutationRef,
+    mutationEpochRef,
+    refreshRequestSeqRef,
     setRuntimeStatus,
+    setAIControlStatus,
     setMessages,
     setTakeover,
     setOverlay,
@@ -101,10 +132,14 @@ export const useSidebar = () => {
     setInstallSnapshot,
     setIsSavingModelConfig,
     setIsSwitchingAgent,
-    setIsUninstallRequestPending
+    setIsUninstallRequestPending,
+    setIsReleasingControl,
+    setPicoclawMutation,
+    setKeyboardLock
   });
   const refreshStateRef = useRef(actions.refreshState);
   refreshStateRef.current = actions.refreshState;
+  isTogglingRuntimeRef.current = isTogglingRuntime;
   const sessionActions = createPicoclawSidebarSessionActions({
     t,
     transportState,
@@ -112,6 +147,7 @@ export const useSidebar = () => {
     config,
     activeSessionId,
     isFreshConversation,
+    isSidebarMutationPending,
     isSwitchingSession,
     refreshState: refreshStateRef.current,
     setMessages,
@@ -132,12 +168,17 @@ export const useSidebar = () => {
 
   usePicoclawGatewayEvents({
     t,
+    refreshStateRef,
     setActiveSessionId,
     setTakeover,
     setMessages,
     setTransportState,
     setOverlay,
-    setRunState
+    setRunState,
+    setRuntimeStatus,
+    setAIControlStatus,
+    setKeyboardLock,
+    isTogglingRuntimeRef
   });
   usePicoclawSidebarLifecycle({
     t,
@@ -152,6 +193,13 @@ export const useSidebar = () => {
     setRunState
   });
   usePicoclawInstallRefresh(isRuntimeInstallActive, refreshStateRef);
+  usePicoclawGatewayAutoConnect({
+    activeSessionId,
+    runtimeStatus,
+    transportState,
+    disabled: isSidebarMutationPending
+  });
+  usePicoclawStatusRefresh(isRuntimeInstallActive || isSidebarMutationPending, refreshStateRef);
   usePicoclawInstallSnapshotSync({
     t,
     runtimeStatus,
@@ -181,6 +229,7 @@ export const useSidebar = () => {
 
   return {
     activeSessionId,
+    aiControlStatus,
     connectionLabel,
     handleCancelModelConfig: () => setIsModelConfigOpen(false),
     handleAgentProfileChange: actions.handleAgentProfileChange,
@@ -190,6 +239,7 @@ export const useSidebar = () => {
     handleModelApiKeyChange: setModelApiKey,
     handleModelIdentifierChange: setModelIdentifier,
     handleNewConversation: sessionActions.handleNewConversation,
+    handleReconnectGateway: sessionActions.handleReconnectGateway,
     handleOpenHistory: sessionActions.handleOpenHistory,
     handleOpenModelConfig: () => {
       setIsHistoryOpen(false);
@@ -210,7 +260,11 @@ export const useSidebar = () => {
     installStage,
     isSavingModelConfig,
     isSwitchingAgent,
+    isControlMutationPending,
+    isRuntimeMutationPending,
+    isSidebarMutationPending,
     isTogglingRuntime,
+    isReleasingControl,
     messages,
     modelApiBase,
     modelApiKey,
@@ -218,13 +272,17 @@ export const useSidebar = () => {
     isModelConfigOpen,
     runState,
     runtimeStatus,
+    picoclawMutation,
     sidebarMode,
     statusColor,
+    handleGrantControl: actions.handleGrantControl,
     handleInstallRuntime: actions.handleInstallRuntime,
+    handleReleaseControl: actions.handleReleaseControl,
     handleUninstallRuntime: actions.handleUninstallRuntime,
     transportState,
     handleSend: sessionActions.handleSend,
     handleStartRuntime: actions.handleStartRuntime,
+    refreshRuntimeState: actions.refreshState,
     handleStop: sessionActions.handleStop
   };
 };

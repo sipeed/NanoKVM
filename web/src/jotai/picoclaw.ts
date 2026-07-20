@@ -21,6 +21,29 @@ export type PicoclawRuntimeStatus = {
   last_error?: string;
   checked_at?: string;
   current_session?: string;
+  restoring?: boolean;
+  runtime_intent?: {
+    desired_running: boolean;
+    updated_at?: string;
+    updated_by?: string;
+    last_started_at?: string;
+    last_stopped_at?: string;
+    last_error?: string;
+  };
+  control_mode: 'off' | 'mcp' | 'picoclaw';
+  transitioning?: boolean;
+  control?: {
+    mode: 'off' | 'mcp' | 'picoclaw';
+    transitioning: boolean;
+    can_control: boolean;
+    last_error?: string;
+    changed_at?: string;
+  };
+  capabilities?: {
+    chat: boolean;
+    read_only_tools: boolean;
+    device_write: boolean;
+  };
 };
 
 export type PicoclawRuntimeStartResult = {

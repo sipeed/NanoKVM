@@ -7,7 +7,7 @@ import { Eye, EyeClosed, NetworkIcon, Pencil, SendIcon, Trash2Icon } from 'lucid
 import { useTranslation } from 'react-i18next';
 
 import { deleteWolMac, getWolMacs, setWolMacName, wol } from '@/api/network.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
 
 interface MacItem {
@@ -21,7 +21,7 @@ interface MacItem {
 export const Wol = () => {
   const { t } = useTranslation();
 
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [input, setInput] = useState('');
   const [status, setStatus] = useState('');
@@ -34,12 +34,13 @@ export const Wol = () => {
   function handleOpenChange(open: boolean) {
     if (open) {
       getMacs();
-      setIsKeyboardEnable(false);
+      setKeyboardLock({ source: 'wol-popover', locked: true });
     } else {
       setInput('');
       setStatus('');
       setLog('');
-      setIsKeyboardEnable(true);
+      setKeyboardLock({ source: 'wol-popover', locked: false });
+      setKeyboardLock({ source: 'wol-edit-input', locked: false });
     }
   }
 
@@ -175,8 +176,8 @@ export const Wol = () => {
                 {item.isEdit ? (
                   <Input
                     placeholder={item.mac}
-                    onFocus={() => setIsKeyboardEnable(false)}
-                    onBlur={() => setIsKeyboardEnable(true)}
+                    onFocus={() => setKeyboardLock({ source: 'wol-edit-input', locked: true })}
+                    onBlur={() => setKeyboardLock({ source: 'wol-edit-input', locked: false })}
                     defaultValue={item.name}
                     onPressEnter={(e) => setMacName(e, item.mac)}
                   />

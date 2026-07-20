@@ -46,6 +46,9 @@ export const Absolute = () => {
     const screen = document.getElementById('screen') as HTMLVideoElement | null;
     if (!screen) return;
     const target = screen;
+    const mouse = mouseRef.current;
+    let pendingMove: { x: number; y: number } | null = null;
+    let moveFrame: number | null = null;
 
     target.addEventListener('mousedown', handleMouseDown);
     target.addEventListener('mouseup', handleMouseUp);
@@ -61,15 +64,50 @@ export const Absolute = () => {
       target.addEventListener('touchcancel', handleTouchCancel);
     }
 
+    // Mouse event handler
+    function handleMouseEvent(event: MouseAbsoluteEvent) {
+      let report: Uint8Array;
+
+      switch (event.type) {
+        case 'mousedown':
+          mouse.buttonDown(event.button);
+          report = mouse.buildButtonReport(lastPosRef.current.x, lastPosRef.current.y);
+          break;
+        case 'mouseup':
+          mouse.buttonUp(event.button);
+          report = mouse.buildButtonReport(lastPosRef.current.x, lastPosRef.current.y);
+          break;
+        case 'wheel':
+          report = mouse.buildReport(lastPosRef.current.x, lastPosRef.current.y, event.deltaY);
+          break;
+        case 'move':
+          report = mouse.buildReport(event.x, event.y);
+          lastPosRef.current = { x: event.x, y: event.y };
+          break;
+        default:
+          report = mouse.buildReport(lastPosRef.current.x, lastPosRef.current.y);
+          break;
+      }
+
+      sendReport(report);
+    }
+
+    function sendReport(report: Uint8Array) {
+      const data = new Uint8Array([MessageEvent.Mouse, ...report]);
+      client.send(data);
+    }
+
     // Mouse down event
     function handleMouseDown(e: MouseEvent) {
       disableEvent(e);
+      flushMouseMove();
       handleMouseEvent({ type: 'mousedown', button: e.button });
     }
 
     // Mouse up event
     function handleMouseUp(e: MouseEvent) {
       disableEvent(e);
+      flushMouseMove();
       handleMouseEvent({ type: 'mouseup', button: e.button });
     }
 
@@ -77,7 +115,7 @@ export const Absolute = () => {
     function handleMouseMove(e: MouseEvent) {
       disableEvent(e);
       const { x, y } = getCoordinate(e);
-      handleMouseEvent({ type: 'move', x, y });
+      queueMouseMove(x, y);
     }
 
     // Mouse wheel event
@@ -93,6 +131,7 @@ export const Absolute = () => {
         return;
       }
 
+      flushMouseMove();
       const deltaY = (e.deltaY > 0 ? 1 : -1) * scrollDirection;
       handleMouseEvent({ type: 'wheel', deltaY });
       lastScrollTimeRef.current = currentTime;
@@ -216,6 +255,7 @@ export const Absolute = () => {
           handleMouseEvent({ type: 'mouseup', button: MouseButton.Left });
         }, 50);
       } else if (pressedButtonRef.current !== null) {
+        flushMouseMove();
         handleMouseEvent({ type: 'mouseup', button: pressedButtonRef.current! });
       }
 
@@ -235,6 +275,7 @@ export const Absolute = () => {
       }
 
       if (pressedButtonRef.current !== null) {
+        flushMouseMove();
         handleMouseEvent({ type: 'mouseup', button: pressedButtonRef.current! });
       }
 
@@ -289,7 +330,37 @@ export const Absolute = () => {
       return { x, y };
     }
 
+    function queueMouseMove(x: number, y: number) {
+      pendingMove = { x, y };
+      if (moveFrame !== null) {
+        return;
+      }
+
+      moveFrame = requestAnimationFrame(() => {
+        moveFrame = null;
+        flushMouseMove();
+      });
+    }
+
+    function flushMouseMove() {
+      if (moveFrame !== null) {
+        cancelAnimationFrame(moveFrame);
+        moveFrame = null;
+      }
+      if (pendingMove === null) {
+        return;
+      }
+
+      const move = pendingMove;
+      pendingMove = null;
+      handleMouseEvent({ type: 'move', x: move.x, y: move.y });
+    }
+
     return () => {
+      if (moveFrame !== null) {
+        cancelAnimationFrame(moveFrame);
+      }
+      sendReport(mouse.reset(lastPosRef.current.x, lastPosRef.current.y));
       target.removeEventListener('mousemove', handleMouseMove);
       target.removeEventListener('mousedown', handleMouseDown);
       target.removeEventListener('mouseup', handleMouseUp);
@@ -306,40 +377,6 @@ export const Absolute = () => {
       }
     };
   }, [isBigScreen, resolution, scrollDirection, scrollInterval]);
-
-  // Mouse event handler
-  function handleMouseEvent(event: MouseAbsoluteEvent) {
-    let report: Uint8Array;
-    const mouse = mouseRef.current;
-
-    switch (event.type) {
-      case 'mousedown':
-        mouse.buttonDown(event.button);
-        report = mouse.buildButtonReport(lastPosRef.current.x, lastPosRef.current.y);
-        break;
-      case 'mouseup':
-        mouse.buttonUp(event.button);
-        report = mouse.buildButtonReport(lastPosRef.current.x, lastPosRef.current.y);
-        break;
-      case 'wheel':
-        report = mouse.buildReport(lastPosRef.current.x, lastPosRef.current.y, event.deltaY);
-        break;
-      case 'move':
-        report = mouse.buildReport(event.x, event.y);
-        lastPosRef.current = { x: event.x, y: event.y };
-        break;
-      default:
-        report = mouse.buildReport(lastPosRef.current.x, lastPosRef.current.y);
-        break;
-    }
-
-    sendReport(report);
-  }
-
-  function sendReport(report: Uint8Array) {
-    const data = new Uint8Array([MessageEvent.Mouse, ...report]);
-    client.send(data);
-  }
 
   // disable default events
   function disableEvent(event: any) {

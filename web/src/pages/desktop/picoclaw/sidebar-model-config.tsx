@@ -1,14 +1,24 @@
 import { useEffect } from 'react';
 import { Button, Input } from 'antd';
 import { useSetAtom } from 'jotai';
-import { BookOpenIcon, CpuIcon, ExternalLinkIcon, KeyRoundIcon, LinkIcon, SaveIcon } from 'lucide-react';
+import {
+  BookOpenIcon,
+  CpuIcon,
+  ExternalLinkIcon,
+  KeyRoundIcon,
+  LinkIcon,
+  SaveIcon
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
+
+import { PICOCLAW_MODEL_CONFIG_KEYBOARD_LOCK_SOURCE } from './keyboard-lock.ts';
 
 type SidebarModelConfigProps = {
   apiBase: string;
   apiKey: string;
+  disabled?: boolean;
   isSaving: boolean;
   modelIdentifier: string;
   modelName?: string;
@@ -23,6 +33,7 @@ type SidebarModelConfigProps = {
 export const SidebarModelConfig = ({
   apiBase,
   apiKey,
+  disabled,
   isSaving,
   modelIdentifier,
   modelName,
@@ -34,14 +45,14 @@ export const SidebarModelConfig = ({
   showCancel = false
 }: SidebarModelConfigProps) => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   useEffect(() => {
-    setIsKeyboardEnable(false);
+    setKeyboardLock({ source: PICOCLAW_MODEL_CONFIG_KEYBOARD_LOCK_SOURCE, locked: true });
     return () => {
-      setIsKeyboardEnable(true);
+      setKeyboardLock({ source: PICOCLAW_MODEL_CONFIG_KEYBOARD_LOCK_SOURCE, locked: false });
     };
-  }, [setIsKeyboardEnable]);
+  }, [setKeyboardLock]);
 
   return (
     <div className="flex flex-1 flex-col overflow-y-auto px-5 pb-8 pt-10">
@@ -74,7 +85,10 @@ export const SidebarModelConfig = ({
             </div>
           </div>
         </div>
-        <ExternalLinkIcon size={14} className="text-neutral-500 transition-colors group-hover:text-neutral-300" />
+        <ExternalLinkIcon
+          size={14}
+          className="text-neutral-500 transition-colors group-hover:text-neutral-300"
+        />
       </a>
 
       {/* Fields */}
@@ -116,10 +130,15 @@ export const SidebarModelConfig = ({
 
       {/* Save */}
       <div className="mt-6 flex justify-end gap-2">
-        {showCancel && <Button onClick={onCancel}>{t('picoclaw.cancel')}</Button>}
+        {showCancel && (
+          <Button disabled={disabled || isSaving} onClick={onCancel}>
+            {t('picoclaw.cancel')}
+          </Button>
+        )}
         <Button
           icon={<SaveIcon size={13} />}
           loading={isSaving}
+          disabled={disabled}
           onClick={() => void onSave()}
           type="primary"
         >

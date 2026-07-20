@@ -25,6 +25,7 @@ export const Relative = () => {
   useEffect(() => {
     const screen = document.getElementById('screen');
     if (!screen) return;
+    const mouse = mouseRef.current;
 
     showMessage();
 
@@ -94,6 +95,8 @@ export const Relative = () => {
     }
 
     return () => {
+      const release = mouse.reset();
+      client.send(new Uint8Array([MessageEvent.Mouse, ...release]));
       screen.removeEventListener('click', handleMouseClick);
       screen.removeEventListener('mousemove', handleMouseMove);
       screen.removeEventListener('mousedown', handleMouseDown);

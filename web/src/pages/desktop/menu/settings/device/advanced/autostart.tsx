@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/autostart.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 
 export const Autostart = () => {
   interface AutostartItem {
@@ -16,7 +16,7 @@ export const Autostart = () => {
 
   const { t } = useTranslation();
 
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [isEditAutostartOpen, setIsEditAutostartOpen] = useState(false);
   const [isManageAutostartOpen, setIsManageAutostartOpen] = useState(false);
@@ -52,13 +52,13 @@ export const Autostart = () => {
   ];
 
   useEffect(() => {
-    setIsKeyboardEnable(false);
+    setKeyboardLock({ source: 'autostart-settings', locked: true });
     getAutostart();
 
     return () => {
-      setIsKeyboardEnable(true);
+      setKeyboardLock({ source: 'autostart-settings', locked: false });
     };
-  }, []);
+  }, [setKeyboardLock]);
 
   function getAutostart() {
     api.getAutostart().then((rsp) => {
@@ -166,8 +166,8 @@ export const Autostart = () => {
         footer=""
         onCancel={() => setIsManageAutostartOpen(false)}
         title={t('settings.device.autostart.title')}
-        >
-          <div className="flex justify-end">
+      >
+        <div className="flex justify-end">
           <Button
             type="text"
             onClick={() => {

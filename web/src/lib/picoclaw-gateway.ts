@@ -19,6 +19,23 @@ export type GatewayRuntimeStatus = {
   last_error?: string;
   checked_at?: string;
   current_session?: string;
+  control_mode: 'off' | 'mcp' | 'picoclaw';
+  transitioning?: boolean;
+  control?: GatewayControlStatus;
+  capabilities?: {
+    chat: boolean;
+    read_only_tools: boolean;
+    device_write: boolean;
+  };
+};
+
+export type GatewayControlStatus = {
+  mode: 'off' | 'mcp' | 'picoclaw';
+  transitioning: boolean;
+  can_control: boolean;
+  last_error?: string;
+  changed_at?: string;
+  source?: string;
 };
 
 export type GatewayAssistantMessage = {
@@ -62,6 +79,7 @@ type GatewayEventMap = {
   observation: GatewayObservation;
   error: GatewayError;
   close: GatewayClose;
+  control_mode_changed: GatewayControlStatus;
 };
 
 type EventName = keyof GatewayEventMap;
@@ -84,7 +102,9 @@ const CLOSE_ERRORS: Record<number, string> = {
   4002: 'RUNTIME_UNAVAILABLE',
   4003: 'AUTH_FAILED',
   4004: 'AI_TAKEN_OVER',
-  4005: 'UPSTREAM_CLOSED'
+  4005: 'UPSTREAM_CLOSED',
+  4006: 'AI_MODE_CONFLICT',
+  4007: 'RUNTIME_STOPPED'
 };
 
 export function generateUUIDv4() {
@@ -165,7 +185,7 @@ class PicoClawGateway {
         }
         this.ws = null;
 
-        if (event.code !== 1000) {
+        if (event.code !== 1000 && event.code !== 4006 && event.code !== 4007) {
           const code = CLOSE_ERRORS[event.code] || 'UNKNOWN';
           if (code !== 'UNKNOWN') {
             this.emit('error', {
@@ -180,12 +200,16 @@ class PicoClawGateway {
           reason: event.reason
         });
 
-        this.setTransportState(event.code === 1000 ? 'disconnected' : 'error');
+        this.setTransportState(
+          event.code === 1000 || event.code === 4006 || event.code === 4007
+            ? 'disconnected'
+            : 'error'
+        );
         this.setRunState('idle');
 
         if (!this.explicitClose) {
           reject(new Error(event.reason || 'gateway closed'));
-          if (this.autoReconnect) {
+          if (this.autoReconnect && event.code !== 4006 && event.code !== 4007) {
             this.scheduleReconnect();
           }
         }
@@ -348,6 +372,21 @@ class PicoClawGateway {
         message: String(message.message || 'Gateway error'),
         raw: message
       });
+      return;
+    }
+    if (type === 'control.mode_changed') {
+      const payload = (message.payload || {}) as Record<string, unknown>;
+      const mode = String(payload.mode || 'off');
+      if (mode === 'off' || mode === 'mcp' || mode === 'picoclaw') {
+        this.emit('control_mode_changed', {
+          mode,
+          transitioning: payload.transitioning === true,
+          can_control: payload.can_control === true,
+          last_error: typeof payload.last_error === 'string' ? payload.last_error : undefined,
+          changed_at: typeof payload.changed_at === 'string' ? payload.changed_at : undefined,
+          source: typeof payload.source === 'string' ? payload.source : undefined
+        });
+      }
       return;
     }
     if (type === 'message.create' || type === 'message.update') {
