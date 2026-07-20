@@ -274,6 +274,24 @@ const se = {
     },
     settings: {
       title: 'Inställningar',
+      mcp: {
+        title: 'MCP-tjänst',
+        service: 'MCP-fjärrstyrning',
+        serviceDesc:
+          'Tillåt betrodda MCP-klienter att styra tangentbord och mus och ta skärmbilder',
+        securityWarning:
+          'Alla som har denna API-nyckel kan styra fjärrvärden och se dess skärm. Använd HTTPS och aktivera tjänsten endast i betrodda nätverk.',
+        endpoint: 'Slutpunkt',
+        apiKey: 'API-nyckel',
+        regenerateConfirmTitle: 'Generera om MCP API-nyckeln?',
+        regenerateConfirmDesc: 'Den aktuella nyckeln slutar omedelbart att fungera.',
+        enableConfirmTitle: 'Aktivera extern MCP-styrning?',
+        enableConfirmDesc:
+          'Om MCP aktiveras stoppas PicoClaw och alla aktiva PicoClaw-sessioner stängs.',
+        failed: 'MCP-åtgärden misslyckades',
+        okBtn: 'Bekräfta',
+        cancelBtn: 'Avbryt'
+      },
       about: {
         title: 'Om NanoKVM',
         information: 'Information',
@@ -517,19 +535,28 @@ const se = {
         runtimeStarted: 'PicoClaw runtime startad',
         runtimeStartFailed: 'Det gick inte att starta PicoClaw runtime',
         runtimeStopped: 'PicoClaw runtime stoppad',
-        runtimeStopFailed: 'Det gick inte att stoppa PicoClaw runtime'
+        runtimeStopFailed: 'Det gick inte att stoppa PicoClaw runtime',
+        controlSwitchedToMCP: 'Styrningen har växlats till den externa MCP-tjänsten'
       },
       connection: {
         runtime: {
           checking: 'Kontrollerar',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime klar',
           stopped: 'Runtime stoppad',
+          blockedByMCP: 'Extern MCP-styrning är aktiv',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime inte tillgänglig',
           configError: 'Konfigurationsfel'
         },
         transport: {
           connecting: 'Ansluter',
-          connected: 'Ansluten'
+          connected: 'Ansluten',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Inaktiv',
@@ -543,6 +570,28 @@ const se = {
       },
       overlay: {
         locked: 'PicoClaw styr enheten. Manuell inmatning är pausad.'
+      },
+      control: {
+        picoclaw: 'Enhetsstyrning: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Enhetsstyrning: extern MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Enhetsstyrning: av',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Ge styrning',
+        release: 'Släpp',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw-styrning beviljad',
+        released: 'PicoClaw-styrning släppt',
+        grantFailed: 'Det gick inte att ge PicoClaw styrning',
+        releaseFailed: 'Det gick inte att släppa PicoClaw styrning',
+        grantConfirmTitle: 'Växla enhetsstyrning till PicoClaw?',
+        grantConfirmDesc: 'Externa MCP-enhetsskrivningar kommer att avbrytas.'
       },
       install: {
         install: 'Installera PicoClaw',
@@ -604,15 +653,22 @@ const se = {
         deleteConfirmOk: 'Ta bort',
         deleteConfirmCancel: 'Avbryt',
         messageCount_one: '{{count}} meddelande',
-        messageCount_other: '{{count}} meddelanden'
+        messageCount_other: '{{count}} meddelanden',
+        messageCount: '{{count}} meddelanden'
       },
       config: {
         startRuntime: 'Starta PicoClaw',
         stopRuntime: 'Stoppa PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Växla styrningen till PicoClaw?',
+        enableConfirmDesc: 'När PicoClaw startas inaktiveras den externa MCP-tjänsten.',
+        enableConfirmOk: 'Starta PicoClaw',
+        enableConfirmCancel: 'Avbryt',
         title: 'Starta PicoClaw',
-        description: 'Starta runtime för att börja använda PicoClaw-assistenten.'
+        description: 'Starta runtime för att börja använda PicoClaw-assistenten.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

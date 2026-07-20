@@ -279,6 +279,24 @@ const nl = {
     },
     settings: {
       title: 'Instellingen',
+      mcp: {
+        title: 'MCP-service',
+        service: 'MCP-afstandsbediening',
+        serviceDesc:
+          'Vertrouwde MCP-clients toestaan het toetsenbord en de muis te bedienen en schermafbeeldingen te maken',
+        securityWarning:
+          'Iedereen met deze API-sleutel kan de externe host bedienen en het scherm bekijken. Gebruik HTTPS en schakel de service alleen in op vertrouwde netwerken.',
+        endpoint: 'Eindpunt',
+        apiKey: 'API-sleutel',
+        regenerateConfirmTitle: 'MCP API-sleutel opnieuw genereren?',
+        regenerateConfirmDesc: 'De huidige sleutel werkt dan onmiddellijk niet meer.',
+        enableConfirmTitle: 'Externe MCP-bediening inschakelen?',
+        enableConfirmDesc:
+          'Als MCP wordt ingeschakeld, stopt PicoClaw en worden alle actieve PicoClaw-sessies gesloten.',
+        failed: 'MCP-bewerking mislukt',
+        okBtn: 'Bevestigen',
+        cancelBtn: 'Annuleren'
+      },
       about: {
         title: 'Over NanoKVM',
         information: 'Informatie',
@@ -525,19 +543,28 @@ const nl = {
         runtimeStarted: 'PicoClaw runtime gestart',
         runtimeStartFailed: 'Kan PicoClaw runtime niet starten',
         runtimeStopped: 'PicoClaw runtime gestopt',
-        runtimeStopFailed: 'Kan PicoClaw runtime niet stoppen'
+        runtimeStopFailed: 'Kan PicoClaw runtime niet stoppen',
+        controlSwitchedToMCP: 'Bediening overgeschakeld naar de externe MCP-service'
       },
       connection: {
         runtime: {
           checking: 'Controleren',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime gereed',
           stopped: 'Runtime gestopt',
+          blockedByMCP: 'Externe MCP-bediening is actief',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime niet beschikbaar',
           configError: 'Configuratiefout'
         },
         transport: {
           connecting: 'Verbinden',
-          connected: 'Verbonden'
+          connected: 'Verbonden',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Inactief',
@@ -551,6 +578,28 @@ const nl = {
       },
       overlay: {
         locked: 'PicoClaw bestuurt het apparaat. Handmatige invoer is gepauzeerd.'
+      },
+      control: {
+        picoclaw: 'Apparaatbediening: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Apparaatbediening: externe MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Apparaatbediening: uit',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Bediening geven',
+        release: 'Vrijgeven',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw-bediening gegeven',
+        released: 'PicoClaw-bediening vrijgegeven',
+        grantFailed: 'Kan PicoClaw-bediening niet geven',
+        releaseFailed: 'Kan PicoClaw-bediening niet vrijgeven',
+        grantConfirmTitle: 'Apparaatbediening overschakelen naar PicoClaw?',
+        grantConfirmDesc: 'Schrijfacties van de externe MCP naar het apparaat worden onderbroken.'
       },
       install: {
         install: 'PicoClaw installeren',
@@ -612,15 +661,23 @@ const nl = {
         deleteConfirmOk: 'Verwijderen',
         deleteConfirmCancel: 'Annuleren',
         messageCount_one: '{{count}} bericht',
-        messageCount_other: '{{count}} berichten'
+        messageCount_other: '{{count}} berichten',
+        messageCount: '{{count}} berichten'
       },
       config: {
         startRuntime: 'Start PicoClaw',
         stopRuntime: 'Stop PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Bediening overschakelen naar PicoClaw?',
+        enableConfirmDesc:
+          'Bij het starten van PicoClaw wordt de externe MCP-service uitgeschakeld.',
+        enableConfirmOk: 'PicoClaw starten',
+        enableConfirmCancel: 'Annuleren',
         title: 'Start PicoClaw',
-        description: 'Start de runtime om de PicoClaw assistent te gaan gebruiken.'
+        description: 'Start de runtime om de PicoClaw assistent te gaan gebruiken.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

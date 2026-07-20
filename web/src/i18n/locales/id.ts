@@ -277,6 +277,24 @@ const id = {
     },
     settings: {
       title: 'Pengaturan',
+      mcp: {
+        title: 'Layanan MCP',
+        service: 'Kontrol jarak jauh MCP',
+        serviceDesc:
+          'Izinkan klien MCP tepercaya mengontrol keyboard dan mouse serta mengambil tangkapan layar',
+        securityWarning:
+          'Siapa pun yang memiliki kunci API ini dapat mengontrol host jarak jauh dan melihat layarnya. Gunakan HTTPS dan aktifkan hanya pada jaringan tepercaya.',
+        endpoint: 'Endpoint',
+        apiKey: 'Kunci API',
+        regenerateConfirmTitle: 'Buat ulang kunci API MCP?',
+        regenerateConfirmDesc: 'Kunci saat ini akan langsung berhenti berfungsi.',
+        enableConfirmTitle: 'Aktifkan kontrol MCP eksternal?',
+        enableConfirmDesc:
+          'Mengaktifkan MCP akan menghentikan PicoClaw dan menutup semua sesi PicoClaw yang aktif.',
+        failed: 'Operasi MCP gagal',
+        okBtn: 'Konfirmasi',
+        cancelBtn: 'Batal'
+      },
       about: {
         title: 'Tentang NanoKVM',
         information: 'Informasi',
@@ -521,19 +539,28 @@ const id = {
         runtimeStarted: 'Runtime PicoClaw dimulai',
         runtimeStartFailed: 'Gagal memulai Runtime PicoClaw',
         runtimeStopped: 'Runtime PicoClaw dihentikan',
-        runtimeStopFailed: 'Gagal menghentikan Runtime PicoClaw'
+        runtimeStopFailed: 'Gagal menghentikan Runtime PicoClaw',
+        controlSwitchedToMCP: 'Kontrol dialihkan ke layanan MCP eksternal'
       },
       connection: {
         runtime: {
           checking: 'Memeriksa',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime siap',
           stopped: 'Runtime dihentikan',
+          blockedByMCP: 'Kontrol MCP eksternal sedang aktif',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime tidak tersedia',
           configError: 'Kesalahan konfigurasi'
         },
         transport: {
           connecting: 'Menghubungkan',
-          connected: 'Terhubung'
+          connected: 'Terhubung',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Menganggur',
@@ -547,6 +574,28 @@ const id = {
       },
       overlay: {
         locked: 'PicoClaw sedang mengendalikan perangkat. Input manual dijeda.'
+      },
+      control: {
+        picoclaw: 'Kontrol perangkat: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Kontrol perangkat: MCP eksternal',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Kontrol perangkat: nonaktif',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Berikan kontrol',
+        release: 'Lepaskan',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Kontrol PicoClaw diberikan',
+        released: 'Kontrol PicoClaw dilepaskan',
+        grantFailed: 'Gagal memberikan kontrol PicoClaw',
+        releaseFailed: 'Gagal melepaskan kontrol PicoClaw',
+        grantConfirmTitle: 'Alihkan kontrol perangkat ke PicoClaw?',
+        grantConfirmDesc: 'Penulisan perangkat MCP eksternal akan dihentikan.'
       },
       install: {
         install: 'Instal PicoClaw',
@@ -608,15 +657,22 @@ const id = {
         deleteConfirmOk: 'Hapus',
         deleteConfirmCancel: 'Batalkan',
         messageCount_one: '{{count}} pesan',
-        messageCount_other: '{{count}} pesan'
+        messageCount_other: '{{count}} pesan',
+        messageCount: '{{count}} pesan'
       },
       config: {
         startRuntime: 'Mulai PicoClaw',
         stopRuntime: 'Hentikan PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Alihkan kontrol ke PicoClaw?',
+        enableConfirmDesc: 'Memulai PicoClaw akan menonaktifkan layanan MCP eksternal.',
+        enableConfirmOk: 'Mulai PicoClaw',
+        enableConfirmCancel: 'Batal',
         title: 'Mulai PicoClaw',
-        description: 'Mulai runtime untuk mulai menggunakan asisten PicoClaw.'
+        description: 'Mulai runtime untuk mulai menggunakan asisten PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -280,6 +280,24 @@ const fr = {
     },
     settings: {
       title: 'Paramètres',
+      mcp: {
+        title: 'Service MCP',
+        service: 'Contrôle à distance MCP',
+        serviceDesc:
+          'Autoriser les clients MCP de confiance à contrôler le clavier et la souris et à prendre des captures d’écran',
+        securityWarning:
+          'Toute personne possédant cette clé API peut contrôler l’hôte distant et voir son écran. Utilisez HTTPS et activez ce service uniquement sur des réseaux de confiance.',
+        endpoint: 'Point de terminaison',
+        apiKey: 'Clé API',
+        regenerateConfirmTitle: 'Régénérer la clé API MCP ?',
+        regenerateConfirmDesc: 'La clé actuelle cessera immédiatement de fonctionner.',
+        enableConfirmTitle: 'Activer le contrôle MCP externe ?',
+        enableConfirmDesc:
+          'L’activation de MCP arrêtera PicoClaw et fermera toute session PicoClaw active.',
+        failed: 'Échec de l’opération MCP',
+        okBtn: 'Confirmer',
+        cancelBtn: 'Annuler'
+      },
       about: {
         title: 'A propos de NanoKVM',
         information: 'Informations',
@@ -527,19 +545,28 @@ const fr = {
         runtimeStarted: 'Runtime PicoClaw démarré',
         runtimeStartFailed: 'Échec du démarrage du runtime PicoClaw',
         runtimeStopped: 'Runtime PicoClaw arrêté',
-        runtimeStopFailed: "Échec de l'arrêt du runtime PicoClaw"
+        runtimeStopFailed: "Échec de l'arrêt du runtime PicoClaw",
+        controlSwitchedToMCP: 'Contrôle transféré au service MCP externe'
       },
       connection: {
         runtime: {
           checking: 'Vérification',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime prêt',
           stopped: 'Runtime arrêté',
+          blockedByMCP: 'Le contrôle MCP externe est actif',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime indisponible',
           configError: 'Erreur de configuration'
         },
         transport: {
           connecting: 'Connexion',
-          connected: 'Connecté'
+          connected: 'Connecté',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Inactif',
@@ -553,6 +580,28 @@ const fr = {
       },
       overlay: {
         locked: "PicoClaw contrôle l'appareil. La saisie manuelle est suspendue."
+      },
+      control: {
+        picoclaw: "Contrôle de l'appareil : PicoClaw",
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: "Contrôle de l'appareil : MCP externe",
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: "Contrôle de l'appareil : désactivé",
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Accorder le contrôle',
+        release: 'Libérer',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Contrôle PicoClaw accordé',
+        released: 'Contrôle PicoClaw libéré',
+        grantFailed: "Échec de l'octroi du contrôle PicoClaw",
+        releaseFailed: 'Échec de la libération du contrôle PicoClaw',
+        grantConfirmTitle: "Basculer le contrôle de l'appareil vers PicoClaw ?",
+        grantConfirmDesc: "Les écritures d'appareil du MCP externe seront interrompues."
       },
       install: {
         install: 'Installer PicoClaw',
@@ -614,15 +663,22 @@ const fr = {
         deleteConfirmOk: 'Supprimer',
         deleteConfirmCancel: 'Annuler',
         messageCount_one: '{{count}} message',
-        messageCount_other: '{{count}} messages'
+        messageCount_other: '{{count}} messages',
+        messageCount: '{{count}} messages'
       },
       config: {
         startRuntime: 'Démarrer PicoClaw',
         stopRuntime: 'Arrêter PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Transférer le contrôle à PicoClaw ?',
+        enableConfirmDesc: 'Le démarrage de PicoClaw désactivera le service MCP externe.',
+        enableConfirmOk: 'Démarrer PicoClaw',
+        enableConfirmCancel: 'Annuler',
         title: 'Démarrer PicoClaw',
-        description: "Démarrez le runtime pour commencer à utiliser l'assistant PicoClaw."
+        description: "Démarrez le runtime pour commencer à utiliser l'assistant PicoClaw.",
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {
