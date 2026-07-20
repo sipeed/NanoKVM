@@ -285,6 +285,7 @@ const th = {
         enableConfirmDesc:
           'การเปิดใช้งาน MCP จะหยุด PicoClaw และปิดเซสชัน PicoClaw ที่ใช้งานอยู่ทั้งหมด',
         failed: 'การดำเนินการ MCP ล้มเหลว',
+        copyFailed: 'คัดลอกไม่สำเร็จ โปรดคัดลอกด้วยตนเอง',
         okBtn: 'ยืนยัน',
         cancelBtn: 'ยกเลิก'
       },

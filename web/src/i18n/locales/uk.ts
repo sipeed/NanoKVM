@@ -292,6 +292,7 @@ const uk = {
         enableConfirmTitle: 'Увімкнути зовнішнє керування MCP?',
         enableConfirmDesc: 'Увімкнення MCP зупинить PicoClaw і закриє всі активні сеанси PicoClaw.',
         failed: 'Операція MCP завершилася помилкою',
+        copyFailed: 'Не вдалося скопіювати. Скопіюйте вручну.',
         okBtn: 'Підтвердити',
         cancelBtn: 'Скасувати'
       },

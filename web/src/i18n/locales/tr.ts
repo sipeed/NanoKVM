@@ -291,6 +291,7 @@ const tr = {
         enableConfirmDesc:
           'MCP etkinleştirildiğinde PicoClaw durdurulur ve tüm etkin PicoClaw oturumları kapatılır.',
         failed: 'MCP işlemi başarısız oldu',
+        copyFailed: 'Kopyalama başarısız. Elle kopyalayın.',
         okBtn: 'Onayla',
         cancelBtn: 'İptal'
       },

@@ -294,6 +294,7 @@ const hu = {
         enableConfirmDesc:
           'Az MCP engedélyezése leállítja a PicoClaw-t, és bezár minden aktív PicoClaw-munkamenetet.',
         failed: 'Az MCP-művelet sikertelen',
+        copyFailed: 'A másolás sikertelen. Másolja kézzel.',
         okBtn: 'Megerősítés',
         cancelBtn: 'Mégse'
       },

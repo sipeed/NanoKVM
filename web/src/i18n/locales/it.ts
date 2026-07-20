@@ -294,6 +294,7 @@ const it = {
         enableConfirmDesc:
           'L’abilitazione di MCP arresterà PicoClaw e chiuderà tutte le sessioni PicoClaw attive.',
         failed: 'Operazione MCP non riuscita',
+        copyFailed: 'Copia non riuscita. Copia manualmente.',
         okBtn: 'Conferma',
         cancelBtn: 'Annulla'
       },

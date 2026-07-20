@@ -293,6 +293,7 @@ const cz = {
         enableConfirmDesc:
           'Povolením MCP se zastaví PicoClaw a ukončí se všechny aktivní relace PicoClaw.',
         failed: 'Operace MCP se nezdařila',
+        copyFailed: 'Kopírování se nezdařilo. Zkopírujte ručně.',
         okBtn: 'Potvrdit',
         cancelBtn: 'Zrušit'
       },

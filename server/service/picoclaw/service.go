@@ -1,6 +1,7 @@
 package picoclaw
 
 import (
+	"context"
 	"os"
 	"sync"
 	"time"
@@ -355,16 +356,23 @@ func (s *Service) lockRuntimeLifecycle() func() {
 }
 
 func (s *Service) ensureRuntimeReady() *PicoclawError {
-	return s.ensureRuntimeReadyWithProbeProtection(false)
+	return s.ensureRuntimeReadyWithProbeProtection(context.Background(), false)
 }
 
 func (s *Service) ensureRuntimeReadyForLifecycle() *PicoclawError {
-	return s.ensureRuntimeReadyWithProbeProtection(true)
+	return s.ensureRuntimeReadyForLifecycleContext(context.Background())
 }
 
-func (s *Service) ensureRuntimeReadyWithProbeProtection(allowLifecycleOverwrite bool) *PicoclawError {
+func (s *Service) ensureRuntimeReadyForLifecycleContext(ctx context.Context) *PicoclawError {
+	return s.ensureRuntimeReadyWithProbeProtection(ctx, true)
+}
+
+func (s *Service) ensureRuntimeReadyWithProbeProtection(ctx context.Context, allowLifecycleOverwrite bool) *PicoclawError {
 	if s == nil {
 		return newPicoclawError(CodeRuntimeUnavailable, "picoclaw service is unavailable")
+	}
+	if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+		return lifecycleErr
 	}
 	s.ensureDependencies()
 	setStatus := func(status RuntimeStatus) {
@@ -440,7 +448,10 @@ func (s *Service) ensureRuntimeReadyWithProbeProtection(allowLifecycleOverwrite 
 	}
 	if _, err := os.Stat(configPath); err != nil {
 		if os.IsNotExist(err) {
-			if _, onboardErr := runPicoclawOnboard(); onboardErr != nil {
+			if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+				return lifecycleErr
+			}
+			if _, onboardErr := runPicoclawOnboardContext(ctx); onboardErr != nil {
 				setStatus(RuntimeStatus{
 					Ready:           false,
 					Installed:       true,
@@ -454,6 +465,9 @@ func (s *Service) ensureRuntimeReadyWithProbeProtection(allowLifecycleOverwrite 
 					CurrentSession:  s.lock.Owner(),
 				})
 				return newPicoclawError(CodeRuntimeUnavailable, "picoclaw model is not configured")
+			}
+			if lifecycleErr := runtimeLifecycleOperationError(ctx); lifecycleErr != nil {
+				return lifecycleErr
 			}
 			if _, statErr := os.Stat(configPath); statErr == nil {
 				goto configReady

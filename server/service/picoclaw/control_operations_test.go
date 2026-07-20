@@ -67,6 +67,70 @@ func TestControlModeSwitchCancelsActiveWait(t *testing.T) {
 	}
 }
 
+func TestControlModeSwitchCancelsRuntimeLifecycle(t *testing.T) {
+	control := controlmode.NewManager(filepath.Join(t.TempDir(), "mode"), controlmode.ModePicoclaw)
+	service := &Service{
+		control:    control,
+		operations: newControlOperationTracker(),
+	}
+
+	operationCtx, releaseOperation := service.beginRuntimeLifecycleOperation(context.Background())
+	releaseMode, modeErr := service.acquireControlMode()
+	if modeErr != nil {
+		t.Fatal(modeErr)
+	}
+
+	lifecycleDone := make(chan *PicoclawError, 1)
+	go func() {
+		<-operationCtx.Done()
+		lifecycleErr := runtimeLifecycleOperationError(operationCtx)
+		releaseOperation()
+		releaseMode()
+		lifecycleDone <- lifecycleErr
+	}()
+
+	switchDone := make(chan error, 1)
+	go func() {
+		switchDone <- control.Switch(controlmode.ModeMCP, func() error {
+			service.CancelActiveControlOperations()
+			return nil
+		})
+	}()
+
+	select {
+	case err := <-switchDone:
+		if err != nil {
+			t.Fatal(err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("control mode switch did not cancel the runtime lifecycle operation")
+	}
+
+	select {
+	case lifecycleErr := <-lifecycleDone:
+		if lifecycleErr == nil || lifecycleErr.Code != CodeControlModeConflict {
+			t.Fatalf("lifecycle error = %+v, want %s", lifecycleErr, CodeControlModeConflict)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("canceled runtime lifecycle operation did not return")
+	}
+
+	if got := control.Current(); got != controlmode.ModeMCP {
+		t.Fatalf("mode = %q, want %q", got, controlmode.ModeMCP)
+	}
+}
+
+func TestRuntimeReadyWaitHonorsLifecycleCancellation(t *testing.T) {
+	service := &Service{}
+	ctx, cancel := context.WithCancelCause(context.Background())
+	cancel(errControlModeSwitch)
+
+	err := service.waitForRuntimeReadyContext(ctx, time.Hour)
+	if err == nil || err.Code != CodeControlModeConflict {
+		t.Fatalf("error = %+v, want %s", err, CodeControlModeConflict)
+	}
+}
+
 func TestWaitDurationIsBounded(t *testing.T) {
 	service := &Service{}
 	_, err := service.executeAction(context.Background(), Action{

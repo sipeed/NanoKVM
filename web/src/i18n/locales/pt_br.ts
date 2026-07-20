@@ -292,6 +292,7 @@ const pt_br = {
         enableConfirmDesc:
           'Habilitar o MCP interromperá o PicoClaw e fechará todas as sessões ativas do PicoClaw.',
         failed: 'Falha na operação MCP',
+        copyFailed: 'Falha ao copiar. Copie manualmente.',
         okBtn: 'Confirmar',
         cancelBtn: 'Cancelar'
       },

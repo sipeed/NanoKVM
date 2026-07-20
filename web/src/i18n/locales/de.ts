@@ -296,6 +296,7 @@ const de = {
         enableConfirmDesc:
           'Durch Aktivieren von MCP wird PicoClaw gestoppt und jede aktive PicoClaw-Sitzung geschlossen.',
         failed: 'MCP-Aktion fehlgeschlagen',
+        copyFailed: 'Kopieren fehlgeschlagen. Bitte manuell kopieren.',
         okBtn: 'Bestätigen',
         cancelBtn: 'Abbrechen'
       },

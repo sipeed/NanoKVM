@@ -292,6 +292,7 @@ const ru = {
         enableConfirmDesc:
           'Включение MCP остановит PicoClaw и закроет все активные сеансы PicoClaw.',
         failed: 'Операция MCP завершилась с ошибкой',
+        copyFailed: 'Не удалось скопировать. Скопируйте вручную.',
         okBtn: 'Подтвердить',
         cancelBtn: 'Отмена'
       },

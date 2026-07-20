@@ -290,6 +290,7 @@ const ca = {
         enableConfirmDesc:
           'En activar MCP, PicoClaw s’aturarà i es tancarà qualsevol sessió activa de PicoClaw.',
         failed: 'L’operació MCP ha fallat',
+        copyFailed: 'La còpia ha fallat. Copieu-ho manualment.',
         okBtn: 'Confirma',
         cancelBtn: 'Cancel·la'
       },
@@ -599,7 +600,6 @@ const ca = {
         success: 'PicoClaw instal·lat correctament',
         failed: "No s'ha pogut instal·lar PicoClaw",
         uninstalling: "S'està desinstal·lant el temps d'execució...",
-        uninstaling: "S'està desinstal·lant el temps d'execució...",
         uninstalled: "El temps d'execució s'ha desinstal·lat correctament.",
         uninstallFailed: 'La desinstal·lació ha fallat.',
         requiredTitle: 'PicoClaw no està instal·lat',

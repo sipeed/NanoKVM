@@ -289,6 +289,7 @@ const se = {
         enableConfirmDesc:
           'Om MCP aktiveras stoppas PicoClaw och alla aktiva PicoClaw-sessioner stängs.',
         failed: 'MCP-åtgärden misslyckades',
+        copyFailed: 'Kopiering misslyckades. Kopiera manuellt.',
         okBtn: 'Bekräfta',
         cancelBtn: 'Avbryt'
       },

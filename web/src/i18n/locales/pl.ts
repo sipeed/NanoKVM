@@ -293,6 +293,7 @@ const pl = {
         enableConfirmDesc:
           'Włączenie MCP zatrzyma PicoClaw i zamknie wszystkie aktywne sesje PicoClaw.',
         failed: 'Operacja MCP nie powiodła się',
+        copyFailed: 'Kopiowanie nie powiodło się. Skopiuj ręcznie.',
         okBtn: 'Potwierdź',
         cancelBtn: 'Anuluj'
       },
