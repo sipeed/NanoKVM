@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/inputcontrol"
 )
 
 type Manager struct {
@@ -15,13 +16,16 @@ type Manager struct {
 }
 
 type Client struct {
-	ws            *websocket.Conn
-	hid           *hid.Hid
-	keyboard      chan []byte
-	mouse         chan []byte
-	lastHeartbeat time.Time
-	mutex         sync.Mutex
-	closeOnce     sync.Once
+	ws               *websocket.Conn
+	hid              *hid.Hid
+	manual           *inputcontrol.ManualSession
+	keyboard         chan hid.QueuedReport
+	mouse            chan hid.QueuedReport
+	heartbeatTimeout time.Duration
+	lastHeartbeat    time.Time
+	mutex            sync.Mutex
+	closeOnce        sync.Once
+	workers          sync.WaitGroup
 }
 
 type Message struct {

@@ -120,6 +120,7 @@ func withAgentProfile(status RuntimeStatus) RuntimeStatus {
 }
 
 func (s *Service) UpdateAgentProfile(c *gin.Context) {
+	s.ensureDependencies()
 	var req AgentProfileUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writePicoclawError(c, newPicoclawError(CodeInvalidAction, "invalid agent profile payload"))
@@ -132,16 +133,19 @@ func (s *Service) UpdateAgentProfile(c *gin.Context) {
 		return
 	}
 
+	unlockLifecycle := s.lockRuntimeLifecycle()
+	defer unlockLifecycle()
+
 	if err := applyPicoclawAgentProfile(profile); err != nil {
 		writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, err.Error()))
 		return
 	}
 
 	_ = s.syncConfigFromPicoclaw()
-	_ = s.ensureRuntimeReady()
+	_ = s.ensureRuntimeReadyForLifecycle()
 
 	writeSuccess(c, gin.H{
 		"profile": profile,
-		"status":  withAgentProfile(s.runtime.Get()),
+		"status":  withAgentProfile(s.runtimeStatus()),
 	})
 }

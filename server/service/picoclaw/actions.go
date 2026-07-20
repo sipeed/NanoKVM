@@ -2,6 +2,7 @@ package picoclaw
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"math"
 	"strings"
@@ -20,6 +21,16 @@ const (
 )
 
 func (s *Service) Actions(c *gin.Context) {
+	releaseMode, modeErr := s.acquireControlMode()
+	if modeErr != nil {
+		writePicoclawError(c, modeErr)
+		return
+	}
+	defer releaseMode()
+
+	operationCtx, releaseOperation := s.beginControlOperation(c.Request.Context())
+	defer releaseOperation()
+
 	sessionID, sessionErr := s.requireSessionID(c)
 	if sessionErr != nil {
 		writePicoclawError(c, sessionErr)
@@ -41,7 +52,7 @@ func (s *Service) Actions(c *gin.Context) {
 		return
 	}
 
-	result, execErr := s.executeActions(sessionID, actions)
+	result, execErr := s.executeActions(operationCtx, sessionID, actions)
 	if execErr != nil {
 		writePicoclawError(c, execErr)
 		return
@@ -74,7 +85,7 @@ func normalizeActions(c *gin.Context) ([]Action, *PicoclawError) {
 	return []Action{action}, nil
 }
 
-func (s *Service) executeActions(sessionID string, actions []Action) (result ActionResult, err *PicoclawError) {
+func (s *Service) executeActions(ctx context.Context, sessionID string, actions []Action) (result ActionResult, err *PicoclawError) {
 	startedAt := time.Now()
 	if len(actions) == 0 {
 		return ActionResult{}, newPicoclawError(CodeInvalidAction, "empty actions")
@@ -88,12 +99,16 @@ func (s *Service) executeActions(sessionID string, actions []Action) (result Act
 
 	totalWrites := 0
 	for idx, action := range actions {
+		if contextErr := controlOperationError(ctx); contextErr != nil {
+			contextErr.Index = &idx
+			return ActionResult{}, contextErr
+		}
 		if lockErr := s.lock.Ensure(sessionID); lockErr != nil {
 			lockErr.Index = &idx
 			return ActionResult{}, lockErr
 		}
 
-		writes, execErr := s.executeAction(action)
+		writes, execErr := s.executeAction(ctx, action)
 		if execErr != nil {
 			execErr.Index = &idx
 			return ActionResult{}, execErr
@@ -114,7 +129,11 @@ func (s *Service) executeActions(sessionID string, actions []Action) (result Act
 	return result, nil
 }
 
-func (s *Service) executeAction(action Action) (int, *PicoclawError) {
+func (s *Service) executeAction(ctx context.Context, action Action) (int, *PicoclawError) {
+	if err := controlOperationError(ctx); err != nil {
+		return 0, err
+	}
+
 	switch strings.ToLower(strings.TrimSpace(action.Action)) {
 	case "click":
 		x, y, err := normalizedPoint(action.X, action.Y)
@@ -129,7 +148,9 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 		writes := 0
 		writes += s.sendMouseMoveWithButton(x, y, 0x00, 0)
 		writes += s.sendMousePress(x, y, button)
-		time.Sleep(defaultClickHold)
+		if waitErr := waitForControlOperation(ctx, defaultClickHold); waitErr != nil {
+			return writes, waitErr
+		}
 		writes += s.sendMouseRelease(x, y)
 		return writes, nil
 
@@ -144,7 +165,12 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 		if action.DurationMs < 0 {
 			return 0, newPicoclawError(CodeInvalidAction, "wait duration must be >= 0")
 		}
-		time.Sleep(time.Duration(action.DurationMs) * time.Millisecond)
+		if action.DurationMs > maxWaitDurationMS {
+			return 0, newPicoclawError(CodeInvalidAction, "wait duration must be <= 30000 milliseconds")
+		}
+		if waitErr := waitForControlOperation(ctx, time.Duration(action.DurationMs)*time.Millisecond); waitErr != nil {
+			return 0, waitErr
+		}
 		return 0, nil
 
 	case "drag":
@@ -165,6 +191,9 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 		writes += s.sendMouseMoveWithButton(fromX, fromY, 0x00, 0)
 		writes += s.sendMousePress(fromX, fromY, button)
 		for step := 1; step <= defaultDragSteps; step++ {
+			if contextErr := controlOperationError(ctx); contextErr != nil {
+				return writes, contextErr
+			}
 			ratio := float64(step) / float64(defaultDragSteps)
 			x := fromX + (toX-fromX)*ratio
 			y := fromY + (toY-fromY)*ratio
@@ -203,9 +232,14 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 
 		writes := 0
 		for range amount {
+			if contextErr := controlOperationError(ctx); contextErr != nil {
+				return writes, contextErr
+			}
 			writes += s.sendMouseMoveWithButton(x, y, 0x00, wheel)
 			writes += s.sendMouseMoveWithButton(x, y, 0x00, 0)
-			time.Sleep(defaultScrollStep)
+			if waitErr := waitForControlOperation(ctx, defaultScrollStep); waitErr != nil {
+				return writes, waitErr
+			}
 		}
 		return writes, nil
 
@@ -216,6 +250,9 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 		charMap := hid.GetCharMap("")
 		writes := 0
 		for _, char := range action.Text {
+			if contextErr := controlOperationError(ctx); contextErr != nil {
+				return writes, contextErr
+			}
 			key, ok := charMap[char]
 			if !ok {
 				return 0, newPicoclawError(CodeInvalidAction, "unsupported character in type action")
@@ -223,7 +260,9 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 
 			writes += s.sendKeyboardReport([]byte{byte(key.Modifiers), 0x00, byte(key.Code), 0x00, 0x00, 0x00, 0x00, 0x00})
 			writes += s.sendKeyboardReport([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-			time.Sleep(defaultKeyDelay)
+			if waitErr := waitForControlOperation(ctx, defaultKeyDelay); waitErr != nil {
+				return writes, waitErr
+			}
 		}
 		return writes, nil
 
@@ -234,7 +273,9 @@ func (s *Service) executeAction(action Action) (int, *PicoclawError) {
 		}
 		writes := 0
 		writes += s.sendKeyboardReport(report)
-		time.Sleep(defaultClickHold)
+		if waitErr := waitForControlOperation(ctx, defaultClickHold); waitErr != nil {
+			return writes, waitErr
+		}
 		writes += s.sendKeyboardReport([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 		return writes, nil
 	}

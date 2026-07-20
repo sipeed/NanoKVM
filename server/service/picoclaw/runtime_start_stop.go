@@ -3,14 +3,22 @@ package picoclaw
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 )
 
 func (s *Service) startRuntime() (string, string, *PicoclawError) {
+	if s == nil {
+		return "", "", newPicoclawError(CodeRuntimeStartFailed, "picoclaw service is unavailable")
+	}
+	s.ensureDependencies()
+
 	if installed, statErr := isPicoclawInstalled(); statErr != nil {
 		s.runtime.Update(func(status *RuntimeStatus) {
 			status.Ready = false
@@ -57,6 +65,16 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 		})
 		return "", "", newPicoclawError(CodeRuntimeStartFailed, err.Error())
 	}
+	if err := s.detectGatewayPortConflict(); err != nil {
+		s.runtime.Update(func(status *RuntimeStatus) {
+			status.Ready = false
+			status.Installed = true
+			status.Status = "unavailable"
+			status.LastError = err.Error()
+			status.CheckedAt = time.Now()
+		})
+		return "", "", newPicoclawError(CodeRuntimeStartFailed, err.Error())
+	}
 
 	command := scriptPath + " start"
 	ctx, cancel := context.WithTimeout(context.Background(), picoclawStartTimeout)
@@ -81,6 +99,22 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 	time.Sleep(picoclawStartWaitPeriod)
 	if runtimeErr := s.waitForRuntimeReady(picoclawStartTimeout); runtimeErr != nil {
 		startErr := newPicoclawError(CodeRuntimeStartFailed, runtimeErr.Message)
+		failureStatus := "unavailable"
+		if cleanupErr := s.stopRuntimeAndVerify(true); cleanupErr != nil {
+			failureStatus = "error"
+			startErr.Message = fmt.Sprintf(
+				"%s; failed to stop partially started runtime: %v",
+				startErr.Message,
+				cleanupErr,
+			)
+		}
+		s.runtime.Update(func(status *RuntimeStatus) {
+			status.Ready = false
+			status.Status = failureStatus
+			status.LastError = startErr.Message
+			status.CurrentSession = ""
+			status.CheckedAt = time.Now()
+		})
 		return command, trimmedOutput, startErr
 	}
 
@@ -88,6 +122,11 @@ func (s *Service) startRuntime() (string, string, *PicoclawError) {
 }
 
 func (s *Service) stopRuntime() (string, string, *PicoclawError) {
+	if s == nil {
+		return "", "", newPicoclawError(CodeRuntimeStartFailed, "picoclaw service is unavailable")
+	}
+	s.ensureDependencies()
+
 	settings, _ := loadPicoclawGatewaySettings()
 	scriptPath, err := resolvePicoclawStartScript()
 	if err != nil {
@@ -148,7 +187,8 @@ func (s *Service) waitForRuntimeReady(timeout time.Duration) *PicoclawError {
 	var lastErr *PicoclawError
 
 	for {
-		if runtimeErr := s.ensureRuntimeReady(); runtimeErr == nil {
+		runtimeErr := s.ensureRuntimeReadyForLifecycle()
+		if runtimeErr == nil {
 			return nil
 		} else {
 			lastErr = runtimeErr
@@ -168,11 +208,11 @@ func (s *Service) waitForRuntimeReady(timeout time.Duration) *PicoclawError {
 }
 
 func resolvePicoclawStartScript() (string, error) {
-	if _, err := os.Stat(etcInitPicoclawScript); err == nil {
-		return etcInitPicoclawScript, nil
-	}
 	if _, err := os.Stat(kvmappPicoclawScript); err == nil {
 		return kvmappPicoclawScript, nil
+	}
+	if _, err := os.Stat(etcInitPicoclawScript); err == nil {
+		return etcInitPicoclawScript, nil
 	}
 	return "", fmt.Errorf("picoclaw start script not found: %s or %s", etcInitPicoclawScript, kvmappPicoclawScript)
 }
@@ -211,18 +251,162 @@ func isPicoclawInstalled() (bool, error) {
 }
 
 func isRuntimeRunning() (bool, error) {
-	binName := filepath.Base(picoclawBinaryPath)
-	if binName == "" || binName == "." || binName == string(filepath.Separator) {
-		return false, fmt.Errorf("invalid picoclaw binary path: %s", picoclawBinaryPath)
+	pid, err := runtimeGatewayPID()
+	if err != nil {
+		return false, err
+	}
+	return pid > 0, nil
+}
+
+func (s *Service) detectGatewayPortConflict() error {
+	running, err := isRuntimeRunning()
+	if err != nil {
+		return fmt.Errorf("check PicoClaw gateway process: %w", err)
+	}
+	if running {
+		return nil
 	}
 
-	command := exec.Command("pidof", binName)
-	if err := command.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok && exitErr.ExitCode() == 1 {
+	settings, err := loadPicoclawGatewaySettings()
+	if err != nil {
+		return nil
+	}
+	parsed, err := url.Parse(settings.GatewayURL)
+	if err != nil {
+		return nil
+	}
+	hostPort, err := gatewayHostPort(parsed)
+	if err != nil {
+		return nil
+	}
+
+	timeout := 2 * time.Second
+	if s != nil && s.config != nil {
+		if configured := time.Duration(s.config.Get().ConnectTimeoutMs) * time.Millisecond; configured > 0 {
+			timeout = configured
+		}
+	}
+	conn, err := net.DialTimeout("tcp", hostPort, timeout)
+	if err != nil {
+		return nil
+	}
+	_ = conn.Close()
+
+	return fmt.Errorf("gateway port %s is already in use by another process", hostPort)
+}
+
+func resolvePicoclawPIDPath() (string, error) {
+	home, err := resolvePicoclawHome()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, picoclawPIDFileName), nil
+}
+
+func runtimeGatewayPID() (int, error) {
+	pidPath, err := resolvePicoclawPIDPath()
+	if err != nil {
+		return 0, err
+	}
+
+	pid, err := readRuntimePIDFile(pidPath)
+	if err == nil {
+		running, processErr := isPicoclawGatewayProcess(pid)
+		if processErr != nil {
+			return 0, processErr
+		}
+		if running {
+			return pid, nil
+		}
+		_ = os.Remove(pidPath)
+	} else if !os.IsNotExist(err) {
+		_ = os.Remove(pidPath)
+	}
+
+	pid, err = findPicoclawGatewayProcess()
+	if err != nil {
+		return 0, err
+	}
+	if pid > 0 {
+		_ = os.MkdirAll(filepath.Dir(pidPath), 0o755)
+		_ = os.WriteFile(pidPath, []byte(strconv.Itoa(pid)+"\n"), 0o600)
+	}
+	return pid, nil
+}
+
+func readRuntimePIDFile(path string) (int, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
+	pid, parseErr := strconv.Atoi(strings.TrimSpace(string(data)))
+	if parseErr != nil || pid <= 0 {
+		return 0, fmt.Errorf("invalid PicoClaw pid file: %s", path)
+	}
+	return pid, nil
+}
+
+func isPicoclawGatewayProcess(pid int) (bool, error) {
+	if pid <= 0 {
+		return false, nil
+	}
+	cmdlinePath := filepath.Join("/proc", strconv.Itoa(pid), "cmdline")
+	data, err := os.ReadFile(cmdlinePath)
+	if err != nil {
+		if os.IsNotExist(err) {
 			return false, nil
 		}
 		return false, err
 	}
+	return isPicoclawGatewayCmdline(data), nil
+}
 
-	return true, nil
+func isPicoclawGatewayCmdline(data []byte) bool {
+	parts := strings.Split(string(data), "\x00")
+	args := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			args = append(args, part)
+		}
+	}
+	if len(args) < 2 {
+		return false
+	}
+
+	binName := filepath.Base(picoclawBinaryPath)
+	if binName == "" || binName == "." || binName == string(filepath.Separator) {
+		return false
+	}
+
+	return filepath.Base(args[0]) == binName && args[1] == "gateway"
+}
+
+func findPicoclawGatewayProcess() (int, error) {
+	entries, err := os.ReadDir("/proc")
+	if err != nil {
+		if os.IsNotExist(err) {
+			return 0, nil
+		}
+		return 0, err
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		pid, err := strconv.Atoi(entry.Name())
+		if err != nil || pid <= 0 {
+			continue
+		}
+		running, err := isPicoclawGatewayProcess(pid)
+		if err != nil {
+			continue
+		}
+		if running {
+			return pid, nil
+		}
+	}
+
+	return 0, nil
 }

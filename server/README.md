@@ -64,7 +64,7 @@ turn:
 
 ## Compile & Deploy
 
-Note: Use Linux operating system (x86-64). This build process is not compatible with ARM, Windows or macOS.
+Note: Use Linux operating system (x86-64) with Go 1.25 or newer. This build process is not compatible with ARM, Windows or macOS.
 
 1. Install the Toolchain
     1. Download the toolchain from the following link: [Download Link](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz).

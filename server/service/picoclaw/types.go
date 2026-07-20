@@ -7,6 +7,8 @@ import (
 	"sync"
 	"time"
 
+	"NanoKVM-Server/service/controlmode"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -21,11 +23,17 @@ type HIDWriter interface {
 }
 
 type Service struct {
-	vision  VisionReader
-	hid     HIDWriter
-	config  *ConfigStore
-	lock    *SessionLock
-	runtime *RuntimeStore
+	vision             VisionReader
+	hid                HIDWriter
+	config             *ConfigStore
+	lock               *SessionLock
+	runtime            *RuntimeStore
+	runtimeIntent      *RuntimeIntentStore
+	control            *controlmode.Manager
+	releaseHID         func() error
+	operations         *controlOperationTracker
+	runtimeLifecycleMu sync.Mutex
+	reconcileOnce      sync.Once
 }
 
 type ConfigStore struct {
@@ -36,6 +44,11 @@ type ConfigStore struct {
 type RuntimeStore struct {
 	mu     sync.RWMutex
 	status RuntimeStatus
+}
+
+type RuntimeIntentStore struct {
+	mu   sync.Mutex
+	path string
 }
 
 type Config struct {
@@ -50,20 +63,49 @@ type Config struct {
 }
 
 type RuntimeStatus struct {
-	Ready           bool      `json:"ready"`
-	Installed       bool      `json:"installed"`
-	Installing      bool      `json:"installing"`
-	InstallProgress int       `json:"install_progress,omitempty"`
-	InstallStage    string    `json:"install_stage,omitempty"`
-	InstallPath     string    `json:"install_path,omitempty"`
-	AgentProfile    string    `json:"agent_profile,omitempty"`
-	ModelConfigured bool      `json:"model_configured"`
-	ModelName       string    `json:"model_name,omitempty"`
-	Status          string    `json:"status"`
-	ConfigError     string    `json:"config_error,omitempty"`
-	LastError       string    `json:"last_error,omitempty"`
-	CheckedAt       time.Time `json:"checked_at,omitempty"`
-	CurrentSession  string    `json:"current_session,omitempty"`
+	Ready           bool                `json:"ready"`
+	Installed       bool                `json:"installed"`
+	Installing      bool                `json:"installing"`
+	InstallProgress int                 `json:"install_progress,omitempty"`
+	InstallStage    string              `json:"install_stage,omitempty"`
+	InstallPath     string              `json:"install_path,omitempty"`
+	AgentProfile    string              `json:"agent_profile,omitempty"`
+	ModelConfigured bool                `json:"model_configured"`
+	ModelName       string              `json:"model_name,omitempty"`
+	Status          string              `json:"status"`
+	ConfigError     string              `json:"config_error,omitempty"`
+	LastError       string              `json:"last_error,omitempty"`
+	CheckedAt       time.Time           `json:"checked_at,omitempty"`
+	CurrentSession  string              `json:"current_session,omitempty"`
+	Restoring       bool                `json:"restoring,omitempty"`
+	RuntimeIntent   RuntimeIntentStatus `json:"runtime_intent"`
+	ControlMode     string              `json:"control_mode"`
+	Transitioning   bool                `json:"transitioning,omitempty"`
+	Control         ControlStatus       `json:"control"`
+	Capabilities    RuntimeCapabilities `json:"capabilities"`
+}
+
+type RuntimeIntentStatus struct {
+	DesiredRunning bool   `json:"desired_running"`
+	UpdatedAt      string `json:"updated_at,omitempty"`
+	UpdatedBy      string `json:"updated_by,omitempty"`
+	LastStartedAt  string `json:"last_started_at,omitempty"`
+	LastStoppedAt  string `json:"last_stopped_at,omitempty"`
+	LastError      string `json:"last_error,omitempty"`
+}
+
+type ControlStatus struct {
+	Mode          string    `json:"mode"`
+	Transitioning bool      `json:"transitioning"`
+	CanControl    bool      `json:"can_control"`
+	LastError     string    `json:"last_error,omitempty"`
+	ChangedAt     time.Time `json:"changed_at,omitempty"`
+}
+
+type RuntimeCapabilities struct {
+	Chat          bool `json:"chat"`
+	ReadOnlyTools bool `json:"read_only_tools"`
+	DeviceWrite   bool `json:"device_write"`
 }
 
 type RuntimeStartResult struct {
@@ -186,11 +228,13 @@ const (
 )
 
 const (
-	CloseCodePicoclawLockHeld   = 4001
-	CloseCodeRuntimeUnavailable = 4002
-	CloseCodeAuthFailed         = 4003
-	CloseCodePicoclawTakenOver  = 4004
-	CloseCodeUpstreamClosed     = 4005
+	CloseCodePicoclawLockHeld    = 4001
+	CloseCodeRuntimeUnavailable  = 4002
+	CloseCodeAuthFailed          = 4003
+	CloseCodePicoclawTakenOver   = 4004
+	CloseCodeUpstreamClosed      = 4005
+	CloseCodeControlModeSwitched = 4006
+	CloseCodeRuntimeStopped      = 4007
 )
 
 type GatewaySession struct {

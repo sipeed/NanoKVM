@@ -2,6 +2,7 @@ package picoclaw
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,66 @@ func extractPicoclawModelName(model string) string {
 	}
 
 	return model
+}
+
+var (
+	picoclawProviderPattern = regexp.MustCompile(`^[a-z][a-z0-9_-]*$`)
+	picoclawKnownProviders  = map[string]struct{}{
+		"anthropic":         {},
+		"azure":             {},
+		"azure_openai":      {},
+		"baichuan":          {},
+		"bedrock":           {},
+		"cerebras":          {},
+		"cohere":            {},
+		"dashscope":         {},
+		"deepseek":          {},
+		"fireworks_ai":      {},
+		"gemini":            {},
+		"google":            {},
+		"groq":              {},
+		"lmstudio":          {},
+		"mistral":           {},
+		"moonshot":          {},
+		"ollama":            {},
+		"openai":            {},
+		"openai_compatible": {},
+		"openrouter":        {},
+		"qwen":              {},
+		"siliconflow":       {},
+		"together_ai":       {},
+		"vertex_ai":         {},
+		"vllm":              {},
+		"volcengine":        {},
+		"xai":               {},
+		"zhipu":             {},
+	}
+)
+
+func validatePicoclawModelIdentifier(model string) (string, error) {
+	model = strings.TrimSpace(model)
+	provider, modelRef, ok := strings.Cut(model, "/")
+	provider = strings.ToLower(strings.TrimSpace(provider))
+	modelRef = strings.TrimSpace(modelRef)
+
+	if !ok || provider == "" || modelRef == "" {
+		return "", fmt.Errorf("model identifier must use provider/model format")
+	}
+	if !picoclawProviderPattern.MatchString(provider) {
+		return "", fmt.Errorf("model provider %q is invalid", provider)
+	}
+	if provider == "openao" {
+		return "", fmt.Errorf("model provider %q is invalid; did you mean openai?", provider)
+	}
+	if _, ok := picoclawKnownProviders[provider]; !ok {
+		return "", fmt.Errorf("model provider %q is not supported by this PicoClaw integration", provider)
+	}
+
+	modelName := extractPicoclawModelName(model)
+	if modelName == "" {
+		return "", fmt.Errorf("model identifier must include a model name")
+	}
+	return modelName, nil
 }
 
 func isPicoclawModelConfigured(cfg picoclawConfigFile, security picoclawSecurityConfig, modelName string) bool {
@@ -71,6 +132,7 @@ type ModelConfigUpdateRequest struct {
 }
 
 func (s *Service) UpdateModelConfig(c *gin.Context) {
+	s.ensureDependencies()
 	var req ModelConfigUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		writePicoclawError(c, newPicoclawError(CodeInvalidAction, "invalid model config payload"))
@@ -79,6 +141,33 @@ func (s *Service) UpdateModelConfig(c *gin.Context) {
 
 	currentStatus := s.runtime.Get()
 	shouldRestart := currentStatus.Ready || currentStatus.Status == "ready"
+	var releaseControl func()
+	if shouldRestart {
+		// Restart follows StartRuntime's lock order: stable PicoClaw control
+		// lease first, then the runtime lifecycle lock around config write and
+		// stop/start.
+		var controlErr *PicoclawError
+		releaseControl, controlErr = s.acquireControlMode()
+		if controlErr != nil {
+			writePicoclawErrorWithData(c, controlErr, gin.H{"status": s.runtimeStatus()})
+			return
+		}
+		defer releaseControl()
+	}
+
+	unlockLifecycle := s.lockRuntimeLifecycle()
+	defer unlockLifecycle()
+	currentStatus = s.runtime.Get()
+	if !shouldRestart && (currentStatus.Ready || currentStatus.Status == "ready") {
+		var controlErr *PicoclawError
+		releaseControl, controlErr = s.acquireControlMode()
+		if controlErr != nil {
+			writePicoclawErrorWithData(c, controlErr, gin.H{"status": s.runtimeStatus()})
+			return
+		}
+		defer releaseControl()
+		shouldRestart = true
+	}
 
 	modelName, err := updatePicoclawModelConfig(
 		strings.TrimSpace(req.APIBase),
@@ -103,14 +192,15 @@ func (s *Service) UpdateModelConfig(c *gin.Context) {
 			writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, "model config saved, but failed to restart picoclaw runtime: "+startErr.Message))
 			return
 		}
+		s.setRuntimeIntentDesired(true, "model_config")
 	} else {
 		_ = s.syncConfigFromPicoclaw()
-		_ = s.ensureRuntimeReady()
+		_ = s.ensureRuntimeReadyForLifecycle()
 	}
 
 	writeSuccess(c, gin.H{
 		"model_name": modelName,
-		"status":     s.runtime.Get(),
+		"status":     s.runtimeStatus(),
 	})
 }
 
@@ -125,15 +215,17 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 		return "", fmt.Errorf("model identifier is required")
 	}
 
-	modelName := extractPicoclawModelName(model)
-	if modelName == "" {
-		return "", fmt.Errorf("model identifier is required")
-	}
-
-	doc, err := loadPicoclawConfigDocument()
+	modelName, err := validatePicoclawModelIdentifier(model)
 	if err != nil {
 		return "", err
 	}
+
+	doc, err := loadOrInitializePicoclawConfigDocument()
+	if err != nil {
+		return "", err
+	}
+
+	doc.raw["version"] = currentPicoclawConfigVersion
 
 	modelListValue, ok := doc.raw["model_list"].([]any)
 	if !ok {

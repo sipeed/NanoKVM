@@ -10,6 +10,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type gatewayProbeError struct {
+	status      string
+	configError string
+	lastError   string
+	message     string
+}
+
 func (s *Service) connectGateway(sessionID string) (*websocket.Conn, *PicoclawError) {
 	cfg := s.config.Get()
 
@@ -64,6 +71,69 @@ func (s *Service) connectGateway(sessionID string) (*websocket.Conn, *PicoclawEr
 	})
 
 	return upstream, nil
+}
+
+func probePicoclawGateway(cfg Config) *gatewayProbeError {
+	gatewayURL, err := buildGatewayURL(cfg, "runtime-probe")
+	if err != nil {
+		return &gatewayProbeError{
+			status:      "config_error",
+			configError: err.Error(),
+			lastError:   err.Error(),
+			message:     "gateway config is invalid",
+		}
+	}
+
+	header := http.Header{}
+	if cfg.Token != "" {
+		header.Set("Authorization", fmt.Sprintf("Bearer %s", cfg.Token))
+	}
+
+	timeout := time.Duration(cfg.ConnectTimeoutMs) * time.Millisecond
+	if timeout <= 0 {
+		timeout = 10 * time.Second
+	}
+	dialer := websocket.Dialer{
+		HandshakeTimeout: timeout,
+		NetDialContext: (&net.Dialer{
+			Timeout: timeout,
+		}).DialContext,
+	}
+
+	conn, response, err := dialer.Dial(gatewayURL, header)
+	if err == nil {
+		_ = conn.WriteControl(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseNormalClosure, "runtime probe complete"),
+			time.Now().Add(time.Second),
+		)
+		_ = conn.Close()
+		return nil
+	}
+
+	probeErr := &gatewayProbeError{
+		status:    "unavailable",
+		lastError: err.Error(),
+		message:   "gateway websocket is unavailable",
+	}
+	if response == nil {
+		return probeErr
+	}
+
+	switch response.StatusCode {
+	case http.StatusUnauthorized, http.StatusForbidden:
+		probeErr.status = "config_error"
+		probeErr.configError = "gateway authentication failed"
+		probeErr.message = "gateway authentication failed"
+	case http.StatusNotFound:
+		probeErr.lastError = "gateway pico channel is unavailable"
+		probeErr.message = "gateway pico channel is unavailable"
+	default:
+		probeErr.lastError = fmt.Sprintf("gateway websocket handshake failed: HTTP %d", response.StatusCode)
+		probeErr.message = "gateway websocket handshake failed"
+	}
+
+	return probeErr
 }
 
 func buildGatewayURL(cfg Config, sessionID string) (string, error) {

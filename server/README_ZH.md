@@ -62,7 +62,7 @@ turn:
 
 ## 编译部署
 
-**注意：请使用 Linux 操作系统（x86-64）。该工具链无法在 ARM、Windows 或 macOS 下使用。**
+**注意：请使用 Linux 操作系统（x86-64）和 Go 1.25 或更高版本。该工具链无法在 ARM、Windows 或 macOS 下使用。**
 
 1. 安装工具链
    1. 下载工具链：[下载地址](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)；
