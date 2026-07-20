@@ -6,20 +6,15 @@ import { useSetAtom } from 'jotai';
 import { DownloadIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import {
-  cancelDownloadImage,
-  downloadImage,
-  imageEnabled,
-  statusImage
-} from '@/api/download.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { cancelDownloadImage, downloadImage, imageEnabled, statusImage } from '@/api/download.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
 
 const imageUpdatedEvent = 'nanokvm:image-updated';
 
 export const DownloadImage = () => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [input, setInput] = useState('');
   const [sha256sum, setSha256sum] = useState('');
@@ -58,10 +53,10 @@ export const DownloadImage = () => {
     if (open) {
       checkDiskEnabled();
       startStatusPolling();
-      setIsKeyboardEnable(false);
+      setKeyboardLock({ source: 'download-popover', locked: true });
       setPopoverKey((prevKey) => prevKey + 1); // Force re-render
     } else {
-      setIsKeyboardEnable(true);
+      setKeyboardLock({ source: 'download-popover', locked: false });
 
       // Keep monitoring an active remote download after the popover closes so
       // completion can still refresh an already-open image list.
@@ -243,7 +238,7 @@ export const DownloadImage = () => {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
-    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+    if (!file || !file.name.toLowerCase().endsWith('.iso')) {
       setStatus('failed');
       setLog(t('download.NoISO'));
       return;
@@ -259,7 +254,7 @@ export const DownloadImage = () => {
   function upload(file: File | null) {
     if (!file) return;
 
-    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
+    if (!file || !file.name.toLowerCase().endsWith('.iso')) {
       setStatus('failed');
       setLog(t('download.NoISO'));
       return;
@@ -275,20 +270,19 @@ export const DownloadImage = () => {
     setLog('Downloading: ' + file.name);
 
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append('file', file);
 
-    fetch("/api/download/file", {
-      method: "POST",
+    fetch('/api/download/file', {
+      method: 'POST',
       headers: {
         'X-SHA256-Sum': checksum
       },
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         const rsp = await response.json();
         if (!response.ok || rsp.code !== 0) {
-          const message =
-            rsp.msg === 'sha256 mismatch' ? t('download.checksumFailed') : rsp.msg;
+          const message = rsp.msg === 'sha256 mismatch' ? t('download.checksumFailed') : rsp.msg;
           throw new Error(message || t('download.failed'));
         }
 
@@ -303,7 +297,6 @@ export const DownloadImage = () => {
       });
 
     startStatusPolling();
-    
   }
 
   const content = (
@@ -337,9 +330,7 @@ export const DownloadImage = () => {
                     ? cancelDownload()
                     : download(input)
                 }
-                disabled={
-                  isCancelling || (status === 'in_progress' && !isRemoteDownloading)
-                }
+                disabled={isCancelling || (status === 'in_progress' && !isRemoteDownloading)}
               >
                 {isRemoteDownloading && status === 'in_progress'
                   ? t('download.cancel')
@@ -368,35 +359,35 @@ export const DownloadImage = () => {
                     ? 'cursor-not-allowed bg-neutral-700 opacity-50'
                     : 'cursor-pointer hover:bg-neutral-500'
                 )}
-                  onDrop={(e) => {
-                    if (status === "in_progress") return; // deaktiviert
-                    e.preventDefault();
-                    setIsDragging(false);
-                    const file = e.dataTransfer.files?.[0] ?? null;
-                    if (!file || !file.name.toLowerCase().endsWith(".iso")) {
-                      setStatus('failed');
-                      setLog(t('download.NoISO'));
-                      return;
-                    }
-                    setStatus('idle');
-                    setLog('');
-                    setSelectedFile(file);
-                  }}
-                  onDragOver={(e) => {
-                    if (status === "in_progress") return; // deaktiviert
-                    e.preventDefault();
-                    setIsDragging(true); // Datei wird über den Bereich gezogen
-                  }}
-                  onDragLeave={(e) => {
-                    if (status === "in_progress") return; // deaktiviert
-                    e.preventDefault();
-                    setIsDragging(false); // Maus verlässt Bereich
-                  }}
-                  onClick={() => {
-                    if (status === "in_progress") return; // deaktiviert
-                    document.getElementById("file-upload")?.click()
-                  }}
-                >
+                onDrop={(e) => {
+                  if (status === 'in_progress') return; // deaktiviert
+                  e.preventDefault();
+                  setIsDragging(false);
+                  const file = e.dataTransfer.files?.[0] ?? null;
+                  if (!file || !file.name.toLowerCase().endsWith('.iso')) {
+                    setStatus('failed');
+                    setLog(t('download.NoISO'));
+                    return;
+                  }
+                  setStatus('idle');
+                  setLog('');
+                  setSelectedFile(file);
+                }}
+                onDragOver={(e) => {
+                  if (status === 'in_progress') return; // deaktiviert
+                  e.preventDefault();
+                  setIsDragging(true); // Datei wird über den Bereich gezogen
+                }}
+                onDragLeave={(e) => {
+                  if (status === 'in_progress') return; // deaktiviert
+                  e.preventDefault();
+                  setIsDragging(false); // Maus verlässt Bereich
+                }}
+                onClick={() => {
+                  if (status === 'in_progress') return; // deaktiviert
+                  document.getElementById('file-upload')?.click();
+                }}
+              >
                 <span className="w-full truncate px-2 text-center text-sm text-neutral-100">
                   {selectedFile ? selectedFile.name : t('download.uploadbox')}
                 </span>

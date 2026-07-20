@@ -4,52 +4,75 @@ import { useSetAtom } from 'jotai';
 import { PlusIcon, SendIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import type { PicoclawTransportState } from '@/jotai/picoclaw.ts';
+
+import { PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE } from './keyboard-lock.ts';
 
 type MessageInputProps = {
   transportState: PicoclawTransportState;
-  onSend: (content: string) => void | Promise<void>;
+  disabled?: boolean;
+  onSend: (content: string) => boolean | void | Promise<boolean | void>;
   onNewConversation: () => void | Promise<void>;
   disableNewConversation?: boolean;
 };
 
 export const MessageInput = ({
   transportState,
+  disabled,
   onSend,
   onNewConversation,
   disableNewConversation
 }: MessageInputProps) => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [value, setValue] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const isComposingRef = useRef(false);
 
-  const isReady = transportState === 'connected';
+  const isConnecting = transportState === 'connecting';
+  const canSubmit = !disabled && !isConnecting;
 
   useEffect(() => {
-    setIsKeyboardEnable(false);
     return () => {
-      setIsKeyboardEnable(true);
+      setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false });
     };
-  }, [setIsKeyboardEnable]);
+  }, [setKeyboardLock]);
+
+  useEffect(() => {
+    if (!isConnecting) {
+      return;
+    }
+
+    textareaRef.current?.blur();
+    setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false });
+  }, [isConnecting, setKeyboardLock]);
 
   async function submit() {
     const content = value.trim();
-    if (!content || !isReady) return;
-    await onSend(content);
-    setValue('');
+    if (!content || !canSubmit) return;
+    const sent = await onSend(content);
+    if (sent !== false) {
+      setValue('');
+    }
   }
 
   return (
     <div className="relative">
       <textarea
+        ref={textareaRef}
         rows={3}
         value={value}
-        disabled={!isReady}
-        placeholder={isReady ? t('picoclaw.inputPlaceholder') : '...'}
+        disabled={disabled || isConnecting}
+        placeholder={isConnecting ? '...' : t('picoclaw.inputPlaceholder')}
         onChange={(e) => setValue(e.target.value)}
+        onFocus={() =>
+          setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: true })
+        }
+        onBlur={() =>
+          setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false })
+        }
         onCompositionStart={() => {
           isComposingRef.current = true;
         }}
@@ -75,7 +98,7 @@ export const MessageInput = ({
         type="text"
         icon={<PlusIcon size={14} />}
         onClick={() => void onNewConversation()}
-        disabled={disableNewConversation}
+        disabled={disabled || disableNewConversation}
         className="absolute bottom-2.5 right-11 !flex !h-7 !w-7 !items-center !justify-center !rounded-lg !border !border-white/[0.08]"
         title={t('picoclaw.newConversation')}
       />
@@ -83,7 +106,7 @@ export const MessageInput = ({
         type="primary"
         icon={<SendIcon size={14} />}
         onClick={() => void submit()}
-        disabled={!isReady || !value.trim()}
+        disabled={!canSubmit || !value.trim()}
         className="absolute bottom-2.5 right-2.5 !flex !h-7 !w-7 !items-center !justify-center !rounded-lg"
         title={t('picoclaw.send')}
       />

@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import {
   BadgeInfoIcon,
+  BotIcon,
   CircleArrowUpIcon,
   NetworkIcon,
   PaletteIcon,
@@ -16,7 +17,7 @@ import semver from 'semver';
 
 import * as api from '@/api/application.ts';
 import * as ls from '@/lib/localstorage.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -25,6 +26,7 @@ import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
 import { Device } from './device';
+import { MCP } from './mcp';
 import { Network } from './network';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
@@ -38,7 +40,7 @@ export const Settings = () => {
   const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
 
   const tabs = [
@@ -46,6 +48,7 @@ export const Settings = () => {
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
     { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
     { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
+    { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
     {
       id: 'tailscale',
       icon: <TailscaleIcon />,
@@ -100,7 +103,7 @@ export const Settings = () => {
 
   function openModal() {
     setIsModalOpen(true);
-    setIsKeyboardEnable(false);
+    setKeyboardLock({ source: 'settings-modal', locked: true });
     setSubmenuOpenCount((count) => count + 1);
   }
 
@@ -109,7 +112,7 @@ export const Settings = () => {
       return;
     }
 
-    setIsKeyboardEnable(true);
+    setKeyboardLock({ source: 'settings-modal', locked: false });
     setIsModalOpen(false);
     setCurrentTab('about');
     setSubmenuOpenCount((count) => Math.max(0, count - 1));

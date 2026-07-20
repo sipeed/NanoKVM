@@ -5,7 +5,7 @@ import { KeyboardIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { isModifier } from '@/lib/keymap.ts';
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { Kbd, KbdGroup } from '@/components/ui/kbd.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
@@ -60,7 +60,7 @@ export const Recorder = ({
   setIsRecording
 }: RecorderProps) => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -70,7 +70,7 @@ export const Recorder = ({
   const recordedKeysRef = useRef<KeyInfo[]>([]);
 
   useEffect(() => {
-    setIsKeyboardEnable(!isModalOpen);
+    setKeyboardLock({ source: 'shortcut-recorder', locked: isModalOpen });
     setIsRecording(isModalOpen);
 
     if (!isModalOpen) return;
@@ -81,8 +81,9 @@ export const Recorder = ({
 
     return () => {
       clearTimeout(timer);
+      setKeyboardLock({ source: 'shortcut-recorder', locked: false });
     };
-  }, [isModalOpen]);
+  }, [isModalOpen, setIsRecording, setKeyboardLock]);
 
   useEffect(() => {
     if (!isFocused) return;

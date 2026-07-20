@@ -123,9 +123,9 @@ export class MouseReportAbsolute {
     return this.buildReport(lastX, lastY, 0);
   }
 
-  reset(): Uint8Array {
+  reset(x: number = 0, y: number = 0): Uint8Array {
     this.buttons = 0;
-    return this.buildReport(0, 0, 0);
+    return this.buildReport(x, y, 0);
   }
 
   private clamp(value: number, min: number, max: number): number {

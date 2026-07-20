@@ -13,12 +13,12 @@ import {
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/hid.ts';
-import { isKeyboardEnableAtom, leaderKeyAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom, leaderKeyAtom } from '@/jotai/keyboard.ts';
 
 export const LeaderKey = () => {
   const { t } = useTranslation();
 
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
   const [leaderKey, setLeaderKey] = useAtom(leaderKeyAtom);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -64,7 +64,7 @@ export const LeaderKey = () => {
   }, [isFocused]);
 
   function openModal() {
-    setIsKeyboardEnable(false);
+    setKeyboardLock({ source: 'leader-key-recorder', locked: true });
     setIsLeaderKeyEnable(!!leaderKey);
     setTempLeaderKey(leaderKey);
     setIsDocCollapsed(true);
@@ -72,7 +72,7 @@ export const LeaderKey = () => {
   }
 
   function closeModal() {
-    setIsKeyboardEnable(true);
+    setKeyboardLock({ source: 'leader-key-recorder', locked: false });
     setIsModalOpen(false);
   }
 

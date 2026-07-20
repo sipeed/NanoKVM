@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 type SidebarInstallProps = {
   installProgress?: number;
   installStage?: string;
+  disabled?: boolean;
   isInstalling: boolean;
   onInstall: () => void | Promise<void>;
 };
@@ -12,6 +13,7 @@ type SidebarInstallProps = {
 export const SidebarInstall = ({
   installProgress,
   installStage,
+  disabled,
   isInstalling,
   onInstall
 }: SidebarInstallProps) => {
@@ -54,6 +56,7 @@ export const SidebarInstall = ({
           {!isInstalling && (
             <Button
               icon={<DownloadIcon size={13} />}
+              disabled={disabled}
               onClick={() => void onInstall()}
               type="primary"
             >

@@ -25,6 +25,7 @@ import type {
 
 import { createErrorMessage, createStatusMessage, HIDDEN_OVERLAY } from './message-utils.ts';
 import { canConnectGateway } from './runtime-view.ts';
+import type { PicoclawRefreshOptions } from './sidebar-actions.ts';
 
 type RuntimeStatusSetter = Dispatch<SetStateAction<PicoclawRuntimeStatus | null>>;
 type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
@@ -37,8 +38,9 @@ type PicoclawSidebarSessionActionOptions = {
   config: PicoclawConfigState;
   activeSessionId: string;
   isFreshConversation: boolean;
+  isSidebarMutationPending: boolean;
   isSwitchingSession: boolean;
-  refreshState: () => Promise<PicoclawRuntimeStatus | null>;
+  refreshState: (options?: PicoclawRefreshOptions) => Promise<PicoclawRuntimeStatus | null>;
   setMessages: MessageSetter;
   setTakeover: TakeoverSetter;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
@@ -63,6 +65,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
     config,
     activeSessionId,
     isFreshConversation,
+    isSidebarMutationPending,
     isSwitchingSession,
     refreshState,
     setMessages,
@@ -96,16 +99,20 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
   }
 
   async function handleSend(content: string) {
+    if (isSidebarMutationPending) {
+      return false;
+    }
+
     let ready = transportState === 'connected' && runState === 'idle';
 
     if (!ready) {
-      const nextRuntimeStatus = await refreshState();
+      const nextRuntimeStatus = await refreshState({ force: true, preserveRuntimeOnError: true });
       if (!canConnectGateway(nextRuntimeStatus ?? null)) {
-        return;
+        return false;
       }
 
       try {
-        await connectGateway();
+        await connectGateway(activeSessionId || undefined);
         ready = true;
       } catch {
         ready = false;
@@ -113,7 +120,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
     }
 
     if (!ready) {
-      return;
+      return false;
     }
 
     const id = generateUUIDv4();
@@ -128,15 +135,47 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
       }
     ]);
 
-    sendChatMessage(content, {
+    const sent = sendChatMessage(content, {
       id,
       maxSteps: config.maxSteps,
       maxRuntimeMs: config.maxRuntimeMs
     });
+    return sent !== null;
+  }
+
+  async function handleReconnectGateway() {
+    if (isSidebarMutationPending) {
+      return false;
+    }
+    if (transportState === 'connected' || transportState === 'connecting') {
+      return true;
+    }
+
+    const nextRuntimeStatus = await refreshState({ force: true, preserveRuntimeOnError: true });
+    if (!canConnectGateway(nextRuntimeStatus ?? null)) {
+      setMessages((current) => [
+        ...current,
+        createErrorMessage({
+          code: 'GATEWAY_RECONNECT_BLOCKED',
+          message: t('picoclaw.connection.transport.reconnectBlocked', {
+            defaultValue: 'PicoClaw needs device control before reconnecting.'
+          }),
+          raw: nextRuntimeStatus
+        })
+      ]);
+      return false;
+    }
+
+    try {
+      await connectGateway(activeSessionId || undefined);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async function handleNewConversation() {
-    if (isFreshConversation) {
+    if (isFreshConversation || isSidebarMutationPending) {
       return;
     }
 
@@ -158,7 +197,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
     setIsFreshConversation(true);
 
     await closePromise;
-    const nextRuntimeStatus = await refreshState();
+    const nextRuntimeStatus = await refreshState({ force: true, preserveRuntimeOnError: true });
     if (!canConnectGateway(nextRuntimeStatus ?? null)) {
       return;
     }
@@ -187,7 +226,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
   }
 
   async function handleSelectHistorySession(sessionId: string) {
-    if (isSwitchingSession) {
+    if (isSwitchingSession || isSidebarMutationPending) {
       return;
     }
 
@@ -239,7 +278,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
       setRunState('idle');
 
       await closePromise;
-      const nextRuntimeStatus = await refreshState();
+      const nextRuntimeStatus = await refreshState({ force: true, preserveRuntimeOnError: true });
       setRuntimeStatus((current) =>
         current
           ? {
@@ -313,6 +352,7 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
 
   return {
     handleSend,
+    handleReconnectGateway,
     handleNewConversation,
     handleStop,
     handleOpenHistory,
