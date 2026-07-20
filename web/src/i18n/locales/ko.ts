@@ -273,6 +273,24 @@ const ko = {
     },
     settings: {
       title: '설정',
+      mcp: {
+        title: 'MCP 서비스',
+        service: 'MCP 원격 제어',
+        serviceDesc:
+          '신뢰할 수 있는 MCP 클라이언트가 키보드와 마우스를 제어하고 스크린샷을 캡처하도록 허용합니다',
+        securityWarning:
+          '이 API 키를 가진 사람은 누구나 원격 호스트를 제어하고 화면을 볼 수 있습니다. HTTPS를 사용하고 신뢰할 수 있는 네트워크에서만 활성화하세요.',
+        endpoint: '엔드포인트',
+        apiKey: 'API 키',
+        regenerateConfirmTitle: 'MCP API 키를 다시 생성하시겠습니까?',
+        regenerateConfirmDesc: '현재 키는 즉시 작동을 중지합니다.',
+        enableConfirmTitle: '외부 MCP 제어를 활성화하시겠습니까?',
+        enableConfirmDesc:
+          'MCP를 활성화하면 PicoClaw가 중지되고 활성 PicoClaw 세션이 모두 닫힙니다.',
+        failed: 'MCP 작업에 실패했습니다',
+        okBtn: '확인',
+        cancelBtn: '취소'
+      },
       about: {
         title: 'NanoKVM 정보',
         information: '정보',
@@ -515,19 +533,28 @@ const ko = {
         runtimeStarted: 'PicoClaw 런타임이 시작되었습니다',
         runtimeStartFailed: 'PicoClaw 런타임 시작에 실패했습니다',
         runtimeStopped: 'PicoClaw 런타임이 중지되었습니다',
-        runtimeStopFailed: 'PicoClaw 런타임 중지에 실패했습니다'
+        runtimeStopFailed: 'PicoClaw 런타임 중지에 실패했습니다',
+        controlSwitchedToMCP: '제어가 외부 MCP 서비스로 전환되었습니다'
       },
       connection: {
         runtime: {
           checking: '확인 중',
+          restoring: 'Restoring PicoClaw',
           ready: '런타임 준비됨',
           stopped: '런타임 중지됨',
+          blockedByMCP: '외부 MCP 제어가 활성화되어 있습니다',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: '런타임 사용 불가',
           configError: '구성 에러'
         },
         transport: {
           connecting: '연결 중',
-          connected: '연결됨'
+          connected: '연결됨',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: '대기',
@@ -541,6 +568,28 @@ const ko = {
       },
       overlay: {
         locked: 'PicoClaw가 기기를 제어하고 있습니다. 수동 입력이 일시 중지됩니다.'
+      },
+      control: {
+        picoclaw: '장치 제어: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: '장치 제어: 외부 MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: '장치 제어: 꺼짐',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: '제어 권한 부여',
+        release: '해제',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw 제어 권한이 부여되었습니다',
+        released: 'PicoClaw 제어가 해제되었습니다',
+        grantFailed: 'PicoClaw 제어 권한 부여에 실패했습니다',
+        releaseFailed: 'PicoClaw 제어 해제에 실패했습니다',
+        grantConfirmTitle: '장치 제어를 PicoClaw로 전환할까요?',
+        grantConfirmDesc: '외부 MCP 장치 쓰기가 중단됩니다.'
       },
       install: {
         install: 'PicoClaw 설치',
@@ -601,15 +650,22 @@ const ko = {
         deleteConfirmOk: '삭제',
         deleteConfirmCancel: '취소',
         messageCount_one: '{{count}}개의 메시지',
-        messageCount_other: '{{count}}개의 메시지'
+        messageCount_other: '{{count}}개의 메시지',
+        messageCount: '{{count}}개의 메시지'
       },
       config: {
         startRuntime: 'PicoClaw 시작',
         stopRuntime: 'PicoClaw 중지'
       },
       start: {
+        enableConfirmTitle: '제어를 PicoClaw로 전환하시겠습니까?',
+        enableConfirmDesc: 'PicoClaw를 시작하면 외부 MCP 서비스가 비활성화됩니다.',
+        enableConfirmOk: 'PicoClaw 시작',
+        enableConfirmCancel: '취소',
         title: 'PicoClaw 시작',
-        description: '런타임을 시작하여 PicoClaw 어시스턴트 사용을 시작하세요.'
+        description: '런타임을 시작하여 PicoClaw 어시스턴트 사용을 시작하세요.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

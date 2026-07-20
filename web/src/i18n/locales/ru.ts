@@ -277,6 +277,24 @@ const ru = {
     },
     settings: {
       title: 'Настройки',
+      mcp: {
+        title: 'Служба MCP',
+        service: 'Удалённое управление MCP',
+        serviceDesc:
+          'Разрешить доверенным клиентам MCP управлять клавиатурой и мышью и делать снимки экрана',
+        securityWarning:
+          'Любой, у кого есть этот ключ API, может управлять удалённым хостом и просматривать его экран. Используйте HTTPS и включайте службу только в доверенных сетях.',
+        endpoint: 'Конечная точка',
+        apiKey: 'Ключ API',
+        regenerateConfirmTitle: 'Создать новый ключ API MCP?',
+        regenerateConfirmDesc: 'Текущий ключ немедленно перестанет работать.',
+        enableConfirmTitle: 'Включить внешнее управление MCP?',
+        enableConfirmDesc:
+          'Включение MCP остановит PicoClaw и закроет все активные сеансы PicoClaw.',
+        failed: 'Операция MCP завершилась с ошибкой',
+        okBtn: 'Подтвердить',
+        cancelBtn: 'Отмена'
+      },
       about: {
         title: 'О системе NanoKVM',
         information: 'Информация',
@@ -523,19 +541,28 @@ const ru = {
         runtimeStarted: 'Runtime PicoClaw запущен',
         runtimeStartFailed: 'Не удалось запустить runtime PicoClaw',
         runtimeStopped: 'Runtime PicoClaw остановлен',
-        runtimeStopFailed: 'Не удалось остановить runtime PicoClaw'
+        runtimeStopFailed: 'Не удалось остановить runtime PicoClaw',
+        controlSwitchedToMCP: 'Управление переключено на внешнюю службу MCP'
       },
       connection: {
         runtime: {
           checking: 'Проверка',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime готов',
           stopped: 'Runtime остановлен',
+          blockedByMCP: 'Внешнее управление MCP активно',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime недоступен',
           configError: 'Ошибка конфигурации'
         },
         transport: {
           connecting: 'Подключение',
-          connected: 'Подключено'
+          connected: 'Подключено',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Простой',
@@ -549,6 +576,28 @@ const ru = {
       },
       overlay: {
         locked: 'PicoClaw управляет устройством. Ручной ввод приостановлен.'
+      },
+      control: {
+        picoclaw: 'Управление устройством: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Управление устройством: внешний MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Управление устройством: выкл.',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Передать управление',
+        release: 'Освободить',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Управление PicoClaw предоставлено',
+        released: 'Управление PicoClaw освобождено',
+        grantFailed: 'Не удалось предоставить управление PicoClaw',
+        releaseFailed: 'Не удалось освободить управление PicoClaw',
+        grantConfirmTitle: 'Переключить управление устройством на PicoClaw?',
+        grantConfirmDesc: 'Записи устройства внешним MCP будут прерваны.'
       },
       install: {
         install: 'Установить PicoClaw',
@@ -610,15 +659,22 @@ const ru = {
         deleteConfirmOk: 'Удалить',
         deleteConfirmCancel: 'Отмена',
         messageCount_one: '{{count}} сообщение',
-        messageCount_other: '{{count}} сообщения'
+        messageCount_other: '{{count}} сообщения',
+        messageCount: '{{count}} сообщения'
       },
       config: {
         startRuntime: 'Запустить PicoClaw',
         stopRuntime: 'Остановить PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Переключить управление на PicoClaw?',
+        enableConfirmDesc: 'Запуск PicoClaw отключит внешнюю службу MCP.',
+        enableConfirmOk: 'Запустить PicoClaw',
+        enableConfirmCancel: 'Отмена',
         title: 'Запустить PicoClaw',
-        description: 'Запустите runtime, чтобы начать использовать помощник PicoClaw.'
+        description: 'Запустите runtime, чтобы начать использовать помощник PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -271,6 +271,23 @@ const th = {
     },
     settings: {
       title: 'การตั้งค่า',
+      mcp: {
+        title: 'บริการ MCP',
+        service: 'การควบคุมระยะไกล MCP',
+        serviceDesc: 'อนุญาตให้ไคลเอนต์ MCP ที่เชื่อถือได้ควบคุมแป้นพิมพ์และเมาส์และจับภาพหน้าจอ',
+        securityWarning:
+          'ทุกคนที่มีคีย์ API นี้สามารถควบคุมโฮสต์ระยะไกลและดูหน้าจอได้ โปรดใช้ HTTPS และเปิดใช้งานเฉพาะบนเครือข่ายที่เชื่อถือได้เท่านั้น',
+        endpoint: 'ปลายทาง',
+        apiKey: 'คีย์ API',
+        regenerateConfirmTitle: 'สร้างคีย์ API ของ MCP ใหม่หรือไม่?',
+        regenerateConfirmDesc: 'คีย์ปัจจุบันจะหยุดทำงานทันที',
+        enableConfirmTitle: 'เปิดใช้งานการควบคุม MCP ภายนอกหรือไม่?',
+        enableConfirmDesc:
+          'การเปิดใช้งาน MCP จะหยุด PicoClaw และปิดเซสชัน PicoClaw ที่ใช้งานอยู่ทั้งหมด',
+        failed: 'การดำเนินการ MCP ล้มเหลว',
+        okBtn: 'ยืนยัน',
+        cancelBtn: 'ยกเลิก'
+      },
       about: {
         title: 'เกี๋ยวกับ NanoKVM',
         information: 'ข้อมูล',
@@ -514,19 +531,28 @@ const th = {
         runtimeStarted: 'เริ่ม Runtime PicoClaw แล้ว',
         runtimeStartFailed: 'ไม่สามารถเริ่ม Runtime PicoClaw ได้',
         runtimeStopped: 'หยุด Runtime PicoClaw แล้ว',
-        runtimeStopFailed: 'ไม่สามารถหยุด Runtime PicoClaw ได้'
+        runtimeStopFailed: 'ไม่สามารถหยุด Runtime PicoClaw ได้',
+        controlSwitchedToMCP: 'เปลี่ยนการควบคุมไปยังบริการ MCP ภายนอกแล้ว'
       },
       connection: {
         runtime: {
           checking: 'กำลังตรวจสอบ',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime พร้อมใช้งาน',
           stopped: 'หยุด Runtime แล้ว',
+          blockedByMCP: 'การควบคุม MCP ภายนอกกำลังทำงาน',
+          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime ไม่พร้อมใช้งาน',
           configError: 'ข้อผิดพลาดในการกำหนดค่า'
         },
         transport: {
           connecting: 'กำลังเชื่อมต่อ',
-          connected: 'เชื่อมต่อแล้ว'
+          connected: 'เชื่อมต่อแล้ว',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'ไม่ได้ใช้งาน',
@@ -540,6 +566,28 @@ const th = {
       },
       overlay: {
         locked: 'PicoClaw กำลังควบคุมอุปกรณ์ การป้อนข้อมูลด้วยตนเองถูกหยุดชั่วคราว'
+      },
+      control: {
+        picoclaw: 'การควบคุมอุปกรณ์: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'การควบคุมอุปกรณ์: MCP ภายนอก',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'การควบคุมอุปกรณ์: ปิด',
+        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'มอบการควบคุม',
+        release: 'ปล่อย',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'มอบการควบคุม PicoClaw แล้ว',
+        released: 'ปล่อยการควบคุม PicoClaw แล้ว',
+        grantFailed: 'ไม่สามารถมอบการควบคุม PicoClaw ได้',
+        releaseFailed: 'ไม่สามารถปล่อยการควบคุม PicoClaw ได้',
+        grantConfirmTitle: 'เปลี่ยนการควบคุมอุปกรณ์ไปยัง PicoClaw หรือไม่?',
+        grantConfirmDesc: 'การเขียนอุปกรณ์จาก MCP ภายนอกจะถูกขัดจังหวะ'
       },
       install: {
         install: 'ติดตั้ง PicoClaw',
@@ -601,15 +649,22 @@ const th = {
         deleteConfirmOk: 'ลบ',
         deleteConfirmCancel: 'ยกเลิก',
         messageCount_one: '{{count}} ข้อความ',
-        messageCount_other: '{{count}} ข้อความ'
+        messageCount_other: '{{count}} ข้อความ',
+        messageCount: '{{count}} ข้อความ'
       },
       config: {
         startRuntime: 'เริ่ม PicoClaw',
         stopRuntime: 'หยุด PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'เปลี่ยนการควบคุมไปยัง PicoClaw หรือไม่?',
+        enableConfirmDesc: 'การเริ่ม PicoClaw จะปิดใช้งานบริการ MCP ภายนอก',
+        enableConfirmOk: 'เริ่ม PicoClaw',
+        enableConfirmCancel: 'ยกเลิก',
         title: 'เริ่ม PicoClaw',
-        description: 'เริ่ม Runtime เพื่อเริ่มใช้ผู้ช่วย PicoClaw'
+        description: 'เริ่ม Runtime เพื่อเริ่มใช้ผู้ช่วย PicoClaw',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {
