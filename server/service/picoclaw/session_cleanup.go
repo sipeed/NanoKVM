@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/hid"
 
 	log "github.com/sirupsen/logrus"
@@ -12,15 +13,35 @@ import (
 const picoclawMediaTempDirName = "picoclaw_media"
 
 func ReleaseSession(sessionID string) {
-	GetSessionLock().Release(sessionID)
-	releaseAllHIDState()
+	_, err := releaseOwnedSession(GetSessionLock(), sessionID, hid.ReleaseAllHIDState)
+	if err != nil {
+		log.Errorf("failed to release HID state for PicoClaw session %s: %v", sessionID, err)
+	}
 }
 
-func releaseAllHIDState() {
-	h := hid.GetHid()
-	h.WriteHid0([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
-	h.WriteHid1([]byte{0x00, 0x00, 0x00, 0x00})
-	h.WriteHid2([]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
+func (s *Service) releaseGatewaySession(sessionID string) {
+	if s == nil {
+		ReleaseSession(sessionID)
+		return
+	}
+	s.ensureDependencies()
+	releaseHID := s.releaseHID
+	if s.control.Current() != controlmode.ModePicoclaw {
+		releaseHID = nil
+	}
+	if _, err := releaseOwnedSession(s.lock, sessionID, releaseHID); err != nil {
+		log.Errorf("failed to release HID state for PicoClaw session %s: %v", sessionID, err)
+	}
+}
+
+func releaseOwnedSession(lock *SessionLock, sessionID string, releaseHID func() error) (bool, error) {
+	if lock == nil || !lock.ReleaseOwned(sessionID) {
+		return false, nil
+	}
+	if releaseHID == nil {
+		return true, nil
+	}
+	return true, releaseHID()
 }
 
 func (s *Service) releaseAllHIDState() {

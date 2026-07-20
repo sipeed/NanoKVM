@@ -8,6 +8,7 @@ import (
 )
 
 func (s *Service) ReleaseRuntimeSession(c *gin.Context) {
+	s.ensureDependencies()
 	sessionID := strings.TrimSpace(c.GetHeader(sessionIDHeader))
 	if sessionID == "" {
 		writePicoclawError(c, newPicoclawError(CodeSessionIDMissing, "missing X-PicoClaw-Session-ID"))
@@ -16,8 +17,6 @@ func (s *Service) ReleaseRuntimeSession(c *gin.Context) {
 
 	if session, ok := GetSessionManager().Get(sessionID); ok {
 		s.closeGatewaySession(session, websocket.CloseNormalClosure, "session released")
-	} else {
-		ReleaseSession(sessionID)
 	}
 
 	status := s.runtime.Get()

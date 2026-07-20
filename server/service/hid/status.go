@@ -1,7 +1,6 @@
 package hid
 
 import (
-	"NanoKVM-Server/proto"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +8,9 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/inputcontrol"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -91,7 +93,17 @@ func (s *Service) SetHidMode(c *gin.Context) {
 func (s *Service) ResetHid(c *gin.Context) {
 	var rsp proto.Response
 
-	if err := ResetUSBPHY(); err != nil {
+	manual := s.newManualSession()
+	defer manual.Close()
+	reservation, err := manual.Reserve(c.Request.Context(), inputcontrol.ManualRelativeMouse, false, nil)
+	if err != nil {
+		log.Errorf("failed to acquire manual control for HID reset: %v", err)
+		rsp.ErrRsp(c, -1, "HID control is busy")
+		return
+	}
+	err = manual.Execute(ResetUSBPHY)
+	reservation.Complete(err == nil)
+	if err != nil {
 		log.Errorf("failed to reset hid: %v", err)
 		rsp.ErrRsp(c, -1, "failed to reset hid")
 		return

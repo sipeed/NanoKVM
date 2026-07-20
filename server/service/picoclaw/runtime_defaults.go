@@ -11,10 +11,11 @@ import (
 )
 
 const (
-	defaultPicoclawPingSec  = 30
-	defaultPicoclawReadSec  = 60
-	defaultPicoclawWriteSec = 10
-	defaultPicoclawMaxConns = 100
+	currentPicoclawConfigVersion = 3
+	defaultPicoclawPingSec       = 30
+	defaultPicoclawReadSec       = 60
+	defaultPicoclawWriteSec      = 10
+	defaultPicoclawMaxConns      = 100
 )
 
 type picoclawConfigDefault struct {
@@ -90,6 +91,7 @@ func ensurePicoclawPicoChannelEnabled(doc *picoclawConfigDocument) error {
 }
 
 func applyPicoclawStartupDefaults(editor *picoclawConfigEditor) error {
+	editor.setValue(currentPicoclawConfigVersion, "version")
 	for _, entry := range picoclawNanoKVMDefaults {
 		editor.setValue(entry.value, entry.path...)
 	}

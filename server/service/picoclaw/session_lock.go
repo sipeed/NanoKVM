@@ -108,6 +108,29 @@ func (l *SessionLock) Release(sessionID string) bool {
 	return true
 }
 
+// ReleaseOwned releases the lock only when sessionID is the current owner.
+// Unlike Release, an already-empty lock is not considered a successful
+// release. This distinction prevents stale session cleanup from releasing HID
+// state that may now belong to another controller.
+func (l *SessionLock) ReleaseOwned(sessionID string) bool {
+	if sessionID == "" {
+		return false
+	}
+
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	l.clearExpiredLocked(time.Now())
+	if l.ownerSessionID != sessionID {
+		return false
+	}
+
+	l.ownerSessionID = ""
+	l.acquiredAt = time.Time{}
+	l.expiresAt = time.Time{}
+	return true
+}
+
 func (l *SessionLock) ForceTakeover(sessionID string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()

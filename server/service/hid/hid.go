@@ -249,15 +249,42 @@ func (h *Hid) Close() {
 }
 
 func (h *Hid) WriteHid0(data []byte) {
-	h.writeHIDReport(h.keyboardDevice(HID0), data)
+	if err := h.WriteKeyboardReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID0, err)
+	}
 }
 
 func (h *Hid) WriteHid1(data []byte) {
-	h.writeHIDReport(h.relativeMouseDevice(HID1), data)
+	if err := h.WriteRelativeMouseReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID1, err)
+	}
 }
 
 func (h *Hid) WriteHid2(data []byte) {
-	h.writeHIDReport(h.absoluteMouseDevice(HID2), data)
+	if err := h.WriteAbsoluteMouseReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID2, err)
+	}
+}
+
+func (h *Hid) WriteKeyboardReport(data []byte) error {
+	if len(data) != 8 {
+		return fmt.Errorf("invalid keyboard report length: %d", len(data))
+	}
+	return h.writeHID(h.keyboardDevice(HID0), data)
+}
+
+func (h *Hid) WriteRelativeMouseReport(data []byte) error {
+	if len(data) != 4 {
+		return fmt.Errorf("invalid relative mouse report length: %d", len(data))
+	}
+	return h.writeHID(h.relativeMouseDevice(HID1), data)
+}
+
+func (h *Hid) WriteAbsoluteMouseReport(data []byte) error {
+	if len(data) != 6 {
+		return fmt.Errorf("invalid absolute mouse report length: %d", len(data))
+	}
+	return h.writeHID(h.absoluteMouseDevice(HID2), data)
 }
 
 func (h *Hid) writeHIDReport(device hidDevice, data []byte) bool {

@@ -28,8 +28,9 @@ type jsonRPCResponse struct {
 }
 
 type jsonRPCError struct {
-	Code    int    `json:"code"`
-	Message string `json:"message"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data,omitempty"`
 }
 
 // MCP tool definitions
@@ -59,17 +60,22 @@ var mcpToolDefinitions = []map[string]interface{}{
 					"items": map[string]interface{}{
 						"type": "object",
 						"properties": map[string]interface{}{
-							"action":      map[string]interface{}{"type": "string"},
-							"x":           map[string]interface{}{"type": "number"},
-							"y":           map[string]interface{}{"type": "number"},
-							"button":      map[string]interface{}{"type": "string"},
-							"text":        map[string]interface{}{"type": "string"},
-							"keys":        map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
-							"direction":   map[string]interface{}{"type": "string"},
-							"amount":      map[string]interface{}{"type": "integer"},
-							"duration_ms": map[string]interface{}{"type": "integer"},
-							"from":        map[string]interface{}{"type": "object", "properties": map[string]interface{}{"x": map[string]interface{}{"type": "number"}, "y": map[string]interface{}{"type": "number"}}},
-							"to":          map[string]interface{}{"type": "object", "properties": map[string]interface{}{"x": map[string]interface{}{"type": "number"}, "y": map[string]interface{}{"type": "number"}}},
+							"action":    map[string]interface{}{"type": "string"},
+							"x":         map[string]interface{}{"type": "number"},
+							"y":         map[string]interface{}{"type": "number"},
+							"button":    map[string]interface{}{"type": "string"},
+							"text":      map[string]interface{}{"type": "string"},
+							"keys":      map[string]interface{}{"type": "array", "items": map[string]interface{}{"type": "string"}},
+							"direction": map[string]interface{}{"type": "string"},
+							"amount":    map[string]interface{}{"type": "integer"},
+							"duration_ms": map[string]interface{}{
+								"type":        "integer",
+								"minimum":     0,
+								"maximum":     maxWaitDurationMS,
+								"description": "Wait duration in milliseconds, up to 30000",
+							},
+							"from": map[string]interface{}{"type": "object", "properties": map[string]interface{}{"x": map[string]interface{}{"type": "number"}, "y": map[string]interface{}{"type": "number"}}},
+							"to":   map[string]interface{}{"type": "object", "properties": map[string]interface{}{"x": map[string]interface{}{"type": "number"}, "y": map[string]interface{}{"type": "number"}}},
 						},
 						"required": []string{"action"},
 					},
@@ -122,6 +128,33 @@ func (s *Service) MCPHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
+func mcpModeConflictResponse(req jsonRPCRequest, err *PicoclawError, status controlStatusForMCP) jsonRPCResponse {
+	message := "PicoClaw control mode is not active"
+	reason := CodeControlRequired
+	if err != nil && err.Message != "" {
+		message = err.Message
+		reason = err.Code
+	}
+	return jsonRPCResponse{
+		JSONRPC: "2.0",
+		ID:      req.ID,
+		Error: &jsonRPCError{
+			Code:    -32003,
+			Message: message,
+			Data: map[string]interface{}{
+				"reason":        reason,
+				"control_mode":  status.Mode,
+				"transitioning": status.Transitioning,
+			},
+		},
+	}
+}
+
+type controlStatusForMCP struct {
+	Mode          string
+	Transitioning bool
+}
+
 func (s *Service) mcpInitialize(req jsonRPCRequest) jsonRPCResponse {
 	return jsonRPCResponse{
 		JSONRPC: "2.0",
@@ -166,6 +199,22 @@ func (s *Service) mcpToolsCall(req jsonRPCRequest, c *gin.Context) jsonRPCRespon
 	case "kvm_screenshot":
 		return s.mcpScreenshot(req, params.Arguments, c)
 	case "kvm_actions":
+		releaseMode, modeErr := s.acquireControlMode()
+		if modeErr != nil {
+			controlStatus := controlStatusForMCP{}
+			if status, err := s.control.Status(); err == nil {
+				controlStatus = controlStatusForMCP{
+					Mode:          string(status.Mode),
+					Transitioning: status.Transitioning,
+				}
+			}
+			return mcpModeConflictResponse(req, modeErr, controlStatus)
+		}
+		defer releaseMode()
+
+		operationCtx, releaseOperation := s.beginControlOperation(c.Request.Context())
+		defer releaseOperation()
+		c.Request = c.Request.WithContext(operationCtx)
 		return s.mcpActions(req, params.Arguments, c)
 	default:
 		return jsonRPCResponse{
@@ -262,7 +311,7 @@ func (s *Service) mcpActions(req jsonRPCRequest, args json.RawMessage, c *gin.Co
 		sessionID = s.lock.Owner()
 	}
 
-	result, err := s.executeActions(sessionID, params.Actions)
+	result, err := s.executeActions(c.Request.Context(), sessionID, params.Actions)
 	if err != nil {
 		return mcpToolError(req, err.Message)
 	}

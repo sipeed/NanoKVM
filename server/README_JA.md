@@ -65,7 +65,7 @@ turn:
 
 ## コンパイルとデプロイ
 
-注意: Linux オペレーティングシステム (x86-64) を使用してください。このビルドプロセスは ARM、Windows、macOS では互換性がありません。
+注意: Linux オペレーティングシステム (x86-64) と Go 1.25 以降を使用してください。このビルドプロセスは ARM、Windows、macOS では互換性がありません。
 
 1. ツールチェーンのインストール
     1. 以下のリンクからツールチェーンをダウンロードします: [ダウンロードリンク](https://sophon-file.sophon.cn/sophon-prod-s3/drive/23/03/07/16/host-tools.tar.gz)。

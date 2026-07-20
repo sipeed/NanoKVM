@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/stream/mjpeg"
 
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,19 @@ type relayResult struct {
 }
 
 func (s *Service) ConnectGateway(c *gin.Context) {
+	s.ensureDependencies()
+	modeStatus, modeErr := s.control.Status()
+	if modeErr != nil {
+		writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, modeErr.Error()))
+		return
+	}
+	if modeStatus.Transitioning || modeStatus.Mode == controlmode.ModeMCP {
+		controlErr := s.controlWriteError(controlmode.ModePicoclaw, nil)
+		controlErr.StatusCode = http.StatusConflict
+		writePicoclawError(c, controlErr)
+		return
+	}
+
 	sessionID := strings.TrimSpace(c.Query("session_id"))
 	if sessionID == "" {
 		sessionID = uuid.NewString()
@@ -69,7 +83,7 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	if err != nil {
 		log.Errorf("failed to upgrade gateway websocket: %s", err)
 		_ = upstream.Close()
-		ReleaseSession(sessionID)
+		s.releaseGatewaySession(sessionID)
 		GetSessionManager().SetState(sessionID, SessionStateClosed)
 		GetSessionManager().Remove(sessionID)
 		return
@@ -92,7 +106,6 @@ func (s *Service) ConnectGateway(c *gin.Context) {
 	go s.runPingLoop("upstream", session.SessionID, upstream, cfg, &wg)
 	go s.proxyMessages("downstream", session, downstream, cfg, &wg, results)
 	go s.proxyMessages("upstream", session, upstream, cfg, &wg, results)
-
 	result := <-results
 	closeCode := result.CloseCode
 	if closeCode == 0 {
@@ -217,7 +230,7 @@ func (s *Service) closeGatewaySession(session *GatewaySession, closeCode int, re
 			cleanupPicoclawMediaTempDir()
 		}
 
-		ReleaseSession(session.SessionID)
+		s.releaseGatewaySession(session.SessionID)
 		GetSessionManager().SetState(session.SessionID, SessionStateClosed)
 		GetSessionManager().Remove(session.SessionID)
 

@@ -21,12 +21,7 @@ resolve_user_home() {
   printf '%s\n' "/root"
 }
 
-setup_runtime_env() {
-  [ -x "$BIN_PATH" ] || {
-    echo "picoclaw binary not found: $BIN_PATH"
-    return 1
-  }
-
+setup_picoclaw_home() {
   USER_HOME="$(resolve_user_home)"
   PICOCLAW_HOME="${PICOCLAW_HOME:-$USER_HOME/.picoclaw}"
   HOME="$USER_HOME"
@@ -37,11 +32,82 @@ setup_runtime_env() {
     echo "failed to create picoclaw home: $PICOCLAW_HOME"
     return 1
   }
+  PICOCLAW_PID_FILE="${PICOCLAW_PID_FILE:-$PICOCLAW_HOME/.picoclaw.pid}"
+  export PICOCLAW_PID_FILE
 
   cd "$PICOCLAW_HOME" || {
     echo "failed to enter picoclaw home: $PICOCLAW_HOME"
     return 1
   }
+}
+
+setup_runtime_env() {
+  [ -x "$BIN_PATH" ] || {
+    echo "picoclaw binary not found: $BIN_PATH"
+    return 1
+  }
+
+  setup_picoclaw_home || return 1
+}
+
+read_pid_file() {
+  [ -f "$PICOCLAW_PID_FILE" ] || return 1
+  pid="$(sed -n '1p' "$PICOCLAW_PID_FILE" 2>/dev/null | tr -d '[:space:]')"
+  case "$pid" in
+    ''|*[!0-9]*)
+      return 1
+      ;;
+  esac
+  printf '%s\n' "$pid"
+}
+
+is_gateway_pid() {
+  pid="$1"
+  [ -n "$pid" ] || return 1
+  [ -r "/proc/$pid/cmdline" ] || return 1
+
+  cmd_path="$(tr '\000' '\n' <"/proc/$pid/cmdline" 2>/dev/null | sed -n '1p')"
+  subcommand="$(tr '\000' '\n' <"/proc/$pid/cmdline" 2>/dev/null | sed -n '2p')"
+  [ "$(basename "$cmd_path")" = "$BIN_NAME" ] && [ "$subcommand" = "gateway" ] && return 0
+
+  return 1
+}
+
+find_gateway_pid() {
+  for proc_dir in /proc/[0-9]*; do
+    [ -d "$proc_dir" ] || continue
+    pid="${proc_dir#/proc/}"
+    if is_gateway_pid "$pid"; then
+      printf '%s\n' "$pid"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+cleanup_stale_pid_file() {
+  [ -f "$PICOCLAW_PID_FILE" ] || return 0
+  pid="$(read_pid_file 2>/dev/null)" || {
+    rm -f "$PICOCLAW_PID_FILE"
+    return 0
+  }
+  if ! is_gateway_pid "$pid"; then
+    echo "picoclaw stale pid file removed: $PICOCLAW_PID_FILE"
+    rm -f "$PICOCLAW_PID_FILE"
+  fi
+}
+
+gateway_running_pid() {
+  pid="$(read_pid_file 2>/dev/null)" && is_gateway_pid "$pid" && {
+    printf '%s\n' "$pid"
+    return 0
+  }
+
+  cleanup_stale_pid_file
+  pid="$(find_gateway_pid 2>/dev/null)" || return 1
+  printf '%s\n' "$pid" >"$PICOCLAW_PID_FILE" 2>/dev/null || true
+  printf '%s\n' "$pid"
 }
 
 resolve_kvm_control_source() {
@@ -107,8 +173,8 @@ sync_agent_profile() {
 start_service() {
   setup_runtime_env || return 1
 
-  if pidof "$BIN_NAME" >/dev/null 2>&1; then
-    echo "picoclaw already running"
+  if pid="$(gateway_running_pid)"; then
+    echo "picoclaw gateway already running (PID: $pid)"
     return 0
   fi
 
@@ -118,6 +184,12 @@ start_service() {
   fi
 
   "$BIN_PATH" gateway >>"$LOG_FILE" 2>&1 &
+  gateway_pid="$!"
+  printf '%s\n' "$gateway_pid" >"$PICOCLAW_PID_FILE" || {
+    echo "failed to write picoclaw pid file: $PICOCLAW_PID_FILE"
+    return 1
+  }
+  echo "picoclaw gateway started (PID: $gateway_pid)"
 }
 
 onboard_service() {
@@ -128,7 +200,26 @@ onboard_service() {
 }
 
 stop_service() {
-  killall "$BIN_NAME" 2>/dev/null || true
+  setup_picoclaw_home || return 1
+
+  pid="$(gateway_running_pid 2>/dev/null)" || {
+    cleanup_stale_pid_file
+    return 0
+  }
+
+  kill "$pid" 2>/dev/null || true
+  count=0
+  while is_gateway_pid "$pid"; do
+    count=$((count + 1))
+    if [ "$count" -ge 15 ]; then
+      echo "picoclaw gateway did not stop after TERM, killing PID: $pid"
+      kill -9 "$pid" 2>/dev/null || true
+      break
+    fi
+    sleep 1
+  done
+
+  rm -f "$PICOCLAW_PID_FILE"
 }
 
 case "$1" in

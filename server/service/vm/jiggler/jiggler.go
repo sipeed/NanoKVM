@@ -1,11 +1,15 @@
 package jiggler
 
 import (
-	"NanoKVM-Server/service/hid"
+	"context"
 	"os"
 	"strings"
 	"sync"
 	"time"
+
+	"NanoKVM-Server/service/controlmode"
+	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/inputcontrol"
 )
 
 const (
@@ -120,15 +124,46 @@ func (j *Jiggler) GetMode() string {
 }
 
 func move(mode string) {
+	_, releaseMode, err := controlmode.GetManager().AcquireStable()
+	if err != nil {
+		return
+	}
+	defer releaseMode()
+
+	ctx, release, err := inputcontrol.GetCoordinator().BeginBackground(context.Background())
+	if err != nil {
+		return
+	}
+	defer release()
+
 	h := hid.GetHid()
 
 	if mode == "absolute" {
-		h.WriteHid2([]byte{0x00, 0x00, 0x3f, 0x00, 0x3f, 0x00})
-		time.Sleep(100 * time.Millisecond)
-		h.WriteHid2([]byte{0x00, 0xff, 0x3f, 0xff, 0x3f, 0x00})
+		if err := h.WriteAbsoluteMouseReport([]byte{0x00, 0x00, 0x3f, 0x00, 0x3f, 0x00}); err != nil {
+			return
+		}
+		defer func() {
+			_ = h.WriteAbsoluteMouseReport([]byte{0x00, 0xff, 0x3f, 0xff, 0x3f, 0x00})
+		}()
+		_ = waitMove(ctx, 100*time.Millisecond)
 	} else {
-		h.WriteHid1([]byte{0x00, 0xa, 0xa, 0x00})
-		time.Sleep(100 * time.Millisecond)
-		h.WriteHid1([]byte{0x00, 0xf6, 0xf6, 0x00})
+		if err := h.WriteRelativeMouseReport([]byte{0x00, 0xa, 0xa, 0x00}); err != nil {
+			return
+		}
+		defer func() {
+			_ = h.WriteRelativeMouseReport([]byte{0x00, 0xf6, 0xf6, 0x00})
+		}()
+		_ = waitMove(ctx, 100*time.Millisecond)
+	}
+}
+
+func waitMove(ctx context.Context, delay time.Duration) bool {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return false
+	case <-timer.C:
+		return true
 	}
 }

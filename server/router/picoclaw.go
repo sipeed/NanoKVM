@@ -38,8 +38,7 @@ func PicoclawLoopbackHTTPAllowedPaths() []string {
 	return append([]string(nil), picoclawLoopbackHTTPAllowedPaths...)
 }
 
-func picoclawRouter(r *gin.Engine) {
-	service := picoclaw.NewService()
+func picoclawRouter(r *gin.Engine, service *picoclaw.Service) {
 	frontendAPI := r.Group(picoclawBasePath).Use(middleware.CheckToken())
 	localAPI := r.Group(picoclawBasePath).Use(middleware.CheckLoopbackInternalToken())
 

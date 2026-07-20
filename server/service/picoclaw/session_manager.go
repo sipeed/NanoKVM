@@ -92,3 +92,14 @@ func (m *SessionManager) Remove(sessionID string) {
 	defer m.mu.Unlock()
 	delete(m.sessions, sessionID)
 }
+
+func (m *SessionManager) Snapshot() []*GatewaySession {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	sessions := make([]*GatewaySession, 0, len(m.sessions))
+	for _, session := range m.sessions {
+		sessions = append(sessions, session)
+	}
+	return sessions
+}

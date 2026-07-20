@@ -3,6 +3,7 @@ package picoclaw
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/user"
@@ -93,17 +94,53 @@ func loadPicoclawConfigDocument() (*picoclawConfigDocument, error) {
 	}, nil
 }
 
+var runPicoclawOnboardForConfig = runPicoclawOnboard
+
+func loadOrInitializePicoclawConfigDocument() (*picoclawConfigDocument, error) {
+	doc, err := loadPicoclawConfigDocument()
+	if err == nil {
+		return doc, nil
+	}
+	if !errors.Is(err, os.ErrNotExist) {
+		return nil, err
+	}
+
+	if _, onboardErr := runPicoclawOnboardForConfig(); onboardErr != nil {
+		return nil, fmt.Errorf("failed to initialize PicoClaw config before saving model config: %w", onboardErr)
+	}
+
+	doc, err = loadPicoclawConfigDocument()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load PicoClaw config after initialization: %w", err)
+	}
+	return doc, nil
+}
+
 func resolvePicoclawConfigPath() (string, error) {
-	home := os.Getenv("PICOCLAW_HOME")
-	if home == "" {
-		currentUser, err := user.Current()
-		if err != nil {
-			return "", fmt.Errorf("failed to resolve PICOCLAW_HOME: %w", err)
-		}
-		home = filepath.Join(currentUser.HomeDir, ".picoclaw")
+	home, err := resolvePicoclawHome()
+	if err != nil {
+		return "", err
 	}
 
 	return filepath.Join(home, "config.json"), nil
+}
+
+func resolvePicoclawHome() (string, error) {
+	if home := strings.TrimSpace(os.Getenv("PICOCLAW_HOME")); home != "" {
+		return home, nil
+	}
+
+	currentUser, err := user.Current()
+	if err == nil && currentUser.HomeDir != "" {
+		return filepath.Join(currentUser.HomeDir, ".picoclaw"), nil
+	}
+	if home := strings.TrimSpace(os.Getenv("HOME")); home != "" {
+		return filepath.Join(home, ".picoclaw"), nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve PICOCLAW_HOME: %w", err)
+	}
+	return filepath.Join("/root", ".picoclaw"), nil
 }
 
 func expandPicoclawPath(path string) string {
