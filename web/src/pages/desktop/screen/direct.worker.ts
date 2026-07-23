@@ -5,8 +5,12 @@ let ctx: OffscreenCanvasRenderingContext2D | null = null;
 let rendering: boolean = false;
 let flushScheduled: boolean = false;
 let decoder: VideoDecoder | null = null;
+let displayDecoder: VideoDecoder | null = null;
+let replacementDecoder: VideoDecoder | null = null;
+let resyncAtNextKeyFrame: boolean = false;
 
-const maxQueuedFrames = 3;
+const maxQueuedFrames = 1;
+const maxDecoderQueueSize = 6;
 const frameQueue = new Queue<VideoFrame>();
 const frameChannel = new MessageChannel();
 
@@ -44,39 +48,53 @@ function handleWsMessage(message: ArrayBuffer) {
     const timestamp = Number(view.getBigUint64(1, true));
     const data = new Uint8Array(message, 9);
 
-    if (!decoder && isKeyFrame) {
-      initializeDecoder();
+    if (
+      !replacementDecoder &&
+      decoder?.state === 'configured' &&
+      decoder.decodeQueueSize >= maxDecoderQueueSize
+    ) {
+      resyncAtNextKeyFrame = true;
+    }
+
+    if (resyncAtNextKeyFrame && isKeyFrame && displayDecoder) {
+      const replacement = createDecoder();
+      if (replacement) {
+        replacementDecoder = replacement;
+        decoder = replacement;
+        resyncAtNextKeyFrame = false;
+      }
+    }
+
+    if (!decoder) {
+      if (!isKeyFrame) {
+        return;
+      }
+      const initial = createDecoder();
+      if (!initial) {
+        return;
+      }
+      decoder = initial;
+      displayDecoder = initial;
     }
 
     if (decoder?.state === 'configured') {
-      decode(isKeyFrame, timestamp, data);
+      decode(decoder, isKeyFrame, timestamp, data);
     }
   } catch (error) {
     console.error('Error processing WebSocket message in worker:', error);
   }
 }
 
-function initializeDecoder() {
+function createDecoder(): VideoDecoder | null {
   if (!self.VideoDecoder) {
     console.log('Error: WebCodecs API not supported in this worker.');
-    return;
+    return null;
   }
 
-  if (decoder && decoder.state !== 'unconfigured') {
-    return;
-  }
-
+  let instance: VideoDecoder | null = null;
   const init = {
     output: (frame: VideoFrame) => {
-      frameQueue.enqueue(frame);
-      while (frameQueue.size > maxQueuedFrames) {
-        frameQueue.dequeue()?.close();
-      }
-
-      if (!rendering) {
-        rendering = true;
-        scheduleFrameQueue();
-      }
+      handleDecodedFrame(instance, frame);
     },
     error: () => {
       resetDecoder();
@@ -84,18 +102,52 @@ function initializeDecoder() {
   };
 
   try {
-    decoder = new VideoDecoder(init);
-    decoder.configure({
-      codec: 'avc1.42E01F',
+    instance = new VideoDecoder(init);
+    instance.configure({
+      codec: 'avc1.42E02A',
+      hardwareAcceleration: 'prefer-hardware',
       optimizeForLatency: true
     });
+    return instance;
   } catch (err) {
     console.log(err);
-    decoder = null;
+    return null;
   }
 }
 
-function decode(isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
+function handleDecodedFrame(source: VideoDecoder | null, frame: VideoFrame) {
+  if (!source) {
+    frame.close();
+    return;
+  }
+
+  if (source === replacementDecoder) {
+    const previous = displayDecoder;
+    displayDecoder = source;
+    decoder = source;
+    replacementDecoder = null;
+
+    Array.from(frameQueue.drain()).forEach((queuedFrame) => queuedFrame.close());
+    if (previous && previous !== source && previous.state !== 'closed') {
+      previous.close();
+    }
+  } else if (source !== displayDecoder) {
+    frame.close();
+    return;
+  }
+
+  frameQueue.enqueue(frame);
+  while (frameQueue.size > maxQueuedFrames) {
+    frameQueue.dequeue()?.close();
+  }
+
+  if (!rendering) {
+    rendering = true;
+    scheduleFrameQueue();
+  }
+}
+
+function decode(target: VideoDecoder, isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
   const chunk = new EncodedVideoChunk({
     type: isKeyFrame ? 'key' : 'delta',
     timestamp: timestamp,
@@ -103,7 +155,7 @@ function decode(isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
   });
 
   try {
-    decoder?.decode(chunk);
+    target.decode(chunk);
   } catch (err: any) {
     if (err.name === 'TypeError' || err.message.includes('configured')) {
       resetDecoder();
@@ -149,15 +201,21 @@ function renderFrame(frame: VideoFrame) {
 }
 
 function resetDecoder() {
-  if (decoder && decoder.state !== 'closed') {
-    try {
-      decoder.close();
-    } catch (err) {
-      console.log(err);
+  const decoders = new Set([decoder, displayDecoder, replacementDecoder]);
+  decoders.forEach((item) => {
+    if (item && item.state !== 'closed') {
+      try {
+        item.close();
+      } catch (err) {
+        console.log(err);
+      }
     }
-  }
+  });
 
   decoder = null;
+  displayDecoder = null;
+  replacementDecoder = null;
+  resyncAtNextKeyFrame = false;
   rendering = false;
   flushScheduled = false;
 
