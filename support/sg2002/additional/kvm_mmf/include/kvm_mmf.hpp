@@ -46,6 +46,9 @@ void mmf_get_vi_vflip(int ch, bool *en);
 // get vi frame
 int mmf_vi_frame_pop(int ch, void **data, int *len, int *width, int *height, int *format);
 void mmf_vi_frame_free(int ch);
+// Release the current VI frame immediately. mmf_vi_frame_free() defers
+// release so the frame can be sent directly to VENC without a second copy.
+void mmf_vi_frame_release(int ch);
 
 // invert format
 int mmf_invert_format_to_maix(int mmf_format);
