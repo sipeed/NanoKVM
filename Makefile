@@ -1,13 +1,17 @@
 # Makefile for NanoKVM Project
 
 # Configuration
-IMAGE_NAME := nanokvm-builder
 UID := $(shell id -u)
 GID := $(shell id -g)
+IMAGE_NAME := nanokvm-builder-local-$(UID)-$(GID)
 PWD := $(shell pwd)
 
 # Docker run common parameters
 DOCKER_RUN_BASE := docker run -e UID=$(UID) -e GID=$(GID) -v $(PWD):/home/build/NanoKVM --rm
+
+# Build the image with the host user's identity so entrypoint does not need
+# to recursively rewrite the MaixCDK home directory at container startup.
+DOCKER_BUILD_ARGS := --build-arg DOCKER_UID=$(UID) --build-arg DOCKER_GID=$(GID)
 
 # Build commands
 GO_BUILD_CMD := cd /home/build/NanoKVM/server && go mod tidy && CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build
@@ -58,7 +62,7 @@ check-image: check-root
 builder-image: check-root
 	@if ! docker image inspect $(IMAGE_NAME) >/dev/null 2>&1; then \
 		echo "Building Docker image..."; \
-		docker build -t $(IMAGE_NAME) -f docker/Dockerfile ./; \
+		docker build $(DOCKER_BUILD_ARGS) -t $(IMAGE_NAME) -f docker/Dockerfile ./; \
 	else \
 		echo "Docker image $(IMAGE_NAME) already exists."; \
 	fi
@@ -66,7 +70,7 @@ builder-image: check-root
 # Force rebuild Docker image
 rebuild-image: check-root
 	@echo "Force rebuilding Docker image..."
-	@docker build --no-cache -t $(IMAGE_NAME) -f docker/Dockerfile ./
+	@docker build --no-cache $(DOCKER_BUILD_ARGS) -t $(IMAGE_NAME) -f docker/Dockerfile ./
 
 # Enter interactive shell (equivalent to build.sh with no arguments)
 shell: check-root builder-image

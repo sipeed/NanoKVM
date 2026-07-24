@@ -6,7 +6,10 @@ RUN apt update \
     && apt install wget git cmake build-essential python3 python3-venv python3-pip autoconf automake libtool gosu -y
 
 ARG DOCKER_USER=build
-RUN useradd -m "$DOCKER_USER"
+ARG DOCKER_UID=1000
+ARG DOCKER_GID=1000
+RUN groupadd --gid "$DOCKER_GID" "$DOCKER_USER" \
+    && useradd --uid "$DOCKER_UID" --gid "$DOCKER_GID" --create-home --shell /bin/bash "$DOCKER_USER"
 USER $DOCKER_USER
 
 FROM base_apt AS host_tools
