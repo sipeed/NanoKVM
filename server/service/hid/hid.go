@@ -13,11 +13,13 @@ import (
 )
 
 type Hid struct {
-	g0         *os.File
-	g1         *os.File
-	g2         *os.File
-	kbMutex    sync.Mutex
-	mouseMutex sync.Mutex
+	g0                 *os.File
+	g0Reader           *os.File
+	g1                 *os.File
+	g2                 *os.File
+	kbMutex            sync.Mutex
+	mouseMutex         sync.Mutex
+	ledReaderStartOnce sync.Once
 }
 
 const (
@@ -124,6 +126,15 @@ func (h *Hid) OpenNoLock() error {
 		}
 	}
 
+	if h.g0 != nil {
+		if err := h.openKeyboardLedReaderNoLock(); err != nil {
+			log.Errorf("open keyboard LED reader failed: %s", err)
+			errs = append(errs, err)
+		} else {
+			h.startKeyboardLedReader()
+		}
+	}
+
 	return errors.Join(errs...)
 }
 
@@ -162,6 +173,8 @@ func openNoLockWithRetry(open func() error, timeout, delay time.Duration) error 
 }
 
 func (h *Hid) CloseNoLock() {
+	h.closeKeyboardLedReaderNoLock()
+
 	for _, device := range h.devices() {
 		h.closeDeviceNoLock(device)
 	}
@@ -190,6 +203,32 @@ func (h *Hid) closeDeviceNoLock(device hidDevice) {
 	device.set(nil)
 	if err := file.Close(); err != nil {
 		log.Debugf("close %s failed: %s", device.path, err)
+	}
+}
+
+func (h *Hid) openKeyboardLedReaderNoLock() error {
+	if h.g0Reader != nil {
+		return nil
+	}
+
+	file, err := os.OpenFile(HID0, os.O_RDONLY|syscall.O_NONBLOCK, 0o666)
+	if err != nil {
+		return fmt.Errorf("%s: %w", HID0, err)
+	}
+
+	h.g0Reader = file
+	return nil
+}
+
+func (h *Hid) closeKeyboardLedReaderNoLock() {
+	if h.g0Reader == nil {
+		return
+	}
+
+	file := h.g0Reader
+	h.g0Reader = nil
+	if err := file.Close(); err != nil {
+		log.Debugf("close keyboard LED reader failed: %s", err)
 	}
 }
 
@@ -302,6 +341,13 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 	if err := h.openDeviceNoLock(device); err != nil {
 		return err
 	}
+	if device.path == HID0 {
+		if err := h.openKeyboardLedReaderNoLock(); err != nil {
+			log.Debugf("open keyboard LED reader failed: %s", err)
+		} else {
+			h.startKeyboardLedReader()
+		}
+	}
 
 	file := device.get()
 	if file == nil {
@@ -314,6 +360,9 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 	}
 
 	if err := writeWithTimeout(file, data, hidWriteTimeout); err != nil {
+		if device.path == HID0 {
+			h.closeKeyboardLedReaderNoLock()
+		}
 		h.closeDeviceNoLock(device)
 		switch {
 		case errors.Is(err, os.ErrClosed):

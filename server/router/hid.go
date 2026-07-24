@@ -30,6 +30,7 @@ func hidRouter(r *gin.Engine) {
 	api.GET("/hid/mode", service.GetHidMode)  // get hid mode
 	api.POST("/hid/mode", service.SetHidMode) // set hid mode
 	api.POST("/hid/reset", service.ResetHid)  // reset hid
+	api.GET("/hid/leds", service.GetKeyboardLedStatus)
 
 	localAPI.POST("/usb/recover", service.RecoverUSB)
 }

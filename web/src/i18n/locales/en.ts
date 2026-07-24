@@ -331,6 +331,8 @@ const en = {
           modeOff: 'Off',
           modeAuto: 'Auto hide',
           modeAlways: 'Always visible',
+          keyboardLedStatus: 'Keyboard lock indicators',
+          keyboardLedStatusDesc: 'Display remote Num Lock, Caps Lock, and Scroll Lock status',
           icons: 'Submenu Icons',
           iconsDesc: 'Display submenu icons in the menu bar'
         }

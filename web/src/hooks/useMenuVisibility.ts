@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
-import { getMenuDisabledItems, getMenuDisplayMode } from '@/lib/localstorage.ts';
 import {
+  getKeyboardLedStatusVisible,
+  getMenuDisabledItems,
+  getMenuDisplayMode
+} from '@/lib/localstorage.ts';
+import {
+  keyboardLedStatusVisibleAtom,
   menuDisabledItemsAtom,
   menuDisplayModeAtom,
   submenuOpenCountAtom
@@ -23,6 +28,7 @@ export interface MenuVisibilityState {
 export function useMenuVisibility(): MenuVisibilityState {
   const [menuDisplayMode, setMenuDisplayMode] = useAtom(menuDisplayModeAtom);
   const setMenuDisabledItems = useSetAtom(menuDisabledItemsAtom);
+  const setKeyboardLedStatusVisible = useSetAtom(keyboardLedStatusVisibleAtom);
   const submenuOpenCount = useAtomValue(submenuOpenCountAtom);
 
   const [isMenuExpanded, setIsMenuExpanded] = useState(true);
@@ -61,6 +67,8 @@ export function useMenuVisibility(): MenuVisibilityState {
 
     const items = getMenuDisabledItems();
     setMenuDisabledItems(items);
+
+    setKeyboardLedStatusVisible(getKeyboardLedStatusVisible());
 
     if (displayMode === 'off') {
       setIsMenuExpanded(false);
