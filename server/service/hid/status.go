@@ -132,6 +132,15 @@ func ResetUSBPHY() error {
 	return nil
 }
 
+// CopyModeFile atomically replaces /etc/init.d/S03usbdev with the contents
+// of srcScript. Exposed so callers outside this package (e.g. the USB serial
+// toggle) can force a script swap without relying on the bcdDevice-based
+// mode detection, which is not reliable on all firmware (some kernels
+// default bcdDevice to 0x0623, the hid-only marker).
+func CopyModeFile(srcScript string) error {
+	return copyModeFile(srcScript)
+}
+
 func copyModeFile(srcScript string) error {
 	// open the source file
 	srcFile, err := os.Open(srcScript)
@@ -209,4 +218,32 @@ func GetMode() (string, error) {
 	}
 
 	return mode, nil
+}
+
+// CurrentMode reports the active HID mode ("normal" or "hid-only").
+func CurrentMode() (string, error) {
+	return getHidMode()
+}
+
+// SwitchMode swaps /etc/init.d/S03usbdev to the script for the requested mode
+// if it isn't already active. Returns true when the script was rewritten and
+// the caller must reboot for the change to take effect.
+func SwitchMode(mode string) (bool, error) {
+	if mode != ModeNormal && mode != ModeHidOnly {
+		return false, errors.New("invalid mode")
+	}
+
+	current, err := getHidMode()
+	if err == nil && current == mode {
+		return false, nil
+	}
+
+	srcScript := ModeNormalScript
+	if mode == ModeHidOnly {
+		srcScript = ModeHidOnlyScript
+	}
+	if err := copyModeFile(srcScript); err != nil {
+		return false, err
+	}
+	return true, nil
 }

@@ -237,7 +237,8 @@ const cz = {
       flowControlHard: 'Hardwarové',
       dataBits: 'Datové bity',
       stopBits: 'Stop bity',
-      confirm: 'OK'
+      confirm: 'OK',
+      usbSerial: '(USB CDC ACM)',
     },
     wol: {
       title: 'Wake-on-LAN',
@@ -372,6 +373,19 @@ const cz = {
         diskDesc: 'Mount virtual U-disk on the remote host',
         network: 'Virtuální síť',
         networkDesc: 'Připojit virtuální síťovou kartu na vzdáleném hostiteli',
+        usbSerial: 'USB Serial Console',
+        usbSerialDesc: 'Expose a USB CDC ACM serial port (/dev/ttyACM0) to the attached host. Implies HID-Only mode and disables the touchpad.',
+        usbSerialModal: {
+          title: 'USB Serial Console',
+          descEnable: 'Enable a CDC ACM virtual serial port so the attached host can use NanoKVM as an out-of-band serial console (e.g. OPNsense, FreeBSD, Linux).',
+          descDisable: 'Disable the USB serial console. The touchpad will be restored after reboot.',
+          tip1: 'Touchpad will be disabled (keyboard and mouse continue to work)',
+          tip2: 'Implies HID-Only mode: USB network gadget and mass storage become unavailable',
+          tip3: "NanoKVM's onboard ethernet, Wi-Fi, and web UI are unaffected",
+          tip4: 'NanoKVM will reboot to apply the change',
+          enable: 'Enable USB Serial Console',
+          disable: 'Disable USB Serial Console'
+        },
         reboot: 'Restartujte',
         rebootDesc: 'Opravdu chcete restartovat NanoKVM?',
         okBtn: 'Ano',

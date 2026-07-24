@@ -63,7 +63,7 @@ export const Terminal = () => {
       }
 
       ws.send(
-        `picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits}\r`
+        `picocom ${port} --baud ${baud} --parity ${parity} --flow ${flowControl} --databits ${dataBits} --stopbits ${stopBits} --imap lfcrlf --noreset\r`
       );
 
       isPicocomRunning = true;

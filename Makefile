@@ -6,11 +6,18 @@ UID := $(shell id -u)
 GID := $(shell id -g)
 PWD := $(shell pwd)
 
-# Docker run common parameters
-DOCKER_RUN_BASE := docker run -e UID=$(UID) -e GID=$(GID) -v $(PWD):/home/build/NanoKVM --rm
+# The host-tools toolchain is x86_64-only. Force linux/amd64 so the build
+# runs under QEMU emulation on arm64 hosts (Apple Silicon, arm64 Linux) and
+# directly on amd64 hosts.
+DOCKER_PLATFORM := --platform=linux/amd64
 
-# Build commands
-GO_BUILD_CMD := cd /home/build/NanoKVM/server && go mod tidy && CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build
+# Docker run common parameters
+DOCKER_RUN_BASE := docker run $(DOCKER_PLATFORM) -e UID=$(UID) -e GID=$(GID) -v $(PWD):/home/build/NanoKVM --rm
+
+# Build commands. Delegate the Go build to server/build.sh so the rpath
+# patchelf step and other post-build adjustments live in one place rather
+# than being duplicated between docker, build.sh, and the README.
+GO_BUILD_CMD := cd /home/build/NanoKVM/server && go mod tidy && ./build.sh
 SUPPORT_BUILD_CMD := . ./home/build/MaixCDK/bin/activate && cd /home/build/NanoKVM/support/sg2002 && ./build kvm_system && ./build kvm_system add_to_kvmapp
 
 .PHONY: help check-root builder-image rebuild-image check-image shell app support all clean
@@ -58,7 +65,7 @@ check-image: check-root
 builder-image: check-root
 	@if ! docker image inspect $(IMAGE_NAME) >/dev/null 2>&1; then \
 		echo "Building Docker image..."; \
-		docker build -t $(IMAGE_NAME) -f docker/Dockerfile ./; \
+		docker build $(DOCKER_PLATFORM) -t $(IMAGE_NAME) -f docker/Dockerfile ./; \
 	else \
 		echo "Docker image $(IMAGE_NAME) already exists."; \
 	fi
@@ -66,7 +73,7 @@ builder-image: check-root
 # Force rebuild Docker image
 rebuild-image: check-root
 	@echo "Force rebuilding Docker image..."
-	@docker build --no-cache -t $(IMAGE_NAME) -f docker/Dockerfile ./
+	@docker build $(DOCKER_PLATFORM) --no-cache -t $(IMAGE_NAME) -f docker/Dockerfile ./
 
 # Enter interactive shell (equivalent to build.sh with no arguments)
 shell: check-root builder-image
@@ -76,12 +83,12 @@ shell: check-root builder-image
 # Build Go application
 app: check-root builder-image
 	@echo "Building app..."
-	@$(DOCKER_RUN_BASE) -it $(IMAGE_NAME) /bin/bash -c '$(GO_BUILD_CMD)'
+	@$(DOCKER_RUN_BASE) $(IMAGE_NAME) /bin/bash -c '$(GO_BUILD_CMD)'
 
 # Build hardware support libraries
 support: check-root builder-image
 	@echo "Building support..."
-	@$(DOCKER_RUN_BASE) -it $(IMAGE_NAME) /bin/bash -c '$(SUPPORT_BUILD_CMD)'
+	@$(DOCKER_RUN_BASE) $(IMAGE_NAME) /bin/bash -c '$(SUPPORT_BUILD_CMD)'
 
 # Clean build artifacts
 clean:

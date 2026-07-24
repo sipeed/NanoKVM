@@ -4,6 +4,7 @@ import { useSetAtom } from 'jotai';
 import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { getVirtualDevice } from '@/api/virtual-device.ts';
 import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
 
 export const SerialPort = () => {
@@ -17,9 +18,22 @@ export const SerialPort = () => {
   const [flowControl, setFlowControl] = useState<string>('none');
   const [dataBits, setDataBits] = useState(8);
   const [stopBits, setStopBits] = useState(1);
+  const [isUsbSerialEnabled, setIsUsbSerialEnabled] = useState(false);
 
   function openModal() {
     setIsKeyboardEnable(false);
+
+    // Refresh USB serial availability each time the modal opens so the
+    // /dev/ttyGS0 option appears/disappears in step with the device toggle.
+    getVirtualDevice()
+      .then((rsp) => {
+        if (rsp.code === 0) {
+          setIsUsbSerialEnabled(!!rsp.data.serial);
+        }
+      })
+      .catch(() => {
+        // Treat the failure as "USB serial unavailable" — don't block opening.
+      });
 
     setIsModalOpen(true);
   }
@@ -83,6 +97,11 @@ export const SerialPort = () => {
             <Radio value="/dev/ttyS2">
               <code>/dev/ttyS2</code>
             </Radio>
+            {isUsbSerialEnabled && (
+              <Radio value="/dev/ttyGS0">
+                <code>/dev/ttyGS0</code> <span className="text-xs text-neutral-500">{t('terminal.usbSerial')}</span>
+              </Radio>
+            )}
           </Radio.Group>
         </div>
 

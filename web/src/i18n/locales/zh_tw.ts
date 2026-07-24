@@ -226,7 +226,8 @@ const zh_tw = {
       flowControlHard: '硬體',
       dataBits: '資料位元',
       stopBits: '停止位元',
-      confirm: '確定'
+      confirm: '確定',
+      usbSerial: '(USB CDC ACM)',
     },
     wol: {
       title: 'Wake-on-LAN',
@@ -361,6 +362,19 @@ const zh_tw = {
         diskDesc: '在遠端主機上連接虛擬隨身碟',
         network: '虛擬網卡',
         networkDesc: '在遠端主機上新增虛擬網卡',
+        usbSerial: 'USB Serial Console',
+        usbSerialDesc: 'Expose a USB CDC ACM serial port (/dev/ttyACM0) to the attached host. Implies HID-Only mode and disables the touchpad.',
+        usbSerialModal: {
+          title: 'USB Serial Console',
+          descEnable: 'Enable a CDC ACM virtual serial port so the attached host can use NanoKVM as an out-of-band serial console (e.g. OPNsense, FreeBSD, Linux).',
+          descDisable: 'Disable the USB serial console. The touchpad will be restored after reboot.',
+          tip1: 'Touchpad will be disabled (keyboard and mouse continue to work)',
+          tip2: 'Implies HID-Only mode: USB network gadget and mass storage become unavailable',
+          tip3: "NanoKVM's onboard ethernet, Wi-Fi, and web UI are unaffected",
+          tip4: 'NanoKVM will reboot to apply the change',
+          enable: 'Enable USB Serial Console',
+          disable: 'Disable USB Serial Console'
+        },
         reboot: '重新啟動',
         rebootDesc: '您確定要重新啟動 NanoKVM?',
         okBtn: '確定',

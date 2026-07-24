@@ -3,7 +3,7 @@ FROM ubuntu:24.04 AS base_apt
 # RUN echo 'Acquire::http::Proxy "http://cache.lan:3142";' > /etc/apt/apt.conf.d/00cacher
 RUN userdel -r ubuntu
 RUN apt update \
-    && apt install wget git cmake build-essential python3 python3-venv python3-pip autoconf automake libtool gosu -y
+    && apt install wget git cmake build-essential python3 python3-venv python3-pip autoconf automake libtool gosu patchelf -y
 
 ARG DOCKER_USER=build
 RUN useradd -m "$DOCKER_USER"
