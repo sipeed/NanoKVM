@@ -8,9 +8,19 @@ RUN apt update \
 ARG DOCKER_USER=build
 ARG DOCKER_UID=1000
 ARG DOCKER_GID=1000
-RUN groupadd --gid "$DOCKER_GID" "$DOCKER_USER" \
-    && useradd --uid "$DOCKER_UID" --gid "$DOCKER_GID" --create-home --shell /bin/bash "$DOCKER_USER"
-USER $DOCKER_USER
+# Reuse existing accounts for numeric IDs that are already present in the
+# base image. All later ownership and user switches use numeric IDs, so a
+# dedicated build user/group is only needed when the ID does not exist.
+RUN set -eux; \
+    if ! getent group "$DOCKER_GID" >/dev/null; then \
+        groupadd --gid "$DOCKER_GID" "$DOCKER_USER"; \
+    fi; \
+    if ! getent passwd "$DOCKER_UID" >/dev/null; then \
+        useradd --uid "$DOCKER_UID" --gid "$DOCKER_GID" --no-create-home \
+            --home-dir "/home/$DOCKER_USER" --shell /bin/bash "$DOCKER_USER"; \
+    fi; \
+    install -d -o "$DOCKER_UID" -g "$DOCKER_GID" "/home/$DOCKER_USER"
+USER $DOCKER_UID:$DOCKER_GID
 
 FROM base_apt AS host_tools
 
@@ -42,6 +52,8 @@ RUN cd /tmp/go_cache \
 
 FROM base_apt AS sdk
 
+ENV HOME="/home/$DOCKER_USER"
+
 RUN cd ~ \
     && git clone https://github.com/Sipeed/MaixCDK \
     && cd MaixCDK \
@@ -49,7 +61,7 @@ RUN cd ~ \
     && . ./bin/activate \
     && pip install -U -r requirements.txt 
 
-COPY --chown=$DOCKER_USER . /home/$DOCKER_USER/NanoKVM
+COPY --chown=$DOCKER_UID:$DOCKER_GID . /home/$DOCKER_USER/NanoKVM
 
 RUN cd ~/MaixCDK \
     && . ./bin/activate \
@@ -60,7 +72,7 @@ FROM base_apt
 
 # Install golang
 COPY --from=golang /usr/local/go /usr/local/go
-COPY --chown=$DOCKER_USER --from=golang /root/go /home/$DOCKER_USER/go
+COPY --chown=$DOCKER_UID:$DOCKER_GID --from=golang /root/go /home/$DOCKER_USER/go
 ENV PATH="$PATH:/usr/local/go/bin"
 
 # Install host tools
@@ -68,7 +80,7 @@ COPY --from=host_tools /usr/local/host-tools /usr/local/host-tools
 ENV PATH="$PATH:/usr/local/host-tools/gcc/riscv64-linux-musl-x86_64/bin"
 
 # Install SDK
-COPY --from=sdk /home/$DOCKER_USER/MaixCDK /home/$DOCKER_USER/MaixCDK
+COPY --chown=$DOCKER_UID:$DOCKER_GID --from=sdk /home/$DOCKER_USER/MaixCDK /home/$DOCKER_USER/MaixCDK
 COPY --chmod=+x docker/entrypoint /entrypoint
 
 RUN echo "Verify build tools" \
