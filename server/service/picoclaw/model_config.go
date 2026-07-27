@@ -64,10 +64,47 @@ func securityHasModelAPIKeys(security picoclawSecurityConfig, modelName string) 
 	return false
 }
 
+// ModelConfigResult is the redacted GET /model/config payload. It never returns
+// the API key — only whether one exists.
+type ModelConfigResult struct {
+	Provider           string           `json:"provider"`
+	ModelName          string           `json:"model_name"`
+	ModelIdentifier    string           `json:"model_identifier"`
+	APIBase            string           `json:"api_base"`
+	AuthMethod         string           `json:"auth_method"`
+	ModelConfigured    bool             `json:"model_configured"`
+	APIKeyConfigured   bool             `json:"api_key_configured"`
+	EndpointConfigured bool             `json:"endpoint_configured"`
+	OAuthAvailable     bool             `json:"oauth_available"`
+	OAuthAuthenticated bool             `json:"oauth_authenticated"`
+	AgentProfile       string           `json:"agent_profile"`
+	Providers          []providerPreset `json:"providers"`
+}
+
+func (s *Service) GetModelConfig(c *gin.Context) {
+	summary := computePicoclawModelSummary()
+	writeSuccess(c, ModelConfigResult{
+		Provider:           summary.Provider,
+		ModelName:          summary.ModelName,
+		ModelIdentifier:    summary.ModelIdentifier,
+		APIBase:            summary.APIBase,
+		AuthMethod:         summary.AuthMethod,
+		ModelConfigured:    summary.ModelConfigured,
+		APIKeyConfigured:   summary.APIKeyConfigured,
+		EndpointConfigured: summary.EndpointConfigured,
+		OAuthAvailable:     summary.OAuthAvailable,
+		OAuthAuthenticated: summary.OAuthAuthenticated,
+		AgentProfile:       detectPicoclawAgentProfile(),
+		Providers:          picoclawProviderCatalog,
+	})
+}
+
 type ModelConfigUpdateRequest struct {
-	Model   string `json:"model"`
-	APIBase string `json:"api_base"`
-	APIKey  string `json:"api_key"`
+	Provider   string `json:"provider"`
+	Model      string `json:"model"`
+	APIBase    string `json:"api_base"`
+	APIKey     string `json:"api_key"`
+	AuthMethod string `json:"auth_method"`
 }
 
 func (s *Service) UpdateModelConfig(c *gin.Context) {
@@ -80,13 +117,9 @@ func (s *Service) UpdateModelConfig(c *gin.Context) {
 	currentStatus := s.runtime.Get()
 	shouldRestart := currentStatus.Ready || currentStatus.Status == "ready"
 
-	modelName, err := updatePicoclawModelConfig(
-		strings.TrimSpace(req.APIBase),
-		strings.TrimSpace(req.APIKey),
-		strings.TrimSpace(req.Model),
-	)
-	if err != nil {
-		writePicoclawError(c, newPicoclawError(CodeRuntimeUnavailable, err.Error()))
+	modelName, saveErr := s.saveModelConfig(req)
+	if saveErr != nil {
+		writePicoclawError(c, saveErr)
 		return
 	}
 	if err := ensurePicoclawStartupDefaults(); err != nil {
@@ -110,26 +143,130 @@ func (s *Service) UpdateModelConfig(c *gin.Context) {
 
 	writeSuccess(c, gin.H{
 		"model_name": modelName,
-		"status":     s.runtime.Get(),
+		"status":     withModelMeta(withAgentProfile(s.runtime.Get())),
 	})
 }
 
-func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (string, error) {
-	if apiBase == "" {
-		return "", fmt.Errorf("model api_base is required")
-	}
-	if apiKey == "" {
-		return "", fmt.Errorf("model api_key is required")
-	}
+// saveModelConfig validates the provider/auth/model/endpoint combination and
+// persists it. API keys go only to .security.yml; OAuth/no-auth never write a
+// key. A non-secret sidecar records the chosen provider + auth method.
+func (s *Service) saveModelConfig(req ModelConfigUpdateRequest) (string, *PicoclawError) {
+	model := strings.TrimSpace(req.Model)
 	if model == "" {
-		return "", fmt.Errorf("model identifier is required")
+		return "", newPicoclawError(CodeInvalidAction, "model identifier is required")
 	}
 
-	modelName := extractPicoclawModelName(model)
+	providerID := strings.TrimSpace(strings.ToLower(req.Provider))
+	if providerID == "" {
+		providerID = inferProviderFromModel(model)
+	}
+	preset, ok := lookupProviderPreset(providerID)
+	if !ok {
+		return "", newPicoclawError(CodeInvalidAction, "unsupported provider: "+providerID)
+	}
+
+	authMethod := strings.TrimSpace(strings.ToLower(req.AuthMethod))
+	if authMethod == "" {
+		authMethod = authMethodAPIKey
+	}
+	if !providerAllowsAuthMethod(preset, authMethod) {
+		return "", newPicoclawError(CodeInvalidAction, fmt.Sprintf("provider %s does not support auth method %s", providerID, authMethod))
+	}
+
+	fullModel := buildModelIdentifier(preset, model)
+	modelName := extractPicoclawModelName(fullModel)
 	if modelName == "" {
-		return "", fmt.Errorf("model identifier is required")
+		return "", newPicoclawError(CodeInvalidAction, "model identifier is required")
 	}
 
+	apiBase := strings.TrimSpace(req.APIBase)
+	if apiBase == "" {
+		apiBase = preset.DefaultAPIBase
+	}
+	if apiBase == "" {
+		return "", newPicoclawError(CodeInvalidAction, "API base URL is required for provider "+providerID)
+	}
+
+	doc, err := loadPicoclawConfigDocument()
+	if err != nil {
+		return "", newPicoclawError(CodeRuntimeUnavailable, err.Error())
+	}
+	hasExistingKey := modelHasStoredKey(doc.config, doc.security, modelName)
+
+	apiKey := strings.TrimSpace(req.APIKey)
+	var keyAction modelKeyAction
+	switch authMethod {
+	case authMethodAPIKey:
+		switch {
+		case apiKey != "":
+			keyAction = keyActionSet
+		case hasExistingKey:
+			keyAction = keyActionKeep
+		default:
+			return "", newPicoclawError(CodeInvalidAction, "API key is required for API key authentication")
+		}
+	case authMethodOAuth:
+		capability := picoclawOAuthCapability()
+		if !capability.Available {
+			return "", newPicoclawError(CodeOAuthUnavailable, "OAuth is not available: "+capability.Reason)
+		}
+		if !isProviderOAuthAuthenticated(providerID) {
+			return "", newPicoclawError(CodeAuthFailed, "sign in with OAuth before saving (no authenticated session for "+providerID+")")
+		}
+		keyAction = keyActionClear
+	case authMethodNone:
+		keyAction = keyActionClear
+	default:
+		return "", newPicoclawError(CodeInvalidAction, "unsupported auth method: "+authMethod)
+	}
+
+	savedName, applyErr := applyPicoclawModelConfig(providerID, authMethod, fullModel, modelName, apiBase, apiKey, keyAction)
+	if applyErr != nil {
+		return "", newPicoclawError(CodeRuntimeUnavailable, applyErr.Error())
+	}
+	return savedName, nil
+}
+
+type modelKeyAction int
+
+const (
+	keyActionKeep modelKeyAction = iota
+	keyActionSet
+	keyActionClear
+)
+
+// deleteModelSecurityKeys removes every .security.yml model_list entry that the
+// readers (securityHasModelAPIKeys / resolveModelAPIKey) would treat as a key for
+// modelName — the bare name and any "<modelName>:<index>" form. Returns whether
+// anything was removed.
+func deleteModelSecurityKeys(security *picoclawSecurityConfig, modelName string) bool {
+	if security.ModelList == nil {
+		return false
+	}
+	prefix := modelName + ":"
+	changed := false
+	for key := range security.ModelList {
+		if key == modelName || strings.HasPrefix(key, prefix) {
+			delete(security.ModelList, key)
+			changed = true
+		}
+	}
+	return changed
+}
+
+func modelHasStoredKey(cfg picoclawConfigFile, security picoclawSecurityConfig, modelName string) bool {
+	if securityHasModelAPIKeys(security, modelName) {
+		return true
+	}
+	for _, model := range cfg.ModelList {
+		if strings.TrimSpace(model.ModelName) == modelName && configHasModelAPIKeys(model.APIKey, model.APIKeys) {
+			return true
+		}
+	}
+	return false
+}
+
+func applyPicoclawModelConfig(provider, authMethod, model, modelName, apiBase, apiKey string, keyAction modelKeyAction) (string, error) {
 	doc, err := loadPicoclawConfigDocument()
 	if err != nil {
 		return "", err
@@ -154,6 +291,7 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 		modelMap["model_name"] = modelName
 		modelMap["model"] = model
 		modelMap["api_base"] = apiBase
+		// API keys never live in config.json; they belong in .security.yml.
 		delete(modelMap, "api_key")
 		delete(modelMap, "api_keys")
 		modelUpdated = true
@@ -186,14 +324,38 @@ func updatePicoclawModelConfig(apiBase string, apiKey string, model string) (str
 	if err := doc.saveConfig(); err != nil {
 		return "", err
 	}
-	if doc.security.ModelList == nil {
-		doc.security.ModelList = map[string]picoclawModelSecurityEntry{}
-	}
+
 	securityModelName := indexedModelName(modelListValue, updatedModelIndex, modelName)
-	doc.security.ModelList[securityModelName] = picoclawModelSecurityEntry{
-		APIKeys: []string{apiKey},
+	switch keyAction {
+	case keyActionSet:
+		if doc.security.ModelList == nil {
+			doc.security.ModelList = map[string]picoclawModelSecurityEntry{}
+		}
+		// Drop any stale entries (bare or other indices) so exactly one canonical
+		// key remains and cannot be shadowed at read time.
+		deleteModelSecurityKeys(&doc.security, modelName)
+		doc.security.ModelList[securityModelName] = picoclawModelSecurityEntry{
+			APIKeys: []string{apiKey},
+		}
+		if err := doc.saveSecurity(); err != nil {
+			return "", err
+		}
+	case keyActionClear:
+		// Remove every key the readers would treat as live for this model.
+		if deleteModelSecurityKeys(&doc.security, modelName) {
+			if err := doc.saveSecurity(); err != nil {
+				return "", err
+			}
+		}
+	case keyActionKeep:
+		// Leave the existing stored key untouched.
 	}
-	if err := doc.saveSecurity(); err != nil {
+
+	if err := savePicoclawModelMeta(picoclawModelMeta{
+		Provider:   provider,
+		AuthMethod: authMethod,
+		ModelName:  modelName,
+	}); err != nil {
 		return "", err
 	}
 

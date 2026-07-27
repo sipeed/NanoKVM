@@ -50,20 +50,28 @@ type Config struct {
 }
 
 type RuntimeStatus struct {
-	Ready           bool      `json:"ready"`
-	Installed       bool      `json:"installed"`
-	Installing      bool      `json:"installing"`
-	InstallProgress int       `json:"install_progress,omitempty"`
-	InstallStage    string    `json:"install_stage,omitempty"`
-	InstallPath     string    `json:"install_path,omitempty"`
-	AgentProfile    string    `json:"agent_profile,omitempty"`
-	ModelConfigured bool      `json:"model_configured"`
-	ModelName       string    `json:"model_name,omitempty"`
-	Status          string    `json:"status"`
-	ConfigError     string    `json:"config_error,omitempty"`
-	LastError       string    `json:"last_error,omitempty"`
-	CheckedAt       time.Time `json:"checked_at,omitempty"`
-	CurrentSession  string    `json:"current_session,omitempty"`
+	Ready           bool   `json:"ready"`
+	Installed       bool   `json:"installed"`
+	Installing      bool   `json:"installing"`
+	InstallProgress int    `json:"install_progress,omitempty"`
+	InstallStage    string `json:"install_stage,omitempty"`
+	InstallPath     string `json:"install_path,omitempty"`
+	AgentProfile    string `json:"agent_profile,omitempty"`
+	ModelConfigured bool   `json:"model_configured"`
+	ModelName       string `json:"model_name,omitempty"`
+	// Provider/auth metadata derived for the Configure Model UI. None of these
+	// expose secrets — at most they report whether a credential exists.
+	Provider           string    `json:"provider,omitempty"`
+	AuthMethod         string    `json:"auth_method,omitempty"`
+	OAuthAvailable     bool      `json:"oauth_available"`
+	OAuthAuthenticated bool      `json:"oauth_authenticated"`
+	APIKeyConfigured   bool      `json:"api_key_configured"`
+	EndpointConfigured bool      `json:"endpoint_configured"`
+	Status             string    `json:"status"`
+	ConfigError        string    `json:"config_error,omitempty"`
+	LastError          string    `json:"last_error,omitempty"`
+	CheckedAt          time.Time `json:"checked_at,omitempty"`
+	CurrentSession     string    `json:"current_session,omitempty"`
 }
 
 type RuntimeStartResult struct {

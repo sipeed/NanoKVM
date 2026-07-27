@@ -47,15 +47,11 @@ export const useSidebar = () => {
     status: ''
   });
 
-  const [modelApiBase, setModelApiBase] = useState('');
-  const [modelApiKey, setModelApiKey] = useState('');
-  const [modelIdentifier, setModelIdentifier] = useState('');
   const [isInitializing, setIsInitializing] = useState(true);
   const [isModelConfigOpen, setIsModelConfigOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isInstallRequestPending, setIsInstallRequestPending] = useState(false);
   const [isUninstallRequestPending, setIsUninstallRequestPending] = useState(false);
-  const [isSavingModelConfig, setIsSavingModelConfig] = useState(false);
   const [isSwitchingAgent, setIsSwitchingAgent] = useState(false);
   const [isSwitchingSession, setIsSwitchingSession] = useState(false);
   const [isTogglingRuntime, setIsTogglingRuntime] = useState(false);
@@ -86,9 +82,6 @@ export const useSidebar = () => {
     runtimeStatus,
     transportState,
     installSnapshot,
-    modelApiBase,
-    modelApiKey,
-    modelIdentifier,
     setRuntimeStatus,
     setMessages,
     setTakeover,
@@ -99,7 +92,6 @@ export const useSidebar = () => {
     setIsTogglingRuntime,
     setIsInstallRequestPending,
     setInstallSnapshot,
-    setIsSavingModelConfig,
     setIsSwitchingAgent,
     setIsUninstallRequestPending
   });
@@ -186,16 +178,13 @@ export const useSidebar = () => {
     handleAgentProfileChange: actions.handleAgentProfileChange,
     handleCloseHistory: sessionActions.handleCloseHistory,
     handleDeleteHistorySession: sessionActions.handleDeleteHistorySession,
-    handleModelApiBaseChange: setModelApiBase,
-    handleModelApiKeyChange: setModelApiKey,
-    handleModelIdentifierChange: setModelIdentifier,
+    handleModelConfigSaved: actions.handleModelConfigSaved,
     handleNewConversation: sessionActions.handleNewConversation,
     handleOpenHistory: sessionActions.handleOpenHistory,
     handleOpenModelConfig: () => {
       setIsHistoryOpen(false);
       setIsModelConfigOpen(true);
     },
-    handleSaveModelConfig: actions.handleSaveModelConfig,
     handleSelectHistorySession: sessionActions.handleSelectHistorySession,
     historySessions,
     isDeletingSession,
@@ -208,13 +197,9 @@ export const useSidebar = () => {
     isUninstallingRuntime: isUninstallRequestPending,
     installProgress,
     installStage,
-    isSavingModelConfig,
     isSwitchingAgent,
     isTogglingRuntime,
     messages,
-    modelApiBase,
-    modelApiKey,
-    modelIdentifier,
     isModelConfigOpen,
     runState,
     runtimeStatus,

@@ -19,7 +19,7 @@ func (s *Service) StartRuntime(c *gin.Context) {
 		Started: true,
 		Command: command,
 		Output:  output,
-		Status:  s.runtime.Get(),
+		Status:  withModelMeta(withAgentProfile(s.runtime.Get())),
 	})
 }
 
@@ -34,7 +34,7 @@ func (s *Service) StopRuntime(c *gin.Context) {
 		Started: false,
 		Command: command,
 		Output:  output,
-		Status:  s.runtime.Get(),
+		Status:  withModelMeta(withAgentProfile(s.runtime.Get())),
 	})
 }
 
@@ -51,7 +51,7 @@ func (s *Service) InstallRuntime(c *gin.Context) {
 		Binary:    picoclawBinaryPath,
 		Download:  picoclawDownloadURL,
 		Output:    output,
-		Status:    currentStatus,
+		Status:    withModelMeta(withAgentProfile(currentStatus)),
 	})
 }
 
@@ -105,6 +105,6 @@ func (s *Service) UninstallRuntime(c *gin.Context) {
 		Binary:    picoclawBinaryPath,
 		Download:  picoclawDownloadURL,
 		Output:    uninstallOutput,
-		Status:    s.runtime.Get(),
+		Status:    withModelMeta(withAgentProfile(s.runtime.Get())),
 	})
 }

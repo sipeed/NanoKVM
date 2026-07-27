@@ -55,6 +55,7 @@ type picoclawConfigDocument struct {
 	config       picoclawConfigFile
 	raw          map[string]any
 	security     picoclawSecurityConfig
+	securityRaw  map[string]any
 }
 
 func loadPicoclawConfigDocument() (*picoclawConfigDocument, error) {
@@ -83,6 +84,10 @@ func loadPicoclawConfigDocument() (*picoclawConfigDocument, error) {
 	if err != nil {
 		return nil, err
 	}
+	securityRaw, err := loadPicoclawSecurityRaw(securityPath)
+	if err != nil {
+		return nil, err
+	}
 
 	return &picoclawConfigDocument{
 		configPath:   configPath,
@@ -90,7 +95,25 @@ func loadPicoclawConfigDocument() (*picoclawConfigDocument, error) {
 		config:       cfg,
 		raw:          raw,
 		security:     security,
+		securityRaw:  securityRaw,
 	}, nil
+}
+
+// loadPicoclawSecurityRaw reads .security.yml into an untyped map so unrelated
+// top-level sections survive a save. Returns nil (not an error) when absent.
+func loadPicoclawSecurityRaw(securityPath string) (map[string]any, error) {
+	data, err := os.ReadFile(securityPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to read picoclaw security config: %w", err)
+	}
+	var raw map[string]any
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("failed to parse picoclaw security config for update: %w", err)
+	}
+	return raw, nil
 }
 
 func resolvePicoclawConfigPath() (string, error) {
@@ -140,19 +163,63 @@ func (d *picoclawConfigDocument) saveConfig() error {
 }
 
 func (d *picoclawConfigDocument) saveSecurity() error {
-	var buf bytes.Buffer
-	encoder := yaml.NewEncoder(&buf)
-	encoder.SetIndent(2)
-	if err := encoder.Encode(d.security); err != nil {
-		return fmt.Errorf("failed to encode picoclaw security config: %w", err)
+	output, err := d.encodeSecurity()
+	if err != nil {
+		return err
 	}
-	if err := encoder.Close(); err != nil {
-		return fmt.Errorf("failed to finalize picoclaw security config: %w", err)
-	}
-	if err := os.WriteFile(d.securityPath, buf.Bytes(), 0o600); err != nil {
+	if err := os.WriteFile(d.securityPath, output, 0o600); err != nil {
 		return fmt.Errorf("failed to write picoclaw security config: %w", err)
 	}
 	return nil
+}
+
+// encodeSecurity serializes the security config while preserving any top-level
+// keys present in the original .security.yml that our typed view does not model.
+// The typed model_list/channel_list (the only sections we mutate) are written
+// back over the preserved raw map; an absent raw map falls back to the typed
+// struct (e.g. when the file did not previously exist).
+func (d *picoclawConfigDocument) encodeSecurity() ([]byte, error) {
+	if d.securityRaw == nil {
+		return marshalSecurityYAML(d.security)
+	}
+
+	typedMap, err := securityToMap(d.security)
+	if err != nil {
+		return nil, err
+	}
+	for _, key := range []string{"model_list", "channel_list"} {
+		if value, ok := typedMap[key]; ok {
+			d.securityRaw[key] = value
+		} else {
+			delete(d.securityRaw, key)
+		}
+	}
+	return marshalSecurityYAML(d.securityRaw)
+}
+
+func securityToMap(sec picoclawSecurityConfig) (map[string]any, error) {
+	data, err := yaml.Marshal(sec)
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode picoclaw security config: %w", err)
+	}
+	out := map[string]any{}
+	if err := yaml.Unmarshal(data, &out); err != nil {
+		return nil, fmt.Errorf("failed to normalize picoclaw security config: %w", err)
+	}
+	return out, nil
+}
+
+func marshalSecurityYAML(value any) ([]byte, error) {
+	var buf bytes.Buffer
+	encoder := yaml.NewEncoder(&buf)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(value); err != nil {
+		return nil, fmt.Errorf("failed to encode picoclaw security config: %w", err)
+	}
+	if err := encoder.Close(); err != nil {
+		return nil, fmt.Errorf("failed to finalize picoclaw security config: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 type picoclawSecurityConfig struct {

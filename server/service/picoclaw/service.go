@@ -78,7 +78,7 @@ func (s *Service) GetRuntimeStatus(c *gin.Context) {
 		})
 	}
 
-	writeSuccess(c, withAgentProfile(status))
+	writeSuccess(c, withModelMeta(withAgentProfile(status)))
 }
 
 func (s *Service) GetRuntimeSession(c *gin.Context) {

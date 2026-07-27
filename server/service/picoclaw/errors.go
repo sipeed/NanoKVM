@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	CodePicoclawLockHeld         = "AI_LOCK_HELD"
+	CodePicoclawLockHeld   = "AI_LOCK_HELD"
 	CodeScreenshotFailed   = "SCREENSHOT_FAILED"
 	CodeScreenshotNoSignal = "SCREENSHOT_NO_SIGNAL"
 	CodeHIDWriteFailed     = "HID_WRITE_FAILED"
@@ -16,6 +16,9 @@ const (
 	CodeRuntimeStartFailed = "RUNTIME_START_FAILED"
 	CodeSessionIDMissing   = "SESSION_ID_MISSING"
 	CodeSessionIDInvalid   = "SESSION_ID_INVALID"
+	CodeOAuthUnavailable   = "OAUTH_UNAVAILABLE"
+	CodeAuthFailed         = "AUTH_FAILED"
+	CodeModelTestFailed    = "MODEL_TEST_FAILED"
 )
 
 type PicoclawError struct {

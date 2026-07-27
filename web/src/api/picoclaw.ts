@@ -7,10 +7,26 @@ import {
 
 const sessionIDHeader = 'X-PicoClaw-Session-ID';
 
-type ModelConfigRequest = {
+export type ModelConfigRequest = {
+  provider?: string;
   model: string;
-  api_base: string;
-  api_key: string;
+  api_base?: string;
+  api_key?: string;
+  auth_method?: string;
+};
+
+export type ModelTestRequest = {
+  provider?: string;
+  model?: string;
+  api_base?: string;
+  api_key?: string;
+  auth_method?: string;
+};
+
+export type AuthCallbackRequest = {
+  provider: string;
+  code?: string;
+  state?: string;
 };
 
 type AgentProfileRequest = {
@@ -41,6 +57,30 @@ export type PicoclawSessionDetail = {
 
 export function setPicoclawModelConfig(data: ModelConfigRequest) {
   return http.post('/api/picoclaw/model/config', data);
+}
+
+export function getPicoclawModelConfig() {
+  return http.get('/api/picoclaw/model/config');
+}
+
+export function testPicoclawModel(data?: ModelTestRequest) {
+  return http.post('/api/picoclaw/model/test', data ?? {});
+}
+
+export function getPicoclawAuthStatus(provider: string) {
+  return http.get('/api/picoclaw/auth/status', { provider });
+}
+
+export function startPicoclawAuthLogin(provider: string) {
+  return http.post('/api/picoclaw/auth/login', { provider });
+}
+
+export function picoclawAuthCallback(data: AuthCallbackRequest) {
+  return http.post('/api/picoclaw/auth/callback', data);
+}
+
+export function picoclawAuthLogout(provider: string) {
+  return http.post('/api/picoclaw/auth/logout', { provider });
 }
 
 export function setPicoclawAgentProfile(data: AgentProfileRequest) {

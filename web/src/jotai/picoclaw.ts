@@ -16,11 +16,80 @@ export type PicoclawRuntimeStatus = {
   agent_profile?: string;
   model_configured: boolean;
   model_name?: string;
+  provider?: string;
+  auth_method?: string;
+  oauth_available?: boolean;
+  oauth_authenticated?: boolean;
+  api_key_configured?: boolean;
+  endpoint_configured?: boolean;
   status: string;
   config_error?: string;
   last_error?: string;
   checked_at?: string;
   current_session?: string;
+};
+
+export type PicoclawProviderPreset = {
+  id: string;
+  name: string;
+  model_prefix: string;
+  default_api_base?: string;
+  endpoint_required: boolean;
+  endpoint_editable: boolean;
+  auth_methods: string[];
+  models: string[];
+  supports_web_search_preview?: boolean;
+};
+
+export type PicoclawModelConfig = {
+  provider: string;
+  model_name: string;
+  model_identifier: string;
+  api_base: string;
+  auth_method: string;
+  model_configured: boolean;
+  api_key_configured: boolean;
+  endpoint_configured: boolean;
+  oauth_available: boolean;
+  oauth_authenticated: boolean;
+  agent_profile: string;
+  providers: PicoclawProviderPreset[];
+};
+
+export type PicoclawAuthStatus = {
+  provider: string;
+  available: boolean;
+  authenticated: boolean;
+  status?: string;
+  login_url?: string;
+  user_code?: string;
+  account?: string;
+  expires_at?: string;
+  error?: string;
+  unavailable_reason?: string;
+  missing_command?: string;
+};
+
+export type PicoclawAuthLogin = {
+  provider: string;
+  available: boolean;
+  status: string;
+  login_url?: string;
+  user_code?: string;
+  verification_uri?: string;
+  state?: string;
+  expires_in?: number;
+  requires_code?: boolean;
+  unavailable_reason?: string;
+  missing_command?: string;
+};
+
+export type PicoclawModelTestResult = {
+  ok: boolean;
+  outcome: string;
+  reply?: string;
+  status_code?: number;
+  log_ref?: string;
 };
 
 export type PicoclawRuntimeStartResult = {

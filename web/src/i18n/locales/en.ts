@@ -571,20 +571,98 @@ const en = {
       model: {
         requiredTitle: 'Model configuration is required',
         requiredDescription: 'Configure the PicoClaw model before using PicoClaw chat.',
+        configureTitle: 'Configure Model',
+        configureDescription:
+          'Choose a provider, model, and authentication for the PicoClaw runtime.',
         docsTitle: 'Configuration Guide',
         docsDesc: 'Supported models and protocols',
         menuLabel: 'Configure model',
-        modelIdentifier: 'Model Identifier',
-        modelIdentifierPlaceholder: 'openai/gpt-5.4',
+        provider: 'Provider',
+        authMethod: 'Authentication',
+        modelIdentifier: 'Model',
+        modelIdentifierPlaceholder: 'e.g. gemini-3.1-flash-lite',
+        custom: 'Custom model…',
+        advanced: 'Advanced: custom base URL',
         apiBase: 'API Base URL',
         apiBasePlaceholder: 'https://api.example.com/v1',
         apiKey: 'API Key',
         apiKeyPlaceholder: 'Enter the model API key',
+        apiKeyKeep: '•••••••• (configured — leave blank to keep)',
         save: 'Save',
         saving: 'Saving',
         saved: 'Model configuration saved',
         saveFailed: 'Failed to save model configuration',
-        invalid: 'Model identifier, API base URL, and API key are required'
+        invalid: 'Model identifier, API base URL, and API key are required',
+        auth: {
+          apiKey: 'API key',
+          oauth: 'OAuth / ChatGPT subscription',
+          none: 'No auth (local endpoint)',
+          apiKeyHint: 'Uses pay-as-you-go API billing for the provider.',
+          oauthHint: 'Uses your ChatGPT/Codex subscription plan limits — not API billing.',
+          noneHint: 'No credentials are sent. For local endpoints only.'
+        },
+        oauth: {
+          unavailableTitle: 'OAuth is unavailable',
+          missing: 'Missing backend command:',
+          signedInAs: 'Signed in',
+          signOut: 'Sign out',
+          headlessHint:
+            'Start login, then open the URL on another device to authorize. NanoKVM has no browser of its own.',
+          memoryHint:
+            'NanoKVM briefly stops only the PicoClaw runtime during login to save memory, then restarts it.',
+          start: 'Start OAuth Login',
+          openUrl: 'Open this URL to sign in:',
+          code: 'Code:',
+          pasteCode: 'Paste verification code',
+          submit: 'Submit',
+          waiting: 'Waiting for authorization…',
+          checkNow: 'Check now',
+          failed: 'OAuth login failed. Please try again.'
+        },
+        test: {
+          button: 'Test Model',
+          success: 'Success — model replied: {{reply}}',
+          auth: 'Authentication failed. Check your API key or OAuth login.',
+          model: 'Model not found or invalid for this provider.',
+          endpoint: 'The base URL is invalid or unreachable.',
+          network: 'Network error reaching the provider.',
+          parser: 'Got a response but could not parse the model output (possible streaming/parser issue).',
+          unsupported: 'The provider rejected an unsupported request or tool type.',
+          oauthNotTestable:
+            'OAuth setups are handled by the PicoClaw runtime and cannot be tested directly from NanoKVM. Start the runtime and send a chat message instead.',
+          notConfigured: 'No model configured to test.',
+          unknown: 'Unknown error.'
+        },
+        capability: {
+          webSearchSupported: 'Built-in web search (web_search_preview) is supported by this provider.',
+          webSearchUnsupported: 'Built-in web search (web_search_preview) is not available for this provider.'
+        },
+        err: {
+          modelRequired: 'Enter a model name.',
+          endpointRequired: 'A base URL is required for this provider.',
+          keyRequired: 'An API key is required for API key auth.',
+          oauthRequired: 'Sign in with OAuth before saving.'
+        }
+      },
+      badge: {
+        installed: 'Installed',
+        runtime: 'Runtime',
+        model: 'Model',
+        provider: 'Provider',
+        auth: 'Auth',
+        apiKey: 'API key',
+        endpoint: 'Endpoint',
+        oauth: 'OAuth',
+        checked: 'Checked',
+        yes: 'Yes',
+        no: 'No',
+        ready: 'Ready',
+        notReady: 'Not ready',
+        set: 'Set',
+        missing: 'Missing',
+        unavailable: 'Unavailable',
+        signedIn: 'Signed in',
+        signedOut: 'Signed out'
       },
       uninstall: {
         menuLabel: 'Uninstall',

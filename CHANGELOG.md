@@ -1,3 +1,16 @@
+## Unreleased
+
+### Features
+
+* Reworked the PicoClaw "Configure Model" screen into a full provider/model/auth configuration UI: provider presets (OpenAI/Codex, Anthropic, Google Gemini, OpenAI-compatible, local LM Studio/Ollama, custom), per-provider model presets with custom entry, API-key / OAuth / no-auth methods, optional base URL, status badges, and a "Test Model" connection check with classified results
+* Added OpenAI/Codex OAuth as a first-class auth option driven by PicoClaw's native device-code flow (`picoclaw auth login --provider openai --device-code`): NanoKVM shows the verification URL and code for the user to authorize on another device, polls until authenticated, stops only the PicoClaw runtime during login to reduce peak memory, and restores the previously-selected default model afterwards
+* Extended the PicoClaw runtime status with `provider`, `auth_method`, `oauth_available`, `oauth_authenticated`, `api_key_configured`, and `endpoint_configured` (no secrets exposed)
+* Added `GET /api/picoclaw/model/config`, `POST /api/picoclaw/model/test`, and `GET/POST /api/picoclaw/auth/{status,login,logout,callback}` routes
+
+### Bug Fixes
+
+* PicoClaw API keys are written only to `.security.yml` (0600) and never returned in API responses or logs; OAuth tokens are kept inside the PicoClaw binary and never exposed to the frontend
+
 ## 2.4.3 (2026-06-09)
 
 ### Features

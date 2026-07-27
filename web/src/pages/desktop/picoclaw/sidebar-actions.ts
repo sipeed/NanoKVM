@@ -8,7 +8,6 @@ import {
   installRuntime,
   picoclawGateway,
   setPicoclawAgentProfile,
-  setPicoclawModelConfig,
   startRuntime,
   stopRuntime,
   uninstallRuntime
@@ -38,9 +37,6 @@ type PicoclawSidebarActionOptions = {
   runtimeStatus: PicoclawRuntimeStatus | null;
   transportState: PicoclawTransportState;
   installSnapshot: PicoclawRuntimeInstallSnapshot | null;
-  modelApiBase: string;
-  modelApiKey: string;
-  modelIdentifier: string;
   setRuntimeStatus: RuntimeStatusSetter;
   setMessages: MessageSetter;
   setTakeover: TakeoverSetter;
@@ -51,7 +47,6 @@ type PicoclawSidebarActionOptions = {
   setIsTogglingRuntime: Dispatch<SetStateAction<boolean>>;
   setIsInstallRequestPending: Dispatch<SetStateAction<boolean>>;
   setInstallSnapshot: Dispatch<SetStateAction<PicoclawRuntimeInstallSnapshot | null>>;
-  setIsSavingModelConfig: Dispatch<SetStateAction<boolean>>;
   setIsSwitchingAgent: Dispatch<SetStateAction<boolean>>;
   setIsUninstallRequestPending: Dispatch<SetStateAction<boolean>>;
 };
@@ -62,9 +57,6 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     runtimeStatus,
     transportState,
     installSnapshot,
-    modelApiBase,
-    modelApiKey,
-    modelIdentifier,
     setRuntimeStatus,
     setMessages,
     setTakeover,
@@ -75,7 +67,6 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     setIsTogglingRuntime,
     setIsInstallRequestPending,
     setInstallSnapshot,
-    setIsSavingModelConfig,
     setIsSwitchingAgent,
     setIsUninstallRequestPending
   } = options;
@@ -293,60 +284,23 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     }
   }
 
-  async function handleSaveModelConfig() {
-    const apiBase = modelApiBase.trim();
-    const apiKey = modelApiKey.trim();
-    const model = modelIdentifier.trim();
-    if (!apiBase || !apiKey || !model) {
-      setMessages((current) => [
-        ...current,
-        createErrorMessage({
-          code: 'MODEL_CONFIG_INVALID',
-          message: t('picoclaw.model.invalid')
-        })
-      ]);
-      return;
+  // Called by the Configure Model modal after it persists a config itself. The
+  // modal owns validation, the API call, and error display; here we only update
+  // shared sidebar state and (re)connect when the runtime is ready.
+  async function handleModelConfigSaved(status: PicoclawRuntimeStatus | null) {
+    if (status) {
+      setRuntimeStatus(status);
     }
+    setIsModelConfigOpen(false);
+    setMessages((current) => [...current, createStatusMessage(t('picoclaw.model.saved'))]);
 
-    setIsSavingModelConfig(true);
-    try {
-      const response = await setPicoclawModelConfig({
-        model,
-        api_base: apiBase,
-        api_key: apiKey
-      });
-      if (response.code === 0) {
-        setRuntimeStatus(response.data.status);
-        setIsModelConfigOpen(false);
-        setMessages((current) => [...current, createStatusMessage(t('picoclaw.model.saved'))]);
-        await refreshState();
-        return;
+    const latest = await refreshState();
+    if (latest?.ready === true && transportState !== 'connected') {
+      try {
+        await connectGateway();
+      } catch {
+        // handled by gateway events
       }
-
-      const errorMessage =
-        (response as { message?: string; msg?: string }).message ||
-        (response as { message?: string; msg?: string }).msg ||
-        t('picoclaw.model.saveFailed');
-      setMessages((current) => [
-        ...current,
-        createErrorMessage({
-          code: 'MODEL_CONFIG_SAVE_FAILED',
-          message: errorMessage,
-          raw: response
-        })
-      ]);
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t('picoclaw.model.saveFailed');
-      setMessages((current) => [
-        ...current,
-        createErrorMessage({
-          code: 'MODEL_CONFIG_SAVE_FAILED',
-          message: errorMessage,
-          raw: error
-        })
-      ]);
-    } finally {
-      setIsSavingModelConfig(false);
     }
   }
 
@@ -449,7 +403,7 @@ export function createPicoclawSidebarActions(options: PicoclawSidebarActionOptio
     refreshState,
     handleStartRuntime,
     handleInstallRuntime,
-    handleSaveModelConfig,
+    handleModelConfigSaved,
     handleAgentProfileChange,
     handleUninstallRuntime
   };

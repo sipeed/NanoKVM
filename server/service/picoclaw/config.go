@@ -148,7 +148,15 @@ func loadPicoclawGatewaySettings() (picoclawGatewaySettings, error) {
 	}
 	settings.TargetModelName = resolvePicoclawTargetModelName(cfg)
 
-	if isPicoclawModelConfigured(cfg, doc.security, settings.TargetModelName) {
+	meta := loadPicoclawModelMeta()
+	provider := meta.Provider
+	if provider == "" {
+		provider = inferProviderFromModel(modelIdentifierForName(cfg, settings.TargetModelName))
+	}
+	oauthAuthenticated := isProviderOAuthAuthenticated(provider)
+	apiKeyConfigured := modelHasStoredKey(cfg, doc.security, settings.TargetModelName)
+	authMethod := resolvePicoclawEffectiveAuthMethod(meta, settings.TargetModelName, apiKeyConfigured, oauthAuthenticated)
+	if isPicoclawModelConfiguredWithAuth(cfg, doc.security, settings.TargetModelName, authMethod, oauthAuthenticated) {
 		settings.ModelConfigured = true
 		settings.ModelName = settings.TargetModelName
 	}

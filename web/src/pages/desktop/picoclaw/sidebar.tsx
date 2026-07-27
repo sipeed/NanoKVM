@@ -24,13 +24,10 @@ export const Sidebar = () => {
     handleAgentProfileChange,
     handleCloseHistory,
     handleDeleteHistorySession,
-    handleModelApiBaseChange,
-    handleModelApiKeyChange,
-    handleModelIdentifierChange,
+    handleModelConfigSaved,
     handleNewConversation,
     handleOpenHistory,
     handleOpenModelConfig,
-    handleSaveModelConfig,
     handleSelectHistorySession,
     historySessions,
     activeSessionId,
@@ -42,11 +39,7 @@ export const Sidebar = () => {
     isSwitchingSession,
     installProgress,
     installStage,
-    isSavingModelConfig,
     isSwitchingAgent,
-    modelApiBase,
-    modelApiKey,
-    modelIdentifier,
     isModelConfigOpen,
     runState,
     transportState,
@@ -102,15 +95,8 @@ export const Sidebar = () => {
           />
         ) : sidebarMode === 'model' ? (
           <SidebarModelConfig
-            apiBase={modelApiBase}
-            apiKey={modelApiKey}
-            isSaving={isSavingModelConfig}
-            modelIdentifier={modelIdentifier}
-            modelName={runtimeStatus?.model_name}
-            onApiBaseChange={handleModelApiBaseChange}
-            onApiKeyChange={handleModelApiKeyChange}
-            onModelIdentifierChange={handleModelIdentifierChange}
-            onSave={handleSaveModelConfig}
+            runtimeStatus={runtimeStatus}
+            onSaved={handleModelConfigSaved}
             onCancel={handleCancelModelConfig}
             showCancel={isModelConfigOpen}
           />
