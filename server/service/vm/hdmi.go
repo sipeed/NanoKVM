@@ -14,11 +14,9 @@ import (
 func (s *Service) ResetHdmi(c *gin.Context) {
 	var rsp proto.Response
 
-	vision := common.GetKvmVision()
-
-	vision.SetHDMI(false)
+	DisableHdmiCapture()
 	time.Sleep(1 * time.Second)
-	vision.SetHDMI(true)
+	EnableHdmiCapture()
 	utils.PersistHDMIEnabled()
 
 	rsp.OkRsp(c)
@@ -28,9 +26,7 @@ func (s *Service) ResetHdmi(c *gin.Context) {
 func (s *Service) EnableHdmi(c *gin.Context) {
 	var rsp proto.Response
 
-	vision := common.GetKvmVision()
-
-	vision.SetHDMI(true)
+	EnableHdmiCapture()
 	utils.PersistHDMIEnabled()
 
 	rsp.OkRsp(c)
@@ -40,9 +36,7 @@ func (s *Service) EnableHdmi(c *gin.Context) {
 func (s *Service) DisableHdmi(c *gin.Context) {
 	var rsp proto.Response
 
-	vision := common.GetKvmVision()
-
-	vision.SetHDMI(false)
+	DisableHdmiCapture()
 	utils.PersistHDMIDisabled()
 
 	rsp.OkRsp(c)
@@ -57,4 +51,12 @@ func (s *Service) GetHdmiState(c *gin.Context) {
 	})
 
 	log.Debug("get hdmi state")
+}
+
+func EnableHdmiCapture() {
+	common.GetKvmVision().SetHDMI(true)
+}
+
+func DisableHdmiCapture() {
+	common.GetKvmVision().SetHDMI(false)
 }
