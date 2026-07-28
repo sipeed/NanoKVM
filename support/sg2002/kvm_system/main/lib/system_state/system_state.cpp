@@ -237,24 +237,24 @@ void kvm_update_usb_state()
 void kvm_update_hdmi_state()
 {
 	static uint8_t check_times = 4;
-	FILE *fp;
-	int file_size;
-	uint8_t RW_Data[10];
 	if(++check_times > 5){
 		check_times = 0;
-		fp = popen("cat /proc/cvitek/vi_dbg | grep VIFPS | awk '{print $3}'", "r");
+		FILE *fp = fopen("/proc/cvitek/vi_dbg", "r");
 		if (fp == NULL) {
-			pclose(fp);
 			return;
 		}
-		fgets((char*)RW_Data, 2, fp);
-		pclose(fp);
-		// printf("[kvmd]HDMI exist? %c\n", RW_Data[0]);
-		if (RW_Data[0] != '0'){
-			kvm_sys_state.hdmi_state = 1;
-		} else {
-			kvm_sys_state.hdmi_state = 0;
+
+		char line[256];
+		char field[32];
+		unsigned int value;
+		while (fgets(line, sizeof(line), fp) != NULL) {
+			if (sscanf(line, "%31s : %u", field, &value) == 2 &&
+				strcmp(field, "VIFPS") == 0) {
+				kvm_sys_state.hdmi_state = value == 0 ? 0 : 1;
+				break;
+			}
 		}
+		fclose(fp);
 	}
 }
 

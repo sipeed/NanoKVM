@@ -216,54 +216,58 @@ void write_res_to_file(uint16_t _width, uint16_t _height)
  */
 uint8_t get_vi_state()
 {
-	char VI_State[10]={0};
-	char cmd[100] = "cat /proc/cvitek/vi_dbg | grep -A 17 VIDevFPS | awk '{print $3}'";
-	uint8_t FPS[2];
-	uint8_t VIWHGTLSCnt[4];
-	FILE* fp = popen( cmd, "r" );
-    uint8_t ret = 0;
+	FILE *fp = fopen("/proc/cvitek/vi_dbg", "r");
+	if (fp == NULL) {
+		return 0;
+	}
 
-	if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-		FPS[0] = atoi(VI_State);
-		// debug("VIDevFPS = %d\n", FPS[0]);
-	} else {
-		pclose(fp);
-		return ret;	// VI not init;
+	unsigned int dev_fps = 0;
+	unsigned int fps = 0;
+	unsigned int width_gt = 0;
+	unsigned int width_ls = 0;
+	unsigned int height_gt = 0;
+	unsigned int height_ls = 0;
+	bool have_dev_fps = false;
+	bool have_fps = false;
+	char line[256];
+	char field[32];
+	unsigned int value;
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		if (sscanf(line, "%31s : %u", field, &value) != 2) {
+			continue;
+		}
+		if (strcmp(field, "VIDevFPS") == 0) {
+			dev_fps = value;
+			have_dev_fps = true;
+		} else if (strcmp(field, "VIFPS") == 0) {
+			fps = value;
+			have_fps = true;
+		} else if (strcmp(field, "VICsiCh0WidthGTCnt") == 0) {
+			width_gt = value;
+		} else if (strcmp(field, "VICsiCh0WidthLSCnt") == 0) {
+			width_ls = value;
+		} else if (strcmp(field, "VICsiCh0HeightGTCnt") == 0) {
+			height_gt = value;
+		} else if (strcmp(field, "VICsiCh0HeightLSCnt") == 0) {
+			height_ls = value;
+		}
 	}
-	if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-		FPS[1] = atoi(VI_State);
-		// debug("VIFPS = %d\n", FPS[1]);
-	}
-	if (FPS[0] == 0){
-		ret = 2;	// HDMI not OK;
-	} else if (FPS[1] == 0){
-		ret = 3;	// HDMI OK ; CSI not;
-	} else {
-		ret = 1;	// HDMI CSI OK;
-	}
-    if(ret == 3){
-        // Ignore other information
-        uint8_t count = 0;
-        for(count = 0; count < 13; count ++){
-            fgets(VI_State, sizeof(VI_State), fp);
-        }
-        // Check if the resolution might be set incorrectly
-        for(count = 0; count < 4; count ++){
-            if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-                // debug("VI_State = %s", VI_State);
-                VIWHGTLSCnt[count] = atoi(VI_State);
-                // printf("count = %d, val = %d\n", count, atoi(VI_State));
-            }
-        }
+	fclose(fp);
 
-        if(VIWHGTLSCnt[0] != 0) ret = 3;      // The vi width setting value is too small
-        else if(VIWHGTLSCnt[1] != 0) ret = 4; // The vi width setting value is too large
-        else if(VIWHGTLSCnt[2] != 0) ret = 5; // The vi height setting value is too small
-        else if(VIWHGTLSCnt[3] != 0) ret = 6; // The vi height setting value is too large
-        else ret = 7; // printf("[kvmv] Unexpected situation\n");
-    }
-	pclose(fp);
-    return ret;
+	if (!have_dev_fps || !have_fps) {
+		return 0;
+	}
+	if (dev_fps == 0) {
+		return 2;
+	}
+	if (fps != 0) {
+		return 1;
+	}
+	if (width_gt != 0) return 3;
+	if (width_ls != 0) return 4;
+	if (height_gt != 0) return 5;
+	if (height_ls != 0) return 6;
+	return 7;
 }
 
 int set_hdmi_mode(uint8_t _hdmi_mode)
