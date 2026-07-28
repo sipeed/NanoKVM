@@ -1,5 +1,6 @@
 #include "config.h"
 #include "system_state.h"
+#include "internal/vi_state_shared.hpp"
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -239,22 +240,10 @@ void kvm_update_hdmi_state()
 	static uint8_t check_times = 4;
 	if(++check_times > 5){
 		check_times = 0;
-		FILE *fp = fopen("/proc/cvitek/vi_dbg", "r");
-		if (fp == NULL) {
-			return;
+		vi_state_shared::State state;
+		if (vi_state_shared::read(&state, 3000U)) {
+			kvm_sys_state.hdmi_state = state.fps == 0 ? 0 : 1;
 		}
-
-		char line[256];
-		char field[32];
-		unsigned int value;
-		while (fgets(line, sizeof(line), fp) != NULL) {
-			if (sscanf(line, "%31s : %u", field, &value) == 2 &&
-				strcmp(field, "VIFPS") == 0) {
-				kvm_sys_state.hdmi_state = value == 0 ? 0 : 1;
-				break;
-			}
-		}
-		fclose(fp);
 	}
 }
 
