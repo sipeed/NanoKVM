@@ -10,6 +10,7 @@
  * // free 错内存时会炸的问题
  */
 #include "kvm_vision.h"
+#include "internal/vi_state_shared.hpp"
 
 #define default_venc_chn        1
 
@@ -205,71 +206,6 @@ void write_res_to_file(uint16_t _width, uint16_t _height)
     system("sync");
 }
 
-/* return 0 : VI not init;
- * return 1 : HDMI and CSI status are normal;
- * return 2 : HDMI abnormal;
- * return 3 : CSI abnormal: width too small;
- * return 4 : CSI abnormal: width too large;
- * return 5 : CSI abnormal: height too small;
- * return 6 : CSI abnormal: height too large;
- * return 7 : CSI abnormal: Unknown reason;
- */
-uint8_t get_vi_state()
-{
-	FILE *fp = fopen("/proc/cvitek/vi_dbg", "r");
-	if (fp == NULL) {
-		return 0;
-	}
-
-	unsigned int dev_fps = 0;
-	unsigned int fps = 0;
-	unsigned int width_gt = 0;
-	unsigned int width_ls = 0;
-	unsigned int height_gt = 0;
-	unsigned int height_ls = 0;
-	bool have_dev_fps = false;
-	bool have_fps = false;
-	char line[256];
-	char field[32];
-	unsigned int value;
-	while (fgets(line, sizeof(line), fp) != NULL) {
-		if (sscanf(line, "%31s : %u", field, &value) != 2) {
-			continue;
-		}
-		if (strcmp(field, "VIDevFPS") == 0) {
-			dev_fps = value;
-			have_dev_fps = true;
-		} else if (strcmp(field, "VIFPS") == 0) {
-			fps = value;
-			have_fps = true;
-		} else if (strcmp(field, "VICsiCh0WidthGTCnt") == 0) {
-			width_gt = value;
-		} else if (strcmp(field, "VICsiCh0WidthLSCnt") == 0) {
-			width_ls = value;
-		} else if (strcmp(field, "VICsiCh0HeightGTCnt") == 0) {
-			height_gt = value;
-		} else if (strcmp(field, "VICsiCh0HeightLSCnt") == 0) {
-			height_ls = value;
-		}
-	}
-	fclose(fp);
-
-	if (!have_dev_fps || !have_fps) {
-		return 0;
-	}
-	if (dev_fps == 0) {
-		return 2;
-	}
-	if (fps != 0) {
-		return 1;
-	}
-	if (width_gt != 0) return 3;
-	if (width_ls != 0) return 4;
-	if (height_gt != 0) return 5;
-	if (height_ls != 0) return 6;
-	return 7;
-}
-
 int set_hdmi_mode(uint8_t _hdmi_mode)
 {
     if(_hdmi_mode >= 0 && _hdmi_mode <= 2){
@@ -418,7 +354,7 @@ uint8_t auto_try_res()
     uint8_t auto_trying_times = 0;
 
     for (auto_trying_times = 0; auto_trying_times < sizeof(hdmi_res_list)/4; auto_trying_times++){
-        err_code = get_vi_state();
+        err_code = vi_state_shared::refresh();
         switch(err_code){
         case 0:
             // shouldn't be possible to run here
@@ -457,8 +393,8 @@ uint8_t auto_try_res()
             break;
         }
     }
-    if (get_vi_state() == 1) return 1;
-    if (get_vi_state() == 2) return 2;
+    if (vi_state_shared::refresh() == 1) return 1;
+    if (vi_state_shared::refresh() == 2) return 2;
     else return 0;
 }
 
@@ -1158,6 +1094,7 @@ void* vi_subsystem_detection(void * arg)
 
     // while(!app::need_exit())
     uint8_t while_count_detect_res = 0;
+    uint8_t while_count_publish_vi_state = 0;
     while(true)
     {
         if(kvmv_cfg.try_exit_thread == 1)
@@ -1169,6 +1106,10 @@ void* vi_subsystem_detection(void * arg)
 
         switch (kvmv_cfg.hdmi_mode){
         case 0:
+            while_count_publish_vi_state = (while_count_publish_vi_state + 1)%100;
+            if (while_count_publish_vi_state == 1) {
+                vi_state_shared::refresh();
+            }
             // Switching to Mode 0 requires restarting HDMI (effective only for PCIe version)
             // Handling of automatic detection situations
             if(get_new_hdmi_mode == 1){
@@ -1324,7 +1265,7 @@ void* vi_subsystem_detection(void * arg)
             } else if (kvmv_cfg.vi_detect_state == 2){
                 // Low-frequency detection of HDMI status, no log output
                 printf("[kvmv] kvmv_cfg.vi_detect_state == 2\n");
-                err_code = get_vi_state();
+                err_code = vi_state_shared::refresh();
                 if (err_code != 1) {
                     kvmv_cfg.vi_detect_state = 1;
                 }
@@ -1345,7 +1286,7 @@ void* vi_subsystem_detection(void * arg)
                     }
 
                     // dbg info
-                    err_code = get_vi_state();
+                    err_code = vi_state_shared::refresh();
                     switch(err_code){
                     case 0:
                         debug("[kvmv] VI not init\n");
@@ -1375,7 +1316,7 @@ void* vi_subsystem_detection(void * arg)
                     }
                 } else if (kvmv_cfg.vi_detect_state == 2){
                     // detection of HDMI status, no log output
-                    err_code = get_vi_state();
+                    err_code = vi_state_shared::refresh();
                     if (err_code != 1) kvmv_cfg.vi_detect_state = 1;
                 } else {
                     kvmv_cfg.vi_detect_state = 1;
