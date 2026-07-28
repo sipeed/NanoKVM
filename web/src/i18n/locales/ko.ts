@@ -367,7 +367,10 @@ const ko = {
           tip: '사용하지 않는 경우 끄는 것이 좋습니다'
         },
         hdmi: {
-          description: 'HDMI/모니터 출력 활성화'
+          description: 'HDMI/모니터 출력 활성화',
+          idleTimeoutTitle: '캡처 유휴 시간 제한',
+          idleTimeoutDescription: '활성 시청자가 없는 상태가 다음 시간 동안 지속되면 HDMI 캡처 중지',
+          minutes: '분'
         },
         autostart: {
           title: '자동 시작 스크립트 설정',

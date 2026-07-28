@@ -372,7 +372,10 @@ const cz = {
           tip: 'Vypnutí, pokud to není potřeba'
         },
         hdmi: {
-          description: 'Povolit výstup HDMI/monitor'
+          description: 'Povolit výstup HDMI/monitor',
+          idleTimeoutTitle: 'Časový limit nečinnosti snímání',
+          idleTimeoutDescription: 'Zastavit snímání HDMI po době bez aktivních diváků',
+          minutes: 'min'
         },
         autostart: {
           title: 'Nastavení automatického spuštění skriptů',

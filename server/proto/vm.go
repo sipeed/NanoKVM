@@ -98,7 +98,12 @@ type GetOLEDRsp struct {
 }
 
 type GetGetHdmiStateRsp struct {
-	Enabled bool `json:"enabled"`
+	Enabled     bool `json:"enabled"`
+	IdleTimeout int  `json:"idleTimeout"`
+}
+
+type SetHdmiIdleTimeoutReq struct {
+	Minutes int `validate:"gte=0"`
 }
 
 type GetSSHStateRsp struct {

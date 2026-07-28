@@ -371,7 +371,10 @@ const uk = {
           tip: 'Вимкнути, якщо це не потрібно'
         },
         hdmi: {
-          description: 'Увімкнути вихід HDMI/monitor'
+          description: 'Увімкнути вихід HDMI/monitor',
+          idleTimeoutTitle: 'Час очікування неактивного захоплення',
+          idleTimeoutDescription: 'Зупинити захоплення HDMI, якщо активних глядачів немає протягом',
+          minutes: 'хв'
         },
         autostart: {
           title: 'Налаштування сценаріїв автозапуску',

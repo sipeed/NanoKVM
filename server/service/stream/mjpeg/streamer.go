@@ -3,6 +3,7 @@ package mjpeg
 import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
+	"NanoKVM-Server/service/vm"
 	"fmt"
 	"strconv"
 	"sync"
@@ -37,7 +38,8 @@ func NewStreamer() *Streamer {
 func (s *Streamer) AddClient(c *gin.Context) {
 	s.mutex.Lock()
 	s.clients[c] = true
-	s.updateClientSnapshotLocked()
+	count := s.updateClientSnapshotLocked()
+	vm.SetHdmiViewerCountForSource("mjpeg", count)
 	s.mutex.Unlock()
 
 	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
@@ -50,6 +52,7 @@ func (s *Streamer) RemoveClient(c *gin.Context) {
 	s.mutex.Lock()
 	delete(s.clients, c)
 	count := s.updateClientSnapshotLocked()
+	vm.SetHdmiViewerCountForSource("mjpeg", count)
 	s.mutex.Unlock()
 
 	log.Debugf("mjpeg connection removed, remaining clients: %d", count)

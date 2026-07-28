@@ -3,6 +3,7 @@ package direct
 import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
+	"NanoKVM-Server/service/vm"
 	"bytes"
 	"encoding/binary"
 	"sync"
@@ -32,7 +33,8 @@ func newStreamer() *Streamer {
 func (s *Streamer) addClient(ws *websocket.Conn) {
 	s.mutex.Lock()
 	s.clients[ws] = true
-	s.updateClientSnapshotLocked()
+	count := s.updateClientSnapshotLocked()
+	vm.SetHdmiViewerCountForSource("direct", count)
 	s.mutex.Unlock()
 
 	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
@@ -45,6 +47,7 @@ func (s *Streamer) removeClient(ws *websocket.Conn) {
 	s.mutex.Lock()
 	delete(s.clients, ws)
 	count := s.updateClientSnapshotLocked()
+	vm.SetHdmiViewerCountForSource("direct", count)
 	s.mutex.Unlock()
 
 	log.Debugf("h264 websocket disconnected, remaining clients: %d", count)

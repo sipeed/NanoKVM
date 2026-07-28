@@ -372,7 +372,10 @@ const es = {
           tip: 'Desactívalo si no es necesario'
         },
         hdmi: {
-          description: 'Habilitar salida HDMI/monitor'
+          description: 'Habilitar salida HDMI/monitor',
+          idleTimeoutTitle: 'Tiempo de espera de captura inactiva',
+          idleTimeoutDescription: 'Detener la captura HDMI después de no haber espectadores activos durante',
+          minutes: 'min'
         },
         autostart: {
           title: 'Configuración de scripts de inicio automático',

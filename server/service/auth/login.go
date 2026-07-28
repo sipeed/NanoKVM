@@ -6,8 +6,6 @@ import (
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
-	"NanoKVM-Server/service/vm"
-	"NanoKVM-Server/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -60,10 +58,6 @@ func (s *Service) Login(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsHdmiDisabled() {
-		vm.EnableHdmiCapture()
-	}
-
 	rsp.OkRspWithData(c, &proto.LoginRsp{
 		Token: token,
 	})
@@ -73,9 +67,6 @@ func (s *Service) Login(c *gin.Context) {
 
 func (s *Service) Logout(c *gin.Context) {
 	conf := config.GetInstance()
-	if conf.Authentication != "disable" {
-		vm.DisableHdmiCapture()
-	}
 
 	if conf.JWT.RevokeTokensOnLogout {
 		config.RegenerateSecretKey()

@@ -375,7 +375,10 @@ const de = {
           tip: 'Deaktivieren Sie den Dienst, wenn Sie ihn nicht benötigen'
         },
         hdmi: {
-          description: 'HDMI/Monitor-Ausgabe aktivieren'
+          description: 'HDMI/Monitor-Ausgabe aktivieren',
+          idleTimeoutTitle: 'Zeitlimit für inaktive Aufnahme',
+          idleTimeoutDescription: 'HDMI-Aufnahme stoppen, wenn keine aktiven Zuschauer vorhanden sind für',
+          minutes: 'Min.'
         },
         autostart: {
           title: 'Autostart-Skripteinstellungen',

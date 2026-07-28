@@ -373,7 +373,10 @@ const it = {
           tip: 'Spegnerlo se non è necessario'
         },
         hdmi: {
-          description: 'Abilita HDMI/monitora uscita'
+          description: 'Abilita HDMI/monitora uscita',
+          idleTimeoutTitle: 'Timeout cattura inattiva',
+          idleTimeoutDescription: 'Interrompi la cattura HDMI dopo che non ci sono visualizzatori attivi per',
+          minutes: 'min'
         },
         autostart: {
           title: 'Impostazioni script di avvio automatico',

@@ -41,9 +41,10 @@ func initialize() {
 	// init HDMI
 	vm.DisableHdmiCapture()
 	time.Sleep(10 * time.Millisecond)
-	if config.GetInstance().Authentication == "disable" && !utils.IsHdmiDisabled() {
+	if !utils.IsHdmiDisabled() {
 		vm.EnableHdmiCapture()
 	}
+	vm.SetHdmiViewerCount(0)
 
 	// run mouse jiggler
 	jiggler.GetJiggler().Run()

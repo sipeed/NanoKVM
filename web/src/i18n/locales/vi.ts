@@ -368,7 +368,10 @@ const vi = {
           tip: 'Tắt đi nếu không cần thiết'
         },
         hdmi: {
-          description: 'Kích hoạt HDMI/đầu ra màn hình'
+          description: 'Kích hoạt HDMI/đầu ra màn hình',
+          idleTimeoutTitle: 'Thời gian chờ khi không hoạt động',
+          idleTimeoutDescription: 'Dừng việc ghi hình HDMI sau khi không có người xem hoạt động trong',
+          minutes: 'phút'
         },
         autostart: {
           title: 'Cài đặt tập lệnh tự khởi động',

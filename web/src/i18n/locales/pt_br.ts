@@ -371,7 +371,10 @@ const pt_br = {
           tip: 'Desligue se não for necessário'
         },
         hdmi: {
-          description: 'Habilitar saída HDMI/monitor'
+          description: 'Habilitar saída HDMI/monitor',
+          idleTimeoutTitle: 'Tempo limite de captura inativa',
+          idleTimeoutDescription: 'Parar a captura HDMI após não haver visualizadores ativos por',
+          minutes: 'min'
         },
         autostart: {
           title: 'Configurações de scripts de inicialização automática',

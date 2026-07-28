@@ -372,7 +372,10 @@ const pl = {
           tip: 'Wyłączanie, jeśli nie jest potrzebne'
         },
         hdmi: {
-          description: 'Włącz HDMI/wyjście monitora'
+          description: 'Włącz HDMI/wyjście monitora',
+          idleTimeoutTitle: 'Limit czasu bezczynności przechwytywania',
+          idleTimeoutDescription: 'Zatrzymaj przechwytywanie HDMI po czasie bez aktywnych widzów:',
+          minutes: 'min'
         },
         autostart: {
           title: 'Ustawienia skryptów autostartu',

@@ -370,7 +370,10 @@ const tr = {
           tip: 'Kullanmıyorsanız devre dışı bırakabilirsiniz'
         },
         hdmi: {
-          description: 'HDMI/Momitör çıktısını aktifleştir'
+          description: 'HDMI/Momitör çıktısını aktifleştir',
+          idleTimeoutTitle: 'Etkin olmayan yakalama zaman aşımı',
+          idleTimeoutDescription: 'Etkin görüntüleyici olmadığında HDMI yakalamayı şu süre sonunda durdur:',
+          minutes: 'dk'
         },
         autostart: {
           title: 'Otomatik Başlatılan Komut Dosyaları Ayarları',

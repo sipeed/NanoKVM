@@ -374,7 +374,10 @@ const fr = {
           tip: "L'éteindre si ce n'est pas nécessaire"
         },
         hdmi: {
-          description: 'Activer HDMI/sortie moniteur'
+          description: 'Activer HDMI/sortie moniteur',
+          idleTimeoutTitle: "Délai d'inactivité de la capture",
+          idleTimeoutDescription: "Arrêter la capture HDMI lorsqu'il n'y a aucun spectateur actif pendant",
+          minutes: 'min'
         },
         autostart: {
           title: 'Paramètres des scripts de démarrage automatique',

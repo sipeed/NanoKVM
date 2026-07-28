@@ -373,7 +373,10 @@ const nl = {
           tip: 'Schakel het uit als het niet nodig is'
         },
         hdmi: {
-          description: 'Schakel HDMI/monitoruitgang in'
+          description: 'Schakel HDMI/monitoruitgang in',
+          idleTimeoutTitle: 'Time-out voor inactieve opname',
+          idleTimeoutDescription: 'HDMI-opname stoppen nadat er gedurende deze tijd geen actieve kijkers zijn:',
+          minutes: 'min'
         },
         autostart: {
           title: 'Instellingen voor automatisch starten van scripts',
