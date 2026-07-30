@@ -1,55 +1,87 @@
-#include "internal/vi_state_shared.hpp"
+#include "vi_state_shared.hpp"
+#include "internal/vi_state_writer.hpp"
 
-#include <stdio.h>
-#include <string.h>
+#include <sys/file.h>
 
 namespace vi_state_shared {
 namespace {
 
-detail::SharedState *map_writer()
+void log_once(bool *logged, const char *message)
 {
-	static detail::SharedState *shared = NULL;
-	if (shared != NULL) {
-		return shared;
+	if (!__atomic_exchange_n(logged, true, __ATOMIC_RELAXED)) {
+		fprintf(stderr, "[vi_state] %s\n", message);
 	}
-
-	int fd = open(detail::path, O_CREAT | O_RDWR | O_CLOEXEC, 0644);
-	if (fd < 0) {
-		return NULL;
-	}
-	if (ftruncate(fd, sizeof(*shared)) != 0) {
-		close(fd);
-		return NULL;
-	}
-	void *addr = mmap(NULL, sizeof(*shared), PROT_READ | PROT_WRITE,
-		MAP_SHARED, fd, 0);
-	close(fd);
-	if (addr == MAP_FAILED) {
-		return NULL;
-	}
-	shared = (detail::SharedState *)addr;
-	return shared;
 }
 
-void publish(const State &state)
+void reset_log_once(bool *logged)
 {
-	detail::SharedState *shared = map_writer();
-	if (shared == NULL) {
-		return;
+	__atomic_store_n(logged, false, __ATOMIC_RELAXED);
+}
+
+bool publish(const State &state)
+{
+	static bool logged_open_failed = false;
+	static bool logged_lock_failed = false;
+	static bool logged_file_failed = false;
+	static bool logged_size_failed = false;
+	static bool logged_map_failed = false;
+
+	int fd = open(shared_path(), O_CREAT | O_RDWR | O_CLOEXEC | O_NOFOLLOW, 0600);
+	if (fd < 0) {
+		log_once(&logged_open_failed, "cannot open shared state");
+		return false;
+	}
+	if (flock(fd, LOCK_EX) != 0) {
+		log_once(&logged_lock_failed, "cannot lock shared state");
+		close(fd);
+		return false;
 	}
 
-	uint32_t sequence = __atomic_load_n(&shared->sequence, __ATOMIC_RELAXED) | 1U;
-	__atomic_store_n(&shared->sequence, sequence, __ATOMIC_SEQ_CST);
-	__atomic_store_n(&shared->magic, detail::magic, __ATOMIC_RELAXED);
-	__atomic_store_n(&shared->version, detail::version, __ATOMIC_RELAXED);
-	__atomic_store_n(&shared->updated_ms, detail::monotonic_ms(), __ATOMIC_RELAXED);
+	struct stat stat_buf;
+	if (fstat(fd, &stat_buf) != 0 || !S_ISREG(stat_buf.st_mode) || fchmod(fd, 0600) != 0) {
+		log_once(&logged_file_failed, "shared state is not a private regular file");
+		close(fd);
+		return false;
+	}
+	if (ftruncate(fd, sizeof(detail::SharedState)) != 0) {
+		log_once(&logged_size_failed, "cannot size shared state");
+		close(fd);
+		return false;
+	}
+
+	void *addr = mmap(NULL, sizeof(detail::SharedState), PROT_READ | PROT_WRITE,
+		MAP_SHARED, fd, 0);
+	if (addr == MAP_FAILED) {
+		log_once(&logged_map_failed, "cannot map shared state");
+		close(fd);
+		return false;
+	}
+
+	detail::SharedState *shared = (detail::SharedState *)addr;
+	uint32_t sequence = __atomic_load_n(&shared->sequence, __ATOMIC_RELAXED);
+	sequence = (sequence & ~1U) + 1U;
+	__atomic_store_n(&shared->sequence, sequence, __ATOMIC_RELAXED);
+	__atomic_thread_fence(__ATOMIC_RELEASE);
+	__atomic_store_n(&shared->magic, detail::SHARED_MAGIC, __ATOMIC_RELAXED);
+	__atomic_store_n(&shared->version, detail::SHARED_VERSION, __ATOMIC_RELAXED);
+	__atomic_store_n(&shared->updated_ms, monotonic_ms(), __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.dev_fps, state.dev_fps, __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.fps, state.fps, __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.width_gt, state.width_gt, __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.width_ls, state.width_ls, __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.height_gt, state.height_gt, __ATOMIC_RELAXED);
 	__atomic_store_n(&shared->state.height_ls, state.height_ls, __ATOMIC_RELAXED);
-	__atomic_store_n(&shared->sequence, sequence + 1U, __ATOMIC_RELEASE);
+	__atomic_thread_fence(__ATOMIC_RELEASE);
+	__atomic_store_n(&shared->sequence, sequence + 1U, __ATOMIC_RELAXED);
+
+	munmap(addr, sizeof(detail::SharedState));
+	close(fd);
+	reset_log_once(&logged_open_failed);
+	reset_log_once(&logged_lock_failed);
+	reset_log_once(&logged_file_failed);
+	reset_log_once(&logged_size_failed);
+	reset_log_once(&logged_map_failed);
+	return true;
 }
 
 } // namespace
@@ -65,50 +97,36 @@ void publish(const State &state)
  */
 uint8_t refresh()
 {
-	FILE *fp = fopen("/proc/cvitek/vi_dbg", "r");
-	if (fp == NULL) {
-		return 0;
-	}
+	static bool logged_open_failed = false;
+	static bool logged_no_fields = false;
+	static bool logged_missing_fields = false;
+	static bool logged_publish_failed = false;
 
 	State state = {};
-	bool have_dev_fps = false;
-	bool have_fps = false;
-	char line[256];
-	char field[32];
-	unsigned int value;
-	while (fgets(line, sizeof(line), fp) != NULL) {
-		if (sscanf(line, "%31s : %u", field, &value) != 2) {
-			continue;
-		}
-		if (strcmp(field, "VIDevFPS") == 0) {
-			state.dev_fps = value;
-			have_dev_fps = true;
-		} else if (strcmp(field, "VIFPS") == 0) {
-			state.fps = value;
-			have_fps = true;
-		} else if (strcmp(field, "VICsiCh0WidthGTCnt") == 0) {
-			state.width_gt = value;
-		} else if (strcmp(field, "VICsiCh0WidthLSCnt") == 0) {
-			state.width_ls = value;
-		} else if (strcmp(field, "VICsiCh0HeightGTCnt") == 0) {
-			state.height_gt = value;
-		} else if (strcmp(field, "VICsiCh0HeightLSCnt") == 0) {
-			state.height_ls = value;
-		}
-	}
-	fclose(fp);
-
-	if (!have_dev_fps || !have_fps) {
+	uint32_t fields = FIELD_NONE;
+	ProcReadStatus status = read_proc_state(&state, &fields);
+	if (status == PROC_READ_OPEN_FAILED) {
+		log_once(&logged_open_failed, "cannot open /proc/cvitek/vi_dbg");
 		return 0;
 	}
-	publish(state);
-	if (state.dev_fps == 0) return 2;
-	if (state.fps != 0) return 1;
-	if (state.width_gt != 0) return 3;
-	if (state.width_ls != 0) return 4;
-	if (state.height_gt != 0) return 5;
-	if (state.height_ls != 0) return 6;
-	return 7;
+	if (status == PROC_READ_NO_KNOWN_FIELDS) {
+		log_once(&logged_no_fields, "no known fields in /proc/cvitek/vi_dbg");
+		return 0;
+	}
+	if ((fields & (FIELD_DEV_FPS | FIELD_FPS)) != (FIELD_DEV_FPS | FIELD_FPS)) {
+		log_once(&logged_missing_fields, "missing VIDevFPS or VIFPS in /proc/cvitek/vi_dbg");
+		return 0;
+	}
+	if (!publish(state)) {
+		log_once(&logged_publish_failed, "cannot publish VI state");
+		return 0;
+	}
+
+	reset_log_once(&logged_open_failed);
+	reset_log_once(&logged_no_fields);
+	reset_log_once(&logged_missing_fields);
+	reset_log_once(&logged_publish_failed);
+	return classify(state);
 }
 
 } // namespace vi_state_shared

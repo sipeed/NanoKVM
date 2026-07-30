@@ -51,7 +51,7 @@ typedef struct {
 	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
 	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
 	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep 'inet addr' | awk '{print $2}'
-	int8_t  hdmi_state = -1;		// cat /proc/cvitek/vi_dbg | grep VIFPS | awk '{print $3}' (1s)
+	int8_t  hdmi_state = -1;		// Shared VI state, with a native fallback on failure
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
 	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
@@ -84,7 +84,7 @@ typedef struct {
 	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
 	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
 	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep inet\ addr | awk '{print $2}'
-	int8_t  hdmi_state = -1;		// cat /proc/cvitek/vi_dbg | grep VIFPS | awk '{print $3}' (1s)
+	int8_t  hdmi_state = -1;		// Shared VI state, with a native fallback on failure
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
 	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
