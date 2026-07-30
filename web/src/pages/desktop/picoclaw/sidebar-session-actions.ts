@@ -135,12 +135,16 @@ export function createPicoclawSidebarSessionActions(options: PicoclawSidebarSess
       }
     ]);
 
-    const sent = sendChatMessage(content, {
+    const task = sendChatMessage(content, {
       id,
       maxSteps: config.maxSteps,
       maxRuntimeMs: config.maxRuntimeMs
     });
-    return sent !== null;
+    if (task === null) {
+      setMessages((current) => current.filter((message) => message.id !== id));
+      return false;
+    }
+    return true;
   }
 
   async function handleReconnectGateway() {

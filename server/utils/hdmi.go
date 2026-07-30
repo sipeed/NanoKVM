@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	HDMIDisableFile        = "/etc/kvm/hdmi_disable"
-	HDMIIdleTimeoutFile    = "/etc/kvm/hdmi_idle_timeout"
-	DefaultHDMIIdleTimeout = 0
+	HDMIDisableFile           = "/etc/kvm/hdmi_disable"
+	HDMIIdleTimeoutFile       = "/etc/kvm/hdmi_idle_timeout"
+	DefaultHDMIIdleTimeout    = 0
+	MaxHDMIIdleTimeoutMinutes = 7 * 24 * 60
 )
 
 func PersistHDMIDisabled() {
@@ -57,7 +58,7 @@ func GetHDMIIdleTimeout() int {
 	}
 
 	minutes, err := strconv.Atoi(strings.TrimSpace(string(data)))
-	if err != nil || minutes < 0 {
+	if err != nil || minutes < 0 || minutes > MaxHDMIIdleTimeoutMinutes {
 		log.Error("invalid hdmi idle timeout")
 		return DefaultHDMIIdleTimeout
 	}

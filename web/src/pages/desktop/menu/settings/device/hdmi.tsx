@@ -116,6 +116,7 @@ export const Hdmi = () => {
             <InputNumber
               style={{ width: 150 }}
               min={0}
+              max={10080}
               precision={0}
               value={idleTimeoutInput}
               addonAfter={t('settings.device.hdmi.minutes')}

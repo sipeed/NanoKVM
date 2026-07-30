@@ -1,12 +1,12 @@
 package picoclaw
 
 import (
+	"context"
 	"encoding/base64"
 	"net/http"
 	"time"
 
 	"NanoKVM-Server/common"
-	"NanoKVM-Server/service/stream/mjpeg"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,8 +14,7 @@ import (
 var screenshotRetryDelay = 100 * time.Millisecond
 
 const (
-	screenshotRetryCount             = 3
-	cachedFrameMaxAge                = 2 * time.Second
+	screenshotRetryCount             = 30
 	defaultPicoclawScreenshotWidth   = 960
 	defaultPicoclawScreenshotHeight  = 540
 	defaultPicoclawScreenshotQuality = 60
@@ -43,7 +42,7 @@ func (s *Service) Screenshot(c *gin.Context) {
 		defer s.lock.Release(sessionID)
 	}
 
-	data, meta, err := s.captureScreenshot(query)
+	data, meta, err := s.captureScreenshot(c.Request.Context(), query)
 	if err != nil {
 		writePicoclawError(c, err)
 		return
@@ -58,36 +57,42 @@ func (s *Service) Screenshot(c *gin.Context) {
 	c.Data(http.StatusOK, "image/jpeg", data)
 }
 
-func (s *Service) captureScreenshot(query ScreenshotQuery) ([]byte, ScreenshotMeta, *PicoclawError) {
+func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) ([]byte, ScreenshotMeta, *PicoclawError) {
 	width, height, quality := resolveScreenshotRequest(query)
-
-	if canUseCachedFrame(query) {
-		if frame, ok := mjpeg.GetLatestFrame(); ok && time.Since(frame.CapturedAt) <= cachedFrameMaxAge {
-			return frame.Data, ScreenshotMeta{
-				SourceWidth:   frame.Width,
-				SourceHeight:  frame.Height,
-				CaptureWidth:  frame.Width,
-				CaptureHeight: frame.Height,
-				Format:        "jpeg",
-			}, nil
-		}
-	}
 
 	screen := common.GetScreen()
 	common.CheckScreen()
+	releaseLease, claimFresh, leaseErr := s.acquireCaptureLease(ctx)
+	if leaseErr != nil {
+		return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "screenshot capture canceled")
+	}
+	defer releaseLease()
 
 	for attempt := 0; attempt < screenshotRetryCount; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "screenshot capture canceled")
+		}
 		data, result := s.vision.ReadMjpeg(width, height, quality)
 		switch {
-		case result == 5:
+		case result == 5 || result == -3 || result == -4 || result == -5:
 			if attempt < screenshotRetryCount-1 {
-				time.Sleep(screenshotRetryDelay)
+				timer := time.NewTimer(screenshotRetryDelay)
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "screenshot capture canceled")
+				case <-timer.C:
+				}
 				continue
 			}
 			return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotNoSignal, "no HDMI signal or frame unavailable")
 		case result < 0 || len(data) == 0:
 			return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "failed to capture screenshot")
 		default:
+			if claimFresh != nil && claimFresh() {
+				claimFresh = nil
+				continue
+			}
 			return data, ScreenshotMeta{
 				SourceWidth:   screen.Width,
 				SourceHeight:  screen.Height,
@@ -99,10 +104,6 @@ func (s *Service) captureScreenshot(query ScreenshotQuery) ([]byte, ScreenshotMe
 	}
 
 	return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "failed to capture screenshot")
-}
-
-func canUseCachedFrame(query ScreenshotQuery) bool {
-	return query.Width == 0 && query.Height == 0 && query.Quality == 0
 }
 
 func resolveScreenshotRequest(query ScreenshotQuery) (uint16, uint16, uint16) {

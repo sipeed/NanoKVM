@@ -35,15 +35,19 @@ type fakeVision struct {
 	responses []visionResponse
 	calls     int
 	quality   uint16
+	width     uint16
+	height    uint16
 	active    int
 	maxActive int
 	delay     time.Duration
 }
 
-func (v *fakeVision) ReadMjpeg(_ uint16, _ uint16, quality uint16) ([]byte, int) {
+func (v *fakeVision) ReadMjpeg(width uint16, height uint16, quality uint16) ([]byte, int) {
 	v.mu.Lock()
 	v.calls++
 	v.quality = quality
+	v.width = width
+	v.height = height
 	v.active++
 	if v.active > v.maxActive {
 		v.maxActive = v.active
@@ -73,12 +77,12 @@ func TestCaptureSuccessAndQualityBounds(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !snapshot.OK || snapshot.Width != 1920 || snapshot.Height != 1080 || vision.quality != defaultQuality {
-		t.Fatalf("snapshot=%+v quality=%d", snapshot, vision.quality)
+	if !snapshot.OK || snapshot.Width != 1920 || snapshot.Height != 1080 || vision.quality != defaultQuality || vision.width != 1920 || vision.height != 1080 {
+		t.Fatalf("snapshot=%+v capture=%dx%d quality=%d", snapshot, vision.width, vision.height, vision.quality)
 	}
 
 	_, err = snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{Quality: 200})
-	if err != nil || vision.quality != 100 {
+	if err != nil || vision.quality != maximumQuality {
 		t.Fatalf("quality clamp=%d err=%v", vision.quality, err)
 	}
 }
@@ -99,6 +103,34 @@ func TestCaptureRetriesNoSignal(t *testing.T) {
 	snapshot, err = snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{TimeoutMS: &timeout})
 	if err != nil || snapshot.RetCode != 5 || vision.calls != 1 {
 		t.Fatalf("timeout snapshot=%+v calls=%d err=%v", snapshot, vision.calls, err)
+	}
+}
+
+func TestCaptureRetriesInitialReadFailure(t *testing.T) {
+	vision := &fakeVision{responses: []visionResponse{
+		{result: -1},
+		{data: testJPEG(t, 1280, 720), result: 0},
+	}}
+	snapshotter := New(vision, func() (uint16, uint16) { return 1280, 720 })
+	snapshotter.retryDelay = 0
+
+	snapshot, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{})
+	if err != nil || !snapshot.OK || vision.calls != 2 {
+		t.Fatalf("snapshot=%+v calls=%d err=%v", snapshot, vision.calls, err)
+	}
+}
+
+func TestCaptureRetriesInvalidJPEG(t *testing.T) {
+	vision := &fakeVision{responses: []visionResponse{
+		{data: []byte("partial jpeg"), result: 0},
+		{data: testJPEG(t, 1280, 720), result: 0},
+	}}
+	snapshotter := New(vision, func() (uint16, uint16) { return 1280, 720 })
+	snapshotter.retryDelay = 0
+
+	snapshot, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{})
+	if err != nil || !snapshot.OK || vision.calls != 2 {
+		t.Fatalf("snapshot=%+v calls=%d err=%v", snapshot, vision.calls, err)
 	}
 }
 
@@ -139,7 +171,7 @@ func TestCaptureSerializesConcurrentCalls(t *testing.T) {
 	}
 }
 
-func TestCaptureUsesJPEGDimensionsForAutomaticResolution(t *testing.T) {
+func TestCapturePassesThroughAutomaticResolution(t *testing.T) {
 	vision := &fakeVision{responses: []visionResponse{{data: testJPEG(t, 640, 480), result: 0}}}
 	snapshotter := New(vision, func() (uint16, uint16) { return 0, 0 })
 
@@ -147,8 +179,40 @@ func TestCaptureUsesJPEGDimensionsForAutomaticResolution(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !snapshot.OK || snapshot.Width != 640 || snapshot.Height != 480 {
-		t.Fatalf("snapshot=%+v", snapshot)
+	if !snapshot.OK || snapshot.Width != 640 || snapshot.Height != 480 || vision.width != 0 || vision.height != 0 {
+		t.Fatalf("snapshot=%+v capture=%dx%d", snapshot, vision.width, vision.height)
+	}
+}
+
+func TestCaptureDropsClaimedFirstFreshFrame(t *testing.T) {
+	first := testJPEG(t, 320, 240)
+	second := testJPEG(t, 640, 480)
+	vision := &fakeVision{responses: []visionResponse{
+		{data: first, result: 0},
+		{data: second, result: 0},
+	}}
+	claimed := 0
+	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 640, 480 }, func(context.Context) (func(), func() bool, error) {
+		return nil, func() bool {
+			claimed++
+			return claimed == 1
+		}, nil
+	})
+
+	snapshot, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{})
+	if err != nil || !snapshot.OK || !bytes.Equal(snapshot.JPEG, second) || vision.calls != 2 || claimed != 1 {
+		t.Fatalf("snapshot=%+v calls=%d claimed=%d err=%v", snapshot, vision.calls, claimed, err)
+	}
+}
+
+func TestCaptureRejectsOversizedJPEG(t *testing.T) {
+	data := make([]byte, maximumJPEGBytes+1)
+	vision := &fakeVision{responses: []visionResponse{{data: data, result: 0}}}
+	snapshotter := New(vision, func() (uint16, uint16) { return 960, 540 })
+
+	snapshot, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{})
+	if err != nil || snapshot.OK || len(snapshot.JPEG) != 0 || snapshot.Message == "" {
+		t.Fatalf("snapshot=%+v err=%v", snapshot, err)
 	}
 }
 
@@ -192,5 +256,68 @@ func TestCaptureTimeoutStartsAfterSlotIsAcquired(t *testing.T) {
 		}
 	case <-time.After(time.Second):
 		t.Fatal("capture did not complete after slot release")
+	}
+}
+
+func TestCaptureReleasesLeaseOnSuccessAndCancellation(t *testing.T) {
+	vision := &fakeVision{responses: []visionResponse{{data: testJPEG(t, 320, 240), result: 0}}}
+	acquired := 0
+	released := 0
+	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 320, 240 }, func(context.Context) (func(), func() bool, error) {
+		acquired++
+		return func() { released++ }, nil, nil
+	})
+
+	if _, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{}); err != nil {
+		t.Fatal(err)
+	}
+	if acquired != 1 || released != 1 {
+		t.Fatalf("lease acquired=%d released=%d, want 1/1", acquired, released)
+	}
+
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, err := snapshotter.Capture(canceled, mcpservice.SnapshotRequest{}); !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v, want canceled", err)
+	}
+	if acquired != 1 || released != 1 {
+		t.Fatalf("lease acquired=%d released=%d after cancellation before acquisition, want 1/1", acquired, released)
+	}
+}
+
+type blockingVision struct {
+	started chan struct{}
+	finish  chan struct{}
+}
+
+func (v *blockingVision) ReadMjpeg(_ uint16, _ uint16, _ uint16) ([]byte, int) {
+	v.started <- struct{}{}
+	<-v.finish
+	return nil, 5
+}
+
+func TestCaptureReleasesLeaseAfterAcquisitionCancellation(t *testing.T) {
+	vision := &blockingVision{started: make(chan struct{}, 1), finish: make(chan struct{})}
+	acquired := 0
+	released := 0
+	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 320, 240 }, func(context.Context) (func(), func() bool, error) {
+		acquired++
+		return func() { released++ }, nil, nil
+	})
+
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan error, 1)
+	go func() {
+		_, err := snapshotter.Capture(ctx, mcpservice.SnapshotRequest{})
+		done <- err
+	}()
+	<-vision.started
+	cancel()
+	close(vision.finish)
+	if err := <-done; !errors.Is(err, context.Canceled) {
+		t.Fatalf("error = %v, want canceled", err)
+	}
+	if acquired != 1 || released != 1 {
+		t.Fatalf("lease acquired=%d released=%d after cancellation during capture, want 1/1", acquired, released)
 	}
 }

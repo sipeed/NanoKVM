@@ -103,7 +103,7 @@ type GetGetHdmiStateRsp struct {
 }
 
 type SetHdmiIdleTimeoutReq struct {
-	Minutes int `validate:"gte=0"`
+	Minutes int `validate:"gte=0,lte=10080"`
 }
 
 type GetSSHStateRsp struct {

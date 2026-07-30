@@ -24,6 +24,7 @@ type Streamer struct {
 	frameMutex     sync.RWMutex
 	latestFrame    LatestFrame
 	cacheRefs      int32
+	viewerVersion  uint64
 }
 
 func NewStreamer() *Streamer {
@@ -39,8 +40,10 @@ func (s *Streamer) AddClient(c *gin.Context) {
 	s.mutex.Lock()
 	s.clients[c] = true
 	count := s.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("mjpeg", count)
+	s.viewerVersion++
+	version := s.viewerVersion
 	s.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("mjpeg", count, version)
 
 	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
 		go s.run()
@@ -52,8 +55,10 @@ func (s *Streamer) RemoveClient(c *gin.Context) {
 	s.mutex.Lock()
 	delete(s.clients, c)
 	count := s.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("mjpeg", count)
+	s.viewerVersion++
+	version := s.viewerVersion
 	s.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("mjpeg", count, version)
 
 	log.Debugf("mjpeg connection removed, remaining clients: %d", count)
 }

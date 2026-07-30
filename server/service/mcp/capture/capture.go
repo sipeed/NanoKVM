@@ -11,7 +11,10 @@ import (
 )
 
 const (
-	defaultQuality       = 85
+	defaultQuality       = 60
+	minimumQuality       = 51
+	maximumQuality       = 60
+	maximumJPEGBytes     = 1 << 20
 	screenshotRetryDelay = 100 * time.Millisecond
 	maxTimeoutMS         = 30_000
 )
@@ -21,20 +24,27 @@ type VisionReader interface {
 }
 
 type ScreenReader func() (width uint16, height uint16)
+type CaptureLeaseAcquirer func(context.Context) (release func(), claimFresh func() bool, err error)
 
 type Snapshotter struct {
-	vision      VisionReader
-	readScreen  ScreenReader
-	captureSlot chan struct{}
-	retryDelay  time.Duration
+	vision       VisionReader
+	readScreen   ScreenReader
+	captureSlot  chan struct{}
+	retryDelay   time.Duration
+	acquireLease CaptureLeaseAcquirer
 }
 
 func New(vision VisionReader, readScreen ScreenReader) *Snapshotter {
+	return NewWithCaptureLease(vision, readScreen, nil)
+}
+
+func NewWithCaptureLease(vision VisionReader, readScreen ScreenReader, acquireLease CaptureLeaseAcquirer) *Snapshotter {
 	return &Snapshotter{
-		vision:      vision,
-		readScreen:  readScreen,
-		captureSlot: make(chan struct{}, 1),
-		retryDelay:  screenshotRetryDelay,
+		vision:       vision,
+		readScreen:   readScreen,
+		captureSlot:  make(chan struct{}, 1),
+		retryDelay:   screenshotRetryDelay,
+		acquireLease: acquireLease,
 	}
 }
 
@@ -50,9 +60,9 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 	if quality == 0 {
 		quality = defaultQuality
 	}
-	quality = clamp(quality, 1, 100)
+	quality = clamp(quality, minimumQuality, maximumQuality)
 
-	timeoutMS := 1000
+	timeoutMS := 3000
 	if req.TimeoutMS != nil {
 		timeoutMS = clamp(*req.TimeoutMS, 0, maxTimeoutMS)
 	}
@@ -63,9 +73,29 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 	case <-ctx.Done():
 		return mcpservice.Snapshot{}, ctx.Err()
 	}
+	if err := ctx.Err(); err != nil {
+		return mcpservice.Snapshot{}, err
+	}
+	if s.acquireLease != nil {
+		releaseLease, claimFresh, err := s.acquireLease(ctx)
+		if err != nil {
+			return mcpservice.Snapshot{}, err
+		}
+		if releaseLease != nil {
+			defer releaseLease()
+		}
+
+		deadline := time.Now().Add(time.Duration(timeoutMS) * time.Millisecond)
+		width, height := s.readScreen()
+		return s.capture(ctx, width, height, quality, deadline, timeoutMS, claimFresh)
+	}
 
 	deadline := time.Now().Add(time.Duration(timeoutMS) * time.Millisecond)
 	width, height := s.readScreen()
+	return s.capture(ctx, width, height, quality, deadline, timeoutMS, nil)
+}
+
+func (s *Snapshotter) capture(ctx context.Context, width uint16, height uint16, quality int, deadline time.Time, timeoutMS int, claimFresh func() bool) (mcpservice.Snapshot, error) {
 	for {
 		if err := ctx.Err(); err != nil {
 			return mcpservice.Snapshot{}, err
@@ -83,10 +113,19 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 		}
 		switch {
 		case result >= 0 && result != 5 && len(data) > 0:
+			if claimFresh != nil && claimFresh() {
+				claimFresh = nil
+				continue
+			}
+			if len(data) > maximumJPEGBytes {
+				snapshot.JPEG = nil
+				snapshot.Message = "captured JPEG exceeds the MCP response size limit"
+				return snapshot, nil
+			}
 			config, err := jpeg.DecodeConfig(bytes.NewReader(data))
 			if err != nil {
 				snapshot.Message = "captured data is not a valid JPEG"
-				return snapshot, nil
+				break
 			}
 			snapshot.OK = true
 			snapshot.Width = config.Width
@@ -98,7 +137,6 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 			snapshot.Message = "screenshot capture is temporarily unavailable"
 		case result < 0 || len(data) == 0:
 			snapshot.Message = "failed to capture screenshot"
-			return snapshot, nil
 		}
 
 		if timeoutMS == 0 || time.Now().Add(s.retryDelay).After(deadline) {

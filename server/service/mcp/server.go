@@ -103,7 +103,7 @@ func newMCPHandler(control *controlmode.Manager, coordinator *inputcontrol.Coord
 	registerTools(server, executor, remote, snapshotter)
 	handler := protocol.NewStreamableHTTPHandler(
 		func(*http.Request) *protocol.Server { return server },
-		&protocol.StreamableHTTPOptions{Stateless: true},
+		&protocol.StreamableHTTPOptions{Stateless: true, JSONResponse: true},
 	)
 	return http.MaxBytesHandler(handler, maxRequestBodyBytes)
 }
@@ -496,7 +496,7 @@ func scrollMouseSchema() *jsonschema.Schema {
 
 func screenshotSchema() *jsonschema.Schema {
 	return objectSchema(map[string]*jsonschema.Schema{
-		"quality":   integerSchema("JPEG quality", 1, 100),
+		"quality":   integerSchema("JPEG quality; values are limited to 51-60 on the device", 1, 100),
 		"timeoutMs": integerSchema("Capture timeout in milliseconds", 0, 30000),
 	})
 }

@@ -28,8 +28,10 @@ func (m *WebRTCManager) AddClient(ws *websocket.Conn, client *Client) {
 	m.mutex.Lock()
 	m.clients[ws] = client
 	count := m.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("webrtc", count)
+	m.viewerVersion++
+	version := m.viewerVersion
 	m.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("webrtc", count, version)
 
 	log.Debugf("added client %s, total clients: %d", ws.RemoteAddr(), count)
 }
@@ -38,8 +40,10 @@ func (m *WebRTCManager) RemoveClient(ws *websocket.Conn) {
 	m.mutex.Lock()
 	delete(m.clients, ws)
 	count := m.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("webrtc", count)
+	m.viewerVersion++
+	version := m.viewerVersion
 	m.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("webrtc", count, version)
 
 	log.Debugf("removed client %s, total clients: %d", ws.RemoteAddr(), count)
 }
@@ -69,8 +73,6 @@ func (m *WebRTCManager) getClients() []*Client {
 
 func (m *WebRTCManager) StartVideoStream() {
 	if atomic.CompareAndSwapInt32(&m.videoSending, 0, 1) {
-		screen := common.GetScreen()
-		common.GetKvmVision().SetGop(screen.GOP)
 		go m.sendVideoStream()
 		log.Debugf("start sending h264 stream")
 	}

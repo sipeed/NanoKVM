@@ -19,6 +19,7 @@ type Streamer struct {
 	clients        map[*websocket.Conn]bool
 	clientSnapshot atomic.Pointer[[]*websocket.Conn]
 	running        int32
+	viewerVersion  uint64
 }
 
 func newStreamer() *Streamer {
@@ -34,8 +35,10 @@ func (s *Streamer) addClient(ws *websocket.Conn) {
 	s.mutex.Lock()
 	s.clients[ws] = true
 	count := s.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("direct", count)
+	s.viewerVersion++
+	version := s.viewerVersion
 	s.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("direct", count, version)
 
 	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
 		go s.run()
@@ -47,8 +50,10 @@ func (s *Streamer) removeClient(ws *websocket.Conn) {
 	s.mutex.Lock()
 	delete(s.clients, ws)
 	count := s.updateClientSnapshotLocked()
-	vm.SetHdmiViewerCountForSource("direct", count)
+	s.viewerVersion++
+	version := s.viewerVersion
 	s.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("direct", count, version)
 
 	log.Debugf("h264 websocket disconnected, remaining clients: %d", count)
 }
