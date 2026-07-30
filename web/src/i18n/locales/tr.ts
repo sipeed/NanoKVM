@@ -79,6 +79,11 @@ const tr = {
       frameDetectTip:
         'Gönderilen kareler arasındaki farkı hesaplar. Uzak ana bilgisayardan gönderilen yayında bir değişiklik yoksa görüntü yayınını durdurur.',
       resetHdmi: 'HDMI sıfırla',
+      mixedH264: {
+        title: 'H.264 akış çakışması',
+        description:
+          'H.264 Direct ve H.264 WebRTC aynı anda kullanılıyor. Bu, ekran yırtılmasına veya bozuk videoya neden olabilir. Lütfen yalnızca bir H.264 modu kullanın.'
+      },
       captureStatus: {
         hdmiError: 'HDMI ekran hatası',
         unsupportedResolution: 'Geçerli çözünürlük desteklenmiyor',

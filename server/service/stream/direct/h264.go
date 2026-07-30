@@ -1,6 +1,7 @@
 package direct
 
 import (
+	"NanoKVM-Server/service/stream"
 	"net/http"
 	"time"
 
@@ -35,6 +36,9 @@ func Connect(c *gin.Context) {
 
 	streamer.addClient(ws)
 	defer streamer.removeClient(ws)
+
+	unregisterMode := stream.RegisterH264Mode(stream.H264ModeDirect)
+	defer unregisterMode()
 
 	for {
 		if _, _, err := ws.NextReader(); err != nil {

@@ -80,6 +80,11 @@ const it = {
       frameDetectTip:
         'Calcola la differenza tra i frame. Interrompe la trasmissione del flusso video quando non vengono rilevate modifiche sullo schermo del dispositivo remoto.',
       resetHdmi: 'Reimposta HDMI',
+      mixedH264: {
+        title: 'Conflitto del flusso H.264',
+        description:
+          'I flussi H.264 Direct e H.264 WebRTC sono utilizzati contemporaneamente. Ciò può causare tearing dello schermo o video danneggiato. Utilizzare una sola modalità H.264.'
+      },
       captureStatus: {
         hdmiError: 'Errore schermata HDMI',
         unsupportedResolution: 'La risoluzione attuale non è supportata',

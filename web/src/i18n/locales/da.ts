@@ -78,6 +78,11 @@ const da = {
       frameDetectTip:
         'Beregner forskellen mellem hver frame. Stopper med at sende et video stream hvis der ikke registreres ændringer på fjerncomputerens skærm.',
       resetHdmi: 'Nulstil HDMI',
+      mixedH264: {
+        title: 'H.264-streamkonflikt',
+        description:
+          'H.264 Direct og H.264 WebRTC bruges samtidigt. Dette kan forårsage skærmrivning eller beskadiget video. Brug kun én H.264-tilstand.'
+      },
       captureStatus: {
         hdmiError: 'Fejl i HDMI-billedet',
         unsupportedResolution: 'Den aktuelle opløsning understøttes ikke',

@@ -74,12 +74,9 @@ func Connect(c *gin.Context) {
 		return
 	}
 
-	manager := getManager()
-	manager.AddClient(wsConn, client)
-	defer manager.RemoveClient(wsConn)
-
 	// handle signaling
 	signalingHandler := NewSignalingHandler(client)
+	defer signalingHandler.Close()
 	signalingHandler.RegisterCallbacks()
 	if err := sendICEServers(client, iceServers); err != nil {
 		log.Errorf("failed to send ICE servers: %s", err)

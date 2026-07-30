@@ -78,6 +78,11 @@ const ca = {
       frameDetectTip:
         "Calcula la diferència entre fotogrames. S'atura la transmissió si no hi ha canvis a la pantalla de l'amfitrió remot.",
       resetHdmi: 'Restablir HDMI',
+      mixedH264: {
+        title: 'Conflicte de flux H.264',
+        description:
+          "S'estan utilitzant H.264 Direct i H.264 WebRTC alhora. Això pot provocar esquinçament de pantalla o vídeo corrupte. Utilitzeu només un mode H.264."
+      },
       captureStatus: {
         hdmiError: 'Error a la pantalla HDMI',
         unsupportedResolution: 'La resolució actual no és compatible',

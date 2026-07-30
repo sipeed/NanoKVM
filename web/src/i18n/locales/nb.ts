@@ -79,6 +79,11 @@ const nb = {
       frameDetectTip:
         'Kalkuler forskjellen mellom bilder. Stopper overføring av video når det ikke oppdages forskjell på den eksterne vertens skjerm.',
       resetHdmi: 'Tilbakestill HDMI',
+      mixedH264: {
+        title: 'H.264-strømmekonflikt',
+        description:
+          'H.264 Direct og H.264 WebRTC brukes samtidig. Dette kan føre til skjermriving eller ødelagt video. Bruk bare én H.264-modus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-skjermfeil',
         unsupportedResolution: 'Gjeldende oppløsning støttes ikke',

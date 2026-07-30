@@ -78,6 +78,11 @@ const vi = {
       frameDetectTip:
         'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.',
       resetHdmi: 'Đặt lại HDMI',
+      mixedH264: {
+        title: 'Xung đột luồng H.264',
+        description:
+          'H.264 Direct và H.264 WebRTC đang được sử dụng đồng thời. Điều này có thể gây xé hình hoặc video bị hỏng. Vui lòng chỉ sử dụng một chế độ H.264.'
+      },
       captureStatus: {
         hdmiError: 'Lỗi màn hình HDMI',
         unsupportedResolution: 'Độ phân giải hiện tại không được hỗ trợ',
