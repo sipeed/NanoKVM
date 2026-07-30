@@ -1293,6 +1293,8 @@ int mmf_vi_init(void)
 	s32Ret = _mmf_vpss_init_new(0, priv.vi_size.u32Width, priv.vi_size.u32Height, PIXEL_FORMAT_UYVY);		// PIXEL_FORMAT_UYVY  PIXEL_FORMAT_NV21
 	if (s32Ret != CVI_SUCCESS) {
 		SAMPLE_PRT("_mmf_vpss_init_new failed. s32Ret: 0x%x !\n", s32Ret);
+		priv.vi_is_inited = false;
+		return s32Ret;
 	}
 
 	priv.vi_is_inited = true;
@@ -1505,9 +1507,22 @@ int mmf_vi_frame_pop(int ch, void **data, int *len, int *width, int *height, int
         int image_size = frame->stVFrame.u32Length[0]
                         + frame->stVFrame.u32Length[1]
 				        + frame->stVFrame.u32Length[2];
-        CVI_VOID *vir_addr;
-        vir_addr = CVI_SYS_MmapCache(frame->stVFrame.u64PhyAddr[0], image_size);
-        CVI_SYS_IonInvalidateCache(frame->stVFrame.u64PhyAddr[0], vir_addr, image_size);
+		if (frame->stVFrame.u64PhyAddr[0] == 0 || image_size <= 0) {
+			SAMPLE_PRT("invalid VI frame address or size\n");
+			CVI_VPSS_ReleaseChnFrame(0, ch, frame);
+			memset(frame, 0, sizeof(*frame));
+			return -1;
+		}
+
+		CVI_VOID *vir_addr;
+		vir_addr = CVI_SYS_MmapCache(frame->stVFrame.u64PhyAddr[0], image_size);
+		if (vir_addr == NULL) {
+			SAMPLE_PRT("CVI_SYS_MmapCache failed for VI frame\n");
+			CVI_VPSS_ReleaseChnFrame(0, ch, frame);
+			memset(frame, 0, sizeof(*frame));
+			return -1;
+		}
+		CVI_SYS_IonInvalidateCache(frame->stVFrame.u64PhyAddr[0], vir_addr, image_size);
 
 		frame->stVFrame.pu8VirAddr[0] = (CVI_U8 *)vir_addr;		// save virtual address for munmap
 		priv.vi_frame_valid[ch] = true;

@@ -372,7 +372,10 @@ const ja = {
           tip: 'この機能を使用していない場合は、オフにすることをお勧めします'
         },
         hdmi: {
-          description: 'HDMI/モニター 出力機能を有効にする'
+          description: 'HDMI/モニター 出力機能を有効にする',
+          idleTimeoutTitle: 'キャプチャのアイドルタイムアウト',
+          idleTimeoutDescription: 'アクティブな閲覧者がいない状態が次の時間続いたら HDMI キャプチャを停止',
+          minutes: '分'
         },
         autostart: {
           title: '自動起動スクリプト設定',

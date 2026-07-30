@@ -34,6 +34,7 @@
 #define default_mjpeg_qlty      60
 #define default_h264_qlty       1000
 #define default_h264_gop        30
+#define fresh_frame_discard_count 5
 
 #define kvmv_data_buffer_size   4
 #define Try_rounds_HDMI_err_res 5
@@ -96,6 +97,7 @@ typedef struct {
     uint8_t hdmi_try_rounds = 0;
     uint8_t vi_detect_state = 0;
     uint8_t venc_auto_recyc = 0;
+    uint8_t fresh_frame_count = 0;
 } kvmv_cfg_t;
 
 typedef struct {
@@ -1438,12 +1440,21 @@ uint8_t frame_changed(image::Image *raw)
     return ret;
 }
 
-void jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
+bool jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
 {
+    if(dump_to == NULL || raw == NULL || raw->data() == NULL || raw->data_size() == 0){
+        return false;
+    }
     dump_to->p_img_data = (uint8_t *)malloc(raw->data_size());
+    if(dump_to->p_img_data == NULL){
+        dump_to->img_data_size = 0;
+        dump_to->img_data_type = 0;
+        return false;
+    }
     dump_to->img_data_size = raw->data_size();
     dump_to->img_data_type = VENC_MJPEG;
     memcpy(dump_to->p_img_data, (uint8_t *)raw->data(), raw->data_size());
+    return true;
 }
 
 uint8_t kvmvenc_gop = default_h264_gop;
@@ -1684,6 +1695,8 @@ void set_venc_auto_recyc(uint8_t _enable)
  **********************************************************************************/
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
 {
+    *_pp_kvm_data = NULL;
+    *_p_kvmv_data_size = 0;
     static uint8_t frame_undetact_count = 0;
 	// uint64_t __attribute__((unused)) start_time = time::time_ms();
     debug("[kvmv]kvmv_read_img type = %d...\n", _type);
@@ -1743,6 +1756,16 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         // debug("[kvmv]read img: %d \r\n", (int)(time::time_ms() - start_time));
 
         if(img != NULL){
+            if(kvmv_cfg.fresh_frame_count != 0){
+                // Do not restart VI after HDMI idle. Reopening the MMF
+                // channel can exhaust the carveout heap when the detector
+                // thread is also transitioning. Consume queued frames
+                // instead; the camera buffer contains at most three frames.
+                kvmv_cfg.fresh_frame_count--;
+                delete img;
+                continue;
+            }
+
             // frame detect
             if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
                 if(kvmv_cfg.stream_stop == 0){
@@ -1801,18 +1824,22 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         kvmv_cfg.venc_type = _type;
 
         if(kvmv_cfg.venc_type == VENC_MJPEG){
-            image::Image *jpg = img->to_jpeg(maxmin_data(99, 51, (int)_qlty));
             kvmv_data_t* p_kvmv_data = get_save_buffer();
             if(p_kvmv_data == NULL){
                 // buffer full
-                delete jpg;
 			    delete img;
                 debug("[kvmv]jpg buffer full\n");
-                *_pp_kvm_data = NULL;
                 pthread_mutex_unlock(&vi_mutex);
                 return IMG_BUFFER_FULL;
             }
-            jpg_dump(p_kvmv_data, jpg);
+            image::Image *jpg = img->to_jpeg(maxmin_data(99, 51, (int)_qlty));
+            if(jpg == NULL || !jpg_dump(p_kvmv_data, jpg)){
+                delete jpg;
+			    delete img;
+                debug("[kvmv]failed to allocate jpg buffer\n");
+                pthread_mutex_unlock(&vi_mutex);
+                return IMG_BUFFER_FULL;
+            }
             delete jpg;
 			delete img;
             *_pp_kvm_data = p_kvmv_data->p_img_data;
@@ -1868,7 +1895,7 @@ int free_kvmv_data(uint8_t ** _pp_kvm_data)
 
 void free_all_kvmv_data()
 {
-    for(int i = 0; i <= kvmv_data_buffer_size; i++){
+    for(int i = 0; i < kvmv_data_buffer_size; i++){
         if(kvmv_data_buffer[i].p_img_data != NULL){
             free(kvmv_data_buffer[i].p_img_data);
             kvmv_data_buffer[i].p_img_data = NULL;
@@ -1922,6 +1949,11 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     } else {
         kvmv_cfg.hdmi_stop_flag = 0;
         system("echo 1 > /sys/class/gpio/gpio451/value");
+
+        // Keep the existing VI channel and consume queued frames after idle.
+        // Reopening it here or from kvmv_read_img can exhaust the carveout
+        // heap while the HDMI detector is transitioning.
+        kvmv_cfg.fresh_frame_count = fresh_frame_discard_count;
         return 0;
     }
     return -1;

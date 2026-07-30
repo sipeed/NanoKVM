@@ -369,7 +369,10 @@ const ca = {
           tip: 'Desactiva-ho si no és necessari'
         },
         hdmi: {
-          description: 'Activa la sortida HDMI'
+          description: 'Activa la sortida HDMI',
+          idleTimeoutTitle: "Temps d'espera d'inactivitat de captura",
+          idleTimeoutDescription: "Atura la captura HDMI després de no detectar espectadors actius durant",
+          minutes: 'min'
         },
         autostart: {
           title: "Configuració dels scripts d'inici automàtic",

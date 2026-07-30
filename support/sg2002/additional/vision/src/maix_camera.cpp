@@ -135,8 +135,9 @@ namespace maix::camera
 
         if (open) {
             e = this->open(_width, _height, _format, _buff_num);
-
-            // err::check_raise(e, "camera open failed");
+			if (e != err::ERR_NONE) {
+				log::error("camera open failed: %d", (int)e);
+			}
         }
     }
 
@@ -422,4 +423,3 @@ namespace maix::camera
         return _impl->vflip(value);
     }
 }
-

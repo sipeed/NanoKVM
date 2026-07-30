@@ -373,7 +373,10 @@ const hu = {
           tip: 'Kikapcsolás, ha nincs rá szükség'
         },
         hdmi: {
-          description: 'HDMI/monitor kimenet engedélyezése'
+          description: 'HDMI/monitor kimenet engedélyezése',
+          idleTimeoutTitle: 'Inaktív rögzítés időkorlátja',
+          idleTimeoutDescription: 'A HDMI-rögzítés leállítása, ha nincs aktív néző ennyi ideig:',
+          minutes: 'perc'
         },
         autostart: {
           title: 'Automatikus indítási parancsfájlok beállításai',

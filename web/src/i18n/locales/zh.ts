@@ -359,7 +359,10 @@ const zh = {
           tip: '如果您未使用此功能，建议将其关闭'
         },
         hdmi: {
-          description: '启用 HDMI/显示器 输出功能'
+          description: '启用 HDMI/显示器 输出功能',
+          idleTimeoutTitle: '无观看者自动停止采集',
+          idleTimeoutDescription: '没有活跃观看者后停止 HDMI 采集，0 表示永不停止',
+          minutes: '分钟'
         },
         autostart: {
           title: '自动启动脚本设置',

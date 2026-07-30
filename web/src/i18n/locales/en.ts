@@ -368,7 +368,10 @@ const en = {
           tip: "Turning it off if it's not needed"
         },
         hdmi: {
-          description: 'Enable HDMI/monitor output'
+          description: 'Enable HDMI/monitor output',
+          idleTimeoutTitle: 'Capture idle timeout',
+          idleTimeoutDescription: 'Stop HDMI capture after there are no active viewers for',
+          minutes: 'min'
         },
         autostart: {
           title: 'Autostart Scripts Settings',

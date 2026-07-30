@@ -370,7 +370,10 @@ const nb = {
           tip: 'Slå den av hvis den ikke er nødvendig'
         },
         hdmi: {
-          description: 'Aktiver HDMI/skjermutgang'
+          description: 'Aktiver HDMI/skjermutgang',
+          idleTimeoutTitle: 'Tidsavbrudd for inaktivt opptak',
+          idleTimeoutDescription: 'Stopp HDMI-opptak etter at det ikke har vært aktive seere i',
+          minutes: 'min'
         },
         autostart: {
           title: 'Autostart skriptinnstillinger',

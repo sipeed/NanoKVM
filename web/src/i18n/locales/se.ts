@@ -368,7 +368,10 @@ const se = {
           tip: 'Stäng av om det inte behövs'
         },
         hdmi: {
-          description: 'Aktivera HDMI/monitorutgång'
+          description: 'Aktivera HDMI/monitorutgång',
+          idleTimeoutTitle: 'Tidsgräns för inaktiv inspelning',
+          idleTimeoutDescription: 'Stoppa HDMI-inspelning efter att det inte har funnits aktiva tittare i',
+          minutes: 'min'
         },
         autostart: {
           title: 'Autostart skriptinställningar',

@@ -3,6 +3,7 @@ package webrtc
 import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
+	"NanoKVM-Server/service/vm"
 	"sync/atomic"
 	"time"
 
@@ -27,7 +28,10 @@ func (m *WebRTCManager) AddClient(ws *websocket.Conn, client *Client) {
 	m.mutex.Lock()
 	m.clients[ws] = client
 	count := m.updateClientSnapshotLocked()
+	m.viewerVersion++
+	version := m.viewerVersion
 	m.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("webrtc", count, version)
 
 	log.Debugf("added client %s, total clients: %d", ws.RemoteAddr(), count)
 }
@@ -36,7 +40,10 @@ func (m *WebRTCManager) RemoveClient(ws *websocket.Conn) {
 	m.mutex.Lock()
 	delete(m.clients, ws)
 	count := m.updateClientSnapshotLocked()
+	m.viewerVersion++
+	version := m.viewerVersion
 	m.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("webrtc", count, version)
 
 	log.Debugf("removed client %s, total clients: %d", ws.RemoteAddr(), count)
 }

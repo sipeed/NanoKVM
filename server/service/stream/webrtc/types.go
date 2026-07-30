@@ -14,6 +14,7 @@ type WebRTCManager struct {
 	clientSnapshot atomic.Pointer[[]*Client]
 	videoSending   int32
 	mutex          sync.Mutex
+	viewerVersion  uint64
 }
 
 type Client struct {

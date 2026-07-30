@@ -371,7 +371,10 @@ const id = {
           tip: 'Mematikan jika tidak diperlukan'
         },
         hdmi: {
-          description: 'Aktifkan keluaran HDMI/monitor'
+          description: 'Aktifkan keluaran HDMI/monitor',
+          idleTimeoutTitle: 'Batas waktu tangkapan tidak aktif',
+          idleTimeoutDescription: 'Hentikan tangkapan HDMI setelah tidak ada penonton aktif selama',
+          minutes: 'mnt'
         },
         autostart: {
           title: 'Pengaturan Skrip Mulai Otomatis',

@@ -79,7 +79,7 @@ namespace maix::camera
             }
 
             if (0 != mmf_vi_init()) {
-                err::check_raise(err::ERR_RUNTIME, "mmf vi init failed");
+                log::error("mmf vi init failed");
             }
         }
 
@@ -97,7 +97,7 @@ namespace maix::camera
             }
 
             if (0 != mmf_vi_init()) {
-                err::check_raise(err::ERR_RUNTIME, "mmf vi init failed");
+                log::error("mmf vi init failed");
             }
         }
 

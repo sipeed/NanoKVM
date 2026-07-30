@@ -372,7 +372,10 @@ const ru = {
           tip: 'Выключите, если нет необходимости'
         },
         hdmi: {
-          description: 'Включить HDMI/выход монитора'
+          description: 'Включить HDMI/выход монитора',
+          idleTimeoutTitle: 'Тайм-аут неактивного захвата',
+          idleTimeoutDescription: 'Остановить захват HDMI, если активных зрителей нет в течение',
+          minutes: 'мин'
         },
         autostart: {
           title: 'Настройки сценариев автозапуска',

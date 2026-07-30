@@ -155,6 +155,7 @@ func (s *Service) proxyMessages(source string, session *GatewaySession, src *web
 			}
 			return
 		}
+		s.updateTaskCaptureLease(source, session.SessionID, data)
 
 		var writeErr error
 		switch source {
@@ -215,6 +216,7 @@ func (s *Service) closeGatewaySession(session *GatewaySession, closeCode int, re
 		hadDownstream := session.Downstream != nil
 
 		mjpeg.DisableLatestFrameCache()
+		s.releaseCaptureLeasesForSession(session.SessionID)
 		GetSessionManager().SetState(session.SessionID, SessionStateClosing)
 
 		if session.Upstream != nil {

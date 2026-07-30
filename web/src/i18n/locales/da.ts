@@ -369,7 +369,10 @@ const da = {
           tip: 'Slukker den, hvis den ikke er nødvendig'
         },
         hdmi: {
-          description: 'Aktiver HDMI/monitor output'
+          description: 'Aktiver HDMI/monitor output',
+          idleTimeoutTitle: 'Timeout for inaktiv optagelse',
+          idleTimeoutDescription: 'Stop HDMI-optagelse efter en periode uden aktive seere på',
+          minutes: 'min'
         },
         autostart: {
           title: 'Indstillinger for autostart scripts',

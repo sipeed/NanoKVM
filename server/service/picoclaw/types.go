@@ -1,6 +1,7 @@
 package picoclaw
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"strings"
@@ -32,6 +33,11 @@ type Service struct {
 	control            *controlmode.Manager
 	releaseHID         func() error
 	operations         *controlOperationTracker
+	acquireHDMILease   func() func()
+	acquireHDMIForRead func(context.Context) (func(), func() bool, error)
+	captureLeaseMu     sync.Mutex
+	captureLeases      map[string]func()
+	captureLeaseTimers map[string]*time.Timer
 	runtimeLifecycleMu sync.Mutex
 	reconcileOnce      sync.Once
 }

@@ -111,6 +111,9 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 	if initialize.Code != http.StatusOK {
 		t.Fatalf("initialize status=%d body=%s", initialize.Code, initialize.Body.String())
 	}
+	if contentType := initialize.Header().Get("Content-Type"); !strings.HasPrefix(contentType, "application/json") {
+		t.Fatalf("initialize content type=%q, want application/json", contentType)
+	}
 	sessionID := initialize.Header().Get("Mcp-Session-Id")
 	if sessionID == "" || !strings.Contains(initialize.Body.String(), "nanokvm-cube-remote-control") {
 		t.Fatalf("session=%q body=%s", sessionID, initialize.Body.String())
@@ -156,6 +159,9 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 		}
 		if call.name == "cube_screenshot" && !strings.Contains(response.Body.String(), "image/jpeg") {
 			t.Fatalf("screenshot response missing image: %s", response.Body.String())
+		}
+		if call.name == "cube_screenshot" && strings.HasPrefix(response.Body.String(), "data:") {
+			t.Fatalf("screenshot unexpectedly used SSE response: %s", response.Body.String())
 		}
 	}
 

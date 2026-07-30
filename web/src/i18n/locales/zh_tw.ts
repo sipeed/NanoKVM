@@ -359,7 +359,10 @@ const zh_tw = {
           tip: '若無需求，建議關閉此功能'
         },
         hdmi: {
-          description: '啟用 HDMI/螢幕 輸出'
+          description: '啟用 HDMI/螢幕 輸出',
+          idleTimeoutTitle: '擷取閒置逾時',
+          idleTimeoutDescription: '沒有活躍觀看者時，在指定時間後停止 HDMI 擷取',
+          minutes: '分鐘'
         },
         autostart: {
           title: '啟動時指令碼設定',

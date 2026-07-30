@@ -242,7 +242,7 @@ func (s *Service) mcpScreenshot(req jsonRPCRequest, args json.RawMessage, c *gin
 		Quality: params.Quality,
 	}
 
-	data, meta, err := s.captureScreenshot(query)
+	data, meta, err := s.captureScreenshot(c.Request.Context(), query)
 	if err != nil {
 		return mcpToolError(req, err.Message)
 	}

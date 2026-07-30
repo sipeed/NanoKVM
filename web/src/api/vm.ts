@@ -85,6 +85,11 @@ export function setHdmiState(enabled: boolean) {
   return disableHdmi();
 }
 
+// set HDMI idle timeout in minutes
+export function setHdmiIdleTimeout(minutes: number) {
+  return http.post('/api/vm/hdmi/timeout', { minutes });
+}
+
 // get SSH state
 export function getSSHState() {
   return http.get('/api/vm/ssh');
