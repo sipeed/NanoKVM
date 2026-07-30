@@ -3,10 +3,13 @@
 # Configuration
 UID := $(shell id -u)
 GID := $(shell id -g)
-IMAGE_NAME := nanokvm-builder-local-$(UID)-$(GID)
+# ?= so a prebuilt image can be used instead, e.g. a GHCR-cached builder in CI.
+IMAGE_NAME ?= nanokvm-builder-local-$(UID)-$(GID)
 PWD := $(shell pwd)
 
-# Docker run common parameters
+# Docker run common parameters. Allocating a TTY breaks in environments without
+# one, so it can be overridden with DOCKER_TTY=
+DOCKER_TTY ?= -it
 DOCKER_RUN_BASE := docker run -e UID=$(UID) -e GID=$(GID) -v $(PWD):/home/build/NanoKVM --rm
 
 # Build the image with the host user's identity so entrypoint does not need
@@ -80,12 +83,12 @@ shell: check-root builder-image
 # Build Go application
 app: check-root builder-image
 	@echo "Building app..."
-	@$(DOCKER_RUN_BASE) -it $(IMAGE_NAME) /bin/bash -c '$(GO_BUILD_CMD)'
+	@$(DOCKER_RUN_BASE) $(DOCKER_TTY) $(IMAGE_NAME) /bin/bash -c '$(GO_BUILD_CMD)'
 
 # Build hardware support libraries
 support: check-root builder-image
 	@echo "Building support..."
-	@$(DOCKER_RUN_BASE) -it $(IMAGE_NAME) /bin/bash -c '$(SUPPORT_BUILD_CMD)'
+	@$(DOCKER_RUN_BASE) $(DOCKER_TTY) $(IMAGE_NAME) /bin/bash -c '$(SUPPORT_BUILD_CMD)'
 
 # Clean build artifacts
 clean:
