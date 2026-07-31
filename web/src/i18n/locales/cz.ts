@@ -79,6 +79,11 @@ const cz = {
       frameDetectTip:
         'Vypočítá rozdíl mezi snímky. Přenos video streamu se zastaví, pokud nejsou detekovány změny na obrazovce vzdáleného hostitele.',
       resetHdmi: 'Resetovat HDMI',
+      mixedH264: {
+        title: 'Konflikt streamu H.264',
+        description:
+          'H.264 Direct a H.264 WebRTC se používají současně. To může způsobit trhání obrazu nebo poškozené video. Používejte pouze jeden režim H.264.'
+      },
       captureStatus: {
         hdmiError: 'Chyba obrazu HDMI',
         unsupportedResolution: 'Aktuální rozlišení není podporováno',

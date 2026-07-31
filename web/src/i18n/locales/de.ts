@@ -81,6 +81,11 @@ const de = {
       frameDetectTip:
         'Berechnet den Unterschied zwischen den Einzelbildern. Beendet die Liveübertragung des Videostreams wenn keine Änderungen auf dem Bildschirm des Hosts festgestellt werden kann.',
       resetHdmi: 'HDMI zurücksetzen',
+      mixedH264: {
+        title: 'H.264-Streamkonflikt',
+        description:
+          'H.264 Direct und H.264 WebRTC werden gleichzeitig verwendet. Dies kann zu Bildschirm-Tearing oder beschädigtem Video führen. Bitte verwenden Sie nur einen H.264-Modus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-Bildschirmfehler',
         unsupportedResolution: 'Die aktuelle Auflösung wird nicht unterstützt',

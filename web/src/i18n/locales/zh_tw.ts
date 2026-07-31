@@ -74,6 +74,11 @@ const zh_tw = {
       frameDetect: '影格檢測',
       frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止視訊傳輸串流。',
       resetHdmi: '重置 HDMI',
+      mixedH264: {
+        title: 'H.264 串流衝突',
+        description:
+          '偵測到 H.264 Direct 和 H.264 WebRTC 同時使用，可能導致畫面撕裂或影片損壞。請只保留一種 H.264 模式。'
+      },
       captureStatus: {
         hdmiError: 'HDMI 畫面異常',
         unsupportedResolution: '目前解析度不支援',

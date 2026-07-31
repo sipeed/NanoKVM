@@ -14,7 +14,7 @@ import { CaptureStatusOverlay, useCaptureStatus } from './capture-status';
 import { Keyboard } from './keyboard';
 import { Menu } from './menu';
 import { Mouse } from './mouse';
-import { Notification } from './notification.tsx';
+import { H264ModeNotification, Notification } from './notification.tsx';
 import { Sidebar as PicoclawSidebar } from './picoclaw';
 import { ActionOverlay } from './picoclaw/action-overlay.tsx';
 import { Screen } from './screen';
@@ -70,6 +70,7 @@ export const Desktop = () => {
       <Head title={t('head.desktop')} />
 
       {isBigScreen && <Notification />}
+      <H264ModeNotification />
 
       {videoMode && resolution && (
         <div className="relative flex h-full min-h-0 w-full min-w-0">

@@ -4,7 +4,6 @@ import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
 	"NanoKVM-Server/service/vm"
-	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -15,7 +14,7 @@ import (
 func NewWebRTCManager() *WebRTCManager {
 	m := &WebRTCManager{
 		clients:      make(map[*websocket.Conn]*Client),
-		videoSending: 0,
+		videoSending: false,
 	}
 	m.updateClientSnapshotLocked()
 
@@ -72,15 +71,31 @@ func (m *WebRTCManager) getClients() []*Client {
 }
 
 func (m *WebRTCManager) StartVideoStream() {
-	if atomic.CompareAndSwapInt32(&m.videoSending, 0, 1) {
-		go m.sendVideoStream()
-		log.Debugf("start sending h264 stream")
+	m.mutex.Lock()
+	if m.videoSending || len(m.clients) == 0 {
+		m.mutex.Unlock()
+		return
 	}
+	m.videoSending = true
+	m.mutex.Unlock()
+
+	go m.sendVideoStream()
+	log.Debugf("start sending h264 stream")
+}
+
+func (m *WebRTCManager) stopVideoStreamIfIdle() bool {
+	m.mutex.Lock()
+	defer m.mutex.Unlock()
+
+	if len(m.clients) > 0 {
+		return false
+	}
+
+	m.videoSending = false
+	return true
 }
 
 func (m *WebRTCManager) sendVideoStream() {
-	defer atomic.StoreInt32(&m.videoSending, 0)
-
 	screen := common.GetScreen()
 	common.CheckScreen()
 	fps := screen.FPS
@@ -94,8 +109,12 @@ func (m *WebRTCManager) sendVideoStream() {
 	for range ticker.C {
 		clients := m.getClients()
 		if len(clients) == 0 {
-			log.Debugf("stop sending h264 stream")
-			return
+			if m.stopVideoStreamIfIdle() {
+				log.Debugf("stop sending h264 stream")
+				return
+			}
+
+			continue
 		}
 
 		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)

@@ -76,6 +76,11 @@ const se = {
       frameDetectTip:
         'Beräkna skillnaden mellan ramar. Sluta skicka videoström när inga förändringar upptäcks på fjärrvärdens skärm.',
       resetHdmi: 'Återställ HDMI',
+      mixedH264: {
+        title: 'H.264-strömningskonflikt',
+        description:
+          'H.264 Direct och H.264 WebRTC används samtidigt. Detta kan orsaka skärmrivningar eller skadad video. Använd endast ett H.264-läge.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-skärmfel',
         unsupportedResolution: 'Den aktuella upplösningen stöds inte',

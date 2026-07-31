@@ -79,6 +79,11 @@ const pl = {
       frameDetectTip:
         'Obliczanie różnicy między klatkami. Zatrzymaj transmisję strumienia wideo, gdy na ekranie zdalnego hosta nie zostaną wykryte żadne zmiany.',
       resetHdmi: 'Resetuj HDMI',
+      mixedH264: {
+        title: 'Konflikt strumieni H.264',
+        description:
+          'Strumienie H.264 Direct i H.264 WebRTC są używane jednocześnie. Może to powodować rozrywanie obrazu lub uszkodzenie wideo. Używaj tylko jednego trybu H.264.'
+      },
       captureStatus: {
         hdmiError: 'Błąd obrazu HDMI',
         unsupportedResolution: 'Bieżąca rozdzielczość nie jest obsługiwana',

@@ -1,6 +1,7 @@
 package webrtc
 
 import (
+	"NanoKVM-Server/service/stream"
 	"encoding/json"
 	"errors"
 
@@ -33,16 +34,83 @@ func (s *SignalingHandler) RegisterCallbacks() {
 		}
 	})
 
-	manager := getManager()
-
 	// video connection state change
 	s.client.video.OnICEConnectionStateChange(func(state webrtc.ICEConnectionState) {
-		if state == webrtc.ICEConnectionStateConnected {
-			manager.StartVideoStream()
-		}
+		s.updateVideoStreamState(state)
 
 		log.Debugf("video connection state changed to %s", state.String())
 	})
+}
+
+func (s *SignalingHandler) Close() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.closed {
+		return
+	}
+
+	s.closed = true
+	s.unregisterH264ModeLocked()
+	if s.client != nil && s.client.WsConn() != nil {
+		getManager().RemoveClient(s.client.WsConn())
+	}
+}
+
+func (s *SignalingHandler) updateVideoStreamState(state webrtc.ICEConnectionState) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.closed {
+		return
+	}
+
+	manager := getManager()
+	if s.updateH264ModeLocked(state) {
+		manager.AddClient(s.client.WsConn(), s.client)
+		manager.StartVideoStream()
+		return
+	}
+
+	manager.RemoveClient(s.client.WsConn())
+}
+
+func (s *SignalingHandler) updateH264Mode(state webrtc.ICEConnectionState) bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.closed {
+		return false
+	}
+
+	return s.updateH264ModeLocked(state)
+}
+
+func (s *SignalingHandler) updateH264ModeLocked(state webrtc.ICEConnectionState) bool {
+	if state == webrtc.ICEConnectionStateConnected || state == webrtc.ICEConnectionStateCompleted {
+		s.registerH264ModeLocked()
+		return true
+	}
+
+	s.unregisterH264ModeLocked()
+	return false
+}
+
+func (s *SignalingHandler) registerH264ModeLocked() {
+	if s.unregisterMode != nil {
+		return
+	}
+
+	s.unregisterMode = stream.RegisterH264Mode(stream.H264ModeWebRTC)
+}
+
+func (s *SignalingHandler) unregisterH264ModeLocked() {
+	unregisterMode := s.unregisterMode
+	s.unregisterMode = nil
+
+	if unregisterMode != nil {
+		unregisterMode()
+	}
 }
 
 // HandleMessage handle the received message

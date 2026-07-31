@@ -152,6 +152,7 @@ func (s *Streamer) send(clients []*websocket.Conn, isKeyFrame byte, timestamp in
 			log.Errorf("failed to write message to client %s: %s.", client.RemoteAddr(), err)
 
 			s.removeClient(client)
+			_ = client.Close()
 		}
 	}
 

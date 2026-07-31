@@ -80,6 +80,11 @@ const nl = {
       frameDetectTip:
         'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.',
       resetHdmi: 'Reset HDMI',
+      mixedH264: {
+        title: 'H.264-streamconflict',
+        description:
+          'H.264 Direct en H.264 WebRTC worden tegelijkertijd gebruikt. Dit kan tearing of beschadigde video veroorzaken. Gebruik slechts één H.264-modus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-schermfout',
         unsupportedResolution: 'De huidige resolutie wordt niet ondersteund',

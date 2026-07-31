@@ -80,6 +80,11 @@ const hu = {
       frameDetectTip:
         'Elemzi a képkockák közötti különbségeket. A videó stream küldése leáll, ha a távoli gép képernyőjén nem történik változás.',
       resetHdmi: 'HDMI visszaállítása',
+      mixedH264: {
+        title: 'H.264 adatfolyam-ütközés',
+        description:
+          'Az H.264 Direct és az H.264 WebRTC egyszerre van használatban. Ez képtörést vagy sérült videót okozhat. Csak egy H.264 módot használjon.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-képernyőhiba',
         unsupportedResolution: 'A jelenlegi felbontás nem támogatott',

@@ -81,6 +81,11 @@ const fr = {
       frameDetectTip:
         "Calcule la différence entre les images. Arrête la transmission du flux vidéo lorsqu'aucun changement n'est détecté sur l'écran de l'hôte distant",
       resetHdmi: 'Réinitialiser le HDMI',
+      mixedH264: {
+        title: 'Conflit de flux H.264',
+        description:
+          'Les modes H.264 Direct et H.264 WebRTC sont utilisés simultanément. Cela peut provoquer des déchirures d’écran ou une vidéo corrompue. Veuillez n’utiliser qu’un seul mode H.264.'
+      },
       captureStatus: {
         hdmiError: 'Erreur d’image HDMI',
         unsupportedResolution: 'La résolution actuelle n’est pas prise en charge',

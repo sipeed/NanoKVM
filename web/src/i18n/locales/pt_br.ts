@@ -78,6 +78,11 @@ const pt_br = {
       frameDetectTip:
         'Calcular a diferença entre os quadros. Parar a transmissão de vídeo quando nenhuma alteração for detectada na tela do host remoto.',
       resetHdmi: 'Redefinir HDMI',
+      mixedH264: {
+        title: 'Conflito de transmissão H.264',
+        description:
+          'H.264 Direct e H.264 WebRTC estão sendo usados ao mesmo tempo. Isso pode causar rasgos na tela ou vídeo corrompido. Use apenas um modo H.264.'
+      },
       captureStatus: {
         hdmiError: 'Erro na imagem HDMI',
         unsupportedResolution: 'A resolução atual não é compatível',

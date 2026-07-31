@@ -38,6 +38,7 @@ func (s *Service) Connect(c *gin.Context) {
 	defer manager.RemoveClient(ws)
 
 	sendCaptureStatusSnapshot(client)
+	sendH264ModeStatusSnapshot(client)
 
 	client.Start()
 }

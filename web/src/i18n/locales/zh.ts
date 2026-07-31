@@ -74,6 +74,11 @@ const zh = {
       frameDetect: '帧差检测',
       frameDetectTip: '计算帧之间的差异，当检测到远程主机画面不变时，停止传输视频流',
       resetHdmi: '重置 HDMI',
+      mixedH264: {
+        title: 'H.264 视频流冲突',
+        description:
+          '检测到 H.264 Direct 和 H.264 WebRTC 同时使用，可能导致画面撕裂或花屏。请只保留一种 H.264 模式。'
+      },
       captureStatus: {
         hdmiError: 'HDMI 画面异常',
         unsupportedResolution: '当前分辨率不支持',

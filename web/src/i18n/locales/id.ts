@@ -78,6 +78,11 @@ const id = {
       frameDetectTip:
         'Hitung selisih antar frame. Hentikan transmisi aliran video saat tidak ada perubahan yang terdeteksi di layar host jarak jauh.',
       resetHdmi: 'Atur ulang HDMI',
+      mixedH264: {
+        title: 'Konflik aliran H.264',
+        description:
+          'H.264 Direct dan H.264 WebRTC sedang digunakan secara bersamaan. Hal ini dapat menyebabkan layar robek atau video rusak. Harap gunakan hanya satu mode H.264.'
+      },
       captureStatus: {
         hdmiError: 'Kesalahan layar HDMI',
         unsupportedResolution: 'Resolusi saat ini tidak didukung',

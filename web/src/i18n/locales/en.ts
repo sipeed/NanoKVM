@@ -77,6 +77,11 @@ const en = {
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
       resetHdmi: 'Reset HDMI',
+      mixedH264: {
+        title: 'H.264 stream conflict',
+        description:
+          'H.264 Direct and H.264 WebRTC are being used at the same time. This may cause screen tearing or corrupted video. Please use only one H.264 mode.'
+      },
       captureStatus: {
         hdmiError: 'HDMI screen error',
         unsupportedResolution: 'Current resolution is not supported',
