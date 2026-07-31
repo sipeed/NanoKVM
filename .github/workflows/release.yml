@@ -1,0 +1,343 @@
+name: NanoKVM Package
+
+# Builds nanokvm_<version>.tar.gz and the latest.json manifest that the
+# on-device updater consumes (server/service/application/). Pull requests get a
+# uniquely identified, short-lived test artifact; version tags also attach the
+# same package to a GitHub release.
+#
+# This workflow does NOT publish to cdn.sipeed.com. Uploading latest.json is what
+# actually offers the update to every device in the field, so that step stays
+# manual and deliberate.
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release.yml
+      - kvmapp/**
+      - scripts/**
+      - server/**
+      - support/**
+      - tools/nanokvm_update_edid/**
+      - web/**
+      - Makefile
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to package, e.g. 2.4.4
+        required: true
+        type: string
+
+concurrency:
+  group: package-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  package:
+    name: Build package
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    outputs:
+      artifact_name: ${{ steps.version.outputs.artifact_name }}
+      version: ${{ steps.version.outputs.version }}
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # package.sh derives SOURCE_DATE_EPOCH from the commit date.
+          fetch-depth: 0
+          # Build scripts from a pull request must not inherit checkout's token.
+          persist-credentials: false
+
+      - name: Resolve version
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          INPUT_VERSION: ${{ inputs.version }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            VERSION="0.${PR_NUMBER}.${GITHUB_RUN_NUMBER}"
+            SOURCE_SHA="$HEAD_SHA"
+          elif [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+            SOURCE_SHA="$GITHUB_SHA"
+          else
+            VERSION="$REF_NAME"
+            SOURCE_SHA="$GITHUB_SHA"
+          fi
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::invalid version '$VERSION', expected MAJOR.MINOR.PATCH"
+            exit 1
+          fi
+          if [ -z "$SOURCE_SHA" ]; then
+            echo "::error::could not resolve source commit"
+            exit 1
+          fi
+          SHORT_SHA=$(printf '%s' "$SOURCE_SHA" | cut -c1-12)
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            ARTIFACT_NAME="nanokvm-pr-${PR_NUMBER}-${SHORT_SHA}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
+          else
+            ARTIFACT_NAME="nanokvm-${VERSION}-${SHORT_SHA}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
+          fi
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "source_sha=$SOURCE_SHA" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Packaging version $VERSION as $ARTIFACT_NAME"
+
+      - name: Free up disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          df -h /
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up pnpm
+        run: npm install --global pnpm@11
+
+      - name: Build frontend
+        run: make web
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ok=0
+          for attempt in 1 2 3; do
+            if printf '%s' "$GHCR_TOKEN" \
+                 | docker login ghcr.io -u "$GHCR_USER" --password-stdin; then
+              ok=1
+              break
+            fi
+            echo "login attempt $attempt failed, retrying in 15s"
+            sleep 15
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::could not log in to ghcr.io after 3 attempts"
+            exit 1
+          fi
+
+      - name: Pull builder image
+        id: image
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          # GHCR only accepts lowercase repository paths.
+          owner=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          IMAGE_REPO="ghcr.io/$owner/nanokvm-builder"
+          TAGGED_REF="${IMAGE_REPO}:latest"
+          ok=0
+          for attempt in 1 2 3; do
+            if docker pull "$TAGGED_REF"; then
+              ok=1
+              break
+            fi
+            echo "pull attempt $attempt failed, retrying in 15s"
+            sleep 15
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::could not pull $TAGGED_REF - run the 'Builder Image' workflow first and ensure PR builds can pull it without credentials"
+            exit 1
+          fi
+          RESOLVED_REF=$(docker image inspect --format='{{index .RepoDigests 0}}' "$TAGGED_REF")
+          case "$RESOLVED_REF" in
+            "$IMAGE_REPO"@sha256:*) ;;
+            *)
+              echo "::error::could not resolve immutable digest for $TAGGED_REF (got '$RESOLVED_REF')"
+              exit 1
+              ;;
+          esac
+          echo "Pulled $RESOLVED_REF"
+          echo "ref=$RESOLVED_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Build riscv64 artifacts
+        run: |
+          make release-build \
+            DOCKER_TTY= \
+            IMAGE_NAME="${{ steps.image.outputs.ref }}"
+
+      - name: Assemble package
+        run: make package VERSION="${{ steps.version.outputs.version }}"
+
+      - name: Compare against the published release
+        # Informational only: highlights what changed relative to what devices
+        # are currently running. Never blocks the build.
+        continue-on-error: true
+        run: |
+          ./scripts/compare-release.sh \
+            "build/release/nanokvm_${{ steps.version.outputs.version }}.tar.gz"
+
+      - name: Write build provenance
+        env:
+          ARTIFACT_NAME: ${{ steps.version.outputs.artifact_name }}
+          BUILDER_IMAGE: ${{ steps.image.outputs.ref }}
+          BUILD_SHA: ${{ github.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_SHA: ${{ steps.version.outputs.source_sha }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          TARBALL="build/release/nanokvm_${VERSION}.tar.gz"
+          TARBALL_NAME=$(basename "$TARBALL")
+          SHA256_HEX=$(sha256sum "$TARBALL" | cut -d' ' -f1)
+          SHA512_HEX=$(sha512sum "$TARBALL" | cut -d' ' -f1)
+          SHA512_BASE64=$(jq -er '.sha512 | select(type == "string" and length > 0)' \
+            build/release/latest.json)
+          ACTUAL_BASE64=$(openssl dgst -sha512 -binary "$TARBALL" | openssl base64 -A)
+          if [ "$SHA512_BASE64" != "$ACTUAL_BASE64" ]; then
+            echo "::error::latest.json sha512 does not match $TARBALL"
+            exit 1
+          fi
+          printf '%s  %s\n' "$SHA256_HEX" "$TARBALL_NAME" > build/release/sha256.txt
+          {
+            echo "artifact=${ARTIFACT_NAME}"
+            echo "version=${VERSION}"
+            echo "event=${GITHUB_EVENT_NAME}"
+            echo "pull_request=${PR_NUMBER}"
+            echo "source_sha=${SOURCE_SHA}"
+            echo "build_sha=${BUILD_SHA}"
+            echo "builder_image=${BUILDER_IMAGE}"
+            echo "run_id=${GITHUB_RUN_ID}"
+            echo "run_attempt=${GITHUB_RUN_ATTEMPT}"
+            echo "run_url=https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo "tarball=${TARBALL_NAME}"
+            echo "sha256_hex=${SHA256_HEX}"
+            echo "sha512_hex=${SHA512_HEX}"
+            echo "sha512_base64=${SHA512_BASE64}"
+          } > build/release/BUILD_INFO.txt
+
+      - name: Summary
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          {
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              echo "> [!WARNING]"
+              echo "> PR TEST ONLY — DO NOT PUBLISH TO CDN"
+              echo
+            fi
+            echo "### nanokvm_${VERSION}.tar.gz"
+            echo
+            echo '```text'
+            cat build/release/BUILD_INFO.txt
+            echo '```'
+            echo
+            echo '```json'
+            cat build/release/latest.json
+            echo '```'
+            echo
+            if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+              echo "Upload only the inner tarball through NanoKVM's manual offline update UI."
+            else
+              echo "Publishing to \`cdn.sipeed.com/nanokvm/\` is a separate manual step."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.version.outputs.artifact_name }}
+          path: |
+            build/release/nanokvm_${{ steps.version.outputs.version }}.tar.gz
+            build/release/latest.json
+            build/release/sha256.txt
+            build/release/BUILD_INFO.txt
+          if-no-files-found: error
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}
+
+  publish-release:
+    name: Attach package to GitHub release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.package.outputs.artifact_name }}
+          path: build/release
+
+      - name: Attach to GitHub release
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          TARBALL="build/release/nanokvm_${VERSION}.tar.gz"
+          TARBALL_NAME=$(basename "$TARBALL")
+          SHA256=$(sha256sum "$TARBALL" | cut -d' ' -f1)
+          EXPECTED_SHA256_LINE="${SHA256}  ${TARBALL_NAME}"
+          ACTUAL_SHA256_LINE=$(cat build/release/sha256.txt)
+          if [ "$ACTUAL_SHA256_LINE" != "$EXPECTED_SHA256_LINE" ]; then
+            echo "::error::sha256.txt does not match $TARBALL"
+            exit 1
+          fi
+          SHA512=$(jq -er '.sha512 | select(type == "string" and length > 0)' \
+            build/release/latest.json)
+          ACTUAL_SHA512=$(openssl dgst -sha512 -binary "$TARBALL" | openssl base64 -A)
+          if [ "$SHA512" != "$ACTUAL_SHA512" ]; then
+            echo "::error::latest.json sha512 does not match $TARBALL"
+            exit 1
+          fi
+
+          CHECKSUM_BLOCK=$(printf '%s\n' \
+            "<!-- nanokvm-checksums:start -->" \
+            "### Checksums" \
+            "" \
+            "\`SHA-256\` (hex):" \
+            "" \
+            "    ${SHA256}" \
+            "" \
+            "\`SHA-512\` (base64, as expected by the on-device updater):" \
+            "" \
+            "    ${SHA512}" \
+            "<!-- nanokvm-checksums:end -->")
+
+          NOTES=$(printf '%s\n' \
+            "Application package for NanoKVM ${VERSION}." \
+            "" \
+            "${CHECKSUM_BLOCK}" \
+            "" \
+            "To offer this build over OTA, upload the tarball and \`latest.json\` to \`cdn.sipeed.com/nanokvm/\`.")
+
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            echo "Release $VERSION exists; updating notes and assets"
+            CURRENT_NOTES=$(gh release view "$VERSION" --json body --jq .body)
+            PRESERVED_NOTES=$(printf '%s\n' "$CURRENT_NOTES" | awk '
+              $0 == "<!-- nanokvm-checksums:start -->" { skip = 1; next }
+              $0 == "<!-- nanokvm-checksums:end -->" { skip = 0; next }
+              !skip { print }
+            ')
+            if [ -n "$PRESERVED_NOTES" ]; then
+              UPDATED_NOTES=$(printf '%s\n\n%s\n' "$PRESERVED_NOTES" "$CHECKSUM_BLOCK")
+            else
+              UPDATED_NOTES="$CHECKSUM_BLOCK"
+            fi
+            gh release upload "$VERSION" \
+              "$TARBALL" build/release/latest.json build/release/sha256.txt --clobber
+            # Publish the new checksums only after every asset upload succeeds.
+            gh release edit "$VERSION" --notes "$UPDATED_NOTES"
+          else
+            gh release create "$VERSION" \
+              --title "$VERSION" \
+              --notes "$NOTES" \
+              "$TARBALL" build/release/latest.json build/release/sha256.txt
+          fi

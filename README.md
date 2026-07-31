@@ -87,6 +87,7 @@ Start with the guide that matches the part of NanoKVM you want to work on:
 - **System support modules:** Build and update the low-level hardware support components in [support/sg2002/README.md](support/sg2002/README.md).
 - **Backend service:** Set up, build, and understand the Go service in [server/README.md](server/README.md).
 - **Frontend UI:** Develop, lint, and build the React interface in [web/README.md](web/README.md).
+- **Release packaging:** Assemble the `nanokvm_<version>.tar.gz` update package in [scripts/README.md](scripts/README.md).
 
 > Backend compilation and runtime validation require the target toolchain or a NanoKVM device. See the module-specific guides above for the latest development workflow.
 
