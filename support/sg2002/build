@@ -41,6 +41,10 @@ maixcdk_clean(){
 
 case "$1" in
   update_lib)
+    # This script does not run under "set -e", and a release build relies on
+    # update_lib to guarantee the SDK components match the source tree. A copy
+    # that fails silently here would produce stale libraries, so fail loudly.
+    set -e
     cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm $MAIXCDK_PATH/components
     cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm_mmf $MAIXCDK_PATH/components
     cp -rf $NanoKVM_PATH/support/sg2002/additional/vision $MAIXCDK_PATH/components
@@ -48,7 +52,7 @@ case "$1" in
     cp -f $NanoKVM_PATH/support/sg2002/additional/sophgo-middleware/v2/sample/common/sample_common_sensor.c $MAIXCDK_PATH/components/3rd_party/sophgo-middleware/sophgo-middleware/v2/sample/common/
 
     echo -e "\e[36m[build] \e[32mupdate_lib ok!\e[0m"
-    exit 1
+    exit 0
   ;;
   kvm_system)
     Project_Name="kvm_system"
@@ -138,6 +142,7 @@ then
         echo -e "\e[36m[build] \e[32mBuild completed! Use \e[34m./build $Project_Name add_to_kvmapp\e[32m to add it to kvmapp.\e[0m"
       else
         echo -e "\e[36m[build] \e[31mBuild Error!\e[0m"
+        exit 1
       fi
     ;;
     clean)
@@ -171,6 +176,7 @@ then
         
       else
         echo -e "\e[36m[build] \e[31mThe source file does not exist. Please compile using \e[34m./build kvm_system \e[31mfirst.\e[0m"
+        exit 1
       fi
     ;;
     *)
