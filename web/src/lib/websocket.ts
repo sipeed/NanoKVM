@@ -22,7 +22,7 @@ const DEFAULT_OPTIONS: Required<WsClientOptions> = {
   url: `${getBaseUrl('ws')}/api/ws`,
   heartbeatInterval: 10 * 1000,
   reconnectInterval: 3 * 1000,
-  maxReconnectAttempts: 1
+  maxReconnectAttempts: Number.POSITIVE_INFINITY
 };
 
 export class WsClient {
