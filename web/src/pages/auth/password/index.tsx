@@ -12,6 +12,9 @@ import { Head } from '@/components/head.tsx';
 export const Password = () => {
   const { t } = useTranslation();
   const [msg, setMsg] = useState('');
+  // A device still on the default account has no password worth confirming,
+  // so the current-password field only appears once one has been set.
+  const [needOldPassword, setNeedOldPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,6 +22,17 @@ export const Password = () => {
       setTimeout(() => setMsg(''), 3000);
     }
   }, [msg]);
+
+  useEffect(() => {
+    api
+      .isPasswordUpdated()
+      .then((rsp: any) => {
+        setNeedOldPassword(rsp.code === 0 && rsp.data?.isUpdated === true);
+      })
+      .catch(() => {
+        setNeedOldPassword(true);
+      });
+  }, []);
 
   function changePassword(values: any) {
     if (values.password !== values.password2) {
@@ -36,10 +50,15 @@ export const Password = () => {
 
     const username = values.username;
     const password = encrypt(values.password);
+    const oldPassword = values.oldPassword ? encrypt(values.oldPassword) : '';
 
     api
-      .changePassword(username, password)
+      .changePassword(username, password, oldPassword)
       .then((rsp: any) => {
+        if (rsp.code === -6) {
+          setMsg(t('auth.invalidOldPassword'));
+          return;
+        }
         if (rsp.code !== 0) {
           setMsg(t('auth.error'));
           return;
@@ -80,6 +99,19 @@ export const Password = () => {
           >
             <Input prefix={<UserOutlined />} placeholder={t('auth.placeholderUsername')} />
           </Form.Item>
+
+          {needOldPassword && (
+            <Form.Item
+              name="oldPassword"
+              rules={[{ required: true, message: t('auth.noEmptyOldPassword'), min: 1 }]}
+            >
+              <Input
+                prefix={<LockOutlined />}
+                type="password"
+                placeholder={t('auth.placeholderOldPassword')}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item
             name="password"
