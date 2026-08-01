@@ -1,7 +1,7 @@
 package ws
 
 import (
-	"net/http"
+	"NanoKVM-Server/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -13,9 +13,7 @@ type Service struct{}
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	CheckOrigin:     middleware.SameOrigin,
 }
 
 func NewService() *Service {

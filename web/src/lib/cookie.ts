@@ -15,7 +15,15 @@ export function getToken() {
 }
 
 export function setToken(token: string) {
-  Cookies.set(COOKIE_TOKEN_KEY, token, { expires: 30 });
+  // sameSite strict keeps the token off cross-site requests, which is what
+  // stops another page from driving the device through the API or a websocket.
+  // secure is only set on https, otherwise the browser would drop the cookie
+  // on devices served over plain http.
+  Cookies.set(COOKIE_TOKEN_KEY, token, {
+    expires: 30,
+    sameSite: 'strict',
+    secure: window.location.protocol === 'https:'
+  });
 }
 
 export function removeToken() {

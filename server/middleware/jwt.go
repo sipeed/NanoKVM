@@ -18,6 +18,11 @@ type Token struct {
 
 func CheckToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !allowByOrigin(c.Request) {
+			abortForbiddenOrigin(c)
+			return
+		}
+
 		if allowByToken(c) {
 			c.Next()
 			return
@@ -40,6 +45,11 @@ func CheckLoopbackInternalToken() gin.HandlerFunc {
 
 func CheckTokenOrLoopbackInternalToken() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if !allowByOrigin(c.Request) {
+			abortForbiddenOrigin(c)
+			return
+		}
+
 		if allowByToken(c) || allowByLoopbackInternalToken(c.Request) {
 			c.Next()
 			return
@@ -67,6 +77,13 @@ func allowByToken(c *gin.Context) bool {
 
 func abortUnauthorized(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, "unauthorized")
+	c.Abort()
+}
+
+func abortForbiddenOrigin(c *gin.Context) {
+	log.Debugf("rejected request from origin %s to host %s", c.Request.Header.Get("Origin"), c.Request.Host)
+
+	c.JSON(http.StatusForbidden, "forbidden origin")
 	c.Abort()
 }
 
