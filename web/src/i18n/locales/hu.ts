@@ -508,6 +508,22 @@ const hu = {
         previewDesc: 'Korai hozzáférést kap az új funkciókhoz és fejlesztésekhez',
         previewTip:
           'Kérjük, vegye figyelembe, hogy az előzetes verziók hibákat vagy hiányos funkciókat tartalmazhatnak!',
+        customServer: {
+          title: 'Egyéni frissítési kiszolgáló',
+          desc: 'Online frissítések keresése és letöltése a megadott kiszolgálóról',
+          invalidUrl:
+            'Adjon meg egy érvényes HTTP- vagy HTTPS-kiszolgálókönyvtárat lekérdezés, töredékazonosító és latest.json nélkül.',
+          loadFailed: 'Nem sikerült betölteni a frissítési kiszolgáló beállításait.',
+          saveFailed: 'Nem sikerült menteni a frissítési kiszolgáló beállításait.',
+          saved: 'A frissítési kiszolgáló beállításai mentve.',
+          save: 'Mentés',
+          confirmTitle: 'Egyéni frissítési kiszolgálót használ?',
+          confirmDesc:
+            'Az SHA-512 csak azt ellenőrzi, hogy a csomag megfelel-e a kiszolgáló által biztosított jegyzéknek. Nem igazolja, hogy a csomag hivatalos NanoKVM-kiadás. Egy hibás vagy rosszindulatú kiszolgáló használhatatlanná teheti az eszközt, adatvesztést okozhat, vagy veszélyeztetheti a rendszert.',
+          confirm: 'Használat mindenképpen',
+          previewDisabled:
+            'Az előzetes frissítések nem érhetők el, amíg egyéni frissítési kiszolgáló van engedélyezve.'
+        },
         offline: {
           title: 'Offline frissítések',
           desc: 'Frissítés helyi telepítőcsomaggal',
@@ -561,8 +577,10 @@ const hu = {
           ready: 'Runtime kész',
           stopped: 'Runtime leállt',
           blockedByMCP: 'A külső MCP-vezérlés aktív',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime nem érhető el',
           configError: 'Konfigurációs hiba'
         },
@@ -593,7 +611,8 @@ const hu = {
         mcp: 'Eszközvezérlés: külső MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Eszközvezérlés: kikapcsolva',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Vezérlés átadása',
@@ -601,7 +620,8 @@ const hu = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw-vezérlés megadva',
         released: 'PicoClaw-vezérlés feloldva',
         grantFailed: 'Nem sikerült megadni a PicoClaw-vezérlést',

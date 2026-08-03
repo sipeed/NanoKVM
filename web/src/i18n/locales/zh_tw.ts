@@ -491,6 +491,21 @@ const zh_tw = {
         preview: '預覽更新',
         previewDesc: '預覽版本，搶先體驗新功能和改進',
         previewTip: '請注意，預覽版本可能包含一些不穩定因素或未完善的功能！',
+        customServer: {
+          title: '自訂更新伺服器',
+          desc: '從指定伺服器檢查並下載線上更新',
+          invalidUrl:
+            '請輸入有效的 HTTP 或 HTTPS 伺服器目錄，不可包含查詢參數、片段或 latest.json。',
+          loadFailed: '讀取更新伺服器設定失敗。',
+          saveFailed: '儲存更新伺服器設定失敗。',
+          saved: '更新伺服器設定已儲存。',
+          save: '儲存',
+          confirmTitle: '使用自訂更新伺服器？',
+          confirmDesc:
+            'SHA-512 只能驗證安裝套件與該伺服器提供的清單一致，不能證明安裝套件來自 NanoKVM 官方。錯誤或惡意的伺服器可能導致裝置無法使用、資料遺失或系統遭到接管。',
+          confirm: '仍然使用',
+          previewDisabled: '啟用自訂更新伺服器時，預覽更新無法使用'
+        },
         offline: {
           title: '離線更新',
           desc: '透過本地安裝包進行更新',

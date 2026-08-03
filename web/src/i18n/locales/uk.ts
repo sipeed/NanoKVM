@@ -505,6 +505,22 @@ const uk = {
         previewDesc: 'Отримайте ранній доступ до нових функцій та вдосконалень',
         previewTip:
           'Будь ласка, майте на увазі, що випуски бета релізів можуть містити помилки або неповну функціональність!',
+        customServer: {
+          title: 'Користувацький сервер оновлень',
+          desc: 'Перевіряйте наявність оновлень і завантажуйте їх із зазначеного сервера',
+          invalidUrl:
+            'Введіть коректну адресу каталогу HTTP- або HTTPS-сервера без рядка запиту, фрагмента чи файлу latest.json.',
+          loadFailed: 'Не вдалося завантажити конфігурацію сервера оновлень.',
+          saveFailed: 'Не вдалося зберегти конфігурацію сервера оновлень.',
+          saved: 'Конфігурацію сервера оновлень збережено.',
+          save: 'Зберегти',
+          confirmTitle: 'Використовувати користувацький сервер оновлень?',
+          confirmDesc:
+            'SHA-512 перевіряє лише відповідність пакета маніфесту, наданому цим сервером. Це не підтверджує, що пакет є офіційним випуском NanoKVM. Несправний або зловмисний сервер може вивести пристрій із ладу, спричинити втрату даних або поставити під загрозу безпеку системи.',
+          confirm: 'Усе одно використовувати',
+          previewDisabled:
+            'Попередні оновлення недоступні, доки ввімкнено користувацький сервер оновлень.'
+        },
         offline: {
           title: 'Оновлення в автономному режимі',
           desc: 'Оновлення через локальний інсталяційний пакет',
@@ -558,8 +574,10 @@ const uk = {
           ready: 'Runtime готовий',
           stopped: 'Runtime зупинено',
           blockedByMCP: 'Зовнішнє керування MCP активне',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime недоступний',
           configError: 'Помилка конфігурації'
         },
@@ -590,7 +608,8 @@ const uk = {
         mcp: 'Керування пристроєм: зовнішній MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Керування пристроєм: вимкнено',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Надати керування',
@@ -598,7 +617,8 @@ const uk = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Керування PicoClaw надано',
         released: 'Керування PicoClaw звільнено',
         grantFailed: 'Не вдалося надати керування PicoClaw',

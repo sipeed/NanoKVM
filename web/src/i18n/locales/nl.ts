@@ -380,7 +380,8 @@ const nl = {
         hdmi: {
           description: 'Schakel HDMI/monitoruitgang in',
           idleTimeoutTitle: 'Time-out voor inactieve opname',
-          idleTimeoutDescription: 'HDMI-opname stoppen nadat er gedurende deze tijd geen actieve kijkers zijn:',
+          idleTimeoutDescription:
+            'HDMI-opname stoppen nadat er gedurende deze tijd geen actieve kijkers zijn:',
           minutes: 'min'
         },
         autostart: {
@@ -509,6 +510,22 @@ const nl = {
         previewDesc: 'Krijg vroegtijdig toegang tot nieuwe functies en verbeteringen',
         previewTip:
           'Houd er rekening mee dat preview-releases bugs of onvolledige functionaliteit kunnen bevatten!',
+        customServer: {
+          title: 'Aangepaste updateserver',
+          desc: 'Online-updates zoeken en downloaden vanaf een opgegeven server',
+          invalidUrl:
+            'Voer een geldige HTTP- of HTTPS-servermap in zonder queryparameters, fragment of latest.json.',
+          loadFailed: 'De configuratie van de updateserver kon niet worden geladen.',
+          saveFailed: 'De configuratie van de updateserver kon niet worden opgeslagen.',
+          saved: 'De configuratie van de updateserver is opgeslagen.',
+          save: 'Opslaan',
+          confirmTitle: 'Een aangepaste updateserver gebruiken?',
+          confirmDesc:
+            'SHA-512 controleert alleen of het pakket overeenkomt met het manifest dat door deze server wordt verstrekt. Het bewijst niet dat het pakket een officiële NanoKVM-release is. Een defecte of kwaadwillende server kan het apparaat onbruikbaar maken, gegevensverlies veroorzaken of het systeem compromitteren.',
+          confirm: 'Toch gebruiken',
+          previewDisabled:
+            'Preview-updates zijn niet beschikbaar zolang een aangepaste updateserver is ingeschakeld.'
+        },
         offline: {
           title: 'Offline-updates',
           desc: 'Update via lokaal installatiepakket',
@@ -562,8 +579,10 @@ const nl = {
           ready: 'Runtime gereed',
           stopped: 'Runtime gestopt',
           blockedByMCP: 'Externe MCP-bediening is actief',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime niet beschikbaar',
           configError: 'Configuratiefout'
         },
@@ -594,7 +613,8 @@ const nl = {
         mcp: 'Apparaatbediening: externe MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Apparaatbediening: uit',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Bediening geven',
@@ -602,7 +622,8 @@ const nl = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw-bediening gegeven',
         released: 'PicoClaw-bediening vrijgegeven',
         grantFailed: 'Kan PicoClaw-bediening niet geven',

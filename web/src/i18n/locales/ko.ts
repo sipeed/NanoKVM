@@ -374,7 +374,8 @@ const ko = {
         hdmi: {
           description: 'HDMI/모니터 출력 활성화',
           idleTimeoutTitle: '캡처 유휴 시간 제한',
-          idleTimeoutDescription: '활성 시청자가 없는 상태가 다음 시간 동안 지속되면 HDMI 캡처 중지',
+          idleTimeoutDescription:
+            '활성 시청자가 없는 상태가 다음 시간 동안 지속되면 HDMI 캡처 중지',
           minutes: '분'
         },
         autostart: {
@@ -499,6 +500,22 @@ const ko = {
         preview: '미리보기 업데이트',
         previewDesc: '새로운 기능과 개선 사항에 미리 접근하세요',
         previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!',
+        customServer: {
+          title: '사용자 지정 업데이트 서버',
+          desc: '지정한 서버에서 온라인 업데이트를 확인하고 다운로드합니다',
+          invalidUrl:
+            '쿼리, 프래그먼트 또는 latest.json이 포함되지 않은 올바른 HTTP 또는 HTTPS 서버 디렉터리를 입력하세요.',
+          loadFailed: '업데이트 서버 구성을 불러오지 못했습니다.',
+          saveFailed: '업데이트 서버 구성을 저장하지 못했습니다.',
+          saved: '업데이트 서버 구성을 저장했습니다.',
+          save: '저장',
+          confirmTitle: '사용자 지정 업데이트 서버를 사용하시겠습니까?',
+          confirmDesc:
+            'SHA-512는 패키지가 이 서버에서 제공한 매니페스트와 일치하는지만 확인합니다. 해당 패키지가 공식 NanoKVM 릴리스임을 보장하지는 않습니다. 결함이 있거나 악의적인 서버를 사용하면 장치를 사용할 수 없게 되거나, 데이터가 손실되거나, 시스템이 침해될 수 있습니다.',
+          confirm: '그래도 사용',
+          previewDisabled:
+            '사용자 지정 업데이트 서버가 활성화되어 있는 동안에는 미리 보기 업데이트를 사용할 수 없습니다.'
+        },
         offline: {
           title: '오프라인 업데이트',
           desc: '로컬 설치 패키지를 통한 업데이트',
@@ -552,8 +569,10 @@ const ko = {
           ready: '런타임 준비됨',
           stopped: '런타임 중지됨',
           blockedByMCP: '외부 MCP 제어가 활성화되어 있습니다',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: '런타임 사용 불가',
           configError: '구성 에러'
         },
@@ -584,7 +603,8 @@ const ko = {
         mcp: '장치 제어: 외부 MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: '장치 제어: 꺼짐',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: '제어 권한 부여',
@@ -592,7 +612,8 @@ const ko = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw 제어 권한이 부여되었습니다',
         released: 'PicoClaw 제어가 해제되었습니다',
         grantFailed: 'PicoClaw 제어 권한 부여에 실패했습니다',

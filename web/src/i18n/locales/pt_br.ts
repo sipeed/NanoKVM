@@ -506,6 +506,22 @@ const pt_br = {
         previewDesc: 'Tenha acesso antecipado a novos recursos e melhorias',
         previewTip:
           'Esteja ciente de que as versões de prévia podem conter bugs ou funcionalidade incompleta!',
+        customServer: {
+          title: 'Servidor de atualização personalizado',
+          desc: 'Verifique e baixe atualizações online de um servidor especificado',
+          invalidUrl:
+            'Insira um diretório de servidor HTTP ou HTTPS válido, sem parâmetros de consulta, fragmentos ou latest.json.',
+          loadFailed: 'Não foi possível carregar a configuração do servidor de atualização.',
+          saveFailed: 'Não foi possível salvar a configuração do servidor de atualização.',
+          saved: 'Configuração do servidor de atualização salva.',
+          save: 'Salvar',
+          confirmTitle: 'Usar um servidor de atualização personalizado?',
+          confirmDesc:
+            'O SHA-512 apenas verifica se o pacote corresponde ao manifesto fornecido por este servidor. Ele não comprova que o pacote seja uma versão oficial do NanoKVM. Um servidor com falha ou mal-intencionado pode inutilizar o dispositivo, causar perda de dados ou comprometer o sistema.',
+          confirm: 'Usar mesmo assim',
+          previewDisabled:
+            'As atualizações de prévia ficam indisponíveis enquanto um servidor de atualização personalizado estiver ativado.'
+        },
         offline: {
           title: 'Atualizações off-line',
           desc: 'Atualização através do pacote de instalação local',
@@ -559,8 +575,10 @@ const pt_br = {
           ready: 'Runtime pronto',
           stopped: 'Runtime interrompido',
           blockedByMCP: 'O controle MCP externo está ativo',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime indisponível',
           configError: 'Erro de configuração'
         },
@@ -591,7 +609,8 @@ const pt_br = {
         mcp: 'Controle do dispositivo: MCP externo',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Controle do dispositivo: desativado',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Conceder controle',
@@ -599,7 +618,8 @@ const pt_br = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Controle do PicoClaw concedido',
         released: 'Controle do PicoClaw liberado',
         grantFailed: 'Falha ao conceder controle ao PicoClaw',

@@ -507,6 +507,22 @@ const ru = {
         previewDesc: 'Получайте ранний доступ к новым функциям и улучшениям',
         previewTip:
           'Обратите внимание: в ранних версиях могут быть ошибки или незавершённый функционал!',
+        customServer: {
+          title: 'Пользовательский сервер обновлений',
+          desc: 'Проверяйте наличие обновлений и загружайте их с указанного сервера',
+          invalidUrl:
+            'Введите корректный адрес каталога HTTP- или HTTPS-сервера без строки запроса, фрагмента или файла latest.json.',
+          loadFailed: 'Не удалось загрузить конфигурацию сервера обновлений.',
+          saveFailed: 'Не удалось сохранить конфигурацию сервера обновлений.',
+          saved: 'Конфигурация сервера обновлений сохранена.',
+          save: 'Сохранить',
+          confirmTitle: 'Использовать пользовательский сервер обновлений?',
+          confirmDesc:
+            'SHA-512 проверяет только соответствие пакета манифесту, предоставленному этим сервером. Это не подтверждает, что пакет является официальным выпуском NanoKVM. Неисправный или вредоносный сервер может вывести устройство из строя, привести к потере данных или поставить под угрозу безопасность системы.',
+          confirm: 'Всё равно использовать',
+          previewDisabled:
+            'Предварительные обновления недоступны, пока включён пользовательский сервер обновлений.'
+        },
         offline: {
           title: 'Автономные обновления',
           desc: 'Обновление через локальный установочный пакет',
@@ -560,8 +576,10 @@ const ru = {
           ready: 'Runtime готов',
           stopped: 'Runtime остановлен',
           blockedByMCP: 'Внешнее управление MCP активно',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime недоступен',
           configError: 'Ошибка конфигурации'
         },
@@ -592,7 +610,8 @@ const ru = {
         mcp: 'Управление устройством: внешний MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Управление устройством: выкл.',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Передать управление',
@@ -600,7 +619,8 @@ const ru = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Управление PicoClaw предоставлено',
         released: 'Управление PicoClaw освобождено',
         grantFailed: 'Не удалось предоставить управление PicoClaw',

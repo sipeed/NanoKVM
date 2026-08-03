@@ -36,7 +36,7 @@ func (s *Service) OfflineUpdate(c *gin.Context) {
 	log.Debugf("offline update application success")
 
 	time.Sleep(1 * time.Second)
-	_ = exec.Command("sh", "-c", "/etc/init.d/S95nanokvm restart").Run()
+	_ = exec.Command("sh", "-c", "/kvmapp/system/init.d/S95nanokvm restart").Run()
 }
 
 func offlineUpdate(c *gin.Context) error {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { LoadingOutlined, RocketOutlined, SmileOutlined } from '@ant-design/icons';
 import { Button, Divider, Result, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import semver from 'semver';
 
 import * as api from '@/api/application.ts';
 
+import { CustomServer } from './custom-server.tsx';
 import { Offline } from './offline.tsx';
 import { Preview } from './preview.tsx';
 
@@ -20,18 +21,21 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
   const [currentVersion, setCurrentVersion] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
   const [errMsg, setErrMsg] = useState('');
+  const [isCustomServerEnabled, setIsCustomServerEnabled] = useState(false);
+  const versionRequestRef = useRef(0);
 
   useEffect(() => {
     checkForUpdates();
   }, []);
 
   function checkForUpdates() {
-    if (status === 'loading') return;
+    const requestId = ++versionRequestRef.current;
     setStatus('loading');
 
     api
       .getVersion()
       .then((rsp: any) => {
+        if (requestId !== versionRequestRef.current) return;
         if (rsp.code !== 0 || !rsp.data) {
           setStatus('failed');
           setErrMsg(t('settings.update.queryFailed'));
@@ -49,6 +53,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
         }
       })
       .catch(() => {
+        if (requestId !== versionRequestRef.current) return;
         setStatus('failed');
         setErrMsg(t('settings.update.queryFailed'));
       });
@@ -83,7 +88,8 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <div className="text-base">{t('settings.update.title')}</div>
       <Divider className="opacity-50" />
 
-      <Preview checkForUpdates={checkForUpdates} />
+      <Preview checkForUpdates={checkForUpdates} disabled={isCustomServerEnabled} />
+      <CustomServer checkForUpdates={checkForUpdates} onEnabledChange={setIsCustomServerEnabled} />
       <Offline
         status={status}
         setStatus={setStatus}

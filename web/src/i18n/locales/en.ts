@@ -502,6 +502,21 @@ const en = {
         previewDesc: 'Get early access to new features and improvements',
         previewTip:
           'Please be aware that preview releases may contain bugs or incomplete functionality!',
+        customServer: {
+          title: 'Custom Update Server',
+          desc: 'Check for and download online updates from a specified server',
+          invalidUrl:
+            'Enter a valid HTTP or HTTPS server directory without a query, fragment, or latest.json.',
+          loadFailed: 'Failed to load the update server configuration.',
+          saveFailed: 'Failed to save the update server configuration.',
+          saved: 'Update server configuration saved.',
+          save: 'Save',
+          confirmTitle: 'Use a custom update server?',
+          confirmDesc:
+            'SHA-512 only checks that the package matches the manifest supplied by this server. It does not prove that the package is an official NanoKVM release. A faulty or malicious server may make the device unusable, cause data loss, or compromise the system.',
+          confirm: 'Use Anyway',
+          previewDisabled: 'Preview Updates are unavailable while a custom update server is enabled'
+        },
         offline: {
           title: 'Offline Updates',
           desc: 'Update through local installation package',
@@ -555,8 +570,10 @@ const en = {
           ready: 'Runtime ready',
           stopped: 'Runtime stopped',
           blockedByMCP: 'External MCP control is active',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime unavailable',
           configError: 'Configuration error'
         },

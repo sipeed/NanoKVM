@@ -7,9 +7,10 @@ import * as api from '@/api/application.ts';
 
 interface PreviewProps {
   checkForUpdates: () => void;
+  disabled?: boolean;
 }
 
-export const Preview = ({ checkForUpdates }: PreviewProps) => {
+export const Preview = ({ checkForUpdates, disabled = false }: PreviewProps) => {
   const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -75,10 +76,19 @@ export const Preview = ({ checkForUpdates }: PreviewProps) => {
           </Tooltip>
         </div>
 
-        <span className="text-xs text-neutral-500">{t('settings.update.previewDesc')}</span>
+        <span className="text-xs text-neutral-500">
+          {disabled
+            ? t('settings.update.customServer.previewDisabled')
+            : t('settings.update.previewDesc')}
+        </span>
       </div>
 
-      <Switch checked={isEnabled} loading={isLoading} onChange={setPreviewUpdates} />
+      <Switch
+        checked={isEnabled}
+        loading={isLoading}
+        disabled={disabled}
+        onChange={setPreviewUpdates}
+      />
     </div>
   );
 };
