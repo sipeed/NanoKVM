@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -14,7 +16,55 @@ import (
 
 const maxDownloadSize = int64(1024 * 1024 * 1024)
 
-var downloadClient = &http.Client{Timeout: 15 * time.Minute}
+var downloadClient = NewUpdateHTTPClient(15 * time.Minute)
+
+func NewAuthenticatedRequest(method string, rawURL string, body io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, rawURL, body)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.URL.User != nil {
+		username := req.URL.User.Username()
+		password, _ := req.URL.User.Password()
+		req.SetBasicAuth(username, password)
+		// Keep credentials out of the request URL after copying them to the header.
+		req.URL.User = nil
+	}
+
+	return req, nil
+}
+
+func NewUpdateHTTPClient(timeout time.Duration) *http.Client {
+	return &http.Client{
+		Timeout:       timeout,
+		CheckRedirect: preserveBasicAuthRedirect,
+	}
+}
+
+func preserveBasicAuthRedirect(req *http.Request, via []*http.Request) error {
+	if len(via) == 0 {
+		return nil
+	}
+
+	previous := via[len(via)-1]
+	authorization := previous.Header.Get("Authorization")
+	if authorization == "" {
+		return nil
+	}
+
+	if !sameUpdateHost(previous.URL, req.URL) ||
+		(previous.URL.Scheme == "https" && req.URL.Scheme != "https") {
+		return http.ErrUseLastResponse
+	}
+
+	req.Header.Set("Authorization", authorization)
+	return nil
+}
+
+func sameUpdateHost(left *url.URL, right *url.URL) bool {
+	return strings.EqualFold(left.Host, right.Host)
+}
 
 func Download(req *http.Request, target string) error {
 	log.Debugf("downloading %s to %s", req.URL.Redacted(), target)

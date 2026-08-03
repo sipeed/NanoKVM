@@ -524,6 +524,9 @@ const da = {
           title: 'Offline opdateringer',
           desc: 'Opdatering via lokal installationspakke',
           upload: 'Upload',
+          checksumPlaceholder: 'SHA-256-kontrolsum (valgfri)',
+          invalidChecksum: 'SHA-256-kontrolsummen skal indeholde 64 hexadecimale tegn.',
+          checksumMismatch: 'SHA-256-verificeringen mislykkedes. Pakken kan være beskadiget.',
           invalidName: 'Ugyldigt filnavnsformat. Download venligst fra GitHub-udgivelser.',
           updateFailed: 'Opdatering fejlede. Prøv igen.'
         }

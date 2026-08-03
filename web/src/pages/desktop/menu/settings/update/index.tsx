@@ -22,6 +22,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
   const [latestVersion, setLatestVersion] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [isCustomServerEnabled, setIsCustomServerEnabled] = useState(false);
+  const [isCustomServerPending, setIsCustomServerPending] = useState(false);
   const versionRequestRef = useRef(0);
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
   }
 
   function update() {
-    if (status !== 'outdated') return;
+    if (status !== 'outdated' || isCustomServerPending) return;
 
     setIsLocked(true);
     setStatus('updating');
@@ -88,8 +89,15 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       <div className="text-base">{t('settings.update.title')}</div>
       <Divider className="opacity-50" />
 
-      <Preview checkForUpdates={checkForUpdates} disabled={isCustomServerEnabled} />
-      <CustomServer checkForUpdates={checkForUpdates} onEnabledChange={setIsCustomServerEnabled} />
+      <Preview
+        checkForUpdates={checkForUpdates}
+        disabled={isCustomServerEnabled || isCustomServerPending}
+      />
+      <CustomServer
+        checkForUpdates={checkForUpdates}
+        onEnabledChange={setIsCustomServerEnabled}
+        onPendingChange={setIsCustomServerPending}
+      />
       <Offline
         status={status}
         setStatus={setStatus}
@@ -133,7 +141,12 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
             title={`${currentVersion} -> ${latestVersion}`}
             subTitle={t('settings.update.available')}
             extra={[
-              <Button key="confirm" type="primary" onClick={update}>
+              <Button
+                key="confirm"
+                type="primary"
+                disabled={isCustomServerPending}
+                onClick={update}
+              >
                 {t('settings.update.confirm')}
               </Button>
             ]}

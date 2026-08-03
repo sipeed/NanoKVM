@@ -510,6 +510,9 @@ const zh = {
           title: '离线更新',
           desc: '通过本地安装包进行更新',
           upload: '上传',
+          checksumPlaceholder: 'SHA-256 校验和（可选）',
+          invalidChecksum: 'SHA-256 校验和必须为 64 位十六进制字符。',
+          checksumMismatch: 'SHA-256 校验失败，安装包可能已损坏。',
           invalidName: '文件名格式错误，请前往 GitHub 发布页下载安装包。',
           updateFailed: '更新失败，请重试'
         }

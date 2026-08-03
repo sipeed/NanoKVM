@@ -528,6 +528,9 @@ const pl = {
           title: 'Aktualizacje offline',
           desc: 'Aktualizacja poprzez lokalny pakiet instalacyjny',
           upload: 'Prześlij',
+          checksumPlaceholder: 'Suma kontrolna SHA-256 (opcjonalnie)',
+          invalidChecksum: 'Suma kontrolna SHA-256 musi zawierać 64 znaki szesnastkowe.',
+          checksumMismatch: 'Weryfikacja SHA-256 nie powiodła się. Pakiet może być uszkodzony.',
           invalidName: 'Nieprawidłowy format nazwy pliku. Proszę pobrać z wydań GitHub.',
           updateFailed: 'Aktualizacja nie powiodła się. Spróbuj ponownie.'
         }

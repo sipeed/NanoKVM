@@ -529,6 +529,11 @@ const es = {
           title: 'Actualizaciones sin conexión',
           desc: 'Actualización a través del paquete de instalación local',
           upload: 'Subir',
+          checksumPlaceholder: 'Suma de comprobación SHA-256 (opcional)',
+          invalidChecksum:
+            'La suma de comprobación SHA-256 debe contener 64 caracteres hexadecimales.',
+          checksumMismatch:
+            'La verificación SHA-256 ha fallado. Es posible que el paquete esté dañado.',
           invalidName:
             'Formato de nombre de archivo no válido. Descargue desde las versiones de GitHub.',
           updateFailed: 'La actualización falló. Por favor, inténtalo de nuevo.'

@@ -522,6 +522,11 @@ const ca = {
           title: 'Actualitzacions fora de línia',
           desc: "Actualització mitjançant el paquet d'instal·lació local",
           upload: 'Puja',
+          checksumPlaceholder: 'Suma de verificació SHA-256 (opcional)',
+          invalidChecksum:
+            'La suma de verificació SHA-256 ha de contenir 64 caràcters hexadecimals.',
+          checksumMismatch:
+            'La verificació SHA-256 ha fallat. És possible que el paquet estigui malmès.',
           invalidName: 'Format de nom de fitxer no vàlid. Baixeu-lo des de les versions de GitHub.',
           updateFailed: 'Error en actualitzar. Torna-ho a intentar.'
         }
