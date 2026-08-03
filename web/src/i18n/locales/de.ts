@@ -547,6 +547,10 @@ const de = {
           title: 'Offline Aktualisierung',
           desc: 'Über lokales Installationspaket aktualisieren',
           upload: 'Hochladen',
+          checksumPlaceholder: 'SHA-256-Prüfsumme (optional)',
+          invalidChecksum: 'Die SHA-256-Prüfsumme muss 64 hexadezimale Zeichen enthalten.',
+          checksumMismatch:
+            'Die SHA-256-Überprüfung ist fehlgeschlagen. Das Paket ist möglicherweise beschädigt.',
           invalidName:
             'Ungültiges Dateinamenformat. Bitte laden Sie von den GitHub-Releases herunter.',
           updateFailed: 'Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.'

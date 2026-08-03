@@ -39,10 +39,16 @@ func (s *Service) Update(c *gin.Context) {
 	rsp.OkRsp(c)
 	log.Debugf("update application success")
 
-	// Sleep for a second before restarting the device
+	go restartServices()
+}
+
+func restartServices() {
+	// Let the HTTP response reach the client before stopping the server.
 	time.Sleep(1 * time.Second)
 
-	_ = exec.Command("sh", "-c", "/kvmapp/system/init.d/S95nanokvm restart").Run()
+	if err := exec.Command("/kvmapp/system/init.d/S95nanokvm", "restart").Run(); err != nil {
+		log.Errorf("failed to restart services after update: %v", err)
+	}
 }
 
 func update() error {
@@ -88,7 +94,7 @@ func download(url string, target string) (err error) {
 		}
 
 		var req *http.Request
-		req, err = http.NewRequest("GET", url, nil)
+		req, err = utils.NewAuthenticatedRequest("GET", url, nil)
 		if err != nil {
 			log.Errorf("new request err: %s", err)
 			continue

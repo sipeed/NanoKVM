@@ -540,6 +540,9 @@ const nb = {
           title: 'Offline oppdateringer',
           desc: 'Oppdater gjennom lokal installasjonspakke',
           upload: 'Last opp',
+          checksumPlaceholder: 'SHA-256-sjekksum (valgfritt)',
+          invalidChecksum: 'SHA-256-sjekksummen må inneholde 64 heksadesimale tegn.',
+          checksumMismatch: 'SHA-256-verifiseringen mislyktes. Pakken kan være skadet.',
           invalidName: 'Ugyldig filnavnformat. Last ned fra GitHub-utgivelser.',
           updateFailed: 'En feil oppstod under oppdatering. Vennligst forsøk igjen.'
         }

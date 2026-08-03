@@ -538,6 +538,9 @@ const se = {
           title: 'Offlineuppdateringar',
           desc: 'Uppdatera genom lokalt installationspaket',
           upload: 'Ladda upp',
+          checksumPlaceholder: 'SHA-256-kontrollsumma (valfri)',
+          invalidChecksum: 'SHA-256-kontrollsumman måste innehålla 64 hexadecimala tecken.',
+          checksumMismatch: 'SHA-256-verifieringen misslyckades. Paketet kan vara skadat.',
           invalidName: 'Ogiltigt filnamnsformat. Ladda ner från GitHub-versioner.',
           updateFailed: 'Uppdatering misslyckades. Försök igen.'
         }

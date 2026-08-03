@@ -541,6 +541,9 @@ const id = {
           title: 'Pembaruan Offline',
           desc: 'Perbarui melalui paket instalasi lokal',
           upload: 'Mengunggah',
+          checksumPlaceholder: 'Checksum SHA-256 (opsional)',
+          invalidChecksum: 'Checksum SHA-256 harus berisi 64 karakter heksadesimal.',
+          checksumMismatch: 'Verifikasi SHA-256 gagal. Paket mungkin rusak.',
           invalidName: 'Format nama file tidak valid. Silakan unduh dari rilis GitHub.',
           updateFailed: 'Gagal memperbarui, tolong coba lagi.'
         }

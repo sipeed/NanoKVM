@@ -535,6 +535,9 @@ const ko = {
           title: '오프라인 업데이트',
           desc: '로컬 설치 패키지를 통한 업데이트',
           upload: '업로드',
+          checksumPlaceholder: 'SHA-256 체크섬(선택 사항)',
+          invalidChecksum: 'SHA-256 체크섬은 64개의 16진수 문자를 포함해야 합니다.',
+          checksumMismatch: 'SHA-256 검증에 실패했습니다. 패키지가 손상되었을 수 있습니다.',
           invalidName: '유효하지 않은 파일 이름 형식입니다. GitHub 릴리즈에서 다운로드하세요.',
           updateFailed: '업데이트에 실패했습니다. 재시도하세요.'
         }

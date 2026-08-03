@@ -10,9 +10,14 @@ const OFFICIAL_UPDATE_SERVER = 'https://cdn.sipeed.com/nanokvm';
 interface CustomServerProps {
   checkForUpdates: () => void;
   onEnabledChange: (enabled: boolean) => void;
+  onPendingChange: (pending: boolean) => void;
 }
 
-export const CustomServer = ({ checkForUpdates, onEnabledChange }: CustomServerProps) => {
+export const CustomServer = ({
+  checkForUpdates,
+  onEnabledChange,
+  onPendingChange
+}: CustomServerProps) => {
   const { t } = useTranslation();
 
   const [savedConfig, setSavedConfig] = useState<api.UpdateServerConfig>({
@@ -99,7 +104,6 @@ export const CustomServer = ({ checkForUpdates, onEnabledChange }: CustomServerP
   function confirmRisk() {
     setEnabled(true);
     setError('');
-    onEnabledChange(true);
     setIsConfirmOpen(false);
   }
 
@@ -136,6 +140,11 @@ export const CustomServer = ({ checkForUpdates, onEnabledChange }: CustomServerP
   }
 
   const hasChanges = enabled !== savedConfig.enabled || url.trim() !== savedConfig.url;
+
+  useEffect(() => {
+    onPendingChange(hasChanges);
+  }, [hasChanges, onPendingChange]);
+
   const modalTitle = (
     <div className="flex items-center space-x-1 text-red-500">
       <TriangleAlertIcon size={18} />

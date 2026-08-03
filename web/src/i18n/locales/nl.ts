@@ -546,6 +546,9 @@ const nl = {
           title: 'Offline-updates',
           desc: 'Update via lokaal installatiepakket',
           upload: 'Uploaden',
+          checksumPlaceholder: 'SHA-256-controlesom (optioneel)',
+          invalidChecksum: 'De SHA-256-controlesom moet 64 hexadecimale tekens bevatten.',
+          checksumMismatch: 'De SHA-256-verificatie is mislukt. Het pakket is mogelijk beschadigd.',
           invalidName: 'Ongeldig bestandsnaamformaat. Download de versie van GitHub-releases.',
           updateFailed: 'Update mislukt. Probeer het opnieuw.'
         }

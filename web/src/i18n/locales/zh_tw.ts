@@ -525,6 +525,9 @@ const zh_tw = {
           title: '離線更新',
           desc: '透過本地安裝包進行更新',
           upload: '上傳',
+          checksumPlaceholder: 'SHA-256 校驗和（選填）',
+          invalidChecksum: 'SHA-256 校驗和必須包含 64 個十六進位字元。',
+          checksumMismatch: 'SHA-256 驗證失敗。套件可能已損毀。',
           invalidName: '檔名格式錯誤，請前往 GitHub 釋出頁下載安裝包。',
           updateFailed: '更新失敗，請重試'
         }

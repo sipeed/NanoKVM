@@ -1,15 +1,16 @@
 package application
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"NanoKVM-Server/proto"
 	"github.com/gin-gonic/gin"
@@ -35,11 +36,15 @@ func (s *Service) OfflineUpdate(c *gin.Context) {
 	rsp.OkRsp(c)
 	log.Debugf("offline update application success")
 
-	time.Sleep(1 * time.Second)
-	_ = exec.Command("sh", "-c", "/kvmapp/system/init.d/S95nanokvm restart").Run()
+	go restartServices()
 }
 
 func offlineUpdate(c *gin.Context) error {
+	expectedSHA256, err := parseSHA256Checksum(c.GetHeader("X-SHA256-Checksum"))
+	if err != nil {
+		return err
+	}
+
 	_ = os.RemoveAll(CacheDir)
 	_ = os.MkdirAll(CacheDir, 0o755)
 	defer func() {
@@ -63,9 +68,51 @@ func offlineUpdate(c *gin.Context) error {
 		return err
 	}
 
+	if err := verifySHA256Checksum(target, expectedSHA256); err != nil {
+		log.Errorf("failed to verify install package: %v", err)
+		return err
+	}
+
 	if err := installPackage(target); err != nil {
 		log.Errorf("failed to install package: %v", err)
 		return err
+	}
+
+	return nil
+}
+
+func parseSHA256Checksum(value string) ([]byte, error) {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil, nil
+	}
+
+	checksum, err := hex.DecodeString(value)
+	if err != nil || len(checksum) != sha256.Size {
+		return nil, fmt.Errorf("invalid sha256 checksum")
+	}
+
+	return checksum, nil
+}
+
+func verifySHA256Checksum(filePath string, expected []byte) error {
+	if len(expected) == 0 {
+		return nil
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to open uploaded file: %w", err)
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return fmt.Errorf("failed to calculate sha256 checksum: %w", err)
+	}
+
+	if subtle.ConstantTimeCompare(hasher.Sum(nil), expected) != 1 {
+		return fmt.Errorf("sha256 checksum mismatch")
 	}
 
 	return nil

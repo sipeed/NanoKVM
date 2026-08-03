@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -32,7 +33,7 @@ const (
 )
 
 var (
-	latestClient       = &http.Client{Timeout: 15 * time.Second}
+	latestClient       = utils.NewUpdateHTTPClient(15 * time.Second)
 	packageNamePattern = regexp.MustCompile(`^nanokvm_[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz$`)
 	versionPattern     = regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
 )
@@ -84,7 +85,11 @@ func getLatest() (*Latest, error) {
 	query.Set("now", fmt.Sprintf("%d", time.Now().Unix()))
 	parsedManifestURL.RawQuery = query.Encode()
 
-	resp, err := latestClient.Get(parsedManifestURL.String())
+	request, err := utils.NewAuthenticatedRequest("GET", parsedManifestURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := latestClient.Do(request)
 	if err != nil {
 		log.Debugf("failed to request version from %s", parsedManifestURL.Redacted())
 		return nil, errors.New("update server is inaccessible")
