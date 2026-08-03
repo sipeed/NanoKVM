@@ -335,9 +335,25 @@ const pl = {
           modeOff: 'Wyłączone',
           modeAuto: 'Automatyczne ukrywanie',
           modeAlways: 'Zawsze widoczny',
+          keyboardLedStatus: 'Wskaźniki blokad klawiatury',
+          keyboardLedStatusDesc:
+            'Wyświetl stan Num Lock, Caps Lock i Scroll Lock zdalnego komputera',
           icons: 'Ikony podmenu',
           iconsDesc: 'Wyświetla ikony podmenu na pasku menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Stan blokad zdalnej klawiatury',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Włączone',
+        off: 'Wyłączone',
+        unknown: 'Nieznany'
       },
       device: {
         title: 'Urządzenie',

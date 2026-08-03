@@ -334,9 +334,25 @@ const pt_br = {
           modeOff: 'Desligado',
           modeAuto: 'Ocultar automaticamente',
           modeAlways: 'Sempre visível',
+          keyboardLedStatus: 'Indicadores de bloqueio do teclado',
+          keyboardLedStatusDesc:
+            'Exibir o estado de Num Lock, Caps Lock e Scroll Lock do computador remoto',
           icons: 'Ícones do submenu',
           iconsDesc: 'Exibir ícones de submenus na barra de menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Estado dos bloqueios do teclado remoto',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Ativado',
+        off: 'Desativado',
+        unknown: 'Desconhecido'
       },
       device: {
         title: 'Dispositivo',

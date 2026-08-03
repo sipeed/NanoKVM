@@ -336,9 +336,25 @@ const nl = {
           modeOff: 'Uit',
           modeAuto: 'Automatisch verbergen',
           modeAlways: 'Altijd zichtbaar',
+          keyboardLedStatus: 'Toetsvergrendelingsindicatoren',
+          keyboardLedStatusDesc:
+            'Toon de Num Lock-, Caps Lock- en Scroll Lock-status van de externe computer',
           icons: 'Submenupictogrammen',
           iconsDesc: 'Submenupictogrammen weergeven in de menubalk'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Toetsvergrendelingsstatus van extern toetsenbord',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Aan',
+        off: 'Uit',
+        unknown: 'Onbekend'
       },
       device: {
         title: 'Apparaat',

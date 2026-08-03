@@ -334,9 +334,25 @@ const uk = {
           modeOff: 'Вимк',
           modeAuto: 'Автоматичне приховування',
           modeAlways: 'Завжди видно',
+          keyboardLedStatus: 'Індикатори блокування клавіатури',
+          keyboardLedStatusDesc:
+            'Показувати стан Num Lock, Caps Lock і Scroll Lock віддаленого комп’ютера',
           icons: 'Значки підменю',
           iconsDesc: 'Відображення значків підменю на панелі меню'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Стан блокувань віддаленої клавіатури',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Увімкнено',
+        off: 'Вимкнено',
+        unknown: 'Невідомо'
       },
       device: {
         title: 'Пристрій',

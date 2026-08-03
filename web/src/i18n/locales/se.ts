@@ -331,9 +331,25 @@ const se = {
           modeOff: 'Av',
           modeAuto: 'Dölj automatiskt',
           modeAlways: 'Alltid synlig',
+          keyboardLedStatus: 'Indikatorer för tangentbordslås',
+          keyboardLedStatusDesc:
+            'Visa Num Lock-, Caps Lock- och Scroll Lock-status för fjärrdatorn',
           icons: 'Undermenyikoner',
           iconsDesc: 'Visa undermenyikoner i menyraden'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Status för lås på fjärrtangentbord',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'På',
+        off: 'Av',
+        unknown: 'Okänd'
       },
       device: {
         title: 'Enhet',

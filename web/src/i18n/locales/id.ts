@@ -334,9 +334,25 @@ const id = {
           modeOff: 'Mati',
           modeAuto: 'Sembunyikan otomatis',
           modeAlways: 'Selalu terlihat',
+          keyboardLedStatus: 'Indikator kunci keyboard',
+          keyboardLedStatusDesc:
+            'Tampilkan status Num Lock, Caps Lock, dan Scroll Lock komputer jarak jauh',
           icons: 'Ikon Submenu',
           iconsDesc: 'Menampilkan ikon submenu di bilah menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Status kunci keyboard jarak jauh',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Aktif',
+        off: 'Nonaktif',
+        unknown: 'Tidak diketahui'
       },
       device: {
         title: 'Perangkat',

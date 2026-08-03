@@ -2,17 +2,18 @@ package hid
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sync"
 	"syscall"
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/sys/unix"
 )
 
 const (
 	KeyboardLedStatusEvent = "hid-led-status"
-	keyboardLedReadDelay   = 10 * time.Millisecond
 )
 
 // KeyboardLedStatus is the lock-key LED state last reported by the remote host
@@ -123,49 +124,156 @@ func (h *Hid) readKeyboardLeds() {
 	buf := make([]byte, 64)
 
 	for {
-		file := h.keyboardLedReader()
+		file, notifierFD := h.keyboardLedReaderHandles()
 		if file == nil {
-			time.Sleep(keyboardLedReadDelay)
+			if err := waitForKeyboardLedReaderChange(notifierFD); err != nil {
+				log.Debugf("wait for keyboard LED reader failed: %s", err)
+			}
+			continue
+		}
+
+		changed, err := waitForKeyboardLedReportOrChange(file, notifierFD)
+		if err != nil {
+			if !errors.Is(err, os.ErrClosed) {
+				log.Debugf("wait for keyboard LED report failed: %s", err)
+			}
+			h.reopenKeyboardLedReader(file)
+			continue
+		}
+		if changed {
 			continue
 		}
 
 		n, err := file.Read(buf)
 		if n > 0 {
-			// The HID descriptor has one-byte LED output reports. report_length
-			// is larger because it also covers keyboard input reports, so only
-			// the first byte of each read is an LED bitmap.
+			// Both keyboard gadget descriptors in kvmapp/system/init.d declare
+			// boot-keyboard reports without a Report ID (no 0x85 item). Their LED
+			// output report is one byte: bits 0-4 are the LED bitmap and bits 5-7
+			// are padding. report_length is 8 because it also covers input reports.
 			keyboardLeds.Update(buf[0])
 		}
 
 		if err == nil && n > 0 {
 			continue
 		}
-		if err == nil || errors.Is(err, syscall.EAGAIN) || errors.Is(err, syscall.EWOULDBLOCK) {
-			time.Sleep(keyboardLedReadDelay)
-			continue
+		if err != nil && !errors.Is(err, os.ErrClosed) {
+			log.Debugf("read keyboard LED report failed: %s", err)
 		}
-		if errors.Is(err, os.ErrClosed) {
-			time.Sleep(keyboardLedReadDelay)
-			continue
-		}
-
-		log.Debugf("read keyboard LED report failed: %s", err)
-		h.closeKeyboardLedReader(file)
-		time.Sleep(keyboardLedReadDelay)
+		h.reopenKeyboardLedReader(file)
 	}
 }
 
-func (h *Hid) keyboardLedReader() *os.File {
+func (h *Hid) keyboardLedReaderHandles() (*os.File, int) {
 	h.kbMutex.Lock()
 	defer h.kbMutex.Unlock()
-	return h.g0Reader
+	if h.ledReaderNotifyReader == nil {
+		return h.g0Reader, -1
+	}
+	return h.g0Reader, h.ledReaderNotifyReadFD
 }
 
-func (h *Hid) closeKeyboardLedReader(file *os.File) {
+func (h *Hid) reopenKeyboardLedReader(file *os.File) {
 	h.kbMutex.Lock()
 	defer h.kbMutex.Unlock()
 
-	if h.g0Reader == file {
-		h.closeKeyboardLedReaderNoLock()
+	// A reset may have installed a new reader while the old descriptor was
+	// reporting an error. Never let that stale reader close the replacement.
+	if h.g0Reader != file {
+		return
+	}
+	h.closeKeyboardLedReaderNoLock()
+	if h.g0 == nil {
+		return
+	}
+	if err := h.openKeyboardLedReaderNoLock(); err != nil {
+		log.Debugf("reopen keyboard LED reader failed: %s", err)
+	}
+}
+
+func (h *Hid) ensureKeyboardLedReaderNotifierNoLock() error {
+	if h.ledReaderNotifyReader != nil {
+		return nil
+	}
+
+	reader, writer, err := os.Pipe()
+	if err != nil {
+		return fmt.Errorf("create keyboard LED reader notifier: %w", err)
+	}
+	readerFD := int(reader.Fd())
+	writerFD := int(writer.Fd())
+	if err := unix.SetNonblock(readerFD, true); err != nil {
+		_ = reader.Close()
+		_ = writer.Close()
+		return fmt.Errorf("set keyboard LED reader notifier read end nonblocking: %w", err)
+	}
+	if err := unix.SetNonblock(writerFD, true); err != nil {
+		_ = reader.Close()
+		_ = writer.Close()
+		return fmt.Errorf("set keyboard LED reader notifier write end nonblocking: %w", err)
+	}
+	h.ledReaderNotifyReader = reader
+	h.ledReaderNotifyWriter = writer
+	h.ledReaderNotifyReadFD = readerFD
+	h.ledReaderNotifyWriteFD = writerFD
+	return nil
+}
+
+func (h *Hid) notifyKeyboardLedReaderNoLock() {
+	if h.ledReaderNotifyWriter == nil {
+		return
+	}
+	_, err := unix.Write(h.ledReaderNotifyWriteFD, []byte{1})
+	if err != nil && !errors.Is(err, syscall.EAGAIN) && !errors.Is(err, syscall.EWOULDBLOCK) {
+		log.Debugf("notify keyboard LED reader failed: %s", err)
+	}
+}
+
+func waitForKeyboardLedReaderChange(notifierFD int) error {
+	if notifierFD < 0 {
+		return fmt.Errorf("keyboard LED reader notifier is nil")
+	}
+	_, err := unix.Poll([]unix.PollFd{{Fd: int32(notifierFD), Events: unix.POLLIN}}, -1)
+	if err != nil {
+		return err
+	}
+	drainKeyboardLedReaderNotifier(notifierFD)
+	return nil
+}
+
+// waitForKeyboardLedReportOrChange blocks until a HID output report arrives or
+// the reader is replaced/closed. Its bool result is true for the latter.
+func waitForKeyboardLedReportOrChange(file *os.File, notifierFD int) (bool, error) {
+	if file == nil || notifierFD < 0 {
+		return false, fmt.Errorf("keyboard LED reader or notifier is nil")
+	}
+
+	fds := []unix.PollFd{
+		{Fd: int32(file.Fd()), Events: unix.POLLIN},
+		{Fd: int32(notifierFD), Events: unix.POLLIN},
+	}
+	_, err := unix.Poll(fds, -1)
+	if err != nil {
+		return false, err
+	}
+	if fds[1].Revents&unix.POLLIN != 0 {
+		drainKeyboardLedReaderNotifier(notifierFD)
+		return true, nil
+	}
+	if fds[0].Revents&(unix.POLLIN|unix.POLLERR|unix.POLLHUP|unix.POLLNVAL) != 0 {
+		return false, nil
+	}
+	return false, fmt.Errorf("keyboard LED poll returned without an event")
+}
+
+func drainKeyboardLedReaderNotifier(notifierFD int) {
+	buf := make([]byte, 64)
+	for {
+		_, err := unix.Read(notifierFD, buf)
+		if err != nil {
+			if !errors.Is(err, syscall.EAGAIN) && !errors.Is(err, syscall.EWOULDBLOCK) {
+				log.Debugf("drain keyboard LED reader notifier failed: %s", err)
+			}
+			return
+		}
 	}
 }

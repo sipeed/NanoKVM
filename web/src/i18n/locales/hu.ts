@@ -336,9 +336,25 @@ const hu = {
           modeOff: 'Ki',
           modeAuto: 'Automatikus elrejtés',
           modeAlways: 'Mindig látható',
+          keyboardLedStatus: 'Billentyűzár-jelzők',
+          keyboardLedStatusDesc:
+            'A távoli számítógép Num Lock, Caps Lock és Scroll Lock állapotának megjelenítése',
           icons: 'Almenü ikonok',
           iconsDesc: 'Almenüikonok megjelenítése a menüsorban'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Távoli billentyűzárak állapota',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Be',
+        off: 'Ki',
+        unknown: 'Ismeretlen'
       },
       device: {
         title: 'Eszköz',

@@ -80,9 +80,7 @@ func sendKeyboardLedStatusSnapshot(client *Client) {
 
 func broadcastKeyboardLedStatus(status hid.KeyboardLedStatus) {
 	for _, client := range GetManager().GetClients() {
-		if err := sendKeyboardLedStatus(client, status); err != nil {
-			log.Errorf("failed to send keyboard LED status: %s", err)
-		}
+		client.enqueueKeyboardLedStatus(status)
 	}
 }
 

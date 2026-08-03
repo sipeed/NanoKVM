@@ -336,9 +336,25 @@ const it = {
           modeOff: 'Spento',
           modeAuto: 'Nascondi automaticamente',
           modeAlways: 'Sempre visibile',
+          keyboardLedStatus: 'Indicatori di blocco della tastiera',
+          keyboardLedStatusDesc:
+            'Mostra lo stato di Bloc Num, Bloc Maiusc e Bloc Scorr del computer remoto',
           icons: 'Icone dei sottomenu',
           iconsDesc: 'Visualizza le icone dei sottomenu nella barra dei menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Stato dei blocchi della tastiera remota',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Bloc Num',
+        numLockShort: 'Num',
+        capsLock: 'Bloc Maiusc',
+        capsLockShort: 'Mai',
+        scrollLock: 'Bloc Scorr',
+        scrollLockShort: 'Scorr',
+        on: 'Attivo',
+        off: 'Disattivo',
+        unknown: 'Sconosciuto'
       },
       device: {
         title: 'Dispositivo',

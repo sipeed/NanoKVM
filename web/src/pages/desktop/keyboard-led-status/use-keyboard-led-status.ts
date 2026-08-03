@@ -36,6 +36,10 @@ export function useKeyboardLedStatus() {
 
     getKeyboardLedStatus()
       .then((rsp) => {
+        if (rsp.code !== 0) {
+          return;
+        }
+
         const next = parseKeyboardLedStatus(rsp.data);
         if (!disposed && next) {
           update(next);

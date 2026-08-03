@@ -335,9 +335,25 @@ const ru = {
           modeOff: 'Выкл.',
           modeAuto: 'Автоматическое скрытие',
           modeAlways: 'Всегда виден',
+          keyboardLedStatus: 'Индикаторы блокировки клавиатуры',
+          keyboardLedStatusDesc:
+            'Показывать состояние Num Lock, Caps Lock и Scroll Lock удалённого компьютера',
           icons: 'Значки подменю',
           iconsDesc: 'Отображение значков подменю в строке меню'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Состояние блокировок удалённой клавиатуры',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Вкл.',
+        off: 'Выкл.',
+        unknown: 'Неизвестно'
       },
       device: {
         title: 'Устройство',

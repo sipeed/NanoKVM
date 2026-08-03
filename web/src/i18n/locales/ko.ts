@@ -330,9 +330,24 @@ const ko = {
           modeOff: '꺼짐',
           modeAuto: '자동 숨기기',
           modeAlways: '항상 보이기',
+          keyboardLedStatus: '키보드 잠금 표시기',
+          keyboardLedStatusDesc: '원격 컴퓨터의 Num Lock, Caps Lock, Scroll Lock 상태 표시',
           icons: '하위 메뉴 아이콘',
           iconsDesc: '메뉴 바에 하위 메뉴 아이콘을 표시합니다'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: '원격 키보드 잠금 상태',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: '켜짐',
+        off: '꺼짐',
+        unknown: '알 수 없음'
       },
       device: {
         title: '장치',

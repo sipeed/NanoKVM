@@ -335,9 +335,25 @@ const ja = {
           modeOff: '閉じる',
           modeAuto: '自動非表示',
           modeAlways: '常に表示',
+          keyboardLedStatus: 'キーボードロックの表示',
+          keyboardLedStatusDesc:
+            'リモートコンピューターの Num Lock、Caps Lock、Scroll Lock の状態を表示',
           icons: 'メニューアイコン',
           iconsDesc: 'メニューバーでのサブメニューアイコンの表示'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'リモートキーボードのロック状態',
+        indicatorLabel: '{{label}}：{{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'オン',
+        off: 'オフ',
+        unknown: '不明'
       },
       device: {
         title: 'デバイス',

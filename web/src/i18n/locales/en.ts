@@ -337,6 +337,19 @@ const en = {
           iconsDesc: 'Display submenu icons in the menu bar'
         }
       },
+      keyboardLedStatus: {
+        groupLabel: 'Remote keyboard lock status',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'On',
+        off: 'Off',
+        unknown: 'Unknown'
+      },
       device: {
         title: 'Device',
         oled: {

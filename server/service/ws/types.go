@@ -16,16 +16,23 @@ type Manager struct {
 }
 
 type Client struct {
-	ws               *websocket.Conn
-	hid              *hid.Hid
-	manual           *inputcontrol.ManualSession
-	keyboard         chan hid.QueuedReport
-	mouse            chan hid.QueuedReport
-	heartbeatTimeout time.Duration
-	lastHeartbeat    time.Time
-	mutex            sync.Mutex
-	closeOnce        sync.Once
-	workers          sync.WaitGroup
+	ws                 *websocket.Conn
+	hid                *hid.Hid
+	manual             *inputcontrol.ManualSession
+	keyboard           chan hid.QueuedReport
+	mouse              chan hid.QueuedReport
+	heartbeatTimeout   time.Duration
+	lastHeartbeat      time.Time
+	mutex              sync.Mutex
+	keyboardLedMutex   sync.Mutex
+	keyboardLedStatus  *hid.KeyboardLedStatus
+	keyboardLedNotify  chan struct{}
+	keyboardLedDone    chan struct{}
+	keyboardLedClosed  bool
+	keyboardLedOnce    sync.Once
+	keyboardLedWorkers sync.WaitGroup
+	closeOnce          sync.Once
+	workers            sync.WaitGroup
 }
 
 type Message struct {

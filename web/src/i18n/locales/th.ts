@@ -327,9 +327,25 @@ const th = {
           modeOff: 'ปิด',
           modeAuto: 'ซ่อนอัตโนมัติ',
           modeAlways: 'มองเห็นได้เสมอ',
+          keyboardLedStatus: 'ตัวบ่งชี้ปุ่มล็อกแป้นพิมพ์',
+          keyboardLedStatusDesc:
+            'แสดงสถานะ Num Lock, Caps Lock และ Scroll Lock ของคอมพิวเตอร์ระยะไกล',
           icons: 'ไอคอนเมนูย่อย',
           iconsDesc: 'แสดงไอคอนเมนูย่อยในแถบเมนู'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'สถานะปุ่มล็อกแป้นพิมพ์ระยะไกล',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'เปิด',
+        off: 'ปิด',
+        unknown: 'ไม่ทราบ'
       },
       device: {
         title: 'อุปกรณ์',

@@ -13,13 +13,17 @@ import (
 )
 
 type Hid struct {
-	g0                 *os.File
-	g0Reader           *os.File
-	g1                 *os.File
-	g2                 *os.File
-	kbMutex            sync.Mutex
-	mouseMutex         sync.Mutex
-	ledReaderStartOnce sync.Once
+	g0                     *os.File
+	g0Reader               *os.File
+	g1                     *os.File
+	g2                     *os.File
+	ledReaderNotifyReader  *os.File
+	ledReaderNotifyWriter  *os.File
+	ledReaderNotifyReadFD  int
+	ledReaderNotifyWriteFD int
+	kbMutex                sync.Mutex
+	mouseMutex             sync.Mutex
+	ledReaderStartOnce     sync.Once
 }
 
 const (
@@ -211,12 +215,20 @@ func (h *Hid) openKeyboardLedReaderNoLock() error {
 		return nil
 	}
 
-	file, err := os.OpenFile(HID0, os.O_RDONLY|syscall.O_NONBLOCK, 0o666)
+	if err := h.ensureKeyboardLedReaderNotifierNoLock(); err != nil {
+		return err
+	}
+
+	// Keep this descriptor blocking. The LED reader waits for either an output
+	// report or a lifecycle notification, so an idle host does not cause a
+	// periodic EAGAIN retry loop.
+	file, err := os.OpenFile(HID0, os.O_RDONLY, 0o666)
 	if err != nil {
 		return fmt.Errorf("%s: %w", HID0, err)
 	}
 
 	h.g0Reader = file
+	h.notifyKeyboardLedReaderNoLock()
 	return nil
 }
 
@@ -227,6 +239,7 @@ func (h *Hid) closeKeyboardLedReaderNoLock() {
 
 	file := h.g0Reader
 	h.g0Reader = nil
+	h.notifyKeyboardLedReaderNoLock()
 	if err := file.Close(); err != nil {
 		log.Debugf("close keyboard LED reader failed: %s", err)
 	}

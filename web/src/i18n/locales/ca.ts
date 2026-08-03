@@ -332,9 +332,25 @@ const ca = {
           modeOff: 'Apagat',
           modeAuto: 'Ocultació automàtica',
           modeAlways: 'Sempre visible',
+          keyboardLedStatus: 'Indicadors de bloqueig del teclat',
+          keyboardLedStatusDesc:
+            'Mostra l’estat de Bloq Num, Bloq Maj i Bloq Despl de l’ordinador remot',
           icons: 'Icones del submenú',
           iconsDesc: 'Mostra les icones del submenú a la barra de menús'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Estat de bloqueig del teclat remot',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Bloq Num',
+        numLockShort: 'Num',
+        capsLock: 'Bloq Maj',
+        capsLockShort: 'Maj',
+        scrollLock: 'Bloq Despl',
+        scrollLockShort: 'Despl',
+        on: 'Activat',
+        off: 'Desactivat',
+        unknown: 'Desconegut'
       },
       device: {
         title: 'Dispositiu',
