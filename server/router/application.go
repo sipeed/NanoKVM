@@ -17,4 +17,7 @@ func applicationRouter(r *gin.Engine) {
 
 	api.GET("/application/preview", service.GetPreview)  // get preview updates state
 	api.POST("/application/preview", service.SetPreview) // set preview updates state
+
+	api.GET("/application/update-server", service.GetUpdateServer)  // get custom update server
+	api.POST("/application/update-server", service.SetUpdateServer) // set custom update server
 }

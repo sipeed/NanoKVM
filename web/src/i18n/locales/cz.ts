@@ -522,6 +522,22 @@ const cz = {
         previewDesc: 'Získejte včasný přístup k novým funkcím a vylepšením',
         previewTip:
           'Uvědomte si prosím, že předběžné verze mohou obsahovat chyby nebo neúplné funkce!',
+        customServer: {
+          title: 'Vlastní aktualizační server',
+          desc: 'Vyhledávejte a stahujte online aktualizace ze zadaného serveru',
+          invalidUrl:
+            'Zadejte platnou adresu adresáře serveru HTTP nebo HTTPS bez parametrů, fragmentu nebo souboru latest.json.',
+          loadFailed: 'Konfiguraci aktualizačního serveru se nepodařilo načíst.',
+          saveFailed: 'Konfiguraci aktualizačního serveru se nepodařilo uložit.',
+          saved: 'Konfigurace aktualizačního serveru byla uložena.',
+          save: 'Uložit',
+          confirmTitle: 'Použít vlastní aktualizační server?',
+          confirmDesc:
+            'SHA-512 pouze ověřuje, že balíček odpovídá manifestu poskytnutému tímto serverem. Neprokazuje, že je balíček oficiálním vydáním NanoKVM. Vadný nebo škodlivý server může způsobit nefunkčnost zařízení, ztrátu dat nebo narušení zabezpečení systému.',
+          confirm: 'Přesto použít',
+          previewDisabled:
+            'Testovací aktualizace nejsou při použití vlastního aktualizačního serveru dostupné.'
+        },
         offline: {
           title: 'Offline aktualizace',
           desc: 'Aktualizace prostřednictvím místního instalačního balíčku',
@@ -575,8 +591,10 @@ const cz = {
           ready: 'Běhové prostředí připraveno',
           stopped: 'Běhové prostředí zastaveno',
           blockedByMCP: 'Externí ovládání MCP je aktivní',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Běhové prostředí není k dispozici',
           configError: 'Chyba konfigurace'
         },
@@ -607,7 +625,8 @@ const cz = {
         mcp: 'Ovládání zařízení: externí MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Ovládání zařízení: vypnuto',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Předat ovládání',
@@ -615,7 +634,8 @@ const cz = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Ovládání PicoClaw povoleno',
         released: 'Ovládání PicoClaw uvolněno',
         grantFailed: 'Nepodařilo se předat ovládání PicoClaw',

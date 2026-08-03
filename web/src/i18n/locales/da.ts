@@ -520,6 +520,22 @@ const da = {
         previewDesc: 'Få tidlig adgang til nye funktioner og forbedringer',
         previewTip:
           'Vær opmærksom på, at forhåndsvisningsudgivelser kan indeholde fejl eller ufuldstændig funktionalitet!',
+        customServer: {
+          title: 'Brugerdefineret opdateringsserver',
+          desc: 'Søg efter og download onlineopdateringer fra en angivet server',
+          invalidUrl:
+            'Indtast en gyldig HTTP- eller HTTPS-servermappe uden forespørgsel, fragment eller latest.json.',
+          loadFailed: 'Konfigurationen af opdateringsserveren kunne ikke indlæses.',
+          saveFailed: 'Konfigurationen af opdateringsserveren kunne ikke gemmes.',
+          saved: 'Konfigurationen af opdateringsserveren er gemt.',
+          save: 'Gem',
+          confirmTitle: 'Vil du bruge en brugerdefineret opdateringsserver?',
+          confirmDesc:
+            'SHA-512 kontrollerer kun, at pakken stemmer overens med manifestet fra denne server. Det beviser ikke, at pakken er en officiel NanoKVM-udgivelse. En fejlbehæftet eller ondsindet server kan gøre enheden ubrugelig, medføre tab af data eller kompromittere systemet.',
+          confirm: 'Brug alligevel',
+          previewDisabled:
+            'Forhåndsvisningsopdateringer er ikke tilgængelige, mens en brugerdefineret opdateringsserver er aktiveret.'
+        },
         offline: {
           title: 'Offline opdateringer',
           desc: 'Opdatering via lokal installationspakke',
@@ -573,8 +589,10 @@ const da = {
           ready: 'Runtime klar',
           stopped: 'Runtime stoppet',
           blockedByMCP: 'Ekstern MCP-styring er aktiv',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime utilgængelig',
           configError: 'Konfigurationsfejl'
         },
@@ -605,7 +623,8 @@ const da = {
         mcp: 'Enhedsstyring: ekstern MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Enhedsstyring: fra',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Giv styring',
@@ -613,7 +632,8 @@ const da = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw-styring givet',
         released: 'PicoClaw-styring frigivet',
         grantFailed: 'Kunne ikke give PicoClaw styring',

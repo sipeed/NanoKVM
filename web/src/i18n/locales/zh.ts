@@ -506,6 +506,21 @@ const zh = {
         preview: '预览更新',
         previewDesc: '率先体验即将推出的新功能和优化',
         previewTip: '预览版更新可能包含一些不稳定因素或未完善的功能！',
+        customServer: {
+          title: '自定义更新服务器',
+          desc: '从指定服务器检查并下载在线更新',
+          invalidUrl:
+            '请输入有效的 HTTP 或 HTTPS 服务器目录，不能包含查询参数、片段或 latest.json。',
+          loadFailed: '读取更新服务器配置失败。',
+          saveFailed: '保存更新服务器配置失败。',
+          saved: '更新服务器配置已保存。',
+          save: '保存',
+          confirmTitle: '使用自定义更新服务器？',
+          confirmDesc:
+            'SHA-512 只能验证安装包与该服务器提供的清单一致，不能证明安装包来自 NanoKVM 官方。错误或恶意的服务器可能导致设备不可用、数据丢失或系统被接管。',
+          confirm: '仍然使用',
+          previewDisabled: '启用自定义更新服务器时，预览更新不可用'
+        },
         offline: {
           title: '离线更新',
           desc: '通过本地安装包进行更新',

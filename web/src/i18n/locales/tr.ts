@@ -393,7 +393,8 @@ const tr = {
         hdmi: {
           description: 'HDMI/Momitör çıktısını aktifleştir',
           idleTimeoutTitle: 'Etkin olmayan yakalama zaman aşımı',
-          idleTimeoutDescription: 'Etkin görüntüleyici olmadığında HDMI yakalamayı şu süre sonunda durdur:',
+          idleTimeoutDescription:
+            'Etkin görüntüleyici olmadığında HDMI yakalamayı şu süre sonunda durdur:',
           minutes: 'dk'
         },
         autostart: {
@@ -521,6 +522,22 @@ const tr = {
         previewDesc: 'En son geliştirmelere ve özelliklere erken erişin',
         previewTip:
           'Ön izleme güncellemelerinin tamamlanmamış olduğunu ve sorunlara sebep olabileceğini unutmayın!',
+        customServer: {
+          title: 'Özel güncelleme sunucusu',
+          desc: 'Belirtilen sunucudaki çevrimiçi güncellemeleri denetleyin ve indirin',
+          invalidUrl:
+            'Sorgu, parça tanımlayıcısı veya latest.json içermeyen geçerli bir HTTP ya da HTTPS sunucu dizini girin.',
+          loadFailed: 'Güncelleme sunucusu yapılandırması yüklenemedi.',
+          saveFailed: 'Güncelleme sunucusu yapılandırması kaydedilemedi.',
+          saved: 'Güncelleme sunucusu yapılandırması kaydedildi.',
+          save: 'Kaydet',
+          confirmTitle: 'Özel bir güncelleme sunucusu kullanılsın mı?',
+          confirmDesc:
+            'SHA-512 yalnızca paketin bu sunucunun sağladığı bildirimle eşleştiğini doğrular. Paketin resmi bir NanoKVM sürümü olduğunu kanıtlamaz. Hatalı veya kötü amaçlı bir sunucu cihazı kullanılamaz hâle getirebilir, veri kaybına yol açabilir ya da sistem güvenliğini tehlikeye atabilir.',
+          confirm: 'Yine de kullan',
+          previewDisabled:
+            'Özel bir güncelleme sunucusu etkinken önizleme güncellemeleri kullanılamaz.'
+        },
         offline: {
           title: 'Çevrimdışı Güncellemeler',
           desc: 'Yerel kurulum paketi aracılığıyla güncelleme',
@@ -574,8 +591,10 @@ const tr = {
           ready: 'Runtime hazır',
           stopped: 'Runtime durduruldu',
           blockedByMCP: 'Harici MCP kontrolü etkin',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime mevcut değil',
           configError: 'Yapılandırma hatası'
         },
@@ -606,7 +625,8 @@ const tr = {
         mcp: 'Cihaz kontrolü: harici MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Cihaz kontrolü: kapalı',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Kontrol ver',
@@ -614,7 +634,8 @@ const tr = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw kontrolü verildi',
         released: 'PicoClaw kontrolü bırakıldı',
         grantFailed: 'PicoClaw kontrolü verilemedi',

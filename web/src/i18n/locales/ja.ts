@@ -395,7 +395,8 @@ const ja = {
         hdmi: {
           description: 'HDMI/モニター 出力機能を有効にする',
           idleTimeoutTitle: 'キャプチャのアイドルタイムアウト',
-          idleTimeoutDescription: 'アクティブな閲覧者がいない状態が次の時間続いたら HDMI キャプチャを停止',
+          idleTimeoutDescription:
+            'アクティブな閲覧者がいない状態が次の時間続いたら HDMI キャプチャを停止',
           minutes: '分'
         },
         autostart: {
@@ -523,6 +524,22 @@ const ja = {
         previewDesc: '新機能や改善をいち早く体験する',
         previewTip:
           'プレビューアップデートには不安定な部分や不完全な機能が含まれる場合があります！',
+        customServer: {
+          title: 'カスタム更新サーバー',
+          desc: '指定したサーバーでオンラインアップデートを確認し、ダウンロードします',
+          invalidUrl:
+            'クエリ、フラグメント、latest.json を含まない、有効な HTTP または HTTPS のサーバーディレクトリを入力してください。',
+          loadFailed: '更新サーバーの設定を読み込めませんでした。',
+          saveFailed: '更新サーバーの設定を保存できませんでした。',
+          saved: '更新サーバーの設定を保存しました。',
+          save: '保存',
+          confirmTitle: 'カスタム更新サーバーを使用しますか？',
+          confirmDesc:
+            'SHA-512 で確認できるのは、パッケージがこのサーバーから提供されたマニフェストと一致することだけです。そのパッケージが NanoKVM の公式リリースであることは保証されません。不具合のあるサーバーや悪意のあるサーバーを使用すると、デバイスが使用不能になったり、データが失われたり、システムが侵害されたりする可能性があります。',
+          confirm: 'そのまま使用',
+          previewDisabled:
+            'カスタム更新サーバーが有効な間は、プレビュー版アップデートを利用できません。'
+        },
         offline: {
           title: 'オフラインアップデート',
           desc: 'ローカルインストールパッケージでアップデートする',
@@ -577,8 +594,10 @@ const ja = {
           ready: 'ランタイムの準備が完了しました',
           stopped: 'ランタイムが停止しました',
           blockedByMCP: '外部 MCP 制御が有効です',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'ランタイムが使用できません',
           configError: '構成エラー'
         },
@@ -609,7 +628,8 @@ const ja = {
         mcp: 'デバイス制御: 外部 MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'デバイス制御: オフ',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: '制御を付与',
@@ -617,7 +637,8 @@ const ja = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw 制御を付与しました',
         released: 'PicoClaw 制御を解除しました',
         grantFailed: 'PicoClaw 制御の付与に失敗しました',

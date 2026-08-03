@@ -398,7 +398,8 @@ const de = {
         hdmi: {
           description: 'HDMI/Monitor-Ausgabe aktivieren',
           idleTimeoutTitle: 'Zeitlimit für inaktive Aufnahme',
-          idleTimeoutDescription: 'HDMI-Aufnahme stoppen, wenn keine aktiven Zuschauer vorhanden sind für',
+          idleTimeoutDescription:
+            'HDMI-Aufnahme stoppen, wenn keine aktiven Zuschauer vorhanden sind für',
           minutes: 'Min.'
         },
         autostart: {
@@ -526,6 +527,22 @@ const de = {
         previewDesc: 'Erhalten Sie vorab Zugriff auf neue Funktionen und Verbesserungen',
         previewTip:
           'Bitte beachten Sie, dass Vorab-Versionen womöglich noch Fehler oder unvollständige Funktionen enthalten!',
+        customServer: {
+          title: 'Benutzerdefinierter Update-Server',
+          desc: 'Online-Updates von einem angegebenen Server suchen und herunterladen',
+          invalidUrl:
+            'Geben Sie ein gültiges HTTP- oder HTTPS-Serververzeichnis ohne Abfrageparameter, Fragment oder latest.json ein.',
+          loadFailed: 'Die Konfiguration des Update-Servers konnte nicht geladen werden.',
+          saveFailed: 'Die Konfiguration des Update-Servers konnte nicht gespeichert werden.',
+          saved: 'Die Konfiguration des Update-Servers wurde gespeichert.',
+          save: 'Speichern',
+          confirmTitle: 'Benutzerdefinierten Update-Server verwenden?',
+          confirmDesc:
+            'SHA-512 bestätigt lediglich, dass das Paket mit dem von diesem Server bereitgestellten Manifest übereinstimmt. Es beweist nicht, dass das Paket eine offizielle NanoKVM-Version ist. Ein fehlerhafter oder bösartiger Server kann das Gerät unbrauchbar machen, Datenverlust verursachen oder das System kompromittieren.',
+          confirm: 'Trotzdem verwenden',
+          previewDisabled:
+            'Vorschau-Updates sind nicht verfügbar, solange ein benutzerdefinierter Update-Server aktiviert ist.'
+        },
         offline: {
           title: 'Offline Aktualisierung',
           desc: 'Über lokales Installationspaket aktualisieren',
@@ -580,8 +597,10 @@ const de = {
           ready: 'Runtime bereit',
           stopped: 'Runtime gestoppt',
           blockedByMCP: 'Externe MCP-Steuerung ist aktiv',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime nicht verfügbar',
           configError: 'Konfigurationsfehler'
         },
@@ -612,7 +631,8 @@ const de = {
         mcp: 'Gerätesteuerung: externes MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Gerätesteuerung: aus',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Steuerung erteilen',
@@ -620,7 +640,8 @@ const de = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw-Steuerung erteilt',
         released: 'PicoClaw-Steuerung freigegeben',
         grantFailed: 'PicoClaw-Steuerung konnte nicht erteilt werden',

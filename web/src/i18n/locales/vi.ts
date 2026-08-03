@@ -391,7 +391,8 @@ const vi = {
         hdmi: {
           description: 'Kích hoạt HDMI/đầu ra màn hình',
           idleTimeoutTitle: 'Thời gian chờ khi không hoạt động',
-          idleTimeoutDescription: 'Dừng việc ghi hình HDMI sau khi không có người xem hoạt động trong',
+          idleTimeoutDescription:
+            'Dừng việc ghi hình HDMI sau khi không có người xem hoạt động trong',
           minutes: 'phút'
         },
         autostart: {
@@ -518,6 +519,22 @@ const vi = {
         previewDesc: 'Nhận quyền truy cập sớm vào các tính năng và cải tiến mới',
         previewTip:
           'Xin lưu ý rằng các bản phát hành xem trước có thể có lỗi hoặc chức năng chưa hoàn chỉnh!',
+        customServer: {
+          title: 'Máy chủ cập nhật tùy chỉnh',
+          desc: 'Kiểm tra và tải xuống các bản cập nhật trực tuyến từ máy chủ được chỉ định',
+          invalidUrl:
+            'Nhập thư mục máy chủ HTTP hoặc HTTPS hợp lệ, không chứa truy vấn, phân đoạn hoặc latest.json.',
+          loadFailed: 'Không thể tải cấu hình máy chủ cập nhật.',
+          saveFailed: 'Không thể lưu cấu hình máy chủ cập nhật.',
+          saved: 'Đã lưu cấu hình máy chủ cập nhật.',
+          save: 'Lưu',
+          confirmTitle: 'Sử dụng máy chủ cập nhật tùy chỉnh?',
+          confirmDesc:
+            'SHA-512 chỉ kiểm tra xem gói có khớp với tệp kê khai do máy chủ này cung cấp hay không. Điều này không chứng minh rằng gói đó là bản phát hành NanoKVM chính thức. Máy chủ bị lỗi hoặc độc hại có thể khiến thiết bị không thể sử dụng, gây mất dữ liệu hoặc xâm phạm hệ thống.',
+          confirm: 'Vẫn sử dụng',
+          previewDisabled:
+            'Không thể sử dụng Bản cập nhật xem trước khi máy chủ cập nhật tùy chỉnh đang được bật.'
+        },
         offline: {
           title: 'Cập nhật ngoại tuyến',
           desc: 'Cập nhật thông qua gói cài đặt cục bộ',
@@ -572,8 +589,10 @@ const vi = {
           ready: 'Runtime đã sẵn sàng',
           stopped: 'Đã dừng runtime',
           blockedByMCP: 'Điều khiển MCP bên ngoài đang hoạt động',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime không khả dụng',
           configError: 'Lỗi cấu hình'
         },
@@ -604,7 +623,8 @@ const vi = {
         mcp: 'Điều khiển thiết bị: MCP bên ngoài',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Điều khiển thiết bị: tắt',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Cấp quyền điều khiển',
@@ -612,7 +632,8 @@ const vi = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Đã cấp quyền điều khiển PicoClaw',
         released: 'Đã nhả quyền điều khiển PicoClaw',
         grantFailed: 'Không thể cấp quyền điều khiển PicoClaw',

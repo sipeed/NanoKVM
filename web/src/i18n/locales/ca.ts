@@ -392,7 +392,8 @@ const ca = {
         hdmi: {
           description: 'Activa la sortida HDMI',
           idleTimeoutTitle: "Temps d'espera d'inactivitat de captura",
-          idleTimeoutDescription: "Atura la captura HDMI després de no detectar espectadors actius durant",
+          idleTimeoutDescription:
+            'Atura la captura HDMI després de no detectar espectadors actius durant',
           minutes: 'min'
         },
         autostart: {
@@ -517,6 +518,22 @@ const ca = {
         preview: 'Versió de prova',
         previewDesc: 'Prova noves funcions abans que ningú',
         previewTip: 'Compte: aquestes versions poden tenir errors o funcions inacabades!',
+        customServer: {
+          title: 'Servidor d’actualitzacions personalitzat',
+          desc: 'Cerca i baixa actualitzacions en línia des d’un servidor especificat',
+          invalidUrl:
+            'Introduïu un directori de servidor HTTP o HTTPS vàlid, sense paràmetres de consulta, fragments ni latest.json.',
+          loadFailed: 'No s’ha pogut carregar la configuració del servidor d’actualitzacions.',
+          saveFailed: 'No s’ha pogut desar la configuració del servidor d’actualitzacions.',
+          saved: 'S’ha desat la configuració del servidor d’actualitzacions.',
+          save: 'Desa',
+          confirmTitle: 'Voleu utilitzar un servidor d’actualitzacions personalitzat?',
+          confirmDesc:
+            'SHA-512 només comprova que el paquet coincideixi amb el manifest proporcionat per aquest servidor. Això no demostra que el paquet sigui una versió oficial de NanoKVM. Un servidor defectuós o maliciós pot deixar el dispositiu inutilitzable, provocar la pèrdua de dades o comprometre el sistema.',
+          confirm: 'Utilitza’l igualment',
+          previewDisabled:
+            'Les actualitzacions de previsualització no estan disponibles mentre hi hagi activat un servidor d’actualitzacions personalitzat.'
+        },
         offline: {
           title: 'Actualitzacions fora de línia',
           desc: "Actualització mitjançant el paquet d'instal·lació local",
@@ -570,8 +587,10 @@ const ca = {
           ready: "Temps d'execució a punt",
           stopped: "El temps d'execució s'ha aturat",
           blockedByMCP: 'El control MCP extern està actiu',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: "Temps d'execució no disponible",
           configError: 'Error de configuració'
         },
@@ -602,7 +621,8 @@ const ca = {
         mcp: 'Control del dispositiu: MCP extern',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Control del dispositiu: desactivat',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Concedeix control',
@@ -610,7 +630,8 @@ const ca = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Control de PicoClaw concedit',
         released: 'Control de PicoClaw alliberat',
         grantFailed: "No s'ha pogut concedir el control a PicoClaw",

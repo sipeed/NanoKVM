@@ -391,7 +391,8 @@ const se = {
         hdmi: {
           description: 'Aktivera HDMI/monitorutgång',
           idleTimeoutTitle: 'Tidsgräns för inaktiv inspelning',
-          idleTimeoutDescription: 'Stoppa HDMI-inspelning efter att det inte har funnits aktiva tittare i',
+          idleTimeoutDescription:
+            'Stoppa HDMI-inspelning efter att det inte har funnits aktiva tittare i',
           minutes: 'min'
         },
         autostart: {
@@ -517,6 +518,22 @@ const se = {
         previewDesc: 'Få tidig tillgång till nya funktioner och förbättringar',
         previewTip:
           'Observera att förhandsversioner kan innehålla buggar eller ofullständig funktionalitet!',
+        customServer: {
+          title: 'Anpassad uppdateringsserver',
+          desc: 'Sök efter och hämta onlineuppdateringar från en angiven server',
+          invalidUrl:
+            'Ange en giltig HTTP- eller HTTPS-serverkatalog utan frågesträng, fragment eller latest.json.',
+          loadFailed: 'Det gick inte att läsa in uppdateringsserverns konfiguration.',
+          saveFailed: 'Det gick inte att spara uppdateringsserverns konfiguration.',
+          saved: 'Uppdateringsserverns konfiguration har sparats.',
+          save: 'Spara',
+          confirmTitle: 'Vill du använda en anpassad uppdateringsserver?',
+          confirmDesc:
+            'SHA-512 kontrollerar endast att paketet överensstämmer med manifestet från den här servern. Det bevisar inte att paketet är en officiell NanoKVM-utgåva. En felaktig eller skadlig server kan göra enheten obrukbar, orsaka dataförlust eller äventyra systemets säkerhet.',
+          confirm: 'Använd ändå',
+          previewDisabled:
+            'Förhandsuppdateringar är inte tillgängliga när en anpassad uppdateringsserver är aktiverad.'
+        },
         offline: {
           title: 'Offlineuppdateringar',
           desc: 'Uppdatera genom lokalt installationspaket',
@@ -570,8 +587,10 @@ const se = {
           ready: 'Runtime klar',
           stopped: 'Runtime stoppad',
           blockedByMCP: 'Extern MCP-styrning är aktiv',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime inte tillgänglig',
           configError: 'Konfigurationsfel'
         },
@@ -602,7 +621,8 @@ const se = {
         mcp: 'Enhetsstyrning: extern MCP',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Enhetsstyrning: av',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Ge styrning',
@@ -610,7 +630,8 @@ const se = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'PicoClaw-styrning beviljad',
         released: 'PicoClaw-styrning släppt',
         grantFailed: 'Det gick inte att ge PicoClaw styrning',

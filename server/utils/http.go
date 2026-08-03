@@ -2,16 +2,22 @@ package utils
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
 
+const maxDownloadSize = int64(1024 * 1024 * 1024)
+
+var downloadClient = &http.Client{Timeout: 15 * time.Minute}
+
 func Download(req *http.Request, target string) error {
-	log.Debugf("downloading %s to %s", req.URL.String(), target)
+	log.Debugf("downloading %s to %s", req.URL.Redacted(), target)
 	err := os.MkdirAll(filepath.Dir(target), 0o755)
 	if err != nil {
 		log.Errorf("create dir %s err: %s", filepath.Dir(target), err)
@@ -26,10 +32,10 @@ func Download(req *http.Request, target string) error {
 		_ = out.Close()
 	}()
 
-	resp, err := (&http.Client{}).Do(req)
+	resp, err := downloadClient.Do(req)
 	if err != nil {
-		log.Errorf("request error: %s", err)
-		return err
+		log.Errorf("request to %s failed", req.URL.Redacted())
+		return errors.New("update website is inaccessible right now")
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -46,10 +52,13 @@ func Download(req *http.Request, target string) error {
 		return errors.New("unsupported content type")
 	}
 
-	_, err = io.Copy(out, resp.Body)
+	written, err := io.Copy(out, io.LimitReader(resp.Body, maxDownloadSize+1))
 	if err != nil {
 		log.Errorf("download file to %s err: %s", target, err)
 		return err
+	}
+	if written > maxDownloadSize {
+		return fmt.Errorf("download exceeds %d bytes", maxDownloadSize)
 	}
 
 	return nil

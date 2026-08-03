@@ -513,6 +513,22 @@ const th = {
         previewDesc: 'เข้าถึงฟีเจอร์และการปรับปรุงใหม่ก่อนใคร',
         previewTip:
           'โปรดทราบว่าการเผยแพร่ตัวอย่างอาจมีข้อบกพร่องหรือฟังก์ชันการทำงานที่ไม่สมบูรณ์!',
+        customServer: {
+          title: 'เซิร์ฟเวอร์อัปเดตแบบกำหนดเอง',
+          desc: 'ตรวจสอบและดาวน์โหลดการอัปเดตออนไลน์จากเซิร์ฟเวอร์ที่ระบุ',
+          invalidUrl:
+            'ป้อนไดเรกทอรีเซิร์ฟเวอร์ HTTP หรือ HTTPS ที่ถูกต้อง โดยไม่มีคิวรี แฟรกเมนต์ หรือ latest.json',
+          loadFailed: 'โหลดการกำหนดค่าเซิร์ฟเวอร์อัปเดตไม่สำเร็จ',
+          saveFailed: 'บันทึกการกำหนดค่าเซิร์ฟเวอร์อัปเดตไม่สำเร็จ',
+          saved: 'บันทึกการกำหนดค่าเซิร์ฟเวอร์อัปเดตแล้ว',
+          save: 'บันทึก',
+          confirmTitle: 'ใช้เซิร์ฟเวอร์อัปเดตแบบกำหนดเองหรือไม่',
+          confirmDesc:
+            'SHA-512 ตรวจสอบเพียงว่าแพ็กเกจตรงกับไฟล์ Manifest ที่เซิร์ฟเวอร์นี้จัดเตรียมไว้เท่านั้น ไม่ได้ยืนยันว่าแพ็กเกจดังกล่าวเป็นรุ่นอย่างเป็นทางการของ NanoKVM เซิร์ฟเวอร์ที่มีข้อผิดพลาดหรือเป็นอันตรายอาจทำให้อุปกรณ์ใช้งานไม่ได้ ทำให้ข้อมูลสูญหาย หรือทำให้ระบบถูกบุกรุก',
+          confirm: 'ใช้ต่อไป',
+          previewDisabled:
+            'การอัปเดตเวอร์ชันตัวอย่างจะไม่พร้อมใช้งานขณะที่เปิดใช้เซิร์ฟเวอร์อัปเดตแบบกำหนดเอง'
+        },
         offline: {
           title: 'อัปเดตออฟไลน์',
           desc: 'อัปเดตผ่านแพ็คเกจการติดตั้งในเครื่อง',
@@ -566,8 +582,10 @@ const th = {
           ready: 'Runtime พร้อมใช้งาน',
           stopped: 'หยุด Runtime แล้ว',
           blockedByMCP: 'การควบคุม MCP ภายนอกกำลังทำงาน',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime ไม่พร้อมใช้งาน',
           configError: 'ข้อผิดพลาดในการกำหนดค่า'
         },
@@ -598,7 +616,8 @@ const th = {
         mcp: 'การควบคุมอุปกรณ์: MCP ภายนอก',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'การควบคุมอุปกรณ์: ปิด',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'มอบการควบคุม',
@@ -606,7 +625,8 @@ const th = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'มอบการควบคุม PicoClaw แล้ว',
         released: 'ปล่อยการควบคุม PicoClaw แล้ว',
         grantFailed: 'ไม่สามารถมอบการควบคุม PicoClaw ได้',

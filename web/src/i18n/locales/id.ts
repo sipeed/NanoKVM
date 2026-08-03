@@ -521,6 +521,22 @@ const id = {
         previewDesc: 'Dapatkan akses awal ke fitur dan peningkatan baru',
         previewTip:
           'Perlu diketahui bahwa rilis pratinjau mungkin mengandung bug atau fungsi yang tidak lengkap!',
+        customServer: {
+          title: 'Server Pembaruan Kustom',
+          desc: 'Periksa dan unduh pembaruan daring dari server yang ditentukan',
+          invalidUrl:
+            'Masukkan direktori server HTTP atau HTTPS yang valid tanpa kueri, fragmen, atau latest.json.',
+          loadFailed: 'Gagal memuat konfigurasi server pembaruan.',
+          saveFailed: 'Gagal menyimpan konfigurasi server pembaruan.',
+          saved: 'Konfigurasi server pembaruan telah disimpan.',
+          save: 'Simpan',
+          confirmTitle: 'Gunakan server pembaruan kustom?',
+          confirmDesc:
+            'SHA-512 hanya memeriksa bahwa paket cocok dengan manifes yang disediakan oleh server ini. Pemeriksaan ini tidak membuktikan bahwa paket tersebut merupakan rilis resmi NanoKVM. Server yang bermasalah atau berbahaya dapat membuat perangkat tidak dapat digunakan, menyebabkan kehilangan data, atau membahayakan sistem.',
+          confirm: 'Tetap Gunakan',
+          previewDisabled:
+            'Pembaruan Pratinjau tidak tersedia saat server pembaruan kustom diaktifkan.'
+        },
         offline: {
           title: 'Pembaruan Offline',
           desc: 'Perbarui melalui paket instalasi lokal',
@@ -574,8 +590,10 @@ const id = {
           ready: 'Runtime siap',
           stopped: 'Runtime dihentikan',
           blockedByMCP: 'Kontrol MCP eksternal sedang aktif',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime tidak tersedia',
           configError: 'Kesalahan konfigurasi'
         },
@@ -606,7 +624,8 @@ const id = {
         mcp: 'Kontrol perangkat: MCP eksternal',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Kontrol perangkat: nonaktif',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Berikan kontrol',
@@ -614,7 +633,8 @@ const id = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Kontrol PicoClaw diberikan',
         released: 'Kontrol PicoClaw dilepaskan',
         grantFailed: 'Gagal memberikan kontrol PicoClaw',

@@ -395,7 +395,8 @@ const es = {
         hdmi: {
           description: 'Habilitar salida HDMI/monitor',
           idleTimeoutTitle: 'Tiempo de espera de captura inactiva',
-          idleTimeoutDescription: 'Detener la captura HDMI después de no haber espectadores activos durante',
+          idleTimeoutDescription:
+            'Detener la captura HDMI después de no haber espectadores activos durante',
           minutes: 'min'
         },
         autostart: {
@@ -524,6 +525,22 @@ const es = {
         previewDesc: 'Accede anticipadamente a nuevas funciones y mejoras',
         previewTip:
           'Ten en cuenta que las versiones de vista previa pueden contener errores o funcionalidades incompletas',
+        customServer: {
+          title: 'Servidor de actualizaciones personalizado',
+          desc: 'Buscar y descargar actualizaciones en línea desde un servidor especificado',
+          invalidUrl:
+            'Introduce un directorio de servidor HTTP o HTTPS válido, sin parámetros de consulta, fragmentos ni latest.json.',
+          loadFailed: 'No se pudo cargar la configuración del servidor de actualizaciones.',
+          saveFailed: 'No se pudo guardar la configuración del servidor de actualizaciones.',
+          saved: 'Se ha guardado la configuración del servidor de actualizaciones.',
+          save: 'Guardar',
+          confirmTitle: '¿Usar un servidor de actualizaciones personalizado?',
+          confirmDesc:
+            'SHA-512 solo comprueba que el paquete coincide con el manifiesto proporcionado por este servidor. No demuestra que el paquete sea una versión oficial de NanoKVM. Un servidor defectuoso o malicioso puede inutilizar el dispositivo, provocar la pérdida de datos o comprometer el sistema.',
+          confirm: 'Usar de todos modos',
+          previewDisabled:
+            'Las actualizaciones preliminares no están disponibles mientras esté activado un servidor de actualizaciones personalizado.'
+        },
         offline: {
           title: 'Actualizaciones sin conexión',
           desc: 'Actualización a través del paquete de instalación local',
@@ -578,8 +595,10 @@ const es = {
           ready: 'Tiempo de ejecución listo',
           stopped: 'Tiempo de ejecución detenido',
           blockedByMCP: 'El control MCP externo está activo',
-          readyBlockedByMCP: 'The runtime is running, but external MCP currently controls device input.',
-          readyWithoutControl: 'The runtime is running. Grant PicoClaw device control before reconnecting.',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Tiempo de ejecución no disponible',
           configError: 'Error de configuración'
         },
@@ -610,7 +629,8 @@ const es = {
         mcp: 'Control del dispositivo: MCP externo',
         mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
         off: 'Control del dispositivo: desactivado',
-        offDescription: 'AI will not write keyboard or mouse input. Manual control remains available.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
         transitioning: 'Device control: switching',
         transitioningDescription: 'Device control is syncing. Please wait.',
         grant: 'Conceder control',
@@ -618,7 +638,8 @@ const es = {
         releasing: 'Releasing...',
         switching: 'Switching...',
         releasingLabel: 'Device control: releasing',
-        releasingDescription: 'Device control is being returned. PicoClaw has stopped current writes.',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
         granted: 'Control de PicoClaw concedido',
         released: 'Control de PicoClaw liberado',
         grantFailed: 'No se pudo conceder el control de PicoClaw',
@@ -700,7 +721,8 @@ const es = {
         enableConfirmOk: 'Iniciar PicoClaw',
         enableConfirmCancel: 'Cancelar',
         title: 'Iniciar PicoClaw',
-        description: 'Inicia el tiempo de ejecución para comenzar a utilizar el asistente PicoClaw.',
+        description:
+          'Inicia el tiempo de ejecución para comenzar a utilizar el asistente PicoClaw.',
         switchFromMCP: 'Switch to PicoClaw and start',
         takeoverAndStart: 'Take over and start'
       }
