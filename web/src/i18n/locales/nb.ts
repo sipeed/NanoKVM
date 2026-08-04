@@ -333,9 +333,25 @@ const nb = {
           modeOff: 'Av',
           modeAuto: 'Skjul automatisk',
           modeAlways: 'Alltid synlig',
+          keyboardLedStatus: 'Indikatorer for tastaturlås',
+          keyboardLedStatusDesc:
+            'Vis Num Lock-, Caps Lock- og Scroll Lock-status for den eksterne datamaskinen',
           icons: 'Undermenyikoner',
           iconsDesc: 'Vis undermenyikoner i menylinjen'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Status for låser på eksternt tastatur',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'På',
+        off: 'Av',
+        unknown: 'Ukjent'
       },
       device: {
         title: 'Enhet',

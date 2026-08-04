@@ -338,9 +338,25 @@ const de = {
           modeOff: 'Aus',
           modeAuto: 'Automatisch ausblenden',
           modeAlways: 'Immer sichtbar',
+          keyboardLedStatus: 'Tastensperren-Anzeigen',
+          keyboardLedStatusDesc:
+            'Num-Lock-, Feststell- und Rollen-Status des Remote-Computers anzeigen',
           icons: 'Untermenüsymbole',
           iconsDesc: 'Untermenüsymbole in der Menüleiste anzeigen'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Tastensperren-Status der Remote-Tastatur',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num-Taste',
+        numLockShort: 'Num',
+        capsLock: 'Feststelltaste',
+        capsLockShort: 'Fest',
+        scrollLock: 'Rollen-Taste',
+        scrollLockShort: 'Roll',
+        on: 'Ein',
+        off: 'Aus',
+        unknown: 'Unbekannt'
       },
       device: {
         title: 'Gerät',

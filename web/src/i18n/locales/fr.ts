@@ -337,9 +337,25 @@ const fr = {
           modeOff: 'Désactivé',
           modeAuto: 'Masquer automatiquement',
           modeAlways: 'Toujours visible',
+          keyboardLedStatus: 'Indicateurs de verrouillage du clavier',
+          keyboardLedStatusDesc:
+            'Afficher l’état de Verr Num, Verr Maj et Arrêt défil du poste distant',
           icons: 'Icônes du sous-menu',
           iconsDesc: 'Afficher les icônes des sous-menus dans la barre de menus'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'État des verrouillages du clavier distant',
+        indicatorLabel: '{{label}} : {{state}}',
+        numLock: 'Verr Num',
+        numLockShort: 'Num',
+        capsLock: 'Verr Maj',
+        capsLockShort: 'Maj',
+        scrollLock: 'Arrêt défil',
+        scrollLockShort: 'Défil',
+        on: 'Activé',
+        off: 'Désactivé',
+        unknown: 'Inconnu'
       },
       device: {
         title: 'Appareil',

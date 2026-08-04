@@ -332,9 +332,25 @@ const da = {
           modeOff: 'Fra',
           modeAuto: 'Skjul automatisk',
           modeAlways: 'Altid synlig',
+          keyboardLedStatus: 'Tastaturlåseindikatorer',
+          keyboardLedStatusDesc:
+            'Vis Num Lock-, Caps Lock- og Scroll Lock-status for fjerncomputeren',
           icons: 'Undermenuikoner',
           iconsDesc: 'Vis undermenuikoner i menulinjen'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Status for låse på fjernkeyboard',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Til',
+        off: 'Fra',
+        unknown: 'Ukendt'
       },
       device: {
         title: 'Enhed',

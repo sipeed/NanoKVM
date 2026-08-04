@@ -322,9 +322,24 @@ const zh = {
           modeOff: '关闭',
           modeAuto: '自动隐藏',
           modeAlways: '始终显示',
+          keyboardLedStatus: '键盘锁定状态指示灯',
+          keyboardLedStatusDesc: '显示远程主机的 Num Lock、Caps Lock 和 Scroll Lock 状态',
           icons: '菜单图标',
           iconsDesc: '是否在菜单栏中显示子菜单图标'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: '远程键盘锁定状态',
+        indicatorLabel: '{{label}}：{{state}}',
+        numLock: '数字锁定',
+        numLockShort: '数',
+        capsLock: '大写锁定',
+        capsLockShort: '大',
+        scrollLock: '滚动锁定',
+        scrollLockShort: '滚',
+        on: '开启',
+        off: '关闭',
+        unknown: '未知'
       },
       device: {
         title: '设备',

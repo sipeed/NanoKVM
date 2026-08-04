@@ -335,9 +335,25 @@ const es = {
           modeOff: 'Apagado',
           modeAuto: 'Ocultar automáticamente',
           modeAlways: 'Siempre visible',
+          keyboardLedStatus: 'Indicadores de bloqueo del teclado',
+          keyboardLedStatusDesc:
+            'Mostrar el estado de Bloq Num, Bloq Mayús y Bloq Despl del equipo remoto',
           icons: 'Iconos del submenú',
           iconsDesc: 'Mostrar iconos de submenú en la barra de menú'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Estado de bloqueos del teclado remoto',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Bloq Num',
+        numLockShort: 'Num',
+        capsLock: 'Bloq Mayús',
+        capsLockShort: 'May',
+        scrollLock: 'Bloq Despl',
+        scrollLockShort: 'Despl',
+        on: 'Activado',
+        off: 'Desactivado',
+        unknown: 'Desconocido'
       },
       device: {
         title: 'Dispositivo',

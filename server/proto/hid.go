@@ -4,6 +4,14 @@ type GetHidModeRsp struct {
 	Mode string `json:"mode"` // normal or hid-only
 }
 
+type GetKeyboardLedStatusRsp struct {
+	NumLock    bool   `json:"numLock"`
+	CapsLock   bool   `json:"capsLock"`
+	ScrollLock bool   `json:"scrollLock"`
+	Known      bool   `json:"known"`
+	UpdatedAt  string `json:"updatedAt"`
+}
+
 type SetHidModeReq struct {
 	Mode string `validate:"required"` // normal or hid-only
 }

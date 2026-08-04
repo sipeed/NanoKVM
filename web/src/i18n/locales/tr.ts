@@ -333,9 +333,25 @@ const tr = {
           modeOff: 'Kapalı',
           modeAuto: 'Otomatik gizle',
           modeAlways: 'Her zaman görünür',
+          keyboardLedStatus: 'Klavye kilidi göstergeleri',
+          keyboardLedStatusDesc:
+            'Uzak bilgisayarın Num Lock, Caps Lock ve Scroll Lock durumunu göster',
           icons: 'Alt Menü Simgeleri',
           iconsDesc: 'Menü çubuğunda alt menü simgelerini görüntüle'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Uzak klavye kilidi durumu',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Açık',
+        off: 'Kapalı',
+        unknown: 'Bilinmiyor'
       },
       device: {
         title: 'Cihaz',

@@ -47,6 +47,23 @@ func (s *Service) GetHidMode(c *gin.Context) {
 	log.Debugf("get hid mode: %s", mode)
 }
 
+func (s *Service) GetKeyboardLedStatus(c *gin.Context) {
+	var rsp proto.Response
+	status := GetKeyboardLedStatus()
+	updatedAt := ""
+	if !status.UpdatedAt.IsZero() {
+		updatedAt = status.UpdatedAt.UTC().Format(time.RFC3339Nano)
+	}
+
+	rsp.OkRspWithData(c, &proto.GetKeyboardLedStatusRsp{
+		NumLock:    status.NumLock,
+		CapsLock:   status.CapsLock,
+		ScrollLock: status.ScrollLock,
+		Known:      status.Known,
+		UpdatedAt:  updatedAt,
+	})
+}
+
 func (s *Service) SetHidMode(c *gin.Context) {
 	var req proto.SetHidModeReq
 	var rsp proto.Response

@@ -331,9 +331,25 @@ const vi = {
           modeOff: 'Tắt',
           modeAuto: 'Tự động ẩn',
           modeAlways: 'Luôn hiển thị',
+          keyboardLedStatus: 'Chỉ báo khóa bàn phím',
+          keyboardLedStatusDesc:
+            'Hiển thị trạng thái Num Lock, Caps Lock và Scroll Lock của máy tính từ xa',
           icons: 'Biểu tượng menu con',
           iconsDesc: 'Hiển thị biểu tượng menu con trên thanh menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Trạng thái khóa bàn phím từ xa',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Bật',
+        off: 'Tắt',
+        unknown: 'Không rõ'
       },
       device: {
         title: 'Thiết bị',

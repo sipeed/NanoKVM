@@ -29,13 +29,15 @@ const (
 
 func NewClient(ws *websocket.Conn) *Client {
 	client := &Client{
-		ws:               ws,
-		hid:              hid.GetHid(),
-		manual:           inputcontrol.NewManualSession(controlmode.GetManager(), inputcontrol.GetCoordinator()),
-		keyboard:         make(chan hid.QueuedReport, 200),
-		mouse:            make(chan hid.QueuedReport, 200),
-		heartbeatTimeout: clientHeartbeatTimeout,
-		lastHeartbeat:    time.Time{},
+		ws:                ws,
+		hid:               hid.GetHid(),
+		manual:            inputcontrol.NewManualSession(controlmode.GetManager(), inputcontrol.GetCoordinator()),
+		keyboard:          make(chan hid.QueuedReport, 200),
+		mouse:             make(chan hid.QueuedReport, 200),
+		heartbeatTimeout:  clientHeartbeatTimeout,
+		keyboardLedNotify: make(chan struct{}, 1),
+		keyboardLedDone:   make(chan struct{}),
+		lastHeartbeat:     time.Time{},
 	}
 
 	client.hid.Open()
@@ -44,6 +46,8 @@ func NewClient(ws *websocket.Conn) *Client {
 }
 
 func (c *Client) Start() {
+	c.startKeyboardLedStatusWorker()
+
 	c.workers.Add(2)
 	go func() {
 		defer c.workers.Done()
@@ -194,6 +198,7 @@ func (c *Client) Close() {
 		if c.ws != nil {
 			_ = c.ws.Close()
 		}
+		c.stopKeyboardLedStatusWorker()
 
 		if c.keyboard != nil {
 			close(c.keyboard)
@@ -203,10 +208,102 @@ func (c *Client) Close() {
 		}
 	})
 	c.workers.Wait()
+	c.keyboardLedWorkers.Wait()
 	if c.manual != nil {
 		c.manual.Close()
 	}
 	log.Debug("websocket disconnected")
+}
+
+// enqueueKeyboardLedStatus records only the newest status for this client. It
+// never waits for a WebSocket write, so a client which stops reading cannot
+// delay LED updates for the other connected clients.
+func (c *Client) enqueueKeyboardLedStatus(status hid.KeyboardLedStatus) {
+	c.keyboardLedMutex.Lock()
+	if c.keyboardLedClosed || c.keyboardLedNotify == nil {
+		c.keyboardLedMutex.Unlock()
+		return
+	}
+	c.keyboardLedStatus = &status
+	notify := c.keyboardLedNotify
+	c.keyboardLedMutex.Unlock()
+
+	select {
+	case notify <- struct{}{}:
+	default:
+	}
+}
+
+func (c *Client) startKeyboardLedStatusWorker() {
+	c.keyboardLedMutex.Lock()
+	if c.keyboardLedClosed {
+		c.keyboardLedMutex.Unlock()
+		return
+	}
+	if c.keyboardLedNotify == nil {
+		c.keyboardLedNotify = make(chan struct{}, 1)
+	}
+	if c.keyboardLedDone == nil {
+		c.keyboardLedDone = make(chan struct{})
+	}
+	c.keyboardLedMutex.Unlock()
+
+	c.keyboardLedOnce.Do(func() {
+		c.keyboardLedWorkers.Add(1)
+		go func() {
+			defer c.keyboardLedWorkers.Done()
+			c.runKeyboardLedStatusWorker()
+		}()
+	})
+}
+
+func (c *Client) stopKeyboardLedStatusWorker() {
+	c.keyboardLedMutex.Lock()
+	defer c.keyboardLedMutex.Unlock()
+	if c.keyboardLedClosed {
+		return
+	}
+	c.keyboardLedClosed = true
+	if c.keyboardLedDone != nil {
+		close(c.keyboardLedDone)
+	}
+}
+
+func (c *Client) runKeyboardLedStatusWorker() {
+	for {
+		c.keyboardLedMutex.Lock()
+		notify := c.keyboardLedNotify
+		done := c.keyboardLedDone
+		c.keyboardLedMutex.Unlock()
+
+		select {
+		case <-done:
+			return
+		case <-notify:
+		}
+
+		for {
+			status, ok := c.takeKeyboardLedStatus()
+			if !ok {
+				break
+			}
+			if err := sendKeyboardLedStatus(c, status); err != nil {
+				log.Errorf("failed to send keyboard LED status: %s", err)
+			}
+		}
+	}
+}
+
+func (c *Client) takeKeyboardLedStatus() (hid.KeyboardLedStatus, bool) {
+	c.keyboardLedMutex.Lock()
+	defer c.keyboardLedMutex.Unlock()
+	if c.keyboardLedStatus == nil {
+		return hid.KeyboardLedStatus{}, false
+	}
+
+	status := *c.keyboardLedStatus
+	c.keyboardLedStatus = nil
+	return status, true
 }
 
 func writeQueue(queue chan hid.QueuedReport, report hid.QueuedReport) bool {

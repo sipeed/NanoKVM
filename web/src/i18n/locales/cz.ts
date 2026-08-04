@@ -335,9 +335,25 @@ const cz = {
           modeOff: 'Vypnuto',
           modeAuto: 'Automatické skrytí',
           modeAlways: 'Vždy viditelné',
+          keyboardLedStatus: 'Indikátory zámku klávesnice',
+          keyboardLedStatusDesc:
+            'Zobrazit stav Num Lock, Caps Lock a Scroll Lock vzdáleného počítače',
           icons: 'Ikony podnabídky',
           iconsDesc: 'Zobrazení ikon podnabídky na liště nabídek'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Stav zámků vzdálené klávesnice',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Zapnuto',
+        off: 'Vypnuto',
+        unknown: 'Neznámé'
       },
       device: {
         title: 'Zařízení',

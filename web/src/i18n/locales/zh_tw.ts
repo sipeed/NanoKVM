@@ -322,9 +322,24 @@ const zh_tw = {
           modeOff: '關閉',
           modeAuto: '自動隱藏',
           modeAlways: '始終顯示',
+          keyboardLedStatus: '鍵盤鎖定狀態指示燈',
+          keyboardLedStatusDesc: '顯示遠端電腦的 Num Lock、Caps Lock 與 Scroll Lock 狀態',
           icons: '選單圖示',
           iconsDesc: '是否在選單欄中顯示子選單圖示'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: '遠端鍵盤鎖定狀態',
+        indicatorLabel: '{{label}}：{{state}}',
+        numLock: '數字鎖定',
+        numLockShort: '數',
+        capsLock: '大寫鎖定',
+        capsLockShort: '大',
+        scrollLock: '捲動鎖定',
+        scrollLockShort: '捲',
+        on: '開啟',
+        off: '關閉',
+        unknown: '未知'
       },
       device: {
         title: '設備',

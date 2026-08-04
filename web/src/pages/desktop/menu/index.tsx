@@ -5,10 +5,11 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
-import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
+import { keyboardLedStatusVisibleAtom, menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
 import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 
+import { KeyboardLedStatus } from '../keyboard-led-status';
 import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
 import { Image } from './image';
@@ -27,6 +28,7 @@ export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
 
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
+  const isKeyboardLedStatusVisible = useAtomValue(keyboardLedStatusVisibleAtom);
 
   const {
     isInitialized,
@@ -75,11 +77,21 @@ export const Menu = () => {
         <div className="sticky top-[10px] flex w-full justify-center">
           <div
             className={clsx(
-              'h-[36px] items-center rounded bg-neutral-800/80 pl-1 pr-2 transition-all duration-300',
+              'relative h-[36px] items-center rounded bg-neutral-800/80 pl-1 pr-2 transition-all duration-300',
               isMenuExpanded ? 'flex' : 'hidden',
               isMenuHidden ? '-translate-y-[110%] opacity-80' : 'translate-y-0 opacity-100'
             )}
           >
+            {isMenuExpanded && isKeyboardLedStatusVisible && (
+              <div
+                className={clsx(
+                  'absolute inset-y-0 right-full mr-1 transition-all duration-300',
+                  isMenuHidden ? 'pointer-events-none opacity-0' : 'opacity-100'
+                )}
+              >
+                <KeyboardLedStatus />
+              </div>
+            )}
             <strong>
               <div className="flex h-[30px] cursor-move select-none items-center justify-center pl-1 text-neutral-500">
                 <GripVerticalIcon size={18} />

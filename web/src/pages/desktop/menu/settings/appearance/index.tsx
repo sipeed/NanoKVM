@@ -1,6 +1,7 @@
 import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { KeyboardLedStatusSetting } from './keyboard-led-status.tsx';
 import { Language } from './language.tsx';
 import { MenuIcons } from './menu-icons.tsx';
 import { MenuMode } from './menu-mode.tsx';
@@ -22,6 +23,7 @@ export const Appearance = () => {
 
       <div className="text-neutral-400">{t('settings.appearance.menuBar.title')}</div>
       <MenuMode />
+      <KeyboardLedStatusSetting />
       <MenuIcons />
     </>
   );
