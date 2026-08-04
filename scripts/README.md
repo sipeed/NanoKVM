@@ -8,6 +8,8 @@ over the air: `nanokvm_<version>.tar.gz` plus its `latest.json` manifest.
 | `build-in-container.sh` | Builds every riscv64 artifact (`kvm_system`, `libkvm.so`, `NanoKVM-Server`). Runs inside the `nanokvm-builder` image only. |
 | `package.sh` | Stages the package tree, creates the tarball, and writes `latest.json`. |
 | `compare-release.sh` | Diffs a freshly built package against the currently published one. Informational. |
+| `verify-release-assets.sh` | Checks the three GitHub Release assets before publishing or promotion. |
+| `verify-release-tag.sh` | Requires an annotated numeric tag whose commit is on `main`. |
 
 ## What the updater expects
 
@@ -46,9 +48,13 @@ make web                   # web/dist
 make package VERSION=2.4.4 # build/release/{nanokvm_2.4.4.tar.gz,latest.json}
 ```
 
-In CI this runs as the **NanoKVM Package** workflow. Pull requests get a
-short-lived Actions artifact for device testing; pushing a `MAJOR.MINOR.PATCH`
-tag creates or updates a GitHub release with three assets:
+In CI this runs as the **NanoKVM Package** workflow. Pull requests and manual
+runs only create Actions artifacts. For a public release, run **NanoKVM Create
+Tag**, then run **NanoKVM Release** and choose prerelease, stable, or promotion.
+Publishing attaches three assets:
+
+Publishing is one-shot: an existing Release or draft is an error, and only a
+published prerelease can be promoted.
 
 - `nanokvm_<version>.tar.gz`
 - `latest.json`

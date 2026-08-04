@@ -1,0 +1,108 @@
+name: NanoKVM Create Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Numeric version to tag, e.g. 2.5.0
+        required: true
+        type: string
+      commit_sha:
+        description: Full commit SHA on main (empty uses latest main)
+        required: false
+        default: ''
+        type: string
+
+concurrency:
+  group: create-tag-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  create-tag:
+    name: Create annotated tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Validate target
+        id: target
+        env:
+          COMMIT_INPUT: ${{ inputs.commit_sha }}
+          VERSION_INPUT: ${{ inputs.version }}
+        run: |
+          VERSION="$VERSION_INPUT"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::invalid version '$VERSION', expected MAJOR.MINOR.PATCH"
+            exit 1
+          fi
+
+          git fetch --force --tags origin main
+
+          if [ -n "$COMMIT_INPUT" ]; then
+            if ! echo "$COMMIT_INPUT" | grep -qE '^[0-9a-fA-F]{40}$'; then
+              echo "::error::commit_sha must be a full 40-character hexadecimal SHA"
+              exit 1
+            fi
+            TARGET_SHA=$(git rev-parse "${COMMIT_INPUT}^{commit}" 2>/dev/null) || {
+              echo "::error::commit '$COMMIT_INPUT' does not exist"
+              exit 1
+            }
+          else
+            TARGET_SHA=$(git rev-parse 'origin/main^{commit}')
+          fi
+
+          if ! git merge-base --is-ancestor "$TARGET_SHA" origin/main; then
+            echo "::error::commit '$TARGET_SHA' is not reachable from origin/main"
+            exit 1
+          fi
+
+          set +e
+          git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null
+          TAG_STATUS=$?
+          set -e
+          case "$TAG_STATUS" in
+            0)
+              echo "::error::tag '$VERSION' already exists"
+              exit 1
+              ;;
+            2) ;;
+            *)
+              echo "::error::failed to check whether tag '$VERSION' exists"
+              exit 1
+              ;;
+          esac
+
+          echo "sha=$TARGET_SHA" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Create and push tag
+        env:
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git tag -a "$VERSION" "$TARGET_SHA" -m "Release $VERSION"
+          git push origin "refs/tags/$VERSION"
+          ./scripts/verify-release-tag.sh "$VERSION" "$TARGET_SHA" >/dev/null
+
+      - name: Summary
+        env:
+          TARGET_SHA: ${{ steps.target.outputs.sha }}
+          VERSION: ${{ steps.target.outputs.version }}
+        run: |
+          {
+            echo '### NanoKVM tag created'
+            echo
+            echo "- Tag: \`$VERSION\`"
+            echo "- Commit: \`$TARGET_SHA\`"
+            echo
+            echo 'No package, GitHub Release, or CDN object was created.'
+          } >> "$GITHUB_STEP_SUMMARY"
