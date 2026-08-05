@@ -67,18 +67,20 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
 
     api
       .offlineUpdate(formData, checksum)
-      .then((rsp: Response) => {
+      .then(async (rsp: Response) => {
+        // The proxy may return 502 after the update stops the old server.
+        if (rsp.status === 502) return;
         if (!rsp.ok) throw new Error(`HTTP error ${rsp.status}`);
-        return rsp.json();
-      })
-      .then((rspj: any) => {
+
+        const rspj = await rsp.json();
         if (rspj.code !== 0) {
           const message = rspj.msg?.includes('sha256 checksum mismatch')
             ? t('settings.update.offline.checksumMismatch')
             : rspj.msg || t('settings.update.offline.updateFailed');
           throw new Error(message);
         }
-
+      })
+      .then(() => {
         setTimeout(() => {
           setIsLocked(false);
           window.location.reload();
