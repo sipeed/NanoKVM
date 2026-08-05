@@ -1,559 +1,493 @@
 #include "oled_ui.h"
 
+#include <ctype.h>
+#include <errno.h>
+#include <sys/stat.h>
+
 using namespace maix;
 using namespace maix::sys;
 
 extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
 
-void kvm_init_cube_ui(void)
-{
-	uint8_t temp;
-	char* str_temp = "192.168.1.243";
+namespace {
+const char *const OLED_SLEEP_FILE = "/etc/kvm/oled_sleep";
+const char *const OLED_VIEWERS_FILE = "/run/nanokvm/oled_viewers";
 
-	OLED_Clear();
-	// OLED_Revolve();
-	OLED_ShowKVMLogo();
-	OLED_ShowLogo();
-	OLED_ShowKVMState(HDMI_STATE, 	0);
-	OLED_ShowKVMState(HID_STATE, 	0);
-	OLED_ShowKVMState(ETH_STATE, 	0);
-	OLED_ShowKVMState(WIFI_STATE, 	0);
-	OLED_Showline();
-	OLED_ShowKVMStreamState(KVM_INIT, &temp);
-	temp = 0;
-	OLED_ShowKVMStreamState(KVM_ETH_IP, &temp);
-	temp = KVM_RES_none;
-	OLED_ShowKVMStreamState(KVM_HDMI_RES, &temp);
-	temp = KVM_TYPE_none;
-	OLED_ShowKVMStreamState(KVM_STEAM_TYPE, &temp);
-	temp = 0;
-	OLED_ShowKVMStreamState(KVM_STEAM_FPS, &temp);
-	temp = 80;
-	OLED_ShowKVMStreamState(KVM_JPG_QLTY, &temp);
+uint64_t hash_bytes(uint64_t value, const void *data, size_t size)
+{
+	const uint8_t *bytes = static_cast<const uint8_t *>(data);
+	for(size_t i = 0; i < size; ++i) value = (value ^ bytes[i]) * 1099511628211ULL;
+	return value;
 }
 
-void kvm_init_pcie_ui(void)
+uint64_t render_signature()
 {
+	uint64_t value = 1469598103934665603ULL;
+	value = hash_bytes(value, &kvm_sys_state.eth_state, sizeof(kvm_sys_state.eth_state));
+	value = hash_bytes(value, &kvm_sys_state.wifi_state, sizeof(kvm_sys_state.wifi_state));
+	value = hash_bytes(value, &kvm_sys_state.usb_state, sizeof(kvm_sys_state.usb_state));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_state, sizeof(kvm_sys_state.hdmi_state));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_width, sizeof(kvm_sys_state.hdmi_width));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_height, sizeof(kvm_sys_state.hdmi_height));
+	value = hash_bytes(value, &kvm_sys_state.type, sizeof(kvm_sys_state.type));
+	value = hash_bytes(value, &kvm_sys_state.now_fps, sizeof(kvm_sys_state.now_fps));
+	value = hash_bytes(value, &kvm_sys_state.qlty, sizeof(kvm_sys_state.qlty));
+	value = hash_bytes(value, kvm_sys_state.eth_addr, sizeof(kvm_sys_state.eth_addr));
+	value = hash_bytes(value, kvm_sys_state.wifi_addr, sizeof(kvm_sys_state.wifi_addr));
+	value = hash_bytes(value, &kvm_oled_state.main_page, sizeof(kvm_oled_state.main_page));
+	value = hash_bytes(value, &kvm_oled_state.pixel_shift_x, sizeof(kvm_oled_state.pixel_shift_x));
+	value = hash_bytes(value, &kvm_oled_state.pixel_shift_y, sizeof(kvm_oled_state.pixel_shift_y));
+	value = hash_bytes(value, &kvm_oled_state.viewers, sizeof(kvm_oled_state.viewers));
+	return value;
+}
+
+bool parse_number(const char *text, long *value)
+{
+	if(text == NULL || *text == '\0') return false;
+	char *end = NULL;
+	errno = 0;
+	long parsed = strtol(text, &end, 10);
+	while(end != NULL && isspace(static_cast<unsigned char>(*end))) ++end;
+	if(errno != 0 || end == text || (end != NULL && *end != '\0')) return false;
+	*value = parsed;
+	return true;
+}
+
+bool read_text_file(const char *path, char *buffer, size_t size)
+{
+	if(size == 0) return false;
+	FILE *file = fopen(path, "r");
+	if(file == NULL) return false;
+	size_t count = fread(buffer, 1, size - 1, file);
+	bool complete = !ferror(file);
+	fclose(file);
+	buffer[count] = '\0';
+	return complete;
+}
+
+void note_local_activity(uint64_t now)
+{
+	kvm_sys_state.oled_local_activity_ms = now;
+	kvm_oled_state.oled_sleep_start = now;
+}
+
+void reset_idle_policy(uint64_t now)
+{
+	note_local_activity(now);
+	kvm_oled_state.main_page = 0;
+	kvm_oled_state.pixel_shift_x = 0;
+	kvm_oled_state.pixel_shift_y = 0;
+	kvm_oled_state.pixel_shift_dx = 1;
+	kvm_oled_state.pixel_shift_dy = 1;
+	kvm_oled_state.next_page_switch_ms = 0;
+	kvm_oled_state.next_pixel_shift_ms = 0;
+	kvm_oled_state.force_full_redraw = 1;
+}
+
+void reload_oled_config(uint64_t now)
+{
+	struct stat info;
+	static time_t sleep_mtime = -1;
+	static ino_t sleep_ino = 0;
+	if(stat(OLED_SLEEP_FILE, &info) == 0){
+		if(info.st_mtime != sleep_mtime || info.st_ino != sleep_ino){
+			sleep_mtime = info.st_mtime;
+			sleep_ino = info.st_ino;
+			char sleep_buffer[32] = {0};
+			long sleep = OLED_SLEEP_DELAY_DEFAULT;
+			if(read_text_file(OLED_SLEEP_FILE, sleep_buffer, sizeof(sleep_buffer))){
+				long parsed = 0;
+				if(parse_number(sleep_buffer, &parsed) && (parsed == 0 || (parsed >= OLED_SLEEP_DELAY_MIN && parsed <= 3600))) sleep = parsed;
+				else {
+					printf("[kvms] invalid OLED sleep setting; keeping last valid setting\n");
+					sleep = kvm_oled_state.oled_sleep_param;
+				}
+			} else sleep = kvm_oled_state.oled_sleep_param;
+			if(kvm_oled_state.oled_sleep_param != sleep){
+				kvm_oled_state.oled_sleep_param = static_cast<uint16_t>(sleep);
+				reset_idle_policy(now);
+			}
+		}
+	} else if(sleep_mtime != 0) {
+		sleep_mtime = 0;
+		sleep_ino = 0;
+		if(kvm_oled_state.oled_sleep_param != OLED_SLEEP_DELAY_DEFAULT){
+			kvm_oled_state.oled_sleep_param = OLED_SLEEP_DELAY_DEFAULT;
+			reset_idle_policy(now);
+		}
+	}
+}
+
+void refresh_viewers(uint64_t now)
+{
+	static time_t mtime = -1;
+	static ino_t inode = 0;
+	struct stat info;
+	if(stat(OLED_VIEWERS_FILE, &info) == 0){
+		if(info.st_mtime != mtime || info.st_ino != inode){
+			mtime = info.st_mtime;
+			inode = info.st_ino;
+			char buffer[32] = {0};
+			long viewers = 0;
+			if(read_text_file(OLED_VIEWERS_FILE, buffer, sizeof(buffer)) && parse_number(buffer, &viewers) && viewers >= 0){
+				if(viewers > 99) viewers = 99;
+				kvm_oled_state.viewers = static_cast<uint8_t>(viewers);
+				kvm_oled_state.viewer_file_seen_ms = now;
+			}
+		}
+	}
+	if(kvm_oled_state.viewer_file_seen_ms == 0 || now - kvm_oled_state.viewer_file_seen_ms > 5000) kvm_oled_state.viewers = 0;
+}
+
+bool passive_state_changed()
+{
+	static uint64_t previous = 0;
+	uint64_t value = 1469598103934665603ULL;
+	value = hash_bytes(value, &kvm_sys_state.eth_state, sizeof(kvm_sys_state.eth_state));
+	value = hash_bytes(value, &kvm_sys_state.wifi_state, sizeof(kvm_sys_state.wifi_state));
+	value = hash_bytes(value, &kvm_sys_state.usb_state, sizeof(kvm_sys_state.usb_state));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_state, sizeof(kvm_sys_state.hdmi_state));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_width, sizeof(kvm_sys_state.hdmi_width));
+	value = hash_bytes(value, &kvm_sys_state.hdmi_height, sizeof(kvm_sys_state.hdmi_height));
+	value = hash_bytes(value, kvm_sys_state.eth_addr, sizeof(kvm_sys_state.eth_addr));
+	value = hash_bytes(value, kvm_sys_state.wifi_addr, sizeof(kvm_sys_state.wifi_addr));
+	bool changed = previous != 0 && previous != value;
+	previous = value;
+	return changed;
+}
+
+void address_or_off(char *output, size_t size, const char *label, int8_t state, const uint8_t *address)
+{
+	if(state > 0 && address[0] != 0) snprintf(output, size, "%s %s", label, reinterpret_cast<const char *>(address));
+	else snprintf(output, size, "%s OFF", label);
+}
+
+void draw_cube_network()
+{
+	char line[22] = {0};
+	address_or_off(line, sizeof(line), "ETH", kvm_sys_state.eth_state, kvm_sys_state.eth_addr);
+	OLED_ShowString(0, 1, line, 8);
+	address_or_off(line, sizeof(line), "WIFI", kvm_sys_state.wifi_state, kvm_sys_state.wifi_addr);
+	OLED_ShowString(0, 2, line, 8);
+	snprintf(line, sizeof(line), "USB %s HDMI %s", kvm_sys_state.usb_state > 0 ? "ON" : "OFF", kvm_sys_state.hdmi_state > 0 ? "ON" : "OFF");
+	OLED_ShowString(0, 3, line, 8);
+	OLED_ShowString(0, 4, "NETWORK", 8);
+}
+
+void draw_cube_video()
+{
+	char line[22] = {0};
+	OLED_ShowString(0, 1, kvm_sys_state.hdmi_state > 0 ? "HDMI ON" : "NO SIGNAL", 8);
+	if(kvm_sys_state.hdmi_state > 0) snprintf(line, sizeof(line), "RES %dx%d", kvm_sys_state.hdmi_width, kvm_sys_state.hdmi_height);
+	else snprintf(line, sizeof(line), "RES --");
+	OLED_ShowString(0, 2, line, 8);
+	snprintf(line, sizeof(line), "%s %d FPS", kvm_sys_state.type == KVM_TYPE_H264 ? "H264" : "MJPG", kvm_sys_state.now_fps);
+	OLED_ShowString(0, 3, line, 8);
+	snprintf(line, sizeof(line), "QUALITY %d", kvm_sys_state.qlty);
+	OLED_ShowString(0, 4, line, 8);
+}
+
+void draw_cube_session()
+{
+	char line[22] = {0};
+	snprintf(line, sizeof(line), "VIEWERS %u", kvm_oled_state.viewers);
+	OLED_ShowString(0, 1, line, 8);
+	snprintf(line, sizeof(line), "USB %s HID %s", kvm_sys_state.usb_state > 0 ? "ON" : "OFF", kvm_sys_state.hid_state > 0 ? "ON" : "OFF");
+	OLED_ShowString(0, 2, line, 8);
+	snprintf(line, sizeof(line), "QUALITY %d", kvm_sys_state.qlty);
+	OLED_ShowString(0, 3, line, 8);
+	address_or_off(line, sizeof(line), "ETH", kvm_sys_state.eth_state, kvm_sys_state.eth_addr);
+	OLED_ShowString(0, 4, line, 8);
+}
+
+void draw_cube_main()
+{
+	OLED_SetLayoutOffset(kvm_oled_state.pixel_shift_x);
+	OLED_SetVerticalOffset(kvm_oled_state.pixel_shift_y);
+	OLED_Clear();
+	switch(kvm_oled_state.main_page){
+		case 0: draw_cube_network(); break;
+		case 1: draw_cube_video(); break;
+		default: draw_cube_session(); break;
+	}
+	OLED_SetLayoutOffset(0);
+}
+
+bool carousel_enabled()
+{
+	// Preserve the original Cube dashboard through the 10-minute option.
+	// Never-off, 30-minute, and one-hour modes opt into anti-burn carousel.
+	return kvm_oled_state.oled_sleep_param == 0 || kvm_oled_state.oled_sleep_param > 600;
+}
+
+bool carousel_active(uint64_t local_idle)
+{
+	return carousel_enabled() && local_idle >= OLED_CAROUSEL_START_DELAY * 1000ULL;
+}
+
+void draw_cube_legacy()
+{
+	OLED_SetLayoutOffset(0);
+	OLED_SetVerticalOffset(0);
+	OLED_Clear();
+	OLED_ShowKVMLogo();
+	OLED_ShowLogo();
+	OLED_ShowKVMState(HDMI_STATE, kvm_sys_state.hdmi_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(HID_STATE, kvm_sys_state.usb_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(ETH_STATE, kvm_sys_state.eth_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(WIFI_STATE, kvm_sys_state.wifi_state > 0 ? 1 : 0);
+	OLED_Showline();
+	uint8_t empty = 0;
+	OLED_ShowKVMStreamState(KVM_INIT, &empty);
+	if(kvm_sys_state.eth_state > 0 && kvm_sys_state.eth_addr[0] != 0)
+		OLED_ShowKVMStreamState(KVM_ETH_IP, kvm_sys_state.eth_addr);
+	else if(kvm_sys_state.wifi_state > 0 && kvm_sys_state.wifi_addr[0] != 0)
+		OLED_ShowKVMStreamState(KVM_WIFI_IP, kvm_sys_state.wifi_addr);
+	else
+		OLED_ShowKVMStreamState(KVM_ETH_IP, &empty);
+	OLED_Show_Res(kvm_sys_state.hdmi_width, kvm_sys_state.hdmi_height);
+	OLED_ShowKVMStreamState(KVM_STEAM_TYPE, &kvm_sys_state.type);
+	OLED_ShowKVMStreamState(KVM_STEAM_FPS, &kvm_sys_state.now_fps);
+	OLED_ShowKVMStreamState(KVM_JPG_QLTY, &kvm_sys_state.qlty);
+}
+
+void draw_pcie_legacy()
+{
+	OLED_SetLayoutOffset(0);
+	OLED_SetVerticalOffset(0);
+	OLED_Clear();
 	OLED_Revolve();
 	OLED_Showline_1();
 	OLED_ShowLogo();
-	OLED_ShowKVMState(HDMI_STATE, 	0);
-	OLED_ShowKVMState(HID_STATE, 	0);
-	OLED_ShowKVMState(ETH_STATE, 	0);
-	OLED_ShowKVMState(WIFI_STATE, 	0);
-
-	// OLED_ShowString(0, 2, "!192.168.222.197", 4);
-	// OLED_ShowString(1, 2, "  192.168.2.197", 4);
-	// OLED_ShowString(1, 3, "1920*1080", 4);
-	// OLED_ShowString(41, 3, "  FPS", 4);
-
-	// OLED_ShowString_AlignRight(AlignRightEND_P, 2, "192.168.0.69", 4);
-	// OLED_ShowString_AlignRight(37, 3, "1920*1080", 4);
-	OLED_ShowString_AlignRight(AlignRightEND_P, 3, "  FPS", 4);
-	// OLED_ShowString(0, 3, "\"ABCDEFGHIJKLMMN\'", 4);
-	// OLED_ShowString(5, 2, "1", 4);
+	OLED_ShowKVMState(HDMI_STATE, kvm_sys_state.hdmi_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(HID_STATE, kvm_sys_state.usb_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(ETH_STATE, kvm_sys_state.eth_state > 0 ? 1 : 0);
+	OLED_ShowKVMState(WIFI_STATE, kvm_sys_state.wifi_state > 0 ? 1 : 0);
+	OLED_ShowKVMStreamState(KVM_ETH_IP, kvm_sys_state.eth_addr);
+	OLED_Show_Res(kvm_sys_state.hdmi_width, kvm_sys_state.hdmi_height);
+	OLED_ShowKVMStreamState(KVM_STEAM_FPS, &kvm_sys_state.now_fps);
 }
 
-void kvm_init_ui(void)
-{
-	if(kvm_hw_ver != 2){
-		kvm_init_cube_ui();
-	} else {
-		kvm_init_pcie_ui();
-	}
-}
-
-void qrcode_to_oled(QRCode *qr)
-{
-	char *p_oled_data;
-	uint16_t count = 0;
-	uint8_t bit;
-	uint8_t begin_x = 2;
-	uint8_t begin_y = 2;
-	p_oled_data = (char *)malloc( 132 * sizeof(char));
-	if(p_oled_data != NULL){
-		// fill
-		for(int i = 0; i < 132; i++){
-			p_oled_data[i] = 0xFF;
-		}
-		// i | ; j -
-		for(int i = 0; i < 29; i++){
-			for(int j = 0; j < 29; j++){
-				if(qrIsBlacke(qr, i, j)){
-					// 敲黑点
-					uint16_t data_index = ((i+begin_y)/8)*33+(j+begin_x);
-					uint8_t mask = ~(0x01 << ((i+begin_y)%8));
-					p_oled_data[data_index] &= mask;
-				}
-			}
-		}
-		OLED_Fill();
-		OLED_ShowIMG(29, 0, p_oled_data, 33, 4);
-		free(p_oled_data);
-	}
-}
-
-int qrencode(char *string)
-{
-	// test: qrencode("WIFI:T:WPA2;S:NanoKVM;P:12345678;;");
-	int errcode = QR_ERR_NONE;
-	QRCode* p = qrInit(3, QR_EM_8BIT, 1, 4, &errcode);
-	if (p == NULL) {
-		printf("error\n");
-		return -1;
-	}
-	qrAddData(p, (const qr_byte_t*)string, strlen(string));
-	if (!qrFinalize(p)) {
-		printf("finalize error\n");
-		return -1;
-	}
-
-	qrcode_to_oled(p);
-	if(string[0] == 'W'){
-		OLED_ShowStringTurn(3, 1, "WiFi", 8);
-		OLED_ShowStringTurn(3, 2, "AP:", 8);
-	} else if(string[0] == 'h'){
-		if(string[7] == '1'){
-			OLED_ShowStringTurn(3, 1, "Web:", 8);
-		} else if(string[8] == 'w'){
-			OLED_ShowStringTurn(3, 1, "WiKi", 8);
-		}
-	}
-	int size = 0;
-	// width = height = qr_vertable[version] * mag + sep * mag * 2
-	qr_byte_t * buffer = qrSymbolToBMP(p, 5, 5, &size);
-	if (buffer == NULL) {
-		printf("error %s", qrGetErrorInfo(p));
-		return -1;
-	}
-	// output qrcode to file
-	// ofstream f("/etc/kvm/wifi_config.bmp");
-	// if (f.fail()) {
-	// 	return -1;
-	// }
-	// f.write((const char *)buffer, size);
-	// f.close();
-	return 0;
-}
-
-ip_addr_t show_which_ip(void)
-{
-	if(kvm_sys_state.wifi_state == -2) return ETH_IP;
-	if(kvm_oled_state.eth_state == 3 && kvm_oled_state.wifi_state != 1) return ETH_IP;
-	if(kvm_oled_state.eth_state != 3 && kvm_oled_state.wifi_state == 1) return WiFi_IP;
-	static uint8_t run_count = 0;
-	static ip_addr_t ip_type = ETH_IP; 
-	run_count++;
-	if(run_count > IP_Change_time/STATE_DELAY){
-		run_count = 0;
-		switch(ip_type){
-			case ETH_IP:
-				ip_type = WiFi_IP;
-				break;
-			case WiFi_IP:
-				ip_type = ETH_IP;
-				break;
-			default:
-				ip_type = ETH_IP;
-		}
-	}
-	// printf("show_which_ip? %d\n", ip_type);
-	return ip_type;
-}
-
-uint8_t ip_changed(ip_addr_t ip_type)
-{
-	uint8_t *kvm_sys_ip;
-	uint8_t *kvm_oled_ip;
-	uint8_t ret;
-	if(ip_type == ETH_IP){
-		kvm_sys_ip = kvm_sys_state.eth_addr;
-		kvm_oled_ip = kvm_oled_state.eth_addr;
-	} else if(ip_type == WiFi_IP){
-		kvm_sys_ip = kvm_sys_state.wifi_addr;
-		kvm_oled_ip = kvm_oled_state.wifi_addr;
-	} else ret = 0;
-	for (int i = 0; i < 16; i++){
-		if(kvm_sys_ip[i] == 0) ret = 0;
-		if(kvm_sys_ip[i] != kvm_oled_ip[i]) ret = 1;
-	}
-	if(ret == 1){
-		memcpy(kvm_oled_ip, kvm_sys_ip, 16);
-	}
-	return ret;
-}
-
-uint8_t kvm_state_is_changed()
-{
-	if(	(kvm_sys_state.eth_state 	!= kvm_oled_state.eth_state) 	|| 
-		(kvm_sys_state.wifi_state 	!= kvm_oled_state.wifi_state) 	|| 
-		(kvm_sys_state.usb_state 	!= kvm_oled_state.usb_state) 	|| 
-		(kvm_sys_state.hdmi_state 	!= kvm_oled_state.hdmi_state) 	|| 
-	/*	(kvm_sys_state.now_fps 		!= kvm_oled_state.now_fps) 		|| */
-		(kvm_sys_state.hdmi_width 	!= kvm_oled_state.hdmi_width) 	|| 
-		(kvm_sys_state.hdmi_height 	!= kvm_oled_state.hdmi_height) 	|| 
-		(kvm_sys_state.type 		!= kvm_oled_state.type) 		|| 
-		(kvm_sys_state.qlty 		!= kvm_oled_state.qlty) )
-		return 1;
-	else
-		return 0;
-}
-
-void kvm_eth_state_disp(ip_addr_t _ip_type, uint8_t first_disp)
-{
-	static ip_addr_t _ip_type_old = NULL_IP;
-	uint8_t temp;
-	// printf("[kvmd]eth_state = %d\n", kvm_sys_state.eth_state);
-	if(	(kvm_oled_state.eth_state != kvm_sys_state.eth_state) || 
-		(_ip_type_old != _ip_type) || 
-		first_disp || ip_changed(ETH_IP))
-	{
-		// ensure eth_addr is updated
-		if (kvm_sys_state.eth_state >= 2) {
-			if (kvm_sys_state.eth_addr[0] != 0) 
-				kvm_oled_state.eth_state = kvm_sys_state.eth_state;
-		} else {
-			kvm_oled_state.eth_state = kvm_sys_state.eth_state;
-		}
-		
-		_ip_type_old = _ip_type;
-		switch(kvm_oled_state.eth_state){
-			case -1:
-			case  0:
-				temp = 0;
-				OLED_ShowKVMState(ETH_STATE, 	0);
-				if(_ip_type == ETH_IP)
-					OLED_ShowKVMStreamState(KVM_ETH_IP, &temp);
-				break;
-			case  1:
-				OLED_ShowKVMState(ETH_STATE, 	1);
-				if(_ip_type == ETH_IP)
-					OLED_ShowKVMStreamState(KVM_ETH_IP, &temp);
-				break;
-			case  2:
-				OLED_Show_Network_Error(1);
-			case  3:
-				OLED_Show_Network_Error(0);
-				OLED_ShowKVMState(ETH_STATE, 	1);
-				if(_ip_type == ETH_IP)
-					OLED_ShowKVMStreamState(KVM_ETH_IP, kvm_sys_state.eth_addr);
-				break;
-		}
-	}
-}
-
-void kvm_wifi_state_disp(ip_addr_t _ip_type, uint8_t first_disp)
-{
-	static ip_addr_t _ip_type_old = NULL_IP;
-	uint8_t temp;
-	// printf("[kvmd]wifi_state = %d\n", kvm_sys_state.wifi_state);
-	if(	(kvm_oled_state.wifi_state != kvm_sys_state.wifi_state) || 
-		(_ip_type_old != _ip_type) || 
-		first_disp || ip_changed(WiFi_IP))
-	{
-		kvm_oled_state.wifi_state = kvm_sys_state.wifi_state;
-		_ip_type_old = _ip_type;
-		switch(kvm_oled_state.wifi_state){
-			case -2:
-				OLED_ShowKVMState(WIFI_STATE, 	-1);
-				break;
-			case -1:
-			case  0:
-				temp = 0;
-				OLED_ShowKVMState(WIFI_STATE, 	0);
-				if(_ip_type == WiFi_IP)
-					OLED_ShowKVMStreamState(KVM_WIFI_IP, &temp);
-				break;
-			case  1:
-				OLED_ShowKVMState(WIFI_STATE, 	1);
-				if(_ip_type == WiFi_IP){
-					OLED_ShowKVMStreamState(KVM_WIFI_IP, kvm_sys_state.wifi_addr);
-				}
-				break;
-		}
-	}
-}
-
-void kvm_usb_state_disp(uint8_t first_disp)
-{
-	if((kvm_oled_state.usb_state != kvm_sys_state.usb_state) || first_disp){
-		kvm_oled_state.usb_state = kvm_sys_state.usb_state;
-		switch(kvm_oled_state.usb_state){
-			case -1:
-			case  0:
-				OLED_ShowKVMState(HID_STATE, 	0);
-				break;
-			case  1:
-				OLED_ShowKVMState(HID_STATE, 	1);
-				break;
-		}
-	}
-}
-
-void kvm_hdmi_state_disp(uint8_t first_disp)
-{
-	if((kvm_oled_state.hdmi_state != kvm_sys_state.hdmi_state) || first_disp){
-		kvm_oled_state.hdmi_state = kvm_sys_state.hdmi_state;
-		switch(kvm_oled_state.hdmi_state){
-			case -1:
-			case  0:
-				OLED_ShowKVMState(HDMI_STATE, 	0);
-				break;
-			case  1:
-				OLED_ShowKVMState(HDMI_STATE, 	1);
-				break;
-		}
-	}
-}
-
-void kvm_fps_disp(uint8_t first_disp)
-{
-	if((kvm_oled_state.now_fps != kvm_sys_state.now_fps) || first_disp){
-		kvm_oled_state.now_fps = kvm_sys_state.now_fps;
-		OLED_ShowKVMStreamState(KVM_STEAM_FPS, &kvm_oled_state.now_fps);
-	}
-}
-
-void kvm_res_disp(uint8_t first_disp)
-{
-	if(	(kvm_oled_state.hdmi_width != kvm_sys_state.hdmi_width) || \
-		(kvm_oled_state.hdmi_height != kvm_sys_state.hdmi_height) || \
-		first_disp ){
-		kvm_oled_state.hdmi_width = kvm_sys_state.hdmi_width;
-		kvm_oled_state.hdmi_height = kvm_sys_state.hdmi_height;
-		OLED_Show_Res(kvm_sys_state.hdmi_width, kvm_sys_state.hdmi_height);
-	}
-}
-
-void kvm_type_disp(uint8_t first_disp)
-{
-	if(	(kvm_oled_state.type != kvm_sys_state.type) || first_disp){
-		kvm_oled_state.type = kvm_sys_state.type;
-		OLED_ShowKVMStreamState(KVM_STEAM_TYPE, &kvm_oled_state.type);
-	}
-}
-
-void kvm_qlty_disp(uint8_t first_disp)
-{
-	if(	(kvm_oled_state.qlty != kvm_sys_state.qlty) || first_disp){
-		kvm_oled_state.qlty = kvm_sys_state.qlty;
-		OLED_ShowKVMStreamState(KVM_JPG_QLTY, &kvm_sys_state.qlty);
-	}
-}
-
-void kvm_main_disp(uint8_t first_disp)
-{
-	if(first_disp){
-		OLED_Clear();
-		kvm_init_ui();
-	}
-}
-
-void kvm_oled_clear(uint8_t subpage_changed)
-{
-	if(subpage_changed){
-		OLED_Clear();
-	}
-}
-
-void kvm_main_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
-{
-	ip_addr_t now_ip_type;
-	// if(kvm_oled_state.sub_page == 0)
-	// if(kvm_oled_state.oled_sleep_state == 1){
-
-	// Any operation will update the OLED sleep time
-	if (kvm_state_is_changed())
-		oled_auto_sleep_time_update();
-
-	if(kvm_oled_state.sub_page == 1){
-		// main page (oled sleep)
-		kvm_oled_clear(first_disp || subpage_changed);
-		kvm_oled_state.oled_sleep_state = 1;
-	} else {
-		// main page
-		kvm_oled_state.oled_sleep_state = 0;
-		now_ip_type = show_which_ip();
-		kvm_main_disp(first_disp || subpage_changed);
-		kvm_eth_state_disp(now_ip_type, first_disp || subpage_changed);
-		kvm_wifi_state_disp(now_ip_type, first_disp || subpage_changed);
-		kvm_usb_state_disp(first_disp || subpage_changed);
-		kvm_hdmi_state_disp(first_disp || subpage_changed);
-		kvm_fps_disp(first_disp || subpage_changed);
-		kvm_res_disp(first_disp || subpage_changed);
-		kvm_type_disp(first_disp || subpage_changed);
-		kvm_qlty_disp(first_disp || subpage_changed);
-	}
-}
-
-uint8_t show_which_page()
-{
-	static uint8_t run_count = 0xfe;
-	static uint8_t show_type = 0;	// 0 不动 1 QRcode; 2 text
-	if(sta_connect_ap()){
-		if(ssid_pass_ok()){
-			// 
-		}
-	}
-	run_count++;
-	if(run_count > QR_Change_time/STATE_DELAY){
-		run_count = 0;
-		if(show_type == 1) show_type = 2;
-		else show_type = 1;
-		return show_type;
-	}
-	return 0;
-}
-
-void show_text_wifi_config(char *ap_ssid)
+void show_text_wifi_config(char *password)
 {
 	OLED_Clear();
 	OLED_ShowString(0, 0, "SSID:", 8);
 	OLED_ShowString_AlignRight(63, 1, "NanoKVM", 8);
 	OLED_ShowString(0, 2, "PASS:", 8);
-	OLED_ShowString_AlignRight(63, 3, ap_ssid, 8);
+	OLED_ShowString_AlignRight(63, 3, password, 8);
 }
 
-void show_wifi_config_ip(void)
+void show_wifi_config_ip()
 {
+	char url[30] = {0};
+	char key[30] = {0};
 	OLED_Clear();
 	get_ip_addr(WiFi_IP);
+	snprintf(url, sizeof(url), "%s/#/", kvm_sys_state.wifi_addr);
+	snprintf(key, sizeof(key), "WIFI?P=%s", kvm_sys_state.wifi_ap_pass);
 	OLED_ShowString(1, 0, "Config URL", 8);
-	OLED_ShowString_AlignRight(63, 1, "----------------", 4);
-	// OLED_ShowString_AlignRight(63, 2, (char*)kvm_sys_state.wifi_addr, 4);
-	static char wifi_addr_with_path[30];
-	static char wifi_addr_with_key[30];
-	sprintf(wifi_addr_with_path, "%s/#/", kvm_sys_state.wifi_addr);
-	sprintf(wifi_addr_with_key, "WIFI?P=%s", kvm_sys_state.wifi_ap_pass);
-	OLED_ShowString_AlignRight(63, 2, wifi_addr_with_path, 4);
-	OLED_ShowString_AlignRight(63, 3, wifi_addr_with_key, 4);
+	OLED_ShowString_AlignRight(63, 2, url, 4);
+	OLED_ShowString_AlignRight(63, 3, key, 4);
 }
 
-void show_wifi_config_QR(void)
+void draw_qr_code(QRCode *qr)
 {
-	static char cmd[70];
-	OLED_Clear();
-	get_ip_addr(WiFi_IP);
-	sprintf(cmd, "http://%s/#/WIFI?P=%s", kvm_sys_state.wifi_addr, kvm_sys_state.wifi_ap_pass);
-	qrencode(cmd);
-}
-
-void show_wifi_starting(void)
-{
-	OLED_Clear();
-	OLED_ShowString(0, 1, "WiFi AP is", 8);
-	OLED_ShowString(0, 2, "Starting..", 8);
-}
-
-void show_wifi_connecting(void)
-{
-	OLED_Clear();
-	OLED_ShowString(0, 1, "WiFi", 8);
-	OLED_ShowString(0, 2, "Connect...", 8);
-}
-
-void kvm_wifi_config_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
-{
-	static char cmd[70];
-	// printf("[kvmd]kvm_wifi_config_ui_disp %d | %d\n", first_disp, subpage_changed);
-	if(first_disp) kvm_start_wifi_config_process(); // 略有不妥,就这样吧
-	if(first_disp || subpage_changed){
-		switch(kvm_oled_state.sub_page){
-			case 0: // wifi ap is starting
-				show_wifi_starting();
-				break;
-			case 1: // QRcode
-				printf("WIFI:T:WPA2;S:NanoKVM;P:%s;;\n", kvm_sys_state.wifi_ap_pass);
-				sprintf(cmd, "WIFI:T:WPA2;S:NanoKVM;P:%s;;", kvm_sys_state.wifi_ap_pass);
-				qrencode(cmd);
-				break;
-			case 2: // Textcode
-				show_text_wifi_config(kvm_sys_state.wifi_ap_pass);
-				break;
-			case 3: // open IP with QR Code
-				show_wifi_config_QR();
-				break;
-			case 4: // open IP
-				show_wifi_config_ip();
-				break;
-			case 5: // Connecting...
-				show_wifi_connecting();
-				break;
+	char data[132];
+	memset(data, 0xFF, sizeof(data));
+	for(int y = 0; y < 29; ++y){
+		for(int x = 0; x < 29; ++x){
+			if(qrIsBlacke(qr, y, x)){
+				uint16_t index = ((y + 2) / 8) * 33 + (x + 2);
+				data[index] &= ~(0x01 << ((y + 2) % 8));
+			}
 		}
 	}
-	// switch(show_which_page())
+	OLED_Fill();
+	OLED_ShowIMG(29, 0, data, 33, 4);
+}
+
+void show_wifi_qr()
+{
+	char command[70] = {0};
+	get_ip_addr(WiFi_IP);
+	snprintf(command, sizeof(command), "http://%s/#/WIFI?P=%s", kvm_sys_state.wifi_addr, kvm_sys_state.wifi_ap_pass);
+	int error = QR_ERR_NONE;
+	QRCode *qr = qrInit(3, QR_EM_8BIT, 1, 4, &error);
+	if(qr == NULL) return;
+	qrAddData(qr, reinterpret_cast<const qr_byte_t *>(command), strlen(command));
+	if(qrFinalize(qr)) draw_qr_code(qr);
+	qrDestroy(qr);
+}
 }
 
 void oled_auto_sleep_time_update(void)
 {
-	kvm_oled_state.oled_sleep_start = time::time_ms();
+	note_local_activity(time::ticks_ms());
+}
+
+void oled_note_wifi_activity(void)
+{
+	kvm_sys_state.oled_wifi_activity_ms = time::ticks_ms();
+}
+
+void oled_policy_tick(void)
+{
+	// All OLED deadlines use the monotonic clock. Wall-clock time can jump by
+	// years when an RTC-less device synchronizes with NTP during startup.
+	uint64_t now = time::ticks_ms();
+	if(kvm_sys_state.oled_local_activity_ms == 0) reset_idle_policy(now);
+	reload_oled_config(now);
+	refresh_viewers(now);
+
+	if(passive_state_changed() && !kvm_sys_state.oled_manual_off && kvm_sys_state.page == 0){
+		// A quiet period starts a new event burst. Repeated link flaps extend
+		// only the current burst, never beyond its 60-second hard limit.
+		if(kvm_oled_state.event_wake_last_ms == 0 || now - kvm_oled_state.event_wake_last_ms > 2000)
+			kvm_oled_state.event_wake_started_ms = now;
+		kvm_oled_state.event_wake_last_ms = now;
+		uint64_t deadline = now + OLED_EVENT_WAKE_DELAY * 1000ULL;
+		uint64_t maximum = kvm_oled_state.event_wake_started_ms + OLED_EVENT_WAKE_MAX * 1000ULL;
+		kvm_oled_state.event_wake_deadline_ms = deadline < maximum ? deadline : maximum;
+	}
+
+	bool wifi = kvm_sys_state.page == 1;
+	if(wifi && kvm_oled_state.wifi_context_started_ms == 0){
+		kvm_oled_state.wifi_context_started_ms = now;
+		oled_note_wifi_activity();
+		kvm_oled_state.force_full_redraw = 1;
+	} else if(!wifi) {
+		kvm_oled_state.wifi_context_started_ms = 0;
+	}
+
+	uint64_t local_activity = kvm_sys_state.oled_local_activity_ms;
+	uint64_t wifi_activity = kvm_sys_state.oled_wifi_activity_ms;
+	uint64_t local_idle = now >= local_activity ? now - local_activity : 0;
+	uint64_t wifi_idle = now >= wifi_activity ? now - wifi_activity : 0;
+	uint8_t desired = 1;
+	if(wifi){
+		if(wifi_idle >= OLED_WIFI_SLEEP_DELAY * 1000ULL) desired = 0;
+	} else if(kvm_sys_state.oled_manual_off) {
+		desired = 0;
+	} else if(kvm_oled_state.event_wake_deadline_ms > now) {
+		desired = 1;
+	} else if(kvm_oled_state.oled_sleep_param > 0 && local_idle >= kvm_oled_state.oled_sleep_param * 1000ULL) {
+		desired = 0;
+	}
+
+	if(desired != kvm_oled_state.power_state){
+		if(desired == 0) {
+			OLED_EnterSleep();
+			kvm_oled_state.wake_pending = 0;
+		}
+		else if(kvm_oled_state.power_state == 0) {
+			OLED_PrepareFrame();
+			kvm_oled_state.wake_pending = 1;
+		}
+		kvm_oled_state.power_state = desired;
+		kvm_oled_state.oled_sleep_state = desired == 0;
+		kvm_oled_state.force_full_redraw = desired != 0;
+	}
+
+	if(!wifi && kvm_hw_ver != 2 && kvm_oled_state.power_state != 0 && carousel_active(local_idle)){
+		if(kvm_oled_state.next_page_switch_ms == 0) kvm_oled_state.next_page_switch_ms = now + OLED_CAROUSEL_DELAY * 1000ULL;
+		if(kvm_oled_state.next_pixel_shift_ms == 0) kvm_oled_state.next_pixel_shift_ms = now + OLED_PIXEL_SHIFT_DELAY * 1000ULL;
+		if(now >= kvm_oled_state.next_page_switch_ms){
+			kvm_oled_state.main_page = (kvm_oled_state.main_page + 1) % 3;
+			kvm_oled_state.next_page_switch_ms = now + OLED_CAROUSEL_DELAY * 1000ULL;
+			kvm_oled_state.force_full_redraw = 1;
+		}
+		if(now >= kvm_oled_state.next_pixel_shift_ms){
+			int16_t next_x = kvm_oled_state.pixel_shift_x + kvm_oled_state.pixel_shift_dx;
+			int16_t next_y = kvm_oled_state.pixel_shift_y + kvm_oled_state.pixel_shift_dy;
+			if(next_x < 0 || next_x > OLED_PIXEL_SHIFT_X){
+				kvm_oled_state.pixel_shift_dx = -kvm_oled_state.pixel_shift_dx;
+				next_x = kvm_oled_state.pixel_shift_x + kvm_oled_state.pixel_shift_dx;
+			}
+			if(next_y < 0 || next_y > OLED_PIXEL_SHIFT_Y){
+				kvm_oled_state.pixel_shift_dy = -kvm_oled_state.pixel_shift_dy;
+				next_y = kvm_oled_state.pixel_shift_y + kvm_oled_state.pixel_shift_dy;
+			}
+			kvm_oled_state.pixel_shift_x = static_cast<uint8_t>(next_x);
+			kvm_oled_state.pixel_shift_y = static_cast<uint8_t>(next_y);
+			kvm_oled_state.next_pixel_shift_ms = now + OLED_PIXEL_SHIFT_DELAY * 1000ULL;
+			kvm_oled_state.force_full_redraw = 1;
+		}
+	} else if(!carousel_active(local_idle) && (kvm_oled_state.main_page != 0 || kvm_oled_state.pixel_shift_x != 0 || kvm_oled_state.pixel_shift_y != 0)) {
+		kvm_oled_state.main_page = 0;
+		kvm_oled_state.pixel_shift_x = 0;
+		kvm_oled_state.pixel_shift_y = 0;
+		kvm_oled_state.pixel_shift_dx = 1;
+		kvm_oled_state.pixel_shift_dy = 1;
+		kvm_oled_state.next_page_switch_ms = 0;
+		kvm_oled_state.next_pixel_shift_ms = 0;
+		kvm_oled_state.force_full_redraw = 1;
+	}
+}
+
+bool oled_is_awake(void)
+{
+	return kvm_oled_state.power_state != 0;
+}
+
+void oled_finish_frame(void)
+{
+	if(kvm_oled_state.wake_pending && kvm_oled_state.power_state != 0){
+		OLED_CommitAndWake();
+		kvm_oled_state.wake_pending = 0;
+	}
+}
+
+void kvm_main_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
+{
+	if(!oled_is_awake()) return;
+	uint64_t signature = render_signature();
+	if(!first_disp && !subpage_changed && !kvm_oled_state.force_full_redraw && signature == kvm_oled_state.render_signature) return;
+	if(kvm_hw_ver == 2) draw_pcie_legacy();
+	else {
+		uint64_t now = time::ticks_ms();
+		uint64_t local_activity = kvm_sys_state.oled_local_activity_ms;
+		uint64_t local_idle = now >= local_activity ? now - local_activity : 0;
+		if(carousel_active(local_idle)) draw_cube_main();
+		else draw_cube_legacy();
+	}
+	kvm_oled_state.render_signature = signature;
+	kvm_oled_state.force_full_redraw = 0;
+}
+
+void kvm_wifi_config_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
+{
+	if(!oled_is_awake()) return;
+	if(first_disp){
+		kvm_start_wifi_config_process();
+		oled_note_wifi_activity();
+	}
+	if(!first_disp && !subpage_changed && !kvm_oled_state.force_full_redraw) return;
+	OLED_SetLayoutOffset(0);
+	OLED_SetVerticalOffset(0);
+	switch(kvm_sys_state.sub_page){
+		case 0: OLED_Clear(); OLED_ShowString(0, 1, "WiFi AP is", 8); OLED_ShowString(0, 2, "Starting..", 8); break;
+		case 1: show_wifi_qr(); break;
+		case 2: show_text_wifi_config(kvm_sys_state.wifi_ap_pass); break;
+		case 3: show_wifi_qr(); break;
+		case 4: show_wifi_config_ip(); break;
+		case 5: OLED_Clear(); OLED_ShowString(0, 1, "WiFi", 8); OLED_ShowString(0, 2, "Connect...", 8); break;
+		default: OLED_Clear(); break;
+	}
+	kvm_oled_state.force_full_redraw = 0;
 }
 
 void oled_auto_sleep(void)
 {
-	uint16_t tmp16;
-	uint8_t sleep_close_signal = 0;
-	FILE *fp;
-	int file_size;
-	char RW_Data[10] = {0};
-	if(access("/etc/kvm/oled_sleep", F_OK) == 0){
-        fp = fopen("/etc/kvm/oled_sleep", "r");
-		fseek(fp, 0, SEEK_END);
-		file_size = ftell(fp); 
-		fseek(fp, 0, SEEK_SET);
-		if(file_size >= (int)sizeof(RW_Data)){
-			file_size = sizeof(RW_Data) - 1;
-		}
-        fread(RW_Data, sizeof(char), file_size, fp);
-		RW_Data[file_size] = '\0';
-        fclose(fp);
-		if(file_size != 0){
-			tmp16 = atoi(RW_Data);
-		} else {
-			tmp16 = OLED_SLEEP_DELAY_DEFAULT;
-		}
-		if(tmp16 != kvm_oled_state.oled_sleep_param){
-			// printf("/etc/kvm/oled_sleep = %d\n", tmp16);
-			kvm_oled_state.oled_sleep_param = tmp16;
-			if(kvm_oled_state.oled_sleep_param < OLED_SLEEP_DELAY_MIN){
-				sleep_close_signal = 1;
-			} else {
-				// printf("oled_auto_sleep_time_update\n");
-				oled_auto_sleep_time_update();
-			}
-		}
-    } else {
-		if(kvm_oled_state.oled_sleep_param != 0){
-        	kvm_oled_state.oled_sleep_param = 0;
-			sleep_close_signal = 1;
-		}	
-    }
-	
-	if(kvm_oled_state.page == 0){
-		if(kvm_oled_state.oled_sleep_param < OLED_SLEEP_DELAY_MIN){
-			if(sleep_close_signal == 1){
-				kvm_sys_state.sub_page = 0;
-			}
-		} else {
-			if((time::time_ms() - kvm_oled_state.oled_sleep_start)/1000 >= kvm_oled_state.oled_sleep_param){
-				// kvm_oled_state.oled_sleep_state = 1;
-				kvm_sys_state.sub_page = 1;
-			} else {
-				kvm_sys_state.sub_page = 0;
-			}
-		}
-	}
+	// Kept as an API compatibility shim. The real state transition lives in
+	// oled_policy_tick(), which is called only by the OLED thread.
+	oled_policy_tick();
 }
 
 void kvm_show_UE(void)
 {
-	if(kvm_hw_ver != 2){
-		OLED_ShowString(0, 0, "HDMI: UE", 16);
-	} else {
-		OLED_Revolve();
-		OLED_ShowString(0, 0, "HDMI: UE", 16);
-		// OLED_ShowString_AlignRight(AlignRightEND_P, 3, "  FPS", 4);
-		// kvm_init_pcie_ui();
-	}
+	OLED_SetLayoutOffset(0);
+	OLED_SetVerticalOffset(0);
+	OLED_Clear();
+	OLED_ShowString(0, 0, "HDMI: UE", 16);
 }

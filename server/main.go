@@ -45,6 +45,7 @@ func initialize() {
 		vm.EnableHdmiCapture()
 	}
 	vm.SetHdmiViewerCount(0)
+	vm.StartOLEDViewerPublisher()
 
 	// run mouse jiggler
 	jiggler.GetJiggler().Run()
@@ -123,5 +124,6 @@ func run() {
 }
 
 func dispose() {
+	vm.StopOLEDViewerPublisher()
 	common.GetKvmVision().Close()
 }

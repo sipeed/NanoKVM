@@ -8,6 +8,7 @@ i2c::I2C oled_beta(5, i2c::Mode::MASTER);
 
 uint8_t OLED_state = 0;
 uint8_t kvm_hw_ver = 0;
+static int8_t oled_layout_offset = 0;
 
 /* mode = OLED_CMD
  * 		= OLED_DATA         */
@@ -81,13 +82,32 @@ void OLED_Set_Pos(uint8_t x, uint8_t y)
 	// oled_write_register(OLED_CMD, 0xb0+y);
 	// oled_write_register(OLED_CMD, ((x&0xf0)>>4)|0x10);
 	// oled_write_register(OLED_CMD, (x&0x0f));
+	uint16_t adjusted_x = x;
+	if(kvm_hw_ver != 2 && oled_layout_offset > 0){
+		adjusted_x += oled_layout_offset;
+		if(adjusted_x > 127) adjusted_x = 127;
+	}
 	if(kvm_hw_ver == 2){
-		x += 32;
+		adjusted_x += 32;
 		y += 8;
 	}
 	oled_write_register(OLED_CMD, 0xb0+y);
-	oled_write_register(OLED_CMD, ((x&0xf0)>>4)|0x10);
-	oled_write_register(OLED_CMD, (x&0x0f));
+	oled_write_register(OLED_CMD, ((adjusted_x&0xf0)>>4)|0x10);
+	oled_write_register(OLED_CMD, (adjusted_x&0x0f));
+}
+
+void OLED_SetLayoutOffset(int8_t offset)
+{
+	oled_layout_offset = (kvm_hw_ver == 2 || offset < 0) ? 0 : offset;
+}
+
+void OLED_SetVerticalOffset(uint8_t offset)
+{
+	// SSD1306 display offset is expressed in physical pixels, allowing a
+	// vertical swim without rewriting the page-oriented text renderer.
+	if(kvm_hw_ver == 2) return;
+	oled_write_register(OLED_CMD, 0xD3);
+	oled_write_register(OLED_CMD, offset & 0x3F);
 }
 
 //开启OLED显示    
@@ -101,9 +121,35 @@ void OLED_Display_On()
 //关闭OLED显示     
 void OLED_Display_Off()
 {
+	oled_write_register(OLED_CMD, 0XAE);
 	oled_write_register(OLED_CMD, 0X8D);
 	oled_write_register(OLED_CMD, 0X10);
-	oled_write_register(OLED_CMD, 0XAE);
+}
+
+bool OLED_PrepareFrame()
+{
+	if(!OLED_state) return false;
+	oled_write_register(OLED_CMD, 0xAE);
+	return true;
+}
+
+bool OLED_EnterSleep()
+{
+	if(!OLED_state) return false;
+	OLED_PrepareFrame();
+	OLED_Clear();
+	oled_write_register(OLED_CMD, 0x8D);
+	oled_write_register(OLED_CMD, 0x10);
+	return true;
+}
+
+bool OLED_CommitAndWake()
+{
+	if(!OLED_state) return false;
+	oled_write_register(OLED_CMD, 0x8D);
+	oled_write_register(OLED_CMD, 0x14);
+	oled_write_register(OLED_CMD, 0xAF);
+	return true;
 }
 
 //清屏函数,清完屏,整个屏幕是黑色的!和没点亮一样!!!	  
@@ -217,7 +263,7 @@ void OLED_ShowNum(uint8_t x, uint8_t y, uint8_t num, uint8_t len, uint8_t sizey)
 }
 
 //显示一个字符号串
-void OLED_ShowString(uint8_t x, uint8_t y, char *chr, uint8_t sizey)
+void OLED_ShowString(uint8_t x, uint8_t y, const char *chr, uint8_t sizey)
 {
 	uint8_t j=0;
 	while (chr[j]!='\0')
@@ -229,7 +275,7 @@ void OLED_ShowString(uint8_t x, uint8_t y, char *chr, uint8_t sizey)
 	}
 }
 //反显一个字符号串
-void OLED_ShowStringTurn(uint8_t x, uint8_t y, char *chr, uint8_t sizey)
+void OLED_ShowStringTurn(uint8_t x, uint8_t y, const char *chr, uint8_t sizey)
 {
 	uint8_t j=0;
 	while (chr[j]!='\0')
@@ -282,7 +328,9 @@ void OLED_Init(void)
 	oled_write_register(OLED_CMD, 0x10);//---set high column address
 	oled_write_register(OLED_CMD, 0x40);//--set start line address  Set Mapping RAM Display Start Line (0x00~0x3F)
 	oled_write_register(OLED_CMD, 0x81);//--set contrast control register
-	oled_write_register(OLED_CMD, 0xCF);// Set SEG Output Current Brightness
+	// Keep the hardware's established controller contrast. Cube panels do not
+	// reliably expose a usable brightness range through this register.
+	oled_write_register(OLED_CMD, 0xCF);
 	oled_write_register(OLED_CMD, 0xA1);//--Set SEG/Column Mapping     0xa0左右反置 0xa1正常
 	oled_write_register(OLED_CMD, 0xC8);//Set COM/Row Scan Direction   0xc0上下反置 0xc8正常
 	oled_write_register(OLED_CMD, 0xA6);//--set normal display
@@ -304,11 +352,12 @@ void OLED_Init(void)
 	oled_write_register(OLED_CMD, 0x14);//--set(0x10) disable
 	oled_write_register(OLED_CMD, 0xA4);// Disable Entire Display On (0xa4/0xa5)
 	oled_write_register(OLED_CMD, 0xA6);// Disable Inverse Display On (0xa6/a7) 
+	// Do not expose an old frame during boot. The OLED thread draws a complete
+	// frame first and then calls OLED_CommitAndWake().
 	OLED_Clear();
-	oled_write_register(OLED_CMD, 0xAF); /*display ON*/ 
 }
 
-void OLED_ShowStringtoend(uint8_t x, uint8_t y, char *chr, uint8_t sizey, uint8_t end)
+void OLED_ShowStringtoend(uint8_t x, uint8_t y, const char *chr, uint8_t sizey, uint8_t end)
 {
 	uint8_t j=0;
 	while (chr[j] != end)
@@ -442,7 +491,7 @@ void OLED_Showline()
     }
 }
 
-void OLED_ShowString_AlignRight(uint8_t x_end, uint8_t y, char *chr, uint8_t size)
+void OLED_ShowString_AlignRight(uint8_t x_end, uint8_t y, const char *chr, uint8_t size)
 {
 	uint8_t j = 0;
 	uint8_t x = x_end;
