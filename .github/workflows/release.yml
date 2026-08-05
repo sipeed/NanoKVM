@@ -147,7 +147,7 @@ jobs:
           ./scripts/verify-release-tag.sh "$TAG" "$SOURCE_SHA" >/dev/null
           gh release create "$TAG" \
             --verify-tag \
-            --title "$TAG" \
+            --title "nanokvm@${TAG}" \
             --notes "$NOTES" \
             "${STATE_ARGS[@]}" \
             "$TARBALL" build/release/latest.json build/release/sha256.txt
