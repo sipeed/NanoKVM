@@ -7,7 +7,7 @@ import { w3cwebsocket as W3cWebSocket } from 'websocket';
 import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
+import { videoScaleAtom } from '@/jotai/screen.ts';
 
 type SignalingMessage = {
   event?: string;
@@ -23,7 +23,6 @@ const parseSignalingData = <T,>(data?: string): T | null => {
 };
 
 export const H264Webrtc = () => {
-  const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
   const [isLoading, setIsLoading] = useState(true);
@@ -230,13 +229,13 @@ export const H264Webrtc = () => {
         <video
           id="screen"
           ref={videoRef}
-          className={clsx('block select-none', mouseStyle)}
+          className={clsx('block select-none touch-none', mouseStyle)}
           style={{
             transform: `scale(${videoScale})`,
             transformOrigin: 'center',
-            ...(resolution?.width
-              ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-              : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain'
           }}
           muted
           autoPlay
