@@ -29,9 +29,9 @@ func (s *Service) Update(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "update already in progress")
 		return
 	}
-	defer releaseUpdateLock()
 
 	if err := update(); err != nil {
+		releaseUpdateLock()
 		rsp.ErrRsp(c, -1, fmt.Sprintf("update failed: %s", err))
 		return
 	}
