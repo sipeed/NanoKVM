@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -45,11 +46,33 @@ func offlineUpdate(c *gin.Context) error {
 		return err
 	}
 
-	_ = os.RemoveAll(CacheDir)
-	_ = os.MkdirAll(CacheDir, 0o755)
+	if err := prepareCacheForUpdate(); err != nil {
+		return err
+	}
+	workspace, err := newUpdateWorkspace(CacheDir)
+	if err != nil {
+		return err
+	}
 	defer func() {
-		_ = os.RemoveAll(CacheDir)
+		if err := workspace.Close(); err != nil {
+			log.Warnf("failed to clean update workspace %s: %v", workspace.dir, err)
+		}
 	}()
+	if err := ensureInstallFilesystem(workspace.dir, AppDir, BackupDir); err != nil {
+		return err
+	}
+
+	maxRequestBytes := int64(maxPackageSize) + (1 << 20)
+	contentLength := c.Request.ContentLength
+	if contentLength > maxRequestBytes {
+		return fmt.Errorf("offline update request exceeds %d bytes", maxRequestBytes)
+	}
+	if contentLength > 0 {
+		if err := ensureFreeSpace(workspace.dir, uint64(contentLength)); err != nil {
+			return err
+		}
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxRequestBytes)
 
 	if err := createSentinelFile(); err != nil {
 		return err
@@ -62,7 +85,7 @@ func offlineUpdate(c *gin.Context) error {
 		return fmt.Errorf("invalid multipart data: %w", err)
 	}
 
-	target, err := processUpload(reader, c.Request.ContentLength)
+	target, err := processUpload(reader, contentLength, workspace.dir)
 	if err != nil {
 		log.Errorf("failed to upload install package: %v", err)
 		return err
@@ -73,7 +96,24 @@ func offlineUpdate(c *gin.Context) error {
 		return err
 	}
 
-	if err := installPackage(target); err != nil {
+	archiveName := filepath.Base(target)
+	expectedRoot := strings.TrimSuffix(archiveName, ".tar.gz")
+	expectedVersion := strings.TrimPrefix(expectedRoot, "nanokvm_")
+	info, err := inspectUpdateArchive(target, expectedRoot)
+	if err != nil {
+		return fmt.Errorf("inspect update package: %w", err)
+	}
+	if err := ensureExpandedSpace(workspace.dir, info.expandedBytes); err != nil {
+		return err
+	}
+	sourceDir, err := extractUpdateArchive(target, workspace.dir, expectedRoot)
+	if err != nil {
+		return fmt.Errorf("extract update package: %w", err)
+	}
+	if err := validateExtractedPackage(sourceDir, expectedVersion); err != nil {
+		return err
+	}
+	if err := installPreparedPackage(sourceDir); err != nil {
 		log.Errorf("failed to install package: %v", err)
 		return err
 	}
@@ -145,7 +185,7 @@ func createSentinelFile() error {
 	return nil
 }
 
-func processUpload(reader *multipart.Reader, contentLength int64) (string, error) {
+func processUpload(reader *multipart.Reader, contentLength int64, workspaceDir string) (string, error) {
 	var outPath string
 
 	for {
@@ -160,8 +200,11 @@ func processUpload(reader *multipart.Reader, contentLength int64) (string, error
 		if part.FormName() != "file" {
 			continue
 		}
+		if outPath != "" {
+			return "", fmt.Errorf("multiple files uploaded")
+		}
 
-		outPath, err = saveUploadedFile(part, contentLength)
+		outPath, err = saveUploadedFile(part, contentLength, workspaceDir)
 		if err != nil {
 			return "", err
 		}
@@ -174,7 +217,7 @@ func processUpload(reader *multipart.Reader, contentLength int64) (string, error
 	return outPath, nil
 }
 
-func saveUploadedFile(part *multipart.Part, contentLength int64) (string, error) {
+func saveUploadedFile(part *multipart.Part, contentLength int64, workspaceDir string) (string, error) {
 	filename := part.FileName()
 	if filename == "" {
 		return "", fmt.Errorf("no filename provided")
@@ -184,19 +227,36 @@ func saveUploadedFile(part *multipart.Part, contentLength int64) (string, error)
 		return "", err
 	}
 
-	outPath := filepath.Join(CacheDir, filename)
-	out, err := os.Create(outPath)
+	outPath := filepath.Join(workspaceDir, filename)
+	out, err := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o600)
 	if err != nil {
 		return "", fmt.Errorf("failed to create output file: %w", err)
 	}
-	defer out.Close()
+	success := false
+	defer func() {
+		_ = out.Close()
+		if !success {
+			_ = os.Remove(outPath)
+		}
+	}()
 
+	if contentLength < 0 {
+		contentLength = 0
+	}
 	pw := newProgressWriter(out, contentLength)
 	defer pw.Stop()
 
-	if _, err := io.Copy(pw, part); err != nil {
+	written, err := io.Copy(pw, io.LimitReader(part, int64(maxPackageSize)+1))
+	if err != nil {
 		return "", fmt.Errorf("failed to write file: %w", err)
 	}
+	if written > int64(maxPackageSize) {
+		return "", fmt.Errorf("uploaded package exceeds %d bytes", maxPackageSize)
+	}
+	if err := out.Close(); err != nil {
+		return "", fmt.Errorf("failed to close output file: %w", err)
+	}
+	success = true
 
 	return outPath, nil
 }
@@ -220,6 +280,9 @@ func validateFilename(filename string) error {
 	if !validFilenameRegex.MatchString(filename) {
 		log.Warnf("Invalid filename characters: %s", filename)
 		return fmt.Errorf("invalid filename: contains invalid characters")
+	}
+	if !packageNamePattern.MatchString(filename) {
+		return fmt.Errorf("invalid update package name")
 	}
 
 	return nil

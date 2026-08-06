@@ -7,9 +7,9 @@
 #     download URL as "<base>/<name>", so "name" must be the tarball file name.
 #   - server/service/application/update.go   verifies the download against
 #     "sha512", which is the *base64* encoding of the raw SHA-512 digest.
-#   - server/service/application/install.go  untars the package and moves the
-#     single top-level directory over /kvmapp, so the tarball must contain
-#     exactly one root directory: nanokvm_<version>/.
+#   - server/service/application/archive.go validates and extracts the package
+#     before install.go moves its single top-level directory over /kvmapp, so
+#     the tarball must contain exactly one root directory: nanokvm_<version>/.
 #
 # Build artifacts are expected to be in place already (see
 # scripts/build-in-container.sh and the "web" target in the Makefile):
@@ -199,14 +199,29 @@ fi
 # --- manifest ----------------------------------------------------------------
 # update.go compares base64(raw sha512), not the hex digest.
 SHA512="$(openssl dgst -sha512 -binary "$TARBALL" | openssl base64 -A)"
-SIZE="$(wc -c < "$TARBALL" | tr -d ' ')"
+SIZE_BYTES="$(wc -c < "$TARBALL" | tr -d ' ')"
+UNPACKED_SIZE_BYTES="$(python3 - "$TARBALL" <<'PY'
+import sys
+import tarfile
+
+total = 0
+with tarfile.open(sys.argv[1], "r:gz") as archive:
+    for member in archive:
+        if member.isfile():
+            total += member.size
+print(total)
+PY
+)"
 
 cat > "$MANIFEST" <<EOF
 {
+  "manifest_version": 2,
   "version": "$VERSION",
   "name": "nanokvm_$VERSION.tar.gz",
   "sha512": "$SHA512",
-  "size": $SIZE
+  "size": $SIZE_BYTES,
+  "size_bytes": $SIZE_BYTES,
+  "unpacked_size_bytes": $UNPACKED_SIZE_BYTES
 }
 EOF
 
