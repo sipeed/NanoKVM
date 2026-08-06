@@ -1,3 +1,42 @@
+## 2.5.0 (2026-08-04)
+
+### Features
+
+* Added an MCP service that lets trusted MCP clients capture screenshots and control the keyboard and mouse with an API key, including a settings page for enabling it and regenerating the key
+* Added coordinated device control so MCP, PicoClaw and manual input hand ownership over to each other instead of writing HID input at the same time
+* Added remote keyboard lock indicators that show the target machine's Num Lock, Caps Lock and Scroll Lock state
+* Added an optional SHA-256 checksum and cancellation to remote image downloads
+
+### Bug Fixes
+
+* Fixed the USB network gadget getting a random host-side MAC on every bind, which made the attached PC register a new network adapter after each reboot; both the device and host MAC are now derived from the chip UID (thanks to [@BeaconCat](https://github.com/BeaconCat))
+* Fixed OLED sleep durations above 255 seconds being truncated, so the 5 min, 10 min, 30 min and 1 hour options now behave as selected
+* Fixed the mounted image API returning an error in HID-Only mode
+* Fixed image downloads and application updates interfering with each other when running at the same time
+* Fixed Direct H.264 playback falling behind when the decoder queue backed up, by resynchronizing at the next key frame and preferring hardware decoding
+* Added a warning when Direct and WebRTC H.264 stream modes are used at the same time
+* Made the video input state shared between processes and read it without shell pipelines, so HDMI status stays consistent between `NanoKVM-Server` and `kvm_system`
+
+### Performance
+
+* Reduced latency in 60 Hz mode with decode-driven flow control, GOP-aware bounded queues, and dedicated writer goroutines with write deadlines so a slow client no longer stalls the others
+* Integrated zero-copy H.264 capture into the video pipeline instead of relying on a preload hook
+* Stopped HDMI capture when no user is logged in or all viewers are idle, reducing power consumption
+
+### UI Improvements
+
+* Tidied the image download dialog layout and truncated long file names in the upload box
+
+### Localization
+
+* Synchronized translations of other languages according to English
+
+### Chores
+
+* Split release automation into separate package, tag and release workflows, and produced identifiable build artifacts with checksums for pull requests
+* Allowed overriding the builder image, installed `patchelf` in the build environment, and fixed the exit codes of `support/sg2002/build`
+* Fixed slow container builds caused by uid/gid mismatch and reused existing container users and groups
+
 ## 2.4.3 (2026-06-09)
 
 ### Features
