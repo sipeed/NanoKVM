@@ -5,6 +5,10 @@ web/node_modules
 web/dist
 web/web
 
+# pnpm keeps its content-addressable store next to the project when the
+# home directory is on a different filesystem (e.g. inside the dev container)
+.pnpm-store/
+
 .DS_Store
 *.local
 *.suo
