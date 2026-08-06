@@ -99,6 +99,7 @@ type GetOLEDRsp struct {
 
 type GetGetHdmiStateRsp struct {
 	Enabled     bool `json:"enabled"`
+	Signal      bool `json:"signal"`
 	IdleTimeout int  `json:"idleTimeout"`
 }
 
