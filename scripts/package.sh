@@ -157,7 +157,7 @@ printf '0\n'     > "$STAGE/kvm/now_fps"
 printf '60\n'    > "$STAGE/kvm/qlty"
 printf '1920\n'  > "$STAGE/kvm/width"
 printf '1080\n'  > "$STAGE/kvm/height"
-printf '1\n'     > "$STAGE/kvm/state"
+printf '0\n'     > "$STAGE/kvm/state"
 printf 'mjpeg\n' > "$STAGE/kvm/type"
 printf '0'       > "$STAGE/kvm/res"
 

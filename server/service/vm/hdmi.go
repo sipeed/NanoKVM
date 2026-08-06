@@ -2,9 +2,6 @@ package vm
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"strings"
 	"sync"
 	"time"
 
@@ -17,10 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	hdmiCaptureWarmupDuration = time.Second
-	hdmiStateFile             = "/kvmapp/kvm/state"
-)
+const hdmiCaptureWarmupDuration = time.Second
 
 var (
 	hdmiMutex           sync.Mutex
@@ -33,7 +27,7 @@ var (
 	setHDMI            = func(enabled bool) { common.GetKvmVision().SetHDMI(enabled) }
 	isHdmiDisabled     = utils.IsHdmiDisabled
 	getHdmiIdleTimeout = utils.GetHDMIIdleTimeout
-	readHdmiStateFile  = func() ([]byte, error) { return os.ReadFile(hdmiStateFile) }
+	getHdmiSignal      = func() bool { return common.GetKvmVision().HasHDMISignal() }
 )
 
 func (s *Service) ResetHdmi(c *gin.Context) {
@@ -70,37 +64,15 @@ func (s *Service) DisableHdmi(c *gin.Context) {
 
 func (s *Service) GetHdmiState(c *gin.Context) {
 	var rsp proto.Response
-
-	signal, err := getHdmiSignal()
-	if err != nil {
-		log.WithError(err).Error("failed to read hdmi signal state")
-		rsp.ErrRsp(c, -1, "failed to get hdmi state")
-		return
-	}
+	enabled := !isHdmiDisabled()
 
 	rsp.OkRspWithData(c, &proto.GetGetHdmiStateRsp{
-		Enabled:     !isHdmiDisabled(),
-		Signal:      signal,
+		Enabled:     enabled,
+		Signal:      enabled && getHdmiSignal(),
 		IdleTimeout: getHdmiIdleTimeout(),
 	})
 
 	log.Debug("get hdmi state")
-}
-
-func getHdmiSignal() (bool, error) {
-	data, err := readHdmiStateFile()
-	if err != nil {
-		return false, err
-	}
-
-	switch strings.TrimSpace(string(data)) {
-	case "1":
-		return true, nil
-	case "0":
-		return false, nil
-	default:
-		return false, fmt.Errorf("invalid hdmi signal state: %q", string(data))
-	}
 }
 
 func EnableHdmiCapture() {

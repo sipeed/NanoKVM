@@ -116,6 +116,16 @@ func (k *KvmVision) SetHDMI(enable bool) int {
 	return result
 }
 
+func (k *KvmVision) HasHDMISignal() bool {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return false
+	}
+
+	return C.kvmv_hdmi_signal_active() != 0
+}
+
 func (k *KvmVision) SetGop(gop uint8) {
 	k.mutex.RLock()
 	defer k.mutex.RUnlock()

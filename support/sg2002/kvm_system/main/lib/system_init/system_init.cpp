@@ -1,11 +1,46 @@
 #include "config.h"
 #include "system_init.h"
 
+#include <errno.h>
+#include <sys/stat.h>
+
 using namespace maix;
 using namespace maix::sys;
 
 extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
+
+static void write_hdmi_state(uint8_t active)
+{
+    char temp_path[] = "/kvmapp/kvm/.state.init.XXXXXX";
+    const char *state = active != 0 ? "1\n" : "0\n";
+    int fd = mkstemp(temp_path);
+    if(fd < 0){
+        printf("failed to create HDMI state file: %d\n", errno);
+        return;
+    }
+
+    int failure = 0;
+    if(fchmod(fd, 0644) != 0){
+        failure = errno;
+    }
+    if(failure == 0 && write(fd, state, 2) != 2){
+        failure = errno != 0 ? errno : EIO;
+    }
+    if(failure == 0 && fsync(fd) != 0){
+        failure = errno;
+    }
+    if(close(fd) != 0 && failure == 0){
+        failure = errno;
+    }
+    if(failure == 0 && rename(temp_path, "/kvmapp/kvm/state") != 0){
+        failure = errno;
+    }
+    if(failure != 0){
+        unlink(temp_path);
+        printf("failed to publish HDMI state file: %d\n", failure);
+    }
+}
 
 uint8_t get_hdmi_version()
 {
@@ -101,7 +136,7 @@ void new_app_init(void)
 	system("echo 2000 > /kvmapp/kvm/qlty");
 	system("echo 720 > /kvmapp/kvm/res");
 	system("echo h264 > /kvmapp/kvm/type");
-	system("echo 0 > /kvmapp/kvm/state");
+	write_hdmi_state(0);
 	system("touch /etc/kvm/frame_detact");
 
 	// rm jpg_stream & kvm_stream
