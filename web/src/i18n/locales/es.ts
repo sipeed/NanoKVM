@@ -110,6 +110,7 @@ const es = {
       dropdownGerman: 'Alemán',
       dropdownFrench: 'Francés',
       dropdownRussian: 'ruso',
+      dropdownSpanish: 'Español',
       shortcut: {
         title: 'Atajos',
         custom: 'Personalizado',

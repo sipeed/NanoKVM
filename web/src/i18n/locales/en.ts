@@ -108,6 +108,7 @@ const en = {
       dropdownGerman: 'German',
       dropdownFrench: 'French',
       dropdownRussian: 'Russian',
+      dropdownSpanish: 'Spanish',
       shortcut: {
         title: 'Shortcuts',
         custom: 'Custom',

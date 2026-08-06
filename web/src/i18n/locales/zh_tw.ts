@@ -104,6 +104,7 @@ const zh_tw = {
       dropdownGerman: '德語',
       dropdownFrench: '法語',
       dropdownRussian: '俄語',
+      dropdownSpanish: '西班牙語',
       shortcut: {
         title: '快捷鍵',
         custom: '自定義',

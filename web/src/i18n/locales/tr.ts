@@ -110,6 +110,7 @@ const tr = {
       dropdownGerman: 'Almanca',
       dropdownFrench: 'Fransızca',
       dropdownRussian: 'Rusça',
+      dropdownSpanish: 'İspanyolca',
       shortcut: {
         title: 'Kısayollar',
         custom: 'Özel',

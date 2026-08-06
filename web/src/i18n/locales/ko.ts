@@ -108,6 +108,7 @@ const ko = {
       dropdownGerman: '독일어',
       dropdownFrench: '프랑스어',
       dropdownRussian: '러시아어',
+      dropdownSpanish: '스페인어',
       shortcut: {
         title: '바로가기',
         custom: '관습',

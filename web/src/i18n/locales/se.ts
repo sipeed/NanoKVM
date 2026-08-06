@@ -107,6 +107,7 @@ const se = {
       dropdownGerman: 'Tyska',
       dropdownFrench: 'Franska',
       dropdownRussian: 'ryska',
+      dropdownSpanish: 'Spanska',
       shortcut: {
         title: 'Genvägar',
         custom: 'Anpassad',
