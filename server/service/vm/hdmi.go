@@ -27,6 +27,7 @@ var (
 	setHDMI            = func(enabled bool) { common.GetKvmVision().SetHDMI(enabled) }
 	isHdmiDisabled     = utils.IsHdmiDisabled
 	getHdmiIdleTimeout = utils.GetHDMIIdleTimeout
+	getHdmiSignal      = func() bool { return common.GetKvmVision().HasHDMISignal() }
 )
 
 func (s *Service) ResetHdmi(c *gin.Context) {
@@ -63,10 +64,12 @@ func (s *Service) DisableHdmi(c *gin.Context) {
 
 func (s *Service) GetHdmiState(c *gin.Context) {
 	var rsp proto.Response
+	enabled := !isHdmiDisabled()
 
 	rsp.OkRspWithData(c, &proto.GetGetHdmiStateRsp{
-		Enabled:     !utils.IsHdmiDisabled(),
-		IdleTimeout: utils.GetHDMIIdleTimeout(),
+		Enabled:     enabled,
+		Signal:      enabled && getHdmiSignal(),
+		IdleTimeout: getHdmiIdleTimeout(),
 	})
 
 	log.Debug("get hdmi state")

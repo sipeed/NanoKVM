@@ -66,6 +66,7 @@ void set_h264_gop(uint8_t _gop);
 void set_frame_detact(uint8_t _frame_detact);
 void kvmv_deinit();
 uint8_t kvmv_hdmi_control(uint8_t _en);
+uint8_t kvmv_hdmi_signal_active(void);
 
 #ifdef __cplusplus
 }
