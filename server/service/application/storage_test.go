@@ -2,6 +2,7 @@ package application
 
 import (
 	"math"
+	"path/filepath"
 	"testing"
 )
 
@@ -30,5 +31,16 @@ func TestStorageOverflowIsRejected(t *testing.T) {
 	}
 	if _, _, err := hasFreeSpace(filesystemSpace{total: 1}, math.MaxUint64); err == nil {
 		t.Fatal("expected requirement overflow")
+	}
+}
+
+func TestInstallFilesystemChecksAppMountPoint(t *testing.T) {
+	workspace := t.TempDir()
+	backup := filepath.Join(t.TempDir(), "backup")
+
+	// /proc is a mount point whose parent is /. Checking filepath.Dir(appDir)
+	// would therefore miss the cross-filesystem layout on a normal Linux host.
+	if err := ensureInstallFilesystem(workspace, "/proc", backup); err == nil {
+		t.Fatal("separate application mount point was accepted")
 	}
 }

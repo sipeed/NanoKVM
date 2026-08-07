@@ -7,11 +7,13 @@ import (
 	"strings"
 	"time"
 
+	"NanoKVM-Server/utils"
+
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	sentinelPath       = "/tmp/.download_in_progress"
+	sentinelPath       = utils.TransferSentinelPath
 	tickerInterval     = 2500 * time.Millisecond
 	sentinelPermission = 0644
 )

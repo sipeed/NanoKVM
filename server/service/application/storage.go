@@ -66,28 +66,25 @@ func ensureFreeSpace(path string, payloadBytes uint64) error {
 }
 
 func ensureExpandedSpace(path string, expandedBytes uint64) error {
-	err := ensureFreeSpace(path, expandedBytes)
-	if !errors.Is(err, ErrInsufficientStorage) {
-		return err
-	}
-	info, statErr := os.Stat(BackupDir)
-	if statErr != nil {
-		if os.IsNotExist(statErr) {
-			return err
-		}
-		return fmt.Errorf("stat application backup: %w", statErr)
-	}
-	if !info.IsDir() {
-		return fmt.Errorf("application backup is not a directory")
-	}
-	if removeErr := os.RemoveAll(BackupDir); removeErr != nil {
-		return fmt.Errorf("remove application backup: %w", removeErr)
-	}
+	// Keep the last known-good backup until the new package is fully prepared.
+	// Reclaiming it here can leave the device without rollback material even
+	// when extraction later fails or the reclaimed space is still insufficient.
 	return ensureFreeSpace(path, expandedBytes)
 }
 
 func ensureInstallFilesystem(workspaceDir, appDir, backupDir string) error {
-	paths := []string{workspaceDir, filepath.Dir(appDir), filepath.Dir(backupDir)}
+	backupPath := backupDir
+	if _, err := os.Stat(backupPath); err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("stat backup path %s: %w", backupPath, err)
+		}
+		backupPath = filepath.Dir(backupPath)
+	}
+
+	// AppDir already exists (prepareCacheForUpdate verifies it), so stat the
+	// directory itself. Its parent can be on another filesystem when AppDir is
+	// a mount point.
+	paths := []string{workspaceDir, appDir, backupPath}
 	var device uint64
 	for i, path := range paths {
 		var stat unix.Stat_t

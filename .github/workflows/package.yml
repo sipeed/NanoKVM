@@ -251,6 +251,11 @@ jobs:
             echo "sha512_base64=${SHA512_BASE64}"
           } > build/release/BUILD_INFO.txt
 
+      - name: Verify release assets
+        run: |
+          ./scripts/verify-release-assets.sh \
+            build/release "${{ steps.version.outputs.version }}"
+
       - name: Summary
         env:
           VERSION: ${{ steps.version.outputs.version }}
