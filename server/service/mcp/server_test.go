@@ -16,6 +16,9 @@ import (
 	"NanoKVM-Server/service/inputcontrol"
 )
 
+// legacyProtocolVersion is an older revision that the handler still answers.
+const legacyProtocolVersion = "2025-03-26"
+
 type fakeSnapshotter struct {
 	snapshot Snapshot
 	err      error
@@ -94,14 +97,13 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 		OK: true, Width: 800, Height: 600, JPEG: []byte{0xff, 0xd8, 0xff},
 	}})
 
-	request := func(method string, body string, sessionID string) *httptest.ResponseRecorder {
+	request := func(method string, body string, protocolVersion string) *httptest.ResponseRecorder {
 		recorder := httptest.NewRecorder()
 		req := httptest.NewRequest(method, "/api/mcp", bytes.NewBufferString(body))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Accept", "application/json, text/event-stream")
-		if sessionID != "" {
-			req.Header.Set("Mcp-Session-Id", sessionID)
-			req.Header.Set("Mcp-Protocol-Version", "2025-03-26")
+		if protocolVersion != "" {
+			req.Header.Set("Mcp-Protocol-Version", protocolVersion)
 		}
 		handler.ServeHTTP(recorder, req)
 		return recorder
@@ -114,17 +116,21 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 	if contentType := initialize.Header().Get("Content-Type"); !strings.HasPrefix(contentType, "application/json") {
 		t.Fatalf("initialize content type=%q, want application/json", contentType)
 	}
-	sessionID := initialize.Header().Get("Mcp-Session-Id")
-	if sessionID == "" || !strings.Contains(initialize.Body.String(), "nanokvm-cube-remote-control") {
-		t.Fatalf("session=%q body=%s", sessionID, initialize.Body.String())
+	if !strings.Contains(initialize.Body.String(), "nanokvm-cube-remote-control") {
+		t.Fatalf("initialize body=%s", initialize.Body.String())
+	}
+	// A stateless server issues no session ID. A legacy client that sends one
+	// is answered without it, and DELETE is not a method it can use.
+	if sessionID := initialize.Header().Get("Mcp-Session-Id"); sessionID != "" {
+		t.Fatalf("stateless initialize returned session %q, want none", sessionID)
 	}
 
-	initialized := request(http.MethodPost, `{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`, sessionID)
+	initialized := request(http.MethodPost, `{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}`, legacyProtocolVersion)
 	if initialized.Code != http.StatusAccepted {
 		t.Fatalf("initialized status=%d body=%s", initialized.Code, initialized.Body.String())
 	}
 
-	tools := request(http.MethodPost, `{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`, sessionID)
+	tools := request(http.MethodPost, `{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}`, legacyProtocolVersion)
 	if tools.Code != http.StatusOK {
 		t.Fatalf("tools/list status=%d body=%s", tools.Code, tools.Body.String())
 	}
@@ -153,7 +159,7 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 	}
 	for _, call := range calls {
 		body := `{"jsonrpc":"2.0","id":` + fmt.Sprint(call.id) + `,"method":"tools/call","params":{"name":"` + call.name + `","arguments":` + call.arguments + `}}`
-		response := request(http.MethodPost, body, sessionID)
+		response := request(http.MethodPost, body, legacyProtocolVersion)
 		if response.Code != http.StatusOK || strings.Contains(response.Body.String(), `"isError":true`) {
 			t.Fatalf("tools/call %s status=%d body=%s", call.name, response.Code, response.Body.String())
 		}
@@ -182,14 +188,14 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 	}
 	for _, call := range invalidCalls {
 		body := `{"jsonrpc":"2.0","id":` + fmt.Sprint(call.id) + `,"method":"tools/call","params":{"name":"` + call.name + `","arguments":` + call.arguments + `}}`
-		response := request(http.MethodPost, body, sessionID)
+		response := request(http.MethodPost, body, legacyProtocolVersion)
 		if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), `"isError":true`) {
 			t.Fatalf("invalid tools/call %s status=%d body=%s", call.name, response.Code, response.Body.String())
 		}
 	}
 
-	closed := request(http.MethodDelete, "", sessionID)
-	if closed.Code != http.StatusNoContent {
+	closed := request(http.MethodDelete, "", legacyProtocolVersion)
+	if closed.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("delete status=%d body=%s", closed.Code, closed.Body.String())
 	}
 }
@@ -227,10 +233,10 @@ func TestMCPHandlerRejectsOversizedRequestBody(t *testing.T) {
 	req.Header.Set("Accept", "application/json, text/event-stream")
 
 	handler.ServeHTTP(recorder, req)
-	if recorder.Code == http.StatusOK {
-		t.Fatalf("oversized request was accepted: status=%d", recorder.Code)
+	if recorder.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("oversized request status=%d, want 413: body=%q", recorder.Code, recorder.Body.String())
 	}
-	if !strings.Contains(recorder.Body.String(), "failed to read body") {
+	if !strings.Contains(recorder.Body.String(), fmt.Sprintf("request body exceeds %d bytes", maxRequestBodyBytes)) {
 		t.Fatalf("unexpected oversized response: status=%d body=%q", recorder.Code, recorder.Body.String())
 	}
 }

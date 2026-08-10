@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/mervick/aes-everywhere/go/aes256 v0.0.0-20240803013625-6759956693c0
-	github.com/modelcontextprotocol/go-sdk v1.6.1
+	github.com/modelcontextprotocol/go-sdk v1.7.0
 	github.com/pion/dtls/v3 v3.1.2
 	github.com/pion/rtp v1.8.18
 	github.com/pion/webrtc/v4 v4.0.1
@@ -80,7 +80,9 @@ require (
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/oauth2 v0.35.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
+	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
