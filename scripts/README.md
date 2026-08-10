@@ -16,9 +16,9 @@ over the air: `nanokvm_<version>.tar.gz` plus its `latest.json` manifest.
 The format is not arbitrary — it is fixed by the on-device updater in
 `server/service/application/`:
 
-- **One root directory.** `install.go` untars the package and moves the single
-  top-level directory over `/kvmapp`, so the tarball must contain exactly
-  `nanokvm_<version>/`.
+- **One safe root directory.** The updater scans before extracting and accepts
+  only directories and regular files under `nanokvm_<version>/`; links,
+  special files, duplicate paths, and path traversal are rejected.
 - **`name` is the file name.** `version.go` builds the download URL as
   `<base>/<name>`, where `<base>` is `https://cdn.sipeed.com/nanokvm` (or
   `.../preview` when `/etc/kvm/preview_updates` exists).
@@ -27,9 +27,13 @@ The format is not arbitrary — it is fixed by the on-device updater in
 - **`/kvmapp/version`** is what the device reports as its installed version, so
   it must match the `version` field.
 
-`size` is parsed into `Latest.Size` but never read anywhere, so nothing on the
-device depends on its units. Published manifests have carried a kilobyte-ish
-value; `package.sh` writes the exact byte count instead.
+New releases use manifest v2. `size` remains the exact compressed byte count
+for older clients, while v2 clients use `size_bytes` and
+`unpacked_size_bytes` for storage preflight checks. Historical v1 `size`
+values have inconsistent units, so v2 clients only require v1 `size` to be
+non-zero and verify the downloaded SHA-512 instead. Publish v2 metadata before
+releasing clients that consume it; clients retain v1 compatibility for custom
+update servers.
 
 ## Building a release
 

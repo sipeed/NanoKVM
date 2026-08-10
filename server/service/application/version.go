@@ -21,11 +21,14 @@ import (
 )
 
 type Latest struct {
-	Version string `json:"version"`
-	Name    string `json:"name"`
-	Sha512  string `json:"sha512"`
-	Size    uint64 `json:"size"`
-	Url     string `json:"-"`
+	ManifestVersion   int    `json:"manifest_version,omitempty"`
+	Version           string `json:"version"`
+	Name              string `json:"name"`
+	Sha512            string `json:"sha512"`
+	LegacySize        uint64 `json:"size"`
+	SizeBytes         uint64 `json:"size_bytes,omitempty"`
+	UnpackedSizeBytes uint64 `json:"unpacked_size_bytes,omitempty"`
+	Url               string `json:"-"`
 }
 
 const (
@@ -149,8 +152,45 @@ func validateLatest(latest *Latest) error {
 	if err != nil || len(digest) != 64 {
 		return errors.New("invalid update package sha512")
 	}
-	if latest.Size == 0 {
+	if latest.LegacySize == 0 {
 		return errors.New("invalid update package size")
+	}
+	switch latest.ManifestVersion {
+	case 0, 1:
+		return nil
+	case 2:
+		if latest.SizeBytes == 0 || latest.SizeBytes > maxPackageSize {
+			return errors.New("invalid update package size_bytes")
+		}
+		if latest.UnpackedSizeBytes == 0 || latest.UnpackedSizeBytes > maxExpandedSize {
+			return errors.New("invalid update package unpacked_size_bytes")
+		}
+		return nil
+	default:
+		return errors.New("unsupported update manifest version")
+	}
+}
+
+func preflightManifestSpace(path string, latest *Latest) error {
+	if latest.ManifestVersion != 2 {
+		return nil
+	}
+	return ensureFreeSpace(path, latest.SizeBytes)
+}
+
+func validateDownloadedSize(latest *Latest, written uint64) error {
+	if written > maxPackageSize {
+		return fmt.Errorf("update package exceeds %d bytes", maxPackageSize)
+	}
+	if latest.ManifestVersion == 2 && written != latest.SizeBytes {
+		return fmt.Errorf("update package size mismatch: expected %d bytes, got %d", latest.SizeBytes, written)
+	}
+	return nil
+}
+
+func validateExpandedSize(latest *Latest, expanded uint64) error {
+	if latest.ManifestVersion == 2 && expanded != latest.UnpackedSizeBytes {
+		return fmt.Errorf("update package expanded size mismatch: expected %d bytes, got %d", latest.UnpackedSizeBytes, expanded)
 	}
 	return nil
 }

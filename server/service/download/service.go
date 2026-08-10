@@ -2,6 +2,7 @@ package download
 
 import (
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
 	"bytes"
 	"context"
 	"crypto/sha256"
@@ -26,7 +27,7 @@ import (
 type downloadStatus string
 
 const (
-	transferSentinelPath                        = "/tmp/.download_in_progress"
+	transferSentinelPath                        = utils.TransferSentinelPath
 	downloadStatusIdle           downloadStatus = "idle"
 	downloadStatusInProgress     downloadStatus = "in_progress"
 	downloadStatusSuccess        downloadStatus = "success"

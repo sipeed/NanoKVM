@@ -28,6 +28,9 @@ for path in "$TARBALL" "$MANIFEST" "$CHECKSUM"; do
 done
 
 PACKAGE_ROOT="nanokvm_${VERSION}"
+MAX_PACKAGE_SIZE=$((1 << 30))
+MAX_UNPACKED_SIZE=$((2 << 30))
+MAX_ARCHIVE_ENTRIES=100000
 ENTRY_LIST=$(mktemp)
 VERBOSE_LIST=$(mktemp)
 trap 'rm -f "$ENTRY_LIST" "$VERBOSE_LIST"' EXIT
@@ -44,6 +47,10 @@ fi
 ENTRY_COUNT=0
 while IFS= read -r entry; do
     ENTRY_COUNT=$((ENTRY_COUNT + 1))
+    if [ "$ENTRY_COUNT" -gt "$MAX_ARCHIVE_ENTRIES" ]; then
+        echo "[ERROR] archive contains more than $MAX_ARCHIVE_ENTRIES entries" >&2
+        exit 1
+    fi
     case "$entry" in
         "$PACKAGE_ROOT"|"$PACKAGE_ROOT"/*) ;;
         *)
@@ -92,6 +99,9 @@ fi
 MANIFEST_VERSION=$(jq -er '.version | select(type == "string" and length > 0)' "$MANIFEST")
 MANIFEST_NAME=$(jq -er '.name | select(type == "string" and length > 0)' "$MANIFEST")
 MANIFEST_SIZE=$(jq -er '.size | select(type == "number" and . >= 0 and floor == .)' "$MANIFEST")
+MANIFEST_FORMAT=$(jq -er '.manifest_version | select(type == "number" and . == 2)' "$MANIFEST")
+MANIFEST_SIZE_BYTES=$(jq -er '.size_bytes | select(type == "number" and . > 0 and floor == .)' "$MANIFEST")
+MANIFEST_UNPACKED_SIZE_BYTES=$(jq -er '.unpacked_size_bytes | select(type == "number" and . > 0 and floor == .)' "$MANIFEST")
 MANIFEST_SHA512=$(jq -er '.sha512 | select(type == "string" and length > 0)' "$MANIFEST")
 
 if [ "$MANIFEST_VERSION" != "$VERSION" ]; then
@@ -104,8 +114,37 @@ if [ "$MANIFEST_NAME" != "$TARBALL_NAME" ]; then
 fi
 
 ACTUAL_SIZE=$(wc -c < "$TARBALL" | tr -d ' ')
-if [ "$MANIFEST_SIZE" != "$ACTUAL_SIZE" ]; then
+if [ "$MANIFEST_FORMAT" != "2" ]; then
+    echo "[ERROR] latest.json manifest_version must be 2" >&2
+    exit 1
+fi
+if [ "$MANIFEST_SIZE" != "$ACTUAL_SIZE" ] || [ "$MANIFEST_SIZE_BYTES" != "$ACTUAL_SIZE" ]; then
     echo "[ERROR] latest.json size '$MANIFEST_SIZE' does not match '$ACTUAL_SIZE'" >&2
+    exit 1
+fi
+if [ "$ACTUAL_SIZE" -gt "$MAX_PACKAGE_SIZE" ]; then
+    echo "[ERROR] release tarball exceeds device limit of $MAX_PACKAGE_SIZE bytes" >&2
+    exit 1
+fi
+
+ACTUAL_UNPACKED_SIZE=$(python3 - "$TARBALL" <<'PY'
+import sys
+import tarfile
+
+total = 0
+with tarfile.open(sys.argv[1], "r:gz") as archive:
+    for member in archive:
+        if member.isfile():
+            total += member.size
+print(total)
+PY
+)
+if [ "$MANIFEST_UNPACKED_SIZE_BYTES" != "$ACTUAL_UNPACKED_SIZE" ]; then
+    echo "[ERROR] latest.json unpacked_size_bytes '$MANIFEST_UNPACKED_SIZE_BYTES' does not match '$ACTUAL_UNPACKED_SIZE'" >&2
+    exit 1
+fi
+if [ "$ACTUAL_UNPACKED_SIZE" -gt "$MAX_UNPACKED_SIZE" ]; then
+    echo "[ERROR] unpacked package exceeds device limit of $MAX_UNPACKED_SIZE bytes" >&2
     exit 1
 fi
 
