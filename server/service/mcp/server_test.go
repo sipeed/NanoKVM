@@ -3,6 +3,7 @@ package mcpservice
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,8 +17,12 @@ import (
 	"NanoKVM-Server/service/inputcontrol"
 )
 
-// legacyProtocolVersion is an older revision that the handler still answers.
-const legacyProtocolVersion = "2025-03-26"
+const (
+	// legacyProtocolVersion is an older revision that the handler still answers.
+	legacyProtocolVersion = "2025-03-26"
+	// latestProtocolVersion is the newest revision that the handler must serve.
+	latestProtocolVersion = "2026-07-28"
+)
 
 type fakeSnapshotter struct {
 	snapshot Snapshot
@@ -197,6 +202,86 @@ func TestMCPInitializeAndToolsList(t *testing.T) {
 	closed := request(http.MethodDelete, "", legacyProtocolVersion)
 	if closed.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("delete status=%d body=%s", closed.Code, closed.Body.String())
+	}
+}
+
+// TestMCPHandlerServesLatestProtocol pins the newest protocol revision that the
+// handler serves. The streamable HTTP transport offers 2026-07-28 only to a
+// stateless handler; a stateful one negotiates down to 2025-11-25 and the
+// revision becomes unreachable. The test therefore guards the handler options,
+// not the SDK. It also fails when an SDK update adds a newer revision, which is
+// the point: the new revision needs the same deliberate check.
+func TestMCPHandlerServesLatestProtocol(t *testing.T) {
+	hid := &recordingHID{}
+	control := controlmode.NewManager(filepath.Join(t.TempDir(), "mode"), controlmode.ModeMCP)
+	handler := newMCPHandler(control, &inputcontrol.Coordinator{}, newRemoteWithHID(hid), nil)
+
+	const meta = `"_meta":{` +
+		`"io.modelcontextprotocol/protocolVersion":"` + latestProtocolVersion + `",` +
+		`"io.modelcontextprotocol/clientInfo":{"name":"test","version":"1"},` +
+		`"io.modelcontextprotocol/clientCapabilities":{}}`
+
+	// The revision mirrors the method, and the tool name, into HTTP headers so
+	// that intermediaries route without reading the body. A client that omits
+	// either header gets -32020, so every caller must send them.
+	post := func(protocolVersion string, method string, name string, body string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		req := httptest.NewRequest(http.MethodPost, "/api/mcp", strings.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Accept", "application/json, text/event-stream")
+		req.Header.Set("Mcp-Protocol-Version", protocolVersion)
+		req.Header.Set("Mcp-Method", method)
+		if name != "" {
+			req.Header.Set("Mcp-Name", name)
+		}
+		handler.ServeHTTP(recorder, req)
+		return recorder
+	}
+
+	discover := post(latestProtocolVersion, "server/discover", "", `{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{`+meta+`}}`)
+	if discover.Code != http.StatusOK {
+		t.Fatalf("discover status=%d body=%s", discover.Code, discover.Body.String())
+	}
+	var discovered struct {
+		Result struct {
+			SupportedVersions []string `json:"supportedVersions"`
+			Capabilities      struct {
+				Tools *struct{} `json:"tools"`
+			} `json:"capabilities"`
+		} `json:"result"`
+		Error *struct {
+			Code    int    `json:"code"`
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+	if err := json.Unmarshal(discover.Body.Bytes(), &discovered); err != nil {
+		t.Fatalf("discover body=%s: %v", discover.Body.String(), err)
+	}
+	if discovered.Error != nil {
+		t.Fatalf("discover error=%+v", discovered.Error)
+	}
+	// The SDK reports the supported versions newest first.
+	if len(discovered.Result.SupportedVersions) == 0 || discovered.Result.SupportedVersions[0] != latestProtocolVersion {
+		t.Fatalf("supported versions = %v, want %s first", discovered.Result.SupportedVersions, latestProtocolVersion)
+	}
+	if discovered.Result.Capabilities.Tools == nil {
+		t.Fatalf("discover advertises no tools: %s", discover.Body.String())
+	}
+
+	// The revision has no handshake: a tool call carrying `_meta` is enough.
+	call := post(latestProtocolVersion, "tools/call", "cube_move_mouse", `{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"cube_move_mouse","arguments":{"mode":"absolute","x":0.5,"y":0.5},`+meta+`}}`)
+	if call.Code != http.StatusOK || strings.Contains(call.Body.String(), `"isError":true`) {
+		t.Fatalf("tools/call status=%d body=%s", call.Code, call.Body.String())
+	}
+	if len(hid.absolute) != 1 {
+		t.Fatalf("absolute writes = %d, want 1", len(hid.absolute))
+	}
+
+	// The same endpoint keeps serving the older revisions, which have no
+	// `server/discover`. The two revisions must not leak into each other.
+	legacyDiscover := post(legacyProtocolVersion, "server/discover", "", `{"jsonrpc":"2.0","id":3,"method":"server/discover","params":{}}`)
+	if legacyDiscover.Code != http.StatusOK || !strings.Contains(legacyDiscover.Body.String(), "-32601") {
+		t.Fatalf("legacy discover status=%d body=%s, want method not found", legacyDiscover.Code, legacyDiscover.Body.String())
 	}
 }
 
