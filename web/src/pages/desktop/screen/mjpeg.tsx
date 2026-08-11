@@ -39,13 +39,13 @@ export const Mjpeg = () => {
     <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden bg-black">
       <img
         id="screen"
-        className={clsx('block select-none', mouseStyle)}
+        className={clsx('block select-none touch-none', mouseStyle)}
         style={{
           transform: `scale(${videoScale})`,
           transformOrigin: 'center',
-          ...(resolution?.width
-            ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-            : { maxHeight: '100%', objectFit: 'scale-down' }),
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain',
           visibility: hasError ? 'hidden' : 'visible'
         }}
         src={streamSrc}

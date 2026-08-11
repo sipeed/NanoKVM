@@ -5,12 +5,11 @@ import { useAtom, useAtomValue } from 'jotai';
 import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse';
-import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
+import { videoScaleAtom } from '@/jotai/screen.ts';
 
 import DirectWorker from './direct.worker.ts?worker';
 
 export const H264Direct = () => {
-  const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
 
@@ -51,13 +50,13 @@ export const H264Direct = () => {
       <canvas
         id="screen"
         ref={canvasRef}
-        className={clsx('block select-none', mouseStyle)}
+        className={clsx('block select-none touch-none', mouseStyle)}
         style={{
           transform: `scale(${videoScale})`,
           transformOrigin: 'center',
-          ...(resolution?.width
-            ? { width: resolution.width, height: resolution.height, objectFit: 'cover' }
-            : { maxWidth: '100%', maxHeight: '100%', objectFit: 'scale-down' })
+          width: '100%',
+          height: '100%',
+          objectFit: 'contain'
         }}
       ></canvas>
     </div>
