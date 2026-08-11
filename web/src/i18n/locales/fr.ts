@@ -86,6 +86,10 @@ const fr = {
         description:
           'Les modes H.264 Direct et H.264 WebRTC sont utilisés simultanément. Cela peut provoquer des déchirures d’écran ou une vidéo corrompue. Veuillez n’utiliser qu’un seul mode H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Échec de la connexion WebRTC',
+        description: 'Vérifiez la connexion réseau ou changez de mode vidéo.'
+      },
       captureStatus: {
         hdmiError: 'Erreur d’image HDMI',
         unsupportedResolution: 'La résolution actuelle n’est pas prise en charge',

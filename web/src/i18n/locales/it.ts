@@ -85,6 +85,10 @@ const it = {
         description:
           'I flussi H.264 Direct e H.264 WebRTC sono utilizzati contemporaneamente. Ciò può causare tearing dello schermo o video danneggiato. Utilizzare una sola modalità H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Connessione WebRTC non riuscita',
+        description: 'Controlla la connessione di rete o cambia la modalità video.'
+      },
       captureStatus: {
         hdmiError: 'Errore schermata HDMI',
         unsupportedResolution: 'La risoluzione attuale non è supportata',

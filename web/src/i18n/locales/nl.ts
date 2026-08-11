@@ -85,6 +85,10 @@ const nl = {
         description:
           'H.264 Direct en H.264 WebRTC worden tegelijkertijd gebruikt. Dit kan tearing of beschadigde video veroorzaken. Gebruik slechts één H.264-modus.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC-verbinding mislukt',
+        description: 'Controleer de netwerkverbinding of wijzig de videomodus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-schermfout',
         unsupportedResolution: 'De huidige resolutie wordt niet ondersteund',

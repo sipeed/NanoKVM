@@ -83,6 +83,10 @@ const da = {
         description:
           'H.264 Direct og H.264 WebRTC bruges samtidigt. Dette kan forårsage skærmrivning eller beskadiget video. Brug kun én H.264-tilstand.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC-forbindelse mislykkedes',
+        description: 'Kontrollér netværksforbindelsen, eller skift videotilstand.'
+      },
       captureStatus: {
         hdmiError: 'Fejl i HDMI-billedet',
         unsupportedResolution: 'Den aktuelle opløsning understøttes ikke',

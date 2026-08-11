@@ -83,6 +83,10 @@ const ca = {
         description:
           "S'estan utilitzant H.264 Direct i H.264 WebRTC alhora. Això pot provocar esquinçament de pantalla o vídeo corrupte. Utilitzeu només un mode H.264."
       },
+      webrtcConnectionFailed: {
+        title: 'Error de connexió WebRTC',
+        description: 'Comproveu la connexió de xarxa o canvieu el mode de vídeo.'
+      },
       captureStatus: {
         hdmiError: 'Error a la pantalla HDMI',
         unsupportedResolution: 'La resolució actual no és compatible',

@@ -84,6 +84,10 @@ const nb = {
         description:
           'H.264 Direct og H.264 WebRTC brukes samtidig. Dette kan føre til skjermriving eller ødelagt video. Bruk bare én H.264-modus.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC-tilkobling mislyktes',
+        description: 'Kontroller nettverkstilkoblingen eller bytt videomodus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-skjermfeil',
         unsupportedResolution: 'Gjeldende oppløsning støttes ikke',

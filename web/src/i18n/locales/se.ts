@@ -81,6 +81,10 @@ const se = {
         description:
           'H.264 Direct och H.264 WebRTC används samtidigt. Detta kan orsaka skärmrivningar eller skadad video. Använd endast ett H.264-läge.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC-anslutningen misslyckades',
+        description: 'Kontrollera nätverksanslutningen eller byt videoläge.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-skärmfel',
         unsupportedResolution: 'Den aktuella upplösningen stöds inte',

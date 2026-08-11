@@ -83,6 +83,10 @@ const vi = {
         description:
           'H.264 Direct và H.264 WebRTC đang được sử dụng đồng thời. Điều này có thể gây xé hình hoặc video bị hỏng. Vui lòng chỉ sử dụng một chế độ H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Kết nối WebRTC thất bại',
+        description: 'Kiểm tra kết nối mạng hoặc chuyển đổi chế độ video.'
+      },
       captureStatus: {
         hdmiError: 'Lỗi màn hình HDMI',
         unsupportedResolution: 'Độ phân giải hiện tại không được hỗ trợ',
