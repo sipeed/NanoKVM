@@ -1,5 +1,5 @@
 #!/bin/sh
-# kvmhwd Rev2.1
+# kvmhwd Rev2.2
 
 start_usb_dev(){
     . /etc/profile
@@ -23,6 +23,11 @@ start_usb_dev(){
     else
         echo 0x1009 > idProduct
     fi
+
+    echo 0xEF > bDeviceClass
+    echo 0x02 > bDeviceSubClass
+    echo 0x01 > bDeviceProtocol
+
     mkdir strings/0x409
     echo '0123456789ABCDEF' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer
@@ -34,16 +39,46 @@ start_usb_dev(){
     mkdir configs/c.1/strings/0x409
     echo "NanoKVM" >  configs/c.1/strings/0x409/configuration
 
+    # Deterministic gadget MACs from the chip UID so the host-side RNDIS/NCM
+    # interface keeps a STABLE MAC across re-enumeration/reboot. Without this
+    # the kernel assigns a random dev_addr/host_addr on every bind, so the
+    # attached PC sees a brand-new network adapter (and MAC) each time.
+    usb_uid=$(sha512sum /sys/class/cvi-base/base_uid | head -c 4)
+    if [ -n "$usb_uid" ]
+    then
+        usb_dev_mac="48:da:35:6e:${usb_uid%??}:${usb_uid#??}"
+        usb_host_mac="48:da:35:6d:${usb_uid%??}:${usb_uid#??}"
+    fi
+
     if [ -e /boot/usb.ncm ]
     then
         mkdir functions/ncm.usb0
+        [ -n "$usb_dev_mac" ]  && echo "$usb_dev_mac"  > functions/ncm.usb0/dev_addr
+        [ -n "$usb_host_mac" ] && echo "$usb_host_mac" > functions/ncm.usb0/host_addr
+        echo WINNCM > functions/ncm.usb0/os_desc/interface.ncm/compatible_id
         ln -s functions/ncm.usb0 configs/c.1/
     else
         if [ -e /boot/usb.rndis0 ]
         then
                 mkdir functions/rndis.usb0
+                [ -n "$usb_dev_mac" ]  && echo "$usb_dev_mac"  > functions/rndis.usb0/dev_addr
+                [ -n "$usb_host_mac" ] && echo "$usb_host_mac" > functions/rndis.usb0/host_addr
+                echo e0 > functions/rndis.usb0/class
+                echo 01 > functions/rndis.usb0/subclass
+                echo 03 > functions/rndis.usb0/protocol
+                echo RNDIS > functions/rndis.usb0/os_desc/interface.rndis/compatible_id
+                echo 5162001 > functions/rndis.usb0/os_desc/interface.rndis/sub_compatible_id
                 ln -s functions/rndis.usb0 configs/c.1/
         fi
+    fi
+
+    if [ -e /boot/usb.ncm ] || [ -e /boot/usb.rndis0 ]
+    then
+        # Microsoft OS 2.0 Descriptor
+        echo 1 > os_desc/use
+        echo 0xCD > os_desc/b_vendor_code
+        echo MSFT100 > os_desc/qw_sign
+        ln -s configs/c.1 os_desc
     fi
 
     if [ ! -e /boot/disable_hid ]

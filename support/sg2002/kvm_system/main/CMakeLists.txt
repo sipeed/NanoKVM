@@ -10,7 +10,7 @@ list(APPEND ADD_INCLUDE
                         "lib/hdmi"
                         )
 
-list(APPEND ADD_PRIVATE_INCLUDE "")
+list(APPEND ADD_PRIVATE_INCLUDE "../../additional/kvm/include")
 
 append_srcs_dir(ADD_SRCS    
                         "src"

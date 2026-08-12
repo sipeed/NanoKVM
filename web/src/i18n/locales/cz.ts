@@ -79,6 +79,11 @@ const cz = {
       frameDetectTip:
         'Vypočítá rozdíl mezi snímky. Přenos video streamu se zastaví, pokud nejsou detekovány změny na obrazovce vzdáleného hostitele.',
       resetHdmi: 'Resetovat HDMI',
+      mixedH264: {
+        title: 'Konflikt streamu H.264',
+        description:
+          'H.264 Direct a H.264 WebRTC se používají současně. To může způsobit trhání obrazu nebo poškozené video. Používejte pouze jeden režim H.264.'
+      },
       captureStatus: {
         hdmiError: 'Chyba obrazu HDMI',
         unsupportedResolution: 'Aktuální rozlišení není podporováno',
@@ -253,7 +258,15 @@ const cz = {
       disabled: 'Oddíl /data je RO, takže obrázek nelze stáhnout',
       uploadbox: 'Přetáhněte soubor sem nebo kliknutím vyberte',
       inputfile: 'Zadejte soubor obrázku',
-      NoISO: 'Žádné ISO'
+      NoISO: 'Žádné ISO',
+      sha256: 'SHA-256 (volitelné)',
+      sha256Placeholder: 'Zadejte 64znakový kontrolní součet SHA-256',
+      invalidSHA256: 'SHA-256 musí být 64znakový hexadecimální řetězec',
+      failed: 'Stažení se nezdařilo',
+      success: 'Stažení proběhlo úspěšně',
+      checksumFailed: 'Stažení se nezdařilo: ověření SHA-256 selhalo',
+      cancel: 'Zrušit',
+      cancelFailed: 'Stažení se nepodařilo zrušit'
     },
     power: {
       title: 'Napájení',
@@ -270,6 +283,25 @@ const cz = {
     },
     settings: {
       title: 'Nastavení',
+      mcp: {
+        title: 'Služba MCP',
+        service: 'Vzdálené ovládání MCP',
+        serviceDesc:
+          'Umožnit důvěryhodným klientům MCP ovládat klávesnici a myš a pořizovat snímky obrazovky',
+        securityWarning:
+          'Kdokoli s tímto API klíčem může ovládat vzdálený hostitel a zobrazit jeho obrazovku. Používejte HTTPS a povolte službu pouze v důvěryhodných sítích.',
+        endpoint: 'Koncový bod',
+        apiKey: 'API klíč',
+        regenerateConfirmTitle: 'Vygenerovat nový MCP API klíč?',
+        regenerateConfirmDesc: 'Aktuální klíč přestane okamžitě fungovat.',
+        enableConfirmTitle: 'Povolit externí ovládání MCP?',
+        enableConfirmDesc:
+          'Povolením MCP se zastaví PicoClaw a ukončí se všechny aktivní relace PicoClaw.',
+        failed: 'Operace MCP se nezdařila',
+        copyFailed: 'Kopírování se nezdařilo. Zkopírujte ručně.',
+        okBtn: 'Potvrdit',
+        cancelBtn: 'Zrušit'
+      },
       about: {
         title: 'O NanoKVM',
         information: 'Informace',
@@ -303,9 +335,25 @@ const cz = {
           modeOff: 'Vypnuto',
           modeAuto: 'Automatické skrytí',
           modeAlways: 'Vždy viditelné',
+          keyboardLedStatus: 'Indikátory zámku klávesnice',
+          keyboardLedStatusDesc:
+            'Zobrazit stav Num Lock, Caps Lock a Scroll Lock vzdáleného počítače',
           icons: 'Ikony podnabídky',
           iconsDesc: 'Zobrazení ikon podnabídky na liště nabídek'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Stav zámků vzdálené klávesnice',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Zapnuto',
+        off: 'Vypnuto',
+        unknown: 'Neznámé'
       },
       device: {
         title: 'Zařízení',
@@ -345,7 +393,10 @@ const cz = {
           tip: 'Vypnutí, pokud to není potřeba'
         },
         hdmi: {
-          description: 'Povolit výstup HDMI/monitor'
+          description: 'Povolit výstup HDMI/monitor',
+          idleTimeoutTitle: 'Časový limit nečinnosti snímání',
+          idleTimeoutDescription: 'Zastavit snímání HDMI po době bez aktivních diváků',
+          minutes: 'min'
         },
         autostart: {
           title: 'Nastavení automatického spuštění skriptů',
@@ -471,10 +522,29 @@ const cz = {
         previewDesc: 'Získejte včasný přístup k novým funkcím a vylepšením',
         previewTip:
           'Uvědomte si prosím, že předběžné verze mohou obsahovat chyby nebo neúplné funkce!',
+        customServer: {
+          title: 'Vlastní aktualizační server',
+          desc: 'Vyhledávejte a stahujte online aktualizace ze zadaného serveru',
+          invalidUrl:
+            'Zadejte platnou adresu adresáře serveru HTTP nebo HTTPS bez parametrů, fragmentu nebo souboru latest.json.',
+          loadFailed: 'Konfiguraci aktualizačního serveru se nepodařilo načíst.',
+          saveFailed: 'Konfiguraci aktualizačního serveru se nepodařilo uložit.',
+          saved: 'Konfigurace aktualizačního serveru byla uložena.',
+          save: 'Uložit',
+          confirmTitle: 'Použít vlastní aktualizační server?',
+          confirmDesc:
+            'SHA-512 pouze ověřuje, že balíček odpovídá manifestu poskytnutému tímto serverem. Neprokazuje, že je balíček oficiálním vydáním NanoKVM. Vadný nebo škodlivý server může způsobit nefunkčnost zařízení, ztrátu dat nebo narušení zabezpečení systému.',
+          confirm: 'Přesto použít',
+          previewDisabled:
+            'Testovací aktualizace nejsou při použití vlastního aktualizačního serveru dostupné.'
+        },
         offline: {
           title: 'Offline aktualizace',
           desc: 'Aktualizace prostřednictvím místního instalačního balíčku',
           upload: 'Nahrát',
+          checksumPlaceholder: 'Kontrolní součet SHA-256 (volitelný)',
+          invalidChecksum: 'Kontrolní součet SHA-256 musí obsahovat 64 hexadecimálních znaků.',
+          checksumMismatch: 'Ověření SHA-256 se nezdařilo. Balíček může být poškozený.',
           invalidName: 'Neplatný formát souboru. Stáhněte si prosím z vydání GitHubu.',
           updateFailed: 'Aktualizace se nezdařila. Zkuste to prosím znovu.'
         }
@@ -546,19 +616,30 @@ const cz = {
         runtimeStarted: 'Spuštěno běhové prostředí PicoClaw',
         runtimeStartFailed: 'Selhalo spuštění běhového prostředí PicoClaw',
         runtimeStopped: 'Běhové prostředí PicoClaw zastaveno',
-        runtimeStopFailed: 'Zastavení běhového prostředí PicoClaw se nezdařilo'
+        runtimeStopFailed: 'Zastavení běhového prostředí PicoClaw se nezdařilo',
+        controlSwitchedToMCP: 'Ovládání bylo přepnuto na externí službu MCP'
       },
       connection: {
         runtime: {
           checking: 'Kontrola',
+          restoring: 'Restoring PicoClaw',
           ready: 'Běhové prostředí připraveno',
           stopped: 'Běhové prostředí zastaveno',
+          blockedByMCP: 'Externí ovládání MCP je aktivní',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Běhové prostředí není k dispozici',
           configError: 'Chyba konfigurace'
         },
         transport: {
           connecting: 'Připojování',
-          connected: 'Připojeno'
+          connected: 'Připojeno',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Nečinný',
@@ -572,6 +653,30 @@ const cz = {
       },
       overlay: {
         locked: 'PicoClaw ovládá zařízení. Ruční zadávání je pozastaveno.'
+      },
+      control: {
+        picoclaw: 'Ovládání zařízení: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Ovládání zařízení: externí MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Ovládání zařízení: vypnuto',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Předat ovládání',
+        release: 'Uvolnit',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Ovládání PicoClaw povoleno',
+        released: 'Ovládání PicoClaw uvolněno',
+        grantFailed: 'Nepodařilo se předat ovládání PicoClaw',
+        releaseFailed: 'Nepodařilo se uvolnit ovládání PicoClaw',
+        grantConfirmTitle: 'Přepnout ovládání zařízení na PicoClaw?',
+        grantConfirmDesc: 'Zápisy zařízení z externího MCP budou přerušeny.'
       },
       install: {
         install: 'Nainstalovat PicoClaw',
@@ -633,15 +738,22 @@ const cz = {
         deleteConfirmOk: 'Smazat',
         deleteConfirmCancel: 'Zrušit',
         messageCount_one: '{{count}} zpráva',
-        messageCount_other: '{{count}} zpráv'
+        messageCount_other: '{{count}} zpráv',
+        messageCount: '{{count}} zpráv'
       },
       config: {
         startRuntime: 'Spustit PicoClaw',
         stopRuntime: 'Zastavit PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Přepnout ovládání na PicoClaw?',
+        enableConfirmDesc: 'Spuštěním PicoClaw se deaktivuje externí služba MCP.',
+        enableConfirmOk: 'Spustit PicoClaw',
+        enableConfirmCancel: 'Zrušit',
         title: 'Spustit PicoClaw',
-        description: 'Spusťte běhové prostředí a začněte používat asistenta PicoClaw.'
+        description: 'Spusťte běhové prostředí a začněte používat asistenta PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -80,6 +80,11 @@ const nl = {
       frameDetectTip:
         'Berekent het verschil tussen frames. Stopt met het verzenden van de videostream wanneer er geen veranderingen worden gedetecteerd op het scherm van de externe host.',
       resetHdmi: 'Reset HDMI',
+      mixedH264: {
+        title: 'H.264-streamconflict',
+        description:
+          'H.264 Direct en H.264 WebRTC worden tegelijkertijd gebruikt. Dit kan tearing of beschadigde video veroorzaken. Gebruik slechts één H.264-modus.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-schermfout',
         unsupportedResolution: 'De huidige resolutie wordt niet ondersteund',
@@ -254,7 +259,15 @@ const nl = {
       disabled: '/data partitie is RO, dus we kunnen de afbeelding niet downloaden',
       uploadbox: 'Zet het bestand hier neer of klik om te selecteren',
       inputfile: 'Voer het afbeeldingsbestand in',
-      NoISO: 'Geen ISO'
+      NoISO: 'Geen ISO',
+      sha256: 'SHA-256 (optioneel)',
+      sha256Placeholder: 'Voer een SHA-256-controlesom van 64 tekens in',
+      invalidSHA256: 'SHA-256 moet een hexadecimale tekenreeks van 64 tekens zijn',
+      failed: 'Download mislukt',
+      success: 'Download geslaagd',
+      checksumFailed: 'Download mislukt: SHA-256-verificatie mislukt',
+      cancel: 'Annuleren',
+      cancelFailed: 'Download annuleren mislukt'
     },
     power: {
       title: 'Aan/uit',
@@ -271,6 +284,25 @@ const nl = {
     },
     settings: {
       title: 'Instellingen',
+      mcp: {
+        title: 'MCP-service',
+        service: 'MCP-afstandsbediening',
+        serviceDesc:
+          'Vertrouwde MCP-clients toestaan het toetsenbord en de muis te bedienen en schermafbeeldingen te maken',
+        securityWarning:
+          'Iedereen met deze API-sleutel kan de externe host bedienen en het scherm bekijken. Gebruik HTTPS en schakel de service alleen in op vertrouwde netwerken.',
+        endpoint: 'Eindpunt',
+        apiKey: 'API-sleutel',
+        regenerateConfirmTitle: 'MCP API-sleutel opnieuw genereren?',
+        regenerateConfirmDesc: 'De huidige sleutel werkt dan onmiddellijk niet meer.',
+        enableConfirmTitle: 'Externe MCP-bediening inschakelen?',
+        enableConfirmDesc:
+          'Als MCP wordt ingeschakeld, stopt PicoClaw en worden alle actieve PicoClaw-sessies gesloten.',
+        failed: 'MCP-bewerking mislukt',
+        copyFailed: 'Kopiëren mislukt. Kopieer handmatig.',
+        okBtn: 'Bevestigen',
+        cancelBtn: 'Annuleren'
+      },
       about: {
         title: 'Over NanoKVM',
         information: 'Informatie',
@@ -304,9 +336,25 @@ const nl = {
           modeOff: 'Uit',
           modeAuto: 'Automatisch verbergen',
           modeAlways: 'Altijd zichtbaar',
+          keyboardLedStatus: 'Toetsvergrendelingsindicatoren',
+          keyboardLedStatusDesc:
+            'Toon de Num Lock-, Caps Lock- en Scroll Lock-status van de externe computer',
           icons: 'Submenupictogrammen',
           iconsDesc: 'Submenupictogrammen weergeven in de menubalk'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Toetsvergrendelingsstatus van extern toetsenbord',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Aan',
+        off: 'Uit',
+        unknown: 'Onbekend'
       },
       device: {
         title: 'Apparaat',
@@ -346,7 +394,11 @@ const nl = {
           tip: 'Schakel het uit als het niet nodig is'
         },
         hdmi: {
-          description: 'Schakel HDMI/monitoruitgang in'
+          description: 'Schakel HDMI/monitoruitgang in',
+          idleTimeoutTitle: 'Time-out voor inactieve opname',
+          idleTimeoutDescription:
+            'HDMI-opname stoppen nadat er gedurende deze tijd geen actieve kijkers zijn:',
+          minutes: 'min'
         },
         autostart: {
           title: 'Instellingen voor automatisch starten van scripts',
@@ -474,10 +526,29 @@ const nl = {
         previewDesc: 'Krijg vroegtijdig toegang tot nieuwe functies en verbeteringen',
         previewTip:
           'Houd er rekening mee dat preview-releases bugs of onvolledige functionaliteit kunnen bevatten!',
+        customServer: {
+          title: 'Aangepaste updateserver',
+          desc: 'Online-updates zoeken en downloaden vanaf een opgegeven server',
+          invalidUrl:
+            'Voer een geldige HTTP- of HTTPS-servermap in zonder queryparameters, fragment of latest.json.',
+          loadFailed: 'De configuratie van de updateserver kon niet worden geladen.',
+          saveFailed: 'De configuratie van de updateserver kon niet worden opgeslagen.',
+          saved: 'De configuratie van de updateserver is opgeslagen.',
+          save: 'Opslaan',
+          confirmTitle: 'Een aangepaste updateserver gebruiken?',
+          confirmDesc:
+            'SHA-512 controleert alleen of het pakket overeenkomt met het manifest dat door deze server wordt verstrekt. Het bewijst niet dat het pakket een officiële NanoKVM-release is. Een defecte of kwaadwillende server kan het apparaat onbruikbaar maken, gegevensverlies veroorzaken of het systeem compromitteren.',
+          confirm: 'Toch gebruiken',
+          previewDisabled:
+            'Preview-updates zijn niet beschikbaar zolang een aangepaste updateserver is ingeschakeld.'
+        },
         offline: {
           title: 'Offline-updates',
           desc: 'Update via lokaal installatiepakket',
           upload: 'Uploaden',
+          checksumPlaceholder: 'SHA-256-controlesom (optioneel)',
+          invalidChecksum: 'De SHA-256-controlesom moet 64 hexadecimale tekens bevatten.',
+          checksumMismatch: 'De SHA-256-verificatie is mislukt. Het pakket is mogelijk beschadigd.',
           invalidName: 'Ongeldig bestandsnaamformaat. Download de versie van GitHub-releases.',
           updateFailed: 'Update mislukt. Probeer het opnieuw.'
         }
@@ -549,19 +620,30 @@ const nl = {
         runtimeStarted: 'PicoClaw runtime gestart',
         runtimeStartFailed: 'Kan PicoClaw runtime niet starten',
         runtimeStopped: 'PicoClaw runtime gestopt',
-        runtimeStopFailed: 'Kan PicoClaw runtime niet stoppen'
+        runtimeStopFailed: 'Kan PicoClaw runtime niet stoppen',
+        controlSwitchedToMCP: 'Bediening overgeschakeld naar de externe MCP-service'
       },
       connection: {
         runtime: {
           checking: 'Controleren',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime gereed',
           stopped: 'Runtime gestopt',
+          blockedByMCP: 'Externe MCP-bediening is actief',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime niet beschikbaar',
           configError: 'Configuratiefout'
         },
         transport: {
           connecting: 'Verbinden',
-          connected: 'Verbonden'
+          connected: 'Verbonden',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Inactief',
@@ -575,6 +657,30 @@ const nl = {
       },
       overlay: {
         locked: 'PicoClaw bestuurt het apparaat. Handmatige invoer is gepauzeerd.'
+      },
+      control: {
+        picoclaw: 'Apparaatbediening: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Apparaatbediening: externe MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Apparaatbediening: uit',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Bediening geven',
+        release: 'Vrijgeven',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw-bediening gegeven',
+        released: 'PicoClaw-bediening vrijgegeven',
+        grantFailed: 'Kan PicoClaw-bediening niet geven',
+        releaseFailed: 'Kan PicoClaw-bediening niet vrijgeven',
+        grantConfirmTitle: 'Apparaatbediening overschakelen naar PicoClaw?',
+        grantConfirmDesc: 'Schrijfacties van de externe MCP naar het apparaat worden onderbroken.'
       },
       install: {
         install: 'PicoClaw installeren',
@@ -636,15 +742,23 @@ const nl = {
         deleteConfirmOk: 'Verwijderen',
         deleteConfirmCancel: 'Annuleren',
         messageCount_one: '{{count}} bericht',
-        messageCount_other: '{{count}} berichten'
+        messageCount_other: '{{count}} berichten',
+        messageCount: '{{count}} berichten'
       },
       config: {
         startRuntime: 'Start PicoClaw',
         stopRuntime: 'Stop PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Bediening overschakelen naar PicoClaw?',
+        enableConfirmDesc:
+          'Bij het starten van PicoClaw wordt de externe MCP-service uitgeschakeld.',
+        enableConfirmOk: 'PicoClaw starten',
+        enableConfirmCancel: 'Annuleren',
         title: 'Start PicoClaw',
-        description: 'Start de runtime om de PicoClaw assistent te gaan gebruiken.'
+        description: 'Start de runtime om de PicoClaw assistent te gaan gebruiken.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

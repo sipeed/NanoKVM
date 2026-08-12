@@ -5,33 +5,146 @@ let ctx: OffscreenCanvasRenderingContext2D | null = null;
 let rendering: boolean = false;
 let flushScheduled: boolean = false;
 let decoder: VideoDecoder | null = null;
+let streamUrl: string | null = null;
+let socket: WebSocket | null = null;
+let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+let reconnectDelayMs = 250;
+let stopped = false;
+let resyncRequested = false;
+let pendingAckTimestamp: number | null = null;
+let decodeBackpressured = false;
 
-const maxQueuedFrames = 3;
+const maxQueuedFrames = 1;
+const maxReconnectDelayMs = 5_000;
+const frameAckMessage = 2;
+const streamResyncMessage = 3;
+const flowControlWindow = 8;
+const decoderHighWatermark = 6;
+const decoderLowWatermark = 3;
 const frameQueue = new Queue<VideoFrame>();
 const frameChannel = new MessageChannel();
+
+type WorkerMessage = {
+  type: 'h264' | 'stop';
+  canvas?: OffscreenCanvas;
+  url?: string;
+};
 
 frameChannel.port1.onmessage = () => {
   flushScheduled = false;
   processFrameQueue();
 };
 
-self.onmessage = (event: MessageEvent) => {
-  const { type, data, canvas: offscreenCanvas } = event.data;
+self.onmessage = (event: MessageEvent<WorkerMessage>) => {
+  const { type, canvas: offscreenCanvas, url } = event.data;
 
   switch (type) {
     case 'h264':
+      if (!offscreenCanvas || !url) {
+        return;
+      }
+
       canvas = offscreenCanvas;
-      ctx = canvas!.getContext('2d') as OffscreenCanvasRenderingContext2D;
+      ctx = canvas!.getContext('2d', {
+        alpha: false,
+        desynchronized: true
+      }) as OffscreenCanvasRenderingContext2D;
+      streamUrl = url;
+      stopped = false;
+      connect();
       break;
-    case 'ws_message':
-      handleWsMessage(data);
-      break;
-    case 'error':
-    case 'close':
+    case 'stop':
+      stopped = true;
+      clearReconnectTimer();
+      disconnect();
       resetDecoder();
       break;
   }
 };
+
+function connect() {
+  if (stopped || !streamUrl || socket) {
+    return;
+  }
+
+  try {
+    const url = new URL(streamUrl);
+    url.searchParams.set('flow', String(flowControlWindow));
+    const nextSocket = new WebSocket(url);
+    nextSocket.binaryType = 'arraybuffer';
+    socket = nextSocket;
+
+    nextSocket.onopen = () => {
+      if (socket !== nextSocket || stopped) {
+        return;
+      }
+
+      reconnectDelayMs = 250;
+      resyncRequested = false;
+      pendingAckTimestamp = null;
+      decodeBackpressured = false;
+    };
+
+    nextSocket.onmessage = (event) => {
+      if (socket !== nextSocket || stopped || !(event.data instanceof ArrayBuffer)) {
+        return;
+      }
+
+      handleWsMessage(event.data);
+    };
+
+    nextSocket.onerror = () => {
+      if (socket === nextSocket) {
+        nextSocket.close();
+      }
+    };
+
+    nextSocket.onclose = () => {
+      if (socket !== nextSocket) {
+        return;
+      }
+
+      socket = null;
+      resyncRequested = false;
+      pendingAckTimestamp = null;
+      decodeBackpressured = false;
+      resetDecoder();
+      scheduleReconnect();
+    };
+  } catch (error) {
+    console.error('Failed to create Direct H264 WebSocket:', error);
+    scheduleReconnect();
+  }
+}
+
+function disconnect() {
+  const currentSocket = socket;
+  socket = null;
+
+  if (currentSocket && currentSocket.readyState !== WebSocket.CLOSED) {
+    currentSocket.close();
+  }
+}
+
+function scheduleReconnect() {
+  if (stopped || reconnectTimer !== null || !streamUrl) {
+    return;
+  }
+
+  const delay = reconnectDelayMs;
+  reconnectDelayMs = Math.min(reconnectDelayMs * 2, maxReconnectDelayMs);
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connect();
+  }, delay);
+}
+
+function clearReconnectTimer() {
+  if (reconnectTimer !== null) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+}
 
 function handleWsMessage(message: ArrayBuffer) {
   try {
@@ -44,58 +157,97 @@ function handleWsMessage(message: ArrayBuffer) {
     const timestamp = Number(view.getBigUint64(1, true));
     const data = new Uint8Array(message, 9);
 
-    if (!decoder && isKeyFrame) {
-      initializeDecoder();
+    if (!decoder) {
+      if (!isKeyFrame) {
+        requestStreamResync();
+        return;
+      }
+
+      resyncRequested = false;
+      const initial = createDecoder();
+      if (!initial) {
+        requestStreamResync();
+        return;
+      }
+
+      decoder = initial;
+      resyncRequested = false;
     }
 
     if (decoder?.state === 'configured') {
-      decode(isKeyFrame, timestamp, data);
+      decode(decoder, isKeyFrame, timestamp, data);
     }
   } catch (error) {
     console.error('Error processing WebSocket message in worker:', error);
   }
 }
 
-function initializeDecoder() {
+function createDecoder(): VideoDecoder | null {
   if (!self.VideoDecoder) {
     console.log('Error: WebCodecs API not supported in this worker.');
-    return;
+    return null;
   }
 
-  if (decoder && decoder.state !== 'unconfigured') {
-    return;
-  }
-
+  let instance: VideoDecoder | null = null;
   const init = {
     output: (frame: VideoFrame) => {
-      frameQueue.enqueue(frame);
-      while (frameQueue.size > maxQueuedFrames) {
-        frameQueue.dequeue()?.close();
-      }
-
-      if (!rendering) {
-        rendering = true;
-        scheduleFrameQueue();
-      }
+      handleDecodedFrame(instance, frame);
     },
     error: () => {
-      resetDecoder();
+      if (decoder === instance) {
+        requestStreamResync();
+        resetDecoder();
+      }
     }
   };
 
   try {
-    decoder = new VideoDecoder(init);
-    decoder.configure({
-      codec: 'avc1.42E01F',
+    instance = new VideoDecoder(init);
+    const configuredDecoder = instance;
+    instance.ondequeue = () => {
+      releaseDecodeBackpressure(configuredDecoder);
+    };
+    instance.configure({
+      codec: 'avc1.42E02A',
+      hardwareAcceleration: 'prefer-hardware',
       optimizeForLatency: true
     });
+    return instance;
   } catch (err) {
+    if (instance && instance.state !== 'closed') {
+      instance.close();
+    }
     console.log(err);
-    decoder = null;
+    return null;
   }
 }
 
-function decode(isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
+function handleDecodedFrame(source: VideoDecoder | null, frame: VideoFrame) {
+  if (!source) {
+    frame.close();
+    return;
+  }
+
+  if (source !== decoder) {
+    frame.close();
+    return;
+  }
+
+  frameQueue.enqueue(frame);
+  while (frameQueue.size > maxQueuedFrames) {
+    const droppedFrame = frameQueue.dequeue();
+    if (droppedFrame) {
+      droppedFrame.close();
+    }
+  }
+
+  if (!rendering) {
+    rendering = true;
+    scheduleFrameQueue();
+  }
+}
+
+function decode(target: VideoDecoder, isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
   const chunk = new EncodedVideoChunk({
     type: isKeyFrame ? 'key' : 'delta',
     timestamp: timestamp,
@@ -103,9 +255,15 @@ function decode(isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
   });
 
   try {
-    decoder?.decode(chunk);
+    target.decode(chunk);
+    pendingAckTimestamp = timestamp;
+    if (target.decodeQueueSize >= decoderHighWatermark) {
+      decodeBackpressured = true;
+    }
+    releaseDecodeBackpressure(target);
   } catch (err: any) {
     if (err.name === 'TypeError' || err.message.includes('configured')) {
+      requestStreamResync();
       resetDecoder();
     }
   }
@@ -114,7 +272,14 @@ function decode(isKeyFrame: boolean, timestamp: number, data: Uint8Array) {
 function processFrameQueue() {
   const frame = frameQueue.dequeue();
   if (frame) {
-    renderFrame(frame);
+    try {
+      renderFrame(frame);
+    } catch (error) {
+      console.error('Failed to render Direct H264 frame:', error);
+      requestStreamResync();
+      resetDecoder();
+      return;
+    }
   }
 
   if (frameQueue.size > 0) {
@@ -139,13 +304,16 @@ function renderFrame(frame: VideoFrame) {
     return;
   }
 
-  if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
-    canvas.width = frame.displayWidth;
-    canvas.height = frame.displayHeight;
-  }
+  try {
+    if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
+      canvas.width = frame.displayWidth;
+      canvas.height = frame.displayHeight;
+    }
 
-  ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-  frame.close();
+    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+  } finally {
+    frame.close();
+  }
 }
 
 function resetDecoder() {
@@ -158,8 +326,59 @@ function resetDecoder() {
   }
 
   decoder = null;
+  pendingAckTimestamp = null;
+  decodeBackpressured = false;
   rendering = false;
   flushScheduled = false;
 
   Array.from(frameQueue.drain()).forEach((frame) => frame.close());
+}
+
+function releaseDecodeBackpressure(source: VideoDecoder) {
+  if (source !== decoder || pendingAckTimestamp === null) {
+    return;
+  }
+
+  if (decodeBackpressured && source.decodeQueueSize > decoderLowWatermark) {
+    return;
+  }
+
+  decodeBackpressured = false;
+  acknowledgeFrame(pendingAckTimestamp);
+  pendingAckTimestamp = null;
+}
+
+function acknowledgeFrame(timestamp: number) {
+  const currentSocket = socket;
+  if (!currentSocket || currentSocket.readyState !== WebSocket.OPEN) {
+    return;
+  }
+
+  const message = new ArrayBuffer(9);
+  const view = new DataView(message);
+  view.setUint8(0, frameAckMessage);
+  view.setBigUint64(1, BigInt(timestamp), true);
+  try {
+    currentSocket.send(message);
+  } catch {
+    currentSocket.close();
+  }
+}
+
+function requestStreamResync() {
+  if (resyncRequested) {
+    return;
+  }
+
+  const currentSocket = socket;
+  if (!currentSocket || currentSocket.readyState !== WebSocket.OPEN) {
+    return;
+  }
+
+  try {
+    currentSocket.send(new Uint8Array([streamResyncMessage]));
+    resyncRequested = true;
+  } catch {
+    currentSocket.close();
+  }
 }

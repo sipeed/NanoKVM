@@ -74,6 +74,11 @@ const zh_tw = {
       frameDetect: '影格檢測',
       frameDetectTip: '計算影格之間的差異。當遠端主機畫面未偵測到任何變更時，停止視訊傳輸串流。',
       resetHdmi: '重置 HDMI',
+      mixedH264: {
+        title: 'H.264 串流衝突',
+        description:
+          '偵測到 H.264 Direct 和 H.264 WebRTC 同時使用，可能導致畫面撕裂或影片損壞。請只保留一種 H.264 模式。'
+      },
       captureStatus: {
         hdmiError: 'HDMI 畫面異常',
         unsupportedResolution: '目前解析度不支援',
@@ -241,8 +246,16 @@ const zh_tw = {
       ok: '確定',
       disabled: '/data 為唯讀目錄，無法下載映像檔',
       uploadbox: '將檔案拖曳到此處或按一下選擇',
-      inputfile: '請輸入圖片檔案',
-      NoISO: '無 ISO'
+      inputfile: '請輸入映像檔案',
+      NoISO: '無 ISO',
+      sha256: 'SHA-256（可選）',
+      sha256Placeholder: '請輸入 64 位元 SHA-256 校驗和',
+      invalidSHA256: 'SHA-256 必須是 64 位元十六進位字串',
+      failed: '下載失敗',
+      success: '下載成功',
+      checksumFailed: '下載失敗：SHA-256 校驗失敗',
+      cancel: '取消',
+      cancelFailed: '取消下載失敗'
     },
     power: {
       title: '電源控制',
@@ -259,6 +272,23 @@ const zh_tw = {
     },
     settings: {
       title: '設定',
+      mcp: {
+        title: 'MCP 服務',
+        service: 'MCP 遠端控制',
+        serviceDesc: '允許受信任的 MCP 用戶端控制鍵盤、滑鼠並擷取螢幕截圖',
+        securityWarning:
+          '任何持有此 API Key 的人都可以控制遠端主機並查看螢幕。請使用 HTTPS，且只在受信任的網路中啟用。',
+        endpoint: '服務位址',
+        apiKey: 'API Key',
+        regenerateConfirmTitle: '重新產生 MCP API Key？',
+        regenerateConfirmDesc: '目前的 Key 將立即失效。',
+        enableConfirmTitle: '啟用外部 MCP 控制？',
+        enableConfirmDesc: '啟用 MCP 將停止 PicoClaw，並關閉目前作用中的 PicoClaw 工作階段。',
+        failed: 'MCP 操作失敗',
+        copyFailed: '複製失敗，請手動複製。',
+        okBtn: '確認',
+        cancelBtn: '取消'
+      },
       about: {
         title: '關於 NanoKVM',
         information: '資訊',
@@ -292,9 +322,24 @@ const zh_tw = {
           modeOff: '關閉',
           modeAuto: '自動隱藏',
           modeAlways: '始終顯示',
+          keyboardLedStatus: '鍵盤鎖定狀態指示燈',
+          keyboardLedStatusDesc: '顯示遠端電腦的 Num Lock、Caps Lock 與 Scroll Lock 狀態',
           icons: '選單圖示',
           iconsDesc: '是否在選單欄中顯示子選單圖示'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: '遠端鍵盤鎖定狀態',
+        indicatorLabel: '{{label}}：{{state}}',
+        numLock: '數字鎖定',
+        numLockShort: '數',
+        capsLock: '大寫鎖定',
+        capsLockShort: '大',
+        scrollLock: '捲動鎖定',
+        scrollLockShort: '捲',
+        on: '開啟',
+        off: '關閉',
+        unknown: '未知'
       },
       device: {
         title: '設備',
@@ -334,7 +379,10 @@ const zh_tw = {
           tip: '若無需求，建議關閉此功能'
         },
         hdmi: {
-          description: '啟用 HDMI/螢幕 輸出'
+          description: '啟用 HDMI/螢幕 輸出',
+          idleTimeoutTitle: '擷取閒置逾時',
+          idleTimeoutDescription: '沒有活躍觀看者時，在指定時間後停止 HDMI 擷取',
+          minutes: '分鐘'
         },
         autostart: {
           title: '啟動時指令碼設定',
@@ -458,10 +506,28 @@ const zh_tw = {
         preview: '預覽更新',
         previewDesc: '預覽版本，搶先體驗新功能和改進',
         previewTip: '請注意，預覽版本可能包含一些不穩定因素或未完善的功能！',
+        customServer: {
+          title: '自訂更新伺服器',
+          desc: '從指定伺服器檢查並下載線上更新',
+          invalidUrl:
+            '請輸入有效的 HTTP 或 HTTPS 伺服器目錄，不可包含查詢參數、片段或 latest.json。',
+          loadFailed: '讀取更新伺服器設定失敗。',
+          saveFailed: '儲存更新伺服器設定失敗。',
+          saved: '更新伺服器設定已儲存。',
+          save: '儲存',
+          confirmTitle: '使用自訂更新伺服器？',
+          confirmDesc:
+            'SHA-512 只能驗證安裝套件與該伺服器提供的清單一致，不能證明安裝套件來自 NanoKVM 官方。錯誤或惡意的伺服器可能導致裝置無法使用、資料遺失或系統遭到接管。',
+          confirm: '仍然使用',
+          previewDisabled: '啟用自訂更新伺服器時，預覽更新無法使用'
+        },
         offline: {
           title: '離線更新',
           desc: '透過本地安裝包進行更新',
           upload: '上傳',
+          checksumPlaceholder: 'SHA-256 校驗和（選填）',
+          invalidChecksum: 'SHA-256 校驗和必須包含 64 個十六進位字元。',
+          checksumMismatch: 'SHA-256 驗證失敗。套件可能已損毀。',
           invalidName: '檔名格式錯誤，請前往 GitHub 釋出頁下載安裝包。',
           updateFailed: '更新失敗，請重試'
         }
@@ -533,19 +599,28 @@ const zh_tw = {
         runtimeStarted: 'PicoClaw Runtime 已啟動',
         runtimeStartFailed: '啟動 PicoClaw Runtime 失敗',
         runtimeStopped: 'PicoClaw Runtime 已停止',
-        runtimeStopFailed: '停止 PicoClaw Runtime 失敗'
+        runtimeStopFailed: '停止 PicoClaw Runtime 失敗',
+        controlSwitchedToMCP: '控制權已切換至外部 MCP 服務'
       },
       connection: {
         runtime: {
           checking: '檢查中',
+          restoring: '正在恢復 PicoClaw',
           ready: 'Runtime 已就緒',
           stopped: 'Runtime 未啟動',
+          blockedByMCP: '外部 MCP 控制已啟用',
+          readyBlockedByMCP: 'Runtime 正在執行，但外部 MCP 目前控制裝置輸入。',
+          readyWithoutControl: 'Runtime 正在執行，請先授予 PicoClaw 裝置控制權後再重新連線。',
           unavailable: 'Runtime 不可用',
           configError: '設定錯誤'
         },
         transport: {
           connecting: '連接中',
-          connected: '已連接'
+          connected: '已連接',
+          disconnected: '未連線',
+          reconnect: '重新連線',
+          reconnectDescription: '重新連線到正在執行的 PicoClaw 會話。',
+          reconnectBlocked: 'PicoClaw 需要先取得裝置控制權才能重新連線。'
         },
         run: {
           idle: '空閒',
@@ -559,6 +634,28 @@ const zh_tw = {
       },
       overlay: {
         locked: 'PicoClaw 正在控制設備。手動輸入已暫停。'
+      },
+      control: {
+        picoclaw: '設備控制：PicoClaw',
+        picoclawDescription: 'PicoClaw 可以寫入鍵鼠，手動輸入可能會被暫停。',
+        mcp: '設備控制：外部 MCP',
+        mcpDescription: '外部 MCP 可以寫入裝置，PicoClaw 不會接管鍵鼠。',
+        off: '設備控制：關閉',
+        offDescription: 'AI 不會寫入鍵鼠，手動控制保持可用。',
+        transitioning: '裝置控制：正在切換',
+        transitioningDescription: '正在同步裝置控制權，請稍候。',
+        grant: '授予控制權',
+        release: '釋放',
+        releasing: '正在釋放...',
+        switching: '正在切換...',
+        releasingLabel: '裝置控制：正在釋放',
+        releasingDescription: '正在交還裝置控制，PicoClaw 已停止目前寫入。',
+        granted: '已授予 PicoClaw 控制權',
+        released: '已釋放 PicoClaw 控制權',
+        grantFailed: '授予 PicoClaw 控制權失敗',
+        releaseFailed: '釋放 PicoClaw 控制權失敗',
+        grantConfirmTitle: '將設備控制切換至 PicoClaw？',
+        grantConfirmDesc: '外部 MCP 的設備寫入將被中斷。'
       },
       install: {
         install: '安裝 PicoClaw',
@@ -619,15 +716,22 @@ const zh_tw = {
         deleteConfirmOk: '刪除',
         deleteConfirmCancel: '取消',
         messageCount_one: '{{count}} 則訊息',
-        messageCount_other: '{{count}} 則訊息'
+        messageCount_other: '{{count}} 則訊息',
+        messageCount: '{{count}} 則訊息'
       },
       config: {
         startRuntime: '啟動 PicoClaw',
         stopRuntime: '停止 PicoClaw'
       },
       start: {
+        enableConfirmTitle: '將控制權切換至 PicoClaw？',
+        enableConfirmDesc: '啟動 PicoClaw 將停用外部 MCP 服務。',
+        enableConfirmOk: '啟動 PicoClaw',
+        enableConfirmCancel: '取消',
         title: '啟動 PicoClaw',
-        description: '啟動 Runtime 後即可開始使用 PicoClaw 助理。'
+        description: '啟動 Runtime 後即可開始使用 PicoClaw 助理。',
+        switchFromMCP: '切換到 PicoClaw 並啟動',
+        takeoverAndStart: '接管並啟動'
       }
     },
     error: {

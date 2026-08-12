@@ -76,6 +76,11 @@ const th = {
       frameDetectTip:
         'ระบบจะคำนวณความแตกต่างระหว่างเฟรม และหยุดส่งสตรีมวิดีโอเมื่อไม่พบการเปลี่ยนแปลงบนหน้าจอของคอมพิวเตอร์ต้นทาง',
       resetHdmi: 'รีเช็ท HDMI',
+      mixedH264: {
+        title: 'สตรีม H.264 ขัดแย้งกัน',
+        description:
+          'กำลังใช้งาน H.264 Direct และ H.264 WebRTC พร้อมกัน ซึ่งอาจทำให้ภาพฉีกขาดหรือวิดีโอเสียหาย โปรดใช้โหมด H.264 เพียงโหมดเดียว'
+      },
       captureStatus: {
         hdmiError: 'ข้อผิดพลาดหน้าจอ HDMI',
         unsupportedResolution: 'ไม่รองรับความละเอียดปัจจุบัน',
@@ -246,7 +251,15 @@ const th = {
       disabled: '/data มีการตั้งค่าเป็นอ่านอย่างเดียว ดังนั้นเราไม่สามารถดาวโหลด Disk Image ได้',
       uploadbox: 'วางไฟล์ที่นี่หรือคลิกเพื่อเลือก',
       inputfile: 'กรุณากรอกไฟล์ภาพ',
-      NoISO: 'ไม่มี ISO'
+      NoISO: 'ไม่มี ISO',
+      sha256: 'SHA-256 (ไม่บังคับ)',
+      sha256Placeholder: 'ป้อน checksum SHA-256 64 ตัวอักษร',
+      invalidSHA256: 'SHA-256 ต้องเป็นสตริงเลขฐานสิบหก 64 ตัวอักษร',
+      failed: 'ดาวน์โหลดล้มเหลว',
+      success: 'ดาวน์โหลดสำเร็จ',
+      checksumFailed: 'ดาวน์โหลดล้มเหลว: การตรวจสอบ SHA-256 ล้มเหลว',
+      cancel: 'ยกเลิก',
+      cancelFailed: 'ยกเลิกการดาวน์โหลดไม่สำเร็จ'
     },
     power: {
       title: 'เปิด/ปิด',
@@ -263,6 +276,24 @@ const th = {
     },
     settings: {
       title: 'การตั้งค่า',
+      mcp: {
+        title: 'บริการ MCP',
+        service: 'การควบคุมระยะไกล MCP',
+        serviceDesc: 'อนุญาตให้ไคลเอนต์ MCP ที่เชื่อถือได้ควบคุมแป้นพิมพ์และเมาส์และจับภาพหน้าจอ',
+        securityWarning:
+          'ทุกคนที่มีคีย์ API นี้สามารถควบคุมโฮสต์ระยะไกลและดูหน้าจอได้ โปรดใช้ HTTPS และเปิดใช้งานเฉพาะบนเครือข่ายที่เชื่อถือได้เท่านั้น',
+        endpoint: 'ปลายทาง',
+        apiKey: 'คีย์ API',
+        regenerateConfirmTitle: 'สร้างคีย์ API ของ MCP ใหม่หรือไม่?',
+        regenerateConfirmDesc: 'คีย์ปัจจุบันจะหยุดทำงานทันที',
+        enableConfirmTitle: 'เปิดใช้งานการควบคุม MCP ภายนอกหรือไม่?',
+        enableConfirmDesc:
+          'การเปิดใช้งาน MCP จะหยุด PicoClaw และปิดเซสชัน PicoClaw ที่ใช้งานอยู่ทั้งหมด',
+        failed: 'การดำเนินการ MCP ล้มเหลว',
+        copyFailed: 'คัดลอกไม่สำเร็จ โปรดคัดลอกด้วยตนเอง',
+        okBtn: 'ยืนยัน',
+        cancelBtn: 'ยกเลิก'
+      },
       about: {
         title: 'เกี๋ยวกับ NanoKVM',
         information: 'ข้อมูล',
@@ -296,9 +327,25 @@ const th = {
           modeOff: 'ปิด',
           modeAuto: 'ซ่อนอัตโนมัติ',
           modeAlways: 'มองเห็นได้เสมอ',
+          keyboardLedStatus: 'ตัวบ่งชี้ปุ่มล็อกแป้นพิมพ์',
+          keyboardLedStatusDesc:
+            'แสดงสถานะ Num Lock, Caps Lock และ Scroll Lock ของคอมพิวเตอร์ระยะไกล',
           icons: 'ไอคอนเมนูย่อย',
           iconsDesc: 'แสดงไอคอนเมนูย่อยในแถบเมนู'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'สถานะปุ่มล็อกแป้นพิมพ์ระยะไกล',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'เปิด',
+        off: 'ปิด',
+        unknown: 'ไม่ทราบ'
       },
       device: {
         title: 'อุปกรณ์',
@@ -338,7 +385,10 @@ const th = {
           tip: 'ปิดเครื่องหากไม่จำเป็น'
         },
         hdmi: {
-          description: 'เปิดใช้งาน HDMI/เอาต์พุตมอนิเตอร์'
+          description: 'เปิดใช้งาน HDMI/เอาต์พุตมอนิเตอร์',
+          idleTimeoutTitle: 'หมดเวลาการจับภาพเมื่อไม่มีการใช้งาน',
+          idleTimeoutDescription: 'หยุดการจับภาพ HDMI เมื่อไม่มีผู้ชมที่ใช้งานอยู่เป็นเวลา',
+          minutes: 'นาที'
         },
         autostart: {
           title: 'การตั้งค่าสคริปต์เริ่มอัตโนมัติ',
@@ -463,10 +513,29 @@ const th = {
         previewDesc: 'เข้าถึงฟีเจอร์และการปรับปรุงใหม่ก่อนใคร',
         previewTip:
           'โปรดทราบว่าการเผยแพร่ตัวอย่างอาจมีข้อบกพร่องหรือฟังก์ชันการทำงานที่ไม่สมบูรณ์!',
+        customServer: {
+          title: 'เซิร์ฟเวอร์อัปเดตแบบกำหนดเอง',
+          desc: 'ตรวจสอบและดาวน์โหลดการอัปเดตออนไลน์จากเซิร์ฟเวอร์ที่ระบุ',
+          invalidUrl:
+            'ป้อนไดเรกทอรีเซิร์ฟเวอร์ HTTP หรือ HTTPS ที่ถูกต้อง โดยไม่มีคิวรี แฟรกเมนต์ หรือ latest.json',
+          loadFailed: 'โหลดการกำหนดค่าเซิร์ฟเวอร์อัปเดตไม่สำเร็จ',
+          saveFailed: 'บันทึกการกำหนดค่าเซิร์ฟเวอร์อัปเดตไม่สำเร็จ',
+          saved: 'บันทึกการกำหนดค่าเซิร์ฟเวอร์อัปเดตแล้ว',
+          save: 'บันทึก',
+          confirmTitle: 'ใช้เซิร์ฟเวอร์อัปเดตแบบกำหนดเองหรือไม่',
+          confirmDesc:
+            'SHA-512 ตรวจสอบเพียงว่าแพ็กเกจตรงกับไฟล์ Manifest ที่เซิร์ฟเวอร์นี้จัดเตรียมไว้เท่านั้น ไม่ได้ยืนยันว่าแพ็กเกจดังกล่าวเป็นรุ่นอย่างเป็นทางการของ NanoKVM เซิร์ฟเวอร์ที่มีข้อผิดพลาดหรือเป็นอันตรายอาจทำให้อุปกรณ์ใช้งานไม่ได้ ทำให้ข้อมูลสูญหาย หรือทำให้ระบบถูกบุกรุก',
+          confirm: 'ใช้ต่อไป',
+          previewDisabled:
+            'การอัปเดตเวอร์ชันตัวอย่างจะไม่พร้อมใช้งานขณะที่เปิดใช้เซิร์ฟเวอร์อัปเดตแบบกำหนดเอง'
+        },
         offline: {
           title: 'อัปเดตออฟไลน์',
           desc: 'อัปเดตผ่านแพ็คเกจการติดตั้งในเครื่อง',
           upload: 'อัปโหลด',
+          checksumPlaceholder: 'ผลรวมตรวจสอบ SHA-256 (ไม่บังคับ)',
+          invalidChecksum: 'ผลรวมตรวจสอบ SHA-256 ต้องมีอักขระเลขฐานสิบหก 64 ตัว',
+          checksumMismatch: 'การตรวจสอบ SHA-256 ล้มเหลว แพ็กเกจอาจเสียหาย',
           invalidName: 'รูปแบบชื่อไฟล์ไม่ถูกต้อง กรุณาดาวน์โหลดจากรุ่น GitHub',
           updateFailed: 'การอัปเดตล้มเหลว กรุณาลองใหม่'
         }
@@ -538,19 +607,30 @@ const th = {
         runtimeStarted: 'เริ่ม Runtime PicoClaw แล้ว',
         runtimeStartFailed: 'ไม่สามารถเริ่ม Runtime PicoClaw ได้',
         runtimeStopped: 'หยุด Runtime PicoClaw แล้ว',
-        runtimeStopFailed: 'ไม่สามารถหยุด Runtime PicoClaw ได้'
+        runtimeStopFailed: 'ไม่สามารถหยุด Runtime PicoClaw ได้',
+        controlSwitchedToMCP: 'เปลี่ยนการควบคุมไปยังบริการ MCP ภายนอกแล้ว'
       },
       connection: {
         runtime: {
           checking: 'กำลังตรวจสอบ',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime พร้อมใช้งาน',
           stopped: 'หยุด Runtime แล้ว',
+          blockedByMCP: 'การควบคุม MCP ภายนอกกำลังทำงาน',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime ไม่พร้อมใช้งาน',
           configError: 'ข้อผิดพลาดในการกำหนดค่า'
         },
         transport: {
           connecting: 'กำลังเชื่อมต่อ',
-          connected: 'เชื่อมต่อแล้ว'
+          connected: 'เชื่อมต่อแล้ว',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'ไม่ได้ใช้งาน',
@@ -564,6 +644,30 @@ const th = {
       },
       overlay: {
         locked: 'PicoClaw กำลังควบคุมอุปกรณ์ การป้อนข้อมูลด้วยตนเองถูกหยุดชั่วคราว'
+      },
+      control: {
+        picoclaw: 'การควบคุมอุปกรณ์: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'การควบคุมอุปกรณ์: MCP ภายนอก',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'การควบคุมอุปกรณ์: ปิด',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'มอบการควบคุม',
+        release: 'ปล่อย',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'มอบการควบคุม PicoClaw แล้ว',
+        released: 'ปล่อยการควบคุม PicoClaw แล้ว',
+        grantFailed: 'ไม่สามารถมอบการควบคุม PicoClaw ได้',
+        releaseFailed: 'ไม่สามารถปล่อยการควบคุม PicoClaw ได้',
+        grantConfirmTitle: 'เปลี่ยนการควบคุมอุปกรณ์ไปยัง PicoClaw หรือไม่?',
+        grantConfirmDesc: 'การเขียนอุปกรณ์จาก MCP ภายนอกจะถูกขัดจังหวะ'
       },
       install: {
         install: 'ติดตั้ง PicoClaw',
@@ -625,15 +729,22 @@ const th = {
         deleteConfirmOk: 'ลบ',
         deleteConfirmCancel: 'ยกเลิก',
         messageCount_one: '{{count}} ข้อความ',
-        messageCount_other: '{{count}} ข้อความ'
+        messageCount_other: '{{count}} ข้อความ',
+        messageCount: '{{count}} ข้อความ'
       },
       config: {
         startRuntime: 'เริ่ม PicoClaw',
         stopRuntime: 'หยุด PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'เปลี่ยนการควบคุมไปยัง PicoClaw หรือไม่?',
+        enableConfirmDesc: 'การเริ่ม PicoClaw จะปิดใช้งานบริการ MCP ภายนอก',
+        enableConfirmOk: 'เริ่ม PicoClaw',
+        enableConfirmCancel: 'ยกเลิก',
         title: 'เริ่ม PicoClaw',
-        description: 'เริ่ม Runtime เพื่อเริ่มใช้ผู้ช่วย PicoClaw'
+        description: 'เริ่ม Runtime เพื่อเริ่มใช้ผู้ช่วย PicoClaw',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -79,7 +79,7 @@ namespace maix::camera
             }
 
             if (0 != mmf_vi_init()) {
-                err::check_raise(err::ERR_RUNTIME, "mmf vi init failed");
+                log::error("mmf vi init failed");
             }
         }
 
@@ -97,7 +97,7 @@ namespace maix::camera
             }
 
             if (0 != mmf_vi_init()) {
-                err::check_raise(err::ERR_RUNTIME, "mmf vi init failed");
+                log::error("mmf vi init failed");
             }
         }
 
@@ -161,16 +161,30 @@ namespace maix::camera
 
             if (0 == mmf_vi_frame_pop(this->ch, &buffer, &buffer_len, &width, &height, &format)) {
                 if (buffer == NULL) {
-                    mmf_vi_frame_free(this->ch);
+                    mmf_vi_frame_release(this->ch);
                     printf("mmf_vi_frame_free error\r\n");
                     return NULL;
+                }
+                bool native_frame = !buff
+                    && this->format == image::FMT_YVU420SP
+                    && !this->align_need
+                    && width == this->width
+                    && height == this->height
+                    && format == mmf_invert_format_to_mmf(this->format)
+                    && buffer_len >= this->width * this->height * 3 / 2;
+                if (native_frame) {
+                    img = new image::Image(this->width, this->height,
+                        this->format, (uint8_t *)buffer,
+                        this->width * this->height * 3 / 2, false);
+                    mmf_vi_frame_free(this->ch);
+                    return img;
                 }
                 if(buff)
                 {
                     if(buff_size < (size_t)buffer_len)
                     {
                         log::error("camera read: buff size not enough, need %d, but %d", buffer_len, buff_size);
-                        mmf_vi_frame_free(this->ch);
+                        mmf_vi_frame_release(this->ch);
                         return NULL;
                     }
                     img = new image::Image(width, height, this->format, (uint8_t*)buff, buff_size, false);
@@ -212,11 +226,11 @@ namespace maix::camera
                     default:
                         printf("unknown format\n");
                         delete img;
-                        mmf_vi_frame_free(this->ch);
+                        mmf_vi_frame_release(this->ch);
                         printf("switch (img->format()\r\n");
                         return NULL;
                 }
-                mmf_vi_frame_free(this->ch);
+                mmf_vi_frame_release(this->ch);
                 // printf("mmf_vi_frame_free\r\n");
                 return img;
             }

@@ -4,11 +4,11 @@ import { useSetAtom } from 'jotai';
 import { SquareTerminalIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { isKeyboardEnableAtom } from '@/jotai/keyboard.ts';
+import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 
 export const SerialPort = () => {
   const { t } = useTranslation();
-  const setIsKeyboardEnable = useSetAtom(isKeyboardEnableAtom);
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [port, setPort] = useState('');
@@ -19,13 +19,12 @@ export const SerialPort = () => {
   const [stopBits, setStopBits] = useState(1);
 
   function openModal() {
-    setIsKeyboardEnable(false);
-
+    setKeyboardLock({ source: 'serial-port-modal', locked: true });
     setIsModalOpen(true);
   }
 
   function closeModal() {
-    setIsKeyboardEnable(true);
+    setKeyboardLock({ source: 'serial-port-modal', locked: false });
     setIsModalOpen(false);
   }
 
@@ -48,8 +47,12 @@ export const SerialPort = () => {
       return;
     }
 
+    setKeyboardLock({ source: 'serial-port-modal', locked: false });
     setIsModalOpen(false);
-    window.open(`/#terminal?port=${port}&baud=${baudrate}&parity=${parity}&flowControl=${flowControl}&dataBits=${dataBits}&stopBits=${stopBits}`, '_blank');
+    window.open(
+      `/#terminal?port=${port}&baud=${baudrate}&parity=${parity}&flowControl=${flowControl}&dataBits=${dataBits}&stopBits=${stopBits}`,
+      '_blank'
+    );
   }
 
   return (
@@ -113,7 +116,9 @@ export const SerialPort = () => {
         </div>
 
         <div className="mt-7 flex items-center space-x-[20px]">
-          <div className="flex w-[80px] justify-end text-neutral-400">{t('terminal.flowControl')}</div>
+          <div className="flex w-[80px] justify-end text-neutral-400">
+            {t('terminal.flowControl')}
+          </div>
           <div className="w-1/2">
             <Select
               defaultValue="none"
@@ -127,7 +132,6 @@ export const SerialPort = () => {
             />
           </div>
         </div>
-
 
         <div className="mt-7 flex items-center space-x-[20px]">
           <div className="flex w-[80px] justify-end text-neutral-400">{t('terminal.dataBits')}</div>

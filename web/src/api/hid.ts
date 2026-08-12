@@ -15,6 +15,11 @@ export function getHidMode() {
   return http.get('/api/hid/mode');
 }
 
+// get remote keyboard lock LED status
+export function getKeyboardLedStatus() {
+  return http.get('/api/hid/leds');
+}
+
 // set hid mode
 export function setHidMode(mode: string) {
   const data = {

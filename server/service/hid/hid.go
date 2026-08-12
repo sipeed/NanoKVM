@@ -13,11 +13,17 @@ import (
 )
 
 type Hid struct {
-	g0         *os.File
-	g1         *os.File
-	g2         *os.File
-	kbMutex    sync.Mutex
-	mouseMutex sync.Mutex
+	g0                     *os.File
+	g0Reader               *os.File
+	g1                     *os.File
+	g2                     *os.File
+	ledReaderNotifyReader  *os.File
+	ledReaderNotifyWriter  *os.File
+	ledReaderNotifyReadFD  int
+	ledReaderNotifyWriteFD int
+	kbMutex                sync.Mutex
+	mouseMutex             sync.Mutex
+	ledReaderStartOnce     sync.Once
 }
 
 const (
@@ -124,6 +130,15 @@ func (h *Hid) OpenNoLock() error {
 		}
 	}
 
+	if h.g0 != nil {
+		if err := h.openKeyboardLedReaderNoLock(); err != nil {
+			log.Errorf("open keyboard LED reader failed: %s", err)
+			errs = append(errs, err)
+		} else {
+			h.startKeyboardLedReader()
+		}
+	}
+
 	return errors.Join(errs...)
 }
 
@@ -162,6 +177,8 @@ func openNoLockWithRetry(open func() error, timeout, delay time.Duration) error 
 }
 
 func (h *Hid) CloseNoLock() {
+	h.closeKeyboardLedReaderNoLock()
+
 	for _, device := range h.devices() {
 		h.closeDeviceNoLock(device)
 	}
@@ -190,6 +207,41 @@ func (h *Hid) closeDeviceNoLock(device hidDevice) {
 	device.set(nil)
 	if err := file.Close(); err != nil {
 		log.Debugf("close %s failed: %s", device.path, err)
+	}
+}
+
+func (h *Hid) openKeyboardLedReaderNoLock() error {
+	if h.g0Reader != nil {
+		return nil
+	}
+
+	if err := h.ensureKeyboardLedReaderNotifierNoLock(); err != nil {
+		return err
+	}
+
+	// Keep this descriptor blocking. The LED reader waits for either an output
+	// report or a lifecycle notification, so an idle host does not cause a
+	// periodic EAGAIN retry loop.
+	file, err := os.OpenFile(HID0, os.O_RDONLY, 0o666)
+	if err != nil {
+		return fmt.Errorf("%s: %w", HID0, err)
+	}
+
+	h.g0Reader = file
+	h.notifyKeyboardLedReaderNoLock()
+	return nil
+}
+
+func (h *Hid) closeKeyboardLedReaderNoLock() {
+	if h.g0Reader == nil {
+		return
+	}
+
+	file := h.g0Reader
+	h.g0Reader = nil
+	h.notifyKeyboardLedReaderNoLock()
+	if err := file.Close(); err != nil {
+		log.Debugf("close keyboard LED reader failed: %s", err)
 	}
 }
 
@@ -249,15 +301,42 @@ func (h *Hid) Close() {
 }
 
 func (h *Hid) WriteHid0(data []byte) {
-	h.writeHIDReport(h.keyboardDevice(HID0), data)
+	if err := h.WriteKeyboardReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID0, err)
+	}
 }
 
 func (h *Hid) WriteHid1(data []byte) {
-	h.writeHIDReport(h.relativeMouseDevice(HID1), data)
+	if err := h.WriteRelativeMouseReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID1, err)
+	}
 }
 
 func (h *Hid) WriteHid2(data []byte) {
-	h.writeHIDReport(h.absoluteMouseDevice(HID2), data)
+	if err := h.WriteAbsoluteMouseReport(data); err != nil {
+		log.Errorf("write to %s failed: %s", HID2, err)
+	}
+}
+
+func (h *Hid) WriteKeyboardReport(data []byte) error {
+	if len(data) != 8 {
+		return fmt.Errorf("invalid keyboard report length: %d", len(data))
+	}
+	return h.writeHID(h.keyboardDevice(HID0), data)
+}
+
+func (h *Hid) WriteRelativeMouseReport(data []byte) error {
+	if len(data) != 4 {
+		return fmt.Errorf("invalid relative mouse report length: %d", len(data))
+	}
+	return h.writeHID(h.relativeMouseDevice(HID1), data)
+}
+
+func (h *Hid) WriteAbsoluteMouseReport(data []byte) error {
+	if len(data) != 6 {
+		return fmt.Errorf("invalid absolute mouse report length: %d", len(data))
+	}
+	return h.writeHID(h.absoluteMouseDevice(HID2), data)
 }
 
 func (h *Hid) writeHIDReport(device hidDevice, data []byte) bool {
@@ -275,6 +354,13 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 	if err := h.openDeviceNoLock(device); err != nil {
 		return err
 	}
+	if device.path == HID0 {
+		if err := h.openKeyboardLedReaderNoLock(); err != nil {
+			log.Debugf("open keyboard LED reader failed: %s", err)
+		} else {
+			h.startKeyboardLedReader()
+		}
+	}
 
 	file := device.get()
 	if file == nil {
@@ -287,6 +373,9 @@ func (h *Hid) writeHID(device hidDevice, data []byte) error {
 	}
 
 	if err := writeWithTimeout(file, data, hidWriteTimeout); err != nil {
+		if device.path == HID0 {
+			h.closeKeyboardLedReaderNoLock()
+		}
 		h.closeDeviceNoLock(device)
 		switch {
 		case errors.Is(err, os.ErrClosed):

@@ -1,6 +1,11 @@
 import { http } from '@/lib/http.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 
+export type UpdateServerConfig = {
+  enabled: boolean;
+  url: string;
+};
+
 // get application version
 export function getVersion() {
   return http.get('/api/application/version');
@@ -16,11 +21,12 @@ export function update() {
 }
 
 // offline update application
-export function offlineUpdate(data: FormData) {
+export function offlineUpdate(data: FormData, sha256Checksum = '') {
   const baseUrl = getBaseUrl('http');
   const url = `${baseUrl}/api/application/update/offline`;
   return fetch(url, {
     method: 'POST',
+    headers: sha256Checksum ? { 'X-SHA256-Checksum': sha256Checksum } : undefined,
     body: data
   });
 }
@@ -36,4 +42,14 @@ export function setPreviewUpdates(enable: boolean) {
 // get preview updates state
 export function getPreviewUpdates() {
   return http.get('/api/application/preview');
+}
+
+// get custom update server configuration
+export function getUpdateServer() {
+  return http.get('/api/application/update-server');
+}
+
+// enable/disable custom update server
+export function setUpdateServer(config: UpdateServerConfig) {
+  return http.post('/api/application/update-server', config);
 }

@@ -53,6 +53,7 @@ func vmRouter(r *gin.Engine) {
 	adminAPI.POST("/vm/hdmi/reset", service.ResetHdmi)
 	adminAPI.POST("/vm/hdmi/enable", service.EnableHdmi)
 	adminAPI.POST("/vm/hdmi/disable", service.DisableHdmi)
+	adminAPI.POST("/vm/hdmi/timeout", service.SetHdmiIdleTimeout)
 	adminAPI.POST("/vm/ssh/enable", service.EnableSSH)
 	adminAPI.POST("/vm/ssh/disable", service.DisableSSH)
 	adminAPI.POST("/vm/swap", service.SetSwap)

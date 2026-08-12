@@ -48,7 +48,7 @@ export const ActionOverlay = () => {
     };
   }, [takeover.active]);
 
-  if (!takeover.active || !rect || rect.width <= 0 || rect.height <= 0) {
+  if (!takeover.active || !overlay.visible || !rect || rect.width <= 0 || rect.height <= 0) {
     return null;
   }
 

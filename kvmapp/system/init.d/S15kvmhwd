@@ -1,5 +1,5 @@
 #!/bin/sh
-# kvmhwd Rev2.4
+# kvmhwd Rev2.5
 
 Alpha_OLED_RST_Pin=371
 Beta_OLED_RST_Pin=502
@@ -25,7 +25,7 @@ init_alpha_hw(){
   devmem 0x03001060 32 0x3  # GPIOA24
   devmem 0x03001054 32 0x3  # GPIOA25
   devmem 0x03001058 32 0x3  # GPIOA27
-  
+
 	devmem 0x03001068 32 0x6  # GPIOA 18 UART1 RX
 	devmem 0x03001064 32 0x6  # GPIOA 19 UART1 TX
 	devmem 0x03001070 32 0x2  # GPIOA 28 UART2 TX
@@ -146,19 +146,7 @@ kvm_hw_detect(){
       insmod /mnt/system/ko/i2c-algo-bit.ko
       insmod /mnt/system/ko/i2c-gpio.ko
 
-      kvm_tmp=$(i2cdetect -ry 4 0x2c 0x2c | grep 2c)
-      if [ -n "$kvm_tmp" ]
-      then
-        echo "c" > /etc/kvm/hdmi_version
-      else
-        kvm_tmp1=$(i2cdetect -ry 4 0x2b 0x2b | grep 2b)
-        if [ -n "$kvm_tmp1" ]
-        then
-          echo "ux" > /etc/kvm/hdmi_version
-        else
-          echo "ue" > /etc/kvm/hdmi_version
-        fi
-      fi
+      kvm_hdmi_version_detect
 
       kvm_tmp=$(i2cdetect -ry 5 0x3c 0x3c | grep 3c)
       if [ -n "$kvm_tmp" ]
@@ -199,20 +187,19 @@ kvm_hw_init(){
     fi
 }
 
-kvm_hdmi_version_detect(){
-  hdmi_tmp=$(i2cdetect -ry 4 0x2c 0x2c | grep 2c)
-  if [ -n "$hdmi_tmp" ]
-  then
-    echo "c" > /etc/kvm/hdmi_version
-  else
-    hdmi_tmp1=$(i2cdetect -ry 4 0x2b 0x2b | grep 2b)
-    if [ -n "$hdmi_tmp1" ]
-    then
-      echo "ux" > /etc/kvm/hdmi_version
+kvm_hdmi_version_detect()
+{
+    if i2cdetect -ry 4 0x2c 0x2c | grep -qw "2c"; then
+        echo "c" > /etc/kvm/hdmi_version
+    elif i2cdetect -ry 4 0x2b 0x2b | grep -qw "2b"; then
+        if i2cdetect -ry 4 0x44 0x44 | grep -qw "44"; then
+            echo "ux" > /etc/kvm/hdmi_version
+        else
+            echo "d" > /etc/kvm/hdmi_version
+        fi
     else
-      echo "ue" > /etc/kvm/hdmi_version
+        echo "ue" > /etc/kvm/hdmi_version
     fi
-  fi
 }
 
 case "$1" in

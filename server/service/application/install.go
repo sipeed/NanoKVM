@@ -31,17 +31,12 @@ func releaseUpdateLock() {
 	isUpdating = false
 }
 
-func installPackage(source string) error {
-	dir, err := utils.UnTarGz(source, CacheDir)
-	if err != nil {
-		return fmt.Errorf("failed to decompress app: %w", err)
-	}
-
+func installPreparedPackage(sourceDir string) error {
 	if err := backupCurrentApp(); err != nil {
 		return err
 	}
 
-	if err := applyUpdate(dir); err != nil {
+	if err := applyUpdate(sourceDir); err != nil {
 		return err
 	}
 

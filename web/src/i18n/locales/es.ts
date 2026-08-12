@@ -79,6 +79,11 @@ const es = {
       frameDetectTip:
         'Calcula la diferencia entre fotogramas. Para de transmitir vídeo cuando no se detectan cambios en la pantalla del host remoto.',
       resetHdmi: 'Reiniciar HDMI',
+      mixedH264: {
+        title: 'Conflicto de flujo H.264',
+        description:
+          'H.264 Direct y H.264 WebRTC se están utilizando al mismo tiempo. Esto puede causar tearing de pantalla o vídeo corrupto. Utilice solo un modo H.264.'
+      },
       captureStatus: {
         hdmiError: 'Error de imagen HDMI',
         unsupportedResolution: 'La resolución actual no es compatible',
@@ -253,7 +258,15 @@ const es = {
       disabled: 'La partición /data es de sólo lectura, no se puede descargar la imagen',
       uploadbox: 'Suelte el archivo aquí o haga clic para seleccionar',
       inputfile: 'Por favor ingrese el archivo de imagen',
-      NoISO: 'Sin ISO'
+      NoISO: 'Sin ISO',
+      sha256: 'SHA-256 (opcional)',
+      sha256Placeholder: 'Introduzca una suma de comprobación SHA-256 de 64 caracteres',
+      invalidSHA256: 'SHA-256 debe ser una cadena hexadecimal de 64 caracteres',
+      failed: 'Descarga fallida',
+      success: 'Descarga correcta',
+      checksumFailed: 'Descarga fallida: error en la verificación SHA-256',
+      cancel: 'Cancelar',
+      cancelFailed: 'No se pudo cancelar la descarga'
     },
     power: {
       title: 'Encender / Apagar',
@@ -270,6 +283,25 @@ const es = {
     },
     settings: {
       title: 'Ajustes',
+      mcp: {
+        title: 'Servicio MCP',
+        service: 'Control remoto MCP',
+        serviceDesc:
+          'Permitir que clientes MCP de confianza controlen el teclado y el ratón y realicen capturas de pantalla',
+        securityWarning:
+          'Cualquier persona con esta clave API puede controlar el host remoto y ver su pantalla. Utiliza HTTPS y actívalo solo en redes de confianza.',
+        endpoint: 'Punto de conexión',
+        apiKey: 'Clave API',
+        regenerateConfirmTitle: '¿Volver a generar la clave API de MCP?',
+        regenerateConfirmDesc: 'La clave actual dejará de funcionar inmediatamente.',
+        enableConfirmTitle: '¿Activar el control MCP externo?',
+        enableConfirmDesc:
+          'Al activar MCP se detendrá PicoClaw y se cerrará cualquier sesión activa de PicoClaw.',
+        failed: 'Error en la operación MCP',
+        copyFailed: 'Error al copiar. Copia manualmente.',
+        okBtn: 'Confirmar',
+        cancelBtn: 'Cancelar'
+      },
       about: {
         title: 'Sobre NanoKVM',
         information: 'Información',
@@ -303,9 +335,25 @@ const es = {
           modeOff: 'Apagado',
           modeAuto: 'Ocultar automáticamente',
           modeAlways: 'Siempre visible',
+          keyboardLedStatus: 'Indicadores de bloqueo del teclado',
+          keyboardLedStatusDesc:
+            'Mostrar el estado de Bloq Num, Bloq Mayús y Bloq Despl del equipo remoto',
           icons: 'Iconos del submenú',
           iconsDesc: 'Mostrar iconos de submenú en la barra de menú'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Estado de bloqueos del teclado remoto',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Bloq Num',
+        numLockShort: 'Num',
+        capsLock: 'Bloq Mayús',
+        capsLockShort: 'May',
+        scrollLock: 'Bloq Despl',
+        scrollLockShort: 'Despl',
+        on: 'Activado',
+        off: 'Desactivado',
+        unknown: 'Desconocido'
       },
       device: {
         title: 'Dispositivo',
@@ -345,7 +393,11 @@ const es = {
           tip: 'Desactívalo si no es necesario'
         },
         hdmi: {
-          description: 'Habilitar salida HDMI/monitor'
+          description: 'Habilitar salida HDMI/monitor',
+          idleTimeoutTitle: 'Tiempo de espera de captura inactiva',
+          idleTimeoutDescription:
+            'Detener la captura HDMI después de no haber espectadores activos durante',
+          minutes: 'min'
         },
         autostart: {
           title: 'Configuración de scripts de inicio automático',
@@ -473,10 +525,31 @@ const es = {
         previewDesc: 'Accede anticipadamente a nuevas funciones y mejoras',
         previewTip:
           'Ten en cuenta que las versiones de vista previa pueden contener errores o funcionalidades incompletas',
+        customServer: {
+          title: 'Servidor de actualizaciones personalizado',
+          desc: 'Buscar y descargar actualizaciones en línea desde un servidor especificado',
+          invalidUrl:
+            'Introduce un directorio de servidor HTTP o HTTPS válido, sin parámetros de consulta, fragmentos ni latest.json.',
+          loadFailed: 'No se pudo cargar la configuración del servidor de actualizaciones.',
+          saveFailed: 'No se pudo guardar la configuración del servidor de actualizaciones.',
+          saved: 'Se ha guardado la configuración del servidor de actualizaciones.',
+          save: 'Guardar',
+          confirmTitle: '¿Usar un servidor de actualizaciones personalizado?',
+          confirmDesc:
+            'SHA-512 solo comprueba que el paquete coincide con el manifiesto proporcionado por este servidor. No demuestra que el paquete sea una versión oficial de NanoKVM. Un servidor defectuoso o malicioso puede inutilizar el dispositivo, provocar la pérdida de datos o comprometer el sistema.',
+          confirm: 'Usar de todos modos',
+          previewDisabled:
+            'Las actualizaciones preliminares no están disponibles mientras esté activado un servidor de actualizaciones personalizado.'
+        },
         offline: {
           title: 'Actualizaciones sin conexión',
           desc: 'Actualización a través del paquete de instalación local',
           upload: 'Subir',
+          checksumPlaceholder: 'Suma de comprobación SHA-256 (opcional)',
+          invalidChecksum:
+            'La suma de comprobación SHA-256 debe contener 64 caracteres hexadecimales.',
+          checksumMismatch:
+            'La verificación SHA-256 ha fallado. Es posible que el paquete esté dañado.',
           invalidName:
             'Formato de nombre de archivo no válido. Descargue desde las versiones de GitHub.',
           updateFailed: 'La actualización falló. Por favor, inténtalo de nuevo.'
@@ -549,19 +622,30 @@ const es = {
         runtimeStarted: 'Tiempo de ejecución de PicoClaw iniciado',
         runtimeStartFailed: 'Error al iniciar el tiempo de ejecución de PicoClaw',
         runtimeStopped: 'Tiempo de ejecución de PicoClaw detenido',
-        runtimeStopFailed: 'No se pudo detener el tiempo de ejecución de PicoClaw'
+        runtimeStopFailed: 'No se pudo detener el tiempo de ejecución de PicoClaw',
+        controlSwitchedToMCP: 'El control se ha transferido al servicio MCP externo'
       },
       connection: {
         runtime: {
           checking: 'Comprobando',
+          restoring: 'Restoring PicoClaw',
           ready: 'Tiempo de ejecución listo',
           stopped: 'Tiempo de ejecución detenido',
+          blockedByMCP: 'El control MCP externo está activo',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Tiempo de ejecución no disponible',
           configError: 'Error de configuración'
         },
         transport: {
           connecting: 'Conectando',
-          connected: 'Conectado'
+          connected: 'Conectado',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Inactivo',
@@ -575,6 +659,30 @@ const es = {
       },
       overlay: {
         locked: 'PicoClaw está controlando el dispositivo. La entrada manual está en pausa.'
+      },
+      control: {
+        picoclaw: 'Control del dispositivo: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Control del dispositivo: MCP externo',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Control del dispositivo: desactivado',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Conceder control',
+        release: 'Liberar',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Control de PicoClaw concedido',
+        released: 'Control de PicoClaw liberado',
+        grantFailed: 'No se pudo conceder el control de PicoClaw',
+        releaseFailed: 'No se pudo liberar el control de PicoClaw',
+        grantConfirmTitle: '¿Cambiar el control del dispositivo a PicoClaw?',
+        grantConfirmDesc: 'Se interrumpirán las escrituras de dispositivo del MCP externo.'
       },
       install: {
         install: 'Instalar PicoClaw',
@@ -637,15 +745,23 @@ const es = {
         deleteConfirmOk: 'Eliminar',
         deleteConfirmCancel: 'Cancelar',
         messageCount_one: '{{count}} mensaje',
-        messageCount_other: '{{count}} mensajes'
+        messageCount_other: '{{count}} mensajes',
+        messageCount: '{{count}} mensajes'
       },
       config: {
         startRuntime: 'Iniciar PicoClaw',
         stopRuntime: 'Detener PicoClaw'
       },
       start: {
+        enableConfirmTitle: '¿Cambiar el control a PicoClaw?',
+        enableConfirmDesc: 'Al iniciar PicoClaw se desactivará el servicio MCP externo.',
+        enableConfirmOk: 'Iniciar PicoClaw',
+        enableConfirmCancel: 'Cancelar',
         title: 'Iniciar PicoClaw',
-        description: 'Inicia el tiempo de ejecución para comenzar a utilizar el asistente PicoClaw.'
+        description:
+          'Inicia el tiempo de ejecución para comenzar a utilizar el asistente PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -1,13 +1,17 @@
 package direct
 
 import (
+	"NanoKVM-Server/service/stream"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
+
+const pongWait = 30 * time.Second
 
 var (
 	streamer = newStreamer()
@@ -25,21 +29,36 @@ func Connect(c *gin.Context) {
 		log.Errorf("failed to upgrade to websocket: %s", err)
 		return
 	}
+	client := newClient(ws)
+	if flowWindow, err := strconv.Atoi(c.Query("flow")); err == nil && flowWindow > 0 {
+		client.queue.enableFlowControl(flowWindow)
+	}
 	defer func() {
-		_ = ws.Close()
+		streamer.removeClient(client)
+		client.close()
+		client.wait()
 		log.Debugf("h264 websocket disconnected: %s", ws.RemoteAddr())
 	}()
 	log.Debugf("h264 websocket connected: %s", ws.RemoteAddr())
 
-	_ = ws.SetReadDeadline(time.Time{})
+	ws.SetReadLimit(64)
+	_ = ws.SetReadDeadline(time.Now().Add(pongWait))
+	ws.SetPongHandler(func(string) error {
+		return ws.SetReadDeadline(time.Now().Add(pongWait))
+	})
 
-	streamer.addClient(ws)
-	defer streamer.removeClient(ws)
+	streamer.addClient(client)
+
+	unregisterMode := stream.RegisterH264Mode(stream.H264ModeDirect)
+	defer unregisterMode()
 
 	for {
-		if _, _, err := ws.NextReader(); err != nil {
+		messageType, data, err := ws.ReadMessage()
+		if err != nil {
 			log.Debugf("failed to read message (client disconnected): %s", err)
 			return
 		}
+		_ = ws.SetReadDeadline(time.Now().Add(pongWait))
+		client.handleControl(messageType, data)
 	}
 }

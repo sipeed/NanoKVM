@@ -18,9 +18,12 @@ type SidebarHeaderProps = {
   modelConfigured?: boolean;
   runtimeReady?: boolean;
   isTogglingRuntime: boolean;
+  actionDisabled?: boolean;
+  runtimeActionDisabled?: boolean;
   agentProfile?: string;
   isSwitchingAgent?: boolean;
   isHistoryOpen?: boolean;
+  runtimeToggleTitle?: string;
   onToggleRuntime: () => void | Promise<void>;
   onClose?: () => void;
   onOpenHistory?: () => void;
@@ -36,9 +39,12 @@ export const SidebarHeader = ({
   modelConfigured,
   runtimeReady,
   isTogglingRuntime,
+  actionDisabled,
+  runtimeActionDisabled,
   agentProfile,
   isSwitchingAgent,
   isHistoryOpen,
+  runtimeToggleTitle,
   onToggleRuntime,
   onClose,
   onOpenHistory,
@@ -52,6 +58,8 @@ export const SidebarHeader = ({
   const isRuntimeReady = runtimeReady === true;
   const isInstalled = installed !== false;
   const isModelConfigured = modelConfigured !== false;
+  const areActionsDisabled = actionDisabled === true;
+  const isRuntimeActionDisabled = runtimeActionDisabled === true || areActionsDisabled;
 
   const agentOptions = [
     {
@@ -79,7 +87,7 @@ export const SidebarHeader = ({
       label: <span className="text-xs">{t('picoclaw.model.menuLabel')}</span>,
       icon: <SlidersHorizontalIcon size={14} className="text-neutral-400" />,
       onClick: () => onOpenModelConfig?.(),
-      disabled: isUninstallingRuntime || isTogglingRuntime || !isInstalled
+      disabled: areActionsDisabled || isUninstallingRuntime || isTogglingRuntime || !isInstalled
     },
     {
       type: 'divider'
@@ -90,7 +98,7 @@ export const SidebarHeader = ({
       label: <span className="text-xs">{t('picoclaw.uninstall.menuLabel')}</span>,
       icon: <TrashIcon size={14} />,
       onClick: handleUninstallClick,
-      disabled: isUninstallingRuntime || isTogglingRuntime
+      disabled: areActionsDisabled || isUninstallingRuntime || isTogglingRuntime
     }
   ];
 
@@ -120,7 +128,9 @@ export const SidebarHeader = ({
                 size="small"
                 value={agentProfile || 'kvm'}
                 onChange={(value) => void onAgentProfileChange?.(value)}
-                disabled={isUninstallingRuntime || isTogglingRuntime || isSwitchingAgent}
+                disabled={
+                  areActionsDisabled || isUninstallingRuntime || isTogglingRuntime || isSwitchingAgent
+                }
                 loading={isSwitchingAgent}
                 popupMatchSelectWidth={false}
                 className="min-w-[120px] text-xs [&_.ant-select-selection-item]:text-xs [&_.ant-select-selection-item]:text-neutral-300"
@@ -146,6 +156,7 @@ export const SidebarHeader = ({
               {isRuntimeReady ? (
                 <>
                   <Button
+                    disabled={areActionsDisabled}
                     type="text"
                     size="small"
                     onClick={onOpenHistory}
@@ -159,10 +170,10 @@ export const SidebarHeader = ({
                     icon={<HistoryIcon size={14} />}
                   />
                   <Button
-                    disabled={isTogglingRuntime}
+                    disabled={isRuntimeActionDisabled || isTogglingRuntime}
                     loading={isTogglingRuntime}
                     onClick={() => void onToggleRuntime()}
-                    title={t('picoclaw.config.stopRuntime')}
+                    title={runtimeToggleTitle || t('picoclaw.config.stopRuntime')}
                     icon={!isTogglingRuntime ? <PowerIcon size={14} /> : undefined}
                     type="text"
                     size="small"
@@ -171,10 +182,10 @@ export const SidebarHeader = ({
                 </>
               ) : isModelConfigured ? (
                 <Button
-                  disabled={isTogglingRuntime}
+                  disabled={isRuntimeActionDisabled || isTogglingRuntime}
                   loading={isTogglingRuntime}
                   onClick={() => void onToggleRuntime()}
-                  title={t('picoclaw.config.startRuntime')}
+                  title={runtimeToggleTitle || t('picoclaw.config.startRuntime')}
                   icon={!isTogglingRuntime ? <PlayIcon size={14} /> : undefined}
                   type="text"
                   size="small"
@@ -187,11 +198,11 @@ export const SidebarHeader = ({
                 menu={{ items: moreMenuItems }}
                 trigger={['click']}
                 placement="bottomRight"
-                disabled={isUninstallingRuntime || isTogglingRuntime}
+                disabled={areActionsDisabled || isUninstallingRuntime || isTogglingRuntime}
                 arrow={{ pointAtCenter: true }}
               >
                 <Button
-                  disabled={isUninstallingRuntime}
+                  disabled={areActionsDisabled || isUninstallingRuntime}
                   loading={isUninstallingRuntime}
                   icon={!isUninstallingRuntime ? <EllipsisIcon size={16} /> : undefined}
                   type="text"

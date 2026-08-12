@@ -77,6 +77,11 @@ const ko = {
       frameDetectTip:
         '프레임 간의 차이를 계산합니다. 원격 호스트 화면에 변경 사항이 감지되지 않으면 비디오 스트림 전송을 중지합니다.',
       resetHdmi: 'HDMI 초기화',
+      mixedH264: {
+        title: 'H.264 스트림 충돌',
+        description:
+          'H.264 Direct와 H.264 WebRTC가 동시에 사용되고 있습니다. 화면 찢어짐이나 손상된 영상이 발생할 수 있습니다. H.264 모드는 하나만 사용하세요.'
+      },
       captureStatus: {
         hdmiError: 'HDMI 화면 오류',
         unsupportedResolution: '현재 해상도는 지원되지 않습니다',
@@ -248,7 +253,15 @@ const ko = {
       disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.',
       uploadbox: '여기에 파일을 놓거나 클릭하여 선택하세요.',
       inputfile: '이미지 파일을 입력해주세요',
-      NoISO: 'ISO 없음'
+      NoISO: 'ISO 없음',
+      sha256: 'SHA-256 (선택 사항)',
+      sha256Placeholder: '64자 SHA-256 체크섬을 입력하세요',
+      invalidSHA256: 'SHA-256은 64자의 16진수 문자열이어야 합니다',
+      failed: '다운로드 실패',
+      success: '다운로드 성공',
+      checksumFailed: '다운로드 실패: SHA-256 검증 실패',
+      cancel: '취소',
+      cancelFailed: '다운로드 취소 실패'
     },
     power: {
       title: '전원',
@@ -265,6 +278,25 @@ const ko = {
     },
     settings: {
       title: '설정',
+      mcp: {
+        title: 'MCP 서비스',
+        service: 'MCP 원격 제어',
+        serviceDesc:
+          '신뢰할 수 있는 MCP 클라이언트가 키보드와 마우스를 제어하고 스크린샷을 캡처하도록 허용합니다',
+        securityWarning:
+          '이 API 키를 가진 사람은 누구나 원격 호스트를 제어하고 화면을 볼 수 있습니다. HTTPS를 사용하고 신뢰할 수 있는 네트워크에서만 활성화하세요.',
+        endpoint: '엔드포인트',
+        apiKey: 'API 키',
+        regenerateConfirmTitle: 'MCP API 키를 다시 생성하시겠습니까?',
+        regenerateConfirmDesc: '현재 키는 즉시 작동을 중지합니다.',
+        enableConfirmTitle: '외부 MCP 제어를 활성화하시겠습니까?',
+        enableConfirmDesc:
+          'MCP를 활성화하면 PicoClaw가 중지되고 활성 PicoClaw 세션이 모두 닫힙니다.',
+        failed: 'MCP 작업에 실패했습니다',
+        copyFailed: '복사에 실패했습니다. 수동으로 복사하세요.',
+        okBtn: '확인',
+        cancelBtn: '취소'
+      },
       about: {
         title: 'NanoKVM 정보',
         information: '정보',
@@ -298,9 +330,24 @@ const ko = {
           modeOff: '꺼짐',
           modeAuto: '자동 숨기기',
           modeAlways: '항상 보이기',
+          keyboardLedStatus: '키보드 잠금 표시기',
+          keyboardLedStatusDesc: '원격 컴퓨터의 Num Lock, Caps Lock, Scroll Lock 상태 표시',
           icons: '하위 메뉴 아이콘',
           iconsDesc: '메뉴 바에 하위 메뉴 아이콘을 표시합니다'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: '원격 키보드 잠금 상태',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: '켜짐',
+        off: '꺼짐',
+        unknown: '알 수 없음'
       },
       device: {
         title: '장치',
@@ -340,7 +387,11 @@ const ko = {
           tip: '사용하지 않는 경우 끄는 것이 좋습니다'
         },
         hdmi: {
-          description: 'HDMI/모니터 출력 활성화'
+          description: 'HDMI/모니터 출력 활성화',
+          idleTimeoutTitle: '캡처 유휴 시간 제한',
+          idleTimeoutDescription:
+            '활성 시청자가 없는 상태가 다음 시간 동안 지속되면 HDMI 캡처 중지',
+          minutes: '분'
         },
         autostart: {
           title: '자동 시작 스크립트 설정',
@@ -464,10 +515,29 @@ const ko = {
         preview: '미리보기 업데이트',
         previewDesc: '새로운 기능과 개선 사항에 미리 접근하세요',
         previewTip: '미리보기 버전에는 버그나 완성되지 않은 기능이 포함될 수 있으니 주의하세요!',
+        customServer: {
+          title: '사용자 지정 업데이트 서버',
+          desc: '지정한 서버에서 온라인 업데이트를 확인하고 다운로드합니다',
+          invalidUrl:
+            '쿼리, 프래그먼트 또는 latest.json이 포함되지 않은 올바른 HTTP 또는 HTTPS 서버 디렉터리를 입력하세요.',
+          loadFailed: '업데이트 서버 구성을 불러오지 못했습니다.',
+          saveFailed: '업데이트 서버 구성을 저장하지 못했습니다.',
+          saved: '업데이트 서버 구성을 저장했습니다.',
+          save: '저장',
+          confirmTitle: '사용자 지정 업데이트 서버를 사용하시겠습니까?',
+          confirmDesc:
+            'SHA-512는 패키지가 이 서버에서 제공한 매니페스트와 일치하는지만 확인합니다. 해당 패키지가 공식 NanoKVM 릴리스임을 보장하지는 않습니다. 결함이 있거나 악의적인 서버를 사용하면 장치를 사용할 수 없게 되거나, 데이터가 손실되거나, 시스템이 침해될 수 있습니다.',
+          confirm: '그래도 사용',
+          previewDisabled:
+            '사용자 지정 업데이트 서버가 활성화되어 있는 동안에는 미리 보기 업데이트를 사용할 수 없습니다.'
+        },
         offline: {
           title: '오프라인 업데이트',
           desc: '로컬 설치 패키지를 통한 업데이트',
           upload: '업로드',
+          checksumPlaceholder: 'SHA-256 체크섬(선택 사항)',
+          invalidChecksum: 'SHA-256 체크섬은 64개의 16진수 문자를 포함해야 합니다.',
+          checksumMismatch: 'SHA-256 검증에 실패했습니다. 패키지가 손상되었을 수 있습니다.',
           invalidName: '유효하지 않은 파일 이름 형식입니다. GitHub 릴리즈에서 다운로드하세요.',
           updateFailed: '업데이트에 실패했습니다. 재시도하세요.'
         }
@@ -539,19 +609,30 @@ const ko = {
         runtimeStarted: 'PicoClaw 런타임이 시작되었습니다',
         runtimeStartFailed: 'PicoClaw 런타임 시작에 실패했습니다',
         runtimeStopped: 'PicoClaw 런타임이 중지되었습니다',
-        runtimeStopFailed: 'PicoClaw 런타임 중지에 실패했습니다'
+        runtimeStopFailed: 'PicoClaw 런타임 중지에 실패했습니다',
+        controlSwitchedToMCP: '제어가 외부 MCP 서비스로 전환되었습니다'
       },
       connection: {
         runtime: {
           checking: '확인 중',
+          restoring: 'Restoring PicoClaw',
           ready: '런타임 준비됨',
           stopped: '런타임 중지됨',
+          blockedByMCP: '외부 MCP 제어가 활성화되어 있습니다',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: '런타임 사용 불가',
           configError: '구성 에러'
         },
         transport: {
           connecting: '연결 중',
-          connected: '연결됨'
+          connected: '연결됨',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: '대기',
@@ -565,6 +646,30 @@ const ko = {
       },
       overlay: {
         locked: 'PicoClaw가 기기를 제어하고 있습니다. 수동 입력이 일시 중지됩니다.'
+      },
+      control: {
+        picoclaw: '장치 제어: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: '장치 제어: 외부 MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: '장치 제어: 꺼짐',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: '제어 권한 부여',
+        release: '해제',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw 제어 권한이 부여되었습니다',
+        released: 'PicoClaw 제어가 해제되었습니다',
+        grantFailed: 'PicoClaw 제어 권한 부여에 실패했습니다',
+        releaseFailed: 'PicoClaw 제어 해제에 실패했습니다',
+        grantConfirmTitle: '장치 제어를 PicoClaw로 전환할까요?',
+        grantConfirmDesc: '외부 MCP 장치 쓰기가 중단됩니다.'
       },
       install: {
         install: 'PicoClaw 설치',
@@ -625,15 +730,22 @@ const ko = {
         deleteConfirmOk: '삭제',
         deleteConfirmCancel: '취소',
         messageCount_one: '{{count}}개의 메시지',
-        messageCount_other: '{{count}}개의 메시지'
+        messageCount_other: '{{count}}개의 메시지',
+        messageCount: '{{count}}개의 메시지'
       },
       config: {
         startRuntime: 'PicoClaw 시작',
         stopRuntime: 'PicoClaw 중지'
       },
       start: {
+        enableConfirmTitle: '제어를 PicoClaw로 전환하시겠습니까?',
+        enableConfirmDesc: 'PicoClaw를 시작하면 외부 MCP 서비스가 비활성화됩니다.',
+        enableConfirmOk: 'PicoClaw 시작',
+        enableConfirmCancel: '취소',
         title: 'PicoClaw 시작',
-        description: '런타임을 시작하여 PicoClaw 어시스턴트 사용을 시작하세요.'
+        description: '런타임을 시작하여 PicoClaw 어시스턴트 사용을 시작하세요.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -1,6 +1,78 @@
 #!/bin/sh
 # nanokvm Rev3.1
 
+wait_for_exit() {
+    process="$1"
+    timeout="$2"
+    elapsed=0
+
+    while pidof "$process" >/dev/null 2>&1; do
+        if [ "$elapsed" -ge "$timeout" ]; then
+            return 1
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+    return 0
+}
+
+stop_process() {
+    process="$1"
+
+    if ! pidof "$process" >/dev/null 2>&1; then
+        return
+    fi
+
+    killall -INT "$process" 2>/dev/null || true
+    if wait_for_exit "$process" 20; then
+        return
+    fi
+
+    killall -TERM "$process" 2>/dev/null || true
+    if wait_for_exit "$process" 5; then
+        return
+    fi
+
+    killall -KILL "$process" 2>/dev/null || true
+    wait_for_exit "$process" 2 || true
+}
+
+stop_services() {
+    # The server owns VI/VPSS. Let it release MMF before stopping kvm_system.
+    stop_process NanoKVM-Server
+    stop_process kvm_system
+    rm -rf /tmp/kvm_system /tmp/server
+}
+
+start_services() {
+    cp -r /kvmapp/kvm_system /tmp/
+    if [ -f /kvmapp/kvm_new_app ]; then
+        touch /tmp/.nanokvm_migrating
+        /tmp/kvm_system/kvm_system &
+
+        # The legacy migration invokes this init script recursively and starts
+        # the server itself. Wait for that single migration path to finish.
+        migration_wait=0
+        while [ "$migration_wait" -lt 30 ]; do
+            if [ ! -f /kvmapp/kvm_new_app ] && pidof NanoKVM-Server >/dev/null 2>&1; then
+                rm -f /tmp/.nanokvm_migrating
+                return
+            fi
+            sleep 1
+            migration_wait=$((migration_wait + 1))
+        done
+        rm -f /tmp/.nanokvm_migrating
+    else
+        /tmp/kvm_system/kvm_system &
+    fi
+
+    if ! pidof NanoKVM-Server >/dev/null 2>&1; then
+        rm -rf /tmp/server
+        cp -r /kvmapp/server /tmp/
+        /tmp/server/NanoKVM-Server &
+    fi
+}
+
 case "$1" in
   start)
     echo -n kvm > /boot/hostname.prefix
@@ -45,30 +117,20 @@ case "$1" in
     fi
 
     # Start services
-    cp -r /kvmapp/kvm_system /tmp/
-    /tmp/kvm_system/kvm_system &
-
-    cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    start_services
    ;;
 
   stop)
-    killall kvm_system
-    killall NanoKVM-Server
-    rm -r /tmp/kvm_system /tmp/server
+    stop_services
     echo "OK"
    ;;
 
   restart)
-    killall kvm_system
-    killall NanoKVM-Server
-    rm -r /tmp/kvm_system /tmp/server
-
-    cp -r /kvmapp/kvm_system /tmp/
-    /tmp/kvm_system/kvm_system &
-
-    cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    if [ -f /tmp/.nanokvm_migrating ]; then
+        exit 0
+    fi
+    stop_services
+    start_services
 
     sync
     echo "OK"

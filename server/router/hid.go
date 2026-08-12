@@ -33,6 +33,8 @@ func hidRouter(r *gin.Engine) {
 
 	opAPI.GET("/hid/mode", service.GetHidMode) // get hid mode
 
+	opAPI.GET("/hid/leds", service.GetKeyboardLedStatus) // get keyboard led status
+
 	// Admin only: HID hardware configuration
 	adminAPI := r.Group("/api").Use(
 		middleware.CheckToken(),
@@ -43,5 +45,6 @@ func hidRouter(r *gin.Engine) {
 
 	// Internal loopback (for kvm_system / picoclaw): no JWT, only loopback token
 	localAPI := r.Group("/api/internal").Use(middleware.CheckLoopbackInternalToken())
+
 	localAPI.POST("/usb/recover", service.RecoverUSB)
 }

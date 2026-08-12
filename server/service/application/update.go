@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -28,9 +30,9 @@ func (s *Service) Update(c *gin.Context) {
 		rsp.ErrRsp(c, -1, "update already in progress")
 		return
 	}
-	defer releaseUpdateLock()
 
 	if err := update(); err != nil {
+		releaseUpdateLock()
 		rsp.ErrRsp(c, -1, fmt.Sprintf("update failed: %s", err))
 		return
 	}
@@ -38,40 +40,75 @@ func (s *Service) Update(c *gin.Context) {
 	rsp.OkRsp(c)
 	log.Debugf("update application success")
 
-	// Sleep for a second before restarting the device
+	go restartServices()
+}
+
+func restartServices() {
+	// Let the HTTP response reach the client before stopping the server.
 	time.Sleep(1 * time.Second)
 
-	_ = exec.Command("sh", "-c", "/etc/init.d/S95nanokvm restart").Run()
+	if err := exec.Command("/kvmapp/system/init.d/S95nanokvm", "restart").Run(); err != nil {
+		log.Errorf("failed to restart services after update: %v", err)
+	}
 }
 
 func update() error {
-	_ = os.RemoveAll(CacheDir)
-	_ = os.MkdirAll(CacheDir, 0o755)
-	defer func() {
-		_ = os.RemoveAll(CacheDir)
-	}()
-
-	// get latest information
 	latest, err := getLatest()
 	if err != nil {
 		return err
 	}
-
-	// download
-	target := fmt.Sprintf("%s/%s", CacheDir, latest.Name)
-	if err := download(latest.Url, target); err != nil {
-		log.Errorf("download app failed: %s", err)
+	if err := prepareCacheForUpdate(); err != nil {
+		return err
+	}
+	workspace, err := newUpdateWorkspace(CacheDir)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := workspace.Close(); err != nil {
+			log.Warnf("failed to clean update workspace %s: %v", workspace.dir, err)
+		}
+	}()
+	if err := ensureInstallFilesystem(workspace.dir, AppDir, BackupDir); err != nil {
+		return err
+	}
+	if err := preflightManifestSpace(workspace.dir, latest); err != nil {
 		return err
 	}
 
-	// check sha512
+	target := filepath.Join(workspace.dir, latest.Name)
+	downloadInfo, err := download(latest, target)
+	if err != nil {
+		log.Errorf("download app failed: %s", err)
+		return err
+	}
+	if err := validateDownloadedSize(latest, uint64(downloadInfo.Written)); err != nil {
+		return err
+	}
+
 	if err := checksum(target, latest.Sha512); err != nil {
 		log.Errorf("check sha512 failed: %s", err)
 		return err
 	}
-
-	// install
-	if err := installPackage(target); err != nil {
+	expectedRoot := strings.TrimSuffix(latest.Name, ".tar.gz")
+	info, err := inspectUpdateArchive(target, expectedRoot)
+	if err != nil {
+		return fmt.Errorf("inspect update package: %w", err)
+	}
+	if err := validateExpandedSize(latest, info.expandedBytes); err != nil {
+		return err
+	}
+	if err := ensureExpandedSpace(workspace.dir, info.expandedBytes); err != nil {
+		return err
+	}
+	sourceDir, err := extractUpdateArchive(target, workspace.dir, expectedRoot)
+	if err != nil {
+		return fmt.Errorf("extract update package: %w", err)
+	}
+	if err := validateExtractedPackage(sourceDir, latest.Version); err != nil {
+		return err
+	}
+	if err := installPreparedPackage(sourceDir); err != nil {
 		log.Errorf("failed to install package: %v", err)
 		return err
 	}
@@ -79,7 +116,7 @@ func update() error {
 	return nil
 }
 
-func download(url string, target string) (err error) {
+func download(latest *Latest, target string) (info utils.DownloadInfo, err error) {
 	for i := range maxTries {
 		log.Debugf("attempt #%d/%d", i+1, maxTries)
 		if i > 0 {
@@ -87,21 +124,26 @@ func download(url string, target string) (err error) {
 		}
 
 		var req *http.Request
-		req, err = http.NewRequest("GET", url, nil)
+		req, err = utils.NewAuthenticatedRequest("GET", latest.Url, nil)
 		if err != nil {
 			log.Errorf("new request err: %s", err)
 			continue
 		}
 
 		log.Debugf("update will be saved to: %s", target)
-		err = utils.Download(req, target)
+		info, err = utils.Download(req, target, int64(maxPackageSize), func(contentLength int64) error {
+			if latest.ManifestVersion == 2 && uint64(contentLength) != latest.SizeBytes {
+				return fmt.Errorf("update package size mismatch: manifest has %d bytes, response has %d", latest.SizeBytes, contentLength)
+			}
+			return ensureFreeSpace(filepath.Dir(target), uint64(contentLength))
+		})
 		if err != nil {
 			log.Errorf("downloading latest application failed, try again...")
 			continue
 		}
-		return nil
+		return info, nil
 	}
-	return err
+	return utils.DownloadInfo{}, err
 }
 
 func checksum(filePath string, expectedHash string) error {

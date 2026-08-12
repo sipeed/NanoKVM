@@ -3,55 +3,72 @@ package direct
 import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
-	"bytes"
-	"encoding/binary"
+	"NanoKVM-Server/service/vm"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
 type Streamer struct {
 	mutex          sync.Mutex
-	clients        map[*websocket.Conn]bool
-	clientSnapshot atomic.Pointer[[]*websocket.Conn]
-	running        int32
+	clients        map[*client]struct{}
+	clientSnapshot atomic.Pointer[[]*client]
+	running        bool
+	viewerVersion  uint64
 }
 
 func newStreamer() *Streamer {
 	s := &Streamer{
-		clients: make(map[*websocket.Conn]bool),
+		clients: make(map[*client]struct{}),
 	}
 	s.updateClientSnapshotLocked()
 
 	return s
 }
 
-func (s *Streamer) addClient(ws *websocket.Conn) {
-	s.mutex.Lock()
-	s.clients[ws] = true
-	s.updateClientSnapshotLocked()
-	s.mutex.Unlock()
+func (s *Streamer) addClient(client *client) {
+	client.start()
 
-	if atomic.CompareAndSwapInt32(&s.running, 0, 1) {
+	s.mutex.Lock()
+	s.clients[client] = struct{}{}
+	count := s.updateClientSnapshotLocked()
+	s.viewerVersion++
+	version := s.viewerVersion
+	start := !s.running
+	if start {
+		s.running = true
+	}
+	s.mutex.Unlock()
+	vm.UpdateHdmiViewerSnapshot("direct", count, version)
+
+	if start {
 		go s.run()
 		log.Debug("h264 stream started")
 	}
 }
 
-func (s *Streamer) removeClient(ws *websocket.Conn) {
+func (s *Streamer) removeClient(client *client) {
 	s.mutex.Lock()
-	delete(s.clients, ws)
+	if _, exists := s.clients[client]; !exists {
+		s.mutex.Unlock()
+		return
+	}
+
+	delete(s.clients, client)
 	count := s.updateClientSnapshotLocked()
+	s.viewerVersion++
+	version := s.viewerVersion
 	s.mutex.Unlock()
+	client.close()
+	vm.UpdateHdmiViewerSnapshot("direct", count, version)
 
 	log.Debugf("h264 websocket disconnected, remaining clients: %d", count)
 }
 
 func (s *Streamer) updateClientSnapshotLocked() int {
-	clients := make([]*websocket.Conn, 0, len(s.clients))
+	clients := make([]*client, 0, len(s.clients))
 	for client := range s.clients {
 		clients = append(clients, client)
 	}
@@ -60,7 +77,7 @@ func (s *Streamer) updateClientSnapshotLocked() int {
 	return len(clients)
 }
 
-func (s *Streamer) getClients() []*websocket.Conn {
+func (s *Streamer) getClients() []*client {
 	clients := s.clientSnapshot.Load()
 	if clients == nil {
 		return nil
@@ -70,8 +87,6 @@ func (s *Streamer) getClients() []*websocket.Conn {
 }
 
 func (s *Streamer) run() {
-	defer atomic.StoreInt32(&s.running, 0)
-
 	screen := common.GetScreen()
 	common.CheckScreen()
 	fps := screen.FPS
@@ -85,24 +100,10 @@ func (s *Streamer) run() {
 	for range ticker.C {
 		clients := s.getClients()
 		if len(clients) == 0 {
-			log.Debug("h264 stream stopped due to no clients")
-			return
-		}
-
-		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
-		stream.UpdateCaptureStatus(stream.CaptureModeDirect, result)
-		if result < 0 || len(data) == 0 {
-			continue
-		}
-
-		isKeyFrame := byte(0)
-		if result == 3 {
-			isKeyFrame = byte(1)
-		}
-
-		timestamp := time.Since(startTime).Microseconds()
-
-		if err := s.send(clients, isKeyFrame, timestamp, data); err != nil {
+			if s.stopIfIdle() {
+				log.Debug("h264 stream stopped due to no clients")
+				return
+			}
 			continue
 		}
 
@@ -111,41 +112,34 @@ func (s *Streamer) run() {
 			ticker.Reset(time.Second / time.Duration(fps))
 		}
 
+		if !hasCaptureDemand(clients) {
+			continue
+		}
+
+		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
+		stream.UpdateCaptureStatus(stream.CaptureModeDirect, result)
+		if result < 0 || len(data) == 0 {
+			continue
+		}
+
+		timestamp := time.Since(startTime).Microseconds()
+		frame := newOutboundFrame(result == 3, timestamp, data)
+		for _, client := range clients {
+			client.offer(frame)
+		}
+
 		stream.GetFrameRateCounter().Update()
 	}
 }
 
-func (s *Streamer) send(clients []*websocket.Conn, isKeyFrame byte, timestamp int64, data []byte) error {
-	buf := BufferPool.Get().(*bytes.Buffer)
-	defer BufferPool.Put(buf)
+func (s *Streamer) stopIfIdle() bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 
-	buf.Reset()
-	buf.Grow(1 + 8 + len(data))
-
-	if err := buf.WriteByte(isKeyFrame); err != nil {
-		log.Errorf("failed to write keyframe flag: %s", err)
-		return err
+	if len(s.clients) > 0 {
+		return false
 	}
 
-	var tsBytes [8]byte
-	binary.LittleEndian.PutUint64(tsBytes[:], uint64(timestamp))
-	if _, err := buf.Write(tsBytes[:]); err != nil {
-		log.Errorf("failed to write timestamp: %s", err)
-		return err
-	}
-
-	if _, err := buf.Write(data); err != nil {
-		log.Errorf("failed to write h264 data: %s", err)
-		return err
-	}
-
-	for _, client := range clients {
-		if err := client.WriteMessage(websocket.BinaryMessage, buf.Bytes()); err != nil {
-			log.Errorf("failed to write message to client %s: %s.", client.RemoteAddr(), err)
-
-			s.removeClient(client)
-		}
-	}
-
-	return nil
+	s.running = false
+	return true
 }

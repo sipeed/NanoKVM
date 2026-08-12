@@ -78,6 +78,11 @@ const ru = {
       frameDetectTip:
         'Вычисляет разницу между кадрами и прекращает передачу видеопотока, если на экране удаленного узла не обнаружено никаких изменений.',
       resetHdmi: 'Перезагрузить HDMI подсистему',
+      mixedH264: {
+        title: 'Конфликт потоков H.264',
+        description:
+          'H.264 Direct и H.264 WebRTC используются одновременно. Это может привести к разрывам изображения или повреждению видео. Используйте только один режим H.264.'
+      },
       captureStatus: {
         hdmiError: 'Ошибка изображения HDMI',
         unsupportedResolution: 'Текущее разрешение не поддерживается',
@@ -252,7 +257,15 @@ const ru = {
       disabled: 'Невозможно скачать образ, раздел /data находится в режиме только для чтения',
       uploadbox: 'Перетащите сюда файл или нажмите, чтобы выбрать',
       inputfile: 'Пожалуйста, введите файл изображения',
-      NoISO: 'Нет ISO'
+      NoISO: 'Нет ISO',
+      sha256: 'SHA-256 (необязательно)',
+      sha256Placeholder: 'Введите контрольную сумму SHA-256 из 64 символов',
+      invalidSHA256: 'SHA-256 должен быть шестнадцатеричной строкой из 64 символов',
+      failed: 'Ошибка загрузки',
+      success: 'Загрузка выполнена',
+      checksumFailed: 'Ошибка загрузки: проверка SHA-256 не пройдена',
+      cancel: 'Отмена',
+      cancelFailed: 'Не удалось отменить загрузку'
     },
     power: {
       title: 'Питание',
@@ -269,6 +282,25 @@ const ru = {
     },
     settings: {
       title: 'Настройки',
+      mcp: {
+        title: 'Служба MCP',
+        service: 'Удалённое управление MCP',
+        serviceDesc:
+          'Разрешить доверенным клиентам MCP управлять клавиатурой и мышью и делать снимки экрана',
+        securityWarning:
+          'Любой, у кого есть этот ключ API, может управлять удалённым хостом и просматривать его экран. Используйте HTTPS и включайте службу только в доверенных сетях.',
+        endpoint: 'Конечная точка',
+        apiKey: 'Ключ API',
+        regenerateConfirmTitle: 'Создать новый ключ API MCP?',
+        regenerateConfirmDesc: 'Текущий ключ немедленно перестанет работать.',
+        enableConfirmTitle: 'Включить внешнее управление MCP?',
+        enableConfirmDesc:
+          'Включение MCP остановит PicoClaw и закроет все активные сеансы PicoClaw.',
+        failed: 'Операция MCP завершилась с ошибкой',
+        copyFailed: 'Не удалось скопировать. Скопируйте вручную.',
+        okBtn: 'Подтвердить',
+        cancelBtn: 'Отмена'
+      },
       about: {
         title: 'О системе NanoKVM',
         information: 'Информация',
@@ -303,9 +335,25 @@ const ru = {
           modeOff: 'Выкл.',
           modeAuto: 'Автоматическое скрытие',
           modeAlways: 'Всегда виден',
+          keyboardLedStatus: 'Индикаторы блокировки клавиатуры',
+          keyboardLedStatusDesc:
+            'Показывать состояние Num Lock, Caps Lock и Scroll Lock удалённого компьютера',
           icons: 'Значки подменю',
           iconsDesc: 'Отображение значков подменю в строке меню'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Состояние блокировок удалённой клавиатуры',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Вкл.',
+        off: 'Выкл.',
+        unknown: 'Неизвестно'
       },
       device: {
         title: 'Устройство',
@@ -345,7 +393,10 @@ const ru = {
           tip: 'Выключите, если нет необходимости'
         },
         hdmi: {
-          description: 'Включить HDMI/выход монитора'
+          description: 'Включить HDMI/выход монитора',
+          idleTimeoutTitle: 'Тайм-аут неактивного захвата',
+          idleTimeoutDescription: 'Остановить захват HDMI, если активных зрителей нет в течение',
+          minutes: 'мин'
         },
         autostart: {
           title: 'Настройки сценариев автозапуска',
@@ -472,10 +523,30 @@ const ru = {
         previewDesc: 'Получайте ранний доступ к новым функциям и улучшениям',
         previewTip:
           'Обратите внимание: в ранних версиях могут быть ошибки или незавершённый функционал!',
+        customServer: {
+          title: 'Пользовательский сервер обновлений',
+          desc: 'Проверяйте наличие обновлений и загружайте их с указанного сервера',
+          invalidUrl:
+            'Введите корректный адрес каталога HTTP- или HTTPS-сервера без строки запроса, фрагмента или файла latest.json.',
+          loadFailed: 'Не удалось загрузить конфигурацию сервера обновлений.',
+          saveFailed: 'Не удалось сохранить конфигурацию сервера обновлений.',
+          saved: 'Конфигурация сервера обновлений сохранена.',
+          save: 'Сохранить',
+          confirmTitle: 'Использовать пользовательский сервер обновлений?',
+          confirmDesc:
+            'SHA-512 проверяет только соответствие пакета манифесту, предоставленному этим сервером. Это не подтверждает, что пакет является официальным выпуском NanoKVM. Неисправный или вредоносный сервер может вывести устройство из строя, привести к потере данных или поставить под угрозу безопасность системы.',
+          confirm: 'Всё равно использовать',
+          previewDisabled:
+            'Предварительные обновления недоступны, пока включён пользовательский сервер обновлений.'
+        },
         offline: {
           title: 'Автономные обновления',
           desc: 'Обновление через локальный установочный пакет',
           upload: 'Загрузить',
+          checksumPlaceholder: 'Контрольная сумма SHA-256 (необязательно)',
+          invalidChecksum:
+            'Контрольная сумма SHA-256 должна содержать 64 шестнадцатеричных символа.',
+          checksumMismatch: 'Проверка SHA-256 не пройдена. Возможно, пакет повреждён.',
           invalidName: 'Неверный формат имени файла. Загрузите выпуски с GitHub.',
           updateFailed: 'Обновление не удалось. Пожалуйста, попробуйте еще раз.'
         }
@@ -547,19 +618,30 @@ const ru = {
         runtimeStarted: 'Runtime PicoClaw запущен',
         runtimeStartFailed: 'Не удалось запустить runtime PicoClaw',
         runtimeStopped: 'Runtime PicoClaw остановлен',
-        runtimeStopFailed: 'Не удалось остановить runtime PicoClaw'
+        runtimeStopFailed: 'Не удалось остановить runtime PicoClaw',
+        controlSwitchedToMCP: 'Управление переключено на внешнюю службу MCP'
       },
       connection: {
         runtime: {
           checking: 'Проверка',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime готов',
           stopped: 'Runtime остановлен',
+          blockedByMCP: 'Внешнее управление MCP активно',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime недоступен',
           configError: 'Ошибка конфигурации'
         },
         transport: {
           connecting: 'Подключение',
-          connected: 'Подключено'
+          connected: 'Подключено',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Простой',
@@ -573,6 +655,30 @@ const ru = {
       },
       overlay: {
         locked: 'PicoClaw управляет устройством. Ручной ввод приостановлен.'
+      },
+      control: {
+        picoclaw: 'Управление устройством: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Управление устройством: внешний MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Управление устройством: выкл.',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Передать управление',
+        release: 'Освободить',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Управление PicoClaw предоставлено',
+        released: 'Управление PicoClaw освобождено',
+        grantFailed: 'Не удалось предоставить управление PicoClaw',
+        releaseFailed: 'Не удалось освободить управление PicoClaw',
+        grantConfirmTitle: 'Переключить управление устройством на PicoClaw?',
+        grantConfirmDesc: 'Записи устройства внешним MCP будут прерваны.'
       },
       install: {
         install: 'Установить PicoClaw',
@@ -634,15 +740,22 @@ const ru = {
         deleteConfirmOk: 'Удалить',
         deleteConfirmCancel: 'Отмена',
         messageCount_one: '{{count}} сообщение',
-        messageCount_other: '{{count}} сообщения'
+        messageCount_other: '{{count}} сообщения',
+        messageCount: '{{count}} сообщения'
       },
       config: {
         startRuntime: 'Запустить PicoClaw',
         stopRuntime: 'Остановить PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Переключить управление на PicoClaw?',
+        enableConfirmDesc: 'Запуск PicoClaw отключит внешнюю службу MCP.',
+        enableConfirmOk: 'Запустить PicoClaw',
+        enableConfirmCancel: 'Отмена',
         title: 'Запустить PicoClaw',
-        description: 'Запустите runtime, чтобы начать использовать помощник PicoClaw.'
+        description: 'Запустите runtime, чтобы начать использовать помощник PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

@@ -80,6 +80,11 @@ const hu = {
       frameDetectTip:
         'Elemzi a képkockák közötti különbségeket. A videó stream küldése leáll, ha a távoli gép képernyőjén nem történik változás.',
       resetHdmi: 'HDMI visszaállítása',
+      mixedH264: {
+        title: 'H.264 adatfolyam-ütközés',
+        description:
+          'Az H.264 Direct és az H.264 WebRTC egyszerre van használatban. Ez képtörést vagy sérült videót okozhat. Csak egy H.264 módot használjon.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-képernyőhiba',
         unsupportedResolution: 'A jelenlegi felbontás nem támogatott',
@@ -254,7 +259,15 @@ const hu = {
       disabled: '/data partíció RO, ezért nem tudjuk letölteni a képet',
       uploadbox: 'Dobja ide a fájlt, vagy kattintson a kiválasztáshoz',
       inputfile: 'Kérjük, írja be a képfájlt',
-      NoISO: 'Nincs ISO'
+      NoISO: 'Nincs ISO',
+      sha256: 'SHA-256 (opcionális)',
+      sha256Placeholder: 'Adjon meg egy 64 karakteres SHA-256 ellenőrzőösszeget',
+      invalidSHA256: 'A SHA-256 értékének 64 karakteres hexadecimális karakterláncnak kell lennie',
+      failed: 'Sikertelen letöltés',
+      success: 'Sikeres letöltés',
+      checksumFailed: 'Sikertelen letöltés: a SHA-256 ellenőrzése sikertelen',
+      cancel: 'Mégse',
+      cancelFailed: 'A letöltés megszakítása sikertelen'
     },
     power: {
       title: 'Bekapcsolás',
@@ -271,6 +284,25 @@ const hu = {
     },
     settings: {
       title: 'Beállítások',
+      mcp: {
+        title: 'MCP-szolgáltatás',
+        service: 'MCP távoli vezérlés',
+        serviceDesc:
+          'Megbízható MCP-kliensek számára a billentyűzet és az egér vezérlésének, valamint képernyőképek készítésének engedélyezése',
+        securityWarning:
+          'Az API-kulcs birtokában bárki vezérelheti a távoli gazdagépet és láthatja annak képernyőjét. Használjon HTTPS-t, és csak megbízható hálózatokon engedélyezze.',
+        endpoint: 'Végpont',
+        apiKey: 'API-kulcs',
+        regenerateConfirmTitle: 'Újragenerálja az MCP API-kulcsot?',
+        regenerateConfirmDesc: 'A jelenlegi kulcs azonnal érvényét veszti.',
+        enableConfirmTitle: 'Engedélyezi a külső MCP-vezérlést?',
+        enableConfirmDesc:
+          'Az MCP engedélyezése leállítja a PicoClaw-t, és bezár minden aktív PicoClaw-munkamenetet.',
+        failed: 'Az MCP-művelet sikertelen',
+        copyFailed: 'A másolás sikertelen. Másolja kézzel.',
+        okBtn: 'Megerősítés',
+        cancelBtn: 'Mégse'
+      },
       about: {
         title: 'NanoKVM Névjegy',
         information: 'Információ',
@@ -304,9 +336,25 @@ const hu = {
           modeOff: 'Ki',
           modeAuto: 'Automatikus elrejtés',
           modeAlways: 'Mindig látható',
+          keyboardLedStatus: 'Billentyűzár-jelzők',
+          keyboardLedStatusDesc:
+            'A távoli számítógép Num Lock, Caps Lock és Scroll Lock állapotának megjelenítése',
           icons: 'Almenü ikonok',
           iconsDesc: 'Almenüikonok megjelenítése a menüsorban'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Távoli billentyűzárak állapota',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Be',
+        off: 'Ki',
+        unknown: 'Ismeretlen'
       },
       device: {
         title: 'Eszköz',
@@ -346,7 +394,10 @@ const hu = {
           tip: 'Kikapcsolás, ha nincs rá szükség'
         },
         hdmi: {
-          description: 'HDMI/monitor kimenet engedélyezése'
+          description: 'HDMI/monitor kimenet engedélyezése',
+          idleTimeoutTitle: 'Inaktív rögzítés időkorlátja',
+          idleTimeoutDescription: 'A HDMI-rögzítés leállítása, ha nincs aktív néző ennyi ideig:',
+          minutes: 'perc'
         },
         autostart: {
           title: 'Automatikus indítási parancsfájlok beállításai',
@@ -473,10 +524,29 @@ const hu = {
         previewDesc: 'Korai hozzáférést kap az új funkciókhoz és fejlesztésekhez',
         previewTip:
           'Kérjük, vegye figyelembe, hogy az előzetes verziók hibákat vagy hiányos funkciókat tartalmazhatnak!',
+        customServer: {
+          title: 'Egyéni frissítési kiszolgáló',
+          desc: 'Online frissítések keresése és letöltése a megadott kiszolgálóról',
+          invalidUrl:
+            'Adjon meg egy érvényes HTTP- vagy HTTPS-kiszolgálókönyvtárat lekérdezés, töredékazonosító és latest.json nélkül.',
+          loadFailed: 'Nem sikerült betölteni a frissítési kiszolgáló beállításait.',
+          saveFailed: 'Nem sikerült menteni a frissítési kiszolgáló beállításait.',
+          saved: 'A frissítési kiszolgáló beállításai mentve.',
+          save: 'Mentés',
+          confirmTitle: 'Egyéni frissítési kiszolgálót használ?',
+          confirmDesc:
+            'Az SHA-512 csak azt ellenőrzi, hogy a csomag megfelel-e a kiszolgáló által biztosított jegyzéknek. Nem igazolja, hogy a csomag hivatalos NanoKVM-kiadás. Egy hibás vagy rosszindulatú kiszolgáló használhatatlanná teheti az eszközt, adatvesztést okozhat, vagy veszélyeztetheti a rendszert.',
+          confirm: 'Használat mindenképpen',
+          previewDisabled:
+            'Az előzetes frissítések nem érhetők el, amíg egyéni frissítési kiszolgáló van engedélyezve.'
+        },
         offline: {
           title: 'Offline frissítések',
           desc: 'Frissítés helyi telepítőcsomaggal',
           upload: 'Feltöltés',
+          checksumPlaceholder: 'SHA-256 ellenőrzőösszeg (opcionális)',
+          invalidChecksum: 'A SHA-256 ellenőrzőösszegnek 64 hexadecimális karakterből kell állnia.',
+          checksumMismatch: 'Az SHA-256 ellenőrzése sikertelen. Lehet, hogy a csomag sérült.',
           invalidName: 'Érvénytelen fájlnévformátum. Kérjük, töltse le a GitHub kiadásaiból.',
           updateFailed: 'Frissítés sikertelen. Kérem, próbálja újra.'
         }
@@ -548,19 +618,30 @@ const hu = {
         runtimeStarted: 'PicoClaw Runtime elindult',
         runtimeStartFailed: 'Nem sikerült elindítani a PicoClaw Runtime-ot',
         runtimeStopped: 'PicoClaw Runtime leállt',
-        runtimeStopFailed: 'Nem sikerült leállítani a PicoClaw Runtime-ot'
+        runtimeStopFailed: 'Nem sikerült leállítani a PicoClaw Runtime-ot',
+        controlSwitchedToMCP: 'A vezérlés átkerült a külső MCP-szolgáltatáshoz'
       },
       connection: {
         runtime: {
           checking: 'Ellenőrzés',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime kész',
           stopped: 'Runtime leállt',
+          blockedByMCP: 'A külső MCP-vezérlés aktív',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime nem érhető el',
           configError: 'Konfigurációs hiba'
         },
         transport: {
           connecting: 'Csatlakozás',
-          connected: 'Csatlakoztatva'
+          connected: 'Csatlakoztatva',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Üresjárat',
@@ -574,6 +655,30 @@ const hu = {
       },
       overlay: {
         locked: 'PicoClaw vezérli az eszközt. A kézi bevitel szünetel.'
+      },
+      control: {
+        picoclaw: 'Eszközvezérlés: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Eszközvezérlés: külső MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Eszközvezérlés: kikapcsolva',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Vezérlés átadása',
+        release: 'Vezérlés feloldása',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw-vezérlés megadva',
+        released: 'PicoClaw-vezérlés feloldva',
+        grantFailed: 'Nem sikerült megadni a PicoClaw-vezérlést',
+        releaseFailed: 'Nem sikerült feloldani a PicoClaw-vezérlést',
+        grantConfirmTitle: 'Átváltja az eszközvezérlést PicoClaw-ra?',
+        grantConfirmDesc: 'A külső MCP eszközírásai megszakadnak.'
       },
       install: {
         install: 'PicoClaw telepítése',
@@ -636,15 +741,22 @@ const hu = {
         deleteConfirmOk: 'Törlés',
         deleteConfirmCancel: 'Mégse',
         messageCount_one: '{{count}} üzenet',
-        messageCount_other: '{{count}} üzenet'
+        messageCount_other: '{{count}} üzenet',
+        messageCount: '{{count}} üzenet'
       },
       config: {
         startRuntime: 'PicoClaw indítása',
         stopRuntime: 'PicoClaw leállítása'
       },
       start: {
+        enableConfirmTitle: 'Átváltja a vezérlést a PicoClaw-ra?',
+        enableConfirmDesc: 'A PicoClaw indítása letiltja a külső MCP-szolgáltatást.',
+        enableConfirmOk: 'PicoClaw indítása',
+        enableConfirmCancel: 'Mégse',
         title: 'PicoClaw indítása',
-        description: 'Indítsa el a Runtime-ot a PicoClaw segéd használatának megkezdéséhez.'
+        description: 'Indítsa el a Runtime-ot a PicoClaw segéd használatának megkezdéséhez.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

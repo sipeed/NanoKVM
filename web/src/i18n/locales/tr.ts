@@ -79,6 +79,11 @@ const tr = {
       frameDetectTip:
         'Gönderilen kareler arasındaki farkı hesaplar. Uzak ana bilgisayardan gönderilen yayında bir değişiklik yoksa görüntü yayınını durdurur.',
       resetHdmi: 'HDMI sıfırla',
+      mixedH264: {
+        title: 'H.264 akış çakışması',
+        description:
+          'H.264 Direct ve H.264 WebRTC aynı anda kullanılıyor. Bu, ekran yırtılmasına veya bozuk videoya neden olabilir. Lütfen yalnızca bir H.264 modu kullanın.'
+      },
       captureStatus: {
         hdmiError: 'HDMI ekran hatası',
         unsupportedResolution: 'Geçerli çözünürlük desteklenmiyor',
@@ -251,7 +256,15 @@ const tr = {
       disabled: '/data bölüntüsü salt okunur modda, disk imajı indirilemiyor.',
       uploadbox: 'Dosyayı buraya bırakın veya seçmek için tıklayın',
       inputfile: 'Lütfen resim dosyasını giriniz',
-      NoISO: 'ISO yok'
+      NoISO: 'ISO yok',
+      sha256: 'SHA-256 (isteğe bağlı)',
+      sha256Placeholder: '64 karakterlik SHA-256 sağlama toplamını girin',
+      invalidSHA256: 'SHA-256, 64 karakterlik bir onaltılık dize olmalıdır',
+      failed: 'İndirme başarısız',
+      success: 'İndirme başarılı',
+      checksumFailed: 'İndirme başarısız: SHA-256 doğrulaması başarısız',
+      cancel: 'İptal',
+      cancelFailed: 'İndirme iptal edilemedi'
     },
     power: {
       title: 'Güç',
@@ -268,6 +281,25 @@ const tr = {
     },
     settings: {
       title: 'Ayarlar',
+      mcp: {
+        title: 'MCP Hizmeti',
+        service: 'MCP uzaktan kumanda',
+        serviceDesc:
+          'Güvenilir MCP istemcilerinin klavye ve fareyi kontrol etmesine ve ekran görüntüsü almasına izin verin',
+        securityWarning:
+          'Bu API anahtarına sahip herkes uzak ana bilgisayarı kontrol edebilir ve ekranını görebilir. HTTPS kullanın ve hizmeti yalnızca güvenilir ağlarda etkinleştirin.',
+        endpoint: 'Uç nokta',
+        apiKey: 'API anahtarı',
+        regenerateConfirmTitle: 'MCP API anahtarı yeniden oluşturulsun mu?',
+        regenerateConfirmDesc: 'Geçerli anahtar hemen çalışmayı durduracaktır.',
+        enableConfirmTitle: 'Harici MCP kontrolü etkinleştirilsin mi?',
+        enableConfirmDesc:
+          'MCP etkinleştirildiğinde PicoClaw durdurulur ve tüm etkin PicoClaw oturumları kapatılır.',
+        failed: 'MCP işlemi başarısız oldu',
+        copyFailed: 'Kopyalama başarısız. Elle kopyalayın.',
+        okBtn: 'Onayla',
+        cancelBtn: 'İptal'
+      },
       about: {
         title: 'NanoKVM Hakkında',
         information: 'Bilgi',
@@ -301,9 +333,25 @@ const tr = {
           modeOff: 'Kapalı',
           modeAuto: 'Otomatik gizle',
           modeAlways: 'Her zaman görünür',
+          keyboardLedStatus: 'Klavye kilidi göstergeleri',
+          keyboardLedStatusDesc:
+            'Uzak bilgisayarın Num Lock, Caps Lock ve Scroll Lock durumunu göster',
           icons: 'Alt Menü Simgeleri',
           iconsDesc: 'Menü çubuğunda alt menü simgelerini görüntüle'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Uzak klavye kilidi durumu',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Açık',
+        off: 'Kapalı',
+        unknown: 'Bilinmiyor'
       },
       device: {
         title: 'Cihaz',
@@ -343,7 +391,11 @@ const tr = {
           tip: 'Kullanmıyorsanız devre dışı bırakabilirsiniz'
         },
         hdmi: {
-          description: 'HDMI/Momitör çıktısını aktifleştir'
+          description: 'HDMI/Momitör çıktısını aktifleştir',
+          idleTimeoutTitle: 'Etkin olmayan yakalama zaman aşımı',
+          idleTimeoutDescription:
+            'Etkin görüntüleyici olmadığında HDMI yakalamayı şu süre sonunda durdur:',
+          minutes: 'dk'
         },
         autostart: {
           title: 'Otomatik Başlatılan Komut Dosyaları Ayarları',
@@ -470,10 +522,29 @@ const tr = {
         previewDesc: 'En son geliştirmelere ve özelliklere erken erişin',
         previewTip:
           'Ön izleme güncellemelerinin tamamlanmamış olduğunu ve sorunlara sebep olabileceğini unutmayın!',
+        customServer: {
+          title: 'Özel güncelleme sunucusu',
+          desc: 'Belirtilen sunucudaki çevrimiçi güncellemeleri denetleyin ve indirin',
+          invalidUrl:
+            'Sorgu, parça tanımlayıcısı veya latest.json içermeyen geçerli bir HTTP ya da HTTPS sunucu dizini girin.',
+          loadFailed: 'Güncelleme sunucusu yapılandırması yüklenemedi.',
+          saveFailed: 'Güncelleme sunucusu yapılandırması kaydedilemedi.',
+          saved: 'Güncelleme sunucusu yapılandırması kaydedildi.',
+          save: 'Kaydet',
+          confirmTitle: 'Özel bir güncelleme sunucusu kullanılsın mı?',
+          confirmDesc:
+            'SHA-512 yalnızca paketin bu sunucunun sağladığı bildirimle eşleştiğini doğrular. Paketin resmi bir NanoKVM sürümü olduğunu kanıtlamaz. Hatalı veya kötü amaçlı bir sunucu cihazı kullanılamaz hâle getirebilir, veri kaybına yol açabilir ya da sistem güvenliğini tehlikeye atabilir.',
+          confirm: 'Yine de kullan',
+          previewDisabled:
+            'Özel bir güncelleme sunucusu etkinken önizleme güncellemeleri kullanılamaz.'
+        },
         offline: {
           title: 'Çevrimdışı Güncellemeler',
           desc: 'Yerel kurulum paketi aracılığıyla güncelleme',
           upload: 'Yükle',
+          checksumPlaceholder: 'SHA-256 sağlama toplamı (isteğe bağlı)',
+          invalidChecksum: 'SHA-256 sağlama toplamı 64 onaltılık karakter içermelidir.',
+          checksumMismatch: 'SHA-256 doğrulaması başarısız oldu. Paket bozulmuş olabilir.',
           invalidName: 'Geçersiz dosya adı biçimi. Lütfen GitHub sürümlerinden indirin.',
           updateFailed: 'Güncelleme başarısız oldu. Lütfen tekrar deneyin.'
         }
@@ -545,19 +616,30 @@ const tr = {
         runtimeStarted: 'PicoClaw runtime başlatıldı',
         runtimeStartFailed: 'PicoClaw runtime başlatılamadı',
         runtimeStopped: 'PicoClaw runtime durduruldu',
-        runtimeStopFailed: 'PicoClaw runtime durdurulamadı'
+        runtimeStopFailed: 'PicoClaw runtime durdurulamadı',
+        controlSwitchedToMCP: 'Kontrol harici MCP hizmetine geçirildi'
       },
       connection: {
         runtime: {
           checking: 'Kontrol ediliyor',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime hazır',
           stopped: 'Runtime durduruldu',
+          blockedByMCP: 'Harici MCP kontrolü etkin',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime mevcut değil',
           configError: 'Yapılandırma hatası'
         },
         transport: {
           connecting: 'Bağlanıyor',
-          connected: 'Bağlandı'
+          connected: 'Bağlandı',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Boşta',
@@ -571,6 +653,30 @@ const tr = {
       },
       overlay: {
         locked: 'PicoClaw cihazı kontrol ediyor. Manuel giriş duraklatıldı.'
+      },
+      control: {
+        picoclaw: 'Cihaz kontrolü: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Cihaz kontrolü: harici MCP',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Cihaz kontrolü: kapalı',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Kontrol ver',
+        release: 'Bırak',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'PicoClaw kontrolü verildi',
+        released: 'PicoClaw kontrolü bırakıldı',
+        grantFailed: 'PicoClaw kontrolü verilemedi',
+        releaseFailed: 'PicoClaw kontrolü bırakılamadı',
+        grantConfirmTitle: "Cihaz kontrolü PicoClaw'a geçirilsin mi?",
+        grantConfirmDesc: 'Harici MCP cihaz yazmaları kesintiye uğrayacak.'
       },
       install: {
         install: 'Yükle PicoClaw',
@@ -632,15 +738,22 @@ const tr = {
         deleteConfirmOk: 'Sil',
         deleteConfirmCancel: 'İptal',
         messageCount_one: '{{count}} mesaj',
-        messageCount_other: '{{count}} mesaj'
+        messageCount_other: '{{count}} mesaj',
+        messageCount: '{{count}} mesaj'
       },
       config: {
         startRuntime: "PicoClaw'ı Başlat",
         stopRuntime: "PicoClaw'ı Durdur"
       },
       start: {
+        enableConfirmTitle: "Kontrol PicoClaw'a geçirilsin mi?",
+        enableConfirmDesc: "PicoClaw'ı başlatmak harici MCP hizmetini devre dışı bırakır.",
+        enableConfirmOk: "PicoClaw'ı Başlat",
+        enableConfirmCancel: 'İptal',
         title: "PicoClaw'ı Başlat",
-        description: "PicoClaw yardımcısını kullanmaya başlamak için runtime'ı başlatın."
+        description: "PicoClaw yardımcısını kullanmaya başlamak için runtime'ı başlatın.",
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

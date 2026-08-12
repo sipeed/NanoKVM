@@ -7,15 +7,19 @@ import (
 )
 
 const (
-	CodePicoclawLockHeld         = "AI_LOCK_HELD"
-	CodeScreenshotFailed   = "SCREENSHOT_FAILED"
-	CodeScreenshotNoSignal = "SCREENSHOT_NO_SIGNAL"
-	CodeHIDWriteFailed     = "HID_WRITE_FAILED"
-	CodeInvalidAction      = "INVALID_ACTION"
-	CodeRuntimeUnavailable = "RUNTIME_UNAVAILABLE"
-	CodeRuntimeStartFailed = "RUNTIME_START_FAILED"
-	CodeSessionIDMissing   = "SESSION_ID_MISSING"
-	CodeSessionIDInvalid   = "SESSION_ID_INVALID"
+	CodePicoclawLockHeld     = "AI_LOCK_HELD"
+	CodeScreenshotFailed     = "SCREENSHOT_FAILED"
+	CodeScreenshotNoSignal   = "SCREENSHOT_NO_SIGNAL"
+	CodeHIDWriteFailed       = "HID_WRITE_FAILED"
+	CodeInvalidAction        = "INVALID_ACTION"
+	CodeRuntimeUnavailable   = "RUNTIME_UNAVAILABLE"
+	CodeRuntimeStartFailed   = "RUNTIME_START_FAILED"
+	CodeSessionIDMissing     = "SESSION_ID_MISSING"
+	CodeSessionIDInvalid     = "SESSION_ID_INVALID"
+	CodeControlModeConflict  = "AI_MODE_CONFLICT"
+	CodeControlRequired      = "CONTROL_REQUIRED"
+	CodeControlOwnedByMCP    = "CONTROL_OWNED_BY_MCP"
+	CodeControlTransitioning = "CONTROL_TRANSITIONING"
 )
 
 type PicoclawError struct {
@@ -47,6 +51,10 @@ func writeSuccess(c *gin.Context, data interface{}) {
 }
 
 func writePicoclawError(c *gin.Context, err *PicoclawError) {
+	writePicoclawErrorWithData(c, err, nil)
+}
+
+func writePicoclawErrorWithData(c *gin.Context, err *PicoclawError, data interface{}) {
 	if err == nil {
 		return
 	}
@@ -54,6 +62,9 @@ func writePicoclawError(c *gin.Context, err *PicoclawError) {
 	payload := gin.H{
 		"code":    err.Code,
 		"message": err.Message,
+	}
+	if data != nil {
+		payload["data"] = data
 	}
 	if err.SessionID != "" {
 		payload["session_id"] = err.SessionID

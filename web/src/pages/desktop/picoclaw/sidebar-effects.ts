@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import type { TFunction } from 'i18next';
 
@@ -8,6 +8,7 @@ import {
   setPicoclawRuntimeInstallSnapshot,
   type PicoclawRuntimeInstallSnapshot
 } from '@/lib/picoclaw-storage.ts';
+import { normalizeAIControlStatus, type AIControlStatus } from '@/jotai/ai-control.ts';
 import type {
   PicoclawChatMessage,
   PicoclawOverlayState,
@@ -17,6 +18,7 @@ import type {
   PicoclawTransportState
 } from '@/jotai/picoclaw.ts';
 
+import { PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, releasePicoclawInputFocus } from './keyboard-lock.ts';
 import {
   createAssistantMessage,
   createErrorMessage,
@@ -27,23 +29,39 @@ import {
   retainLatestObservationScreenshot
 } from './message-utils.ts';
 import { canConnectGateway, isPicoclawRuntimeInstalling } from './runtime-view.ts';
+import type { PicoclawRefreshOptions } from './sidebar-actions.ts';
 
 type MessageSetter = Dispatch<SetStateAction<PicoclawChatMessage[]>>;
 type TakeoverSetter = Dispatch<SetStateAction<PicoclawTakeoverState>>;
+type AIControlStatusSetter = Dispatch<SetStateAction<AIControlStatus | null>>;
+type KeyboardLockSetter = (action: { source: string; locked: boolean }) => void;
+
+const STATUS_CONFIRM_TIMEOUT_MS = 10_000;
+const STATUS_CONFIRM_INTERVAL_MS = 500;
+const STATUS_REFRESH_INTERVAL_MS = 3000;
 
 type GatewayEventOptions = {
   t: TFunction;
+  refreshStateRef: MutableRefObject<
+    (options?: PicoclawRefreshOptions) => Promise<PicoclawRuntimeStatus | null>
+  >;
   setActiveSessionId: Dispatch<SetStateAction<string>>;
   setTakeover: TakeoverSetter;
   setMessages: MessageSetter;
   setTransportState: Dispatch<SetStateAction<PicoclawTransportState>>;
   setOverlay: Dispatch<SetStateAction<PicoclawOverlayState>>;
   setRunState: Dispatch<SetStateAction<PicoclawRunState>>;
+  setRuntimeStatus: Dispatch<SetStateAction<PicoclawRuntimeStatus | null>>;
+  setAIControlStatus: AIControlStatusSetter;
+  setKeyboardLock: KeyboardLockSetter;
+  isTogglingRuntimeRef: MutableRefObject<boolean>;
 };
 
 type LifecycleOptions = {
   t: TFunction;
-  refreshStateRef: MutableRefObject<() => Promise<PicoclawRuntimeStatus | null>>;
+  refreshStateRef: MutableRefObject<
+    (options?: PicoclawRefreshOptions) => Promise<PicoclawRuntimeStatus | null>
+  >;
   setActiveSessionId: Dispatch<SetStateAction<string>>;
   setIsFreshConversation: Dispatch<SetStateAction<boolean>>;
   setMessages: MessageSetter;
@@ -62,16 +80,91 @@ type InstallSnapshotOptions = {
   setMessages: MessageSetter;
 };
 
+type GatewayAutoConnectOptions = {
+  activeSessionId: string;
+  runtimeStatus: PicoclawRuntimeStatus | null;
+  transportState: PicoclawTransportState;
+  disabled?: boolean;
+};
+
 export function usePicoclawGatewayEvents({
   t,
+  refreshStateRef,
   setActiveSessionId,
   setTakeover,
   setMessages,
   setTransportState,
   setOverlay,
-  setRunState
+  setRunState,
+  setRuntimeStatus,
+  setAIControlStatus,
+  setKeyboardLock,
+  isTogglingRuntimeRef
 }: GatewayEventOptions) {
   useEffect(() => {
+    let disposed = false;
+
+    function syncAIControlStatus(value: unknown, source: string) {
+      const nextControlStatus = normalizeAIControlStatus(value, source);
+      if (nextControlStatus) {
+        setAIControlStatus(nextControlStatus);
+      }
+    }
+
+    async function confirmRuntimeStatus(source: string) {
+      const deadline = Date.now() + STATUS_CONFIRM_TIMEOUT_MS;
+      while (!disposed && Date.now() < deadline) {
+        const status = await refreshStateRef.current();
+        if (status && status.transitioning !== true) {
+          syncAIControlStatus(status, source);
+          return status;
+        }
+        await new Promise((resolve) => window.setTimeout(resolve, STATUS_CONFIRM_INTERVAL_MS));
+      }
+      return null;
+    }
+
+    function clearActiveGatewayUI(reason: string) {
+      releasePicoclawInputFocus();
+      setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false });
+      setTakeover((current) => ({
+        ...current,
+        active: false,
+        reason
+      }));
+      setOverlay(HIDDEN_OVERLAY);
+      setTransportState('disconnected');
+      setRunState('idle');
+    }
+
+    function clearDeviceControlUI(reason: string) {
+      releasePicoclawInputFocus();
+      setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false });
+      setTakeover((current) => ({
+        ...current,
+        active: false,
+        reason
+      }));
+      setOverlay(HIDDEN_OVERLAY);
+      setRunState('idle');
+    }
+
+    function markRuntimeTransportUnavailable(reason: string) {
+      releasePicoclawInputFocus();
+      setKeyboardLock({ source: PICOCLAW_INPUT_KEYBOARD_LOCK_SOURCE, locked: false });
+      setTakeover((current) => ({
+        ...current,
+        active: false,
+        reason
+      }));
+      setOverlay(HIDDEN_OVERLAY);
+      setRunState('idle');
+      void refreshStateRef.current({
+        force: true,
+        preserveRuntimeOnError: true
+      });
+    }
+
     const unsubs = [
       picoclawGateway.on('connected', ({ sessionId }) => {
         setActiveSessionId(sessionId);
@@ -92,6 +185,11 @@ export function usePicoclawGatewayEvents({
             sessionId: current.sessionId || picoclawGateway.getSessionId(),
             reason: state
           }));
+          return;
+        }
+
+        if (state === 'error') {
+          markRuntimeTransportUnavailable('transport_error');
           return;
         }
 
@@ -138,7 +236,108 @@ export function usePicoclawGatewayEvents({
       picoclawGateway.on('error', (error) => {
         setMessages((current) => [...current, createErrorMessage(error)]);
       }),
+      picoclawGateway.on('control_mode_changed', (control) => {
+        syncAIControlStatus(control, control.source ?? 'gateway');
+        setRuntimeStatus((current) =>
+          current
+            ? {
+                ...current,
+                control_mode: control.mode,
+                transitioning: control.transitioning,
+                control,
+                capabilities: {
+                  chat: current.capabilities?.chat ?? current.ready === true,
+                  read_only_tools: current.capabilities?.read_only_tools ?? current.ready === true,
+                  device_write: control.can_control
+                }
+              }
+            : current
+        );
+        if (!control.can_control) {
+          if (control.mode === 'mcp') {
+            clearActiveGatewayUI('control_mcp');
+          } else {
+            clearDeviceControlUI('control_released');
+          }
+        }
+      }),
       picoclawGateway.on('close', (closeEvent) => {
+        if (closeEvent.code === 4006) {
+          clearActiveGatewayUI('control_mode_switched');
+          setAIControlStatus((current) =>
+            current
+              ? {
+                  ...current,
+                  transitioning: true,
+                  canControlPicoclaw: false,
+                  source: 'gateway_close'
+                }
+              : current
+          );
+          setRuntimeStatus((current) =>
+            current
+              ? {
+                  ...current,
+                  transitioning: true
+                }
+              : current
+          );
+          void confirmRuntimeStatus('gateway_close').then((status) => {
+            if (disposed || status?.control_mode !== 'mcp') return;
+            setMessages((current) => [
+              ...current,
+              createStatusMessage(t('picoclaw.status.controlSwitchedToMCP'))
+            ]);
+          });
+          return;
+        }
+        if (closeEvent.code === 4007) {
+          clearActiveGatewayUI('runtime_stopped');
+          setAIControlStatus((current) =>
+            current
+              ? {
+                  ...current,
+                  mode: current.mode === 'picoclaw' ? 'off' : current.mode,
+                  transitioning: false,
+                  canControlPicoclaw: false,
+                  source: 'gateway_runtime_stopped'
+                }
+              : current
+          );
+          setRuntimeStatus((current) =>
+            current
+              ? {
+                  ...current,
+                  ready: false,
+                  status: 'stopped',
+                  current_session: '',
+                  control_mode: current.control_mode === 'picoclaw' ? 'off' : current.control_mode,
+                  transitioning: false,
+                  control: current.control
+                    ? {
+                        ...current.control,
+                        mode: current.control.mode === 'picoclaw' ? 'off' : current.control.mode,
+                        transitioning: false,
+                        can_control: false
+                      }
+                    : current.control,
+                  capabilities: {
+                    chat: false,
+                    read_only_tools: false,
+                    device_write: false
+                  }
+                }
+              : current
+          );
+          void confirmRuntimeStatus('gateway_runtime_stopped');
+          if (!isTogglingRuntimeRef.current) {
+            setMessages((current) => [
+              ...current,
+              createStatusMessage(t('picoclaw.status.runtimeStopped'))
+            ]);
+          }
+          return;
+        }
         if (closeEvent.code === 1000) {
           setMessages((current) => [
             ...current,
@@ -149,9 +348,23 @@ export function usePicoclawGatewayEvents({
     ];
 
     return () => {
+      disposed = true;
       unsubs.forEach((unsubscribe) => unsubscribe());
     };
-  }, [setActiveSessionId, setMessages, setOverlay, setRunState, setTakeover, setTransportState, t]);
+  }, [
+    setActiveSessionId,
+    setMessages,
+    setOverlay,
+    setRunState,
+    setRuntimeStatus,
+    setAIControlStatus,
+    setKeyboardLock,
+    setTakeover,
+    setTransportState,
+    isTogglingRuntimeRef,
+    t,
+    refreshStateRef
+  ]);
 }
 
 export function usePicoclawSidebarLifecycle({
@@ -166,6 +379,12 @@ export function usePicoclawSidebarLifecycle({
   setTransportState,
   setRunState
 }: LifecycleOptions) {
+  const tRef = useRef(t);
+
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
   useEffect(() => {
     let cancelled = false;
 
@@ -183,7 +402,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.installing) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.install.installing'))
+            createStatusMessage(tRef.current('picoclaw.install.installing'))
           ]);
           return;
         }
@@ -191,7 +410,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.installed === false) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.install.requiredDescription'))
+            createStatusMessage(tRef.current('picoclaw.install.requiredDescription'))
           ]);
           return;
         }
@@ -199,7 +418,7 @@ export function usePicoclawSidebarLifecycle({
         if (nextRuntimeStatus?.model_configured === false) {
           setMessages((current) => [
             ...current,
-            createStatusMessage(t('picoclaw.model.requiredDescription'))
+            createStatusMessage(tRef.current('picoclaw.model.requiredDescription'))
           ]);
           return;
         }
@@ -210,10 +429,10 @@ export function usePicoclawSidebarLifecycle({
 
         setMessages((current) => [
           ...current,
-          createStatusMessage(t('picoclaw.status.connecting'))
+          createStatusMessage(tRef.current('picoclaw.status.connecting'))
         ]);
         try {
-          await connectGateway();
+          await connectGateway(nextSessionId);
         } catch {
           // handled by gateway events
         }
@@ -247,14 +466,15 @@ export function usePicoclawSidebarLifecycle({
     setOverlay,
     setRunState,
     setTakeover,
-    setTransportState,
-    t
+    setTransportState
   ]);
 }
 
 export function usePicoclawInstallRefresh(
   isRuntimeInstallActive: boolean,
-  refreshStateRef: MutableRefObject<() => Promise<PicoclawRuntimeStatus | null>>
+  refreshStateRef: MutableRefObject<
+    (options?: PicoclawRefreshOptions) => Promise<PicoclawRuntimeStatus | null>
+  >
 ) {
   useEffect(() => {
     if (!isRuntimeInstallActive) {
@@ -269,6 +489,55 @@ export function usePicoclawInstallRefresh(
       window.clearInterval(timer);
     };
   }, [isRuntimeInstallActive, refreshStateRef]);
+}
+
+export function usePicoclawGatewayAutoConnect({
+  activeSessionId,
+  runtimeStatus,
+  transportState,
+  disabled
+}: GatewayAutoConnectOptions) {
+  const lastAttemptAtRef = useRef(0);
+
+  useEffect(() => {
+    if (
+      disabled ||
+      !canConnectGateway(runtimeStatus) ||
+      transportState === 'connected' ||
+      transportState === 'connecting'
+    ) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastAttemptAtRef.current < STATUS_REFRESH_INTERVAL_MS) {
+      return;
+    }
+
+    lastAttemptAtRef.current = now;
+    void connectGateway(activeSessionId || undefined).catch(() => undefined);
+  }, [activeSessionId, runtimeStatus, transportState, disabled]);
+}
+
+export function usePicoclawStatusRefresh(
+  disabled: boolean,
+  refreshStateRef: MutableRefObject<
+    (options?: PicoclawRefreshOptions) => Promise<PicoclawRuntimeStatus | null>
+  >
+) {
+  useEffect(() => {
+    if (disabled) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      void refreshStateRef.current();
+    }, STATUS_REFRESH_INTERVAL_MS);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [disabled, refreshStateRef]);
 }
 
 export function usePicoclawInstallSnapshotSync({

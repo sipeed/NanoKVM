@@ -1,5 +1,10 @@
 package proto
 
+type DownloadImageReq struct {
+	File      string `json:"file" validate:"required"`
+	SHA256Sum string `json:"sha256sum"`
+}
+
 type ImageEnabledRsp struct {
 	Enabled bool `json:"enabled"`
 }

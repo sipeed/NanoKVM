@@ -22,6 +22,8 @@ src
 
 ## Local Development
 
+Requirements: Node.js >= 22 and pnpm >= 11 (the versions CI uses; enforced via the `engines` field in `package.json`).
+
 > Development requires SSH. You can enable it in the Web Settings: `Settings > SSH`.
 
 Due to CORS restrictions, authentication needs to be disabled during local development.

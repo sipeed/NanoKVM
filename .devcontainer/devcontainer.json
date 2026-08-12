@@ -1,0 +1,49 @@
+// Dev container for NanoKVM: Go cross-compilation, MaixCDK C support layer
+// and web frontend in a single container. See "Development" in README.md.
+{
+  "name": "NanoKVM",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  // The Makefile and support/sg2002/build expect the repository at
+  // ~/NanoKVM of the baked-in "build" user -- mount it exactly there.
+  "workspaceMount": "source=${localWorkspaceFolder},target=/home/build/NanoKVM,type=bind,consistency=cached",
+  "workspaceFolder": "/home/build/NanoKVM",
+  "remoteUser": "build",
+  // The published builder image bakes in the CI runner's uid (currently
+  // 1001); on Linux hosts this remaps "build" to the local uid so the bind
+  // mount stays writable. The remap chowns /home/build once, which makes
+  // the first container creation noticeably slower.
+  "updateRemoteUserUID": true,
+  // Equivalent of `. ~/MaixCDK/bin/activate` for every process spawned in
+  // the container, interactive or not (tasks, extensions, exec).
+  "remoteEnv": {
+    "VIRTUAL_ENV": "/home/build/MaixCDK",
+    "PATH": "/home/build/MaixCDK/bin:${containerEnv:PATH}"
+  },
+  "forwardPorts": [3001],
+  "portsAttributes": {
+    "3001": {
+      "label": "web dev server (vite)"
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  // This configuration itself mounts nothing from the host (VS Code may
+  // still forward your SSH agent and git credentials by default). To use
+  // git over SSH or reach a NanoKVM device from inside the container,
+  // uncomment the mount below.
+  // "mounts": [
+  //   "source=${localEnv:HOME}/.ssh,target=/home/build/.ssh,type=bind,readonly"
+  // ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-vscode.cpptools",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

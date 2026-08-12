@@ -1,7 +1,6 @@
 package hid
 
 import (
-	"NanoKVM-Server/proto"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +8,9 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/inputcontrol"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -33,7 +35,7 @@ var modeMap = map[string]string{
 func (s *Service) GetHidMode(c *gin.Context) {
 	var rsp proto.Response
 
-	mode, err := getHidMode()
+	mode, err := GetMode()
 	if err != nil {
 		rsp.ErrRsp(c, -1, "get HID mode failed")
 		return
@@ -43,6 +45,23 @@ func (s *Service) GetHidMode(c *gin.Context) {
 		Mode: mode,
 	})
 	log.Debugf("get hid mode: %s", mode)
+}
+
+func (s *Service) GetKeyboardLedStatus(c *gin.Context) {
+	var rsp proto.Response
+	status := GetKeyboardLedStatus()
+	updatedAt := ""
+	if !status.UpdatedAt.IsZero() {
+		updatedAt = status.UpdatedAt.UTC().Format(time.RFC3339Nano)
+	}
+
+	rsp.OkRspWithData(c, &proto.GetKeyboardLedStatusRsp{
+		NumLock:    status.NumLock,
+		CapsLock:   status.CapsLock,
+		ScrollLock: status.ScrollLock,
+		Known:      status.Known,
+		UpdatedAt:  updatedAt,
+	})
 }
 
 func (s *Service) SetHidMode(c *gin.Context) {
@@ -58,7 +77,7 @@ func (s *Service) SetHidMode(c *gin.Context) {
 		return
 	}
 
-	if mode, _ := getHidMode(); req.Mode == mode {
+	if mode, _ := GetMode(); req.Mode == mode {
 		rsp.OkRsp(c)
 		return
 	}
@@ -91,7 +110,17 @@ func (s *Service) SetHidMode(c *gin.Context) {
 func (s *Service) ResetHid(c *gin.Context) {
 	var rsp proto.Response
 
-	if err := ResetUSBPHY(); err != nil {
+	manual := s.newManualSession()
+	defer manual.Close()
+	reservation, err := manual.Reserve(c.Request.Context(), inputcontrol.ManualRelativeMouse, false, nil)
+	if err != nil {
+		log.Errorf("failed to acquire manual control for HID reset: %v", err)
+		rsp.ErrRsp(c, -1, "HID control is busy")
+		return
+	}
+	err = manual.Execute(ResetUSBPHY)
+	reservation.Complete(err == nil)
+	if err != nil {
 		log.Errorf("failed to reset hid: %v", err)
 		rsp.ErrRsp(c, -1, "failed to reset hid")
 		return
@@ -194,7 +223,7 @@ func copyModeFile(srcScript string) error {
 	return nil
 }
 
-func getHidMode() (string, error) {
+func GetMode() (string, error) {
 	data, err := os.ReadFile(ModeFlag)
 	if err != nil {
 		log.Errorf("failed to read %s: %s", ModeFlag, err)

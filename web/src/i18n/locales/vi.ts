@@ -78,6 +78,11 @@ const vi = {
       frameDetectTip:
         'Tính toán sự khác biệt giữa các khung hình. Dừng truyền video khi không có thay đổi trên màn hình máy chủ từ xa.',
       resetHdmi: 'Đặt lại HDMI',
+      mixedH264: {
+        title: 'Xung đột luồng H.264',
+        description:
+          'H.264 Direct và H.264 WebRTC đang được sử dụng đồng thời. Điều này có thể gây xé hình hoặc video bị hỏng. Vui lòng chỉ sử dụng một chế độ H.264.'
+      },
       captureStatus: {
         hdmiError: 'Lỗi màn hình HDMI',
         unsupportedResolution: 'Độ phân giải hiện tại không được hỗ trợ',
@@ -250,7 +255,15 @@ const vi = {
       disabled: '/data phân vùng là RO nên không tải được image',
       uploadbox: 'Thả file vào đây hoặc bấm vào để chọn',
       inputfile: 'Vui lòng nhập File hình ảnh',
-      NoISO: 'Không có ISO'
+      NoISO: 'Không có ISO',
+      sha256: 'SHA-256 (tùy chọn)',
+      sha256Placeholder: 'Nhập mã kiểm tra SHA-256 gồm 64 ký tự',
+      invalidSHA256: 'SHA-256 phải là chuỗi thập lục phân gồm 64 ký tự',
+      failed: 'Tải xuống thất bại',
+      success: 'Tải xuống thành công',
+      checksumFailed: 'Tải xuống thất bại: xác minh SHA-256 không thành công',
+      cancel: 'Hủy',
+      cancelFailed: 'Không thể hủy tải xuống'
     },
     power: {
       title: 'Nguồn',
@@ -267,6 +280,24 @@ const vi = {
     },
     settings: {
       title: 'Cài đặt',
+      mcp: {
+        title: 'Dịch vụ MCP',
+        service: 'Điều khiển từ xa MCP',
+        serviceDesc:
+          'Cho phép các máy khách MCP đáng tin cậy điều khiển bàn phím và chuột và chụp ảnh màn hình',
+        securityWarning:
+          'Bất kỳ ai có khóa API này đều có thể điều khiển máy chủ từ xa và xem màn hình. Hãy sử dụng HTTPS và chỉ bật dịch vụ trên các mạng đáng tin cậy.',
+        endpoint: 'Điểm cuối',
+        apiKey: 'Khóa API',
+        regenerateConfirmTitle: 'Tạo lại khóa API MCP?',
+        regenerateConfirmDesc: 'Khóa hiện tại sẽ ngừng hoạt động ngay lập tức.',
+        enableConfirmTitle: 'Bật điều khiển MCP bên ngoài?',
+        enableConfirmDesc: 'Bật MCP sẽ dừng PicoClaw và đóng tất cả phiên PicoClaw đang hoạt động.',
+        failed: 'Thao tác MCP không thành công',
+        copyFailed: 'Sao chép thất bại. Vui lòng sao chép thủ công.',
+        okBtn: 'Xác nhận',
+        cancelBtn: 'Hủy'
+      },
       about: {
         title: 'Giới thiệu về NanoKVM',
         information: 'Thông tin',
@@ -300,9 +331,25 @@ const vi = {
           modeOff: 'Tắt',
           modeAuto: 'Tự động ẩn',
           modeAlways: 'Luôn hiển thị',
+          keyboardLedStatus: 'Chỉ báo khóa bàn phím',
+          keyboardLedStatusDesc:
+            'Hiển thị trạng thái Num Lock, Caps Lock và Scroll Lock của máy tính từ xa',
           icons: 'Biểu tượng menu con',
           iconsDesc: 'Hiển thị biểu tượng menu con trên thanh menu'
         }
+      },
+      keyboardLedStatus: {
+        groupLabel: 'Trạng thái khóa bàn phím từ xa',
+        indicatorLabel: '{{label}}: {{state}}',
+        numLock: 'Num Lock',
+        numLockShort: 'Num',
+        capsLock: 'Caps Lock',
+        capsLockShort: 'Caps',
+        scrollLock: 'Scroll Lock',
+        scrollLockShort: 'Scr',
+        on: 'Bật',
+        off: 'Tắt',
+        unknown: 'Không rõ'
       },
       device: {
         title: 'Thiết bị',
@@ -342,7 +389,11 @@ const vi = {
           tip: 'Tắt đi nếu không cần thiết'
         },
         hdmi: {
-          description: 'Kích hoạt HDMI/đầu ra màn hình'
+          description: 'Kích hoạt HDMI/đầu ra màn hình',
+          idleTimeoutTitle: 'Thời gian chờ khi không hoạt động',
+          idleTimeoutDescription:
+            'Dừng việc ghi hình HDMI sau khi không có người xem hoạt động trong',
+          minutes: 'phút'
         },
         autostart: {
           title: 'Cài đặt tập lệnh tự khởi động',
@@ -468,10 +519,29 @@ const vi = {
         previewDesc: 'Nhận quyền truy cập sớm vào các tính năng và cải tiến mới',
         previewTip:
           'Xin lưu ý rằng các bản phát hành xem trước có thể có lỗi hoặc chức năng chưa hoàn chỉnh!',
+        customServer: {
+          title: 'Máy chủ cập nhật tùy chỉnh',
+          desc: 'Kiểm tra và tải xuống các bản cập nhật trực tuyến từ máy chủ được chỉ định',
+          invalidUrl:
+            'Nhập thư mục máy chủ HTTP hoặc HTTPS hợp lệ, không chứa truy vấn, phân đoạn hoặc latest.json.',
+          loadFailed: 'Không thể tải cấu hình máy chủ cập nhật.',
+          saveFailed: 'Không thể lưu cấu hình máy chủ cập nhật.',
+          saved: 'Đã lưu cấu hình máy chủ cập nhật.',
+          save: 'Lưu',
+          confirmTitle: 'Sử dụng máy chủ cập nhật tùy chỉnh?',
+          confirmDesc:
+            'SHA-512 chỉ kiểm tra xem gói có khớp với tệp kê khai do máy chủ này cung cấp hay không. Điều này không chứng minh rằng gói đó là bản phát hành NanoKVM chính thức. Máy chủ bị lỗi hoặc độc hại có thể khiến thiết bị không thể sử dụng, gây mất dữ liệu hoặc xâm phạm hệ thống.',
+          confirm: 'Vẫn sử dụng',
+          previewDisabled:
+            'Không thể sử dụng Bản cập nhật xem trước khi máy chủ cập nhật tùy chỉnh đang được bật.'
+        },
         offline: {
           title: 'Cập nhật ngoại tuyến',
           desc: 'Cập nhật thông qua gói cài đặt cục bộ',
           upload: 'Tải lên',
+          checksumPlaceholder: 'Tổng kiểm SHA-256 (không bắt buộc)',
+          invalidChecksum: 'Tổng kiểm SHA-256 phải chứa 64 ký tự thập lục phân.',
+          checksumMismatch: 'Xác minh SHA-256 không thành công. Gói có thể đã bị hỏng.',
           invalidName:
             'Định dạng tên tệp không hợp lệ. Vui lòng tải xuống từ bản phát hành GitHub.',
           updateFailed: 'Cập nhật thất bại. Vui lòng thử lại.'
@@ -544,19 +614,30 @@ const vi = {
         runtimeStarted: 'Runtime PicoClaw đã bắt đầu',
         runtimeStartFailed: 'Không khởi động được runtime PicoClaw',
         runtimeStopped: 'Runtime PicoClaw đã dừng',
-        runtimeStopFailed: 'Không dừng được runtime PicoClaw'
+        runtimeStopFailed: 'Không dừng được runtime PicoClaw',
+        controlSwitchedToMCP: 'Quyền điều khiển đã chuyển sang dịch vụ MCP bên ngoài'
       },
       connection: {
         runtime: {
           checking: 'Đang kiểm tra',
+          restoring: 'Restoring PicoClaw',
           ready: 'Runtime đã sẵn sàng',
           stopped: 'Đã dừng runtime',
+          blockedByMCP: 'Điều khiển MCP bên ngoài đang hoạt động',
+          readyBlockedByMCP:
+            'The runtime is running, but external MCP currently controls device input.',
+          readyWithoutControl:
+            'The runtime is running. Grant PicoClaw device control before reconnecting.',
           unavailable: 'Runtime không khả dụng',
           configError: 'Lỗi cấu hình'
         },
         transport: {
           connecting: 'Đang kết nối',
-          connected: 'Đã kết nối'
+          connected: 'Đã kết nối',
+          disconnected: 'Disconnected',
+          reconnect: 'Reconnect',
+          reconnectDescription: 'Reconnect to the running PicoClaw session.',
+          reconnectBlocked: 'PicoClaw needs device control before reconnecting.'
         },
         run: {
           idle: 'Nhàn rỗi',
@@ -570,6 +651,30 @@ const vi = {
       },
       overlay: {
         locked: 'PicoClaw đang điều khiển thiết bị. Việc nhập thủ công bị tạm dừng.'
+      },
+      control: {
+        picoclaw: 'Điều khiển thiết bị: PicoClaw',
+        picoclawDescription: 'PicoClaw can write keyboard and mouse input. Manual input may pause.',
+        mcp: 'Điều khiển thiết bị: MCP bên ngoài',
+        mcpDescription: 'External MCP can write to the device. PicoClaw will not take over input.',
+        off: 'Điều khiển thiết bị: tắt',
+        offDescription:
+          'AI will not write keyboard or mouse input. Manual control remains available.',
+        transitioning: 'Device control: switching',
+        transitioningDescription: 'Device control is syncing. Please wait.',
+        grant: 'Cấp quyền điều khiển',
+        release: 'Nhả',
+        releasing: 'Releasing...',
+        switching: 'Switching...',
+        releasingLabel: 'Device control: releasing',
+        releasingDescription:
+          'Device control is being returned. PicoClaw has stopped current writes.',
+        granted: 'Đã cấp quyền điều khiển PicoClaw',
+        released: 'Đã nhả quyền điều khiển PicoClaw',
+        grantFailed: 'Không thể cấp quyền điều khiển PicoClaw',
+        releaseFailed: 'Không thể nhả quyền điều khiển PicoClaw',
+        grantConfirmTitle: 'Chuyển điều khiển thiết bị sang PicoClaw?',
+        grantConfirmDesc: 'Các thao tác ghi thiết bị của MCP bên ngoài sẽ bị gián đoạn.'
       },
       install: {
         install: 'Cài đặt PicoClaw',
@@ -632,15 +737,22 @@ const vi = {
         deleteConfirmOk: 'Xóa',
         deleteConfirmCancel: 'Hủy',
         messageCount_one: '{{count}} tin nhắn',
-        messageCount_other: '{{count}} tin nhắn'
+        messageCount_other: '{{count}} tin nhắn',
+        messageCount: '{{count}} tin nhắn'
       },
       config: {
         startRuntime: 'Bắt đầu PicoClaw',
         stopRuntime: 'Dừng PicoClaw'
       },
       start: {
+        enableConfirmTitle: 'Chuyển quyền điều khiển sang PicoClaw?',
+        enableConfirmDesc: 'Khởi động PicoClaw sẽ tắt dịch vụ MCP bên ngoài.',
+        enableConfirmOk: 'Bắt đầu PicoClaw',
+        enableConfirmCancel: 'Hủy',
         title: 'Bắt đầu PicoClaw',
-        description: 'Bắt đầu runtime để sử dụng trợ lý PicoClaw.'
+        description: 'Bắt đầu runtime để sử dụng trợ lý PicoClaw.',
+        switchFromMCP: 'Switch to PicoClaw and start',
+        takeoverAndStart: 'Take over and start'
       }
     },
     error: {

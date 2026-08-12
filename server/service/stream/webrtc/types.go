@@ -12,8 +12,9 @@ import (
 type WebRTCManager struct {
 	clients        map[*websocket.Conn]*Client
 	clientSnapshot atomic.Pointer[[]*Client]
-	videoSending   int32
+	videoSending   bool
 	mutex          sync.Mutex
+	viewerVersion  uint64
 }
 
 type Client struct {
@@ -28,7 +29,10 @@ func (c *Client) WsConn() *websocket.Conn {
 }
 
 type SignalingHandler struct {
-	client *Client
+	client         *Client
+	mutex          sync.Mutex
+	unregisterMode func()
+	closed         bool
 }
 
 type Track struct {

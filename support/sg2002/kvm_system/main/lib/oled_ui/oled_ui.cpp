@@ -492,26 +492,30 @@ void oled_auto_sleep_time_update(void)
 
 void oled_auto_sleep(void)
 {
-	uint8_t tmp8;
+	uint16_t tmp16;
 	uint8_t sleep_close_signal = 0;
 	FILE *fp;
 	int file_size;
-	uint8_t RW_Data[10];	
+	char RW_Data[10] = {0};
 	if(access("/etc/kvm/oled_sleep", F_OK) == 0){
         fp = fopen("/etc/kvm/oled_sleep", "r");
 		fseek(fp, 0, SEEK_END);
 		file_size = ftell(fp); 
 		fseek(fp, 0, SEEK_SET);
+		if(file_size >= (int)sizeof(RW_Data)){
+			file_size = sizeof(RW_Data) - 1;
+		}
         fread(RW_Data, sizeof(char), file_size, fp);
+		RW_Data[file_size] = '\0';
         fclose(fp);
 		if(file_size != 0){
-			tmp8 = atoi((char*)RW_Data);
+			tmp16 = atoi(RW_Data);
 		} else {
-			tmp8 = OLED_SLEEP_DELAY_DEFAULT;
+			tmp16 = OLED_SLEEP_DELAY_DEFAULT;
 		}
-		if(tmp8 != kvm_oled_state.oled_sleep_param){
-			// printf("/etc/kvm/oled_sleep = %d\n", tmp8);
-			kvm_oled_state.oled_sleep_param = tmp8;
+		if(tmp16 != kvm_oled_state.oled_sleep_param){
+			// printf("/etc/kvm/oled_sleep = %d\n", tmp16);
+			kvm_oled_state.oled_sleep_param = tmp16;
 			if(kvm_oled_state.oled_sleep_param < OLED_SLEEP_DELAY_MIN){
 				sleep_close_signal = 1;
 			} else {

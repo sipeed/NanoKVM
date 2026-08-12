@@ -5,6 +5,10 @@ web/node_modules
 web/dist
 web/web
 
+# pnpm keeps its content-addressable store next to the project when the
+# home directory is on a different filesystem (e.g. inside the dev container)
+.pnpm-store/
+
 .DS_Store
 *.local
 *.suo
@@ -29,3 +33,6 @@ support/sg2002/kvm_vision_test/CMakeLists.txt
 support/sg2002/additional/original
 kvmapp/server/dl_lib
 kvmapp/kvm_system/kvm_system
+
+# Release packages assembled by scripts/package.sh
+/build/

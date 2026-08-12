@@ -1,0 +1,132 @@
+name: Builder Image
+
+# Builds the nanokvm-builder image (riscv64 musl toolchain, Go, and a MaixCDK
+# checkout patched with support/sg2002/additional) and publishes it to GHCR so
+# the release workflow does not have to rebuild the SDK on every tag.
+#
+# The image is deliberately not rebuilt on every push: it only carries the
+# toolchain. Release builds re-sync support/sg2002/additional into MaixCDK and
+# recompile from the checked-out source, so a slightly stale image is harmless.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - docker/**
+      - .github/workflows/builder-image.yml
+
+concurrency:
+  group: builder-image
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and publish nanokvm-builder
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Before:"
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /usr/local/share/boost /usr/local/share/powershell
+          sudo docker image prune -af
+          echo "After:"
+          df -h /
+
+      - name: Resolve image reference
+        id: image
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          # GHCR only accepts lowercase repository paths.
+          owner=$(echo "$OWNER" | tr '[:upper:]' '[:lower:]')
+          echo "ref=ghcr.io/$owner/nanokvm-builder" >> "$GITHUB_OUTPUT"
+
+      # Logging in before the build means a credential or registry problem fails
+      # in seconds instead of after a full SDK build.
+      - name: Log in to GHCR
+        env:
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ok=0
+          for attempt in 1 2 3; do
+            if printf '%s' "$GHCR_TOKEN" \
+                 | docker login ghcr.io -u "$GHCR_USER" --password-stdin; then
+              ok=1
+              break
+            fi
+            echo "login attempt $attempt failed, retrying in 15s"
+            sleep 15
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "::error::could not log in to ghcr.io after 3 attempts"
+            exit 1
+          fi
+
+      - name: Build image
+        run: |
+          # The Dockerfile chowns MaixCDK to DOCKER_UID/DOCKER_GID and the
+          # entrypoint gosu's to the caller's ids, so bake in the ids the
+          # release job will actually run as. Otherwise the SDK tree belongs to
+          # 1000 and syncing components into it fails with permission denied.
+          docker build \
+            --build-arg DOCKER_UID="$(id -u)" \
+            --build-arg DOCKER_GID="$(id -g)" \
+            --tag "${{ steps.image.outputs.ref }}:latest" \
+            --tag "${{ steps.image.outputs.ref }}:${{ github.sha }}" \
+            --file docker/Dockerfile \
+            .
+
+      - name: Verify toolchain
+        run: |
+          docker run --rm -i "${{ steps.image.outputs.ref }}:latest" go version
+          docker run --rm -i "${{ steps.image.outputs.ref }}:latest" \
+            riscv64-unknown-linux-musl-gcc --version | head -1
+          docker run --rm -i "${{ steps.image.outputs.ref }}:latest" patchelf --version
+
+      - name: Push image
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.ref }}
+          SHA: ${{ github.sha }}
+        run: |
+          # ghcr.io occasionally times out; a retry is cheaper than rebuilding.
+          # Push the immutable sha tag first so a failure there cannot leave
+          # :latest — which release.yml pulls — already moved.
+          for tag in "$SHA" latest; do
+            ok=0
+            for attempt in 1 2 3; do
+              if docker push "$IMAGE_REF:$tag"; then
+                ok=1
+                break
+              fi
+              echo "push of $tag attempt $attempt failed, retrying in 15s"
+              sleep 15
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "::error::could not push $IMAGE_REF:$tag after 3 attempts"
+              exit 1
+            fi
+          done
+
+      - name: Summary
+        run: |
+          {
+            echo "### Builder image published"
+            echo
+            echo '```'
+            echo "${{ steps.image.outputs.ref }}:latest"
+            echo "${{ steps.image.outputs.ref }}:${{ github.sha }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

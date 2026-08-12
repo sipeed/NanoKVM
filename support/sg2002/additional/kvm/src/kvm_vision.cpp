@@ -10,6 +10,11 @@
  * // free 错内存时会炸的问题
  */
 #include "kvm_vision.h"
+#include "vi_state_shared.hpp"
+#include "internal/vi_state_writer.hpp"
+
+#include <errno.h>
+#include <sys/stat.h>
 
 #define default_venc_chn        1
 
@@ -32,6 +37,7 @@
 #define default_mjpeg_qlty      60
 #define default_h264_qlty       1000
 #define default_h264_gop        30
+#define fresh_frame_discard_count 5
 
 #define kvmv_data_buffer_size   4
 #define Try_rounds_HDMI_err_res 5
@@ -40,15 +46,18 @@
 #define vi_height_path          "/kvmapp/kvm/height"
 #define hdmi_mode_path          "/etc/kvm/hdmi_mode"
 #define hdmi_state_path         "/proc/lt_int"
+#define hdmi_signal_file_path   "/kvmapp/kvm/state"
 #define watchdog_mode_path      "/etc/kvm/watchdog"
 #define watchdog_temp_path      "/tmp/watchdog"
 #define watchdog_file           "/tmp/nanokvm_wd"
+#define vi_state_publish_interval_ms 10000U
 
 #define LT6911_ADDR 	0x2B
 #define LT6911_READ 	0xFF
 #define LT6911_WRITE 	0x00
 
 pthread_mutex_t vi_mutex;
+pthread_mutex_t hdmi_signal_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static char NanoKVM_edit[] = {
 	0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,0x41,0x0C,0x33,0xC2,0x66,0xBA,0x00,0x00,
@@ -73,7 +82,6 @@ typedef struct {
 	uint16_t vpss_height = default_vpss_height;
 	uint8_t venc_type;
 	uint16_t qlty;
-	uint8_t cam_state = 0;
 	uint8_t stream_stop;
 	uint8_t frame_detact = 0;
 	uint8_t display;
@@ -93,6 +101,7 @@ typedef struct {
     uint8_t hdmi_try_rounds = 0;
     uint8_t vi_detect_state = 0;
     uint8_t venc_auto_recyc = 0;
+    uint8_t fresh_frame_count = 0;
 } kvmv_cfg_t;
 
 typedef struct {
@@ -118,11 +127,100 @@ kvmv_data_t kvmv_data_buffer[kvmv_data_buffer_size];
 uint8_t kvmv_data_buffer_index = 0;
 
 uint8_t debug_en = 0;
+uint8_t last_vi_state_code = 0;
+uint32_t last_vi_state_refresh_ms = 0;
+uint8_t hdmi_capture_enabled = 0;
+uint8_t hdmi_signal_active = 0;
+
+void debug(const char *format, ...);
+
+static bool write_hdmi_signal_file(uint8_t active)
+{
+    char temp_path[] = "/kvmapp/kvm/.state.tmp.XXXXXX";
+    const char *state = active != 0 ? "1\n" : "0\n";
+    const size_t state_size = 2;
+    int fd = mkstemp(temp_path);
+    if(fd < 0){
+        debug("[hdmi] failed to create state file: %d\n", errno);
+        return false;
+    }
+
+    int failure = 0;
+    if(fchmod(fd, 0644) != 0){
+        failure = errno;
+    }
+
+    size_t written = 0;
+    while(failure == 0 && written < state_size){
+        ssize_t result = write(fd, state + written, state_size - written);
+        if(result > 0){
+            written += (size_t)result;
+        } else if(result < 0 && errno == EINTR){
+            continue;
+        } else {
+            failure = result < 0 ? errno : EIO;
+        }
+    }
+
+    if(failure == 0 && fsync(fd) != 0){
+        failure = errno;
+    }
+    if(close(fd) != 0 && failure == 0){
+        failure = errno;
+    }
+    if(failure == 0 && rename(temp_path, hdmi_signal_file_path) != 0){
+        failure = errno;
+    }
+    if(failure != 0){
+        unlink(temp_path);
+        debug("[hdmi] failed to publish state file: %d\n", failure);
+        return false;
+    }
+    return true;
+}
+
+static void set_hdmi_signal_state(uint8_t active)
+{
+    pthread_mutex_lock(&hdmi_signal_mutex);
+    uint8_t enabled = __atomic_load_n(&hdmi_capture_enabled, __ATOMIC_ACQUIRE);
+    uint8_t next = enabled != 0 && active != 0 ? 1 : 0;
+    uint8_t previous = __atomic_exchange_n(&hdmi_signal_active, next, __ATOMIC_ACQ_REL);
+    if(previous != next){
+        write_hdmi_signal_file(next);
+    }
+    pthread_mutex_unlock(&hdmi_signal_mutex);
+}
+
+static void set_hdmi_capture_enabled(uint8_t enabled)
+{
+    pthread_mutex_lock(&hdmi_signal_mutex);
+    __atomic_store_n(&hdmi_capture_enabled, enabled != 0 ? 1 : 0, __ATOMIC_RELEASE);
+    __atomic_store_n(&hdmi_signal_active, 0, __ATOMIC_RELEASE);
+    write_hdmi_signal_file(0);
+    pthread_mutex_unlock(&hdmi_signal_mutex);
+}
+
+static void set_hdmi_detection_state(uint8_t active)
+{
+    __atomic_store_n(&kvmv_cfg.hdmi_cable_state, active != 0 ? 1 : 0, __ATOMIC_RELEASE);
+    set_hdmi_signal_state(active);
+}
+
 void debug(const char *format, ...)
 {
     if(debug_en){
         printf(format);
     }
+}
+
+uint8_t refresh_vi_state()
+{
+	// The driver read blocks for about a second; mark the deadline before it so
+	// that the publication cadence measures wall-clock time, not read time plus it.
+    last_vi_state_refresh_ms = vi_state_shared::monotonic_ms();
+    last_vi_state_code = vi_state_shared::refresh();
+    set_hdmi_detection_state(last_vi_state_code == 1 || last_vi_state_code >= 3);
+    return last_vi_state_code;
 }
 
 uint8_t to_roll(int8_t _input)
@@ -205,67 +303,6 @@ void write_res_to_file(uint16_t _width, uint16_t _height)
     system("sync");
 }
 
-/* return 0 : VI not init;
- * return 1 : HDMI and CSI status are normal;
- * return 2 : HDMI abnormal;
- * return 3 : CSI abnormal: width too small;
- * return 4 : CSI abnormal: width too large;
- * return 5 : CSI abnormal: height too small;
- * return 6 : CSI abnormal: height too large;
- * return 7 : CSI abnormal: Unknown reason;
- */
-uint8_t get_vi_state()
-{
-	char VI_State[10]={0};
-	char cmd[100] = "cat /proc/cvitek/vi_dbg | grep -A 17 VIDevFPS | awk '{print $3}'";
-	uint8_t FPS[2];
-	uint8_t VIWHGTLSCnt[4];
-	FILE* fp = popen( cmd, "r" );
-    uint8_t ret = 0;
-	
-	if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-		FPS[0] = atoi(VI_State);
-		// debug("VIDevFPS = %d\n", FPS[0]);
-	} else {
-		pclose(fp);
-		return ret;	// VI not init;
-	}
-	if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-		FPS[1] = atoi(VI_State);
-		// debug("VIFPS = %d\n", FPS[1]);
-	}
-	if (FPS[0] == 0){
-		ret = 2;	// HDMI not OK;
-	} else if (FPS[1] == 0){
-		ret = 3;	// HDMI OK ; CSI not;
-	} else {
-		ret = 1;	// HDMI CSI OK;
-	}
-    if(ret == 3){
-        // Ignore other information
-        uint8_t count = 0;
-        for(count = 0; count < 13; count ++){
-            fgets(VI_State, sizeof(VI_State), fp);
-        }
-        // Check if the resolution might be set incorrectly
-        for(count = 0; count < 4; count ++){
-            if (fgets(VI_State, sizeof(VI_State), fp) != NULL){
-                // debug("VI_State = %s", VI_State);
-                VIWHGTLSCnt[count] = atoi(VI_State);
-                // printf("count = %d, val = %d\n", count, atoi(VI_State));
-            }
-        }
-
-        if(VIWHGTLSCnt[0] != 0) ret = 3;      // The vi width setting value is too small
-        else if(VIWHGTLSCnt[1] != 0) ret = 4; // The vi width setting value is too large
-        else if(VIWHGTLSCnt[2] != 0) ret = 5; // The vi height setting value is too small
-        else if(VIWHGTLSCnt[3] != 0) ret = 6; // The vi height setting value is too large
-        else ret = 7; // printf("[kvmv] Unexpected situation\n");
-    }
-	pclose(fp);
-    return ret;
-}
-
 int set_hdmi_mode(uint8_t _hdmi_mode)
 {
     if(_hdmi_mode >= 0 && _hdmi_mode <= 2){
@@ -284,14 +321,16 @@ int get_hdmi_mode(void)
     if(access(hdmi_mode_path, F_OK) == 0){
         // exist
         FILE *fp;
-        int file_size;
         uint8_t tmp8;
-        uint8_t RW_Data[2];
+        uint8_t RW_Data[3] = {0};
 
         fp = fopen(hdmi_mode_path, "r");
-        fread(RW_Data, sizeof(char), 1, fp);
+        if (fp == NULL) {
+            kvmv_cfg.hdmi_mode = 0;
+            return 0;
+        }
+        fread(RW_Data, sizeof(char), sizeof(RW_Data) - 1, fp);
         fclose(fp);
-        RW_Data[2] = 0;
         tmp8 = atoi((char*)RW_Data);
         if(tmp8 > 2) {
             tmp8 = 0;
@@ -318,7 +357,7 @@ uint8_t watchdog_sf_is_open(void)
 	else return 0;
 }
 
-int vision_update_watchdog() 
+int vision_update_watchdog()
 {
     FILE *file;
 
@@ -344,7 +383,7 @@ int get_manual_resolution(void)
     if(access("/kvmapp/kvm/width", F_OK) == 0){
         fp = fopen("/kvmapp/kvm/width", "r");
         fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp); 
+        file_size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         fread(RW_Data, sizeof(char), file_size, fp);
         fclose(fp);
@@ -356,7 +395,7 @@ int get_manual_resolution(void)
     if(access("/kvmapp/kvm/height", F_OK) == 0){
         fp = fopen("/kvmapp/kvm/height", "r");
         fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp); 
+        file_size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         fread(RW_Data, sizeof(char), file_size, fp);
         fclose(fp);
@@ -414,7 +453,7 @@ uint8_t auto_try_res()
     uint8_t auto_trying_times = 0;
 
     for (auto_trying_times = 0; auto_trying_times < sizeof(hdmi_res_list)/4; auto_trying_times++){
-        err_code = get_vi_state();
+        err_code = refresh_vi_state();
         switch(err_code){
         case 0:
             // shouldn't be possible to run here
@@ -429,6 +468,7 @@ uint8_t auto_try_res()
             // HDMI not detected or resolution not supported; interval checks will continue
             printf("[kvmv] Cannot obtain HDMI input\n");
             auto_trying_times--;
+            time::sleep_ms(1000);
             break;
         case 3: // width too small
         case 4: // width too large
@@ -453,9 +493,9 @@ uint8_t auto_try_res()
             break;
         }
     }
-    if (get_vi_state() == 1) return 1;
-    if (get_vi_state() == 2) return 2;
-    else return 0;
+    err_code = refresh_vi_state();
+    if (err_code == 1 || err_code == 2) return err_code;
+    return 0;
 }
 
 /* return :
@@ -495,15 +535,20 @@ uint8_t chack_ion()
 void lt6911_enable()
 {
 	uint8_t buf[2];
+
+    if(kvmv_cfg.hdmi_version == 3){
+        return;
+    }
+
 	buf[0] = 0xff;
 	buf[1] = 0x80;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
-	
+
 	buf[0] = 0xee;
 	buf[1] = 0x01;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
 
-    if(kvmv_cfg.hdmi_version != 0){
+    if(kvmv_cfg.hdmi_version == 1){
         // disable watchdog
         buf[0] = 0x10;
         buf[1] = 0x00;
@@ -514,10 +559,15 @@ void lt6911_enable()
 void lt6911_disable()
 {
 	uint8_t buf[2];
+
+    if(kvmv_cfg.hdmi_version == 3){
+        return;
+    }
+
 	buf[0] = 0xff;
 	buf[1] = 0x80;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
-	
+
 	buf[0] = 0xee;
 	buf[1] = 0x00;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
@@ -629,6 +679,38 @@ uint8_t lt6911_get_hdmi_res()
         if(revbuf[0] == 0x55)       return 1;
         else if(revbuf[0] == 0x88)  return 0;
         else return 0;
+    } else if (kvmv_cfg.hdmi_version == 3){
+        // LT6911D
+        buf[0] = 0xff;
+        buf[1] = 0xe0;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
+
+        // Hactive
+        buf[0] = 0x8c;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 1);
+        maix::Bytes *dat0 = LT6911_i2c.readfrom(LT6911_ADDR, 2);
+
+        // Vactive
+        buf[0] = 0x8e;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 1);
+        maix::Bytes *dat1 = LT6911_i2c.readfrom(LT6911_ADDR, 2);
+
+        revbuf[0] = (uint8_t)dat0->data[0];
+        revbuf[1] = (uint8_t)dat0->data[1];
+        revbuf[2] = (uint8_t)dat1->data[0];
+        revbuf[3] = (uint8_t)dat1->data[1];
+
+        Hactive = ((revbuf[0] << 8)|revbuf[1]) * 2;
+        Vactive = (revbuf[2] << 8)|revbuf[3];
+
+        debug("[hdmi]HDMI-D res modification event\n");
+        debug("[hdmi]new res: %d * %d\n", Hactive, Vactive);
+
+        delete dat0;
+        delete dat1;
+
+        if(Hactive != 0 || Vactive != 0) return 1;
+        else return 0;
     } else {
         return 0;
     }
@@ -686,7 +768,7 @@ uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
 	uint16_t Hactive;
 
     if(kvmv_cfg.hdmi_version == 0){
-        // LT6911C	
+        // LT6911C
         buf[0] = 0xff;
         buf[1] = 0xc2;
         LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
@@ -705,7 +787,7 @@ uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
         revbuf[1] = (uint8_t)dat0->data[1];
         revbuf[2] = (uint8_t)dat1->data[0];
         revbuf[3] = (uint8_t)dat1->data[1];
-        
+
         delete dat0;
         delete dat1;
 
@@ -738,6 +820,33 @@ uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
 
         Vactive = (revbuf[0] << 8)|revbuf[1];
         Hactive = (revbuf[2] << 8)|revbuf[3];
+    } else if(kvmv_cfg.hdmi_version == 3) {
+        // LT6911D
+        debug("[hdmi]D get csi res\n");
+        buf[0] = 0xff;
+        buf[1] = 0xe0;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 2);
+
+        // Vactive
+        buf[0] = 0x8e;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 1);
+        maix::Bytes *dat0 = LT6911_i2c.readfrom(LT6911_ADDR, 2);
+
+        // Hactive
+        buf[0] = 0x8c;
+        LT6911_i2c.writeto(LT6911_ADDR, buf, 1);
+        maix::Bytes *dat1 = LT6911_i2c.readfrom(LT6911_ADDR, 2);
+
+        revbuf[0] = (uint8_t)dat0->data[0];
+        revbuf[1] = (uint8_t)dat0->data[1];
+        revbuf[2] = (uint8_t)dat1->data[0];
+        revbuf[3] = (uint8_t)dat1->data[1];
+
+        delete dat0;
+        delete dat1;
+
+        Vactive = (revbuf[0] << 8)|revbuf[1];
+        Hactive = ((revbuf[2] << 8)|revbuf[3]) * 2;
     } else {
         return UNKNOWN_RES;
     }
@@ -790,7 +899,7 @@ void lt6911_read_reg(uint8_t reg)
 	buf[0] = reg;
 	LT6911_i2c.writeto(LT6911_ADDR, buf, 1);
 
-	maix::Bytes *dat = LT6911_i2c.readfrom(LT6911_ADDR, 16);	
+	maix::Bytes *dat = LT6911_i2c.readfrom(LT6911_ADDR, 16);
 
 	for(int i = 0; i < 16; i++){
 		buf[i] = (uint8_t)dat->data[i];
@@ -809,7 +918,7 @@ uint8_t lt6911_read_one_reg(uint8_t reg)
 	ret = reg;
 	LT6911_i2c.writeto(LT6911_ADDR, &ret, 1);
 
-	maix::Bytes *dat = LT6911_i2c.readfrom(LT6911_ADDR, 1);	
+	maix::Bytes *dat = LT6911_i2c.readfrom(LT6911_ADDR, 1);
 
 	ret = (uint8_t)dat->data[0];
 
@@ -846,7 +955,7 @@ void lt6911_write_edid(void)
 		lt6911_write_reg(0x5E, 0xEF);
 		lt6911_write_reg(0x5A, 0xA2);
 		lt6911_write_reg(0x5A, 0x82);
-		
+
 		lt6911_write_reg(0x58, 0x01);
 
 		if(i < 8) {
@@ -1048,6 +1157,10 @@ void get_hdmi_version()
                 kvmv_cfg.hdmi_version = 1;
                 debug("[hdmi]Incomplete version number, set to 'ux'\n");
             }
+        } else if(RW_Data[0] == 'd'){
+            // 6911d
+            kvmv_cfg.hdmi_version = 3;
+            debug("[hdmi]HDMI-D exist!\n");
         } else {
             // 6911c
             kvmv_cfg.hdmi_version = 0;
@@ -1079,16 +1192,31 @@ void* vi_subsystem_detection(void * arg)
 
     get_hdmi_version();
 
-    // while(!app::need_exit())
-    uint8_t while_count_detect_res = 0;
+    // Refresh on elapsed time, not loop iterations whose work varies widely.
+    last_vi_state_refresh_ms = vi_state_shared::monotonic_ms() - vi_state_publish_interval_ms;
     while(true)
     {
         if(kvmv_cfg.try_exit_thread == 1)
             break;
-        
+
         uint8_t get_new_hdmi_mode = get_hdmi_mode();
         uint8_t try_res;
         uint8_t err_code;
+        uint8_t vi_state_refreshed = 0;
+        uint8_t vi_state_due = vi_state_shared::monotonic_ms() - last_vi_state_refresh_ms >= vi_state_publish_interval_ms;
+        uint8_t manual_vi_init_now =
+            (kvmv_cfg.hdmi_mode == 2 &&
+             (get_new_hdmi_mode == 1 || kvmv_cfg.vi_detect_state == 0));
+        uint8_t defer_vi_state_refresh =
+            (kvmv_cfg.hdmi_mode == 1 &&
+             (kvmv_cfg.vi_detect_state == 1 || get_new_hdmi_mode == 1)) ||
+            (kvmv_cfg.hdmi_mode == 2 &&
+             (manual_vi_init_now || kvmv_cfg.vi_detect_state == 1));
+
+        if (vi_state_due && !defer_vi_state_refresh) {
+            refresh_vi_state();
+            vi_state_refreshed = 1;
+        }
 
         switch (kvmv_cfg.hdmi_mode){
         case 0:
@@ -1109,7 +1237,7 @@ void* vi_subsystem_detection(void * arg)
             fp = fopen(hdmi_state_path, "r+");
             if(fp != NULL){
                 // fseek(fp, 0, SEEK_END);
-                // file_size = ftell(fp); 
+                // file_size = ftell(fp);
                 // fseek(fp, 0, SEEK_SET);
                 fread(RW_Data, sizeof(char), 2, fp);
                 tmp8 = atoi((char*)RW_Data);
@@ -1130,11 +1258,11 @@ void* vi_subsystem_detection(void * arg)
                                 if(lt6911_get_hdmi_res()){
                                     // hdmi get res
                                     debug("[hdmi] C HDMI cable insertion!\n");
-                                    kvmv_cfg.hdmi_cable_state = 1;
+                                    set_hdmi_detection_state(1);
                                     kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
-                                        /* Move HDMI resolution modification directly 
+                                        /* Move HDMI resolution modification directly
                                             to mode1 to solve deadlock problem */
                                         auto_change_mode = 1;
                                         set_hdmi_mode(1);
@@ -1142,7 +1270,7 @@ void* vi_subsystem_detection(void * arg)
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] C HDMI cable unplugged!\n");
-                                    kvmv_cfg.hdmi_cable_state = 0;
+                                    set_hdmi_detection_state(0);
                                 }
                                 lt6911_disable();
                             }
@@ -1155,11 +1283,11 @@ void* vi_subsystem_detection(void * arg)
                                 if(lt6911_get_hdmi_res()){
                                     // hdmi get res
                                     debug("[hdmi] UXC HDMI cable insertion!\n");
-                                    kvmv_cfg.hdmi_cable_state = 1;
+                                    set_hdmi_detection_state(1);
                                     kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
-                                        /* Move HDMI resolution modification directly 
+                                        /* Move HDMI resolution modification directly
                                             to mode1 to solve deadlock problem */
                                         auto_change_mode = 1;
                                         set_hdmi_mode(1);
@@ -1167,7 +1295,32 @@ void* vi_subsystem_detection(void * arg)
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] UXC HDMI cable unplugged!\n");
-                                    kvmv_cfg.hdmi_cable_state = 0;
+                                    set_hdmi_detection_state(0);
+                                }
+                                lt6911_disable();
+                            }
+                        } else if (kvmv_cfg.hdmi_version == 3){
+                            // LT6911D
+                                debug("[hdmi] D int\n");
+                            if(falling_times != 0){
+                                debug("[hdmi] D int && \n");
+                                lt6911_enable();
+                                if(lt6911_get_hdmi_res()){
+                                    // hdmi get res
+                                    debug("[hdmi] D HDMI cable insertion!\n");
+                                    set_hdmi_detection_state(1);
+                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
+                                    else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
+                                        /* Move HDMI resolution modification directly
+                                            to mode1 to solve deadlock problem */
+                                        auto_change_mode = 1;
+                                        set_hdmi_mode(1);
+                                    }
+                                } else {
+                                    // HDMI res = 0*0/x*0
+                                    debug("[hdmi] D HDMI cable unplugged!\n");
+                                    set_hdmi_detection_state(0);
                                 }
                                 lt6911_disable();
                             }
@@ -1180,15 +1333,15 @@ void* vi_subsystem_detection(void * arg)
                 fclose(fp);
             }
             break;
-        /* Mode 1 & 2 will disable API access to the image during detection, 
+        /* Mode 1 & 2 will disable API access to the image during detection,
            and will output -4: Modifying image resolution, please wait.*/
         case 1: // Automatically trying common resolutions
-            /* kvmv_cfg.vi_detect_state : 
+            /* kvmv_cfg.vi_detect_state :
              * 0: HDMI standard mode, detection program does not interfere with the camera
              * 1: Preparing / Testing in progress
              * 2: Test completed: Suitable resolution found,
              */
-                    
+
             if(get_new_hdmi_mode == 1){
                 kvmv_cfg.vi_detect_state = 1;
             }
@@ -1199,9 +1352,9 @@ void* vi_subsystem_detection(void * arg)
                     kvmv_cfg.hdmi_try_rounds = 0;
                     kvmv_cfg.vi_detect_state = 2;
                 } else if (try_res == 0) {
-                    /*  There may be a situation where the correct resolution cannot be recognized 
-                        after one round of detection. By default, Try_rounds_HDMI_err_res rounds will be detected, 
-                        and if it cannot be detected, jump to the next mode */ 
+                    /*  There may be a situation where the correct resolution cannot be recognized
+                        after one round of detection. By default, Try_rounds_HDMI_err_res rounds will be detected,
+                        and if it cannot be detected, jump to the next mode */
                     kvmv_cfg.hdmi_res_err = ERROR_RES;
                     kvmv_cfg.hdmi_try_rounds++;
                     if(kvmv_cfg.hdmi_try_rounds >= Try_rounds_HDMI_err_res){
@@ -1221,20 +1374,21 @@ void* vi_subsystem_detection(void * arg)
                 }
             } else if (kvmv_cfg.vi_detect_state == 2){
                 // Low-frequency detection of HDMI status, no log output
-                printf("[kvmv] kvmv_cfg.vi_detect_state == 2\n");
-                err_code = get_vi_state();
-                if (err_code != 1) {
+                if (vi_state_refreshed && last_vi_state_code != 1) {
                     kvmv_cfg.vi_detect_state = 1;
                 }
-                time::sleep_ms(1000); 
             } else {
                 kvmv_cfg.vi_detect_state = 1;
             }
             break;
         case 2:
             // Manually initialize VI.
-            while_count_detect_res = (while_count_detect_res + 1)%100;
-            if(while_count_detect_res == 1){
+            if (manual_vi_init_now) {
+                // Initialize immediately when entering manual mode instead of
+                // waiting for the next periodic state refresh.
+                kvmv_cfg.vi_detect_state = 1;
+            }
+            if(manual_vi_init_now || vi_state_due){
                 if (kvmv_cfg.vi_detect_state == 1){
                     // detect_res
                     if (get_manual_resolution()) {
@@ -1242,8 +1396,8 @@ void* vi_subsystem_detection(void * arg)
                         cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
                     }
 
-                    // dbg info
-                    err_code = get_vi_state();
+                    // Sample after a manual resolution change.
+                    err_code = refresh_vi_state();
                     switch(err_code){
                     case 0:
                         debug("[kvmv] VI not init\n");
@@ -1273,14 +1427,14 @@ void* vi_subsystem_detection(void * arg)
                     }
                 } else if (kvmv_cfg.vi_detect_state == 2){
                     // detection of HDMI status, no log output
-                    err_code = get_vi_state();
+                    err_code = last_vi_state_code;
                     if (err_code != 1) kvmv_cfg.vi_detect_state = 1;
                 } else {
                     kvmv_cfg.vi_detect_state = 1;
                 }
             }
             break;
-        
+
         default:
             debug("Non-existent hdmi state = %d\n", kvmv_cfg.hdmi_mode);
             break;
@@ -1308,7 +1462,7 @@ int sync_vi_res()
     } else {
         fp = fopen(vi_width_path, "r");
         fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp); 
+        file_size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         fread(RW_Data, sizeof(char), file_size, fp);
         fclose(fp);
@@ -1328,7 +1482,7 @@ int sync_vi_res()
     } else {
         fp = fopen(vi_height_path, "r");
         fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp); 
+        file_size = ftell(fp);
         fseek(fp, 0, SEEK_SET);
         fread(RW_Data, sizeof(char), file_size, fp);
         fclose(fp);
@@ -1368,12 +1522,21 @@ uint8_t frame_changed(image::Image *raw)
     return ret;
 }
 
-void jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
+bool jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
 {
+    if(dump_to == NULL || raw == NULL || raw->data() == NULL || raw->data_size() == 0){
+        return false;
+    }
     dump_to->p_img_data = (uint8_t *)malloc(raw->data_size());
+    if(dump_to->p_img_data == NULL){
+        dump_to->img_data_size = 0;
+        dump_to->img_data_type = 0;
+        return false;
+    }
     dump_to->img_data_size = raw->data_size();
     dump_to->img_data_type = VENC_MJPEG;
     memcpy(dump_to->p_img_data, (uint8_t *)raw->data(), raw->data_size());
+    return true;
 }
 
 uint8_t kvmvenc_gop = default_h264_gop;
@@ -1465,15 +1628,15 @@ int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
 		// log::info("getimg: %d \r\n", (int)(time::time_ms()));
     mmf_stream_t _stream = {0};
     if(kvm_venc.enc_h264_init != 1 || raw->width() != kvm_venc.kvm_venc_cfg.w || raw->height() != kvm_venc.kvm_venc_cfg.h || _qlty != kvm_venc.kvm_venc_cfg.bitrate){
-		debug("[kvmv]init_venc_h264	enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n", 
-				kvm_venc.enc_h264_init, 
-				raw->width(), kvm_venc.kvm_venc_cfg.w, 
+		debug("[kvmv]init_venc_h264	enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n",
+				kvm_venc.enc_h264_init,
+				raw->width(), kvm_venc.kvm_venc_cfg.w,
 				raw->height(), kvm_venc.kvm_venc_cfg.h);
 
-		init_venc_h264(raw->width(), raw->height(), _qlty);		
-        debug("[kvmv]init_venc_h264 finish enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n", 
-				kvm_venc.enc_h264_init, 
-				raw->width(), kvm_venc.kvm_venc_cfg.w, 
+		init_venc_h264(raw->width(), raw->height(), _qlty);
+        debug("[kvmv]init_venc_h264 finish enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n",
+				kvm_venc.enc_h264_init,
+				raw->width(), kvm_venc.kvm_venc_cfg.w,
 				raw->height(), kvm_venc.kvm_venc_cfg.h);
         // if(kvm_venc.enc_h264_init == 1){
 		// 	init_venc_h264(raw->width(), raw->height(), _qlty);
@@ -1489,8 +1652,8 @@ int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
 		debug("[kvmv]mmf venc push failed!\n");
         // err::check_raise(err::ERR_RUNTIME, "mmf venc push failed!\r\n");
         return -1;
-    }		
-	// log::info("push(): %d \r\n", (int)(time::time_ms() - start_time));		
+    }
+	// log::info("push(): %d \r\n", (int)(time::time_ms() - start_time));
     if (mmf_venc_pop(kvm_venc.mmf_venc_chn, &_stream)) {
         // log::error("mmf_venc_pop failed\n");
         mmf_venc_free(kvm_venc.mmf_venc_chn);
@@ -1500,10 +1663,10 @@ int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
         // rtmp->unlock();
         return -1;
     }
-	// log::info("pop(): %d \r\n", (int)(time::time_ms() - start_time));	
+	// log::info("pop(): %d \r\n", (int)(time::time_ms() - start_time));
     ret = h264_stream_dump(ret_stream, &_stream);
     mmf_venc_free(kvm_venc.mmf_venc_chn);
-	// log::info("dump(): %d \r\n", (int)(time::time_ms() - start_time));	
+	// log::info("dump(): %d \r\n", (int)(time::time_ms() - start_time));
 
 	// debug("[kvmv]_stream.data[0][4] = %d;\n", _stream.data[0][4]);
 	debug("[kvmv]Frame size = %d;\n", ret_stream->img_data_size);
@@ -1539,7 +1702,7 @@ void kvmv_init(uint8_t _debug_info_en)
 
     kvmv_cfg.try_exit_thread = 0;
     // debug("[kvmv]kvmv_init - 2\r\n");
-    
+
     if(kvmv_cfg.thread_is_running == 1){
         debug("[kvmv]thread is running!\r\n");
     } else {
@@ -1558,7 +1721,7 @@ void kvmv_init(uint8_t _debug_info_en)
 
 uint8_t check_kvmv(uint8_t _try_num)
 {
-    if(kvmv_cfg.hdmi_cable_state == 0){
+    if(__atomic_load_n(&kvmv_cfg.hdmi_cable_state, __ATOMIC_ACQUIRE) == 0){
         debug("[kvmv]HDMI Cable not exist!\n");
         return 0;
     }
@@ -1614,6 +1777,8 @@ void set_venc_auto_recyc(uint8_t _enable)
  **********************************************************************************/
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
 {
+    *_pp_kvm_data = NULL;
+    *_p_kvmv_data_size = 0;
     static uint8_t frame_undetact_count = 0;
 	// uint64_t __attribute__((unused)) start_time = time::time_ms();
     debug("[kvmv]kvmv_read_img type = %d...\n", _type);
@@ -1656,14 +1821,14 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
                 // Set the output
                 kvmv_cfg.vpss_width = _width;
                 kvmv_cfg.vpss_height = _height;
-                
+
                 cam->set_resolution(kvmv_cfg.vpss_width, kvmv_cfg.vpss_height);
                 kvmv_cfg.reinit_flag = 1;
             }
         }
 
         //
-        if (kvmv_cfg.reinit_flag == 1) { 
+        if (kvmv_cfg.reinit_flag == 1) {
             cam->hmirror(1);
             cam->vflip(1);
 			kvmv_cfg.reinit_flag = 0;
@@ -1671,8 +1836,18 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         // debug("[kvmv]befor read img: %d \r\n", (int)(time::time_ms() - start_time));
         image::Image *img = cam->read();
         // debug("[kvmv]read img: %d \r\n", (int)(time::time_ms() - start_time));
-        
+
         if(img != NULL){
+            if(kvmv_cfg.fresh_frame_count != 0){
+                // Do not restart VI after HDMI idle. Reopening the MMF
+                // channel can exhaust the carveout heap when the detector
+                // thread is also transitioning. Consume queued frames
+                // instead; the camera buffer contains at most three frames.
+                kvmv_cfg.fresh_frame_count--;
+                delete img;
+                continue;
+            }
+
             // frame detect
             if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
                 if(kvmv_cfg.stream_stop == 0){
@@ -1680,10 +1855,10 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
                 } else {
                     frame_undetact_count = kvmv_cfg.frame_detact;
                 }
-                
+
                 if(frame_undetact_count == kvmv_cfg.frame_detact){
                     frame_undetact_count = 0;
-    
+
                     if(frame_changed(img) == 0){
                         debug("[kvmv]frame not changed...\n");
                         kvmv_cfg.stream_stop = 1;
@@ -1694,18 +1869,9 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
                         kvmv_cfg.stream_stop = 0;
                     }
                 }
-            } 
-			if(kvmv_cfg.cam_state == 0) {
-				kvmv_cfg.cam_state = 1;
-                kvmv_cfg.hdmi_cable_state = 1;
-				system("echo 1 > /kvmapp/kvm/state");
-			}
+            }
         } else {
-			if(kvmv_cfg.cam_state == 1) {
-				kvmv_cfg.cam_state = 0;
-				system("echo 0 > /kvmapp/kvm/state");
-			}
-			delete img;
+            delete img;
             debug("[kvmv]can`t get img...\n");
             continue;
             // pthread_mutex_unlock(&vi_mutex);
@@ -1731,18 +1897,22 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
         kvmv_cfg.venc_type = _type;
 
         if(kvmv_cfg.venc_type == VENC_MJPEG){
-            image::Image *jpg = img->to_jpeg(maxmin_data(99, 51, (int)_qlty));
             kvmv_data_t* p_kvmv_data = get_save_buffer();
             if(p_kvmv_data == NULL){
                 // buffer full
-                delete jpg;
 			    delete img;
                 debug("[kvmv]jpg buffer full\n");
-                *_pp_kvm_data = NULL;
                 pthread_mutex_unlock(&vi_mutex);
                 return IMG_BUFFER_FULL;
-            } 
-            jpg_dump(p_kvmv_data, jpg);
+            }
+            image::Image *jpg = img->to_jpeg(maxmin_data(99, 51, (int)_qlty));
+            if(jpg == NULL || !jpg_dump(p_kvmv_data, jpg)){
+                delete jpg;
+			    delete img;
+                debug("[kvmv]failed to allocate jpg buffer\n");
+                pthread_mutex_unlock(&vi_mutex);
+                return IMG_BUFFER_FULL;
+            }
             delete jpg;
 			delete img;
             *_pp_kvm_data = p_kvmv_data->p_img_data;
@@ -1758,7 +1928,7 @@ int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _ql
                 *_pp_kvm_data = NULL;
                 pthread_mutex_unlock(&vi_mutex);
                 return IMG_BUFFER_FULL;
-            } 
+            }
             // debug("[kvmv]get_save_buffer: %d \r\n", (int)(time::time_ms() - start_time));
             ret = raw_to_h264(img, p_kvmv_data, maxmin_data(10000, 500, (int)_qlty));
             // debug("[kvmv]venc raw_to_h264: %d \r\n", (int)(time::time_ms() - start_time));
@@ -1798,7 +1968,7 @@ int free_kvmv_data(uint8_t ** _pp_kvm_data)
 
 void free_all_kvmv_data()
 {
-    for(int i = 0; i <= kvmv_data_buffer_size; i++){
+    for(int i = 0; i < kvmv_data_buffer_size; i++){
         if(kvmv_data_buffer[i].p_img_data != NULL){
             free(kvmv_data_buffer[i].p_img_data);
             kvmv_data_buffer[i].p_img_data = NULL;
@@ -1808,6 +1978,7 @@ void free_all_kvmv_data()
 
 void kvmv_deinit()
 {
+    set_hdmi_capture_enabled(0);
     pthread_mutex_destroy(&vi_mutex);
     kvmv_cfg.try_exit_thread = 1;
     cam->close();
@@ -1817,6 +1988,10 @@ void kvmv_deinit()
 
 uint8_t kvmv_hdmi_control(uint8_t _en)
 {
+    if(_en == 0){
+        set_hdmi_capture_enabled(0);
+    }
+
     if(kvmv_cfg.hw_version == 0){
 
         FILE *fp;
@@ -1838,6 +2013,9 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     }
     if(kvmv_cfg.hw_version != 'p'){
         debug("[kvmv]Hardware not support!\n");
+        if(_en != 0){
+            set_hdmi_capture_enabled(1);
+        }
         return -1;
     }
     if(access("/sys/class/gpio/gpio451/value", F_OK) != 0){
@@ -1852,7 +2030,20 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     } else {
         kvmv_cfg.hdmi_stop_flag = 0;
         system("echo 1 > /sys/class/gpio/gpio451/value");
+
+        // Keep the existing VI channel and consume queued frames after idle.
+        // Reopening it here or from kvmv_read_img can exhaust the carveout
+        // heap while the HDMI detector is transitioning.
+        kvmv_cfg.fresh_frame_count = fresh_frame_discard_count;
+        set_hdmi_capture_enabled(1);
         return 0;
     }
     return -1;
+}
+
+uint8_t kvmv_hdmi_signal_active()
+{
+    uint8_t enabled = __atomic_load_n(&hdmi_capture_enabled, __ATOMIC_ACQUIRE);
+    uint8_t active = __atomic_load_n(&hdmi_signal_active, __ATOMIC_ACQUIRE);
+    return enabled != 0 && active != 0 ? 1 : 0;
 }

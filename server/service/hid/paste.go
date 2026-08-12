@@ -1,12 +1,14 @@
 package hid
 
 import (
+	"context"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/inputcontrol"
 )
 
 type Char struct {
@@ -18,6 +20,12 @@ type PasteReq struct {
 	Content string `form:"content" validate:"required"`
 	Langue  string `form:"langue"`
 }
+
+const (
+	defaultPasteDelay    = 30 * time.Millisecond
+	maxPasteDuration     = 25 * time.Second
+	maxPasteContentRunes = int(maxPasteDuration / defaultPasteDelay)
+)
 
 func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 	// if no language is specified → return base map
@@ -86,15 +94,15 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 	case "fr":
 		// French AZERTY layout
 		// Letters: a↔q swap, z↔w swap, m moved to physical ; position
-		m['a'] = Char{0, 20}  // a is at physical Q key (HID 20)
+		m['a'] = Char{0, 20} // a is at physical Q key (HID 20)
 		m['A'] = Char{2, 20}
-		m['q'] = Char{0, 4}   // q is at physical A key (HID 4)
+		m['q'] = Char{0, 4} // q is at physical A key (HID 4)
 		m['Q'] = Char{2, 4}
-		m['z'] = Char{0, 26}  // z is at physical W key (HID 26)
+		m['z'] = Char{0, 26} // z is at physical W key (HID 26)
 		m['Z'] = Char{2, 26}
-		m['w'] = Char{0, 29}  // w is at physical Z key (HID 29)
+		m['w'] = Char{0, 29} // w is at physical Z key (HID 29)
 		m['W'] = Char{2, 29}
-		m['m'] = Char{0, 51}  // m is at physical ; key (HID 51)
+		m['m'] = Char{0, 51} // m is at physical ; key (HID 51)
 		m['M'] = Char{2, 51}
 
 		// Numbers require Shift on AZERTY
@@ -110,53 +118,53 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['0'] = Char{2, 39}
 
 		// Unshifted number row → French/special characters
-		m['&'] = Char{0, 30}         // & at physical key 1
-		m['\u00E9'] = Char{0, 31}    // é at physical key 2
-		m['"'] = Char{0, 32}         // " at physical key 3
-		m['\''] = Char{0, 33}        // ' at physical key 4
-		m['('] = Char{0, 34}         // ( at physical key 5
-		m['-'] = Char{0, 35}         // - at physical key 6
-		m['\u00E8'] = Char{0, 36}    // è at physical key 7
-		m['_'] = Char{0, 37}         // _ at physical key 8
-		m['\u00E7'] = Char{0, 38}    // ç at physical key 9
-		m['\u00E0'] = Char{0, 39}    // à at physical key 0
+		m['&'] = Char{0, 30}      // & at physical key 1
+		m['\u00E9'] = Char{0, 31} // é at physical key 2
+		m['"'] = Char{0, 32}      // " at physical key 3
+		m['\''] = Char{0, 33}     // ' at physical key 4
+		m['('] = Char{0, 34}      // ( at physical key 5
+		m['-'] = Char{0, 35}      // - at physical key 6
+		m['\u00E8'] = Char{0, 36} // è at physical key 7
+		m['_'] = Char{0, 37}      // _ at physical key 8
+		m['\u00E7'] = Char{0, 38} // ç at physical key 9
+		m['\u00E0'] = Char{0, 39} // à at physical key 0
 
 		// Physical - key (HID 45) → ) on AZERTY
-		m[')'] = Char{0, 45}         // ) at physical - key
-		m['\u00B0'] = Char{2, 45}    // ° at shift+physical - key
+		m[')'] = Char{0, 45}      // ) at physical - key
+		m['\u00B0'] = Char{2, 45} // ° at shift+physical - key
 
 		// Letter-row bracket/special keys
-		m['^'] = Char{0, 47}         // ^ (dead) at physical [ key (HID 47)
-		m['\u00A8'] = Char{2, 47}    // ¨ at shift+[
-		m['$'] = Char{0, 48}         // $ at physical ] key (HID 48)
-		m['\u00A3'] = Char{2, 48}    // £ at shift+]
-		m['*'] = Char{0, 49}         // * at physical \ key (HID 49)
-		m['\u00B5'] = Char{2, 49}    // µ at shift+\
-		m['\u00F9'] = Char{0, 52}    // ù at physical ' key (HID 52)
-		m['%'] = Char{2, 52}         // % at shift+'
+		m['^'] = Char{0, 47}      // ^ (dead) at physical [ key (HID 47)
+		m['\u00A8'] = Char{2, 47} // ¨ at shift+[
+		m['$'] = Char{0, 48}      // $ at physical ] key (HID 48)
+		m['\u00A3'] = Char{2, 48} // £ at shift+]
+		m['*'] = Char{0, 49}      // * at physical \ key (HID 49)
+		m['\u00B5'] = Char{2, 49} // µ at shift+\
+		m['\u00F9'] = Char{0, 52} // ù at physical ' key (HID 52)
+		m['%'] = Char{2, 52}      // % at shift+'
 
 		// Bottom row remappings
-		m[','] = Char{0, 16}         // , at physical M key (HID 16)
-		m['?'] = Char{2, 16}         // ? at shift+physical M
-		m[';'] = Char{0, 54}         // ; at physical , key (HID 54)
-		m['.'] = Char{2, 54}         // . at shift+physical ,
-		m[':'] = Char{0, 55}         // : at physical . key (HID 55)
-		m['/'] = Char{2, 55}         // / at shift+physical .
-		m['!'] = Char{0, 56}         // ! at physical / key (HID 56)
-		m['\u00A7'] = Char{2, 56}    // § at shift+physical /
+		m[','] = Char{0, 16}      // , at physical M key (HID 16)
+		m['?'] = Char{2, 16}      // ? at shift+physical M
+		m[';'] = Char{0, 54}      // ; at physical , key (HID 54)
+		m['.'] = Char{2, 54}      // . at shift+physical ,
+		m[':'] = Char{0, 55}      // : at physical . key (HID 55)
+		m['/'] = Char{2, 55}      // / at shift+physical .
+		m['!'] = Char{0, 56}      // ! at physical / key (HID 56)
+		m['\u00A7'] = Char{2, 56} // § at shift+physical /
 
 		// AltGr combinations
-		m['~'] = Char{0x40, 31}      // AltGr+2
-		m['#'] = Char{0x40, 32}      // AltGr+3
-		m['{'] = Char{0x40, 33}      // AltGr+4
-		m['['] = Char{0x40, 34}      // AltGr+5
-		m['|'] = Char{0x40, 35}      // AltGr+6
-		m['`'] = Char{0x40, 36}      // AltGr+7
-		m['\\'] = Char{0x40, 37}     // AltGr+8
-		m[']'] = Char{0x40, 45}      // AltGr+physical -
-		m['}'] = Char{0x40, 46}      // AltGr+=
-		m['@'] = Char{0x40, 39}      // AltGr+0
-		m['\u20AC'] = Char{0x40, 8}  // € AltGr+E
+		m['~'] = Char{0x40, 31}     // AltGr+2
+		m['#'] = Char{0x40, 32}     // AltGr+3
+		m['{'] = Char{0x40, 33}     // AltGr+4
+		m['['] = Char{0x40, 34}     // AltGr+5
+		m['|'] = Char{0x40, 35}     // AltGr+6
+		m['`'] = Char{0x40, 36}     // AltGr+7
+		m['\\'] = Char{0x40, 37}    // AltGr+8
+		m[']'] = Char{0x40, 45}     // AltGr+physical -
+		m['}'] = Char{0x40, 46}     // AltGr+=
+		m['@'] = Char{0x40, 39}     // AltGr+0
+		m['\u20AC'] = Char{0x40, 8} // € AltGr+E
 
 	}
 	return m
@@ -171,16 +179,44 @@ func (s *Service) Paste(c *gin.Context) {
 		return
 	}
 
-	if len(req.Content) > 1024 {
+	contentRunes := []rune(req.Content)
+	if len(contentRunes) > maxPasteContentRunes {
 		rsp.ErrRsp(c, -2, "content too long")
 		return
 	}
 
 	charMapLocal := LangueSwitch(charMap, req.Langue)
+	typeableRunes := 0
+	for _, char := range contentRunes {
+		if _, ok := charMapLocal[char]; ok {
+			typeableRunes++
+		}
+	}
+	if time.Duration(typeableRunes)*defaultPasteDelay > maxPasteDuration {
+		rsp.ErrRsp(c, -2, "paste duration exceeds 25s")
+		return
+	}
 
 	keyUp := []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
+	manual := s.newManualSession()
+	defer manual.Close()
+	reservation, err := manual.Reserve(c.Request.Context(), inputcontrol.ManualKeyboard, false, nil)
+	if err != nil {
+		log.Errorf("manual paste failed to acquire HID control: %v", err)
+		rsp.ErrRsp(c, -3, "HID control is busy")
+		return
+	}
 
-	for _, char := range req.Content {
+	writeKeyboardReport := func(report []byte) error {
+		return manual.Execute(func() error {
+			return s.hid.WriteKeyboardReport(report)
+		})
+	}
+
+	for _, char := range contentRunes {
+		if err := context.Cause(c.Request.Context()); err != nil {
+			break
+		}
 		key, ok := charMapLocal[char]
 		if !ok {
 			log.Debugf("unknown key '%c' (rune: %d)", char, char)
@@ -188,14 +224,40 @@ func (s *Service) Paste(c *gin.Context) {
 		}
 
 		keyDown := []byte{byte(key.Modifiers), 0x00, byte(key.Code), 0x00, 0x00, 0x00, 0x00, 0x00}
-
-		hid.WriteHid0(keyDown)
-		hid.WriteHid0(keyUp)
-		time.Sleep(30 * time.Millisecond)
+		if err = writeKeyboardReport(keyDown); err != nil {
+			break
+		}
+		if err = writeKeyboardReport(keyUp); err != nil {
+			break
+		}
+		if err = sleepPasteContext(c.Request.Context(), defaultPasteDelay); err != nil {
+			break
+		}
+	}
+	if err == nil {
+		err = context.Cause(c.Request.Context())
+	}
+	_ = writeKeyboardReport(keyUp)
+	reservation.Complete(err == nil)
+	if err != nil {
+		log.Errorf("hid paste failed: %v", err)
+		rsp.ErrRsp(c, -3, "HID paste failed")
+		return
 	}
 
 	rsp.OkRsp(c)
-	log.Debugf("hid paste success, total %d characters processed", len(req.Content))
+	log.Debugf("hid paste success, total %d characters processed", len(contentRunes))
+}
+
+func sleepPasteContext(ctx context.Context, delay time.Duration) error {
+	timer := time.NewTimer(delay)
+	defer timer.Stop()
+	select {
+	case <-ctx.Done():
+		return context.Cause(ctx)
+	case <-timer.C:
+		return nil
+	}
 }
 
 func copyMap(src map[rune]Char) map[rune]Char {

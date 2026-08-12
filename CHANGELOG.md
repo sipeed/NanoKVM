@@ -1,39 +1,51 @@
-# Changelog
+## 2.5.0 (2026-08-04)
 
-This changelog tracks releases of the **Schattenwelt/NanoKVM fork**.
-Each entry marked `[Fork]` describes changes added on top of the
-upstream Sipeed/NanoKVM release of the same version.
-Unmarked entries below are the verbatim upstream history for context.
+### Features
 
----
+* Added an MCP service that lets trusted MCP clients capture screenshots and control the keyboard and mouse with an API key, including a settings page for enabling it and regenerating the key
+* Added coordinated device control so MCP, PicoClaw and manual input hand ownership over to each other instead of writing HID input at the same time
+* Added remote keyboard lock indicators that show the target machine's Num Lock, Caps Lock and Scroll Lock state
+* Added an optional SHA-256 checksum and cancellation to remote image downloads
 
-## [Fork] 2.4.2 — 2026-05-21
+### Bug Fixes
 
-Initial Schattenwelt-fork release based on upstream 2.4.2.
+* Fixed the USB network gadget getting a random host-side MAC on every bind, which made the attached PC register a new network adapter after each reboot; both the device and host MAC are now derived from the chip UID (thanks to [@BeaconCat](https://github.com/BeaconCat))
+* Fixed OLED sleep durations above 255 seconds being truncated, so the 5 min, 10 min, 30 min and 1 hour options now behave as selected
+* Fixed the mounted image API returning an error in HID-Only mode
+* Fixed image downloads and application updates interfering with each other when running at the same time
+* Fixed Direct H.264 playback falling behind when the decoder queue backed up, by resynchronizing at the next key frame and preferring hardware decoding
+* Added a warning when Direct and WebRTC H.264 stream modes are used at the same time
+* Made the video input state shared between processes and read it without shell pipelines, so HDMI status stays consistent between `NanoKVM-Server` and `kvm_system`
 
-### Added
+### Performance
 
-* **Multi-user support with role-based access control (RBAC)** — three built-in roles (`viewer`, `operator`, `admin`) on the backend, matching frontend UI under `Settings → Users` and `Settings → Account`. See [README](README.md#-whats-different-in-this-fork) for the full permission matrix.
-* **bcrypt** password hashing, **JWT** session cookies, and **brute-force protection** on the login endpoint.
-* Last-admin protection (cannot delete the only enabled admin) and self-delete protection.
-* Internal loopback endpoints (used by `kvm_system` / picoclaw) gated by a separate loopback token instead of JWT.
-* Localized strings for the user-management UI in **all 24 supported languages** (was only `de` / `en` in the previous 2.4.1-multiuser snapshot).
+* Reduced latency in 60 Hz mode with decode-driven flow control, GOP-aware bounded queues, and dedicated writer goroutines with write deadlines so a slow client no longer stalls the others
+* Integrated zero-copy H.264 capture into the video pipeline instead of relying on a preload hook
+* Stopped HDMI capture when no user is logged in or all viewers are idle, reducing power consumption
 
-### Changed
+### UI Improvements
 
-* **Update channel switched** from `https://cdn.sipeed.com/nanokvm` to this fork's GitHub Releases (`https://github.com/Schattenwelt/NanoKVM/releases/latest/download`). After the first manual offline-update, further updates are pulled automatically from this fork via *Settings → Check for updates*.
-* Migrated accounts file: existing single-user setup in `/etc/kvm/pwd` is automatically converted to `/etc/kvm/accounts.json` on first start. The existing user becomes the initial `admin`; legacy file is removed.
+* Tidied the image download dialog layout and truncated long file names in the upload box
 
-### Notes
+### Localization
 
-* Built against upstream commit corresponding to Sipeed release **2.4.2**.
-* No changes to `kvmapp/`, `support/`, or any hardware-related code — the fork only modifies the Go backend and the React frontend.
+* Synchronized translations of other languages according to English
 
-### Inherited from upstream 2.4.2
+### Chores
 
-See the [upstream changelog](#242-2026-05-20) below for the full list — short summary: HDMI capture-status overlays, WebRTC streaming improvements, PicoClaw session stabilization, WoL hardening, mouse / touch input fixes.
+* Split release automation into separate package, tag and release workflows, and produced identifiable build artifacts with checksums for pull requests
+* Allowed overriding the builder image, installed `patchelf` in the build environment, and fixed the exit codes of `support/sg2002/build`
+* Fixed slow container builds caused by uid/gid mismatch and reused existing container users and groups
 
----
+## 2.4.3 (2026-06-09)
+
+### Features
+
+* Added LT6911D support
+
+### Bug Fixes
+
+* Improved USB network adapter compatibility on Windows
 
 ## 2.4.2 (2026-05-20)
 
