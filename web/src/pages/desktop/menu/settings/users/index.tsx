@@ -146,11 +146,10 @@ export const Users = () => {
           size="small"
           style={{ width: 110 }}
           onChange={(val) => handleRoleChange(record.username, val)}
-          options={[
-            { value: 'admin', label: <Tag color="red">admin</Tag> },
-            { value: 'operator', label: <Tag color="blue">operator</Tag> },
-            { value: 'viewer', label: <Tag>viewer</Tag> }
-          ]}
+          options={['admin', 'operator', 'viewer'].map((r) => ({
+            value: r,
+            label: <Tag color={roleColor[r]}>{r}</Tag>
+          }))}
         />
       )
     },
@@ -216,9 +215,9 @@ export const Users = () => {
       <div className="mb-4 rounded-lg border border-neutral-700/50 bg-neutral-800/30 p-3 text-xs text-neutral-400">
         <div className="mb-1 font-medium text-neutral-300">{t('settings.users.rolesTitle')}</div>
         <div className="space-y-0.5">
-          <div><Tag color="red" className="mr-1">admin</Tag>{t('settings.users.roleAdmin')}</div>
-          <div><Tag color="blue" className="mr-1">operator</Tag>{t('settings.users.roleOperator')}</div>
-          <div><Tag className="mr-1">viewer</Tag>{t('settings.users.roleViewer')}</div>
+          <div><Tag color={roleColor.admin} className="mr-1">admin</Tag>{t('settings.users.roleAdmin')}</div>
+          <div><Tag color={roleColor.operator} className="mr-1">operator</Tag>{t('settings.users.roleOperator')}</div>
+          <div><Tag color={roleColor.viewer} className="mr-1">viewer</Tag>{t('settings.users.roleViewer')}</div>
         </div>
       </div>
 
