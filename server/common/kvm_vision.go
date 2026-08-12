@@ -1,5 +1,3 @@
-//go:build cgo
-
 package common
 
 /*
@@ -20,7 +18,10 @@ var (
 	kvmVisionOnce sync.Once
 )
 
-type KvmVision struct{}
+type KvmVision struct {
+	mutex  sync.RWMutex
+	closed bool
+}
 
 func GetKvmVision() *KvmVision {
 	kvmVisionOnce.Do(func() {
@@ -35,6 +36,12 @@ func GetKvmVision() *KvmVision {
 }
 
 func (k *KvmVision) ReadMjpeg(width uint16, height uint16, quality uint16) (data []byte, result int) {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return nil, -1
+	}
+
 	var (
 		kvmData  *C.uint8_t
 		dataSize C.uint32_t
@@ -59,6 +66,12 @@ func (k *KvmVision) ReadMjpeg(width uint16, height uint16, quality uint16) (data
 }
 
 func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data []byte, result int) {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return nil, -1
+	}
+
 	var (
 		kvmData  *C.uint8_t
 		dataSize C.uint32_t
@@ -83,6 +96,12 @@ func (k *KvmVision) ReadH264(width uint16, height uint16, bitRate uint16) (data 
 }
 
 func (k *KvmVision) SetHDMI(enable bool) int {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return -1
+	}
+
 	hdmiEnable := C.uint8_t(0)
 	if enable {
 		hdmiEnable = C.uint8_t(1)
@@ -97,17 +116,46 @@ func (k *KvmVision) SetHDMI(enable bool) int {
 	return result
 }
 
+func (k *KvmVision) HasHDMISignal() bool {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return false
+	}
+
+	return C.kvmv_hdmi_signal_active() != 0
+}
+
 func (k *KvmVision) SetGop(gop uint8) {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return
+	}
+
 	_gop := C.uint8_t(gop)
 	C.set_h264_gop(_gop)
 }
 
 func (k *KvmVision) SetFrameDetect(frame uint8) {
+	k.mutex.RLock()
+	defer k.mutex.RUnlock()
+	if k.closed {
+		return
+	}
+
 	_frame := C.uint8_t(frame)
 	C.set_frame_detact(_frame)
 }
 
 func (k *KvmVision) Close() {
+	k.mutex.Lock()
+	defer k.mutex.Unlock()
+	if k.closed {
+		return
+	}
+
+	k.closed = true
 	C.kvmv_deinit()
 	log.Debugf("stop kvm vision...")
 }
