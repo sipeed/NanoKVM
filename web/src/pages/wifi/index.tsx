@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { CheckOutlined, KeyOutlined, LockOutlined, WifiOutlined } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { CheckOutlined, KeyOutlined, LockOutlined, UserOutlined, WifiOutlined } from '@ant-design/icons';
+import { Button, Form, Input, Select } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 
@@ -9,6 +9,40 @@ import { Head } from '@/components/head.tsx';
 
 type State = '' | 'loading' | 'success' | 'failed' | 'denied';
 type VerifyState = '' | 'failed' | 'denied';
+type EAPMethod = 'PEAP' | 'TTLS' | 'TLS' | 'PWD' | 'LEAP';
+
+const getDefaultPhase2 = (eap: EAPMethod) => {
+  if (eap === 'PEAP' || eap === 'TTLS') return 'auth=MSCHAPV2';
+  return '';
+};
+
+const getEapOptions = (t: (key: string) => string) => [
+  { value: 'PEAP', label: t('settings.network.wifi.eapPeap') },
+  { value: 'TTLS', label: t('settings.network.wifi.eapTtls') },
+  { value: 'TLS', label: t('settings.network.wifi.eapTls') },
+  { value: 'PWD', label: t('settings.network.wifi.eapPwd') },
+  { value: 'LEAP', label: t('settings.network.wifi.eapLeap') }
+];
+
+const getInnerAuthOptions = (eap: EAPMethod, t: (key: string) => string) => {
+  const peapInnerAuthOptions = [
+    { value: 'auth=MSCHAPV2', label: t('settings.network.wifi.authMschapv2') },
+    { value: 'auth=GTC', label: t('settings.network.wifi.authGtc') },
+    { value: 'auth=MD5', label: t('settings.network.wifi.authMd5') }
+  ];
+  const ttlsInnerAuthOptions = [
+    { value: 'auth=MSCHAPV2', label: t('settings.network.wifi.authMschapv2') },
+    { value: 'auth=MSCHAP', label: t('settings.network.wifi.authMschap') },
+    { value: 'auth=CHAP', label: t('settings.network.wifi.authChap') },
+    { value: 'auth=PAP', label: t('settings.network.wifi.authPap') }
+  ];
+  if (eap === 'PEAP') return peapInnerAuthOptions;
+  if (eap === 'TTLS') return ttlsInnerAuthOptions;
+  return [];
+};
+
+const usesPassword = (eap: EAPMethod) => eap !== 'TLS';
+const usesInnerAuth = (eap: EAPMethod) => eap === 'PEAP' || eap === 'TTLS';
 
 export const Wifi = () => {
   const { t } = useTranslation();
@@ -19,6 +53,9 @@ export const Wifi = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [verifying, setVerifying] = useState<boolean>(false);
   const [verifyState, setVerifyState] = useState<VerifyState>('');
+  const [form] = Form.useForm();
+  const mode = Form.useWatch('mode', form);
+  const eap = (Form.useWatch('eap', form) || 'PEAP') as EAPMethod;
 
   useEffect(() => {
     const pass = searchParams.get('p') || searchParams.get('P');
@@ -53,13 +90,34 @@ export const Wifi = () => {
   }
 
   async function connect(values: any) {
-    if (!values.ssid || !values.password) return;
+    if (!values.ssid) return;
+    if ((values.mode || 'psk') === 'psk' && !values.password) return;
+    if (values.mode === 'enterprise' && !values.identity) return;
+    if (values.mode === 'enterprise' && usesPassword(values.eap || 'PEAP') && !values.password)
+      return;
+    if (
+      values.mode === 'enterprise' &&
+      values.eap === 'TLS' &&
+      (!values.clientCert || !values.privateKey)
+    )
+      return;
 
     if (state === 'loading') return;
     setState('loading');
 
     try {
-      const rsp = await api.connectWifiNoAuth(values.ssid, values.password, apPassword);
+      const rsp = await api.connectWifiNoAuth(values.ssid, values.password, apPassword, {
+        mode: values.mode || 'psk',
+        identity: values.identity,
+        eap: values.eap,
+        phase2: values.phase2,
+        anonymousIdentity: values.anonymousIdentity,
+        caCert: values.caCert,
+        clientCert: values.clientCert,
+        privateKey: values.privateKey,
+        privateKeyPasswd: values.privateKeyPasswd,
+        domainSuffixMatch: values.domainSuffixMatch
+      });
 
       switch (rsp?.code) {
         case 0:
@@ -129,8 +187,9 @@ export const Wifi = () => {
 
       <div className="flex h-screen w-screen flex-col items-center justify-center">
         <Form
+          form={form}
           style={{ minWidth: 300, maxWidth: 500 }}
-          initialValues={{ remember: true }}
+          initialValues={{ remember: true, mode: 'psk', eap: 'PEAP', phase2: 'auth=MSCHAPV2' }}
           onFinish={connect}
         >
           <div className="flex flex-col space-y-1 pb-5">
@@ -140,13 +199,94 @@ export const Wifi = () => {
             <span className="text-center text-neutral-400">{t('wifi.description')}</span>
           </div>
 
+          <Form.Item name="mode">
+            <Select
+              options={[
+                { value: 'psk', label: t('settings.network.wifi.personal') },
+                { value: 'enterprise', label: t('settings.network.wifi.enterprise') }
+              ]}
+            />
+          </Form.Item>
+
           <Form.Item name="ssid">
             <Input prefix={<WifiOutlined />} placeholder="SSID" />
           </Form.Item>
 
-          <Form.Item name="password">
-            <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-          </Form.Item>
+          {mode !== 'enterprise' && (
+            <Form.Item name="password">
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder={t('settings.network.wifi.password')}
+              />
+            </Form.Item>
+          )}
+
+          {mode === 'enterprise' && (
+            <>
+              <Form.Item name="identity">
+                <Input prefix={<UserOutlined />} placeholder={t('settings.network.wifi.identity')} />
+              </Form.Item>
+
+              {usesPassword(eap) && (
+                <Form.Item name="password">
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder={t('settings.network.wifi.password')}
+                  />
+                </Form.Item>
+              )}
+
+              <Form.Item name="eap">
+                <Select
+                  options={getEapOptions(t)}
+                  placeholder={t('settings.network.wifi.authentication')}
+                  onChange={(value: EAPMethod) => {
+                    form.setFieldValue('phase2', getDefaultPhase2(value));
+                    if (value === 'TLS') {
+                      form.setFieldValue('password', '');
+                    }
+                  }}
+                />
+              </Form.Item>
+
+              {usesInnerAuth(eap) && (
+                <Form.Item name="phase2">
+                  <Select
+                    options={getInnerAuthOptions(eap, t)}
+                    placeholder={t('settings.network.wifi.innerAuthentication')}
+                  />
+                </Form.Item>
+              )}
+
+              <Form.Item name="anonymousIdentity">
+                <Input placeholder={t('settings.network.wifi.anonymousIdentity')} />
+              </Form.Item>
+
+              <Form.Item name="caCert">
+                <Input placeholder={t('settings.network.wifi.caCert')} />
+              </Form.Item>
+
+              {eap === 'TLS' && (
+                <>
+                  <Form.Item name="clientCert">
+                    <Input placeholder={t('settings.network.wifi.clientCert')} />
+                  </Form.Item>
+
+                  <Form.Item name="privateKey">
+                    <Input placeholder={t('settings.network.wifi.privateKey')} />
+                  </Form.Item>
+
+                  <Form.Item name="privateKeyPasswd">
+                    <Input.Password placeholder={t('settings.network.wifi.privateKeyPasswd')} />
+                  </Form.Item>
+                </>
+              )}
+
+              <Form.Item name="domainSuffixMatch">
+                <Input placeholder={t('settings.network.wifi.domainSuffixMatch')} />
+              </Form.Item>
+            </>
+          )}
 
           <Form.Item>
             {state === 'success' ? (

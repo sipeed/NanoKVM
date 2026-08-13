@@ -1,6 +1,45 @@
 import { http } from '@/lib/http.ts';
 
 export type DNSMode = 'manual' | 'dhcp';
+export type WiFiSecurityMode = 'psk' | 'enterprise';
+export type EthernetSecurityMode = 'off' | 'enterprise';
+export type EthernetIPMode = 'manual' | 'dhcp';
+export type WiFiIPMode = EthernetIPMode;
+
+export type ConnectWifiOptions = {
+  mode?: WiFiSecurityMode;
+  ipMode?: WiFiIPMode;
+  address?: string;
+  subnetMask?: string;
+  gateway?: string;
+  identity?: string;
+  eap?: string;
+  phase2?: string;
+  anonymousIdentity?: string;
+  caCert?: string;
+  clientCert?: string;
+  privateKey?: string;
+  privateKeyPasswd?: string;
+  domainSuffixMatch?: string;
+};
+
+export type Ethernet8021XOptions = {
+  mode?: EthernetSecurityMode;
+  ipMode?: EthernetIPMode;
+  address?: string;
+  subnetMask?: string;
+  gateway?: string;
+  password?: string;
+  identity?: string;
+  eap?: string;
+  phase2?: string;
+  anonymousIdentity?: string;
+  caCert?: string;
+  clientCert?: string;
+  privateKey?: string;
+  privateKeyPasswd?: string;
+  domainSuffixMatch?: string;
+};
 
 // wake on lan
 export function wol(mac: string) {
@@ -33,10 +72,16 @@ export function getWiFi() {
 }
 
 // connect wifi without auth (only available in wifi configuration mode)
-export function connectWifiNoAuth(ssid: string, password: string, apPassword?: string) {
+export function connectWifiNoAuth(
+  ssid: string,
+  password: string,
+  apPassword?: string,
+  options: ConnectWifiOptions = {}
+) {
   const data = {
     ssid,
-    password
+    password,
+    ...options
   };
   return http.post('/api/network/wifi', data, {
     headers: {
@@ -59,10 +104,11 @@ export function verifyApLogin(apPassword: string) {
 }
 
 // connect wifi
-export function connectWifi(ssid: string, password: string) {
+export function connectWifi(ssid: string, password: string, options: ConnectWifiOptions = {}) {
   const data = {
     ssid,
-    password
+    password,
+    ...options
   };
   return http.post('/api/network/wifi/connect', data);
 }
@@ -70,6 +116,14 @@ export function connectWifi(ssid: string, password: string) {
 // disconnect wifi
 export function disconnectWifi() {
   return http.post('/api/network/wifi/disconnect');
+}
+
+export function getEthernet() {
+  return http.get('/api/network/ethernet');
+}
+
+export function setEthernet(options: Ethernet8021XOptions = {}) {
+  return http.post('/api/network/ethernet', options);
 }
 
 export function getDNS() {

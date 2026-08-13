@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -59,6 +60,10 @@ func (s *Service) GetDNS(c *gin.Context) {
 	dhcpConfig, _ := readDHCPResolvConfig(canFallbackEffectiveForDHCP())
 	dhcp := dhcpConfig.Servers
 	info := getDNSInfo()
+	infos := getDNSInfos()
+	if len(infos) == 0 && info.Interface != "" {
+		infos = []proto.DNSInfo{info}
+	}
 
 	rsp.OkRspWithData(c, &proto.GetDNSRsp{
 		Mode:      mode,
@@ -66,8 +71,9 @@ func (s *Service) GetDNS(c *gin.Context) {
 		Effective: effective,
 		DHCP:      dhcp,
 		Info:      info,
+		Infos:     infos,
 	})
-	log.Debugf("get dns config: mode=%s servers=%v effective=%v dhcp=%v info=%+v", mode, servers, effective, dhcp, info)
+	log.Debugf("get dns config: mode=%s servers=%v effective=%v dhcp=%v info=%+v infos=%d", mode, servers, effective, dhcp, info, len(infos))
 }
 
 func (s *Service) SetDNS(c *gin.Context) {
@@ -379,6 +385,12 @@ func getDNSInfo() proto.DNSInfo {
 	if ifaceName == "" {
 		ifaceName = getFallbackIPv4Interface()
 	}
+	if ifaceName != "" {
+		ifaceGateway := getInterfaceGateway(ifaceName)
+		if ifaceGateway != "" {
+			gateway = ifaceGateway
+		}
+	}
 
 	info := proto.DNSInfo{
 		Interface: ifaceName,
@@ -399,8 +411,104 @@ func getDNSInfo() proto.DNSInfo {
 
 	info.Type = getDNSInterfaceType(iface.Name)
 	info.Address, info.SubnetMask = getIPv4AddressInfo(*iface)
+	if strings.EqualFold(info.Type, "Wireless") {
+		info.Signal, info.RxRate, info.TxRate = getWirelessLinkInfo(iface.Name)
+	}
 
 	return info
+}
+
+func getDNSInfos() []proto.DNSInfo {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return nil
+	}
+
+	infos := make([]proto.DNSInfo, 0, len(interfaces))
+
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue
+		}
+
+		ifaceType := getDNSInterfaceType(iface.Name)
+		if ifaceType == "" {
+			continue
+		}
+
+		address, subnetMask := getIPv4AddressInfo(iface)
+		if address == "" {
+			continue
+		}
+
+		info := proto.DNSInfo{
+			Interface:  iface.Name,
+			Type:       ifaceType,
+			Address:    address,
+			SubnetMask: subnetMask,
+			Gateway:    getInterfaceGateway(iface.Name),
+		}
+		if ifaceType == "Wireless" {
+			info.Signal, info.RxRate, info.TxRate = getWirelessLinkInfo(iface.Name)
+		}
+
+		infos = append(infos, info)
+	}
+
+	sort.SliceStable(infos, func(i, j int) bool {
+		if infos[i].Type != infos[j].Type {
+			return infos[i].Type == "Wired"
+		}
+		return infos[i].Interface < infos[j].Interface
+	})
+
+	return infos
+}
+
+func getWirelessLinkInfo(ifaceName string) (string, string, string) {
+	output, err := exec.Command("iw", "dev", ifaceName, "link").CombinedOutput()
+	if err != nil {
+		return "", "", ""
+	}
+
+	var signal string
+	var rxRate string
+	var txRate string
+
+	scanner := bufio.NewScanner(strings.NewReader(string(output)))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		switch {
+		case strings.HasPrefix(line, "signal:"):
+			signal = strings.TrimSpace(strings.TrimPrefix(line, "signal:"))
+		case strings.HasPrefix(line, "rx bitrate:"):
+			rxRate = strings.TrimSpace(strings.TrimPrefix(line, "rx bitrate:"))
+		case strings.HasPrefix(line, "tx bitrate:"):
+			txRate = strings.TrimSpace(strings.TrimPrefix(line, "tx bitrate:"))
+		}
+	}
+
+	return signal, rxRate, txRate
+}
+
+func getInterfaceGateway(ifaceName string) string {
+	if strings.TrimSpace(ifaceName) == "" {
+		return ""
+	}
+
+	out, err := exec.Command("ip", "route", "show", "dev", ifaceName).CombinedOutput()
+	if err != nil {
+		return ""
+	}
+
+	for _, line := range strings.Split(string(out), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 3 && fields[0] == "default" && fields[1] == "via" {
+			return fields[2]
+		}
+	}
+
+	return ""
 }
 
 func getDefaultIPv4Route() (string, string) {
@@ -486,8 +594,7 @@ func getIPv4AddressInfo(iface net.Interface) (string, string) {
 			continue
 		}
 
-		ones, _ := ipNet.Mask.Size()
-		return fmt.Sprintf("%s/%d", ip.String(), ones), net.IP(ipNet.Mask).String()
+		return ip.String(), net.IP(ipNet.Mask).String()
 	}
 
 	return "", ""
