@@ -41,10 +41,13 @@ stop_services() {
     # The server owns VI/VPSS. Let it release MMF before stopping kvm_system.
     stop_process NanoKVM-Server
     stop_process kvm_system
+    # Runtime viewer state belongs to tmpfs and is safe to discard on restart.
+    rm -f /run/nanokvm/oled_viewers
     rm -rf /tmp/kvm_system /tmp/server
 }
 
 start_services() {
+    mkdir -p /run/nanokvm
     cp -r /kvmapp/kvm_system /tmp/
     if [ -f /kvmapp/kvm_new_app ]; then
         touch /tmp/.nanokvm_migrating

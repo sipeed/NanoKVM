@@ -136,6 +136,14 @@ func SetHdmiViewerCount(count int) {
 	SetHdmiViewerCountForSource("legacy", count)
 }
 
+// OLEDViewerCount returns only long-lived streaming viewers. It intentionally
+// excludes capture leases used by screenshots and other short-lived jobs.
+func OLEDViewerCount() int {
+	hdmiMutex.Lock()
+	defer hdmiMutex.Unlock()
+	return hdmiDemand.ViewerCount()
+}
+
 // SetHdmiViewerCountForSource is retained for callers that cannot provide a
 // source revision. Streamers should use UpdateHdmiViewerSnapshot instead.
 func SetHdmiViewerCountForSource(source string, count int) {
