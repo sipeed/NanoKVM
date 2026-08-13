@@ -113,6 +113,7 @@ const id = {
       dropdownGerman: 'Jerman',
       dropdownFrench: 'Perancis',
       dropdownRussian: 'Rusia',
+      dropdownSpanish: 'Bahasa Spanyol',
       shortcut: {
         title: 'Pintasan',
         custom: 'Adat',

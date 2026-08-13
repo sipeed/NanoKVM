@@ -113,6 +113,7 @@ const vi = {
       dropdownGerman: 'Tiếng Đức',
       dropdownFrench: 'Tiếng Pháp',
       dropdownRussian: 'Tiếng Nga',
+      dropdownSpanish: 'Tiếng Tây Ban Nha',
       shortcut: {
         title: 'Phím tắt',
         custom: 'Tùy chỉnh',

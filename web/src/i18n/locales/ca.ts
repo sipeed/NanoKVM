@@ -113,6 +113,7 @@ const ca = {
       dropdownGerman: 'alemany',
       dropdownFrench: 'francès',
       dropdownRussian: 'rus',
+      dropdownSpanish: 'Espanyol',
       shortcut: {
         title: 'Dreceres',
         custom: 'Personalitzat',

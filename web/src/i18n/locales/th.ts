@@ -111,6 +111,7 @@ const th = {
       dropdownGerman: 'เยอรมัน',
       dropdownFrench: 'ฝรั่งเศส',
       dropdownRussian: 'รัสเซีย',
+      dropdownSpanish: 'ภาษาสเปน',
       shortcut: {
         title: 'ทางลัด',
         custom: 'กำหนดเอง',

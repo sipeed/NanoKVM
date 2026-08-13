@@ -114,6 +114,7 @@ const uk = {
       dropdownGerman: 'нім',
       dropdownFrench: 'французька',
       dropdownRussian: 'рос',
+      dropdownSpanish: 'Іспанська',
       shortcut: {
         title: 'Ярлики',
         custom: 'Custom',

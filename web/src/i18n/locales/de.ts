@@ -116,6 +116,7 @@ const de = {
       dropdownGerman: 'Deutsch',
       dropdownFrench: 'Französisch',
       dropdownRussian: 'Russisch',
+      dropdownSpanish: 'Spanisch',
       shortcut: {
         title: 'Verknüpfungen',
         custom: 'Benutzerdefiniert',

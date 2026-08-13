@@ -113,6 +113,7 @@ const ja = {
       dropdownGerman: 'ドイツ語',
       dropdownFrench: 'フランス語',
       dropdownRussian: 'ロシア語',
+      dropdownSpanish: 'スペイン語',
       shortcut: {
         title: 'ショートカット',
         custom: 'カスタム',
