@@ -119,6 +119,30 @@ type SetSwapReq struct {
 	Size int64 `validate:"omitempty"` // unit: MB
 }
 
+// GetZramRsp separates three questions that a single on/off flag would merge.
+// Available and Enabled can each be true while the device does not run.
+type GetZramRsp struct {
+	Available bool `json:"available"` // the kernel modules are installed
+	Enabled   bool `json:"enabled"`   // the setting survives a reboot
+	Active    bool `json:"active"`    // compressed swap runs now
+
+	Algorithm  string `json:"algorithm"`
+	DiskSize   int64  `json:"diskSize"`   // unit: bytes
+	Original   int64  `json:"original"`   // unit: bytes, before compression
+	Compressed int64  `json:"compressed"` // unit: bytes, after compression
+	MemUsed    int64  `json:"memUsed"`    // unit: bytes
+	MemLimit   int64  `json:"memLimit"`   // unit: bytes, 0 when unset
+
+	// SwapIn and SwapOut are system-wide page counters. They cover every swap
+	// device, not zram alone, and they do not reset when zram restarts.
+	SwapIn  int64 `json:"swapIn"`
+	SwapOut int64 `json:"swapOut"`
+}
+
+type SetZramReq struct {
+	Enabled bool `validate:"omitempty"`
+}
+
 type GetMouseJigglerRsp struct {
 	Enabled bool   `json:"enabled"`
 	Mode    string `json:"mode"`

@@ -49,6 +49,9 @@ func vmRouter(r *gin.Engine) {
 	api.GET("/vm/swap", service.GetSwap)  // get swap file size
 	api.POST("/vm/swap", service.SetSwap) // set swap file size
 
+	api.GET("/vm/zram", service.GetZram)  // get compressed swap state
+	api.POST("/vm/zram", service.SetZram) // enable or disable compressed swap
+
 	api.GET("/vm/mouse-jiggler", service.GetMouseJiggler)   // get mouse jiggler
 	api.POST("/vm/mouse-jiggler/", service.SetMouseJiggler) // set mouse jiggler
 
