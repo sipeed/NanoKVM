@@ -9,6 +9,7 @@ import {
   NetworkIcon,
   PaletteIcon,
   SettingsIcon,
+  ShieldIcon,
   SmartphoneIcon,
   UserRoundIcon
 } from 'lucide-react';
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import semver from 'semver';
 
 import * as api from '@/api/application.ts';
+import { useRole } from '@/hooks/useRole.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
@@ -30,6 +32,7 @@ import { MCP } from './mcp';
 import { Network } from './network';
 import { Tailscale } from './tailscale';
 import { Update } from './update';
+import { Users } from './users';
 
 export const Settings = () => {
   const { t } = useTranslation();
@@ -42,25 +45,34 @@ export const Settings = () => {
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
   const setKeyboardLock = useSetAtom(keyboardLockAtom);
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
+  const { isAdmin, isOperator } = useRole();
 
-  const tabs = [
-    { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
-    { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
-    { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
-    { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
-    { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
+  // Tabs based on role: viewer can only see read-only stuff;
+  // operator can also use the KVM; admin sees everything including network and user management.
+  const allTabs = [
+    { id: 'about', roles: ['admin', 'operator', 'viewer'], icon: <BadgeInfoIcon size={16} />, component: <About /> },
+    { id: 'appearance', roles: ['admin', 'operator', 'viewer'], icon: <PaletteIcon size={16} />, component: <Appearance /> },
+    { id: 'device', roles: ['admin'], icon: <SmartphoneIcon size={16} />, component: <Device /> },
+    { id: 'network', roles: ['admin'], icon: <NetworkIcon size={16} />, component: <Network /> },
+    { id: 'mcp', roles: ['admin'], icon: <BotIcon size={16} />, component: <MCP /> },
     {
       id: 'tailscale',
+      roles: ['admin'],
       icon: <TailscaleIcon />,
       component: <Tailscale setIsLocked={setIsLocked} />
     },
     {
       id: 'update',
+      roles: ['admin'],
       icon: <CircleArrowUpIcon size={16} />,
       component: <Update setIsLocked={setIsLocked} />
     },
-    { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
+    { id: 'account', roles: ['admin', 'operator', 'viewer'], icon: <UserRoundIcon size={18} />, component: <Account /> },
+    { id: 'users', roles: ['admin'], icon: <ShieldIcon size={16} />, component: <Users /> }
   ];
+
+  const currentRole = isAdmin ? 'admin' : isOperator ? 'operator' : 'viewer';
+  const tabs = allTabs.filter((t) => t.roles.includes(currentRole));
 
   useEffect(() => {
     const skip = ls.getSkipUpdate();
