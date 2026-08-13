@@ -84,6 +84,10 @@ const cz = {
         description:
           'H.264 Direct a H.264 WebRTC se používají současně. To může způsobit trhání obrazu nebo poškozené video. Používejte pouze jeden režim H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Připojení WebRTC se nezdařilo',
+        description: 'Zkontrolujte síťové připojení nebo přepněte režim videa.'
+      },
       captureStatus: {
         hdmiError: 'Chyba obrazu HDMI',
         unsupportedResolution: 'Aktuální rozlišení není podporováno',

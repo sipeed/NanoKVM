@@ -82,6 +82,10 @@ const ko = {
         description:
           'H.264 Direct와 H.264 WebRTC가 동시에 사용되고 있습니다. 화면 찢어짐이나 손상된 영상이 발생할 수 있습니다. H.264 모드는 하나만 사용하세요.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC 연결에 실패했습니다',
+        description: '네트워크 연결을 확인하거나 비디오 모드를 전환하세요.'
+      },
       captureStatus: {
         hdmiError: 'HDMI 화면 오류',
         unsupportedResolution: '현재 해상도는 지원되지 않습니다',

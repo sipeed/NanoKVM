@@ -83,6 +83,10 @@ const ja = {
         description:
           'H.264 Direct と H.264 WebRTC が同時に使用されています。画面のティアリングや映像の破損が発生する可能性があります。H.264 モードは 1 つだけ使用してください。'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC 接続に失敗しました',
+        description: 'ネットワーク接続を確認するか、ビデオモードを切り替えてください。'
+      },
       captureStatus: {
         hdmiError: 'HDMI 画面エラー',
         unsupportedResolution: '現在の解像度はサポートされていません',

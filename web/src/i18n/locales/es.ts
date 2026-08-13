@@ -84,6 +84,10 @@ const es = {
         description:
           'H.264 Direct y H.264 WebRTC se están utilizando al mismo tiempo. Esto puede causar tearing de pantalla o vídeo corrupto. Utilice solo un modo H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Error de conexión de WebRTC',
+        description: 'Compruebe la conexión de red o cambie el modo de vídeo.'
+      },
       captureStatus: {
         hdmiError: 'Error de imagen HDMI',
         unsupportedResolution: 'La resolución actual no es compatible',

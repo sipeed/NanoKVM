@@ -84,6 +84,10 @@ const tr = {
         description:
           'H.264 Direct ve H.264 WebRTC aynı anda kullanılıyor. Bu, ekran yırtılmasına veya bozuk videoya neden olabilir. Lütfen yalnızca bir H.264 modu kullanın.'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC bağlantısı başarısız',
+        description: 'Ağ bağlantısını kontrol edin veya video modunu değiştirin.'
+      },
       captureStatus: {
         hdmiError: 'HDMI ekran hatası',
         unsupportedResolution: 'Geçerli çözünürlük desteklenmiyor',

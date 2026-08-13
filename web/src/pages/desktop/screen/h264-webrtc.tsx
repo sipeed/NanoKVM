@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Spin } from 'antd';
+import { notification, Spin } from 'antd';
 import clsx from 'clsx';
 import { useAtom, useAtomValue } from 'jotai';
+import { useTranslation } from 'react-i18next';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
 import * as storage from '@/lib/localstorage.ts';
@@ -14,6 +15,10 @@ type SignalingMessage = {
   data?: string;
 };
 
+const WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY = 'webrtc_connection_failed';
+const WEBRTC_CONNECTION_TIMEOUT = 10 * 1000;
+const WEBRTC_RECONNECT_DELAY = 3 * 1000;
+
 const parseSignalingData = <T,>(data?: string): T | null => {
   if (!data) {
     return null;
@@ -23,13 +28,21 @@ const parseSignalingData = <T,>(data?: string): T | null => {
 };
 
 export const H264Webrtc = () => {
+  const { t } = useTranslation();
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
   const [isLoading, setIsLoading] = useState(true);
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
+  const [notificationApi, contextHolder] = notification.useNotification();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const videoOfferSent = useRef(false);
   const videoIceCandidates = useRef<RTCIceCandidate[]>([]);
+  const translationRef = useRef(t);
+
+  useEffect(() => {
+    translationRef.current = t;
+  }, [t]);
 
   useEffect(() => {
     const url = `${getBaseUrl('ws')}/api/stream/h264`;
@@ -38,7 +51,47 @@ export const H264Webrtc = () => {
 
     let video: RTCPeerConnection | null = null;
     let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let disposed = false;
+
+    const showConnectionFailureNotification = () => {
+      notificationApi.error({
+        key: WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY,
+        message: translationRef.current('screen.webrtcConnectionFailed.title'),
+        description: translationRef.current('screen.webrtcConnectionFailed.description'),
+        placement: 'topRight',
+        closable: false,
+        duration: null
+      });
+    };
+
+    const cancelReconnect = () => {
+      if (!reconnectTimer) {
+        return;
+      }
+
+      clearTimeout(reconnectTimer);
+      reconnectTimer = null;
+    };
+
+    const scheduleReconnect = (reason: string, error?: unknown) => {
+      if (disposed) {
+        return;
+      }
+
+      console.error(`WebRTC connection failed: ${reason}`, error);
+      showConnectionFailureNotification();
+      setIsLoading(false);
+
+      if (reconnectTimer) {
+        return;
+      }
+
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        setConnectionAttempt((attempt) => attempt + 1);
+      }, WEBRTC_RECONNECT_DELAY);
+    };
 
     const sendMsg = (event: string, data: string) => {
       if (ws.readyState !== WebSocket.OPEN) {
@@ -82,6 +135,20 @@ export const H264Webrtc = () => {
         } catch (error) {
           videoOfferSent.current = false;
           console.error('Video negotiation failed:', error);
+          scheduleReconnect('creating or sending the offer', error);
+        }
+      };
+
+      peer.onconnectionstatechange = () => {
+        if (disposed || peer !== video) {
+          return;
+        }
+
+        if (peer.connectionState === 'failed') {
+          scheduleReconnect('peer connection state is failed');
+        } else if (peer.connectionState === 'connected') {
+          cancelReconnect();
+          notificationApi.destroy(WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY);
         }
       };
 
@@ -126,6 +193,7 @@ export const H264Webrtc = () => {
         .catch((error) => {
           console.error('Video answer set failed:', error);
           videoOfferSent.current = false;
+          scheduleReconnect('setting the remote description', error);
         });
     };
 
@@ -154,6 +222,14 @@ export const H264Webrtc = () => {
       heartbeatTimer = setInterval(() => {
         sendMsg('heartbeat', '');
       }, 60 * 1000);
+    };
+
+    ws.onerror = (error) => {
+      scheduleReconnect('the signaling WebSocket returned an error', error);
+    };
+
+    ws.onclose = () => {
+      scheduleReconnect('the signaling WebSocket closed');
     };
 
     ws.onmessage = (event) => {
@@ -192,10 +268,23 @@ export const H264Webrtc = () => {
 
     const loadingTimer = setTimeout(() => {
       setIsLoading(false);
+
+      if (!video || video.connectionState !== 'connected') {
+        showConnectionFailureNotification();
+      }
     }, 5 * 1000);
+
+    const connectionTimeoutTimer = setTimeout(() => {
+      if (!video || video.connectionState !== 'connected') {
+        scheduleReconnect(
+          `connection timed out in state ${video?.connectionState ?? 'not initialized'}`
+        );
+      }
+    }, WEBRTC_CONNECTION_TIMEOUT);
 
     return () => {
       disposed = true;
+      cancelReconnect();
 
       if (ws.readyState !== WebSocket.CLOSING && ws.readyState !== WebSocket.CLOSED) {
         ws.close();
@@ -213,8 +302,15 @@ export const H264Webrtc = () => {
         clearInterval(heartbeatTimer);
       }
       clearTimeout(loadingTimer);
+      clearTimeout(connectionTimeoutTimer);
     };
-  }, []);
+  }, [connectionAttempt, notificationApi]);
+
+  useEffect(() => {
+    return () => {
+      notificationApi.destroy(WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY);
+    };
+  }, [notificationApi]);
 
   useEffect(() => {
     const scale = storage.getVideoScale();
@@ -225,6 +321,8 @@ export const H264Webrtc = () => {
 
   return (
     <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden">
+      {contextHolder}
+
       <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
         <video
           id="screen"

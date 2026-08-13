@@ -85,6 +85,10 @@ const hu = {
         description:
           'Az H.264 Direct és az H.264 WebRTC egyszerre van használatban. Ez képtörést vagy sérült videót okozhat. Csak egy H.264 módot használjon.'
       },
+      webrtcConnectionFailed: {
+        title: 'A WebRTC-kapcsolat sikertelen',
+        description: 'Ellenőrizze a hálózati kapcsolatot, vagy váltson videómódot.'
+      },
       captureStatus: {
         hdmiError: 'HDMI-képernyőhiba',
         unsupportedResolution: 'A jelenlegi felbontás nem támogatott',

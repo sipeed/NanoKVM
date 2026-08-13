@@ -83,6 +83,10 @@ const id = {
         description:
           'H.264 Direct dan H.264 WebRTC sedang digunakan secara bersamaan. Hal ini dapat menyebabkan layar robek atau video rusak. Harap gunakan hanya satu mode H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Koneksi WebRTC gagal',
+        description: 'Periksa koneksi jaringan atau ganti mode video.'
+      },
       captureStatus: {
         hdmiError: 'Kesalahan layar HDMI',
         unsupportedResolution: 'Resolusi saat ini tidak didukung',

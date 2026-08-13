@@ -81,6 +81,10 @@ const th = {
         description:
           'กำลังใช้งาน H.264 Direct และ H.264 WebRTC พร้อมกัน ซึ่งอาจทำให้ภาพฉีกขาดหรือวิดีโอเสียหาย โปรดใช้โหมด H.264 เพียงโหมดเดียว'
       },
+      webrtcConnectionFailed: {
+        title: 'การเชื่อมต่อ WebRTC ล้มเหลว',
+        description: 'โปรดตรวจสอบการเชื่อมต่อเครือข่ายหรือสลับโหมดวิดีโอ'
+      },
       captureStatus: {
         hdmiError: 'ข้อผิดพลาดหน้าจอ HDMI',
         unsupportedResolution: 'ไม่รองรับความละเอียดปัจจุบัน',

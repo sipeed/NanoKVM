@@ -79,6 +79,10 @@ const zh_tw = {
         description:
           '偵測到 H.264 Direct 和 H.264 WebRTC 同時使用，可能導致畫面撕裂或影片損壞。請只保留一種 H.264 模式。'
       },
+      webrtcConnectionFailed: {
+        title: 'WebRTC 連線失敗',
+        description: '請檢查網路連線或切換影片模式。'
+      },
       captureStatus: {
         hdmiError: 'HDMI 畫面異常',
         unsupportedResolution: '目前解析度不支援',

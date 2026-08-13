@@ -84,6 +84,10 @@ const pl = {
         description:
           'Strumienie H.264 Direct i H.264 WebRTC są używane jednocześnie. Może to powodować rozrywanie obrazu lub uszkodzenie wideo. Używaj tylko jednego trybu H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Połączenie WebRTC nie powiodło się',
+        description: 'Sprawdź połączenie sieciowe lub zmień tryb wideo.'
+      },
       captureStatus: {
         hdmiError: 'Błąd obrazu HDMI',
         unsupportedResolution: 'Bieżąca rozdzielczość nie jest obsługiwana',

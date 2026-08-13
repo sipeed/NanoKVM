@@ -83,6 +83,10 @@ const pt_br = {
         description:
           'H.264 Direct e H.264 WebRTC estão sendo usados ao mesmo tempo. Isso pode causar rasgos na tela ou vídeo corrompido. Use apenas um modo H.264.'
       },
+      webrtcConnectionFailed: {
+        title: 'Falha na conexão WebRTC',
+        description: 'Verifique a conexão de rede ou alterne o modo de vídeo.'
+      },
       captureStatus: {
         hdmiError: 'Erro na imagem HDMI',
         unsupportedResolution: 'A resolução atual não é compatível',
