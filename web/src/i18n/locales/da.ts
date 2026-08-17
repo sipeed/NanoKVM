@@ -171,6 +171,24 @@ const da = {
       fast: 'Hurtigt',
       slow: 'Langsomt',
       requestPointer: 'Bruger relativ-tilstand. Klik på skrivebordet for at få musemarkør.',
+      inputAdapter: {
+        title: 'Inputadapter',
+        auto: 'Automatisk',
+        'pointer-lock': 'Markørlås',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Touchpad-guide',
+        scope: 'Gælder når Input Adapter er Touchpad, og musetilstand er Relativ.',
+        swipeTitle: 'Stryg for at flytte',
+        swipeDesc: 'Stryg i det aktive skærmområde for at flytte den eksterne markør.',
+        tapTitle: 'Tryk for at klikke',
+        tapDesc: 'Et kort tryk sender ét venstreklik.',
+        holdTitle: 'Hold for venstre knap nede',
+        holdDesc: 'Tryk og hold fingeren stille i ca. 1 sekund for at holde venstre museknap nede.',
+        dragTitle: 'Flyt efter hold for at trække',
+        dragDesc: 'Når hold er aktivt, kan du flytte fingeren for at trække med venstre knap nede.'
+      },
       resetHid: 'Nulstil HID',
       hidOnly: {
         title: 'Kun HID-tilstand',
@@ -285,6 +303,8 @@ const da = {
     },
     settings: {
       title: 'Indstillinger',
+      back: 'Tilbage',
+      close: 'Luk',
       mcp: {
         title: 'MCP-tjeneste',
         service: 'MCP-fjernbetjening',

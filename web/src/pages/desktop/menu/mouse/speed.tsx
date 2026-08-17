@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Popover, Slider } from 'antd';
+import { Slider } from 'antd';
 import { useAtom } from 'jotai';
 import { GaugeIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as storage from '@/lib/localstorage.ts';
 import { scrollIntervalAtom } from '@/jotai/mouse.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 const MAX_INTERVAL = 300;
 
@@ -56,11 +57,15 @@ export const Speed = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
+    <MenuSubmenu
+      title={t('mouse.speed')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [14, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <GaugeIcon size={18} />
         <span>{t('mouse.speed')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

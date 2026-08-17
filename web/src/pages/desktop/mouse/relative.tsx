@@ -3,9 +3,10 @@ import { message } from 'antd';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
+import { resolveInputAdapter } from '@/lib/input-adapter.ts';
 import { MouseReportRelative } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
-import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
+import { inputAdapterAtom, scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseRelativeEvent } from './types.ts';
@@ -17,6 +18,8 @@ export const Relative = () => {
   const resolution = useAtomValue(resolutionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
+  const inputAdapter = useAtomValue(inputAdapterAtom);
+  const effectiveAdapter = resolveInputAdapter(inputAdapter, 'relative');
 
   const mouseRef = useRef(new MouseReportRelative());
   const isLockedRef = useRef(false);
@@ -31,27 +34,32 @@ export const Relative = () => {
   const isMultiTouchRef = useRef(false);
   const pressedTouchButtonRef = useRef<number | null>(null);
   const lastTouchEndTimeRef = useRef(0);
-  const lastTapTimeRef = useRef(0);
-  const lastTapPosRef = useRef({ x: 0, y: 0 });
-  const isDoubleTapCandidateRef = useRef(false);
-  const doubleTapDragArmedUntilRef = useRef(0);
 
   const TAP_THRESHOLD = 8;
-  const DRAG_THRESHOLD = 10;
   const LONG_PRESS_DELAY = 800;
-  const DOUBLE_TAP_DELAY = 400;
-  const DOUBLE_TAP_DRAG_WINDOW = 800;
-  const DOUBLE_TAP_DISTANCE = 24;
 
   useEffect(() => {
     const screen = document.getElementById('screen');
     if (!screen) return;
     const target = screen;
     const mouse = mouseRef.current;
+    const useTouchpad = effectiveAdapter === 'touchpad';
+    const previousTouchAction = target.style.touchAction;
 
-    showMessage();
+    if (!useTouchpad) {
+      showMessage();
+    } else {
+      // Touchpad mode must never trap the user's pointer.
+      if (document.pointerLockElement === target) {
+        document.exitPointerLock();
+      }
+      isLockedRef.current = false;
+      target.style.touchAction = 'none';
+    }
 
-    target.addEventListener('click', handleMouseClick);
+    if (!useTouchpad) {
+      target.addEventListener('click', handleMouseClick);
+    }
     target.addEventListener('mousedown', handleMouseDown);
     target.addEventListener('mouseup', handleMouseUp);
     target.addEventListener('mousemove', handleMouseMove);
@@ -60,10 +68,14 @@ export const Relative = () => {
     document.addEventListener('pointerlockchange', handlePointerLockChange);
 
     const touchOptions: AddEventListenerOptions = { passive: false };
-    target.addEventListener('touchstart', handleTouchStart, touchOptions);
-    target.addEventListener('touchmove', handleTouchMove, touchOptions);
-    target.addEventListener('touchend', handleTouchEnd, touchOptions);
-    target.addEventListener('touchcancel', handleTouchCancel, touchOptions);
+    if (useTouchpad) {
+      target.addEventListener('touchstart', handleTouchStart, touchOptions);
+      target.addEventListener('touchmove', handleTouchMove, touchOptions);
+      target.addEventListener('touchend', handleTouchEnd, touchOptions);
+      target.addEventListener('touchcancel', handleTouchCancel, touchOptions);
+      window.addEventListener('blur', releaseTouchpadState);
+      window.addEventListener('pagehide', releaseTouchpadState);
+    }
 
     // Mouse click event
     function handleMouseClick(event: MouseEvent) {
@@ -122,7 +134,6 @@ export const Relative = () => {
         hasTouchMoveRef.current = true;
         clearTouchLongPressTimer();
         releasePressedTouchButton();
-        isDoubleTapCandidateRef.current = false;
         lastTouchPosRef.current = {
           x: e.touches[0].clientX,
           y: e.touches[0].clientY
@@ -131,21 +142,6 @@ export const Relative = () => {
       }
 
       const touch = e.touches[0];
-      const currentTime = Date.now();
-      const tapDistance = Math.hypot(
-        touch.clientX - lastTapPosRef.current.x,
-        touch.clientY - lastTapPosRef.current.y
-      );
-      isDoubleTapCandidateRef.current =
-        currentTime - lastTapTimeRef.current <= DOUBLE_TAP_DELAY &&
-        tapDistance <= DOUBLE_TAP_DISTANCE;
-      if (currentTime <= doubleTapDragArmedUntilRef.current && tapDistance <= DOUBLE_TAP_DISTANCE) {
-        isDoubleTapCandidateRef.current = true;
-      }
-      if (!isDoubleTapCandidateRef.current) {
-        doubleTapDragArmedUntilRef.current = 0;
-      }
-
       touchIdentifierRef.current = touch.identifier;
       lastTouchPosRef.current = { x: touch.clientX, y: touch.clientY };
       touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
@@ -158,14 +154,12 @@ export const Relative = () => {
 
       clearTouchLongPressTimer();
 
-      if (!isDoubleTapCandidateRef.current) {
-        touchLongPressTimerRef.current = setTimeout(() => {
-          isTouchLongPressRef.current = true;
-          pressedTouchButtonRef.current = 2;
-          navigator.vibrate?.(50);
-          handleMouseEvent({ type: 'mousedown', button: 2 });
-        }, LONG_PRESS_DELAY);
-      }
+      touchLongPressTimerRef.current = setTimeout(() => {
+        isTouchLongPressRef.current = true;
+        pressedTouchButtonRef.current = 0;
+        navigator.vibrate?.(50);
+        handleMouseEvent({ type: 'mousedown', button: 0 });
+      }, LONG_PRESS_DELAY);
     }
 
     // Touch move event
@@ -217,21 +211,7 @@ export const Relative = () => {
         clearTouchLongPressTimer();
       }
 
-      if (
-        isDoubleTapCandidateRef.current &&
-        distance > DRAG_THRESHOLD &&
-        pressedTouchButtonRef.current === null
-      ) {
-        pressedTouchButtonRef.current = 0;
-        handleMouseEvent({ type: 'mousedown', button: 0 });
-      }
-
-      if (
-        (!isDoubleTapCandidateRef.current ||
-          pressedTouchButtonRef.current !== null ||
-          isTouchLongPressRef.current) &&
-        (pendingTouchDeltaRef.current.x !== 0 || pendingTouchDeltaRef.current.y !== 0)
-      ) {
+      if (pendingTouchDeltaRef.current.x !== 0 || pendingTouchDeltaRef.current.y !== 0) {
         handleMouseEvent({
           type: 'move',
           deltaX: scaleTouchMovement(pendingTouchDeltaRef.current.x),
@@ -262,21 +242,11 @@ export const Relative = () => {
       if (isTap) {
         handleMouseEvent({ type: 'mousedown', button: 0 });
         handleMouseEvent({ type: 'mouseup', button: 0 });
-        lastTapTimeRef.current = Date.now();
-        lastTapPosRef.current = {
-          x: e.changedTouches[0].clientX,
-          y: e.changedTouches[0].clientY
-        };
-        if (isDoubleTapCandidateRef.current) {
-          doubleTapDragArmedUntilRef.current = Date.now() + DOUBLE_TAP_DRAG_WINDOW;
-        }
       } else if (pressedTouchButtonRef.current !== null) {
         releasePressedTouchButton();
-        doubleTapDragArmedUntilRef.current = 0;
       }
 
       resetTouchState();
-      isDoubleTapCandidateRef.current = false;
     }
 
     // Touch cancel event
@@ -287,7 +257,6 @@ export const Relative = () => {
       releasePressedTouchButton();
 
       resetTouchState();
-      isDoubleTapCandidateRef.current = false;
     }
 
     // Mouse wheel event
@@ -312,23 +281,36 @@ export const Relative = () => {
       isLockedRef.current = document.pointerLockElement === target;
     }
 
+    function releaseTouchpadState() {
+      clearTouchLongPressTimer();
+      releasePressedTouchButton();
+      resetTouchState();
+    }
+
     return () => {
       const release = mouse.reset();
       client.send(new Uint8Array([MessageEvent.Mouse, ...release]));
-      target.removeEventListener('click', handleMouseClick);
+      if (!useTouchpad) {
+        target.removeEventListener('click', handleMouseClick);
+      }
       target.removeEventListener('mousemove', handleMouseMove);
       target.removeEventListener('mousedown', handleMouseDown);
       target.removeEventListener('mouseup', handleMouseUp);
       target.removeEventListener('wheel', handleMouseWheel);
       target.removeEventListener('contextmenu', disableEvent);
       document.removeEventListener('pointerlockchange', handlePointerLockChange);
-      target.removeEventListener('touchstart', handleTouchStart, touchOptions.capture);
-      target.removeEventListener('touchmove', handleTouchMove, touchOptions.capture);
-      target.removeEventListener('touchend', handleTouchEnd, touchOptions.capture);
-      target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
-      clearTouchLongPressTimer();
+      if (useTouchpad) {
+        target.style.touchAction = previousTouchAction;
+        target.removeEventListener('touchstart', handleTouchStart, touchOptions.capture);
+        target.removeEventListener('touchmove', handleTouchMove, touchOptions.capture);
+        target.removeEventListener('touchend', handleTouchEnd, touchOptions.capture);
+        target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
+        window.removeEventListener('blur', releaseTouchpadState);
+        window.removeEventListener('pagehide', releaseTouchpadState);
+        releaseTouchpadState();
+      }
     };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }, [effectiveAdapter, resolution, scrollDirection, scrollInterval]);
 
   // Mouse handler
   function handleMouseEvent(event: MouseRelativeEvent) {

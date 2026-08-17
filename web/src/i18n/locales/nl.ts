@@ -174,6 +174,26 @@ const nl = {
       slow: 'Langzaam',
       requestPointer:
         'Relatieve modus wordt gebruikt. Klik op het bureaublad om de muisaanwijzer te krijgen.',
+      inputAdapter: {
+        title: 'Invoeradapter',
+        auto: 'Automatisch',
+        'pointer-lock': 'Aanwijzervergrendeling',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Touchpadgids',
+        scope: 'Geldt wanneer de invoeradapter Touchpad is en de muismodus Relatief is.',
+        swipeTitle: 'Veeg om te bewegen',
+        swipeDesc: 'Veeg binnen het actieve schermgebied om de externe aanwijzer te verplaatsen.',
+        tapTitle: 'Tik om te klikken',
+        tapDesc: 'Een korte tik stuurt één linkermuisklik.',
+        holdTitle: 'Houd vast voor linkermuisknop ingedrukt',
+        holdDesc:
+          'Raak aan en houd uw vinger ongeveer 1 seconde stil om de linkermuisknop ingedrukt te houden.',
+        dragTitle: 'Beweeg na vasthouden om te slepen',
+        dragDesc:
+          'Wanneer vasthouden actief is, beweeg uw vinger om te slepen met de linkermuisknop ingedrukt.'
+      },
       resetHid: 'HID resetten',
       hidOnly: {
         title: 'Alleen HID-modus',
@@ -288,6 +308,8 @@ const nl = {
     },
     settings: {
       title: 'Instellingen',
+      back: 'Terug',
+      close: 'Sluiten',
       mcp: {
         title: 'MCP-service',
         service: 'MCP-afstandsbediening',

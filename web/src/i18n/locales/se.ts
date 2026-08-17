@@ -283,6 +283,8 @@ const se = {
     },
     settings: {
       title: 'Inställningar',
+      back: 'Tillbaka',
+      close: 'Stäng',
       mcp: {
         title: 'MCP-tjänst',
         service: 'MCP-fjärrstyrning',

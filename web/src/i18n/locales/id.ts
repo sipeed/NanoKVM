@@ -172,6 +172,25 @@ const id = {
       slow: 'Lambat',
       requestPointer:
         'Menggunakan mode relatf. Silakan klik desktop untuk mendapatkan penunjuk tetikus.',
+      inputAdapter: {
+        title: 'Adaptor input',
+        auto: 'Otomatis',
+        'pointer-lock': 'Kunci pointer',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Panduan touchpad',
+        scope: 'Berlaku saat Adapter Input adalah Touchpad dan Mode Mouse adalah Relatif.',
+        swipeTitle: 'Usap untuk menggerakkan',
+        swipeDesc: 'Usap di dalam area layar aktif untuk menggerakkan penunjuk jarak jauh.',
+        tapTitle: 'Ketuk untuk mengeklik',
+        tapDesc: 'Ketukan singkat mengirim satu klik kiri.',
+        holdTitle: 'Tahan untuk menekan tombol kiri',
+        holdDesc: 'Sentuh dan tahan tetap diam sekitar 1 detik untuk menahan tombol kiri mouse.',
+        dragTitle: 'Gerakkan setelah tahan untuk menyeret',
+        dragDesc:
+          'Setelah tahan aktif, gerakkan jari untuk menyeret dengan tombol kiri tetap ditekan.'
+      },
       resetHid: 'Setel ulang HID',
       hidOnly: {
         title: 'Mode hanya HID',
@@ -286,6 +305,8 @@ const id = {
     },
     settings: {
       title: 'Pengaturan',
+      back: 'Kembali',
+      close: 'Tutup',
       mcp: {
         title: 'Layanan MCP',
         service: 'Kontrol jarak jauh MCP',

@@ -286,6 +286,8 @@ const pt_br = {
     },
     settings: {
       title: 'Configurações',
+      back: 'Voltar',
+      close: 'Fechar',
       mcp: {
         title: 'Serviço MCP',
         service: 'Controle remoto MCP',

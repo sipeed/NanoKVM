@@ -2,6 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .nanokvm-button-base {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+  }
+}
+
+.nanokvm-mobile-menu-popover {
+  max-width: calc(100vw - 76px);
+}
+
+.nanokvm-mobile-menu-popover .ant-popover-inner-content {
+  max-height: calc(100dvh - 96px);
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.nanokvm-mobile-menu-panel {
+  display: grid;
+  width: min(18rem, calc(100vw - 100px));
+  max-height: calc(100dvh - 96px);
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.nanokvm-mobile-menu-panel__body {
+  display: grid;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.nanokvm-mobile-menu-panel__root,
+.nanokvm-mobile-menu-panel__layer {
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100dvh - 128px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.nanokvm-mobile-menu-popover .ant-popover-inner,
+.nanokvm-mobile-menu-popover .ant-tooltip-inner {
+  background: rgba(38, 38, 38, 0.96);
+  color: #e5e5e5;
+}
+
+.nanokvm-mobile-menu-popover .ant-popover-inner {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
 html,
 body {
   padding: 0;

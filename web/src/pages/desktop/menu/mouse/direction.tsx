@@ -1,10 +1,10 @@
-import { Popover } from 'antd';
 import { useAtom } from 'jotai';
 import { ArrowDownUpIcon, CheckIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as storage from '@/lib/localstorage.ts';
 import { scrollDirectionAtom } from '@/jotai/mouse.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 export const Direction = () => {
   const { t } = useTranslation();
@@ -41,11 +41,15 @@ export const Direction = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
+    <MenuSubmenu
+      title={t('mouse.direction')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [14, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <ArrowDownUpIcon size={18} />
         <span>{t('mouse.direction')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

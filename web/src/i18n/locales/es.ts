@@ -173,6 +173,27 @@ const es = {
       slow: 'Lenta',
       requestPointer:
         'Usando modo relativo. Por favor, haz clic en el escritorio para obtener el cursor del ratón.',
+      inputAdapter: {
+        title: 'Adaptador de entrada',
+        auto: 'Automático',
+        'pointer-lock': 'Bloqueo del puntero',
+        touchpad: 'Panel táctil'
+      },
+      touchpadGuide: {
+        title: 'Guía del panel táctil',
+        scope:
+          'Se aplica cuando el adaptador de entrada es Panel táctil y el modo de ratón es Relativo.',
+        swipeTitle: 'Desliza para mover',
+        swipeDesc: 'Desliza dentro del área activa de la pantalla para mover el puntero remoto.',
+        tapTitle: 'Toca para hacer clic',
+        tapDesc: 'Un toque breve envía un clic izquierdo.',
+        holdTitle: 'Mantén pulsado para presionar el botón izquierdo',
+        holdDesc:
+          'Toca y mantén el dedo quieto durante aproximadamente 1 segundo para mantener pulsado el botón izquierdo del ratón.',
+        dragTitle: 'Mueve después de mantener para arrastrar',
+        dragDesc:
+          'Cuando la pulsación larga esté activa, mueve el dedo para arrastrar con el botón izquierdo pulsado.'
+      },
       resetHid: 'Restablecer HID',
       hidOnly: {
         title: 'Modo solo HID',
@@ -287,6 +308,8 @@ const es = {
     },
     settings: {
       title: 'Ajustes',
+      back: 'Atrás',
+      close: 'Cerrar',
       mcp: {
         title: 'Servicio MCP',
         service: 'Control remoto MCP',

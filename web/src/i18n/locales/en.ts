@@ -170,6 +170,24 @@ const en = {
       fast: 'Fast',
       slow: 'Slow',
       requestPointer: 'Using relative mode. Please click desktop to get mouse pointer.',
+      inputAdapter: {
+        title: 'Input Adapter',
+        auto: 'Auto',
+        'pointer-lock': 'Pointer Lock',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Touchpad guide',
+        scope: 'Applies when Input Adapter is Touchpad and Mouse Mode is Relative.',
+        swipeTitle: 'Swipe to move',
+        swipeDesc: 'Swipe inside the active screen area to move the remote pointer.',
+        tapTitle: 'Tap to click',
+        tapDesc: 'A short tap sends one left click.',
+        holdTitle: 'Hold for left button down',
+        holdDesc: 'Touch and keep still for about 1 second to hold the left mouse button down.',
+        dragTitle: 'Move after hold to drag',
+        dragDesc: 'After the hold is active, move your finger to drag with the left button held.'
+      },
       resetHid: 'Reset HID',
       hidOnly: {
         title: 'HID-Only mode',
@@ -284,6 +302,8 @@ const en = {
     },
     settings: {
       title: 'Settings',
+      back: 'Back',
+      close: 'Close',
       mcp: {
         title: 'MCP Service',
         service: 'Remote control MCP',

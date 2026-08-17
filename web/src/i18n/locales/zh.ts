@@ -164,6 +164,24 @@ const zh = {
       fast: '快',
       slow: '慢',
       requestPointer: '正在使用鼠标相对模式，请点击桌面获取鼠标指针。',
+      inputAdapter: {
+        title: '输入适配器',
+        auto: '自动',
+        'pointer-lock': '指针锁定',
+        touchpad: '触控板'
+      },
+      touchpadGuide: {
+        title: '触控板指南',
+        scope: '适用于输入适配器为触控板，且鼠标模式为相对模式时。',
+        swipeTitle: '滑动移动',
+        swipeDesc: '在有效画面区域内滑动，远端鼠标指针会跟随移动。',
+        tapTitle: '点按单击',
+        tapDesc: '短促点按一次，对应远端鼠标左键单击。',
+        holdTitle: '按住触发左键按下',
+        holdDesc: '手指按下并保持不动约 1 秒，会进入鼠标左键按住状态。',
+        dragTitle: '按住后移动进行拖动',
+        dragDesc: '左键按住状态生效后继续移动手指，会变成按住鼠标左键的拖动。'
+      },
       resetHid: '重置 HID',
       hidOnly: {
         title: 'HID-Only 模式',
@@ -276,6 +294,8 @@ const zh = {
     },
     settings: {
       title: '设置',
+      back: '返回',
+      close: '关闭',
       mcp: {
         title: 'MCP 服务',
         service: '远程控制 MCP',

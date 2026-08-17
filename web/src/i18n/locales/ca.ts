@@ -284,6 +284,8 @@ const ca = {
     },
     settings: {
       title: 'Configuració',
+      back: 'Enrere',
+      close: 'Tanca',
       mcp: {
         title: 'Servei MCP',
         service: 'Control remot MCP',

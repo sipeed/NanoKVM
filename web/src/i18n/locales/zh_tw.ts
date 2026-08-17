@@ -164,6 +164,24 @@ const zh_tw = {
       fast: '快',
       slow: '慢',
       requestPointer: '正在使用滑鼠相對模式。請按一下桌面以取得滑鼠游標。',
+      inputAdapter: {
+        title: '輸入適配器',
+        auto: '自動',
+        'pointer-lock': '指標鎖定',
+        touchpad: '觸控板'
+      },
+      touchpadGuide: {
+        title: '觸控板指南',
+        scope: '適用於輸入適配器為觸控板，且滑鼠模式為相對模式時。',
+        swipeTitle: '滑動移動',
+        swipeDesc: '在有效畫面區域內滑動，遠端滑鼠游標會跟隨移動。',
+        tapTitle: '點按單擊',
+        tapDesc: '短促點按一次，對應遠端滑鼠左鍵單擊。',
+        holdTitle: '按住觸發左鍵按下',
+        holdDesc: '手指按下並保持不動約 1 秒，會進入滑鼠左鍵按住狀態。',
+        dragTitle: '按住後移動進行拖曳',
+        dragDesc: '左鍵按住狀態生效後繼續移動手指，會變成按住滑鼠左鍵的拖曳。'
+      },
       resetHid: '重設 HID',
       hidOnly: {
         title: 'HID-Only 模式',
@@ -276,6 +294,8 @@ const zh_tw = {
     },
     settings: {
       title: '設定',
+      back: '返回',
+      close: '關閉',
       mcp: {
         title: 'MCP 服務',
         service: 'MCP 遠端控制',

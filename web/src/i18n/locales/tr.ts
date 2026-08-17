@@ -285,6 +285,8 @@ const tr = {
     },
     settings: {
       title: 'Ayarlar',
+      back: 'Geri',
+      close: 'Kapat',
       mcp: {
         title: 'MCP Hizmeti',
         service: 'MCP uzaktan kumanda',

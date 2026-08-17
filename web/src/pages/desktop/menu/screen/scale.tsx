@@ -1,11 +1,11 @@
 import { ReactElement, useEffect } from 'react';
-import { Popover } from 'antd';
 import { useAtom } from 'jotai';
 import { CheckIcon, PercentIcon, ScalingIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as storage from '@/lib/localstorage.ts';
 import { videoScaleAtom } from '@/jotai/screen.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 const ScaleList = [
   { label: '200', value: 2 },
@@ -53,13 +53,17 @@ export const Scale = (): ReactElement => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [13, 0] }}>
+    <MenuSubmenu
+      title={t('screen.scale')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [13, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-1 rounded px-3 text-neutral-300 hover:bg-neutral-700/50">
         <div className="flex h-[14px] w-[20px] items-end">
           <ScalingIcon size={16} />
         </div>
         <span>{t('screen.scale')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

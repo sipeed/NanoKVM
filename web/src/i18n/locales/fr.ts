@@ -175,6 +175,27 @@ const fr = {
       slow: 'Lent',
       requestPointer:
         'Pour utiliser le mode relatif, cliquez sur le bureau pour capturer le pointeur de la souris.',
+      inputAdapter: {
+        title: "Adaptateur d'entrée",
+        auto: 'Automatique',
+        'pointer-lock': 'Verrouillage du pointeur',
+        touchpad: 'Pavé tactile'
+      },
+      touchpadGuide: {
+        title: 'Guide du pavé tactile',
+        scope:
+          'S’applique lorsque l’adaptateur d’entrée est Pavé tactile et que le mode souris est Relatif.',
+        swipeTitle: 'Balayer pour déplacer',
+        swipeDesc: 'Balayez dans la zone active de l’écran pour déplacer le pointeur distant.',
+        tapTitle: 'Toucher pour cliquer',
+        tapDesc: 'Un appui bref envoie un clic gauche.',
+        holdTitle: 'Maintenir pour garder le bouton gauche enfoncé',
+        holdDesc:
+          'Touchez et gardez le doigt immobile pendant environ 1 seconde pour maintenir le bouton gauche de la souris enfoncé.',
+        dragTitle: 'Déplacer après maintien pour faire glisser',
+        dragDesc:
+          'Une fois le maintien actif, déplacez le doigt pour faire glisser avec le bouton gauche enfoncé.'
+      },
       resetHid: 'Réinitialiser le périphérique HID',
       hidOnly: {
         title: 'Mode HID uniquement',
@@ -289,6 +310,8 @@ const fr = {
     },
     settings: {
       title: 'Paramètres',
+      back: 'Retour',
+      close: 'Fermer',
       mcp: {
         title: 'Service MCP',
         service: 'Contrôle à distance MCP',

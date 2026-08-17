@@ -172,6 +172,24 @@ const ja = {
       slow: '遅い',
       requestPointer:
         '相対モードを使用中です。マウスポインターを取得するには、デスクトップをクリックしてください。',
+      inputAdapter: {
+        title: '入力アダプター',
+        auto: '自動',
+        'pointer-lock': 'ポインターロック',
+        touchpad: 'タッチパッド'
+      },
+      touchpadGuide: {
+        title: 'タッチパッドガイド',
+        scope: '入力アダプターがタッチパッドで、マウスモードが相対モードの場合に適用されます。',
+        swipeTitle: 'スワイプして移動',
+        swipeDesc: 'アクティブな画面領域内でスワイプすると、リモートポインターが移動します。',
+        tapTitle: 'タップしてクリック',
+        tapDesc: '短くタップすると左クリックを 1 回送信します。',
+        holdTitle: '長押しで左ボタンを押下',
+        holdDesc: '約 1 秒間触れたまま動かさないと、マウスの左ボタンを押した状態になります。',
+        dragTitle: '長押し後に動かしてドラッグ',
+        dragDesc: '長押しが有効になった後、指を動かすと左ボタンを押したままドラッグします。'
+      },
       resetHid: 'HID をリセット',
       hidOnly: {
         title: 'HID-Only モード',
@@ -287,6 +305,8 @@ const ja = {
     },
     settings: {
       title: '設定',
+      back: '戻る',
+      close: '閉じる',
       mcp: {
         title: 'MCP サービス',
         service: 'MCP リモート制御',

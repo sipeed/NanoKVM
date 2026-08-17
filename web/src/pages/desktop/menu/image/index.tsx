@@ -7,13 +7,19 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/storage.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
+import { useDismissMobileMenu } from '@/components/mobile-menu-context.ts';
 
 import { Images } from './images.tsx';
 import { Tips } from './tips.tsx';
 
-export const Image = () => {
+type ImageProps = {
+  tooltipPlacement?: 'bottom' | 'left' | 'right';
+};
+
+export const Image = ({ tooltipPlacement = 'bottom' }: ImageProps) => {
   const { t } = useTranslation();
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
+  const dismissMobileMenu = useDismissMobileMenu();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -61,13 +67,16 @@ export const Image = () => {
 
   return (
     <>
-      <Tooltip title={t('image.title')} placement="bottom" mouseEnterDelay={0.6}>
+      <Tooltip title={t('image.title')} placement={tooltipPlacement} mouseEnterDelay={0.6}>
         <div
           className={clsx(
             'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700',
             isMounted ? 'text-blue-500' : 'text-neutral-300 hover:text-white'
           )}
-          onClick={() => toggleModal(true)}
+          onClick={() => {
+            dismissMobileMenu();
+            toggleModal(true);
+          }}
         >
           <DiscIcon size={18} />
         </div>

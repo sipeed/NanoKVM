@@ -1,4 +1,3 @@
-import { Popover } from 'antd';
 import { useAtom } from 'jotai';
 import { CheckIcon, SquareDashedMousePointerIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import * as ls from '@/lib/localstorage.ts';
 import { client } from '@/lib/websocket.ts';
 import { mouseModeAtom } from '@/jotai/mouse.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 export const MouseMode = () => {
   const { t } = useTranslation();
@@ -47,11 +47,15 @@ export const MouseMode = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
+    <MenuSubmenu
+      title={t('mouse.mode')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [14, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <SquareDashedMousePointerIcon size={18} />
         <span>{t('mouse.mode')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

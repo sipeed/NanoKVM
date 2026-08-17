@@ -171,6 +171,24 @@ const vi = {
       slow: 'Chậm',
       requestPointer:
         'Đang sử dụng chế độ tương đối. Vui lòng nhấp vào màn hình để lấy con trỏ chuột.',
+      inputAdapter: {
+        title: 'Bộ chuyển đổi đầu vào',
+        auto: 'Tự động',
+        'pointer-lock': 'Khóa con trỏ',
+        touchpad: 'Bàn di chuột'
+      },
+      touchpadGuide: {
+        title: 'Hướng dẫn bàn di chuột',
+        scope: 'Áp dụng khi Bộ điều hợp nhập là Bàn di chuột và Chế độ chuột là Tương đối.',
+        swipeTitle: 'Vuốt để di chuyển',
+        swipeDesc: 'Vuốt trong vùng màn hình hoạt động để di chuyển con trỏ từ xa.',
+        tapTitle: 'Chạm để nhấp',
+        tapDesc: 'Một lần chạm ngắn sẽ gửi một cú nhấp trái.',
+        holdTitle: 'Giữ để nhấn nút trái',
+        holdDesc: 'Chạm và giữ yên khoảng 1 giây để giữ nút trái chuột ở trạng thái nhấn.',
+        dragTitle: 'Di chuyển sau khi giữ để kéo',
+        dragDesc: 'Sau khi giữ có hiệu lực, di chuyển ngón tay để kéo với nút trái đang được giữ.'
+      },
       resetHid: 'Đặt lại HID',
       hidOnly: {
         title: 'Chế độ chỉ HID',
@@ -284,6 +302,8 @@ const vi = {
     },
     settings: {
       title: 'Cài đặt',
+      back: 'Quay lại',
+      close: 'Đóng',
       mcp: {
         title: 'Dịch vụ MCP',
         service: 'Điều khiển từ xa MCP',
