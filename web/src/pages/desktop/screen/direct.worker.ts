@@ -13,6 +13,8 @@ let stopped = false;
 let resyncRequested = false;
 let pendingAckTimestamp: number | null = null;
 let decodeBackpressured = false;
+let reportedFrameWidth = 0;
+let reportedFrameHeight = 0;
 
 const maxQueuedFrames = 1;
 const maxReconnectDelayMs = 5_000;
@@ -45,6 +47,8 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
       }
 
       canvas = offscreenCanvas;
+      reportedFrameWidth = 0;
+      reportedFrameHeight = 0;
       ctx = canvas!.getContext('2d', {
         alpha: false,
         desynchronized: true
@@ -308,6 +312,15 @@ function renderFrame(frame: VideoFrame) {
     if (canvas.width !== frame.displayWidth || canvas.height !== frame.displayHeight) {
       canvas.width = frame.displayWidth;
       canvas.height = frame.displayHeight;
+    }
+    if (reportedFrameWidth !== frame.displayWidth || reportedFrameHeight !== frame.displayHeight) {
+      reportedFrameWidth = frame.displayWidth;
+      reportedFrameHeight = frame.displayHeight;
+      self.postMessage({
+        type: 'frame-size',
+        width: reportedFrameWidth,
+        height: reportedFrameHeight
+      });
     }
 
     ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);

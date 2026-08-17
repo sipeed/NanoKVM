@@ -37,6 +37,17 @@ export const H264Direct = () => {
 
     const offscreen = canvasRef.current.transferControlToOffscreen();
     const url = `${getBaseUrl('ws')}/api/stream/h264/direct`;
+    worker.onmessage = (
+      event: MessageEvent<{ type?: string; width?: number; height?: number }>
+    ) => {
+      const { type, width, height } = event.data;
+      if (type !== 'frame-size' || !width || !height || !canvasRef.current) {
+        return;
+      }
+
+      canvasRef.current.dataset.mediaWidth = String(width);
+      canvasRef.current.dataset.mediaHeight = String(height);
+    };
     worker.postMessage({ type: 'h264', canvas: offscreen, url }, [offscreen]);
 
     return () => {
@@ -50,7 +61,7 @@ export const H264Direct = () => {
       <canvas
         id="screen"
         ref={canvasRef}
-        className={clsx('block select-none touch-none', mouseStyle)}
+        className={clsx('block touch-none select-none', mouseStyle)}
         style={{
           transform: `scale(${videoScale})`,
           transformOrigin: 'center',
