@@ -14,12 +14,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// setRootPassword is a variable so tests can avoid shelling out to passwd(1).
+var setRootPassword = changeRootPassword
+
 func (s *Service) ChangePassword(c *gin.Context) {
 	var req proto.ChangePasswordReq
 	var rsp proto.Response
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid parameters")
+		return
+	}
+
+	// Require the current password, otherwise a stolen session - or a request
+	// forged by another site - is enough to take over the device permanently.
+	// A device that still has no account file uses the documented admin/admin
+	// default, so the check adds nothing and would block the initial setup.
+	if isAccountConfigured() && !CompareAccount(req.Username, req.OldPassword) {
+		time.Sleep(2 * time.Second)
+		rsp.ErrRsp(c, -6, "invalid current password")
 		return
 	}
 
@@ -41,7 +54,7 @@ func (s *Service) ChangePassword(c *gin.Context) {
 	}
 
 	// change root password
-	err = changeRootPassword(password)
+	err = setRootPassword(password)
 	if err != nil {
 		_ = DelAccount()
 		rsp.ErrRsp(c, -5, "failed to change password")

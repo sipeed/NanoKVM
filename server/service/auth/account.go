@@ -4,6 +4,7 @@ import (
 	"NanoKVM-Server/utils"
 	"encoding/json"
 	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -11,7 +12,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const AccountFile = "/etc/kvm/pwd"
+// AccountFile is a variable rather than a constant so tests can redirect it.
+var AccountFile = "/etc/kvm/pwd"
 
 type Account struct {
 	Username string `json:"username"`
@@ -38,6 +40,20 @@ func GetAccount() (*Account, error) {
 	}
 
 	return &account, nil
+}
+
+// isAccountConfigured reports whether a password has ever been set on this
+// device. Without the file, GetAccount falls back to the admin/admin default.
+//
+// Only a missing file counts as unconfigured. Any other stat error means the
+// answer is unknown, and the caller uses this to decide whether to demand the
+// current password, so an unknown answer has to keep the check in force.
+func isAccountConfigured() bool {
+	if _, err := os.Stat(AccountFile); err != nil {
+		return !errors.Is(err, fs.ErrNotExist)
+	}
+
+	return true
 }
 
 func SetAccount(username string, hashedPassword string) error {

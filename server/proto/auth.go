@@ -16,6 +16,8 @@ type GetAccountRsp struct {
 type ChangePasswordReq struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
+	// OldPassword is required unless the device still uses the default account.
+	OldPassword string `json:"oldPassword"`
 }
 
 type IsPasswordUpdatedRsp struct {
