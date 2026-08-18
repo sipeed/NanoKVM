@@ -1,3 +1,5 @@
+//go:build !novision
+
 package common
 
 /*
