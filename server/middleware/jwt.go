@@ -90,9 +90,12 @@ func GenerateJWT(username string) (string, error) {
 func ParseJWT(jwtToken string) (*Token, error) {
 	conf := config.GetInstance()
 
+	// Pinned to the one algorithm GenerateJWT issues. Left open, the parser
+	// takes whichever the token's own header names, which is the opening every
+	// algorithm-confusion attack needs.
 	t, err := jwt.ParseWithClaims(jwtToken, &Token{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(conf.JWT.SecretKey), nil
-	})
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil {
 		log.Debugf("parse jwt error: %s", err)
 		return nil, err
