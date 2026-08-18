@@ -1,4 +1,3 @@
-import { Popover } from 'antd';
 import clsx from 'clsx';
 import { useAtom } from 'jotai';
 import { EyeOffIcon, HandIcon, MousePointerIcon, PlusIcon, TextCursorIcon } from 'lucide-react';
@@ -6,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as ls from '@/lib/localstorage.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 export const Cursor = () => {
   const { t } = useTranslation();
@@ -44,11 +44,15 @@ export const Cursor = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
+    <MenuSubmenu
+      title={t('mouse.cursor')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [14, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <MousePointerIcon size={18} />
         <span>{t('mouse.cursor')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

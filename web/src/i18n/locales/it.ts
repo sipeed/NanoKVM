@@ -174,6 +174,26 @@ const it = {
       slow: 'Lento',
       requestPointer:
         'Usando la modalità relativa. Clicca sul desktop per ottenere il puntatore del mouse.',
+      inputAdapter: {
+        title: 'Adattatore input',
+        auto: 'Automatico',
+        'pointer-lock': 'Blocco puntatore',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Guida touchpad',
+        scope: 'Si applica quando l’adattatore di input è Touchpad e la modalità mouse è Relativa.',
+        swipeTitle: 'Scorri per spostare',
+        swipeDesc: 'Scorri nell’area attiva dello schermo per spostare il puntatore remoto.',
+        tapTitle: 'Tocca per fare clic',
+        tapDesc: 'Un tocco breve invia un clic sinistro.',
+        holdTitle: 'Tieni premuto il pulsante sinistro',
+        holdDesc:
+          'Tocca e mantieni il dito fermo per circa 1 secondo per tenere premuto il pulsante sinistro del mouse.',
+        dragTitle: 'Muovi dopo la pressione per trascinare',
+        dragDesc:
+          'Quando la pressione è attiva, muovi il dito per trascinare con il pulsante sinistro premuto.'
+      },
       resetHid: 'Reimposta HID',
       hidOnly: {
         title: 'Modalità solo HID',
@@ -288,6 +308,8 @@ const it = {
     },
     settings: {
       title: 'Impostazioni',
+      back: 'Indietro',
+      close: 'Chiudi',
       mcp: {
         title: 'Servizio MCP',
         service: 'Controllo remoto MCP',

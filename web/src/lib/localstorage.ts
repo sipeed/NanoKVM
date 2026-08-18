@@ -10,6 +10,7 @@ const GOP_KEY = 'nano-kvm-gop';
 const FRAME_DETECT_KEY = 'nano-kvm-frame-detect';
 const MOUSE_STYLE_KEY = 'nano-kvm-mouse-style';
 const MOUSE_MODE_KEY = 'nano-kvm-mouse-mode';
+const INPUT_ADAPTER_KEY = 'nano-kvm-input-adapter';
 const MOUSE_SCROLL_DIRECTION_KEY = 'nano-kvm-mouse-scroll-direction';
 const MOUSE_SCROLL_INTERVAL_KEY = 'nano-kvm-mouse-scroll-interval';
 const SKIP_UPDATE_KEY = 'nano-kvm-check-update';
@@ -18,6 +19,7 @@ const KEYBOARD_LANGUAGE_KEY = 'nano-kvm-keyboard-language';
 const SKIP_MODIFY_PASSWORD_KEY = 'nano-kvm-skip-modify-password';
 const MENU_DISABLED_ITEMS_KEY = 'nano-kvm-menu-disabled-items';
 const MENU_AUTO_HIDE_KEY = 'nano-kvm-menu-auto-hide';
+const MOBILE_MENU_PLACEMENT_KEY = 'nano-kvm-mobile-menu-placement';
 const KEYBOARD_LED_STATUS_VISIBLE_KEY = 'nano-kvm-keyboard-led-status-visible';
 const POWER_CONFIRM_KEY = 'nano-kvm-power-confirm';
 
@@ -147,6 +149,14 @@ export function setMouseMode(mouse: string) {
   localStorage.setItem(MOUSE_MODE_KEY, mouse);
 }
 
+export function getInputAdapter() {
+  return localStorage.getItem(INPUT_ADAPTER_KEY);
+}
+
+export function setInputAdapter(adapter: string) {
+  localStorage.setItem(INPUT_ADAPTER_KEY, adapter);
+}
+
 export function getMouseScrollDirection(): number | null {
   const direction = localStorage.getItem(MOUSE_SCROLL_DIRECTION_KEY);
   if (direction && Number(direction)) {
@@ -221,6 +231,21 @@ export function getMenuDisplayMode(): string {
 
 export function setMenuDisplayMode(mode: string) {
   localStorage.setItem(MENU_AUTO_HIDE_KEY, mode);
+}
+
+export function getMobileMenuPlacement(): unknown {
+  const value = localStorage.getItem(MOBILE_MENU_PLACEMENT_KEY);
+  if (!value) return null;
+
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+}
+
+export function setMobileMenuPlacement(placement: { edge: string; top: number }) {
+  localStorage.setItem(MOBILE_MENU_PLACEMENT_KEY, JSON.stringify(placement));
 }
 
 export function getKeyboardLedStatusVisible(): boolean {

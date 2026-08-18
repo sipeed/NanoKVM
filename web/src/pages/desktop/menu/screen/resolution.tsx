@@ -1,4 +1,4 @@
-import { Popover, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import { useAtom } from 'jotai';
 import { CheckIcon, CircleHelpIcon, RatioIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +7,7 @@ import { updateScreen } from '@/api/vm';
 import { Resolution as TypeResolution } from '@/types';
 import { setResolution as setCookie } from '@/lib/localstorage';
 import { resolutionAtom } from '@/jotai/screen.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 
 const resolutions: TypeResolution[] = [
   { width: 0, height: 0 },
@@ -66,11 +67,15 @@ export const Resolution = () => {
   );
 
   return (
-    <Popover content={content} placement="rightTop" arrow={false} align={{ offset: [14, 0] }}>
+    <MenuSubmenu
+      title={t('screen.resolution')}
+      content={content}
+      popoverProps={{ placement: 'rightTop', arrow: false, align: { offset: [14, 0] } }}
+    >
       <div className="flex h-[30px] cursor-pointer items-center space-x-2 rounded px-3 text-neutral-300 hover:bg-neutral-700/70">
         <RatioIcon size={18} />
         <span className="select-none text-sm">{t('screen.resolution')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

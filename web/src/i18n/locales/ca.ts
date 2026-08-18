@@ -171,6 +171,27 @@ const ca = {
       fast: 'Ràpida',
       slow: 'Lenta',
       requestPointer: "Estàs usant el mode relatiu. Fes clic a l'escriptori per obtenir el punter.",
+      inputAdapter: {
+        title: "Adaptador d'entrada",
+        auto: 'Automàtic',
+        'pointer-lock': 'Bloqueig del punter',
+        touchpad: 'Ratolí tàctil'
+      },
+      touchpadGuide: {
+        title: 'Guia del ratolí tàctil',
+        scope:
+          "S'aplica quan l'adaptador d'entrada és el ratolí tàctil i el mode del ratolí és relatiu.",
+        swipeTitle: 'Llisca per moure',
+        swipeDesc: "Llisca dins de l'àrea activa de la pantalla per moure el punter remot.",
+        tapTitle: 'Toca per fer clic',
+        tapDesc: 'Un toc breu envia un clic esquerre.',
+        holdTitle: 'Mantén premut per prémer el botó esquerre',
+        holdDesc:
+          'Toca i mantén el dit quiet durant aproximadament 1 segon per mantenir premut el botó esquerre del ratolí.',
+        dragTitle: 'Mou després de mantenir premut per arrossegar',
+        dragDesc:
+          'Un cop activada la pulsació mantinguda, mou el dit per arrossegar mantenint premut el botó esquerre.'
+      },
       resetHid: 'Restablir HID',
       hidOnly: {
         title: 'Mode només HID',
@@ -284,6 +305,8 @@ const ca = {
     },
     settings: {
       title: 'Configuració',
+      back: 'Enrere',
+      close: 'Tanca',
       mcp: {
         title: 'Servei MCP',
         service: 'Control remot MCP',

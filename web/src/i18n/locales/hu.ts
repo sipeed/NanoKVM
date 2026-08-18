@@ -174,6 +174,26 @@ const hu = {
       slow: 'Lassú',
       requestPointer:
         'Relatív mód használata. Kattintson az asztalra, hogy megjelenjen az egérmutató.',
+      inputAdapter: {
+        title: 'Bemeneti adapter',
+        auto: 'Automatikus',
+        'pointer-lock': 'Mutató zárolása',
+        touchpad: 'Érintőpad'
+      },
+      touchpadGuide: {
+        title: 'Érintőpad útmutató',
+        scope: 'Akkor érvényes, ha a beviteli adapter Érintőpad, az egérmód pedig Relatív.',
+        swipeTitle: 'Húzza az ujját a mozgatáshoz',
+        swipeDesc: 'Húzza az ujját az aktív képernyőterületen a távoli mutató mozgatásához.',
+        tapTitle: 'Koppintson a kattintáshoz',
+        tapDesc: 'Egy rövid koppintás egy bal kattintást küld.',
+        holdTitle: 'Tartsa nyomva a bal gomb lenyomásához',
+        holdDesc:
+          'Érintse meg és tartsa mozdulatlanul kb. 1 másodpercig, hogy a bal egérgomb lenyomva maradjon.',
+        dragTitle: 'Tartás után mozgassa a húzáshoz',
+        dragDesc:
+          'Amikor a tartás aktív, mozgassa az ujját a bal gomb lenyomva tartásával történő húzáshoz.'
+      },
       resetHid: 'HID alaphelyzetbe állítása',
       hidOnly: {
         title: 'Csak HID mód',
@@ -288,6 +308,8 @@ const hu = {
     },
     settings: {
       title: 'Beállítások',
+      back: 'Vissza',
+      close: 'Bezárás',
       mcp: {
         title: 'MCP-szolgáltatás',
         service: 'MCP távoli vezérlés',

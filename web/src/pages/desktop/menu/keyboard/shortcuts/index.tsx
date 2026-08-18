@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Divider, Popover } from 'antd';
+import { Divider } from 'antd';
 import { CommandIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/hid.ts';
+import { MenuSubmenu } from '@/components/menu-item.tsx';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { Recorder } from './recorder.tsx';
@@ -122,19 +123,23 @@ export const Shortcuts = () => {
   );
 
   return (
-    <Popover
+    <MenuSubmenu
+      title={t('keyboard.shortcut.title')}
       content={content}
-      trigger="hover"
-      placement="rightTop"
-      align={{ offset: [14, 0] }}
-      open={isOpen}
-      onOpenChange={handleOpenChange}
-      arrow={false}
+      popoverProps={{
+        trigger: 'hover',
+        placement: 'rightTop',
+        align: { offset: [14, 0] },
+        open: isOpen,
+        onOpenChange: handleOpenChange,
+        arrow: false
+      }}
+      onBeforeLeave={() => !isRecording}
     >
       <div className="flex cursor-pointer select-none items-center space-x-2 rounded py-1 pl-2 pr-5 hover:bg-neutral-700/70">
         <CommandIcon size={18} />
         <span>{t('keyboard.shortcut.title')}</span>
       </div>
-    </Popover>
+    </MenuSubmenu>
   );
 };

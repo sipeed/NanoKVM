@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 
+import { resolveInputAdapter } from '@/lib/input-adapter.ts';
 import { MouseReportAbsolute } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
-import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
+import { inputAdapterAtom, scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
 import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseAbsoluteEvent } from './types.ts';
@@ -20,6 +21,8 @@ export const Absolute = () => {
   const resolution = useAtomValue(resolutionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
+  const inputAdapter = useAtomValue(inputAdapterAtom);
+  const enableTouchInput = resolveInputAdapter(inputAdapter, 'absolute') === 'touchpad';
 
   const mouseRef = useRef(new MouseReportAbsolute());
   const lastPosRef = useRef({ x: 0.5, y: 0.5 });
@@ -51,6 +54,7 @@ export const Absolute = () => {
     if (!screen) return;
     const target = screen;
     const mouse = mouseRef.current;
+    const previousTouchAction = target.style.touchAction;
     const pressedMouseButtons = new Set<number>();
     let pendingMove: { x: number; y: number } | null = null;
     let moveFrame: number | null = null;
@@ -63,10 +67,15 @@ export const Absolute = () => {
     target.addEventListener('contextmenu', disableEvent);
 
     const touchOptions: AddEventListenerOptions = { passive: false };
-    target.addEventListener('touchstart', handleTouchStart, touchOptions);
-    target.addEventListener('touchmove', handleTouchMove, touchOptions);
-    target.addEventListener('touchend', handleTouchEnd, touchOptions);
-    target.addEventListener('touchcancel', handleTouchCancel, touchOptions);
+    if (enableTouchInput) {
+      target.style.touchAction = 'none';
+      target.addEventListener('touchstart', handleTouchStart, touchOptions);
+      target.addEventListener('touchmove', handleTouchMove, touchOptions);
+      target.addEventListener('touchend', handleTouchEnd, touchOptions);
+      target.addEventListener('touchcancel', handleTouchCancel, touchOptions);
+      window.addEventListener('blur', releaseTouchState);
+      window.addEventListener('pagehide', releaseTouchState);
+    }
 
     // Mouse event handler
     function handleMouseEvent(event: MouseAbsoluteEvent) {
@@ -485,6 +494,17 @@ export const Absolute = () => {
       isLongPressRef.current = false;
     }
 
+    function releaseTouchState() {
+      clearLongPressTimer();
+      releasePressedButton();
+      isLongPressRef.current = false;
+      hasMoveRef.current = false;
+      isDraggingRef.current = false;
+      isMultiTouchRef.current = false;
+      isTouchActiveRef.current = false;
+      isDoubleTapCandidateRef.current = false;
+    }
+
     return () => {
       if (moveFrame !== null) {
         cancelAnimationFrame(moveFrame);
@@ -496,16 +516,18 @@ export const Absolute = () => {
       target.removeEventListener('wheel', handleWheel);
       target.removeEventListener('click', disableEvent);
       target.removeEventListener('contextmenu', disableEvent);
-      target.removeEventListener('touchstart', handleTouchStart, touchOptions.capture);
-      target.removeEventListener('touchmove', handleTouchMove, touchOptions.capture);
-      target.removeEventListener('touchend', handleTouchEnd, touchOptions.capture);
-      target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
-
-      if (longPressTimerRef.current) {
-        clearTimeout(longPressTimerRef.current);
+      if (enableTouchInput) {
+        target.style.touchAction = previousTouchAction;
+        target.removeEventListener('touchstart', handleTouchStart, touchOptions.capture);
+        target.removeEventListener('touchmove', handleTouchMove, touchOptions.capture);
+        target.removeEventListener('touchend', handleTouchEnd, touchOptions.capture);
+        target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
+        window.removeEventListener('blur', releaseTouchState);
+        window.removeEventListener('pagehide', releaseTouchState);
+        releaseTouchState();
       }
     };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }, [enableTouchInput, resolution, scrollDirection, scrollInterval]);
 
   // disable default events
   function disableEvent(event: Event) {

@@ -172,6 +172,27 @@ const pt_br = {
       slow: 'Lento',
       requestPointer:
         'Usando modo relativo. Por favor, clique na área de trabalho para obter o ponteiro do mouse.',
+      inputAdapter: {
+        title: 'Adaptador de entrada',
+        auto: 'Automático',
+        'pointer-lock': 'Bloqueio do ponteiro',
+        touchpad: 'Touchpad'
+      },
+      touchpadGuide: {
+        title: 'Guia do touchpad',
+        scope:
+          'Aplica-se quando o Adaptador de Entrada está definido como Touchpad e o Modo do Mouse como Relativo.',
+        swipeTitle: 'Deslize para mover',
+        swipeDesc: 'Deslize dentro da área ativa da tela para mover o ponteiro remoto.',
+        tapTitle: 'Toque para clicar',
+        tapDesc: 'Um toque rápido envia um clique com o botão esquerdo.',
+        holdTitle: 'Mantenha pressionado para segurar o botão esquerdo',
+        holdDesc:
+          'Toque e mantenha o dedo parado por cerca de 1 segundo para segurar o botão esquerdo do mouse.',
+        dragTitle: 'Mova após manter pressionado para arrastar',
+        dragDesc:
+          'Depois que a ação de manter pressionado for ativada, mova o dedo para arrastar com o botão esquerdo pressionado.'
+      },
       resetHid: 'Redefinir HID',
       hidOnly: {
         title: 'Modo somente HID',
@@ -286,6 +307,8 @@ const pt_br = {
     },
     settings: {
       title: 'Configurações',
+      back: 'Voltar',
+      close: 'Fechar',
       mcp: {
         title: 'Serviço MCP',
         service: 'Controle remoto MCP',

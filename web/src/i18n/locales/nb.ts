@@ -172,6 +172,25 @@ const nb = {
       fast: 'Rask',
       slow: 'Sakte',
       requestPointer: 'Bruker relativ modus. Vennligsk klikk på skrivebordet for vise musepeker.',
+      inputAdapter: {
+        title: 'Inndataadapter',
+        auto: 'Automatisk',
+        'pointer-lock': 'Pekerlås',
+        touchpad: 'Pekeplate'
+      },
+      touchpadGuide: {
+        title: 'Touchpad-veiledning',
+        scope: 'Gjelder når inndataadapteren er Touchpad og musemodus er Relativ.',
+        swipeTitle: 'Sveip for å flytte',
+        swipeDesc: 'Sveip i det aktive skjermområdet for å flytte fjernpekeren.',
+        tapTitle: 'Trykk for å klikke',
+        tapDesc: 'Et kort trykk sender ett venstreklikk.',
+        holdTitle: 'Hold for å holde venstre knapp nede',
+        holdDesc:
+          'Trykk og hold fingeren rolig i omtrent 1 sekund for å holde venstre museknapp nede.',
+        dragTitle: 'Flytt etter hold for å dra',
+        dragDesc: 'Når hold er aktivt, flytter du fingeren for å dra med venstre knapp nede.'
+      },
       resetHid: 'Gjenopprett HID',
       hidOnly: {
         title: 'Kun HID-modus',
@@ -286,6 +305,8 @@ const nb = {
     },
     settings: {
       title: 'Innstillinger',
+      back: 'Tilbake',
+      close: 'Lukk',
       mcp: {
         title: 'MCP-tjeneste',
         service: 'MCP-fjernstyring',

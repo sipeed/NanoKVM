@@ -168,6 +168,26 @@ const ko = {
       fast: '빠름',
       slow: '느림',
       requestPointer: '상대값 모드를 사용 중입니다. 커서를 찾으려면 데스크톱을 클릭하세요.',
+      inputAdapter: {
+        title: '입력 어댑터',
+        auto: '자동',
+        'pointer-lock': '포인터 잠금',
+        touchpad: '터치패드'
+      },
+      touchpadGuide: {
+        title: '터치패드 가이드',
+        scope: '입력 어댑터가 터치패드이고 마우스 모드가 상대 모드일 때 적용됩니다.',
+        swipeTitle: '스와이프하여 이동',
+        swipeDesc: '활성 화면 영역 안에서 스와이프하면 원격 포인터가 이동합니다.',
+        tapTitle: '탭하여 클릭',
+        tapDesc: '짧게 탭하면 왼쪽 클릭 한 번을 보냅니다.',
+        holdTitle: '길게 눌러 왼쪽 버튼 누르기',
+        holdDesc:
+          '손가락을 대고 약 1초 동안 움직이지 않으면 왼쪽 마우스 버튼을 누른 상태가 됩니다.',
+        dragTitle: '길게 누른 뒤 움직여 드래그',
+        dragDesc:
+          '길게 누르기가 활성화된 뒤 손가락을 움직이면 왼쪽 버튼을 누른 상태로 드래그합니다.'
+      },
       resetHid: 'HID 초기화',
       hidOnly: {
         title: 'HID 전용 모드',
@@ -282,6 +302,8 @@ const ko = {
     },
     settings: {
       title: '설정',
+      back: '뒤로',
+      close: '닫기',
       mcp: {
         title: 'MCP 서비스',
         service: 'MCP 원격 제어',
