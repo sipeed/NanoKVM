@@ -141,17 +141,15 @@ start_usb_dev(){
             fi
             echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
             disk=$(cat /boot/usb.disk0)
-            if [ -z "${disk}" ]
+            if [ -n "${disk}" ]
             then
-                    # if [ ! -e /mnt/usbdisk.img ]
-                    # then
-                    #         fallocate -l 8G /mnt/usbdisk.img
-                    #         mkfs.vfat /mnt/usbdisk.img
-                    # fi
-                    echo /dev/mmcblk0p3 > functions/mass_storage.disk0/lun.0/file
-            else
                     cat /boot/usb.disk0 > functions/mass_storage.disk0/lun.0/file
             fi
+            # With usb.disk0 empty, leave lun.0/file unset so the gadget
+            # reports "no media" (removable=1) and a BIOS moves on to the next
+            # boot device. This used to point at /dev/mmcblk0p3, handing the
+            # target machine our raw eMMC partition -- which has no MBR, so
+            # Legacy BIOS reads no 0x55AA signature and hangs in a HLT loop.
     fi
 
     ls /sys/class/udc/ | cat > UDC

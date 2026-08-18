@@ -18,11 +18,13 @@ import (
 
 const (
 	imageDirectory = "/data"
-	imageNone      = "/dev/mmcblk0p3"
-	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
-	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
-	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
-	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
+	// legacyNoImageDevice is what older builds wrote to mean "no image". It is
+	// only ever read now, never written.
+	legacyNoImageDevice = "/dev/mmcblk0p3"
+	cdromFlag           = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
+	mountDevice         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	inquiryString       = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
+	roFlag              = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
 )
 
 func (s *Service) GetImages(c *gin.Context) {
@@ -52,6 +54,27 @@ func (s *Service) GetImages(c *gin.Context) {
 		Files: images,
 	})
 	log.Debugf("get images success, total %d", len(images))
+}
+
+// writeMountTarget points the gadget's backing file at an image. An empty
+// image means "no media": the caller has already cleared the backing file, and
+// naming any device here would expose it to the target machine.
+func writeMountTarget(path string, image string) error {
+	if image == "" {
+		return nil
+	}
+	return os.WriteFile(path, []byte(image), 0o666)
+}
+
+// normalizeMountedImage reads back what the gadget is currently serving.
+// Devices that have not rebooted since this change still hold the old eMMC
+// fallback, which has to keep reading as "nothing mounted".
+func normalizeMountedImage(content string) string {
+	image := strings.TrimSpace(content)
+	if image == legacyNoImageDevice {
+		return ""
+	}
+	return image
 }
 
 func (s *Service) MountImage(c *gin.Context) {
@@ -109,13 +132,8 @@ func (s *Service) MountImage(c *gin.Context) {
 	}
 
 	// mount
-	image := req.File
-	if image == "" {
-		image = imageNone
-	}
-
-	if err := os.WriteFile(mountDevice, []byte(image), 0o666); err != nil {
-		log.Errorf("mount file %s failed: %s", image, err)
+	if err := writeMountTarget(mountDevice, req.File); err != nil {
+		log.Errorf("mount file %s failed: %s", req.File, err)
 		rsp.ErrRsp(c, -2, "mount image failed")
 		return
 	}
@@ -169,10 +187,7 @@ func (s *Service) GetMountedImage(c *gin.Context) {
 		return
 	}
 
-	image := strings.ReplaceAll(string(content), "\n", "")
-	if image == imageNone {
-		image = ""
-	}
+	image := normalizeMountedImage(string(content))
 
 	data := &proto.GetMountedImageRsp{
 		File: image,
