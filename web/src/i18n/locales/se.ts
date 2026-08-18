@@ -169,6 +169,26 @@ const se = {
       fast: 'Snabb',
       slow: 'Långsam',
       requestPointer: 'Använder relativt läge. Klicka på skrivbordet för att få muspekaren.',
+      inputAdapter: {
+        title: 'Indatningsadapter',
+        auto: 'Automatisk',
+        'pointer-lock': 'Pekarlås',
+        touchpad: 'Styrplatta'
+      },
+      touchpadGuide: {
+        title: 'Guide för styrplatta',
+        scope: 'Gäller när Indatningsadapter är Styrplatta och Musläge är inställt på Relativt.',
+        swipeTitle: 'Svep för att flytta',
+        swipeDesc: 'Svep inom det aktiva skärmområdet för att flytta fjärrpekaren.',
+        tapTitle: 'Tryck för att klicka',
+        tapDesc: 'En kort tryckning skickar ett vänsterklick.',
+        holdTitle: 'Håll kvar för att hålla vänsterknappen nedtryckt',
+        holdDesc:
+          'Rör vid skärmen och håll fingret stilla i cirka 1 sekund för att hålla vänster musknapp nedtryckt.',
+        dragTitle: 'Flytta efter att ha hållit kvar för att dra',
+        dragDesc:
+          'När långtryckningen är aktiv flyttar du fingret för att dra med vänsterknappen nedtryckt.'
+      },
       resetHid: 'Återställ HID',
       hidOnly: {
         title: 'Endast HID-läge',

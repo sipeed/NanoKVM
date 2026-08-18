@@ -171,6 +171,28 @@ const tr = {
       fast: 'Hızlı',
       slow: 'Yavaş',
       requestPointer: 'Bağıl fare modu kullanılıyor. Masaüstüne tıklayarak imleç elde edinin.',
+      inputAdapter: {
+        title: 'Giriş Adaptörü',
+        auto: 'Otomatik',
+        'pointer-lock': 'İşaretçi Kilidi',
+        touchpad: 'Dokunmatik Yüzey'
+      },
+      touchpadGuide: {
+        title: 'Dokunmatik yüzey kılavuzu',
+        scope:
+          'Giriş Adaptörü Dokunmatik Yüzey ve Fare Modu Bağıl olarak ayarlandığında geçerlidir.',
+        swipeTitle: 'Hareket ettirmek için kaydırın',
+        swipeDesc:
+          'Uzak işaretçiyi hareket ettirmek için etkin ekran alanının içinde parmağınızı kaydırın.',
+        tapTitle: 'Tıklamak için dokunun',
+        tapDesc: 'Kısa bir dokunuş bir sol tıklama gönderir.',
+        holdTitle: 'Sol düğmeyi basılı tutmak için dokunup bekleyin',
+        holdDesc:
+          'Sol fare düğmesini basılı tutmak için dokunun ve yaklaşık 1 saniye boyunca hareketsiz kalın.',
+        dragTitle: 'Sürüklemek için basılı tuttuktan sonra hareket ettirin',
+        dragDesc:
+          'Basılı tutma etkinleştikten sonra, sol düğme basılıyken sürüklemek için parmağınızı hareket ettirin.'
+      },
       resetHid: 'HID’yi sıfırla',
       hidOnly: {
         title: 'Yalnızca HID modu',
