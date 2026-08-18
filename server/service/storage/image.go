@@ -14,6 +14,7 @@ import (
 
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/utils"
 )
 
 const (
@@ -24,6 +25,19 @@ const (
 	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
 	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
 )
+
+// isMountableImage reports whether a client-supplied path may be handed to the
+// USB mass storage gadget. Without this check any file or block device on the
+// KVM - the raw eMMC, /etc/shadow - can be exported to the attached machine.
+func isMountableImage(path string) bool {
+	if !utils.IsPathInside(imageDirectory, path) {
+		return false
+	}
+
+	name := strings.ToLower(path)
+
+	return strings.HasSuffix(name, ".iso") || strings.HasSuffix(name, ".img")
+}
 
 func (s *Service) GetImages(c *gin.Context) {
 	var rsp proto.Response
@@ -59,6 +73,12 @@ func (s *Service) MountImage(c *gin.Context) {
 	var rsp proto.Response
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	// An empty file unmounts; anything else must be an image under /data.
+	if req.File != "" && !isMountableImage(req.File) {
 		rsp.ErrRsp(c, -1, "invalid arguments")
 		return
 	}
@@ -213,11 +233,9 @@ func (s *Service) DeleteImage(c *gin.Context) {
 		return
 	}
 
-	filename := strings.ToLower(req.File)
-	validPrefix := strings.HasPrefix(filename, imageDirectory)
-	validSuffix := strings.HasSuffix(filename, ".iso") || strings.HasSuffix(filename, ".img")
-
-	if !validPrefix || !validSuffix {
+	// The previous check ran HasPrefix on a lowercased copy while removing the
+	// original path, so "/data/../root/x.iso" passed it.
+	if !isMountableImage(req.File) {
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
 	}

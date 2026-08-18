@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -52,7 +51,8 @@ func (s *Service) UploadScript(c *gin.Context) {
 		return
 	}
 
-	if !isScript(header.Filename) {
+	target, err := utils.SecureJoin(ScriptDirectory, header.Filename)
+	if err != nil || !isScript(header.Filename) {
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
 	}
@@ -61,7 +61,6 @@ func (s *Service) UploadScript(c *gin.Context) {
 		_ = os.MkdirAll(ScriptDirectory, 0o755)
 	}
 
-	target := fmt.Sprintf("%s/%s", ScriptDirectory, header.Filename)
 	err = c.SaveUploadedFile(header, target)
 	if err != nil {
 		rsp.ErrRsp(c, -2, "save failed")
@@ -87,16 +86,16 @@ func (s *Service) RunScript(c *gin.Context) {
 		return
 	}
 
-	command := fmt.Sprintf("%s/%s", ScriptDirectory, req.Name)
-
-	name := strings.ToLower(req.Name)
-	if strings.HasSuffix(name, ".py") {
-		command = fmt.Sprintf("python %s", command)
+	// The name reaches a process argument, so it must be a plain file inside
+	// the script directory - never a path, and never shell metacharacters.
+	script, err := utils.SecureJoin(ScriptDirectory, req.Name)
+	if err != nil || !isScript(req.Name) {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
 	}
 
 	var output []byte
-	var err error
-	cmd := exec.Command("sh", "-c", command)
+	cmd := scriptCommand(req.Name, script)
 
 	if req.Type == "foreground" {
 		output, err = cmd.CombinedOutput()
@@ -133,7 +132,11 @@ func (s *Service) DeleteScript(c *gin.Context) {
 		return
 	}
 
-	file := fmt.Sprintf("%s/%s", ScriptDirectory, req.Name)
+	file, err := utils.SecureJoin(ScriptDirectory, req.Name)
+	if err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
 
 	if err := os.Remove(file); err != nil {
 		log.Errorf("delete script %s failed: %s", file, err)
@@ -143,6 +146,19 @@ func (s *Service) DeleteScript(c *gin.Context) {
 
 	rsp.OkRsp(c)
 	log.Debugf("delete script %s success", file)
+}
+
+// scriptCommand builds the command that runs a script. The interpreter takes
+// the path as an argument, so the name can no longer become shell text. A
+// shell script still goes through sh, because "sh -c <path>" used to fall back
+// to interpreting a file that has no shebang, and running the path directly
+// would break those scripts with ENOEXEC.
+func scriptCommand(name string, path string) *exec.Cmd {
+	if strings.HasSuffix(strings.ToLower(name), ".py") {
+		return exec.Command("python", path)
+	}
+
+	return exec.Command("sh", path)
 }
 
 func isScript(name string) bool {
