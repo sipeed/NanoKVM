@@ -2,10 +2,11 @@ package vm
 
 import (
 	"encoding/json"
-	"net/http"
 	"os"
 	"os/exec"
 	"time"
+
+	"NanoKVM-Server/middleware"
 
 	"github.com/creack/pty"
 	"github.com/gin-gonic/gin"
@@ -26,9 +27,7 @@ type WinSize struct {
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  maxMessageSize,
 	WriteBufferSize: maxMessageSize,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	CheckOrigin:     middleware.SameOrigin,
 }
 
 func (s *Service) Terminal(c *gin.Context) {

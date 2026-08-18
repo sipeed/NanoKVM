@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/stream/mjpeg"
 
@@ -19,9 +20,7 @@ import (
 var gatewayUpgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+	CheckOrigin:     middleware.SameOrigin,
 }
 
 type relayResult struct {
