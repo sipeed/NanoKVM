@@ -380,6 +380,21 @@ const en = {
           description: 'Set the swap file size',
           tip: "Enabling this feature could shorten your SD card's usable life!"
         },
+        zram: {
+          title: 'Compressed swap (zram)',
+          description: 'Swap in compressed RAM, instead of on the SD card',
+          tip: 'zram keeps swap off the SD card, so it causes no wear. There is no disk swap behind it: if zram fills up, the kernel stops a process instead of paging slowly. The memory limit caps how much RAM zram can take.',
+          unavailable: 'The kernel modules are not installed on this device',
+          inactive: 'Enabled, but the device did not start',
+          active: 'Active - {{used}} of {{total}}, {{ratio}}x',
+          off: 'Off',
+          detail: {
+            algorithm: 'Algorithm: {{algorithm}}',
+            memory: 'Memory used: {{used}} of {{limit}}',
+            memoryNoLimit: 'Memory used: {{used}}, no limit set',
+            counters: 'Pages swapped in {{in}}, out {{out}} (all swap devices, since boot)'
+          }
+        },
         mouseJiggler: {
           title: 'Mouse Jiggler',
           description: 'Prevent the remote host from sleeping',

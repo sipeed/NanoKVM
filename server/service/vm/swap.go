@@ -14,10 +14,19 @@ import (
 )
 
 const (
-	SwapFile    = "/swapfile"
 	InittabPath = "/etc/inittab"
 	TempInittab = "/etc/.inittab.tmp"
 )
+
+// SwapFile is a variable rather than a constant so a test can point the
+// service at a temporary file.
+var SwapFile = "/swapfile"
+
+// runShellCommand is the seam the tests replace. Production code runs the
+// command; a test records it, because swapoff on a workstation is destructive.
+var runShellCommand = func(command string) error {
+	return exec.Command("sh", "-c", command).Run()
+}
 
 func (s *Service) GetSwap(c *gin.Context) {
 	var rsp proto.Response
@@ -102,11 +111,27 @@ func enableSwap(size int64) error {
 	return nil
 }
 
+// disableSwap turns off the swap file and deletes it.
+//
+// It names the file rather than using `swapoff -a`. The -a form also stops
+// zram, so every change to the swap file size used to disable compressed swap
+// as a side effect, which is not what a control labelled "swap file size"
+// should do.
 func disableSwap() error {
-	command := "swapoff -a"
-	if err := exec.Command("sh", "-c", command).Run(); err != nil {
-		log.Errorf("failed to execute swapoff: %s", err)
-		return err
+	if _, err := os.Stat(SwapFile); err != nil {
+		// Already disabled. Reporting a failure here would make the Disable
+		// option fail on a device that has no swap file.
+		return nil
+	}
+
+	// swapoff fails on a file that was never swapped on, which happens after a
+	// reboot with no inittab entry. Deleting it is still the right outcome.
+	if parseSwapsHas(readFileString(procSwapsPath), SwapFile) {
+		command := fmt.Sprintf("swapoff %s", SwapFile)
+		if err := runShellCommand(command); err != nil {
+			log.Errorf("failed to execute %s: %s", command, err)
+			return err
+		}
 	}
 
 	if err := os.Remove(SwapFile); err != nil {

@@ -115,6 +115,16 @@ export function setSwap(size: number) {
   return http.post('/api/vm/swap', { size });
 }
 
+// get the state of compressed swap in RAM
+export function getZram() {
+  return http.get('/api/vm/zram');
+}
+
+// enable or disable compressed swap in RAM
+export function setZram(enabled: boolean) {
+  return http.post('/api/vm/zram', { enabled });
+}
+
 // get mouse jiggler
 export function getMouseJiggler() {
   return http.get('/api/vm/mouse-jiggler');
