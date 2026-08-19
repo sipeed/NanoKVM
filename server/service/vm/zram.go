@@ -32,10 +32,25 @@ const zramDevice = "/dev/zram0"
 // from the image. tools/zram/build-modules.sh builds both.
 var zramModules = []string{"zram.ko", "zsmalloc.ko"}
 
+// zramModuleDirs are searched in order for the pair of modules.
+//
+// /mnt/system/ko is the base image's module directory and is where
+// tools/zram/build-modules.sh installs the pair today. It is searched second,
+// because /mnt is not a mount point: it is a plain directory on the root
+// filesystem, so a rootfs update or a re-flash removes anything put there and
+// the feature reverts to unavailable without reporting a fault.
+//
+// /kvmapp/system/ko is part of the install package, which an update restores.
+// The modules are not shipped there today, so on a stock device it holds no
+// pair and the search falls through. It is first so that shipping them later
+// needs no further change.
+//
+// S01zram searches the same two directories in the same order.
+var zramModuleDirs = []string{"/kvmapp/system/ko", "/mnt/system/ko"}
+
 // These are variables rather than constants so a test can point the reader at
 // a temporary tree.
 var (
-	zramModuleDir  = "/mnt/system/ko"
 	zramInitScript = "/etc/init.d/S01zram"
 	zramInitSource = "/kvmapp/system/init.d/S01zram"
 	zramSysfsDir   = "/sys/block/zram0"
@@ -143,7 +158,7 @@ func (s *Service) SetZram(c *gin.Context) {
 // device would report "survives a reboot" for a feature that does not run.
 func enableZram() error {
 	if !zramModulesInstalled() {
-		log.Errorf("zram modules are not installed in %s", zramModuleDir)
+		log.Errorf("zram modules are not installed in any of %s", strings.Join(zramModuleDirs, ", "))
 		return errZramUnavailable
 	}
 
@@ -226,16 +241,35 @@ func installZramInitScript() error {
 	return nil
 }
 
-// zramModulesInstalled reports whether every module is present. One of the two
-// on its own cannot load, so a partial installation counts as unavailable.
-func zramModulesInstalled() bool {
-	for _, module := range zramModules {
-		if !fileExists(filepath.Join(zramModuleDir, module)) {
-			return false
+// zramModuleDir returns the first directory that holds every module, or an
+// empty string when no directory holds a complete set.
+//
+// A directory has to hold both. One of the two on its own cannot load, and a
+// pair split across two directories would be two separate builds: they carry
+// the same vermagic, so the kernel accepts them, and zram then resolves its
+// symbols against a zsmalloc it was not compiled with.
+func zramModuleDir() string {
+	for _, dir := range zramModuleDirs {
+		complete := true
+
+		for _, module := range zramModules {
+			if !fileExists(filepath.Join(dir, module)) {
+				complete = false
+				break
+			}
+		}
+
+		if complete {
+			return dir
 		}
 	}
 
-	return true
+	return ""
+}
+
+// zramModulesInstalled reports whether a complete pair of modules is present.
+func zramModulesInstalled() bool {
+	return zramModuleDir() != ""
 }
 
 func readSysfsAttr(name string) string {

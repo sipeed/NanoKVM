@@ -62,20 +62,80 @@ Switching is one write, before `disksize` is set:
 echo zstd > /sys/block/zram0/comp_algorithm
 ```
 
-## Build and install
+## Getting the modules onto a device
 
 The modules are the only manual step. The server installs the init script.
 
+There are two ways, and the first one is better.
+
+### 1. Enable them in the kernel config
+
+`CONFIG_ZRAM` and `CONFIG_ZSMALLOC` are both unset in the shipped kernel. Two
+lines in the defconfig build them as part of the normal image:
+
+```
+CONFIG_ZSMALLOC=m
+CONFIG_ZRAM=m
+```
+
+They then land in `/mnt/system/ko` with the other modules, they are rebuilt
+whenever the kernel is, and no prebuilt binary has to be trusted or maintained.
+This is the whole change needed to make the feature work for every device.
+
+### 2. Build them out of tree
+
+For a device running an image that does not have them. The build runs in a
+container, because the kernel tree cannot be checked out on a Windows
+filesystem: it carries paths Windows refuses and `git clone` fails at checkout.
+
 ```shell
+docker build -t nanokvm-zram-builder tools/zram
+
 ssh root@<device> 'zcat /proc/config.gz' > kernel.config
-tools/zram/build-modules.sh /path/to/linux_5.10 kernel.config ./ko
+
+docker volume create nanokvm-kernel
+docker run --rm -v nanokvm-kernel:/src -w /src nanokvm-zram-builder sh -c '
+  git clone --depth 1 --filter=blob:none --sparse -b NanoKVM \
+      https://github.com/sipeed/LicheeRV-Nano-Build
+  cd LicheeRV-Nano-Build && git sparse-checkout set linux_5.10'
+
+docker run --rm \
+  -v nanokvm-kernel:/kernel \
+  -v "$PWD/tools/zram:/tools:ro" \
+  -v "$PWD/ko:/work" \
+  nanokvm-zram-builder \
+  bash /tools/build-modules.sh /kernel/LicheeRV-Nano-Build/linux_5.10 \
+       /work/kernel.config /work/ko
+
 scp ko/*.ko root@<device>:/mnt/system/ko/
 ```
 
-Then open `Settings > Device > Advanced` in the web UI and turn on **Compressed
-swap (zram)**. The toggle copies `/kvmapp/system/init.d/S01zram` to
-`/etc/init.d/`, makes it executable, and starts it. Turning the toggle off
-stops the device and removes the script again.
+## Where the modules are looked for
+
+`S01zram` and the server both search `/kvmapp/system/ko` first and
+`/mnt/system/ko` second. A directory has to hold both modules to be used: zram
+cannot load without zsmalloc, and a pair split across two directories is two
+builds carrying the same vermagic, which the kernel accepts and then resolves
+against the wrong copy.
+
+`/mnt` is not a mount point. It is a plain directory on the root filesystem, so
+modules copied there by method 2 are removed by a rootfs update or a re-flash.
+The loss is quiet: `S01zram` prints `FAIL (no zram device)` and returns 1, rcS
+records the exit status and carries on, and the web UI reports the feature as
+unavailable rather than broken. A device that had working compressed swap
+yesterday reads as one that never had it.
+
+`/kvmapp/system/ko` is part of the install package, so an update restores what
+is in it. Nothing is shipped there today and the search falls through on a
+stock device. It is searched first so that shipping the modules there, or
+placing them there by hand, survives an update with no further change.
+
+## Turning it on
+
+Open `Settings > Device > Advanced` in the web UI and turn on **Compressed swap
+(zram)**. The toggle copies `/kvmapp/system/init.d/S01zram` to `/etc/init.d/`,
+makes it executable, and starts it. Turning the toggle off stops the device and
+removes the script again.
 
 The row reports "The kernel modules are not installed on this device" and the
 toggle stays disabled until both `.ko` files are in place.
@@ -155,6 +215,43 @@ device, which is the path that needs the repair.
 
 `disable` does not remove the modules. They stay loaded, so the toggle keeps
 reporting the feature as available and a re-enable costs no `insmod`.
+
+## Testing on a live board
+
+Use a `hot_add` device, never the live swap, and give it a `mem_limit`. Keep the
+payload small: 8 MB is what the measurements above used, and it is small for a
+reason.
+
+```shell
+N=$(cat /sys/class/zram-control/hot_add)
+echo 16M > /sys/block/zram$N/disksize
+echo 8M  > /sys/block/zram$N/mem_limit     # do not skip this
+dd if=/some/real/file of=/dev/zram$N bs=64k count=128
+cat /sys/block/zram$N/mm_stat
+echo 1 > /sys/block/zram$N/reset
+echo $N > /sys/class/zram-control/hot_remove
+```
+
+Two mistakes will wedge the board, and each on its own is enough:
+
+- **Staging the payload in `/tmp`.** `/tmp` is tmpfs, so the file is spent out
+  of the same RAM the test is measuring, before the test begins. Read from a
+  real file on `/data`, or generate the data in the pipe.
+- **A `hot_add` device with no `mem_limit`.** `zram0` is capped at 40 MB by
+  `S01zram` and cannot spiral. A device created by hand is uncapped and will
+  compress the payload into whatever RAM is left.
+
+The board does not crash and the kernel kills nothing. It stops being able to
+`fork`: `ping` answers, the already-running `NanoKVM-Server` answers HTTP in
+well under a second, and `ssh` times out during the banner exchange because
+`sshd` cannot start a child. Recovery is a power cycle. Everything that would
+free the memory can be done with shell builtins, which need no new process
+(`: > /tmp/file`, `echo 1 > /sys/block/zramN/reset`), so it is worth retrying
+ssh on a slow loop before giving up on it.
+
+Use `/dev/zero` only to check deduplication. It never reaches the compressor:
+identical pages are counted in the `same_pages` field of `mm_stat` and the
+compressed size stays 0.
 
 ## The trade
 

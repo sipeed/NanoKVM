@@ -26,6 +26,24 @@ ZRAM_MEM_LIMIT=40M
 ZRAM_COMP=lzo-rle
 ZRAM_PRIORITY=100
 
+# Where the modules live, searched in order.
+#
+# /mnt/system/ko is the base image's module directory, where the other modules
+# live and where a pair built by tools/zram/build-modules.sh is installed today.
+#
+# It is searched second, because it does not survive. /mnt is not a mount point.
+# It is a plain directory on the root filesystem, so anything put there by hand
+# is removed by a rootfs update or a re-flash, and this script then reports
+# "FAIL (no zram device)" on a board that had working swap the day before.
+# Nothing else reports the loss: the web UI shows the feature as unavailable
+# rather than broken, which reads like a board that never had it.
+#
+# /kvmapp/system/ko is searched first because it is part of the install package
+# and an update restores it. The modules are not shipped there today, so on a
+# stock device this directory simply has no pair in it and the search falls
+# through. It is first so that shipping them later needs no further change.
+ZRAM_KO_DIRS=${ZRAM_KO_DIRS:-"/kvmapp/system/ko /mnt/system/ko"}
+
 # Swap priority would put zram ahead of the optional swap file on the SD card.
 # On this image it cannot: the BusyBox 1.36.1 applet is built without
 # FEATURE_SWAPON_PRI, so `swapon --help` offers only -a and -e. The -p attempt
@@ -56,6 +74,31 @@ reset_stale_device() {
 	echo 1 > "$ZRAM_SYSFS/reset"
 }
 
+# Insert both modules from the first directory that holds both.
+#
+# The search is per directory rather than per file. zram cannot load without
+# zsmalloc, and a pair split across two directories would be two different
+# builds against the same vermagic, which loads and then behaves unpredictably.
+#
+# zsmalloc goes first because zram resolves its symbols against it. insmod
+# output is discarded: a module that is already in the kernel makes it fail,
+# and that is a success here. The device node is the only thing trusted.
+load_modules() {
+	[ -e "$ZRAM_DEV" ] && return 0
+
+	for dir in $ZRAM_KO_DIRS
+	do
+		[ -f "$dir/zsmalloc.ko" ] && [ -f "$dir/zram.ko" ] || continue
+
+		insmod "$dir/zsmalloc.ko" 2>/dev/null
+		insmod "$dir/zram.ko" 2>/dev/null
+
+		[ -e "$ZRAM_DEV" ] && return 0
+	done
+
+	return 1
+}
+
 swapon_zram() {
 	if swapon -p "$ZRAM_PRIORITY" "$ZRAM_DEV" 2>/dev/null
 	then
@@ -68,13 +111,7 @@ swapon_zram() {
 start() {
 	printf "zram: "
 
-	if [ ! -e "$ZRAM_DEV" ]
-	then
-		insmod /mnt/system/ko/zsmalloc.ko 2>/dev/null
-		insmod /mnt/system/ko/zram.ko 2>/dev/null
-	fi
-
-	if [ ! -e "$ZRAM_DEV" ]
+	if ! load_modules
 	then
 		echo "FAIL (no zram device)"
 		return 1
