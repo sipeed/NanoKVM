@@ -7,13 +7,6 @@ import (
 	"time"
 )
 
-// RegenerateSecretKey regenerate secret key when logout
-func RegenerateSecretKey() {
-	if instance.JWT.RevokeTokensOnLogout {
-		instance.JWT.SecretKey = generateRandomSecretKey()
-	}
-}
-
 // Generate random string for secret key.
 func generateRandomSecretKey() string {
 	b := make([]byte, 64)

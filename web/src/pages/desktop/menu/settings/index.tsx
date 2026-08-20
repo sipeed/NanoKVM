@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
@@ -33,6 +34,8 @@ import { Update } from './update';
 
 export const Settings = () => {
   const { t } = useTranslation();
+  const { account } = useAuth();
+  const isAdmin = account.role === 'admin';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -46,28 +49,33 @@ export const Settings = () => {
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
-    { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
-    { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
-    { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
-    {
-      id: 'tailscale',
-      icon: <TailscaleIcon />,
-      component: <Tailscale setIsLocked={setIsLocked} />
-    },
-    {
-      id: 'update',
-      icon: <CircleArrowUpIcon size={16} />,
-      component: <Update setIsLocked={setIsLocked} />
-    },
+    ...(isAdmin
+      ? [
+          { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
+          { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
+          { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
+          {
+            id: 'tailscale',
+            icon: <TailscaleIcon />,
+            component: <Tailscale setIsLocked={setIsLocked} />
+          },
+          {
+            id: 'update',
+            icon: <CircleArrowUpIcon size={16} />,
+            component: <Update setIsLocked={setIsLocked} />
+          }
+        ]
+      : []),
     { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
   ];
 
   useEffect(() => {
+    if (!isAdmin) return;
     const skip = ls.getSkipUpdate();
     if (!skip) {
       checkForUpdates();
     }
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });

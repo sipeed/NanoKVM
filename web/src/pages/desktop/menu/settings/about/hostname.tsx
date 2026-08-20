@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
 
-export const Hostname = () => {
+export const Hostname = ({ editable = false }: { editable?: boolean }) => {
   const { t } = useTranslation();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -83,12 +83,14 @@ export const Hostname = () => {
         ) : (
           <div className="flex items-center space-x-2">
             <span>{hostname}</span>
-            <div
-              className="size-[16px] cursor-pointer text-neutral-500 hover:text-blue-500"
-              onClick={showInput}
-            >
-              <ClipboardPenIcon size={16} />
-            </div>
+            {editable && (
+              <div
+                className="size-[16px] cursor-pointer text-neutral-500 hover:text-blue-500"
+                onClick={showInput}
+              >
+                <ClipboardPenIcon size={16} />
+              </div>
+            )}
           </div>
         )}
       </div>

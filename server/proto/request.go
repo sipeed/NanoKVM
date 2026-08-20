@@ -20,7 +20,7 @@ func ValidateRequest(req interface{}) error {
 	}
 
 	if env == "" || env == "debug" {
-		log.Debugf("request: %+v\n", req)
+		log.Debugf("request validated: %T", req)
 	}
 
 	return nil

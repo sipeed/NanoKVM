@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 
-import { removeToken } from '@/lib/cookie.ts';
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 
 type Response = {
@@ -42,8 +42,7 @@ class Http {
         console.log(error);
         const code = error.response?.status;
         if (code === 401) {
-          removeToken();
-          window.location.reload();
+          notifyAuthExpired();
         }
         return Promise.reject(error);
       }

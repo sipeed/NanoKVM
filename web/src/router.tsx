@@ -1,6 +1,6 @@
-import { createHashRouter } from 'react-router-dom';
+import { createHashRouter, Outlet } from 'react-router-dom';
 
-import { ProtectedRoute } from '@/components/auth';
+import { AdminRoute, ProtectedRoute } from '@/components/auth';
 import { Root } from '@/components/root';
 
 export const router = createHashRouter([
@@ -27,11 +27,20 @@ export const router = createHashRouter([
         }
       },
       {
-        path: 'terminal',
-        lazy: async () => {
-          const { Terminal } = await import('./pages/terminal');
-          return { Component: Terminal };
-        }
+        element: (
+          <AdminRoute>
+            <Outlet />
+          </AdminRoute>
+        ),
+        children: [
+          {
+            path: 'terminal',
+            lazy: async () => {
+              const { Terminal } = await import('./pages/terminal');
+              return { Component: Terminal };
+            }
+          }
+        ]
       },
       {
         path: 'auth/password',

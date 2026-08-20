@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/auth.ts';
 import { Switch } from 'antd';
 import { useAtom } from 'jotai';
 import {
@@ -18,6 +19,7 @@ import { Robot } from '@/components/icons/robot.tsx';
 
 export const MenuIcons = () => {
   const { t } = useTranslation();
+  const { account } = useAuth();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
@@ -31,7 +33,11 @@ export const MenuIcons = () => {
     { key: 'power', icon: <PowerIcon size={16} /> },
     { key: 'fullscreen', icon: <MaximizeIcon size={16} />, label: 'fullscreen.toggle' },
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
-  ];
+  ].filter(
+    (item) =>
+      account.role === 'admin' ||
+      !['image', 'download', 'terminal', 'script', 'picoclaw'].includes(item.key)
+  );
 
   function updateItems(key: string) {
     const exist = menuDisabledItems.includes(key);

@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import '@xterm/xterm/css/xterm.css';
 
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { Head } from '@/components/head.tsx';
 
@@ -30,6 +31,12 @@ export const Terminal = () => {
     const url = `${getBaseUrl('ws')}/api/vm/terminal`;
     const ws = new WebSocket(url);
     let isPicocomRunning = false;
+
+    ws.addEventListener('close', (event) => {
+      if (event.code === 4401) {
+        notifyAuthExpired();
+      }
+    });
 
     ws.onopen = () => {
       const attachAddon = new AttachAddon(ws);

@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
-import { LockOutlined, UserOutlined } from '@ant-design/icons';
+import { useAuth } from '@/contexts/auth.ts';
+import { LockOutlined } from '@ant-design/icons';
 import { Button, Card, Form, Input } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import * as api from '@/api/auth.ts';
-import { removeToken } from '@/lib/cookie.ts';
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 import { encrypt } from '@/lib/encrypt.ts';
 import { Head } from '@/components/head.tsx';
+
+// This code is specific to POST /api/auth/password. The backend uses it when
+// the authenticated user cannot verify their current password.
+const invalidCurrentPasswordCode = -3;
 
 export const Password = () => {
   const { t } = useTranslation();
   const [msg, setMsg] = useState('');
   const navigate = useNavigate();
+  const { account } = useAuth();
 
   useEffect(() => {
     if (msg) {
@@ -25,37 +31,27 @@ export const Password = () => {
       setMsg(t('auth.differentPassword'));
       return;
     }
-    if (!validateString(values.username)) {
-      setMsg(t('auth.illegalUsername'));
-      return;
-    }
-    if (!validateString(values.password)) {
-      setMsg('auth.illegalPassword');
-      return;
-    }
-
-    const username = values.username;
+    const currentPassword = encrypt(values.currentPassword);
     const password = encrypt(values.password);
 
     api
-      .changePassword(username, password)
+      .changePassword(currentPassword, password)
       .then((rsp: any) => {
         if (rsp.code !== 0) {
-          setMsg(t('auth.error'));
+          setMsg(
+            rsp.code === invalidCurrentPasswordCode
+              ? t('auth.invalidCurrentPassword')
+              : t('auth.error')
+          );
           return;
         }
 
-        removeToken();
+        notifyAuthExpired();
         navigate('/auth/login', { replace: true });
       })
       .catch(() => {
         setMsg(t('auth.error'));
       });
-  }
-
-  function validateString(str: string) {
-    const regex = /['"\\/]/;
-    return !regex.test(str);
   }
 
   function cancel() {
@@ -75,30 +71,43 @@ export const Password = () => {
           onFinish={changePassword}
         >
           <Form.Item
-            name="username"
-            rules={[{ required: true, message: t('auth.noEmptyUsername'), min: 1 }]}
-          >
-            <Input prefix={<UserOutlined />} placeholder={t('auth.placeholderUsername')} />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: t('auth.noEmptyPassword'), min: 1 }]}
+            name="currentPassword"
+            rules={[{ required: true, message: t('auth.noEmptyPassword') }]}
           >
             <Input
               prefix={<LockOutlined />}
               type="password"
+              autoComplete="current-password"
+              placeholder={t('auth.placeholderCurrentPassword')}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: t('auth.noEmptyPassword') },
+              { min: 8, max: 72, message: t('auth.passwordLength') }
+            ]}
+          >
+            <Input
+              prefix={<LockOutlined />}
+              type="password"
+              autoComplete="new-password"
               placeholder={t('auth.placeholderPassword')}
             />
           </Form.Item>
 
           <Form.Item
             name="password2"
-            rules={[{ required: true, message: t('auth.noEmptyPassword'), min: 1 }]}
+            rules={[
+              { required: true, message: t('auth.noEmptyPassword') },
+              { min: 8, max: 72, message: t('auth.passwordLength') }
+            ]}
           >
             <Input
               prefix={<LockOutlined />}
               type="password"
+              autoComplete="new-password"
               placeholder={t('auth.placeholderPassword2')}
             />
           </Form.Item>
@@ -116,16 +125,18 @@ export const Password = () => {
           </Form.Item>
         </Form>
 
-        <Card>
-          <div className="flex w-[450px] flex-col">
-            <div>{t('auth.tips.change1')}</div>
-            <ul className="list-outside list-decimal">
-              <li>{t('auth.tips.change2')}</li>
-              <li>{t('auth.tips.change3')}</li>
-            </ul>
-            <div className="text-red-500">{t('auth.tips.change4')}</div>
-          </div>
-        </Card>
+        {account.role === 'admin' && (
+          <Card>
+            <div className="flex w-[450px] flex-col">
+              <div>{t('auth.tips.change1')}</div>
+              <ul className="list-outside list-decimal">
+                <li>{t('auth.tips.change2')}</li>
+                <li>{t('auth.tips.change3')}</li>
+              </ul>
+              <div className="text-red-500">{t('auth.tips.change4')}</div>
+            </div>
+          </Card>
+        )}
       </div>
     </>
   );

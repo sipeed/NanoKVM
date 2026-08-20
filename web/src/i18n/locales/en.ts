@@ -11,14 +11,17 @@ const en = {
       login: 'Login',
       placeholderUsername: 'Username',
       placeholderPassword: 'Password',
+      placeholderCurrentPassword: 'Current password',
       placeholderPassword2: 'Please enter password again',
       noEmptyUsername: 'Username required',
       noEmptyPassword: 'Password required',
+      passwordLength: 'Password must be between 8 and 72 characters',
       noAccount: 'Failed to get user information, please refresh web page or reset password',
       invalidUser: 'Invalid username or password',
       locked: 'Too many logins, please try again later',
       globalLocked: 'System under protection, please try again later',
       error: 'Unexpected error',
+      invalidCurrentPassword: 'Current password is incorrect',
       changePassword: 'Change Password',
       changePasswordDesc: 'For the security of your device, please change the password!',
       differentPassword: 'Passwords do not match',
@@ -550,12 +553,33 @@ const en = {
       account: {
         title: 'Account',
         webAccount: 'Web Account Name',
+        role: 'Role',
+        roles: {
+          admin: 'Administrator',
+          user: 'User'
+        },
         password: 'Password',
         updateBtn: 'Change',
         logoutBtn: 'Logout',
         logoutDesc: 'Are you sure you want to logout?',
         okBtn: 'Yes',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        users: {
+          title: 'Users',
+          create: 'Create User',
+          enabled: 'Enabled',
+          disabled: 'Disabled',
+          deviceOwner: 'Device owner',
+          resetPassword: 'Reset Password',
+          delete: 'Delete',
+          deleteConfirm: 'Delete this user and revoke all of their sessions?',
+          created: 'User created',
+          deleted: 'User deleted',
+          passwordUpdated: 'Password updated',
+          loadFailed: 'Failed to load users',
+          saveFailed: 'Failed to save user',
+          deleteFailed: 'Failed to delete user'
+        }
       }
     },
     picoclaw: {

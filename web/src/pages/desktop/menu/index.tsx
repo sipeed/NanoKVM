@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Divider } from 'antd';
 import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
@@ -26,6 +27,8 @@ import { Wol } from './wol';
 
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
+  const { account } = useAuth();
+  const isAdmin = account.role === 'admin';
 
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
   const isKeyboardLedStatusVisible = useAtomValue(keyboardLedStatusVisibleAtom);
@@ -104,17 +107,18 @@ export const Menu = () => {
             <Mouse />
             <Divider type="vertical" />
 
-            {isEnabled('image') && <Image />}
-            {isEnabled('download') && <DownloadImage />}
-            {isEnabled('terminal') && <Terminal />}
-            {isEnabled('script') && <Script />}
+            {isAdmin && isEnabled('image') && <Image />}
+            {isAdmin && isEnabled('download') && <DownloadImage />}
+            {isAdmin && isEnabled('terminal') && <Terminal />}
+            {isAdmin && isEnabled('script') && <Script />}
             {isEnabled('wol') && <Wol />}
 
-            {['image', 'download', 'script', 'terminal', 'wol'].some(isEnabled) && (
+            {(isEnabled('wol') ||
+              (isAdmin && ['image', 'download', 'script', 'terminal'].some(isEnabled))) && (
               <Divider type="vertical" />
             )}
 
-            {isEnabled('picoclaw') && (
+            {isAdmin && isEnabled('picoclaw') && (
               <>
                 <Picoclaw />
                 <Divider type="vertical" />

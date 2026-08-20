@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/hid"
@@ -19,7 +20,10 @@ type setAIControlModeRequest struct {
 }
 
 func controlRouter(r *gin.Engine, control *controlmode.Manager, picoclawService *picoclaw.Service) {
-	group := r.Group("/api/ai/control").Use(middleware.CheckToken())
+	group := r.Group("/api/ai/control").Use(
+		middleware.CheckToken(),
+		middleware.RequireRole(authn.RoleAdmin),
+	)
 	group.GET("/status", func(c *gin.Context) {
 		status, err := control.Status()
 		if err != nil {
