@@ -2,8 +2,8 @@ package webrtc
 
 import (
 	"NanoKVM-Server/config"
+	"NanoKVM-Server/middleware"
 	"encoding/json"
-	"net/http"
 	"sync"
 	"time"
 
@@ -17,9 +17,7 @@ import (
 var (
 	upgrader = websocket.Upgrader{
 		WriteBufferSize: 256 * 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
+		CheckOrigin:     middleware.CheckWebSocketOrigin,
 	}
 	globalManager *WebRTCManager
 	managerOnce   sync.Once
@@ -39,6 +37,8 @@ func Connect(c *gin.Context) {
 		log.Errorf("failed to create h264 websocket: %s", err)
 		return
 	}
+	stopSessionWatcher := middleware.WatchWebSocket(c.Request.Context(), wsConn)
+	defer stopSessionWatcher()
 	defer func() {
 		_ = wsConn.Close()
 		log.Debugf("h264 websocket disconnected: %s", c.ClientIP())

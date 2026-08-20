@@ -48,7 +48,7 @@ authentication: enable              # Whether to enable identity verification fo
 jwt:
    secretKey: ""                    # The secret key used to sign and verify JWT Tokens. If left empty, a random key will be generated automatically on startup
    refreshTokenDuration: 2678400    # The token refresh duration threshold in seconds before forcing a re-login. Default is `2678400` (~31 days)
-   revokeTokensOnLogout: true       # Whether to invalidate all existing tokens upon logout by rotating the SecretKey. Default is `true`
+   revokeTokensOnLogout: true       # Whether logout invalidates all sessions belonging to that user. Other users are never logged out. Setting this to false only clears the browser cookie and is not recommended. Default is `true`
 security:
    loginLockoutDuration: 0,         # The duration (in seconds) to ban an IP from attempting to log in again after reaching the failure limit. If set to `0` or left empty, brute-force protection is disabled. Default is `0`
    loginMaxFailures:     5,         # The maximum number of continuous failed login attempts allowed per IP before triggering protection. Default is `5`
@@ -61,6 +61,28 @@ turn:
     turnUser: example_user    # The username required for authorization to the TURN server
     turnCred: example_cred    # The credential/password required for authorization to the TURN server
 ```
+
+## Web Users
+
+NanoKVM uses two device-wide roles:
+
+- `admin`: KVM access plus user, system, network, update, storage, terminal, script, MCP, and PicoClaw administration.
+- `user`: KVM video, keyboard, mouse, paste, power/reset, and Wake-on-LAN access.
+
+Administrators manage accounts from **Settings > Account**. Account data remains in
+`/etc/kvm/pwd`; the server migrates the legacy single-account JSON format in place and writes
+the multi-user format atomically with mode `0600`. Keeping the same path preserves the physical
+BOOT-button password reset behavior.
+Users must confirm their current password when changing it themselves; administrators can reset
+non-owner users from the account manager. Only the device owner can change the device owner's
+password, because that password is also synchronized to the Linux root account.
+
+All authenticated sessions are backed by the current account state. Disabling, deleting,
+changing the role or password of a user invalidates that user's HTTP and real-time connections
+without affecting other users. Multiple users may watch and control the KVM concurrently; input
+uses the existing cooperative HID coordinator, so simultaneous input can interleave.
+Video mode, quality, resolution, and MJPEG frame-detection controls remain shared KVM
+operations; when several users adjust them concurrently, the latest change applies device-wide.
 
 ## Compile & Deploy
 

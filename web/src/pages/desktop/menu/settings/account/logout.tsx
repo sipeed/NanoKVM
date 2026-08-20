@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
 import * as api from '@/api/auth.ts';
-import { removeToken } from '@/lib/cookie.ts';
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 
 export const Logout = () => {
   const { t } = useTranslation();
@@ -17,7 +17,7 @@ export const Logout = () => {
         return;
       }
 
-      removeToken();
+      notifyAuthExpired();
       navigate('/auth/login');
     });
   }

@@ -1,5 +1,6 @@
-import { IMessageEvent, w3cwebsocket as W3cWebSocket } from 'websocket';
+import { ICloseEvent, IMessageEvent, w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 
 type MessageHandler = (message: IMessageEvent) => void;
@@ -123,8 +124,16 @@ export class WsClient {
     this.startHeartbeat();
   }
 
-  private handleClose(): void {
+  private handleClose(event: ICloseEvent): void {
     this.stopHeartbeat();
+
+    if (event.code === 4401) {
+      this.shouldReconnect = false;
+      this.cleanup();
+      notifyAuthExpired();
+      return;
+    }
+
     this.scheduleReconnect();
   }
 

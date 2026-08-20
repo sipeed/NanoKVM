@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/hid"
@@ -23,7 +24,10 @@ func mcpRouter(r *gin.Engine, control *controlmode.Manager, picoclawService *pic
 			picoclawService.PublishControlModeChangedFrom(status, "mcp_config")
 		},
 	)
-	management := r.Group("/api/mcp").Use(middleware.CheckToken())
+	management := r.Group("/api/mcp").Use(
+		middleware.CheckToken(),
+		middleware.RequireRole(authn.RoleAdmin),
+	)
 	management.GET("/config", service.GetConfig)
 	management.POST("/config", service.SetConfig)
 	management.POST("/key/regenerate", service.RegenerateAPIKey)

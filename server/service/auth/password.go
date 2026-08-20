@@ -1,124 +1,126 @@
 package auth
 
 import (
-	"NanoKVM-Server/proto"
-	"NanoKVM-Server/utils"
-	"errors"
 	"io"
 	"os"
 	"os/exec"
 	"time"
 
+	"NanoKVM-Server/authn"
+	"NanoKVM-Server/config"
+	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/proto"
+	"NanoKVM-Server/utils"
+
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
-	"golang.org/x/crypto/bcrypt"
 )
+
+var systemPasswordUpdater = changeRootPassword
 
 func (s *Service) ChangePassword(c *gin.Context) {
 	var req proto.ChangePasswordReq
 	var rsp proto.Response
-
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid parameters")
 		return
 	}
-
-	password, err := utils.DecodeDecrypt(req.Password)
-	if err != nil || password == "" {
-		rsp.ErrRsp(c, -2, "invalid password")
+	principal, ok := middleware.CurrentPrincipal(c)
+	if !ok {
+		rsp.ErrRsp(c, -2, "invalid session")
+		return
+	}
+	currentPassword, err := utils.DecodeDecrypt(req.CurrentPassword)
+	if err != nil || currentPassword == "" {
+		rsp.ErrRsp(c, -3, "current password is required")
+		return
+	}
+	if _, authenticated, authErr := authn.DefaultStore.Authenticate(principal.Username, currentPassword); authErr != nil {
+		rsp.ErrRsp(c, -4, "authentication unavailable")
+		return
+	} else if !authenticated {
+		rsp.ErrRsp(c, -3, "current password is incorrect")
+		return
+	}
+	if err := changeUserPassword(principal.Username, req.Password); err != nil {
+		rsp.ErrRsp(c, -5, err.Error())
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		rsp.ErrRsp(c, -3, "failed to hash password")
-		return
-	}
-
-	if err = SetAccount(req.Username, string(hashedPassword)); err != nil {
-		rsp.ErrRsp(c, -4, "failed to save password")
-		return
-	}
-
-	// change root password
-	err = changeRootPassword(password)
-	if err != nil {
-		_ = DelAccount()
-		rsp.ErrRsp(c, -5, "failed to change password")
-		return
-	}
-
+	middleware.RevokeUserSessions(principal.Username)
+	clearSessionCookie(c)
 	rsp.OkRsp(c)
-	log.Debugf("change password success, username: %s", req.Username)
+	log.Infof("password changed for user: %s", principal.Username)
 }
 
 func (s *Service) IsPasswordUpdated(c *gin.Context) {
 	var rsp proto.Response
+	if config.GetInstance().Authentication == "disable" {
+		rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{IsUpdated: true})
+		return
+	}
+	principal, ok := middleware.CurrentPrincipal(c)
+	if !ok {
+		rsp.ErrRsp(c, -1, "invalid session")
+		return
+	}
+	user, err := authn.DefaultStore.Get(principal.Username)
+	if err != nil {
+		rsp.ErrRsp(c, -2, "failed to get password state")
+		return
+	}
+	rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{IsUpdated: !user.MustChangePassword})
+}
 
-	if _, err := os.Stat(AccountFile); err != nil {
-		rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
-			IsUpdated: false,
+func changeUserPassword(username, encryptedPassword string) error {
+	password, err := utils.DecodeDecrypt(encryptedPassword)
+	if err != nil || password == "" {
+		return errInvalidPassword
+	}
+	if err = authn.ValidatePassword(password); err != nil {
+		return err
+	}
+	user, err := authn.DefaultStore.Get(username)
+	if err != nil {
+		return err
+	}
+	if user.SystemAccount && user.Role == authn.RoleAdmin && user.Enabled {
+		_, err = authn.DefaultStore.SetPasswordAndRun(username, password, func() error {
+			return systemPasswordUpdater(password)
 		})
-		return
+		return err
 	}
-
-	account, err := GetAccount()
-	if err != nil || account == nil {
-		rsp.ErrRsp(c, -1, "failed to get password")
-		return
-	}
-
-	err = bcrypt.CompareHashAndPassword([]byte(account.Password), []byte("admin"))
-
-	rsp.OkRspWithData(c, &proto.IsPasswordUpdatedRsp{
-		// If the hash is not valid, still assume it's not updated
-		// The error we want to see is password and hash not matching
-		IsUpdated: errors.Is(err, bcrypt.ErrMismatchedHashAndPassword),
-	})
+	_, err = authn.DefaultStore.SetPassword(username, password)
+	return err
 }
 
 func changeRootPassword(password string) error {
-	err := passwd(password)
-	if err != nil {
+	if err := passwd(password); err != nil {
 		log.Errorf("failed to change root password: %s", err)
 		return err
 	}
-
-	log.Debugf("change root password successful.")
+	log.Debug("change root password successful")
 	return nil
 }
 
 func passwd(password string) error {
 	cmd := exec.Command("passwd", "root")
-
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return err
 	}
-	defer func() {
-		_ = stdin.Close()
-	}()
-
+	defer func() { _ = stdin.Close() }()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
 	if err = cmd.Start(); err != nil {
 		return err
 	}
-
 	if _, err = io.WriteString(stdin, password+"\n"); err != nil {
 		return err
 	}
-
 	time.Sleep(100 * time.Millisecond)
-
 	if _, err = io.WriteString(stdin, password+"\n"); err != nil {
 		return err
 	}
-
-	if err = cmd.Wait(); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Wait()
 }

@@ -1,6 +1,7 @@
 package router
 
 import (
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/service/download"
 	"github.com/gin-gonic/gin"
 
@@ -9,7 +10,7 @@ import (
 
 func downloadRouter(r *gin.Engine) {
 	service := download.NewService()
-	api := r.Group("/api").Use(middleware.CheckToken())
+	api := r.Group("/api").Use(middleware.CheckToken(), middleware.RequireRole(authn.RoleAdmin))
 
 	api.POST("/download/image", service.DownloadImage)              // download image
 	api.POST("/download/image/cancel", service.CancelDownloadImage) // cancel image download

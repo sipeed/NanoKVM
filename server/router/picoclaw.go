@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/picoclaw"
 )
@@ -39,7 +40,10 @@ func PicoclawLoopbackHTTPAllowedPaths() []string {
 }
 
 func picoclawRouter(r *gin.Engine, service *picoclaw.Service) {
-	frontendAPI := r.Group(picoclawBasePath).Use(middleware.CheckToken())
+	frontendAPI := r.Group(picoclawBasePath).Use(
+		middleware.CheckToken(),
+		middleware.RequireRole(authn.RoleAdmin),
+	)
 	localAPI := r.Group(picoclawBasePath).Use(middleware.CheckLoopbackInternalToken())
 
 	localAPI.GET(picoclawScreenshotPath, service.Screenshot)

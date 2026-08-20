@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Divider, Popover } from 'antd';
 import { CommandIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,7 @@ import type { Shortcut as ShortcutInterface } from './types.ts';
 
 export const Shortcuts = () => {
   const { t } = useTranslation();
+  const { account } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -112,12 +114,14 @@ export const Shortcuts = () => {
 
       <Divider style={{ margin: '5px 0 5px 0' }} />
 
-      <Recorder
-        shortcuts={customShortcuts}
-        addShortcut={addShortcut}
-        delShortcut={delShortcut}
-        setIsRecording={setIsRecording}
-      />
+      {account.role === 'admin' && (
+        <Recorder
+          shortcuts={customShortcuts}
+          addShortcut={addShortcut}
+          delShortcut={delShortcut}
+          setIsRecording={setIsRecording}
+        />
+      )}
     </ScrollArea>
   );
 

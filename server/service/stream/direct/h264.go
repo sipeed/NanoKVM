@@ -1,8 +1,8 @@
 package direct
 
 import (
+	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/stream"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -17,9 +17,7 @@ var (
 	streamer = newStreamer()
 	upgrader = websocket.Upgrader{
 		WriteBufferSize: 256 * 1024,
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
+		CheckOrigin:     middleware.CheckWebSocketOrigin,
 	}
 )
 
@@ -29,6 +27,8 @@ func Connect(c *gin.Context) {
 		log.Errorf("failed to upgrade to websocket: %s", err)
 		return
 	}
+	stopSessionWatcher := middleware.WatchWebSocket(c.Request.Context(), ws)
+	defer stopSessionWatcher()
 	client := newClient(ws)
 	if flowWindow, err := strconv.Atoi(c.Query("flow")); err == nil && flowWindow > 0 {
 		client.queue.enableFlowControl(flowWindow)
