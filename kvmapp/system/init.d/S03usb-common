@@ -1,0 +1,225 @@
+#!/bin/sh
+# shellcheck disable=SC2034
+
+USB_BOOT_DIR="${USB_BOOT_DIR:-/boot}"
+USB_GADGET_ROOT="${USB_GADGET_ROOT:-/sys/kernel/config/usb_gadget}"
+USB_GADGET_NAME="${USB_GADGET_NAME:-g0}"
+USB_UDC_CLASS="${USB_UDC_CLASS:-/sys/class/udc}"
+USB_OTG_ROLE="${USB_OTG_ROLE:-/proc/cviusb/otg_role}"
+USB_PHY_DEVICE="${USB_PHY_DEVICE:-4340000.usb}"
+USB_DWC2_BIND="${USB_DWC2_BIND:-/sys/bus/platform/drivers/dwc2/bind}"
+USB_DWC2_UNBIND="${USB_DWC2_UNBIND:-/sys/bus/platform/drivers/dwc2/unbind}"
+PATH="/sbin:/usr/sbin:/bin:/usr/bin${PATH:+:${PATH}}"
+export PATH
+
+USB_DEFAULT_VENDOR_ID='0x3346'
+USB_DEFAULT_PRODUCT_ID='0x1009'
+USB_SERIAL_NUMBER='0123456789ABCDEF'
+USB_MANUFACTURER='sipeed'
+USB_PRODUCT='NanoKVM'
+USB_CONFIGURATION='NanoKVM'
+
+USB_NORMAL_BCD_USB='0x0200'
+USB_NORMAL_BCD_DEVICE='0x0510'
+USB_NORMAL_CONFIG_ATTRIBUTES='0xE0'
+USB_NORMAL_MAX_POWER='120'
+USB_HID_ONLY_BCD_USB='0x0110'
+USB_HID_ONLY_BCD_DEVICE='0x0623'
+USB_HID_ONLY_CONFIG_ATTRIBUTES='0xA0'
+USB_HID_ONLY_MAX_POWER='200'
+
+USB_HID_KEYBOARD_FUNC='hid.GS0'
+USB_HID_RELATIVE_MOUSE_FUNC='hid.GS1'
+USB_HID_ABSOLUTE_MOUSE_FUNC='hid.GS2'
+USB_HID_BOOT_SUBCLASS='1'
+USB_HID_NON_BOOT_SUBCLASS='0'
+USB_HID_KEYBOARD_PROTOCOL='1'
+USB_HID_MOUSE_PROTOCOL='2'
+USB_HID_KEYBOARD_REPORT_LENGTH='8'
+USB_HID_RELATIVE_MOUSE_REPORT_LENGTH='4'
+USB_HID_ABSOLUTE_MOUSE_REPORT_LENGTH='6'
+
+USB_HID_REPORT_NORMAL_KEYBOARD='normal-keyboard'
+USB_HID_REPORT_HID_ONLY_KEYBOARD='hid-only-keyboard'
+USB_HID_REPORT_RELATIVE_MOUSE='relative-mouse'
+USB_HID_REPORT_NORMAL_ABSOLUTE_MOUSE='normal-absolute-mouse'
+USB_HID_REPORT_HID_ONLY_ABSOLUTE_MOUSE='hid-only-absolute-mouse'
+
+remove_existing_gadget(){
+    gadget="${USB_GADGET_ROOT}/${USB_GADGET_NAME}"
+    [ -d "${gadget}" ] || return 0
+
+    echo '' > "${gadget}/UDC" 2>/dev/null || true
+    if [ -d "${gadget}/os_desc" ]
+    then
+        find "${gadget}/os_desc" -mindepth 1 -maxdepth 1 -type l -exec rm {} \;
+    fi
+    if [ -d "${gadget}/configs/c.1" ]
+    then
+        find "${gadget}/configs/c.1" -mindepth 1 -maxdepth 1 -type l -exec rm {} \;
+        rmdir "${gadget}/configs/c.1/strings/0x409" 2>/dev/null || true
+        rmdir "${gadget}/configs/c.1/strings" 2>/dev/null || true
+        rmdir "${gadget}/configs/c.1" 2>/dev/null || true
+    fi
+
+    if [ -d "${gadget}/functions" ]
+    then
+        for func in "${gadget}/functions"/*
+        do
+            [ -d "${func}" ] || continue
+            rmdir "${func}/lun.0" 2>/dev/null || true
+            rmdir "${func}" 2>/dev/null || true
+        done
+    fi
+
+    rmdir "${gadget}/strings/0x409" 2>/dev/null || true
+    rmdir "${gadget}/strings" 2>/dev/null || true
+    rmdir "${gadget}/configs" 2>/dev/null || true
+    rmdir "${gadget}/functions" 2>/dev/null || true
+    rmdir "${gadget}" 2>/dev/null || true
+}
+
+write_usb_strings(){
+    mkdir strings/0x409
+    printf '%s' "${USB_SERIAL_NUMBER}" > strings/0x409/serialnumber
+    printf '%s' "${USB_MANUFACTURER}" > strings/0x409/manufacturer
+    printf '%s' "${USB_PRODUCT}" > strings/0x409/product
+}
+
+write_usb_config_string(){
+    mkdir -p configs/c.1/strings/0x409
+    printf '%s' "${USB_CONFIGURATION}" > configs/c.1/strings/0x409/configuration
+}
+
+write_boot_or_default(){
+    if [ -e "${USB_BOOT_DIR}/$2" ]
+    then
+        cat "${USB_BOOT_DIR}/$2" > "$1"
+    else
+        echo "$3" > "$1"
+    fi
+}
+
+prepare_usb_gadget(){
+    echo "usb mode: device"
+    cd "${USB_GADGET_ROOT}" || exit 1
+    remove_existing_gadget
+    mkdir "${USB_GADGET_NAME}"
+    cd "${USB_GADGET_NAME}" || exit 1
+
+    echo "$1" > bcdUSB
+    echo "$2" > bcdDevice
+    write_boot_or_default idVendor usb.vid "${USB_DEFAULT_VENDOR_ID}"
+    write_boot_or_default idProduct usb.pid "${USB_DEFAULT_PRODUCT_ID}"
+    write_usb_strings
+
+    mkdir configs/c.1
+    echo "$3" > configs/c.1/bmAttributes
+    echo "$4" > configs/c.1/MaxPower
+    write_usb_config_string
+}
+
+set_hid_wakeup(){
+    if [ ! -e "${USB_BOOT_DIR}/usb.notwakeup" ] && [ -e "functions/$1/wakeup_on_write" ]
+    then
+        echo 1 > "functions/$1/wakeup_on_write"
+    fi
+}
+
+add_hid_function(){
+    func="$1"
+    subclass="$2"
+    protocol="$3"
+    report_length="$4"
+    report_desc="$5"
+
+    mkdir "functions/${func}"
+    echo "${subclass}" > "functions/${func}/subclass"
+    set_hid_wakeup "${func}"
+    echo "${protocol}" > "functions/${func}/protocol"
+    echo "${report_length}" > "functions/${func}/report_length"
+    write_hid_report_desc "${report_desc}" > "functions/${func}/report_desc"
+    ln -s "functions/${func}" configs/c.1
+}
+
+write_hid_report_desc(){
+    case "$1" in
+      "${USB_HID_REPORT_NORMAL_KEYBOARD}")
+        printf '%b' '\005\001\011\006\241\001\005\007\031\340\051\347\025\000\045\001\165\001\225\010\201\002\225\001\165\010\201\003\225\005\165\001\005\010\031\001\051\005\221\002\225\001\165\003\221\003\225\006\165\010\025\000\045\347\005\007\031\000\051\347\201\000\300'
+        ;;
+      "${USB_HID_REPORT_HID_ONLY_KEYBOARD}")
+        printf '%b' '\005\001\011\006\241\001\005\007\031\340\051\347\025\000\045\001\165\001\225\010\201\002\225\001\165\010\201\003\225\005\165\001\005\010\031\001\051\005\221\002\225\001\165\003\221\003\225\006\165\010\025\000\045\145\005\007\031\000\051\145\201\000\300'
+        ;;
+      "${USB_HID_REPORT_RELATIVE_MOUSE}")
+        printf '%b' '\005\001\011\002\241\001\011\001\241\000\005\011\031\001\051\003\025\000\045\001\225\003\165\001\201\002\225\001\165\005\201\003\005\001\011\060\011\061\011\070\025\201\045\177\165\010\225\003\201\006\300\300'
+        ;;
+      "${USB_HID_REPORT_NORMAL_ABSOLUTE_MOUSE}")
+        printf '%b' '\005\001\011\002\241\001\011\001\241\000\005\011\031\001\051\005\025\000\045\001\225\005\165\001\201\002\225\001\165\003\201\001\005\001\011\060\011\061\025\000\046\377\177\065\000\106\377\177\165\020\225\002\201\002\005\001\011\070\025\201\045\177\065\000\105\000\165\010\225\001\201\006\300\300'
+        ;;
+      "${USB_HID_REPORT_HID_ONLY_ABSOLUTE_MOUSE}")
+        printf '%b' '\005\001\011\002\241\001\011\001\241\000\005\011\031\001\051\003\025\000\045\001\225\003\165\001\201\002\225\001\165\005\201\001\005\001\011\060\011\061\025\000\046\377\177\065\000\106\377\177\165\020\225\002\201\002\005\001\011\070\025\201\045\177\065\000\105\000\165\010\225\001\201\006\300\300'
+        ;;
+      *) echo "unknown HID report descriptor: $1" >&2; return 1 ;;
+    esac
+}
+
+add_hid_functions(){
+    keyboard_report="$1"
+    absolute_mouse_report="$2"
+    add_hid_function "${USB_HID_KEYBOARD_FUNC}" "${USB_HID_BOOT_SUBCLASS}" "${USB_HID_KEYBOARD_PROTOCOL}" "${USB_HID_KEYBOARD_REPORT_LENGTH}" "${keyboard_report}"
+    add_hid_function "${USB_HID_RELATIVE_MOUSE_FUNC}" "${USB_HID_BOOT_SUBCLASS}" "${USB_HID_MOUSE_PROTOCOL}" "${USB_HID_RELATIVE_MOUSE_REPORT_LENGTH}" "${USB_HID_REPORT_RELATIVE_MOUSE}"
+    add_hid_function "${USB_HID_ABSOLUTE_MOUSE_FUNC}" "${USB_HID_NON_BOOT_SUBCLASS}" "${USB_HID_MOUSE_PROTOCOL}" "${USB_HID_ABSOLUTE_MOUSE_REPORT_LENGTH}" "${absolute_mouse_report}"
+}
+
+first_udc(){ find "${USB_UDC_CLASS}" -mindepth 1 -maxdepth 1 -exec basename {} \; | sort | sed -n '1p'; }
+
+bind_first_udc(){
+    udc=$(first_udc)
+    [ -n "${udc}" ] || return 1
+    printf '%s' "${udc}" > UDC
+    echo device > "${USB_OTG_ROLE}"
+}
+
+unbind_udc(){
+    echo '' > "${USB_GADGET_ROOT}/${USB_GADGET_NAME}/UDC"
+}
+
+start_usb_host(){
+    unbind_udc
+    echo host > "${USB_OTG_ROLE}"
+}
+
+restart_udc(){
+    echo '' > "${USB_GADGET_ROOT}/${USB_GADGET_NAME}/UDC"
+    sleep 1
+    udc=$(first_udc)
+    [ -n "${udc}" ] || return 1
+    printf '%s' "${udc}" > "${USB_GADGET_ROOT}/${USB_GADGET_NAME}/UDC"
+}
+
+restart_usb_dev(){
+    restart_udc
+    echo "USB Restart OK!"
+}
+
+restart_usb_phy(){
+    command -v start_usb_dev >/dev/null || {
+        echo "start_usb_dev is not defined" >&2
+        return 1
+    }
+    echo "${USB_PHY_DEVICE}" > "${USB_DWC2_UNBIND}"
+    sleep 1
+    echo "${USB_PHY_DEVICE}" > "${USB_DWC2_BIND}"
+    start_usb_host
+    start_usb_dev
+}
+
+run_usb_action(){
+    case "$1" in
+      start) start_usb_dev ;;
+      restart) restart_usb_dev ;;
+      stop) start_usb_host ;;
+      stop_start) start_usb_host; start_usb_dev ;;
+      restart_phy) restart_usb_phy ;;
+    esac
+}
