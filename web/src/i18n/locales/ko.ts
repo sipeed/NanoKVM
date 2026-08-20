@@ -276,6 +276,9 @@ const ko = {
       okBtn: '네',
       cancelBtn: '아니오'
     },
+    reboot: {
+      title: '재부팅'
+    },
     settings: {
       title: '설정',
       mcp: {

@@ -18,6 +18,7 @@ import { Mouse } from './mouse';
 import { Collapse, Expand } from './operations';
 import { Picoclaw } from './picoclaw';
 import { Power } from './power';
+import { Reboot } from './reboot';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
@@ -121,9 +122,10 @@ export const Menu = () => {
               </>
             )}
 
-            {isEnabled('power') && (
+            {(isEnabled('power') || isEnabled('reboot')) && (
               <>
-                <Power />
+                {isEnabled('power') && <Power />}
+                {isEnabled('reboot') && <Reboot />}
                 <Divider type="vertical" />
               </>
             )}

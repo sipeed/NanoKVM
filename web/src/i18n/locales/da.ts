@@ -279,6 +279,9 @@ const da = {
       okBtn: 'Ja',
       cancelBtn: 'Annuller'
     },
+    reboot: {
+      title: 'Genstart'
+    },
     settings: {
       title: 'Indstillinger',
       mcp: {

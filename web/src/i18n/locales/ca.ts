@@ -278,6 +278,9 @@ const ca = {
       okBtn: 'Sí',
       cancelBtn: 'No'
     },
+    reboot: {
+      title: "Reinicia"
+    },
     settings: {
       title: 'Configuració',
       mcp: {

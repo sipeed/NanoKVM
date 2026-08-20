@@ -270,6 +270,9 @@ const zh_tw = {
       okBtn: '確認',
       cancelBtn: '取消'
     },
+    reboot: {
+      title: '重新啟動'
+    },
     settings: {
       title: '設定',
       mcp: {

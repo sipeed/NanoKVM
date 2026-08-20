@@ -270,6 +270,9 @@ const zh = {
       okBtn: '确认',
       cancelBtn: '取消'
     },
+    reboot: {
+      title: '重启'
+    },
     settings: {
       title: '设置',
       mcp: {
