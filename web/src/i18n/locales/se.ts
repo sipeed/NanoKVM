@@ -281,6 +281,9 @@ const se = {
       okBtn: 'Ja',
       cancelBtn: 'Nej'
     },
+    reboot: {
+      title: 'Starta om'
+    },
     settings: {
       title: 'Inställningar',
       mcp: {

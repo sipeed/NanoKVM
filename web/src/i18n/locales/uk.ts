@@ -285,6 +285,9 @@ const uk = {
       okBtn: 'Так',
       cancelBtn: 'Ні'
     },
+    reboot: {
+      title: 'Перезавантажити'
+    },
     settings: {
       title: 'Налаштування',
       mcp: {

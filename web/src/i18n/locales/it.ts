@@ -286,6 +286,9 @@ const it = {
       okBtn: 'Sì',
       cancelBtn: 'No'
     },
+    reboot: {
+      title: 'Riavvia'
+    },
     settings: {
       title: 'Impostazioni',
       mcp: {

@@ -8,6 +8,7 @@ import {
   MaximizeIcon,
   NetworkIcon,
   PowerIcon,
+  RefreshCwIcon,
   TerminalSquareIcon,
   XIcon
 } from 'lucide-react';
@@ -31,6 +32,7 @@ export const MenuIcons = () => {
     { key: 'wol', icon: <NetworkIcon size={16} /> },
     { key: 'picoclaw', icon: <Robot size={16} /> },
     { key: 'power', icon: <PowerIcon size={16} /> },
+    { key: 'reboot', icon: <RefreshCwIcon size={16} /> },
     { key: 'fullscreen', icon: <MaximizeIcon size={16} />, label: 'fullscreen.toggle' },
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
   ].filter(

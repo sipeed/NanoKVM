@@ -284,6 +284,9 @@ const nb = {
       okBtn: 'Ja',
       cancelBtn: 'Nei'
     },
+    reboot: {
+      title: 'Start på nytt'
+    },
     settings: {
       title: 'Innstillinger',
       mcp: {

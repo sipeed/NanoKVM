@@ -285,6 +285,9 @@ const ja = {
       okBtn: 'はい',
       cancelBtn: 'いいえ'
     },
+    reboot: {
+      title: '再起動'
+    },
     settings: {
       title: '設定',
       mcp: {

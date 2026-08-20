@@ -278,6 +278,9 @@ const th = {
       okBtn: 'ใช่',
       cancelBtn: 'ไม่ใช่'
     },
+    reboot: {
+      title: 'รีบูต'
+    },
     settings: {
       title: 'การตั้งค่า',
       mcp: {

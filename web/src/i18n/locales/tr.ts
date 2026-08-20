@@ -283,6 +283,9 @@ const tr = {
       okBtn: 'Evet',
       cancelBtn: 'Hayır'
     },
+    reboot: {
+      title: 'Yeniden Başlat'
+    },
     settings: {
       title: 'Ayarlar',
       mcp: {

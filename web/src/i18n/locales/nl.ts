@@ -286,6 +286,9 @@ const nl = {
       okBtn: 'Ja',
       cancelBtn: 'Nee'
     },
+    reboot: {
+      title: 'Opnieuw opstarten'
+    },
     settings: {
       title: 'Instellingen',
       mcp: {

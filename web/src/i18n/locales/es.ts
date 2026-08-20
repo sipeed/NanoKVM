@@ -285,6 +285,9 @@ const es = {
       okBtn: 'Sí',
       cancelBtn: 'No'
     },
+    reboot: {
+      title: 'Reiniciar'
+    },
     settings: {
       title: 'Ajustes',
       mcp: {

@@ -285,6 +285,9 @@ const pl = {
       okBtn: 'Tak',
       cancelBtn: 'Nie'
     },
+    reboot: {
+      title: 'Uruchom ponownie'
+    },
     settings: {
       title: 'Ustawienia',
       mcp: {
