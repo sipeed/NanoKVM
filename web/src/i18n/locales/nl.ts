@@ -66,6 +66,37 @@ const nl = {
       video: 'Videomodus',
       videoDirectTips: 'Schakel HTTPS in "Instellingen > Apparaat" in om deze modus te gebruiken',
       resolution: 'Resolutie',
+      controlRegion: {
+        title: 'Muiskalibratie',
+        description:
+          'Gebruik deze instelling wanneer het bestuurde apparaat een andere resolutie dan 16:9 gebruikt en de cursor horizontaal of verticaal niet goed is uitgelijnd.',
+        off: 'Uit',
+        auto: 'Automatisch',
+        autoWarning:
+          'De kalibratie kan mislukken als de gebruikerstoepassing een volledig zwarte achtergrond heeft.',
+        manual: 'Handmatig',
+        originalResolution: 'Oorspronkelijke resolutie',
+        selectResolution: 'Oorspronkelijke resolutie selecteren',
+        useSelectedArea: 'Resolutie van geselecteerd gebied gebruiken',
+        addResolution: 'Aangepaste resolutie toevoegen',
+        add: 'Toevoegen',
+        duplicateResolution: 'Deze resolutie bestaat al.',
+        width: 'Breedte',
+        height: 'Hoogte',
+        apply: 'Berekenen en toepassen',
+        invalidResolution:
+          'Voer een geldige oorspronkelijke resolutie in zodra de video gereed is.',
+        select: 'Gebied selecteren',
+        clear: 'Automatische detectie herstellen',
+        saveFailed: 'Het invoergebied kan niet worden opgeslagen.',
+        tooSmall: 'Het geselecteerde gebied is te klein.',
+        previewUnavailable: 'Voorbeeld niet beschikbaar',
+        clearConfirm: 'Automatische detectie van zwarte randen herstellen?',
+        dragHint: 'Sleep om het externe bureaubladgebied te selecteren',
+        finish: 'Gereed',
+        confirm: 'Bevestigen',
+        cancel: 'Annuleren'
+      },
       auto: 'Automatisch',
       autoTips:
         'Bij bepaalde resoluties kunnen schermverscheuringen of muisverplaatsingen optreden. Overweeg de resolutie van de externe host aan te passen of schakel de automatische modus uit.',

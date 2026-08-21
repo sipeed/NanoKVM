@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { notification, Spin } from 'antd';
 import clsx from 'clsx';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
-import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
-import { videoScaleAtom } from '@/jotai/screen.ts';
+
+import { ScreenViewport } from './viewport.tsx';
 
 type SignalingMessage = {
   event?: string;
@@ -30,7 +30,6 @@ const parseSignalingData = <T,>(data?: string): T | null => {
 export const H264Webrtc = () => {
   const { t } = useTranslation();
   const mouseStyle = useAtomValue(mouseStyleAtom);
-  const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
   const [isLoading, setIsLoading] = useState(true);
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [notificationApi, contextHolder] = notification.useNotification();
@@ -312,29 +311,15 @@ export const H264Webrtc = () => {
     };
   }, [notificationApi]);
 
-  useEffect(() => {
-    const scale = storage.getVideoScale();
-    if (scale) {
-      setVideoScale(scale);
-    }
-  }, [setVideoScale]);
-
   return (
     <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden">
       {contextHolder}
 
-      <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden">
+      <ScreenViewport>
         <video
           id="screen"
           ref={videoRef}
-          className={clsx('block select-none touch-none', mouseStyle)}
-          style={{
-            transform: `scale(${videoScale})`,
-            transformOrigin: 'center',
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain'
-          }}
+          className={clsx('block touch-none select-none', mouseStyle)}
           muted
           autoPlay
           playsInline
@@ -347,7 +332,7 @@ export const H264Webrtc = () => {
             setIsLoading(false);
           }}
         />
-      </div>
+      </ScreenViewport>
 
       {isLoading && (
         <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-[2px] transition-all duration-300">

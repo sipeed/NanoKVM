@@ -152,3 +152,41 @@ type GetWebTitleRsp struct {
 type SetTlsReq struct {
 	Enabled bool `validate:"omitempty"`
 }
+
+type InputRegion struct {
+	Mode               string               `json:"mode"`
+	FrameWidth         int                  `json:"frameWidth"`
+	FrameHeight        int                  `json:"frameHeight"`
+	Left               int                  `json:"left"`
+	Top                int                  `json:"top"`
+	Width              int                  `json:"width"`
+	Height             int                  `json:"height"`
+	Resolutions        []OriginalResolution `json:"resolutions,omitempty"`
+	SelectedResolution string               `json:"selectedResolution"`
+}
+
+type OriginalResolution struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type SetInputRegionReq struct {
+	Mode               string                `json:"mode"`
+	FrameWidth         *int                  `json:"frameWidth,omitempty"`
+	FrameHeight        *int                  `json:"frameHeight,omitempty"`
+	Left               *int                  `json:"left,omitempty"`
+	Top                *int                  `json:"top,omitempty"`
+	Width              *int                  `json:"width,omitempty"`
+	Height             *int                  `json:"height,omitempty"`
+	Resolutions        *[]OriginalResolution `json:"resolutions,omitempty"`
+	SelectedResolution *string               `json:"selectedResolution,omitempty"`
+}
+
+type GetInputRegionRsp struct {
+	InputRegion
+}
+
+type GetInputResolutionRsp struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}

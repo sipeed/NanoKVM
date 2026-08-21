@@ -6,6 +6,9 @@ export const menuDisabledItemsAtom = atom<string[]>([]);
 // track how many submenus are currently open
 export const submenuOpenCountAtom = atom(0);
 
+// signal all toolbar menus to close
+export const menuCloseSignalAtom = atom(0);
+
 // web title
 export const webTitleAtom = atom('');
 

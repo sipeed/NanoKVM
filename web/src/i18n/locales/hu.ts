@@ -66,6 +66,36 @@ const hu = {
       videoDirectTips:
         'Engedélyezze az HTTPS elemet a "Beállítások > Eszköz" menüpontban ennek a módnak a használatához',
       resolution: 'Felbontás',
+      controlRegion: {
+        title: 'Egérkalibrálás',
+        description:
+          'Akkor használja ezt a beállítást, ha a vezérelt eszköz nem 16:9 képarányú felbontást használ, és a kurzor vízszintesen vagy függőlegesen eltolódik.',
+        off: 'Kikapcsolva',
+        auto: 'Automatikus',
+        autoWarning:
+          'A kalibrálás sikertelen lehet, ha a felhasználói alkalmazás háttere teljesen fekete.',
+        manual: 'Kézi',
+        originalResolution: 'Eredeti felbontás',
+        selectResolution: 'Válassza ki az eredeti felbontást',
+        useSelectedArea: 'A kijelölt terület felbontásának használata',
+        addResolution: 'Egyéni felbontás hozzáadása',
+        add: 'Hozzáadás',
+        duplicateResolution: 'Ez a felbontás már létezik.',
+        width: 'Szélesség',
+        height: 'Magasság',
+        apply: 'Számítás és alkalmazás',
+        invalidResolution: 'A videó betöltése után adjon meg érvényes eredeti felbontást.',
+        select: 'Terület kijelölése',
+        clear: 'Automatikus felismerés visszaállítása',
+        saveFailed: 'Nem sikerült menteni a bemeneti területet.',
+        tooSmall: 'A kijelölt terület túl kicsi.',
+        previewUnavailable: 'Az előnézet nem érhető el',
+        clearConfirm: 'Visszaállítja a fekete szegélyek automatikus felismerését?',
+        dragHint: 'Húzással jelölje ki a távoli asztal területét',
+        finish: 'Kész',
+        confirm: 'Megerősítés',
+        cancel: 'Mégse'
+      },
       auto: 'Automatikus',
       autoTips:
         'Bizonyos felbontások esetén képernyőszakadás vagy egéreltolódás léphet fel. Fontolja meg a távoli gép felbontásának módosítását vagy az automatikus mód kikapcsolását.',

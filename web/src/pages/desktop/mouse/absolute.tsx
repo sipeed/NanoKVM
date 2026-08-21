@@ -4,8 +4,16 @@ import { useAtomValue } from 'jotai';
 import { MouseReportAbsolute } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom } from '@/jotai/screen.ts';
+import { inputRegionAtom, resolutionAtom } from '@/jotai/screen.ts';
 
+import {
+  FrameContent,
+  fullFrameContent,
+  getConfiguredFrameContent,
+  getMediaSize,
+  getRenderedMediaRect,
+  MediaSize
+} from '../screen/geometry.ts';
 import { MouseAbsoluteEvent } from './types.ts';
 
 enum MouseButton {
@@ -18,6 +26,7 @@ enum MouseButton {
 
 export const Absolute = () => {
   const resolution = useAtomValue(resolutionAtom);
+  const inputRegion = useAtomValue(inputRegionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
 
@@ -392,52 +401,69 @@ export const Absolute = () => {
     }
 
     function getCorrectedCoords(clientX: number, clientY: number): { x: number; y: number } | null {
+      const viewport = target.parentElement;
+      if (viewport?.id === 'screen-viewport' && viewport.dataset.cropped === 'true') {
+        const viewportRect = viewport.getBoundingClientRect();
+        if (
+          viewportRect.width <= 0 ||
+          viewportRect.height <= 0 ||
+          clientX < viewportRect.left ||
+          clientX > viewportRect.right ||
+          clientY < viewportRect.top ||
+          clientY > viewportRect.bottom
+        ) {
+          return null;
+        }
+
+        return {
+          x: (clientX - viewportRect.left) / viewportRect.width,
+          y: (clientY - viewportRect.top) / viewportRect.height
+        };
+      }
+
       const rect = target.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) {
         return null;
       }
 
       const mediaSize =
-        resolution && resolution.width > 0 && resolution.height > 0
-          ? resolution
-          : getMediaSize(target);
+        getMediaSize(target) ||
+        (resolution && resolution.width > 0 && resolution.height > 0 ? resolution : null);
       if (!mediaSize) {
         const x = (clientX - rect.left) / rect.width;
         const y = (clientY - rect.top) / rect.height;
         return { x, y };
       }
 
-      const mediaRatio = mediaSize.width / mediaSize.height;
-      const elementRatio = rect.width / rect.height;
+      const renderedMediaRect = getRenderedMediaRect(rect, mediaSize);
+      const frameContent = getEffectiveFrameContent(mediaSize);
+      const frameScaleX = renderedMediaRect.width / mediaSize.width;
+      const frameScaleY = renderedMediaRect.height / mediaSize.height;
+      const contentLeft = renderedMediaRect.left + frameContent.left * frameScaleX;
+      const contentTop = renderedMediaRect.top + frameContent.top * frameScaleY;
+      const contentWidth = frameContent.width * frameScaleX;
+      const contentHeight = frameContent.height * frameScaleY;
 
-      let renderedWidth = rect.width;
-      let renderedHeight = rect.height;
-      let offsetX = 0;
-      let offsetY = 0;
-
-      if (mediaRatio > elementRatio) {
-        renderedHeight = rect.width / mediaRatio;
-        offsetY = (rect.height - renderedHeight) / 2;
-      } else {
-        renderedWidth = rect.height * mediaRatio;
-        offsetX = (rect.width - renderedWidth) / 2;
-      }
-
-      const contentLeft = rect.left + offsetX;
-      const contentTop = rect.top + offsetY;
       if (
         clientX < contentLeft ||
-        clientX > contentLeft + renderedWidth ||
+        clientX > contentLeft + contentWidth ||
         clientY < contentTop ||
-        clientY > contentTop + renderedHeight
+        clientY > contentTop + contentHeight
       ) {
         return null;
       }
 
-      const x = (clientX - contentLeft) / renderedWidth;
-      const y = (clientY - contentTop) / renderedHeight;
+      const x = (clientX - contentLeft) / contentWidth;
+      const y = (clientY - contentTop) / contentHeight;
 
       return { x, y };
+    }
+
+    function getEffectiveFrameContent(mediaSize: MediaSize): FrameContent {
+      return (
+        (inputRegion && getConfiguredFrameContent(inputRegion, mediaSize)) ||
+        fullFrameContent(mediaSize)
+      );
     }
 
     function queueMouseMove(x: number, y: number) {
@@ -505,7 +531,7 @@ export const Absolute = () => {
         clearTimeout(longPressTimerRef.current);
       }
     };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }, [inputRegion, resolution, scrollDirection, scrollInterval]);
 
   // disable default events
   function disableEvent(event: Event) {
@@ -515,19 +541,3 @@ export const Absolute = () => {
 
   return <></>;
 };
-
-function getMediaSize(screen: Element) {
-  if (screen instanceof HTMLVideoElement && screen.videoWidth > 0 && screen.videoHeight > 0) {
-    return { width: screen.videoWidth, height: screen.videoHeight };
-  }
-
-  if (screen instanceof HTMLImageElement && screen.naturalWidth > 0 && screen.naturalHeight > 0) {
-    return { width: screen.naturalWidth, height: screen.naturalHeight };
-  }
-
-  if (screen instanceof HTMLCanvasElement && screen.width > 0 && screen.height > 0) {
-    return { width: screen.width, height: screen.height };
-  }
-
-  return null;
-}

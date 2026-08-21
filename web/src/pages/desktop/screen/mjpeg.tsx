@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 
 import { stopFrameDetect } from '@/api/stream.ts';
 import { getFrameDetect } from '@/lib/localstorage.ts';
-import * as storage from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom, videoScaleAtom } from '@/jotai/screen.ts';
+import { resolutionAtom } from '@/jotai/screen.ts';
+
+import { ScreenViewport } from './viewport.tsx';
 
 export const Mjpeg = () => {
   const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
-  const [videoScale, setVideoScale] = useAtom(videoScaleAtom);
   const [hasError, setHasError] = useState(false);
   const [streamNonce, setStreamNonce] = useState(0);
   const streamURL = `${getBaseUrl('http')}/api/stream/mjpeg`;
@@ -28,30 +28,18 @@ export const Mjpeg = () => {
     setStreamNonce((current) => current + 1);
   }, [resolution]);
 
-  useEffect(() => {
-    const scale = storage.getVideoScale();
-    if (scale) {
-      setVideoScale(scale);
-    }
-  }, [setVideoScale]);
-
   return (
-    <div className="flex h-full min-h-0 w-full min-w-0 items-center justify-center overflow-hidden bg-black">
+    <ScreenViewport>
       <img
         id="screen"
-        className={clsx('block select-none touch-none', mouseStyle)}
+        className={clsx('block touch-none select-none', mouseStyle)}
         style={{
-          transform: `scale(${videoScale})`,
-          transformOrigin: 'center',
-          width: '100%',
-          height: '100%',
-          objectFit: 'contain',
           visibility: hasError ? 'hidden' : 'visible'
         }}
         src={streamSrc}
         onError={() => setHasError(true)}
         alt="screen"
       />
-    </div>
+    </ScreenViewport>
   );
 };
