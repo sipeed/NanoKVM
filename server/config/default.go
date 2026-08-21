@@ -30,6 +30,7 @@ var defaultConfig = &Config{
 	Security: Security{
 		LoginLockoutDuration: 0,
 		LoginMaxFailures:     5,
+		TrustedProxies:       []string{"127.0.0.1/32", "::1/128"},
 	},
 }
 
@@ -49,6 +50,12 @@ func checkDefaultValue() {
 
 	if instance.Authentication == "" {
 		instance.Authentication = "enable"
+	}
+
+	// Preserve loopback reverse-proxy support for configurations written by
+	// older versions, without trusting an entire private network by default.
+	if instance.Security.TrustedProxies == nil {
+		instance.Security.TrustedProxies = []string{"127.0.0.1/32", "::1/128"}
 	}
 
 	instance.Hardware = getHardware()

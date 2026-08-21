@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/auth.ts';
 import { User, UserRole } from '@/api/auth.ts';
+import { notifyAuthExpired } from '@/lib/auth-events.ts';
 import { encrypt } from '@/lib/encrypt.ts';
 
 type CreateValues = {
@@ -17,17 +18,23 @@ type PasswordValues = {
   password: string;
 };
 
+type UsernameValues = {
+  username: string;
+};
+
 export const Users = () => {
   const { t } = useTranslation();
   const { account } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
   const [createForm] = Form.useForm<CreateValues>();
   const [passwordForm] = Form.useForm<PasswordValues>();
+  const [usernameForm] = Form.useForm<UsernameValues>();
 
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [passwordUser, setPasswordUser] = useState<string | null>(null);
+  const [usernameUser, setUsernameUser] = useState<User | null>(null);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -85,6 +92,31 @@ export const Users = () => {
     }
   }
 
+  async function renameUser(values: UsernameValues) {
+    if (!usernameUser) return;
+    if (values.username === usernameUser.username) {
+      setUsernameUser(null);
+      usernameForm.resetFields();
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const rsp = await api.updateUser(usernameUser.username, { username: values.username });
+      if (rsp.code !== 0) throw new Error(rsp.msg);
+      setUsernameUser(null);
+      usernameForm.resetFields();
+      messageApi.success(t('settings.account.users.usernameUpdated'));
+      if (usernameUser.username === account.username) {
+        notifyAuthExpired();
+        return;
+      }
+      await loadUsers();
+    } catch {
+      messageApi.error(t('settings.account.users.saveFailed'));
+      setIsLoading(false);
+    }
+  }
+
   async function deleteUser(username: string) {
     setIsLoading(true);
     try {
@@ -128,6 +160,7 @@ export const Users = () => {
         {users.map((user) => {
           const isSelf = user.username === account.username;
           const isProtected = isSelf || user.systemAccount;
+          const canRename = !user.systemAccount || isSelf;
           return (
             <div
               key={user.username}
@@ -160,6 +193,16 @@ export const Users = () => {
               />
               <Button
                 size="small"
+                disabled={isLoading || !canRename}
+                onClick={() => {
+                  usernameForm.setFieldsValue({ username: user.username });
+                  setUsernameUser(user);
+                }}
+              >
+                {t('settings.account.users.rename')}
+              </Button>
+              <Button
+                size="small"
                 disabled={isLoading || isProtected}
                 onClick={() => setPasswordUser(user.username)}
               >
@@ -180,6 +223,30 @@ export const Users = () => {
           );
         })}
       </div>
+
+      <Modal
+        title={t('settings.account.users.rename')}
+        open={!!usernameUser}
+        footer={null}
+        destroyOnHidden
+        onCancel={() => setUsernameUser(null)}
+      >
+        <Form<UsernameValues> form={usernameForm} layout="vertical" onFinish={renameUser}>
+          <Form.Item
+            name="username"
+            label={t('auth.placeholderUsername')}
+            rules={[
+              { required: true, message: t('auth.noEmptyUsername') },
+              { pattern: /^[A-Za-z0-9][A-Za-z0-9_.-]{0,31}$/, message: t('auth.illegalUsername') }
+            ]}
+          >
+            <Input autoComplete="username" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
+            {t('auth.ok')}
+          </Button>
+        </Form>
+      </Modal>
 
       <Modal
         title={t('settings.account.users.create')}
