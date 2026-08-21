@@ -1,3 +1,4 @@
+import { ControlRegionMode, InputRegion, OriginalResolution } from '@/types';
 import { http } from '@/lib/http.ts';
 
 // get NanoKVM information
@@ -31,6 +32,51 @@ export function updateScreen(type: string, value: number) {
     value
   };
   return http.post('/api/vm/screen', data);
+}
+
+// get the device-level absolute mouse input region
+export function getInputRegion() {
+  return http.get('/api/vm/input-region');
+}
+
+export function getInputResolution() {
+  return http.get('/api/vm/input-resolution');
+}
+
+// save the device-level absolute mouse input region
+export function setInputRegion(region: InputRegion) {
+  return http.post('/api/vm/input-region', { mode: 'manual', ...region });
+}
+
+export function setInputRegionConfig(region: InputRegion, selectedResolution: string) {
+  return http.post('/api/vm/input-region', {
+    mode: 'manual',
+    ...region,
+    selectedResolution
+  });
+}
+
+export function setControlRegionMode(mode: ControlRegionMode) {
+  return http.post('/api/vm/input-region', { mode });
+}
+
+export function setOriginalResolutions(mode: ControlRegionMode, resolutions: OriginalResolution[]) {
+  return http.post('/api/vm/input-region', { mode, resolutions });
+}
+
+export function setOriginalResolutionConfig(
+  resolutions: OriginalResolution[],
+  selectedResolution: string
+) {
+  return http.post('/api/vm/input-region', {
+    mode: 'manual',
+    resolutions,
+    selectedResolution
+  });
+}
+
+export function setSelectedOriginalResolution(selectedResolution: string) {
+  return http.post('/api/vm/input-region', { mode: 'manual', selectedResolution });
 }
 
 // get memory limit

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
 import { Divider } from 'antd';
 import clsx from 'clsx';
@@ -6,7 +6,11 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
-import { keyboardLedStatusVisibleAtom, menuDisabledItemsAtom } from '@/jotai/settings.ts';
+import {
+  keyboardLedStatusVisibleAtom,
+  menuCloseSignalAtom,
+  menuDisabledItemsAtom
+} from '@/jotai/settings.ts';
 import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
 import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 
@@ -31,6 +35,7 @@ export const Menu = () => {
   const isAdmin = account.role === 'admin';
 
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
+  const menuCloseSignal = useAtomValue(menuCloseSignalAtom);
   const isKeyboardLedStatusVisible = useAtomValue(keyboardLedStatusVisibleAtom);
 
   const {
@@ -43,6 +48,12 @@ export const Menu = () => {
   } = useMenuVisibility();
 
   const menuBounds = useMenuBounds(nodeRef, isMenuExpanded);
+
+  useEffect(() => {
+    if (menuCloseSignal > 0) {
+      setIsMenuExpanded(false);
+    }
+  }, [menuCloseSignal, setIsMenuExpanded]);
 
   function onDragStop(_e: DraggableEvent, data: DraggableData) {
     if (data.x === 0 && data.y === 0) return;

@@ -67,6 +67,37 @@ const de = {
       videoDirectTips:
         'Aktivieren Sie HTTPS unter „Einstellungen > Gerät“, um diesen Modus zu verwenden',
       resolution: 'Auflösung',
+      controlRegion: {
+        title: 'Mauskalibrierung',
+        description:
+          'Verwenden Sie diese Einstellung, wenn das gesteuerte Gerät eine andere Auflösung als 16:9 verwendet und der Mauszeiger horizontal oder vertikal versetzt ist.',
+        off: 'Aus',
+        auto: 'Automatisch',
+        autoWarning:
+          'Die Kalibrierung kann fehlschlagen, wenn die Benutzeranwendung einen vollständig schwarzen Hintergrund hat.',
+        manual: 'Manuell',
+        originalResolution: 'Originalauflösung',
+        selectResolution: 'Originalauflösung auswählen',
+        useSelectedArea: 'Auflösung des ausgewählten Bereichs verwenden',
+        addResolution: 'Benutzerdefinierte Auflösung hinzufügen',
+        add: 'Hinzufügen',
+        duplicateResolution: 'Diese Auflösung ist bereits vorhanden.',
+        width: 'Breite',
+        height: 'Höhe',
+        apply: 'Berechnen und anwenden',
+        invalidResolution:
+          'Geben Sie eine gültige Originalauflösung ein, sobald das Video bereit ist.',
+        select: 'Bereich auswählen',
+        clear: 'Automatische Erkennung wiederherstellen',
+        saveFailed: 'Der Eingabebereich konnte nicht gespeichert werden.',
+        tooSmall: 'Der ausgewählte Bereich ist zu klein.',
+        previewUnavailable: 'Vorschau nicht verfügbar',
+        clearConfirm: 'Automatische Erkennung schwarzer Ränder wiederherstellen?',
+        dragHint: 'Ziehen Sie, um den Remote-Desktop-Bereich auszuwählen',
+        finish: 'Fertig',
+        confirm: 'Bestätigen',
+        cancel: 'Abbrechen'
+      },
       auto: 'Automatisch',
       autoTips:
         'Bildverzerrungen oder ein versetzter Mauszeiger können bei bestimmten Auflösungen auftreten. Versuchen Sie, die Auflösung des entfernten Hosts anzupassen oder den automatischen Modus zu deaktivieren.',

@@ -1,6 +1,6 @@
 import { atom } from 'jotai';
 
-import { Resolution } from '@/types';
+import { ControlRegionMode, InputRegion, Resolution } from '@/types';
 
 export const isHdmiEnabledAtom = atom(true);
 
@@ -14,3 +14,14 @@ export const videoScaleAtom = atom<number>(1.0);
 
 // browser screen resolution
 export const resolutionAtom = atom<Resolution | null>(null);
+
+// currently effective absolute mouse input region
+export const inputRegionAtom = atom<InputRegion | null>(null);
+export const manualInputRegionAtom = atom<InputRegion | null>(null);
+export const selectedOriginalResolutionAtom = atom<string>('');
+
+// device-level control region mode; disabled by default
+export const controlRegionModeAtom = atom<ControlRegionMode>('off');
+
+// show the live input-region selection overlay
+export const inputRegionSelectingAtom = atom(false);

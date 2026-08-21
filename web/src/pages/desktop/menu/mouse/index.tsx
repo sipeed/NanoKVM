@@ -13,6 +13,7 @@ import {
 } from '@/jotai/mouse';
 import { MenuItem } from '@/components/menu-item.tsx';
 
+import { OriginalResolution } from '../screen/original-resolution.tsx';
 import { Cursor } from './cursor.tsx';
 import { Direction } from './direction.tsx';
 import { HidMode } from './hid-mode.tsx';
@@ -58,6 +59,7 @@ export const Mouse = () => {
       <Speed />
       <Divider style={{ margin: '10px 0' }} />
 
+      <OriginalResolution />
       <HidMode />
       <ResetHid />
     </div>

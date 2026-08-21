@@ -313,6 +313,8 @@ function renderFrame(frame: VideoFrame) {
       canvas.width = frame.displayWidth;
       canvas.height = frame.displayHeight;
     }
+    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+
     if (reportedFrameWidth !== frame.displayWidth || reportedFrameHeight !== frame.displayHeight) {
       reportedFrameWidth = frame.displayWidth;
       reportedFrameHeight = frame.displayHeight;
@@ -322,8 +324,6 @@ function renderFrame(frame: VideoFrame) {
         height: reportedFrameHeight
       });
     }
-
-    ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
   } finally {
     frame.close();
   }

@@ -66,6 +66,36 @@ const it = {
       videoDirectTips:
         'Abilita HTTPS in "Impostazioni > Dispositivo" per utilizzare questa modalità',
       resolution: 'Risoluzione',
+      controlRegion: {
+        title: 'Calibrazione del mouse',
+        description:
+          'Utilizza questa impostazione quando il dispositivo controllato usa una risoluzione diversa da 16:9 e il cursore risulta disallineato orizzontalmente o verticalmente.',
+        off: 'Disattivata',
+        auto: 'Automatica',
+        autoWarning:
+          "La calibrazione potrebbe non riuscire se l'applicazione utente ha uno sfondo completamente nero.",
+        manual: 'Manuale',
+        originalResolution: 'Risoluzione originale',
+        selectResolution: 'Seleziona la risoluzione originale',
+        useSelectedArea: "Usa la risoluzione dell'area selezionata",
+        addResolution: 'Aggiungi una risoluzione personalizzata',
+        add: 'Aggiungi',
+        duplicateResolution: 'Questa risoluzione esiste già.',
+        width: 'Larghezza',
+        height: 'Altezza',
+        apply: 'Calcola e applica',
+        invalidResolution: 'Inserisci una risoluzione originale valida quando il video è pronto.',
+        select: 'Seleziona area',
+        clear: 'Ripristina il rilevamento automatico',
+        saveFailed: "Impossibile salvare l'area di input.",
+        tooSmall: "L'area selezionata è troppo piccola.",
+        previewUnavailable: 'Anteprima non disponibile',
+        clearConfirm: 'Ripristinare il rilevamento automatico dei bordi neri?',
+        dragHint: "Trascina per selezionare l'area del desktop remoto",
+        finish: 'Fine',
+        confirm: 'Conferma',
+        cancel: 'Annulla'
+      },
       auto: 'Automatico',
       autoTips:
         'Potrebbero verificarsi tearing dello schermo o spostamento del mouse a risoluzioni specifiche. Considera di regolare la risoluzione del dispositivo remoto o disabilitare la modalità automatica.',

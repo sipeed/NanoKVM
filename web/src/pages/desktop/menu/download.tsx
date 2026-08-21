@@ -60,7 +60,8 @@ export const DownloadImage = () => {
 
       // Keep monitoring an active remote download after the popover closes so
       // completion can still refresh an already-open image list.
-      if (!remoteDownloadActive.current) {
+      const transferActive = remoteDownloadActive.current || fileUploadActive.current;
+      if (!transferActive) {
         setInput('');
         setSha256sum('');
         setStatus('');

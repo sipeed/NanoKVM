@@ -4,28 +4,17 @@ import { useAtomValue } from 'jotai';
 import { MouseReportAbsolute } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom } from '@/jotai/screen.ts';
+import { inputRegionAtom, resolutionAtom } from '@/jotai/screen.ts';
 
+import {
+  FrameContent,
+  fullFrameContent,
+  getConfiguredFrameContent,
+  getMediaSize,
+  getRenderedMediaRect,
+  MediaSize
+} from '../screen/geometry.ts';
 import { MouseAbsoluteEvent } from './types.ts';
-
-type MediaSize = {
-  width: number;
-  height: number;
-};
-
-type FrameContent = {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-};
-
-const fullFrameContent = (mediaSize: MediaSize): FrameContent => ({
-  left: 0,
-  top: 0,
-  width: mediaSize.width,
-  height: mediaSize.height
-});
 
 enum MouseButton {
   Left = 0,
@@ -37,6 +26,7 @@ enum MouseButton {
 
 export const Absolute = () => {
   const resolution = useAtomValue(resolutionAtom);
+  const inputRegion = useAtomValue(inputRegionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
 
@@ -71,7 +61,6 @@ export const Absolute = () => {
     const target = screen;
     const mouse = mouseRef.current;
     const pressedMouseButtons = new Set<number>();
-    let frameContentCache: { key: string; checkedAt: number; content: FrameContent } | null = null;
     let pendingMove: { x: number; y: number } | null = null;
     let moveFrame: number | null = null;
 
@@ -87,9 +76,6 @@ export const Absolute = () => {
     target.addEventListener('touchmove', handleTouchMove, touchOptions);
     target.addEventListener('touchend', handleTouchEnd, touchOptions);
     target.addEventListener('touchcancel', handleTouchCancel, touchOptions);
-    target.addEventListener('load', invalidateFrameContent);
-    target.addEventListener('loadedmetadata', invalidateFrameContent);
-    target.addEventListener('canplay', invalidateFrameContent);
 
     // Mouse event handler
     function handleMouseEvent(event: MouseAbsoluteEvent) {
@@ -415,42 +401,46 @@ export const Absolute = () => {
     }
 
     function getCorrectedCoords(clientX: number, clientY: number): { x: number; y: number } | null {
+      const viewport = target.parentElement;
+      if (viewport?.id === 'screen-viewport' && viewport.dataset.cropped === 'true') {
+        const viewportRect = viewport.getBoundingClientRect();
+        if (
+          viewportRect.width <= 0 ||
+          viewportRect.height <= 0 ||
+          clientX < viewportRect.left ||
+          clientX > viewportRect.right ||
+          clientY < viewportRect.top ||
+          clientY > viewportRect.bottom
+        ) {
+          return null;
+        }
+
+        return {
+          x: (clientX - viewportRect.left) / viewportRect.width,
+          y: (clientY - viewportRect.top) / viewportRect.height
+        };
+      }
+
       const rect = target.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) {
         return null;
       }
 
       const mediaSize =
-        resolution && resolution.width > 0 && resolution.height > 0
-          ? resolution
-          : getMediaSize(target);
+        getMediaSize(target) ||
+        (resolution && resolution.width > 0 && resolution.height > 0 ? resolution : null);
       if (!mediaSize) {
         const x = (clientX - rect.left) / rect.width;
         const y = (clientY - rect.top) / rect.height;
         return { x, y };
       }
 
-      const mediaRatio = mediaSize.width / mediaSize.height;
-      const elementRatio = rect.width / rect.height;
-
-      let renderedWidth = rect.width;
-      let renderedHeight = rect.height;
-      let offsetX = 0;
-      let offsetY = 0;
-
-      if (mediaRatio > elementRatio) {
-        renderedHeight = rect.width / mediaRatio;
-        offsetY = (rect.height - renderedHeight) / 2;
-      } else {
-        renderedWidth = rect.height * mediaRatio;
-        offsetX = (rect.width - renderedWidth) / 2;
-      }
-
-      const frameContent = getFrameContent(mediaSize);
-      const frameScaleX = renderedWidth / mediaSize.width;
-      const frameScaleY = renderedHeight / mediaSize.height;
-      const contentLeft = rect.left + offsetX + frameContent.left * frameScaleX;
-      const contentTop = rect.top + offsetY + frameContent.top * frameScaleY;
+      const renderedMediaRect = getRenderedMediaRect(rect, mediaSize);
+      const frameContent = getEffectiveFrameContent(mediaSize);
+      const frameScaleX = renderedMediaRect.width / mediaSize.width;
+      const frameScaleY = renderedMediaRect.height / mediaSize.height;
+      const contentLeft = renderedMediaRect.left + frameContent.left * frameScaleX;
+      const contentTop = renderedMediaRect.top + frameContent.top * frameScaleY;
       const contentWidth = frameContent.width * frameScaleX;
       const contentHeight = frameContent.height * frameScaleY;
 
@@ -469,20 +459,11 @@ export const Absolute = () => {
       return { x, y };
     }
 
-    function invalidateFrameContent() {
-      frameContentCache = null;
-    }
-
-    function getFrameContent(mediaSize: MediaSize): FrameContent {
-      const key = `${mediaSize.width}x${mediaSize.height}`;
-      const now = performance.now();
-      if (frameContentCache?.key === key && now - frameContentCache.checkedAt < 1000) {
-        return frameContentCache.content;
-      }
-
-      const content = detectFrameContent(target, mediaSize);
-      frameContentCache = { key, checkedAt: now, content };
-      return content;
+    function getEffectiveFrameContent(mediaSize: MediaSize): FrameContent {
+      return (
+        (inputRegion && getConfiguredFrameContent(inputRegion, mediaSize)) ||
+        fullFrameContent(mediaSize)
+      );
     }
 
     function queueMouseMove(x: number, y: number) {
@@ -545,15 +526,12 @@ export const Absolute = () => {
       target.removeEventListener('touchmove', handleTouchMove, touchOptions.capture);
       target.removeEventListener('touchend', handleTouchEnd, touchOptions.capture);
       target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
-      target.removeEventListener('load', invalidateFrameContent);
-      target.removeEventListener('loadedmetadata', invalidateFrameContent);
-      target.removeEventListener('canplay', invalidateFrameContent);
 
       if (longPressTimerRef.current) {
         clearTimeout(longPressTimerRef.current);
       }
     };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }, [inputRegion, resolution, scrollDirection, scrollInterval]);
 
   // disable default events
   function disableEvent(event: Event) {
@@ -563,118 +541,3 @@ export const Absolute = () => {
 
   return <></>;
 };
-
-function detectFrameContent(screen: Element, mediaSize: MediaSize): FrameContent {
-  // Frame metadata includes letterbox pixels; infer stable side borders until the capture pipeline exposes an active rect.
-  // ponytail: replace pixel inference with active-content metadata when available.
-  const sampleScale = Math.min(1, 640 / mediaSize.width, 360 / mediaSize.height);
-  const sampleWidth = Math.max(1, Math.round(mediaSize.width * sampleScale));
-  const sampleHeight = Math.max(1, Math.round(mediaSize.height * sampleScale));
-  const canvas = document.createElement('canvas');
-  canvas.width = sampleWidth;
-  canvas.height = sampleHeight;
-
-  const context = canvas.getContext('2d', { willReadFrequently: true });
-  if (!context || !drawMediaFrame(context, screen, sampleWidth, sampleHeight)) {
-    return fullFrameContent(mediaSize);
-  }
-
-  try {
-    const pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
-    const left = findBorderInset(pixels, sampleWidth, sampleHeight, true);
-    const right = findBorderInset(pixels, sampleWidth, sampleHeight, false);
-    const minHorizontalBorder = Math.max(4, Math.round(sampleWidth * 0.02));
-    const horizontalBorder =
-      left >= minHorizontalBorder &&
-      right >= minHorizontalBorder &&
-      left + right < sampleWidth * 0.4 &&
-      Math.abs(left - right) <= Math.max(4, Math.round(sampleWidth * 0.05));
-    const frameLeft = horizontalBorder ? (left / sampleWidth) * mediaSize.width : 0;
-    const frameRight = horizontalBorder ? (right / sampleWidth) * mediaSize.width : 0;
-
-    return {
-      left: frameLeft,
-      top: 0,
-      width: mediaSize.width - frameLeft - frameRight,
-      height: mediaSize.height
-    };
-  } catch {
-    return fullFrameContent(mediaSize);
-  }
-}
-
-function drawMediaFrame(
-  context: CanvasRenderingContext2D,
-  screen: Element,
-  width: number,
-  height: number
-) {
-  if (
-    screen instanceof HTMLVideoElement ||
-    screen instanceof HTMLImageElement ||
-    screen instanceof HTMLCanvasElement
-  ) {
-    try {
-      context.drawImage(screen, 0, 0, width, height);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  return false;
-}
-
-function findBorderInset(
-  pixels: Uint8ClampedArray,
-  width: number,
-  height: number,
-  fromStart: boolean
-) {
-  const lines = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map((ratio) =>
-    Math.round((height - 1) * ratio)
-  );
-  const limit = Math.floor(width * 0.45);
-  let inset = 0;
-
-  for (let offset = 0; offset < limit; offset++) {
-    const position = fromStart ? offset : width - offset - 1;
-    const samples = lines.map((line) => getPixel(pixels, width, position, line));
-    if (!samples.every(isBlackPixel)) {
-      break;
-    }
-
-    inset = offset + 1;
-  }
-
-  return inset;
-}
-
-function getPixel(pixels: Uint8ClampedArray, width: number, x: number, y: number) {
-  const offset = (y * width + x) * 4;
-  return [pixels[offset], pixels[offset + 1], pixels[offset + 2]];
-}
-
-function isBlackPixel(pixel: number[]) {
-  return pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0;
-}
-
-function getMediaSize(screen: Element): MediaSize | null {
-  if (screen instanceof HTMLVideoElement && screen.videoWidth > 0 && screen.videoHeight > 0) {
-    return { width: screen.videoWidth, height: screen.videoHeight };
-  }
-
-  if (screen instanceof HTMLImageElement && screen.naturalWidth > 0 && screen.naturalHeight > 0) {
-    return { width: screen.naturalWidth, height: screen.naturalHeight };
-  }
-
-  if (screen instanceof HTMLCanvasElement) {
-    const width = Number(screen.dataset.mediaWidth);
-    const height = Number(screen.dataset.mediaHeight);
-    if (width > 0 && height > 0) {
-      return { width, height };
-    }
-  }
-
-  return null;
-}
