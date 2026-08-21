@@ -64,6 +64,70 @@ func TestCheckTokenUsesLiveRoleAndVersion(t *testing.T) {
 	}
 }
 
+func TestCheckTokenAcceptsBearerAndRejectsInvalidBearerOverCookie(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	store := authn.NewStore(filepath.Join(t.TempDir(), "pwd"))
+	admin, ok, err := store.Authenticate("admin", "admin")
+	if err != nil || !ok {
+		t.Fatalf("default login: ok=%v err=%v", ok, err)
+	}
+	restore := useTestAuthStore(t, store)
+	defer restore()
+	token, err := GenerateJWT(admin.Username, admin.TokenVersion)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	router := gin.New()
+	router.GET("/account", CheckToken(), func(c *gin.Context) { c.Status(http.StatusNoContent) })
+
+	request := httptest.NewRequest(http.MethodGet, "/account", nil)
+	request.Header.Set("Authorization", "Bearer "+token)
+	if status := serve(router, request); status != http.StatusNoContent {
+		t.Fatalf("Bearer authentication status = %d, want %d", status, http.StatusNoContent)
+	}
+
+	// Authorization is deliberate: malformed credentials must not silently use
+	// an unrelated ambient browser cookie.
+	request = httptest.NewRequest(http.MethodGet, "/account", nil)
+	request.Header.Set("Authorization", "Bearer invalid")
+	request.AddCookie(&http.Cookie{Name: CookieName, Value: token})
+	if status := serve(router, request); status != http.StatusUnauthorized {
+		t.Fatalf("invalid Bearer with valid cookie status = %d, want %d", status, http.StatusUnauthorized)
+	}
+
+	for _, authorization := range []string{"Basic " + token, "Bearer", "Bearer ", "Bearer " + token + " extra"} {
+		request = httptest.NewRequest(http.MethodGet, "/account", nil)
+		request.Header.Set("Authorization", authorization)
+		if status := serve(router, request); status != http.StatusUnauthorized {
+			t.Fatalf("malformed Authorization %q status = %d, want %d", authorization, status, http.StatusUnauthorized)
+		}
+	}
+}
+
+func TestCheckTokenAuthenticationDisabledIgnoresCredentials(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	conf := config.GetInstance()
+	originalAuthentication := conf.Authentication
+	conf.Authentication = "disable"
+	defer func() { conf.Authentication = originalAuthentication }()
+
+	router := gin.New()
+	router.GET("/account", CheckToken(), func(c *gin.Context) {
+		principal, ok := CurrentPrincipal(c)
+		if !ok || principal.Username != "admin" || principal.Role != authn.RoleAdmin {
+			c.Status(http.StatusInternalServerError)
+			return
+		}
+		c.Status(http.StatusNoContent)
+	})
+	request := httptest.NewRequest(http.MethodGet, "/account", nil)
+	request.Header.Set("Authorization", "Bearer invalid")
+	if status := serve(router, request); status != http.StatusNoContent {
+		t.Fatalf("disabled authentication status = %d, want %d", status, http.StatusNoContent)
+	}
+}
+
 func TestParseJWTRejectsOtherHMACMethods(t *testing.T) {
 	conf := config.GetInstance()
 	originalSecret := conf.JWT.SecretKey
@@ -178,6 +242,15 @@ func TestWatchWebSocketClosesRevokedConnection(t *testing.T) {
 }
 
 func TestCheckWebSocketOrigin(t *testing.T) {
+	conf := config.GetInstance()
+	originalTrustedProxies := conf.Security.TrustedProxies
+	originalAllowedOrigins := conf.Security.AllowedOrigins
+	defer func() {
+		conf.Security.TrustedProxies = originalTrustedProxies
+		conf.Security.AllowedOrigins = originalAllowedOrigins
+	}()
+	conf.Security.TrustedProxies = nil
+	conf.Security.AllowedOrigins = nil
 	tests := []struct {
 		origin string
 		host   string
@@ -188,6 +261,7 @@ func TestCheckWebSocketOrigin(t *testing.T) {
 		{"http://KVM.local", "kvm.local", true},
 		{"http://kvm.local:8080", "kvm.local:8080", true},
 		{"http://kvm.local:8081", "kvm.local:8080", false},
+		{"https://kvm.local:80", "kvm.local:80", false},
 		{"http://evil.example", "kvm.local", false},
 	}
 	for _, test := range tests {
@@ -202,10 +276,118 @@ func TestCheckWebSocketOrigin(t *testing.T) {
 	}
 }
 
+func TestCheckWebSocketOriginTrustedProxy(t *testing.T) {
+	conf := config.GetInstance()
+	originalTrustedProxies := conf.Security.TrustedProxies
+	originalAllowedOrigins := conf.Security.AllowedOrigins
+	defer func() {
+		conf.Security.TrustedProxies = originalTrustedProxies
+		conf.Security.AllowedOrigins = originalAllowedOrigins
+	}()
+	conf.Security.TrustedProxies = []string{"10.0.0.0/8"}
+	conf.Security.AllowedOrigins = nil
+
+	request := httptest.NewRequest(http.MethodGet, "http://upstream:8080/api/ws", nil)
+	request.Host = "upstream:8080"
+	request.RemoteAddr = "10.1.2.3:4567"
+	request.Header.Set("Origin", "https://kvm.example")
+	request.Header.Set("X-Forwarded-Host", "kvm.example")
+	request.Header.Set("X-Forwarded-Proto", "https")
+	if !CheckWebSocketOrigin(request) {
+		t.Fatal("trusted proxy origin was rejected")
+	}
+
+	request.RemoteAddr = "192.0.2.10:4567"
+	if CheckWebSocketOrigin(request) {
+		t.Fatal("untrusted peer was allowed to spoof forwarded headers")
+	}
+}
+
+func TestCheckWebSocketOriginTrustedIPv6ProxyRejectsMultipleForwardedValues(t *testing.T) {
+	conf := config.GetInstance()
+	originalTrustedProxies := conf.Security.TrustedProxies
+	originalAllowedOrigins := conf.Security.AllowedOrigins
+	defer func() {
+		conf.Security.TrustedProxies = originalTrustedProxies
+		conf.Security.AllowedOrigins = originalAllowedOrigins
+	}()
+	conf.Security.TrustedProxies = []string{"::1/128"}
+	conf.Security.AllowedOrigins = nil
+
+	request := httptest.NewRequest(http.MethodGet, "http://upstream:8080/api/ws", nil)
+	request.Host = "upstream:8080"
+	request.RemoteAddr = "[::1]:4567"
+	request.Header.Set("Origin", "https://[2001:db8::1]:8443")
+	request.Header.Set("X-Forwarded-Host", "[2001:db8::1]:8443")
+	request.Header.Set("X-Forwarded-Proto", "https")
+	if !CheckWebSocketOrigin(request) {
+		t.Fatal("trusted IPv6 proxy origin with a non-default port was rejected")
+	}
+
+	// Multiple values are ambiguous at this hop. The proxy must overwrite
+	// these headers, not append client-provided values.
+	request.Header.Set("X-Forwarded-Host", "[2001:db8::1]:8443, attacker.example")
+	request.Header.Set("X-Forwarded-Proto", "https, http")
+	if CheckWebSocketOrigin(request) {
+		t.Fatal("multiple forwarded values were accepted")
+	}
+}
+
+func TestCheckWebSocketOriginAllowedOrigin(t *testing.T) {
+	conf := config.GetInstance()
+	originalTrustedProxies := conf.Security.TrustedProxies
+	originalAllowedOrigins := conf.Security.AllowedOrigins
+	defer func() {
+		conf.Security.TrustedProxies = originalTrustedProxies
+		conf.Security.AllowedOrigins = originalAllowedOrigins
+	}()
+	conf.Security.TrustedProxies = nil
+	conf.Security.AllowedOrigins = []string{"https://kvm.example"}
+	request := httptest.NewRequest(http.MethodGet, "http://upstream:8080/api/ws", nil)
+	request.Host = "upstream:8080"
+	request.Header.Set("Origin", "https://kvm.example")
+	if !CheckWebSocketOrigin(request) {
+		t.Fatal("configured origin was rejected")
+	}
+	request.Header.Set("Origin", "https://evil.example")
+	if CheckWebSocketOrigin(request) {
+		t.Fatal("unconfigured origin was accepted")
+	}
+}
+
+func TestCheckWebSocketOriginAllowedOriginRequiresExactPort(t *testing.T) {
+	conf := config.GetInstance()
+	originalTrustedProxies := conf.Security.TrustedProxies
+	originalAllowedOrigins := conf.Security.AllowedOrigins
+	defer func() {
+		conf.Security.TrustedProxies = originalTrustedProxies
+		conf.Security.AllowedOrigins = originalAllowedOrigins
+	}()
+	conf.Security.TrustedProxies = nil
+	conf.Security.AllowedOrigins = []string{"https://kvm.example:8443"}
+
+	request := httptest.NewRequest(http.MethodGet, "http://upstream:8080/api/ws", nil)
+	request.Host = "upstream:8080"
+	request.Header.Set("Origin", "https://kvm.example:8443")
+	if !CheckWebSocketOrigin(request) {
+		t.Fatal("configured non-default-port origin was rejected")
+	}
+	request.Header.Set("Origin", "https://kvm.example")
+	if CheckWebSocketOrigin(request) {
+		t.Fatal("allowed origin incorrectly matched a different port")
+	}
+}
+
 func requestWithToken(handler http.Handler, path, token string) int {
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, path, nil)
 	request.AddCookie(&http.Cookie{Name: CookieName, Value: token})
+	handler.ServeHTTP(recorder, request)
+	return recorder.Code
+}
+
+func serve(handler http.Handler, request *http.Request) int {
+	recorder := httptest.NewRecorder()
 	handler.ServeHTTP(recorder, request)
 	return recorder.Code
 }

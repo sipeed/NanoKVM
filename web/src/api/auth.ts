@@ -44,7 +44,10 @@ export function createUser(username: string, password: string, role: UserRole) {
   return http.post('/api/auth/users', { username, password, role });
 }
 
-export function updateUser(username: string, data: Partial<Pick<User, 'role' | 'enabled'>>) {
+export function updateUser(
+  username: string,
+  data: Partial<Pick<User, 'username' | 'role' | 'enabled'>>
+) {
   return http.request({
     method: 'put',
     url: `/api/auth/users/${encodeURIComponent(username)}`,

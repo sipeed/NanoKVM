@@ -1,3 +1,17 @@
+## Unreleased
+
+### Bug Fixes
+
+* Restored device-owner username changes in account management and revoked the affected user's existing sessions when an account is renamed
+* Fixed WebSocket origin validation behind correctly configured reverse proxies; trusted forwarded host and scheme headers are now limited to configured proxy IPs/CIDRs
+* Avoided regenerating the default account password hash for each request while the account file is absent
+
+### Compatibility and Migration
+
+* Browser logins at `POST /api/auth/login` continue to use an HttpOnly session cookie. Automation clients can opt in to the JWT response with `X-NanoKVM-Return-Token: true` and send it as `Authorization: Bearer <JWT>`; an invalid explicit Authorization header does not fall back to the cookie. Clients that formerly read `data.token` must add this header before upgrading. Login responses are marked `Cache-Control: no-store`.
+* Reverse-proxy deployments must use HTTP/1.1 for WebSockets and preserve the browser-visible `Host`, `X-Forwarded-Host`, `X-Forwarded-Proto`, and Upgrade/Connection headers. The final proxy hop must overwrite and sanitize forwarded headers (never append client values); configure that hop with `security.trustedProxies`. Migrate older `Host $proxy_host` configurations, especially when using a non-default public port. `security.allowedOrigins` accepts only explicit complete origins.
+* Clients changing their own password must use encrypted `currentPassword` and `password` fields at `/api/auth/password`. The legacy `{username, password}` request body is no longer accepted. User create/reset password fields use the same CryptoJS/OpenSSL-compatible, URL-encoded format; see `server/README.md` for runnable examples.
+
 ## 2.5.0 (2026-08-04)
 
 ### Features
