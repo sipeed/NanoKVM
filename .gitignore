@@ -32,6 +32,7 @@ support/sg2002/kvm_vision_test/CMakeLists.txt
 
 support/sg2002/additional/original
 kvmapp/server/dl_lib
+kvmapp/server/web
 kvmapp/kvm_system/kvm_system
 
 # Release packages assembled by scripts/package.sh
