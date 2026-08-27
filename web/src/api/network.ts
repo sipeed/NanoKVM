@@ -1,6 +1,15 @@
 import { http } from '@/lib/http.ts';
 
 export type DNSMode = 'manual' | 'dhcp';
+export type EthernetMode = 'dhcp' | 'static';
+
+export type EthernetConfig = {
+  mode: EthernetMode;
+  interface: string;
+  address: string;
+  subnetMask: number;
+  gateway: string;
+};
 
 // wake on lan
 export function wol(mac: string) {
@@ -78,4 +87,12 @@ export function getDNS() {
 
 export function setDNS(mode: DNSMode, servers: string[]) {
   return http.post('/api/network/dns', { mode, servers });
+}
+
+export function getEthernet() {
+  return http.get('/api/network/ethernet');
+}
+
+export function setEthernet(config: Omit<EthernetConfig, 'interface'>) {
+  return http.post('/api/network/ethernet', config);
 }

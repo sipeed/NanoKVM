@@ -461,6 +461,27 @@ const zh_tw = {
           description: '啟用 HTTPS 協議',
           tip: '啟用 HTTPS 可以提高安全性，但可能會增加傳輸延遲，特別是使用 MJPEG 格式傳輸時。'
         },
+        ethernet: {
+          title: '有線網路 IPv4',
+          description: '選擇 DHCP 或設定可在重新開機後保留的固定 IPv4 位址',
+          dhcp: 'DHCP',
+          static: '固定 IP',
+          ipv4: 'IPv4 設定',
+          dhcpDescription: 'IP 位址與閘道由 DHCP 自動取得',
+          staticDescription: '設定會立即套用，並在重新啟動後保留',
+          ipAddress: 'IP 位址',
+          addressPlaceholder: '192.168.10.32',
+          prefixLength: '子網路前綴長度',
+          gateway: '閘道',
+          gatewayPlaceholder: '192.168.10.1',
+          invalid: '請輸入有效的 IPv4 位址、子網路前綴長度與閘道',
+          save: '儲存',
+          unsaved: '有未儲存的變更',
+          savedStatic: '固定 IP 已儲存。請使用 {{address}} 重新連線。',
+          savedDhcp: '已啟用 DHCP。請使用路由器指派的位址重新連線。',
+          saveFailed: '儲存有線網路設定失敗',
+          loadFailed: '讀取有線網路設定失敗'
+        },
         dns: {
           title: 'DNS',
           description: '設定 NanoKVM 使用的 DNS 伺服器',
