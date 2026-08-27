@@ -157,11 +157,6 @@ func (s *SignalingHandler) handleVideoOffer(data string) error {
 		return err
 	}
 
-	if err := s.updateHeaderExtensionID(); err != nil {
-		log.Errorf("could not update header extension ID: %v", err)
-		return err
-	}
-
 	answerByte, err := json.Marshal(answer)
 	if err != nil {
 		log.Errorf("failed to marshal answer: %s", err)
@@ -169,30 +164,6 @@ func (s *SignalingHandler) handleVideoOffer(data string) error {
 	}
 
 	return s.client.WriteMessage("video-answer", string(answerByte))
-}
-
-// set extension ID
-func (s *SignalingHandler) updateHeaderExtensionID() error {
-	receivers := s.client.video.GetReceivers()
-	if len(receivers) == 0 {
-		return errors.New("no RTP receiver found for video")
-	}
-
-	params := receivers[0].GetParameters()
-	if len(params.HeaderExtensions) == 0 {
-		return errors.New("no header extensions found in negotiated parameters")
-	}
-
-	for _, ext := range params.HeaderExtensions {
-		if ext.URI == "http://www.webrtc.org/experiments/rtp-hdrext/playout-delay" {
-			s.client.track.playoutDelayExtensionID = uint8(ext.ID)
-			log.Debugf("found and set playout delay extension ID to: %d", ext.ID)
-			return nil
-		}
-	}
-
-	log.Warnf("no track extension found in negotiated parameters, use default value 5")
-	return nil
 }
 
 // handle video candidate

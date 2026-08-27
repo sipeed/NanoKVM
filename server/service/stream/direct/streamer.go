@@ -1,12 +1,10 @@
 package direct
 
 import (
-	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
 	"NanoKVM-Server/service/vm"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -87,17 +85,14 @@ func (s *Streamer) getClients() []*client {
 }
 
 func (s *Streamer) run() {
-	screen := common.GetScreen()
-	common.CheckScreen()
-	fps := screen.FPS
+	subscription := stream.SubscribeH264()
+	defer subscription.Close()
 
-	ticker := time.NewTicker(time.Second / time.Duration(fps))
-	defer ticker.Stop()
-
-	vision := common.GetKvmVision()
-	startTime := time.Now()
-
-	for range ticker.C {
+	for {
+		frame, ok := subscription.Next()
+		if !ok {
+			return
+		}
 		clients := s.getClients()
 		if len(clients) == 0 {
 			if s.stopIfIdle() {
@@ -107,28 +102,19 @@ func (s *Streamer) run() {
 			continue
 		}
 
-		if screen.FPS != fps && screen.FPS != 0 {
-			fps = screen.FPS
-			ticker.Reset(time.Second / time.Duration(fps))
-		}
-
 		if !hasCaptureDemand(clients) {
 			continue
 		}
 
-		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
-		stream.UpdateCaptureStatus(stream.CaptureModeDirect, result)
-		if result < 0 || len(data) == 0 {
+		stream.UpdateCaptureStatus(stream.CaptureModeDirect, frame.Result)
+		if frame.Result < 0 || len(frame.Data) == 0 {
 			continue
 		}
 
-		timestamp := time.Since(startTime).Microseconds()
-		frame := newOutboundFrame(result == 3, timestamp, data)
+		outbound := newOutboundFrame(frame.Result == 3, frame.Timestamp, frame.Data)
 		for _, client := range clients {
-			client.offer(frame)
+			client.offer(outbound)
 		}
-
-		stream.GetFrameRateCounter().Update()
 	}
 }
 

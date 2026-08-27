@@ -1,19 +1,27 @@
 package webrtc
 
 import (
-	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
 	"NanoKVM-Server/service/vm"
-	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/pion/rtp"
+	"github.com/pion/rtp/codecs"
 	"github.com/pion/webrtc/v4/pkg/media"
 	log "github.com/sirupsen/logrus"
 )
 
 func NewWebRTCManager() *WebRTCManager {
 	m := &WebRTCManager{
-		clients:      make(map[*websocket.Conn]*Client),
+		clients: make(map[*websocket.Conn]*Client),
+		videoPacketizer: rtp.NewPacketizer(
+			1450,
+			100,
+			0x1234ABCD,
+			&codecs.H264Payloader{},
+			rtp.NewRandomSequencer(),
+			90000,
+		),
 		videoSending: false,
 	}
 	m.updateClientSnapshotLocked()
@@ -22,8 +30,6 @@ func NewWebRTCManager() *WebRTCManager {
 }
 
 func (m *WebRTCManager) AddClient(ws *websocket.Conn, client *Client) {
-	client.track.updateExtension()
-
 	m.mutex.Lock()
 	m.clients[ws] = client
 	count := m.updateClientSnapshotLocked()
@@ -96,52 +102,62 @@ func (m *WebRTCManager) stopVideoStreamIfIdle() bool {
 }
 
 func (m *WebRTCManager) sendVideoStream() {
-	screen := common.GetScreen()
-	common.CheckScreen()
-	fps := screen.FPS
-	duration := time.Second / time.Duration(fps)
+	subscription := stream.SubscribeH264()
+	defer subscription.Close()
+	samples, writerDone := m.startVideoWriter()
 
-	vision := common.GetKvmVision()
-
-	ticker := time.NewTicker(duration)
-	defer ticker.Stop()
-
-	for range ticker.C {
+	for {
+		frame, ok := subscription.Next()
+		if !ok {
+			close(samples)
+			<-writerDone
+			return
+		}
 		clients := m.getClients()
 		if len(clients) == 0 {
+			close(samples)
+			<-writerDone
 			if m.stopVideoStreamIfIdle() {
 				log.Debugf("stop sending h264 stream")
 				return
 			}
+			samples, writerDone = m.startVideoWriter()
 
 			continue
 		}
 
-		data, result := vision.ReadH264(screen.Width, screen.Height, screen.BitRate)
-		stream.UpdateCaptureStatus(stream.CaptureModeH264, result)
-		if result < 0 || len(data) == 0 {
+		stream.UpdateCaptureStatus(stream.CaptureModeH264, frame.Result)
+		if frame.Result < 0 || len(frame.Data) == 0 {
 			continue
 		}
 
 		sample := media.Sample{
-			Data:     data,
-			Duration: duration,
+			Data:     frame.Data,
+			Duration: frame.Duration,
 		}
 
-		for _, client := range clients {
-			if err := client.track.writeVideoSample(sample); err != nil {
-				log.Errorf("failed to write h264 video to client: %s", err)
-				m.RemoveClient(client.WsConn())
-				client.Close()
+		samples <- sample
+	}
+}
+
+func (m *WebRTCManager) startVideoWriter() (chan media.Sample, <-chan struct{}) {
+	samples := make(chan media.Sample, 1)
+	done := make(chan struct{})
+
+	go func() {
+		defer close(done)
+		for sample := range samples {
+			packets := m.videoPacketizer.Packetize(sample.Data, uint32(sample.Duration.Seconds()*90000))
+			for _, client := range m.getClients() {
+				err := client.track.writeVideoPackets(packets)
+				if err != nil {
+					log.Errorf("failed to write h264 video to client: %s", err)
+					m.RemoveClient(client.WsConn())
+					client.Close()
+				}
 			}
 		}
+	}()
 
-		if screen.FPS != fps && screen.FPS != 0 {
-			fps = screen.FPS
-			duration = time.Second / time.Duration(fps)
-			ticker.Reset(duration)
-		}
-
-		stream.GetFrameRateCounter().Update()
-	}
+	return samples, done
 }

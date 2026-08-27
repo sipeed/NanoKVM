@@ -2,16 +2,15 @@ package webrtc
 
 import (
 	"encoding/json"
-	"errors"
 
 	"github.com/gorilla/websocket"
-	"github.com/pion/rtp"
-	"github.com/pion/rtp/codecs"
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
 
 	"sync"
 )
+
+const h264SDPFmtpLine = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f"
 
 func NewClient(ws *websocket.Conn, videoConn *webrtc.PeerConnection) *Client {
 	return &Client{
@@ -72,26 +71,16 @@ func (c *Client) ReadMessage() (*Message, error) {
 func (c *Client) AddTrack() error {
 	// video track
 	videoTrack, err := webrtc.NewTrackLocalStaticRTP(
-		webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeH264},
+		webrtc.RTPCodecCapability{
+			MimeType:    webrtc.MimeTypeH264,
+			ClockRate:   90000,
+			SDPFmtpLine: h264SDPFmtpLine,
+		},
 		"video",
 		"pion-video",
 	)
 	if err != nil {
 		log.Errorf("failed to create video track: %s", err)
-		return err
-	}
-
-	videoPacketizer := rtp.NewPacketizer(
-		1200,
-		100,
-		0x1234ABCD,
-		&codecs.H264Payloader{},
-		rtp.NewRandomSequencer(),
-		90000,
-	)
-	if videoPacketizer == nil {
-		err := errors.New("failed to create rtp packetizer")
-		log.Error(err)
 		return err
 	}
 
@@ -103,10 +92,8 @@ func (c *Client) AddTrack() error {
 	go startRTCPReader(videoSender)
 
 	track := &Track{
-		videoPacketizer: videoPacketizer,
-		video:           videoTrack,
+		video: videoTrack,
 	}
-	track.updateExtension()
 
 	c.mutex.Lock()
 	c.track = track

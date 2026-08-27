@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/pion/dtls/v3"
+	"github.com/pion/interceptor"
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -151,14 +152,6 @@ func createMediaEngine() (*webrtc.MediaEngine, error) {
 		return nil, err
 	}
 
-	if err := mediaEngine.RegisterHeaderExtension(
-		webrtc.RTPHeaderExtensionCapability{URI: "http://www.webrtc.org/experiments/rtp-hdrext/playout-delay"},
-		webrtc.RTPCodecTypeVideo,
-	); err != nil {
-		log.Errorf("failed to register header extension: %s", err)
-		return nil, err
-	}
-
 	return mediaEngine, nil
 }
 
@@ -171,6 +164,7 @@ func createPeerConnection(iceServers []webrtc.ICEServer, mediaEngine *webrtc.Med
 
 	apiOptions := []func(api *webrtc.API){
 		webrtc.WithSettingEngine(settingEngine),
+		webrtc.WithInterceptorRegistry(&interceptor.Registry{}),
 	}
 	if mediaEngine != nil {
 		apiOptions = append(apiOptions, webrtc.WithMediaEngine(mediaEngine))

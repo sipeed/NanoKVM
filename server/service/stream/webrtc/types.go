@@ -10,11 +10,12 @@ import (
 )
 
 type WebRTCManager struct {
-	clients        map[*websocket.Conn]*Client
-	clientSnapshot atomic.Pointer[[]*Client]
-	videoSending   bool
-	mutex          sync.Mutex
-	viewerVersion  uint64
+	clients         map[*websocket.Conn]*Client
+	clientSnapshot  atomic.Pointer[[]*Client]
+	videoPacketizer rtp.Packetizer
+	videoSending    bool
+	mutex           sync.Mutex
+	viewerVersion   uint64
 }
 
 type Client struct {
@@ -36,10 +37,7 @@ type SignalingHandler struct {
 }
 
 type Track struct {
-	playoutDelayExtensionID   uint8
-	playoutDelayExtensionData []byte
-	videoPacketizer           rtp.Packetizer
-	video                     *webrtc.TrackLocalStaticRTP
+	video *webrtc.TrackLocalStaticRTP
 }
 
 type Message struct {
