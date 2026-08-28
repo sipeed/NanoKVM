@@ -22,7 +22,7 @@ function isSubnetMask(value: string) {
     .split('.')
     .reduce((result, part) => (result << 8) | Number(part), 0) >>> 0;
   const inverted = (~mask) >>> 0;
-  const prefixLength = 32 - Math.clz32(mask);
+  const prefixLength = Math.clz32(inverted);
 
   return mask !== 0 && mask !== 0xffffffff && (inverted & (inverted + 1)) === 0 && prefixLength >= 1 && prefixLength <= 30;
 }
