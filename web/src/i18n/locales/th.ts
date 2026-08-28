@@ -467,6 +467,28 @@ const th = {
           description: 'เปิดใช้งานโปรโตคอล HTTPS',
           tip: 'โปรดทราบ: การใช้ HTTPS อาจเพิ่มความหน่วง โดยเฉพาะในโหมดวิดีโอ MJPEG'
         },
+        ethernet: {
+          title: "อีเทอร์เน็ต IPv4",
+          description: "เลือก DHCP หรือกำหนดค่าที่อยู่ IPv4 แบบคงที่ถาวร",
+          dhcp: "DHCP",
+          static: "คงที่",
+          ipv4: "การกำหนดค่า IPv4",
+          dhcpDescription: "ระบบจะรับที่อยู่ IP และเกตเวย์โดยอัตโนมัติจาก DHCP",
+          staticDescription: "การตั้งค่าจะถูกนำไปใช้ทันทีและจะยังคงอยู่หลังรีบูต",
+          ipAddress: "ที่อยู่ IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "ซับเน็ตมาสก์",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "เกตเวย์",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "ป้อนที่อยู่ IPv4 ซับเน็ตมาสก์ และเกตเวย์ที่ถูกต้อง",
+          save: "บันทึก",
+          unsaved: "การเปลี่ยนแปลงที่ยังไม่ได้บันทึก",
+          savedStatic: "บันทึกที่อยู่แบบคงที่แล้ว เชื่อมต่อใหม่ที่ {{address}}",
+          savedDhcp: "เปิดใช้ DHCP แล้ว เชื่อมต่อใหม่โดยใช้ที่อยู่ที่เราเตอร์กำหนด",
+          saveFailed: "บันทึกการตั้งค่า Ethernet ไม่สำเร็จ",
+          loadFailed: "โหลดการตั้งค่า Ethernet ไม่สำเร็จ"
+        },
         dns: {
           title: 'DNS',
           description: 'ตั้งค่าเซิร์ฟเวอร์ DNS สำหรับ NanoKVM',

@@ -480,6 +480,28 @@ const fr = {
           description: 'Activer le protocole HTTPS',
           tip: "Attention : l'utilisation de HTTPS peut augmenter la latence, surtout en mode vidéo MJPEG."
         },
+        ethernet: {
+          title: "IPv4 Ethernet",
+          description: "Configurez la connexion IPv4 Ethernet.",
+          dhcp: "DHCP",
+          static: "Statique",
+          ipv4: "IPv4",
+          dhcpDescription: "Obtenez automatiquement une adresse IP via DHCP.",
+          staticDescription: "Configurez manuellement l'adresse IP.",
+          ipAddress: "Adresse IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Masque de sous-réseau",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Passerelle",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Adresse IP non valide",
+          save: "Enregistrer",
+          unsaved: "Modifications non enregistrées",
+          savedStatic: "L'adresse IP statique {{address}} a été enregistrée.",
+          savedDhcp: "La configuration DHCP a été enregistrée.",
+          saveFailed: "Impossible d'enregistrer la configuration.",
+          loadFailed: "Impossible de charger la configuration."
+        },
         dns: {
           title: 'DNS',
           description: 'Configurer les serveurs DNS pour NanoKVM',

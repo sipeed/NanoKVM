@@ -475,6 +475,28 @@ const cz = {
           description: 'Povolit protokol HTTPS',
           tip: 'Upozornění: Použití HTTPS může zvýšit latenci, zejména v režimu videa MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Nakonfigurujte připojení Ethernet IPv4.",
+          dhcp: "DHCP",
+          static: "Statická",
+          ipv4: "IPv4",
+          dhcpDescription: "Automaticky získat IP adresu pomocí DHCP.",
+          staticDescription: "Nakonfigurujte IP adresu ručně.",
+          ipAddress: "IP adresa",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Maska podsítě",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Brána",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Neplatná IP adresa",
+          save: "Uložit",
+          unsaved: "Neuložené změny",
+          savedStatic: "Statická IP adresa {{address}} byla uložena.",
+          savedDhcp: "Konfigurace DHCP byla uložena.",
+          saveFailed: "Konfiguraci se nepodařilo uložit.",
+          loadFailed: "Konfiguraci se nepodařilo načíst."
+        },
         dns: {
           title: 'DNS',
           description: 'Nastavit DNS servery pro NanoKVM',

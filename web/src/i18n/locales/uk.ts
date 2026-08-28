@@ -475,6 +475,28 @@ const uk = {
           description: 'Увімкнути протокол HTTPS',
           tip: 'Будьте в курсі: Використання HTTPS може збільшити затримку, особливо в режимі відео MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Виберіть DHCP або налаштуйте постійну статичну IPv4-адресу",
+          dhcp: "DHCP",
+          static: "Статична",
+          ipv4: "Налаштування IPv4",
+          dhcpDescription: "IP-адреса та шлюз автоматично отримуються через DHCP",
+          staticDescription: "Налаштування застосовуються негайно й зберігаються після перезавантаження",
+          ipAddress: "IP-адреса",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Маска підмережі",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Шлюз",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Введіть коректні IPv4-адресу, маску підмережі та шлюз",
+          save: "Зберегти",
+          unsaved: "Незбережені зміни",
+          savedStatic: "Статичну адресу збережено. Повторно підключіться за адресою {{address}}.",
+          savedDhcp: "DHCP увімкнено. Повторно підключіться, використовуючи адресу, призначену маршрутизатором.",
+          saveFailed: "Не вдалося зберегти налаштування Ethernet",
+          loadFailed: "Не вдалося завантажити налаштування Ethernet"
+        },
         dns: {
           title: 'DNS',
           description: 'Налаштування DNS-серверів для NanoKVM',
