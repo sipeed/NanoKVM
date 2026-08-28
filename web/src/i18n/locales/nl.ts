@@ -481,6 +481,28 @@ const nl = {
           description: 'HTTPS-protocol inschakelen',
           tip: 'Let op: HTTPS gebruiken kan de latentie verhogen, vooral in MJPEG-videomodus.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Kies DHCP of configureer een permanent statisch IPv4-adres",
+          dhcp: "DHCP",
+          static: "Statisch",
+          ipv4: "IPv4-configuratie",
+          dhcpDescription: "IP-adres en gateway worden automatisch via DHCP verkregen",
+          staticDescription: "Instellingen worden onmiddellijk toegepast en blijven behouden na opnieuw opstarten",
+          ipAddress: "IP-adres",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Subnetmasker",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Voer een geldig IPv4-adres, subnetmasker en gateway in",
+          save: "Opslaan",
+          unsaved: "Niet-opgeslagen wijzigingen",
+          savedStatic: "Statisch adres opgeslagen. Maak opnieuw verbinding met {{address}}.",
+          savedDhcp: "DHCP ingeschakeld. Maak opnieuw verbinding met het adres dat door uw router is toegewezen.",
+          saveFailed: "Ethernetinstellingen opslaan mislukt",
+          loadFailed: "Ethernetinstellingen laden mislukt"
+        },
         dns: {
           title: 'DNS',
           description: 'Configureer DNS-servers voor NanoKVM',

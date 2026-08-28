@@ -477,6 +477,28 @@ const tr = {
           description: 'HTTPS protokolünü etkinleştir',
           tip: 'HTTPS protokolü bağlantıda gecikmeye sebep olabilir, özellikle MJPEG görüntü modu ile.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "DHCP’yi seçin veya kalıcı bir statik IPv4 adresi yapılandırın",
+          dhcp: "DHCP",
+          static: "Statik",
+          ipv4: "IPv4 Yapılandırması",
+          dhcpDescription: "IP adresi ve ağ geçidi DHCP’den otomatik olarak alınır",
+          staticDescription: "Ayarlar hemen uygulanır ve yeniden başlatmadan sonra korunur",
+          ipAddress: "IP Adresi",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Alt Ağ Maskesi",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Ağ Geçidi",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Geçerli bir IPv4 adresi, alt ağ maskesi ve ağ geçidi girin",
+          save: "Kaydet",
+          unsaved: "Kaydedilmemiş değişiklikler",
+          savedStatic: "Statik adres kaydedildi. {{address}} adresinden yeniden bağlanın.",
+          savedDhcp: "DHCP etkinleştirildi. Yönlendiricinizin atadığı adresi kullanarak yeniden bağlanın.",
+          saveFailed: "Ethernet ayarları kaydedilemedi",
+          loadFailed: "Ethernet ayarları yüklenemedi"
+        },
         dns: {
           title: 'DNS',
           description: 'NanoKVM için DNS sunucularını yapılandır',

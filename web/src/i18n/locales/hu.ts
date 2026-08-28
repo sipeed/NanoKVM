@@ -478,6 +478,28 @@ const hu = {
           description: 'HTTPS protokoll engedélyezése',
           tip: 'Figyelem: A HTTPS használata növelheti a késleltetést, különösen MJPEG videó módban.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Az Ethernet IPv4-kapcsolat beállítása.",
+          dhcp: "DHCP",
+          static: "Statikus",
+          ipv4: "IPv4",
+          dhcpDescription: "IP-cím automatikus lekérése DHCP használatával.",
+          staticDescription: "Az IP-cím kézi beállítása.",
+          ipAddress: "IP-cím",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Alhálózati maszk",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Átjáró",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Érvénytelen IP-cím",
+          save: "Mentés",
+          unsaved: "Nem mentett módosítások",
+          savedStatic: "A(z) {{address}} statikus IP-cím mentve.",
+          savedDhcp: "A DHCP-konfiguráció mentve.",
+          saveFailed: "A konfiguráció mentése nem sikerült.",
+          loadFailed: "A konfiguráció betöltése nem sikerült."
+        },
         dns: {
           title: 'DNS',
           description: 'DNS-kiszolgálók beállítása a NanoKVM számára',

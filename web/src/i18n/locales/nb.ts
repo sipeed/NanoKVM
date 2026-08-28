@@ -474,6 +474,28 @@ const nb = {
           description: 'Aktiver HTTPS-protokoll',
           tip: 'Merk: Bruk av HTTPS kan øke forsinkelsen, spesielt i MJPEG-videomodus.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Velg DHCP eller konfigurer en vedvarende statisk IPv4-adresse",
+          dhcp: "DHCP",
+          static: "Statisk",
+          ipv4: "IPv4-konfigurasjon",
+          dhcpDescription: "IP-adresse og gateway hentes automatisk fra DHCP",
+          staticDescription: "Innstillingene brukes umiddelbart og beholdes etter omstart",
+          ipAddress: "IP-adresse",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Nettverksmaske",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Angi en gyldig IPv4-adresse, nettverksmaske og gateway",
+          save: "Lagre",
+          unsaved: "Ulagrede endringer",
+          savedStatic: "Statisk adresse lagret. Koble til igjen på {{address}}.",
+          savedDhcp: "DHCP aktivert. Koble til igjen med adressen ruteren har tildelt.",
+          saveFailed: "Kunne ikke lagre Ethernet-innstillinger",
+          loadFailed: "Kunne ikke laste inn Ethernet-innstillinger"
+        },
         dns: {
           title: 'DNS',
           description: 'Konfigurer DNS-servere for NanoKVM',
