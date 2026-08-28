@@ -57,7 +57,7 @@ func (s *Service) SetEthernet(c *gin.Context) {
 			return
 		}
 		config.Address = address.Addr().String()
-		config.SubnetMask = address.Bits()
+		config.SubnetMask = prefixToSubnetMask(address.Bits())
 		config.Gateway = gateway.String()
 	}
 
@@ -114,7 +114,7 @@ func readEthernetConfig() (proto.EthernetConfig, error) {
 
 		config.Mode = ethernetModeStatic
 		config.Address = prefix.Addr().String()
-		config.SubnetMask = prefix.Bits()
+		config.SubnetMask = prefixToSubnetMask(prefix.Bits())
 		config.Gateway = gateway.String()
 		return config, nil
 	}
@@ -155,15 +155,16 @@ func writeEthernetConfig(config proto.EthernetConfig) error {
 	}
 }
 
-func validateStaticEthernet(address string, subnetMask int, gateway string) (netip.Prefix, netip.Addr, error) {
+func validateStaticEthernet(address string, subnetMask string, gateway string) (netip.Prefix, netip.Addr, error) {
 	ip, err := netip.ParseAddr(strings.TrimSpace(address))
 	if err != nil || !ip.Is4() || !ip.IsValid() || ip.IsUnspecified() || ip.IsLoopback() || ip.IsMulticast() {
 		return netip.Prefix{}, netip.Addr{}, fmt.Errorf("invalid static IP address")
 	}
-	if subnetMask < 1 || subnetMask > 30 {
-		return netip.Prefix{}, netip.Addr{}, fmt.Errorf("subnet prefix must be between 1 and 30")
+	prefixBits, err := subnetMaskToPrefix(subnetMask)
+	if err != nil {
+		return netip.Prefix{}, netip.Addr{}, err
 	}
-	prefix := netip.PrefixFrom(ip, subnetMask)
+	prefix := netip.PrefixFrom(ip, prefixBits)
 	if ip == prefix.Masked().Addr() || ip == ipv4Broadcast(prefix) {
 		return netip.Prefix{}, netip.Addr{}, fmt.Errorf("invalid static IP address")
 	}
@@ -177,6 +178,41 @@ func validateStaticEthernet(address string, subnetMask int, gateway string) (net
 	}
 
 	return prefix, gw, nil
+}
+
+func subnetMaskToPrefix(subnetMask string) (int, error) {
+	mask, err := netip.ParseAddr(strings.TrimSpace(subnetMask))
+	if err != nil || !mask.Is4() {
+		return 0, fmt.Errorf("invalid subnet mask")
+	}
+
+	bytes := mask.As4()
+	value := binary.BigEndian.Uint32(bytes[:])
+	prefix := 0
+	seenZero := false
+	for bit := 31; bit >= 0; bit-- {
+		isOne := value&(uint32(1)<<bit) != 0
+		if isOne {
+			if seenZero {
+				return 0, fmt.Errorf("subnet mask must be contiguous")
+			}
+			prefix++
+		} else {
+			seenZero = true
+		}
+	}
+	if prefix < 1 || prefix > 30 {
+		return 0, fmt.Errorf("subnet mask must be between 255.0.0.0 and 255.255.255.252")
+	}
+
+	return prefix, nil
+}
+
+func prefixToSubnetMask(prefix int) string {
+	value := ^uint32(0) << (32 - prefix)
+	var mask [4]byte
+	binary.BigEndian.PutUint32(mask[:], value)
+	return netip.AddrFrom4(mask).String()
 }
 
 func ipv4Broadcast(prefix netip.Prefix) netip.Addr {

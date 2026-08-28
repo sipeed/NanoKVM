@@ -55,13 +55,13 @@ type EthernetConfig struct {
 	Mode       string `json:"mode"`
 	Interface  string `json:"interface"`
 	Address    string `json:"address"`
-	SubnetMask int    `json:"subnetMask"`
+	SubnetMask string `json:"subnetMask"`
 	Gateway    string `json:"gateway"`
 }
 
 type SetEthernetReq struct {
 	Mode       string `json:"mode" validate:"required,oneof=dhcp static"`
 	Address    string `json:"address"`
-	SubnetMask int    `json:"subnetMask"`
+	SubnetMask string `json:"subnetMask"`
 	Gateway    string `json:"gateway"`
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Input, InputNumber, Segmented } from 'antd';
+import { Button, Input, Segmented } from 'antd';
 import { CheckIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,13 +14,26 @@ function isIPv4(value: string) {
   );
 }
 
+function isSubnetMask(value: string) {
+  if (!isIPv4(value)) return false;
+
+  const mask = value
+    .trim()
+    .split('.')
+    .reduce((result, part) => (result << 8) | Number(part), 0) >>> 0;
+  const inverted = (~mask) >>> 0;
+  const prefixLength = 32 - Math.clz32(mask);
+
+  return mask !== 0 && mask !== 0xffffffff && (inverted & (inverted + 1)) === 0 && prefixLength >= 1 && prefixLength <= 30;
+}
+
 export const Ethernet = () => {
   const { t } = useTranslation();
   const [config, setConfig] = useState<EthernetConfig>({
     mode: 'dhcp',
     interface: 'eth0',
     address: '',
-    subnetMask: 24,
+    subnetMask: '255.255.255.0',
     gateway: ''
   });
   const [original, setOriginal] = useState<EthernetConfig | null>(null);
@@ -60,7 +73,7 @@ export const Ethernet = () => {
   const hasChanges = JSON.stringify(config) !== JSON.stringify(original);
   const invalidStatic =
     config.mode === 'static' &&
-    (!isIPv4(config.address) || !isIPv4(config.gateway) || config.subnetMask < 1 || config.subnetMask > 30);
+    (!isIPv4(config.address) || !isIPv4(config.gateway) || !isSubnetMask(config.subnetMask));
 
   async function save() {
     if (isSaving || invalidStatic) return;
@@ -71,7 +84,7 @@ export const Ethernet = () => {
       const rsp = await api.setEthernet({
         mode: config.mode,
         address: config.mode === 'static' ? config.address.trim() : '',
-        subnetMask: config.mode === 'static' ? config.subnetMask : 0,
+        subnetMask: config.mode === 'static' ? config.subnetMask.trim() : '',
         gateway: config.mode === 'static' ? config.gateway.trim() : ''
       });
       if (rsp.code !== 0) {
@@ -128,15 +141,12 @@ export const Ethernet = () => {
               addonBefore={t('settings.network.ethernet.ipAddress')}
               onChange={(event) => update({ address: event.target.value })}
             />
-            <InputNumber
-              className="w-full"
-              controls={false}
-              min={1}
-              max={30}
+            <Input
               value={config.subnetMask}
-              addonBefore={t('settings.network.ethernet.prefixLength')}
-              addonAfter="/32"
-              onChange={(value) => update({ subnetMask: Number(value) || 0 })}
+              status={config.subnetMask && !isSubnetMask(config.subnetMask) ? 'error' : undefined}
+              placeholder={t('settings.network.ethernet.subnetMaskPlaceholder')}
+              addonBefore={t('settings.network.ethernet.subnetMask')}
+              onChange={(event) => update({ subnetMask: event.target.value })}
             />
             <Input
               value={config.gateway}
