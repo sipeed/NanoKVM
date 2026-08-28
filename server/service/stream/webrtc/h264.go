@@ -164,9 +164,16 @@ func createPeerConnection(iceServers []webrtc.ICEServer, mediaEngine *webrtc.Med
 
 	apiOptions := []func(api *webrtc.API){
 		webrtc.WithSettingEngine(settingEngine),
-		webrtc.WithInterceptorRegistry(&interceptor.Registry{}),
 	}
 	if mediaEngine != nil {
+		registry := &interceptor.Registry{}
+		if err := webrtc.ConfigureNack(mediaEngine, registry); err != nil {
+			return nil, err
+		}
+		if err := webrtc.ConfigureRTCPReports(registry); err != nil {
+			return nil, err
+		}
+		apiOptions = append(apiOptions, webrtc.WithInterceptorRegistry(registry))
 		apiOptions = append(apiOptions, webrtc.WithMediaEngine(mediaEngine))
 	}
 

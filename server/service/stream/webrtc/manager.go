@@ -15,7 +15,7 @@ func NewWebRTCManager() *WebRTCManager {
 	m := &WebRTCManager{
 		clients: make(map[*websocket.Conn]*Client),
 		videoPacketizer: rtp.NewPacketizer(
-			1450,
+			1200,
 			100,
 			0x1234ABCD,
 			&codecs.H264Payloader{},

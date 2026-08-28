@@ -15,10 +15,11 @@ type H264Frame struct {
 }
 
 type H264Subscription struct {
-	frames chan H264Frame
-	done   chan struct{}
-	closed atomic.Bool
-	once   sync.Once
+	frames             chan H264Frame
+	done               chan struct{}
+	closed             atomic.Bool
+	once               sync.Once
+	waitingForKeyframe bool
 }
 
 type H264Source struct {
@@ -147,11 +148,38 @@ func (s *H264Subscription) send(frame H264Frame) bool {
 	if s.closed.Load() {
 		return false
 	}
+	if s.waitingForKeyframe {
+		if frame.Result != 3 {
+			return false
+		}
+		s.waitingForKeyframe = false
+	}
 
 	select {
 	case s.frames <- frame:
 		return true
 	case <-s.done:
 		return false
+	default:
+	}
+
+	for {
+		select {
+		case <-s.frames:
+		case <-s.done:
+			return false
+		default:
+			s.waitingForKeyframe = true
+			if frame.Result != 3 {
+				return false
+			}
+			s.waitingForKeyframe = false
+			select {
+			case s.frames <- frame:
+				return true
+			case <-s.done:
+				return false
+			}
+		}
 	}
 }
