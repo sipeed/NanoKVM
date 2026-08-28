@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidateStaticEthernet(t *testing.T) {
-	prefix, gateway, err := validateStaticEthernet("192.168.10.32", 24, "192.168.10.1")
+	prefix, gateway, err := validateStaticEthernet("192.168.10.32", "255.255.255.0", "192.168.10.1")
 	if err != nil {
 		t.Fatalf("expected valid configuration, got %v", err)
 	}
@@ -18,18 +18,18 @@ func TestValidateStaticEthernet(t *testing.T) {
 	}
 
 	for _, test := range []struct {
-		name, address, gateway string
-		prefix                 int
+		name, address, mask, gateway string
 	}{
-		{"invalid address", "192.168.10.999", "192.168.10.1", 24},
-		{"network address", "192.168.10.0", "192.168.10.1", 24},
-		{"broadcast address", "192.168.10.255", "192.168.10.1", 24},
-		{"invalid prefix", "192.168.10.32", "192.168.10.1", 31},
-		{"different subnet gateway", "192.168.10.32", "192.168.11.1", 24},
-		{"same address gateway", "192.168.10.32", "192.168.10.32", 24},
+		{"invalid address", "192.168.10.999", "255.255.255.0", "192.168.10.1"},
+		{"network address", "192.168.10.0", "255.255.255.0", "192.168.10.1"},
+		{"broadcast address", "192.168.10.255", "255.255.255.0", "192.168.10.1"},
+		{"noncontiguous mask", "192.168.10.32", "255.0.255.0", "192.168.10.1"},
+		{"unsupported mask", "192.168.10.32", "255.255.255.255", "192.168.10.1"},
+		{"different subnet gateway", "192.168.10.32", "255.255.255.0", "192.168.11.1"},
+		{"same address gateway", "192.168.10.32", "255.255.255.0", "192.168.10.32"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if _, _, err := validateStaticEthernet(test.address, test.prefix, test.gateway); err == nil {
+			if _, _, err := validateStaticEthernet(test.address, test.mask, test.gateway); err == nil {
 				t.Fatal("expected validation error")
 			}
 		})
@@ -46,7 +46,7 @@ func TestEthernetConfigPersistence(t *testing.T) {
 		Mode:       ethernetModeStatic,
 		Interface:  ethernetInterface,
 		Address:    "10.0.0.20",
-		SubnetMask: 24,
+		SubnetMask: "255.255.255.0",
 		Gateway:    "10.0.0.1",
 	}
 	if err := writeEthernetConfig(static); err != nil {
@@ -57,7 +57,7 @@ func TestEthernetConfigPersistence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read static config: %v", err)
 	}
-	if got.Mode != ethernetModeStatic || got.Address != static.Address || got.Gateway != static.Gateway || got.SubnetMask != 24 {
+	if got.Mode != ethernetModeStatic || got.Address != static.Address || got.Gateway != static.Gateway || got.SubnetMask != static.SubnetMask {
 		t.Fatalf("unexpected static config: %#v", got)
 	}
 

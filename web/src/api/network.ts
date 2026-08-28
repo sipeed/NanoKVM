@@ -7,7 +7,7 @@ export type EthernetConfig = {
   mode: EthernetMode;
   interface: string;
   address: string;
-  subnetMask: number;
+  subnetMask: string;
   gateway: string;
 };
 
