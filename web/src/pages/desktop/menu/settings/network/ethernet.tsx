@@ -14,18 +14,6 @@ function isIPv4(value: string) {
   );
 }
 
-function isSubnetMask(value: string) {
-  if (!isIPv4(value)) return false;
-
-  const mask = value
-    .trim()
-    .split('.')
-    .reduce((result, part) => (result << 8) | Number(part), 0) >>> 0;
-  const inverted = (~mask) >>> 0;
-  const prefixLength = Math.clz32(inverted);
-
-  return mask !== 0 && mask !== 0xffffffff && (inverted & (inverted + 1)) === 0 && prefixLength >= 1 && prefixLength <= 30;
-}
 
 export const Ethernet = () => {
   const { t } = useTranslation();
@@ -73,7 +61,7 @@ export const Ethernet = () => {
   const hasChanges = JSON.stringify(config) !== JSON.stringify(original);
   const invalidStatic =
     config.mode === 'static' &&
-    (!isIPv4(config.address) || !isIPv4(config.gateway) || !isSubnetMask(config.subnetMask));
+    (!isIPv4(config.address) || !isIPv4(config.gateway));
 
   async function save() {
     if (isSaving || invalidStatic) return;
@@ -143,7 +131,6 @@ export const Ethernet = () => {
             />
             <Input
               value={config.subnetMask}
-              status={config.subnetMask && !isSubnetMask(config.subnetMask) ? 'error' : undefined}
               placeholder={t('settings.network.ethernet.subnetMaskPlaceholder')}
               addonBefore={t('settings.network.ethernet.subnetMask')}
               onChange={(event) => update({ subnetMask: event.target.value })}
