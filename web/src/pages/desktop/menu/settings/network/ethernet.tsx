@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button, Input, Segmented } from 'antd';
 import { CheckIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -30,11 +30,7 @@ export const Ethernet = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    void getEthernet();
-  }, []);
-
-  async function getEthernet() {
+  const getEthernet = useCallback(async () => {
     setIsLoading(true);
     try {
       const rsp = await api.getEthernet();
@@ -50,7 +46,11 @@ export const Ethernet = () => {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [t]);
+
+  useEffect(() => {
+    void getEthernet();
+  }, [getEthernet]);
 
   function update(fields: Partial<EthernetConfig>) {
     setMessage('');
