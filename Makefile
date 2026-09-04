@@ -19,11 +19,12 @@ DOCKER_BUILD_ARGS := --build-arg DOCKER_UID=$(UID) --build-arg DOCKER_GID=$(GID)
 
 # Build commands
 GO_BUILD_CMD := cd /home/build/NanoKVM/server && go mod tidy && CGO_ENABLED=1 GOOS=linux GOARCH=riscv64 CC=riscv64-unknown-linux-musl-gcc CGO_CFLAGS="-mcpu=c906fdv -march=rv64imafdcv0p7xthead -mcmodel=medany -mabi=lp64d" go build
+SERVER_BUILD_CMD := cd /home/build/NanoKVM/server && ./build.sh
 SUPPORT_BUILD_CMD := . ./home/build/MaixCDK/bin/activate && cd /home/build/NanoKVM/support/sg2002 && ./build kvm_system && ./build kvm_system add_to_kvmapp
 VISION_BUILD_CMD := . ./home/build/MaixCDK/bin/activate && cd /home/build/NanoKVM/support/sg2002 && ./build kvm_vision && ./build kvm_vision add_to_kvmapp
 RELEASE_BUILD_CMD := /home/build/NanoKVM/scripts/build-in-container.sh
 
-.PHONY: help check-root builder-image rebuild-image check-image shell app support vision \
+.PHONY: help check-root builder-image rebuild-image check-image shell app server support vision \
         web release-build package release all clean
 
 # Default target
@@ -40,6 +41,7 @@ help:
 	@echo "  rebuild-image - Force rebuild Docker image"
 	@echo "  shell         - Enter interactive builder environment"
 	@echo "  app           - Build Go application server"
+	@echo "  server        - Build and stage the backend + frontend for device debugging"
 	@echo "  support       - Build kvm_system daemon"
 	@echo "  vision        - Build video libraries (libkvm.so)"
 	@echo "  web           - Build the frontend into web/dist"
@@ -93,6 +95,28 @@ shell: check-root builder-image
 app: check-root builder-image
 	@echo "Building app..."
 	@$(DOCKER_RUN_BASE) $(DOCKER_TTY) $(IMAGE_NAME) /bin/bash -c '$(GO_BUILD_CMD)'
+
+# Build a release-equivalent backend and the frontend, then stage both in the
+# same layout used by /kvmapp/server on the device. Preserve dl_lib: it is
+# populated separately by the vision build or may already contain debug libs.
+server: check-root builder-image web
+	@echo "Building release-equivalent server..."
+	@$(DOCKER_RUN_BASE) $(DOCKER_TTY) $(IMAGE_NAME) /bin/bash -c '$(SERVER_BUILD_CMD)'
+	@echo "Staging server for device debugging..."
+	@set -eu; \
+		stage="kvmapp/server"; \
+		web_new="$$stage/.web.new"; \
+		binary_new="$$stage/.NanoKVM-Server.new"; \
+		mkdir -p "$$stage"; \
+		trap 'rm -rf "$$web_new" "$$binary_new"' 0 1 2 15; \
+		rm -rf "$$web_new"; \
+		mkdir -p "$$web_new"; \
+		cp -a web/dist/. "$$web_new/"; \
+		install -m 0755 server/NanoKVM-Server "$$binary_new"; \
+		rm -rf "$$stage/web"; \
+		mv "$$web_new" "$$stage/web"; \
+		mv "$$binary_new" "$$stage/NanoKVM-Server"
+	@echo "Staged kvmapp/server/{NanoKVM-Server,web/}"
 
 # Build hardware support libraries
 support: check-root builder-image
@@ -148,5 +172,13 @@ clean:
 	@if [ -d web/dist ]; then \
 		rm -rf web/dist; \
 		echo "Removed web/dist"; \
+	fi
+	@if [ -f kvmapp/server/NanoKVM-Server ]; then \
+		rm -f kvmapp/server/NanoKVM-Server; \
+		echo "Removed kvmapp/server/NanoKVM-Server"; \
+	fi
+	@if [ -d kvmapp/server/web ]; then \
+		rm -rf kvmapp/server/web; \
+		echo "Removed kvmapp/server/web"; \
 	fi
 	@echo "Clean completed."
