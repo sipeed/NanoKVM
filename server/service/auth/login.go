@@ -15,9 +15,20 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// ReturnTokenHeader opts a non-browser automation client into receiving the
+// session JWT in the login response. Keeping this opt-in prevents the normal
+// browser login response from exposing its HttpOnly cookie value to JavaScript.
+const ReturnTokenHeader = "X-NanoKVM-Return-Token"
+
 func (s *Service) Login(c *gin.Context) {
 	var req proto.LoginReq
 	var rsp proto.Response
+	// A successful automation login can carry a bearer credential, and browser
+	// logins establish a session cookie. Neither response is safe to store or
+	// reuse from a shared cache. Vary also documents the opt-in response shape
+	// for intermediaries which inspect request headers despite no-store.
+	c.Header("Cache-Control", "no-store")
+	c.Header("Vary", ReturnTokenHeader)
 
 	conf := config.GetInstance()
 	if conf.Authentication == "disable" {
@@ -61,7 +72,11 @@ func (s *Service) Login(c *gin.Context) {
 		return
 	}
 	setSessionCookie(c, token)
-	rsp.OkRsp(c)
+	if strings.EqualFold(strings.TrimSpace(c.GetHeader(ReturnTokenHeader)), "true") {
+		rsp.OkRspWithData(c, &proto.LoginRsp{Token: token})
+	} else {
+		rsp.OkRsp(c)
+	}
 	log.Infof("user logged in: %s", user.Username)
 }
 
@@ -105,8 +120,8 @@ func (s *Service) GetAccount(c *gin.Context) {
 
 func setSessionCookie(c *gin.Context, token string) {
 	conf := config.GetInstance()
-	secure := conf.Proto == "https" || c.Request.TLS != nil ||
-		strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+	_, scheme := middleware.ExternalRequestAddress(c.Request)
+	secure := scheme == "https"
 	c.SetSameSite(http.SameSiteStrictMode)
 	c.SetCookie(
 		middleware.CookieName,
@@ -120,9 +135,8 @@ func setSessionCookie(c *gin.Context, token string) {
 }
 
 func clearSessionCookie(c *gin.Context) {
-	conf := config.GetInstance()
-	secure := conf.Proto == "https" || c.Request.TLS != nil ||
-		strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
+	_, scheme := middleware.ExternalRequestAddress(c.Request)
+	secure := scheme == "https"
 	c.SetSameSite(http.SameSiteStrictMode)
 	c.SetCookie(middleware.CookieName, "", -1, "/", "", secure, true)
 }

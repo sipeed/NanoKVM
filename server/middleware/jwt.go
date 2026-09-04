@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"NanoKVM-Server/authn"
@@ -141,11 +142,18 @@ func authenticate(c *gin.Context) (Principal, *Token, bool) {
 		return Principal{Username: "admin", Role: authn.RoleAdmin}, nil, true
 	}
 
-	cookie, err := c.Cookie(CookieName)
-	if err != nil {
+	rawToken, supplied := bearerToken(c.GetHeader("Authorization"))
+	if !supplied {
+		var err error
+		rawToken, err = c.Cookie(CookieName)
+		if err != nil {
+			return Principal{}, nil, false
+		}
+	}
+	if rawToken == "" {
 		return Principal{}, nil, false
 	}
-	token, err := ParseJWT(cookie)
+	token, err := ParseJWT(rawToken)
 	if err != nil {
 		return Principal{}, nil, false
 	}
@@ -155,6 +163,24 @@ func authenticate(c *gin.Context) (Principal, *Token, bool) {
 		return Principal{}, nil, false
 	}
 	return Principal{Username: user.Username, Role: user.Role}, token, true
+}
+
+// bearerToken reports whether the caller supplied an Authorization header.
+// A supplied but malformed Bearer credential must not fall back to a cookie:
+// explicit automation credentials take precedence over ambient browser state.
+func bearerToken(header string) (string, bool) {
+	if header == "" {
+		return "", false
+	}
+	const prefix = "Bearer "
+	if len(header) <= len(prefix) || !strings.EqualFold(header[:len(prefix)], prefix) {
+		return "", true
+	}
+	token := strings.TrimSpace(header[len(prefix):])
+	if token == "" || strings.ContainsAny(token, " \t\r\n") {
+		return "", true
+	}
+	return token, true
 }
 
 func abortUnauthorized(c *gin.Context) {

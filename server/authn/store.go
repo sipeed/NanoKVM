@@ -31,12 +31,13 @@ const (
 )
 
 var (
-	ErrUserNotFound     = errors.New("user not found")
-	ErrUserExists       = errors.New("username already exists")
-	ErrLastAdmin        = errors.New("at least one enabled admin is required")
-	ErrSelfModification = errors.New("administrators cannot disable or demote themselves")
-	ErrSelfDelete       = errors.New("administrators cannot delete themselves")
-	ErrSystemAccount    = errors.New("the device owner account must remain an enabled administrator")
+	ErrUserNotFound        = errors.New("user not found")
+	ErrUserExists          = errors.New("username already exists")
+	ErrLastAdmin           = errors.New("at least one enabled admin is required")
+	ErrSelfModification    = errors.New("administrators cannot disable or demote themselves")
+	ErrSelfDelete          = errors.New("administrators cannot delete themselves")
+	ErrSystemAccount       = errors.New("the device owner account must remain an enabled administrator")
+	ErrSystemAccountRename = errors.New("only the device owner can rename the device owner account")
 
 	usernamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]{0,31}$`)
 )
@@ -59,8 +60,9 @@ type UserInfo struct {
 }
 
 type UserPatch struct {
-	Role    *Role
-	Enabled *bool
+	Username *string
+	Role     *Role
+	Enabled  *bool
 }
 
 type database struct {
@@ -78,12 +80,25 @@ type legacyAccount struct {
 type Store struct {
 	path  string
 	mutex sync.RWMutex
+
+	// The account file can be temporarily absent after a BOOT reset. Token
+	// validation must still fail closed in that state, but it must not spend a
+	// bcrypt operation constructing the same default password hash for every
+	// request. The hash is safe to reuse: each default database gets its own
+	// random token version below.
+	defaultPasswordHashOnce sync.Once
+	defaultPasswordHash     string
+	defaultPasswordHashErr  error
+	generatePasswordHash    func([]byte, int) ([]byte, error)
 }
 
 var DefaultStore = NewStore(AccountFile)
 
 func NewStore(path string) *Store {
-	return &Store{path: path}
+	return &Store{
+		path:                 path,
+		generatePasswordHash: bcrypt.GenerateFromPassword,
+	}
 }
 
 func IsValidRole(role Role) bool {
@@ -231,33 +246,51 @@ func (s *Store) Create(username, password string, role Role) error {
 	return s.saveLocked(db)
 }
 
-func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
+// Update applies a user patch and reports whether it changed persisted account
+// state. Callers can use changed to avoid revoking otherwise-valid sessions
+// for idempotent updates.
+func (s *Store) Update(actor, username string, patch UserPatch) (*User, bool, error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	db, err := s.loadLocked(true)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	index := userIndex(db.Users, username)
 	if index < 0 {
-		return nil, ErrUserNotFound
+		return nil, false, ErrUserNotFound
 	}
 	user := db.Users[index]
 
+	if patch.Username != nil {
+		if err = ValidateUsername(*patch.Username); err != nil {
+			return nil, false, err
+		}
+		if *patch.Username != username && userIndex(db.Users, *patch.Username) >= 0 {
+			return nil, false, ErrUserExists
+		}
+	}
+	if user.SystemAccount && patch.Username != nil && *patch.Username != username && actor != username {
+		return nil, false, ErrSystemAccountRename
+	}
 	if patch.Role != nil && !IsValidRole(*patch.Role) {
-		return nil, errors.New("invalid role")
+		return nil, false, errors.New("invalid role")
 	}
 	if actor == username && user.Role == RoleAdmin &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
-		return nil, ErrSelfModification
+		return nil, false, ErrSelfModification
 	}
 	if user.SystemAccount &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
-		return nil, ErrSystemAccount
+		return nil, false, ErrSystemAccount
 	}
 
 	changed := false
+	if patch.Username != nil && user.Username != *patch.Username {
+		user.Username = *patch.Username
+		changed = true
+	}
 	if patch.Role != nil && user.Role != *patch.Role {
 		user.Role = *patch.Role
 		changed = true
@@ -267,18 +300,18 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 		changed = true
 	}
 	if !changed {
-		return &user, nil
+		return cloneUser(&user), false, nil
 	}
 
 	db.Users[index] = user
 	if enabledAdminCount(db.Users) == 0 {
-		return nil, ErrLastAdmin
+		return nil, false, ErrLastAdmin
 	}
 	db.Users[index].TokenVersion++
 	if err = s.saveLocked(db); err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	return cloneUser(&db.Users[index]), nil
+	return cloneUser(&db.Users[index]), true, nil
 }
 
 func (s *Store) Delete(actor, username string) error {
@@ -374,7 +407,7 @@ func (s *Store) Revoke(username string) (*User, error) {
 func (s *Store) loadLocked(migrate bool) (*database, error) {
 	data, err := os.ReadFile(s.path)
 	if errors.Is(err, os.ErrNotExist) {
-		db, defaultErr := defaultDatabase()
+		db, defaultErr := s.defaultDatabase()
 		if defaultErr != nil {
 			return nil, defaultErr
 		}
@@ -475,10 +508,17 @@ func (s *Store) saveLocked(db *database) error {
 	return dir.Sync()
 }
 
-func defaultDatabase() (*database, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(defaultPassword), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
+func (s *Store) defaultDatabase() (*database, error) {
+	s.defaultPasswordHashOnce.Do(func() {
+		hash, err := s.generatePasswordHash([]byte(defaultPassword), bcrypt.DefaultCost)
+		if err != nil {
+			s.defaultPasswordHashErr = err
+			return
+		}
+		s.defaultPasswordHash = string(hash)
+	})
+	if s.defaultPasswordHashErr != nil {
+		return nil, s.defaultPasswordHashErr
 	}
 	tokenVersion, err := newTokenVersion()
 	if err != nil {
@@ -488,7 +528,7 @@ func defaultDatabase() (*database, error) {
 		Version: currentFileVersion,
 		Users: []User{{
 			Username:           defaultUsername,
-			PasswordHash:       string(hash),
+			PasswordHash:       s.defaultPasswordHash,
 			Role:               RoleAdmin,
 			Enabled:            true,
 			TokenVersion:       tokenVersion,

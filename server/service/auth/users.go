@@ -56,24 +56,29 @@ func (s *Service) CreateUser(c *gin.Context) {
 func (s *Service) UpdateUser(c *gin.Context) {
 	var req proto.UpdateUserReq
 	var rsp proto.Response
-	if err := proto.ParseFormRequest(c, &req); err != nil || (req.Role == nil && req.Enabled == nil) {
+	if err := proto.ParseFormRequest(c, &req); err != nil || (req.Username == nil && req.Role == nil && req.Enabled == nil) {
 		rsp.ErrRsp(c, -1, "invalid parameters")
 		return
 	}
 	principal, _ := middleware.CurrentPrincipal(c)
-	patch := authn.UserPatch{Enabled: req.Enabled}
+	patch := authn.UserPatch{Username: req.Username, Enabled: req.Enabled}
 	if req.Role != nil {
 		role := authn.Role(*req.Role)
 		patch.Role = &role
 	}
 	username := c.Param("username")
-	if _, err := authn.DefaultStore.Update(principal.Username, username, patch); err != nil {
+	updated, changed, err := authn.DefaultStore.Update(principal.Username, username, patch)
+	if err != nil {
 		rsp.ErrRsp(c, -2, err.Error())
 		return
 	}
-	middleware.RevokeUserSessions(username)
+	if changed {
+		// Sessions are registered under the route username. This must remain the
+		// old name when an account is renamed.
+		middleware.RevokeUserSessions(username)
+	}
 	rsp.OkRsp(c)
-	log.Infof("user updated: %s", username)
+	log.Infof("user updated: %s", updated.Username)
 }
 
 func (s *Service) DeleteUser(c *gin.Context) {

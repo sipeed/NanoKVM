@@ -45,6 +45,12 @@ type Turn struct {
 type Security struct {
 	LoginLockoutDuration int `yaml:"loginLockoutDuration"`
 	LoginMaxFailures     int `yaml:"loginMaxFailures"`
+	// TrustedProxies contains IP addresses or CIDR ranges of reverse proxies
+	// permitted to supply X-Forwarded-Host and X-Forwarded-Proto.
+	TrustedProxies []string `yaml:"trustedProxies"`
+	// AllowedOrigins permits additional browser origins for deployments whose
+	// proxy cannot preserve the original Host header.
+	AllowedOrigins []string `yaml:"allowedOrigins"`
 }
 
 type Hardware struct {

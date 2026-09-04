@@ -50,6 +50,10 @@ jwt:
 security:
    loginLockoutDuration: 0,         # 达到失败上限后，禁止该 IP 再次尝试登录的持续时间（单位：秒）。如果设为 `0` 或不填，则代表不开启防暴力破解功能。默认为 `0`
    loginMaxFailures:     5,         # 允许触发保护前，单个 IP 连续登录失败的最大次数。默认为 `5`
+   trustedProxies:                  # 允许提供 X-Forwarded-Host 和 X-Forwarded-Proto 的反向代理 IP 或 CIDR。默认仅信任回环地址。
+     - 127.0.0.1/32
+     - ::1/128
+   allowedOrigins: []               # 可选的额外浏览器 Origin，必须精确填写 scheme、host 和非默认端口。
 
 
 # WebRTC 内网穿透
@@ -69,12 +73,82 @@ NanoKVM 使用两种设备级角色：
 
 管理员可在**设置 > 账户**中管理用户。账户数据继续保存在 `/etc/kvm/pwd`；服务会原地迁移旧版单账户
 JSON，并以 `0600` 权限原子写入多用户格式。沿用同一路径可保持长按 BOOT 键重置密码的现有行为。
-用户自助修改密码时必须验证当前密码；管理员可在账户管理中重置非设备所有者的密码。由于设备所有者
-密码还会同步至 Linux root 账户，因此只有设备所有者本人可以修改自己的密码。
+用户自助修改密码时必须验证当前密码；管理员可在账户管理中重置非设备所有者的密码。设备所有者可修改
+自己的用户名和密码；该密码还会同步至 Linux root 账户。设备所有者账户的限制用于防止在账户管理中
+误操作；具有终端或脚本访问权限的管理员仍拥有设备管理员权限，并非受沙箱隔离的用户。
 
 所有登录会话都会校验当前账户状态。禁用、删除、修改角色或密码会立即撤销该用户的 HTTP 与实时连接，
 且不会影响其他用户。多个用户可同时观看和协作控制 KVM；输入沿用现有 HID 协调器，因此同时输入可能交错。
 视频模式、画质、分辨率和 MJPEG 帧检测仍属于共享 KVM 操作；多人同时调整时，以最后一次设备级修改为准。
+
+## 反向代理
+
+将 NanoKVM 部署在反向代理后时，必须保留浏览器可见的主机名和协议。HID、H.264、终端和 PicoClaw 等 WebSocket 接口会校验 `Origin`；漏掉这些请求头时，普通 HTTP 页面虽可打开，WebSocket 握手仍可能返回 `403`。
+
+nginx 配置应至少等效于：
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:80;
+    proxy_http_version 1.1;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+}
+```
+
+最后一跳代理必须用浏览器可见的值覆盖（不要追加）`Host`、`X-Forwarded-Host` 和
+`X-Forwarded-Proto`，并清除客户端自行注入的转发请求头。多跳代理时，应让每一跳把值传给下一跳，
+并确保最终一跳的地址配置在 `security.trustedProxies` 中。旧配置若使用 `Host $proxy_host` 必须迁移；
+该值指向上游地址，可能导致 WebSocket Origin 校验失败（尤其是公网使用非默认端口时）。
+
+只有直连对端地址命中 `security.trustedProxies` 时，NanoKVM 才会采纳 `X-Forwarded-Host` 与 `X-Forwarded-Proto`。默认只信任 `127.0.0.1/32` 和 `::1/128`；非回环反向代理请加入其 IP 或 CIDR，切勿将不受信任的客户端网段加入。若代理确实无法保留原始主机名，可通过 `security.allowedOrigins` 列出 `https://kvm.example.com` 这样的完整 Origin（仅精确匹配 scheme、host 和端口）。优先使用转发请求头；`allowedOrigins` 是例外白名单，不支持通配符，也不能替代代理信任设置。
+
+## API 与自动化认证
+
+默认情况下，`POST /api/auth/login` 是浏览器登录：服务设置 HttpOnly 会话 Cookie，并返回不含 token 的普通成功响应。自动化客户端可发送 `X-NanoKVM-Return-Token: true`，明确要求在响应中取得 JWT；Cookie 仍会同时设置。后续请求使用 `Authorization: Bearer <JWT>`。如果带有 `Authorization` 请求头但凭据无效，NanoKVM 会直接拒绝，不会回退使用浏览器 Cookie。
+
+认证与用户管理 API 中的密码不是明文。其格式是使用口令 `nanokvm-sipeed-2024` 的 CryptoJS / OpenSSL 带盐加密格式。这只是传输混淆，远程访问仍必须使用 HTTPS。下面的 shell 函数输出原始 Base64（为兼容 CryptoJS，必须指定 `-md md5`）；配合 `curl --data-urlencode` 使用时，curl 会恰好执行一次 HTTP 表单编码。JSON 客户端仍可发送旧版的百分号编码 CryptoJS 值：
+
+```sh
+encrypt_password() {
+  printf %s "$1" | openssl enc -aes-256-cbc -salt -a -A -md md5 \
+    -pass pass:nanokvm-sipeed-2024
+}
+```
+
+以下示例登录并请求 token（用 `jq` 提取 token）：
+
+```sh
+BASE='https://kvm.example.com'
+TOKEN=$(curl --fail --silent --show-error \
+  -H 'X-NanoKVM-Return-Token: true' \
+  --data-urlencode 'username=admin' \
+  --data-urlencode "password=$(encrypt_password '替换为实际密码')" \
+  "$BASE/api/auth/login" | jq -er '.data.token')
+curl --fail --silent --show-error -H "Authorization: Bearer $TOKEN" "$BASE/api/auth/account"
+```
+
+管理员可创建用户、重命名非设备所有者用户，并重置非设备所有者的密码。设备所有者只能修改自己的
+用户名；以下使用设备所有者 token 的示例将默认的 `admin` 所有者账户改名：
+
+```sh
+curl --fail --silent --show-error -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode 'username=operator' \
+  --data-urlencode "password=$(encrypt_password 'operator-password')" \
+  --data-urlencode 'role=user' "$BASE/api/auth/users"
+curl --fail --silent --show-error -X POST -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode "password=$(encrypt_password 'new-operator-password')" \
+  "$BASE/api/auth/users/operator/password"
+curl --fail --silent --show-error -X PUT -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode 'username=owner' "$BASE/api/auth/users/admin"
+```
+
+已登录的所有者改名后 `$TOKEN` 会立即失效，因此示例将改名放在最后；继续调用 API 前请使用新用户名重新登录。
+
+修改当前登录用户自己的密码时，向 `/api/auth/password` 提交加密后的 `currentPassword` 与 `password`。此前向该接口提交 `{username, password}` 的客户端必须迁移；旧请求体不再受支持。
 
 ## 编译部署
 
