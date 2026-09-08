@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/auth.ts';
 import { Tooltip } from 'antd';
 import { CircleHelpIcon, EthernetPortIcon, WifiIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
-
-import { Hostname } from './hostname.tsx';
 
 type IP = {
   name: string;
@@ -25,7 +22,6 @@ type Info = {
 
 export const Information = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
 
   const [information, setInformation] = useState<Info>();
 
@@ -107,8 +103,6 @@ export const Information = () => {
 
           <span>{information ? information.application : '-'}</span>
         </div>
-
-        <Hostname editable={account.role === 'admin'} />
       </div>
     </>
   );

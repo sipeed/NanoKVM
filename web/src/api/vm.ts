@@ -206,6 +206,26 @@ export function setHostname(hostname: string) {
   return http.post('/api/vm/hostname', { hostname });
 }
 
+// get USB vendor (manufacturer)
+export function getDeviceVendor() {
+  return http.get('/api/vm/device-vendor');
+}
+
+// set USB vendor
+export function setDeviceVendor(vendor: string) {
+  return http.post('/api/vm/device-vendor', { vendor });
+}
+
+// get USB serial
+export function getDeviceSerial() {
+  return http.get('/api/vm/device-serial');
+}
+
+// set USB serial
+export function setDeviceSerial(serial: string) {
+  return http.post('/api/vm/device-serial', { serial });
+}
+
 // get WebTitle
 export function getWebTitle() {
   return http.get('/api/vm/web-title');

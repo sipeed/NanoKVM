@@ -337,8 +337,6 @@ const zh = {
         imageTip: 'NanoKVM 系统镜像版本',
         deviceKey: '设备码',
         community: '社区',
-        hostname: '主机名',
-        hostnameUpdated: '主机名修改成功，重启后生效',
         ipType: {
           Wired: '有线',
           Wireless: '无线',
@@ -380,6 +378,15 @@ const zh = {
       },
       device: {
         title: '设备',
+        identity: {
+          name: '设备名称',
+          nameDesc: '主机名 + USB 设备名称（重启后生效）',
+          vendor: '厂商',
+          vendorDesc: 'USB 厂商字符串（重启后生效）',
+          serial: '序列号',
+          serialDesc: 'USB 序列号字符串（重启后生效）',
+          saved: '已保存'
+        },
         oled: {
           title: 'OLED',
           description: '设置 OLED 屏幕自动休眠时间',

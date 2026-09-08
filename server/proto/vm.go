@@ -141,6 +141,22 @@ type GetHostnameRsp struct {
 	Hostname string `json:"hostname"`
 }
 
+type SetDeviceVendorReq struct {
+	Vendor string `validate:"omitempty"`
+}
+
+type GetDeviceVendorRsp struct {
+	Vendor string `json:"vendor"`
+}
+
+type SetDeviceSerialReq struct {
+	Serial string `validate:"omitempty"`
+}
+
+type GetDeviceSerialRsp struct {
+	Serial string `json:"serial"`
+}
+
 type SetWebTitleReq struct {
 	Title string `validate:"omitempty"`
 }

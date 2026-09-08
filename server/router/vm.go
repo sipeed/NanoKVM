@@ -61,8 +61,13 @@ func vmRouter(r *gin.Engine) {
 	admin.GET("/vm/mouse-jiggler", service.GetMouseJiggler)   // get mouse jiggler
 	admin.POST("/vm/mouse-jiggler/", service.SetMouseJiggler) // set mouse jiggler
 
-	api.GET("/vm/hostname", service.GetHostname)    // Get Hostname
-	admin.POST("/vm/hostname", service.SetHostname) // Set Hostname
+	api.GET("/vm/hostname", service.GetHostname)     // Get Hostname
+	admin.POST("/vm/hostname", service.SetHostname)  // Set Hostname
+
+	admin.GET("/vm/device-vendor", service.GetDeviceVendor)  // get USB vendor (manufacturer)
+	admin.POST("/vm/device-vendor", service.SetDeviceVendor) // set USB vendor
+	admin.GET("/vm/device-serial", service.GetDeviceSerial)  // get USB serial
+	admin.POST("/vm/device-serial", service.SetDeviceSerial) // set USB serial
 
 	api.GET("/vm/web-title", service.GetWebTitle)    // Get web title
 	admin.POST("/vm/web-title", service.SetWebTitle) // Set web title

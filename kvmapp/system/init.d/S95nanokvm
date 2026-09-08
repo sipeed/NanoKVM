@@ -1,6 +1,18 @@
 #!/bin/sh
 # nanokvm Rev3.1
 
+# Resolve device name — runtime /etc/kvm/device-name overrides the packaged
+# build-time default (/kvmapp/system/device-name.default); empty result means
+# "use the built-in default" (hostname prefix "kvm").
+resolve_device_name() {
+    _name=""
+    [ -f /etc/kvm/device-name ] && _name=$(tr -d '\r\n' < /etc/kvm/device-name)
+    if [ -z "$_name" ] && [ -f /kvmapp/system/device-name.default ]; then
+        _name=$(tr -d '\r\n' < /kvmapp/system/device-name.default)
+    fi
+    printf '%s' "$_name"
+}
+
 wait_for_exit() {
     process="$1"
     timeout="$2"
@@ -75,7 +87,21 @@ start_services() {
 
 case "$1" in
   start)
-    echo -n kvm > /boot/hostname.prefix
+    # Configurable device name. When set, it becomes the hostname (prefix +
+    # /etc/hostname + /etc/hosts + live hostname). Empty/absent keeps the
+    # stock "kvm" prefix behavior.
+    DEVICE_NAME="$(resolve_device_name)"
+    if [ -n "$DEVICE_NAME" ]; then
+        OLD_HOSTNAME="$(cat /etc/hostname 2>/dev/null | tr -d '\r\n')"
+        echo -n "$DEVICE_NAME" > /boot/hostname.prefix
+        echo "$DEVICE_NAME" > /etc/hostname
+        hostname "$DEVICE_NAME"
+        if [ -n "$OLD_HOSTNAME" ] && [ -f /etc/hosts ]; then
+            sed -i "s/$OLD_HOSTNAME/$DEVICE_NAME/g" /etc/hosts
+        fi
+    else
+        echo -n kvm > /boot/hostname.prefix
+    fi
     [ -e /root/.profile ] || printf '%s\n' 'export PS1="\u@\h:\w# "' > /root/.profile
 
     # Copy sensor config if the file exists
