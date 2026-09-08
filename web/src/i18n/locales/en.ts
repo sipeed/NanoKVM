@@ -452,6 +452,28 @@ const en = {
         okBtn: 'Yes',
         cancelBtn: 'No'
       },
+      diagnostics: {
+        title: 'Diagnostics',
+        refresh: 'Refresh',
+        app: 'App version',
+        image: 'Image version',
+        hw: 'Hardware',
+        hdmiVersion: 'HDMI chip',
+        hostname: 'Hostname',
+        deviceKey: 'Device key',
+        previewUpdates: 'Preview updates',
+        fps: 'Video FPS',
+        state: 'Video state',
+        type: 'Video type',
+        resolution: 'Resolution',
+        hdmiSignal: 'HDMI signal',
+        processes: 'Processes',
+        running: 'running',
+        stopped: 'stopped',
+        firewall: 'Firewall (INPUT)',
+        yes: 'yes',
+        no: 'no'
+      },
       network: {
         title: 'Network',
         wifi: {

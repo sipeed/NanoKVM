@@ -141,6 +141,39 @@ type GetHostnameRsp struct {
 	Hostname string `json:"hostname"`
 }
 
+type DiagnosticsVersion struct {
+	App            string `json:"app"`
+	Image          string `json:"image"`
+	Hw             string `json:"hw"`
+	HdmiVersion    string `json:"hdmiVersion"`
+	DeviceKey      string `json:"deviceKey"`
+	Hostname       string `json:"hostname"`
+	PreviewUpdates bool   `json:"previewUpdates"`
+}
+
+type DiagnosticsVideo struct {
+	NowFps      int    `json:"nowFps"`
+	State       int    `json:"state"`
+	Type        string `json:"type"`
+	Width       int    `json:"width"`
+	Height      int    `json:"height"`
+	Qlty        int    `json:"qlty"`
+	Res         int    `json:"res"`
+	HdmiSignal  bool   `json:"hdmiSignal"`
+	HdmiEnabled bool   `json:"hdmiEnabled"`
+}
+
+type DiagnosticsFirewall struct {
+	InputPolicy string `json:"inputPolicy"`
+}
+
+type GetDiagnosticsRsp struct {
+	Version   DiagnosticsVersion  `json:"version"`
+	Video     DiagnosticsVideo    `json:"video"`
+	Processes map[string]bool     `json:"processes"`
+	Firewall  DiagnosticsFirewall `json:"firewall"`
+}
+
 type SetWebTitleReq struct {
 	Title string `validate:"omitempty"`
 }

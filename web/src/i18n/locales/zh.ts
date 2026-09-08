@@ -443,6 +443,28 @@ const zh = {
         okBtn: '是',
         cancelBtn: '否'
       },
+      diagnostics: {
+        title: '诊断',
+        refresh: '刷新',
+        app: '应用版本',
+        image: '镜像版本',
+        hw: '硬件',
+        hdmiVersion: 'HDMI 芯片',
+        hostname: '主机名',
+        deviceKey: '设备码',
+        previewUpdates: '预览更新',
+        fps: '视频帧率',
+        state: '视频状态',
+        type: '视频类型',
+        resolution: '分辨率',
+        hdmiSignal: 'HDMI 信号',
+        processes: '进程',
+        running: '运行中',
+        stopped: '已停止',
+        firewall: '防火墙 (INPUT)',
+        yes: '是',
+        no: '否'
+      },
       network: {
         title: '网络',
         wifi: {
