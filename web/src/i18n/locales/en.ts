@@ -356,6 +356,15 @@ const en = {
       },
       appearance: {
         title: 'Appearance',
+        logo: {
+          title: 'Logo',
+          description: 'Login page logo + favicon (png/jpg/gif/svg/ico, max 1 MiB)',
+          upload: 'Upload',
+          reset: 'Reset',
+          saved: 'Logo updated',
+          uploadFailed: 'Upload failed',
+          resetFailed: 'Reset failed'
+        },
         display: 'Display',
         language: 'Language',
         languageDesc: 'Select the language for the interface',

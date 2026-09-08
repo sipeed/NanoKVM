@@ -216,6 +216,18 @@ export function setWebTitle(title: string) {
   return http.post('/api/vm/web-title', { title });
 }
 
+// upload login logo / favicon
+export function setLogo(file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return http.post('/api/vm/logo', formData);
+}
+
+// restore default logo
+export function resetLogo() {
+  return http.post('/api/vm/logo/reset');
+}
+
 // get mDNS state
 export function getMdnsState() {
   return http.get('/api/vm/mdns');
