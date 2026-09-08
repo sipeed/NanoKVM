@@ -446,6 +446,18 @@ const zh = {
       },
       network: {
         title: '网络',
+        services: {
+          ssdpd: {
+            title: 'SSDP',
+            description: 'UPnP 设备发现',
+            tip: '默认禁用'
+          },
+          dnsmasq: {
+            title: 'dnsmasq',
+            description: 'DHCP/DNS 服务器',
+            tip: '默认禁用'
+          }
+        },
         wifi: {
           title: 'Wi-Fi',
           description: '配置 Wi-Fi 信息',

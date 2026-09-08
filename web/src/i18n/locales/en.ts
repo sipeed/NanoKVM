@@ -455,6 +455,18 @@ const en = {
       },
       network: {
         title: 'Network',
+        services: {
+          ssdpd: {
+            title: 'SSDP',
+            description: 'UPnP device discovery',
+            tip: 'Disabled by default'
+          },
+          dnsmasq: {
+            title: 'dnsmasq',
+            description: 'DHCP/DNS server',
+            tip: 'Disabled by default'
+          }
+        },
         wifi: {
           title: 'Wi-Fi',
           description: 'Configure Wi-Fi',
