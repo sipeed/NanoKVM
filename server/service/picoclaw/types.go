@@ -70,6 +70,7 @@ type Config struct {
 
 type RuntimeStatus struct {
 	Ready           bool                `json:"ready"`
+	Enabled         bool                `json:"enabled"`
 	Installed       bool                `json:"installed"`
 	Installing      bool                `json:"installing"`
 	InstallProgress int                 `json:"install_progress,omitempty"`

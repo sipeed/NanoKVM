@@ -71,6 +71,10 @@ func vmRouter(r *gin.Engine) {
 	admin.POST("/vm/mdns/enable", service.EnableMdns)   // enable mDNS
 	admin.POST("/vm/mdns/disable", service.DisableMdns) // disable mDNS
 
+	admin.GET("/vm/services", service.GetServices)            // get service toggle states
+	admin.POST("/vm/service/enable", service.EnableService)   // enable a service
+	admin.POST("/vm/service/disable", service.DisableService) // disable a service
+
 	admin.POST("/vm/tls", service.SetTls) // enable/disable TLS
 
 	admin.GET("/vm/autostart", service.GetAutostart)              // get autostart list
