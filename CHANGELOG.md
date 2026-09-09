@@ -1,3 +1,42 @@
+## 2.5.1 (2026-09-09)
+
+### Features
+
+* Added device-level multi-user support with `admin` and `user` roles and a user management page under Settings, separating administrative areas (terminal, scripts, storage, network, updates, MCP, PicoClaw and Tailscale) from the video, keyboard, mouse, paste, wake-on-LAN and power controls every account keeps
+* Moved sessions to HttpOnly cookies with a per-user token version, so changing a password or disabling an account immediately ends that user's open web and WebSocket sessions
+* Added support for a custom update server, so the application can be updated from your own mirror, with credentials in the URL, manifest validation and a settings page for configuring it
+* Added SHA-256 verification of offline update packages before they are installed
+* Added configurable mouse input regions for absolute mode, with automatic black-border detection, manual selection of the controllable area on screen, and original-resolution presets, so the pointer stays aligned when the target machine outputs a letterboxed or non-16:9 signal
+* Added touch gestures to relative mouse mode, including tap, drag, long press, double-tap drag and two-finger scroll, so relative mode is now usable from a phone or tablet
+* Added a `signal` field to `/api/vm/hdmi` reporting whether an HDMI source is actually present, not just whether capture is enabled
+* Added a default root shell profile showing the user, host and working directory in the prompt over SSH and the Web terminal
+
+### Bug Fixes
+
+* Fixed mouse coordinates being offset in Direct H.264 mode when the target machine pads the picture with black bars
+* Fixed touch input in absolute mode, and stopped taps on the black letterbox area from being sent to the target machine
+* Fixed the video area not fitting the window, by scaling H.264 and MJPEG playback to contain and letting the page handle touch instead of the browser
+* Fixed WebRTC H.264 failures leaving a silent black screen; signaling, negotiation, ICE and playback failures now report what went wrong and offer a retry
+* Fixed a slow WebRTC viewer stalling the shared H.264 source for everyone else, by dropping its buffered frames until the next key frame
+* Fixed application updates running from a temporary directory that could be too small or shared with another update; online and offline updates are now staged in isolated persistent workspaces with archive, manifest and free-space checks, and the last rollback backup is kept when space runs short
+* Fixed the update lock being released before the server finished restarting, which allowed a second update to start and be killed mid-install
+* Fixed Web terminal sessions not loading the root profile, by starting them as login shells in `/root`
+
+### Performance
+
+* Routed Direct and WebRTC viewers through a single shared H.264 capture source instead of each reading the encoder separately
+
+### Localization
+
+* Synchronized translations of other languages according to English
+
+### Chores
+
+* Upgraded the web build tooling to Vite 8 and switched to Vite's native tsconfig path resolution
+* Added a dev container for full-stack development
+* Prefixed GitHub Release titles with `nanokvm`
+* Added release asset verification with per-device package size limits to the packaging workflow
+
 ## 2.5.0 (2026-08-04)
 
 ### Features
