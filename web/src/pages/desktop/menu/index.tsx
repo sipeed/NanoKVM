@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
 import { Divider } from 'antd';
 import clsx from 'clsx';
@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
+import * as api from '@/api/vm.ts';
 import {
   keyboardLedStatusVisibleAtom,
   menuCloseSignalAtom,
@@ -37,6 +38,22 @@ export const Menu = () => {
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
   const menuCloseSignal = useAtomValue(menuCloseSignalAtom);
   const isKeyboardLedStatusVisible = useAtomValue(keyboardLedStatusVisibleAtom);
+
+  // The PicoClaw menu button only makes sense when picoclaw is enabled (no
+  // /etc/kvm/enable-picoclaw = disabled). Default to shown (stock), hide once
+  // the device confirms it's disabled.
+  const [picoclawEnabled, setPicoclawEnabled] = useState(true);
+
+  useEffect(() => {
+    api
+      .getServices()
+      .then((rsp) => {
+        if (rsp.data?.services?.picoclaw) {
+          setPicoclawEnabled(rsp.data.services.picoclaw.enabled);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const {
     isInitialized,
@@ -129,7 +146,7 @@ export const Menu = () => {
               <Divider type="vertical" />
             )}
 
-            {isAdmin && isEnabled('picoclaw') && (
+            {isAdmin && isEnabled('picoclaw') && picoclawEnabled && (
               <>
                 <Picoclaw />
                 <Divider type="vertical" />

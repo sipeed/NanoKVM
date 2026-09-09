@@ -7,6 +7,11 @@ PIDFILE="/var/run/$DAEMON.pid"
 
 case "$1" in
 	start)
+		# Disabled by default. Enable with: touch /etc/kvm/enable-dnsmasq
+		[ -f /etc/kvm/enable-dnsmasq ] || {
+			echo "dnsmasq disabled (create /etc/kvm/enable-dnsmasq to enable)"
+			exit 0
+		}
 		printf "Starting dnsmasq: "
 		start-stop-daemon -S -p "$PIDFILE" -x "/usr/sbin/$DAEMON" -- \
 			--pid-file="$PIDFILE"

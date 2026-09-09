@@ -231,6 +231,21 @@ export function disableMdns() {
   return http.post('/api/vm/mdns/disable');
 }
 
+// get service toggle states
+export function getServices() {
+  return http.get('/api/vm/services');
+}
+
+// enable a service
+export function enableService(service: string) {
+  return http.post('/api/vm/service/enable', { service });
+}
+
+// disable a service
+export function disableService(service: string) {
+  return http.post('/api/vm/service/disable', { service });
+}
+
 // enable / disable TLS
 export function setTLS(enabled: boolean) {
   return http.post('/api/vm/tls', { enabled });
