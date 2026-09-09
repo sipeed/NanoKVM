@@ -1,10 +1,36 @@
 #!/bin/sh
 # kvmhwd hid only
 
+# Resolve device name — runtime /etc/kvm/device-name overrides the packaged
+# build-time default (/kvmapp/system/device-name.default); empty result means
+# "use the built-in default" (NanoKVM).
+resolve_device_name() {
+    _name=""
+    [ -f /etc/kvm/device-name ] && _name=$(tr -d '\r\n' < /etc/kvm/device-name)
+    if [ -z "$_name" ] && [ -f /kvmapp/system/device-name.default ]; then
+        _name=$(tr -d '\r\n' < /kvmapp/system/device-name.default)
+    fi
+    printf '%s' "$_name"
+}
+
+# Read a single-line device identity value (vendor/serial) from a file.
+resolve_device_value() {
+    _val=""
+    [ -f "$1" ] && _val=$(tr -d '\r\n' < "$1")
+    printf '%s' "$_val"
+}
+
 start_usb_dev(){
     . /etc/profile
     echo "usb mode: device"
     cd /sys/kernel/config/usb_gadget
+
+    DEVICE_NAME="$(resolve_device_name)"
+    [ -z "$DEVICE_NAME" ] && DEVICE_NAME="NanoKVM"
+    DEVICE_VENDOR="$(resolve_device_value /etc/kvm/device-vendor)"
+    [ -z "$DEVICE_VENDOR" ] && DEVICE_VENDOR="sipeed"
+    DEVICE_SERIAL="$(resolve_device_value /etc/kvm/device-serial)"
+    [ -z "$DEVICE_SERIAL" ] && DEVICE_SERIAL="0123456789ABCDEF"
 
     mkdir g0
     cd g0
@@ -26,15 +52,15 @@ start_usb_dev(){
         echo 0x1009 > idProduct
     fi
     mkdir strings/0x409
-    # echo '0' > strings/0x409/serialnumber
-    echo 'sipeed' > strings/0x409/manufacturer
-    echo 'NanoKVM' > strings/0x409/product
+    echo "$DEVICE_SERIAL" > strings/0x409/serialnumber
+    echo "$DEVICE_VENDOR" > strings/0x409/manufacturer
+    echo "$DEVICE_NAME" > strings/0x409/product
 
     mkdir configs/c.1
     echo 0xA0 > configs/c.1/bmAttributes
     echo 200 > configs/c.1/MaxPower
     mkdir configs/c.1/strings/0x409
-    echo "NanoKVM" >  configs/c.1/strings/0x409/configuration
+    echo "$DEVICE_NAME" >  configs/c.1/strings/0x409/configuration
 
     # keyboard
     mkdir functions/hid.GS0

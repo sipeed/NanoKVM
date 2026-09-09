@@ -346,8 +346,6 @@ const en = {
         imageTip: 'NanoKVM system image version',
         deviceKey: 'Device Key',
         community: 'Community',
-        hostname: 'Hostname',
-        hostnameUpdated: 'Hostname updated. Reboot to apply.',
         ipType: {
           Wired: 'Wired',
           Wireless: 'Wireless',
@@ -389,6 +387,15 @@ const en = {
       },
       device: {
         title: 'Device',
+        identity: {
+          name: 'Device Name',
+          nameDesc: 'Hostname + USB device name (applies on reboot)',
+          vendor: 'Vendor',
+          vendorDesc: 'USB manufacturer string (applies on reboot)',
+          serial: 'Serial',
+          serialDesc: 'USB serial string (applies on reboot)',
+          saved: 'Saved'
+        },
         oled: {
           title: 'OLED',
           description: 'Turn off OLED screen after',

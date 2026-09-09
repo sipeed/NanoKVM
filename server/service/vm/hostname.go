@@ -16,6 +16,7 @@ const (
 	BootHostnameFile = "/boot/hostname"
 	EtcHostname      = "/etc/hostname"
 	EtcHosts         = "/etc/hosts"
+	DeviceNameFile   = "/etc/kvm/device-name"
 )
 
 func (s *Service) SetHostname(c *gin.Context) {
@@ -52,6 +53,11 @@ func (s *Service) SetHostname(c *gin.Context) {
 
 	data := []byte(fmt.Sprintf("%s", req.Hostname))
 
+	if err := os.WriteFile(DeviceNameFile, data, 0o644); err != nil {
+		rsp.ErrRsp(c, -2, "failed to write data")
+		return
+	}
+
 	if err := os.WriteFile(BootHostnameFile, data, 0o644); err != nil {
 		rsp.ErrRsp(c, -2, "failed to write data")
 		return
@@ -71,10 +77,15 @@ func (s *Service) SetHostname(c *gin.Context) {
 func (s *Service) GetHostname(c *gin.Context) {
 	var rsp proto.Response
 
-	data, err := os.ReadFile(EtcHostname)
+	// /etc/kvm/device-name is the single source of truth (read by the init
+	// scripts for hostname + USB strings); fall back to /etc/hostname.
+	data, err := os.ReadFile(DeviceNameFile)
 	if err != nil {
-		rsp.ErrRsp(c, -1, "read Hostname failed")
-		return
+		data, err = os.ReadFile(EtcHostname)
+		if err != nil {
+			rsp.ErrRsp(c, -1, "read Hostname failed")
+			return
+		}
 	}
 
 	rsp.OkRspWithData(c, &proto.GetHostnameRsp{
