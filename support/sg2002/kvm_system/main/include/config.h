@@ -35,7 +35,15 @@
 #define KEY_LONGLONG_PRESS 			9000
 #define WIFI_CONNECTION_DELAY 		5000
 #define OLED_SLEEP_DELAY_MIN 		10
-#define OLED_SLEEP_DELAY_DEFAULT 	30
+#define OLED_SLEEP_DELAY_DEFAULT 	60
+#define OLED_WIFI_SLEEP_DELAY      300
+#define OLED_EVENT_WAKE_DELAY      15
+#define OLED_EVENT_WAKE_MAX        60
+#define OLED_CAROUSEL_DELAY        6
+#define OLED_CAROUSEL_START_DELAY  900
+#define OLED_PIXEL_SHIFT_DELAY     60
+#define OLED_PIXEL_SHIFT_X         3
+#define OLED_PIXEL_SHIFT_Y         3
 #define KVM_WD_COUNT_MAX			10
 #define RM_Watchdog_times			60
 
@@ -68,6 +76,11 @@ typedef struct {
 	int8_t wifi_config_process = -1;	// 1:QR;2:Test;3:IP;
 	char wifi_ap_pass[9] = {0};
     uint8_t oled_sleep_state = 0;	// 0:wakeup; 1:sleep;
+	// Key/system threads only publish these intents. OLED I2C remains owned by
+	// the OLED thread.
+	volatile uint8_t oled_manual_off = 0;
+	volatile uint64_t oled_local_activity_ms = 0;
+	volatile uint64_t oled_wifi_activity_ms = 0;
 	int8_t reconvery_update = 0;	// 0:Undetected; 1:Needs Update; 2:Update finish; -1:not need to update
 	uint8_t ping_allow = 1;
 } kvm_sys_state_t;
@@ -95,9 +108,26 @@ typedef struct {
 	int8_t type = -1;				// cat /kvmapp/kvm/type
 	int8_t now_fps = -1;			// cat /kvmapp/kvm/now_fps
 	int16_t qlty = -1;				// cat /kvmapp/kvm/qlty
-    uint16_t oled_sleep_param = 0;
+    uint16_t oled_sleep_param = OLED_SLEEP_DELAY_DEFAULT;
     uint8_t oled_sleep_state = 0;	// 0:wakeup; 1:sleep;
 	uint64_t oled_sleep_start = 0;
+	uint64_t event_wake_deadline_ms = 0;
+	uint64_t event_wake_started_ms = 0;
+	uint64_t event_wake_last_ms = 0;
+	uint64_t next_page_switch_ms = 0;
+	uint64_t next_pixel_shift_ms = 0;
+	uint64_t wifi_context_started_ms = 0;
+	uint64_t viewer_file_seen_ms = 0;
+	uint8_t main_page = 0;
+	uint8_t pixel_shift_x = 0;
+	uint8_t pixel_shift_y = 0;
+	int8_t pixel_shift_dx = 1;
+	int8_t pixel_shift_dy = 1;
+	uint8_t power_state = 0; // 0: off, 1: on
+	uint8_t wake_pending = 0;
+	uint8_t force_full_redraw = 1;
+	uint8_t viewers = 0;
+	uint64_t render_signature = 0;
 	uint64_t ue_patch_state = 0;
 } kvm_oled_state_t;
 
