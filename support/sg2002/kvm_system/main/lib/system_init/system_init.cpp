@@ -100,6 +100,11 @@ void new_app_init(void)
 	system("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/");
 	system("cp -f /kvmapp/system/init.d/S30eth /etc/init.d/");
 	system("cp -f /kvmapp/system/init.d/S50sshd /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S50avahi-daemon /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S50ssdpd /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S80dnsmasq /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S96picoclaw /etc/init.d/");
+	system("cp -f /kvmapp/system/init.d/S97mesh /etc/init.d/");
 	if(kvm_wifi_exist()) {
 		system("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/");
 	} else {
@@ -116,16 +121,12 @@ void new_app_init(void)
 	system("rm -f /mnt/system/ko/soph_saradc.ko");
 
 	// PCIe Patch
-	// system("cp /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
-	if(access("/kvmapp/jpg_stream/dl_lib/libmaixcam_lib.so", F_OK) != 0){
-		system("cp -f /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
-	}
+	system("cp -f /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
 
 	// Remove unnecessary components to speed up boot time
 	system("rm -f /etc/init.d/S04backlight");
 	system("rm -f /etc/init.d/S05tp");
 	system("rm -f /etc/init.d/S40bluetoothd");
-	system("rm -f /etc/init.d/S50ssdpd");
 	system("rm -f /etc/init.d/S99*");
 	
 	// Add necessary configuration files for program execution
