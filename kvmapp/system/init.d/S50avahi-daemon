@@ -5,6 +5,11 @@
 DAEMON=/usr/sbin/avahi-daemon
 case "$1" in
     start)
+	# Disabled by default. Enable with: touch /etc/kvm/enable-avahi
+	[ -f /etc/kvm/enable-avahi ] || {
+	    echo "avahi-daemon disabled (create /etc/kvm/enable-avahi to enable)"
+	    exit 0
+	}
 	$DAEMON -c || $DAEMON -D
 	;;
     stop)

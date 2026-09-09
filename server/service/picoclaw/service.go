@@ -142,6 +142,7 @@ func (s *Service) GetRuntimeStatus(c *gin.Context) {
 		return
 	}
 	status := s.runtime.Get()
+	status.Enabled = isPicoclawEnabled()
 	if shouldRefreshRuntimeStatus(status) {
 		_ = s.ensureRuntimeReady()
 		status = s.runtime.Get()
@@ -169,12 +170,20 @@ func (s *Service) GetRuntimeSession(c *gin.Context) {
 func (s *Service) runtimeStatus() RuntimeStatus {
 	s.ensureDependencies()
 	status := s.runtime.Get()
+	status.Enabled = isPicoclawEnabled()
 	modeStatus, err := s.control.Status()
 	if err != nil {
 		status.ControlMode = string(controlmode.ModeOff)
 		return status
 	}
 	return s.applyRuntimeIntentStatus(applyControlModeStatus(status, modeStatus))
+}
+
+// isPicoclawEnabled reports whether the enable flag is present. When absent,
+// picoclaw is disabled (default) and the UI must not offer to start it.
+func isPicoclawEnabled() bool {
+	_, err := os.Stat(picoclawEnableFlag)
+	return err == nil
 }
 
 func (s *Service) applyRuntimeIntentStatus(status RuntimeStatus) RuntimeStatus {

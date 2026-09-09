@@ -15,6 +15,7 @@ import (
 const (
 	ScriptPath       = "/etc/init.d/S98tailscaled"
 	ScriptBackupPath = "/kvmapp/system/init.d/S98tailscaled"
+	EnableFlag       = "/etc/kvm/enable-tailscale"
 )
 
 type Cli struct{}
@@ -45,6 +46,7 @@ func (c *Cli) Start() error {
 
 	commands := []string{
 		fmt.Sprintf("cp -f %s %s", ScriptBackupPath, ScriptPath),
+		fmt.Sprintf("touch %s", EnableFlag),
 		fmt.Sprintf("%s start", ScriptPath),
 	}
 
@@ -55,6 +57,7 @@ func (c *Cli) Start() error {
 func (c *Cli) Restart() error {
 	commands := []string{
 		fmt.Sprintf("cp -f %s %s", ScriptBackupPath, ScriptPath),
+		fmt.Sprintf("touch %s", EnableFlag),
 		fmt.Sprintf("%s restart", ScriptPath),
 	}
 
@@ -69,6 +72,7 @@ func (c *Cli) Stop() error {
 		return err
 	}
 
+	_ = os.Remove(EnableFlag)
 	return os.Remove(ScriptPath)
 }
 

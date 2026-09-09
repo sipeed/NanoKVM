@@ -361,6 +361,7 @@ const zh = {
           modeAlways: '始终显示',
           keyboardLedStatus: '键盘锁定状态指示灯',
           keyboardLedStatusDesc: '显示远程主机的 Num Lock、Caps Lock 和 Scroll Lock 状态',
+          picoclawDisabled: 'PicoClaw 已禁用 — 请先在 PicoClaw 设置中启用',
           icons: '菜单图标',
           iconsDesc: '是否在菜单栏中显示子菜单图标'
         }

@@ -133,6 +133,18 @@ type GetMdnsStateRsp struct {
 	Enabled bool `json:"enabled"`
 }
 
+type ServiceState struct {
+	Enabled bool `json:"enabled"`
+}
+
+type GetServicesRsp struct {
+	Services map[string]ServiceState `json:"services"`
+}
+
+type SetServiceReq struct {
+	Service string `validate:"required"`
+}
+
 type SetHostnameReq struct {
 	Hostname string `validate:"required"`
 }

@@ -370,6 +370,7 @@ const en = {
           modeAlways: 'Always visible',
           keyboardLedStatus: 'Keyboard lock indicators',
           keyboardLedStatusDesc: 'Display remote Num Lock, Caps Lock, and Scroll Lock status',
+          picoclawDisabled: 'PicoClaw is disabled — enable it in the PicoClaw settings first',
           icons: 'Submenu Icons',
           iconsDesc: 'Display submenu icons in the menu bar'
         }

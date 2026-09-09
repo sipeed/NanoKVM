@@ -102,6 +102,9 @@ export const Sidebar = () => {
     isSwitchingAgent ||
     isUninstallingRuntime ||
     isInstallingRuntime;
+  // When picoclaw is disabled (no /etc/kvm/enable-picoclaw), don't offer to
+  // start it — the enable flag is the master switch. Stopping stays available.
+  const runtimeStartDisabled = runtimeActionDisabled || runtimeStatus?.enabled === false;
   const controlIconClass =
     controlView.severity === 'success'
       ? 'text-emerald-400'
@@ -266,6 +269,7 @@ export const Sidebar = () => {
         isTogglingRuntime={isTogglingRuntime}
         actionDisabled={actionBusy}
         runtimeActionDisabled={runtimeActionDisabled}
+        runtimeStartDisabled={runtimeStartDisabled}
         agentProfile={runtimeStatus?.agent_profile}
         isSwitchingAgent={isSwitchingAgent}
         runtimeReady={runtimeStatus?.ready}
@@ -356,7 +360,7 @@ export const Sidebar = () => {
                     type="primary"
                     icon={<PlayIcon size={14} />}
                     loading={isTogglingRuntime || isRuntimeLifecyclePending}
-                    disabled={runtimeActionDisabled}
+                    disabled={runtimeStartDisabled}
                     onClick={() => void handleToggleRuntime()}
                   >
                     {runtimeStartButtonLabel}
