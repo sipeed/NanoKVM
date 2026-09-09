@@ -64,6 +64,8 @@ func vmRouter(r *gin.Engine) {
 	api.GET("/vm/hostname", service.GetHostname)    // Get Hostname
 	admin.POST("/vm/hostname", service.SetHostname) // Set Hostname
 
+	admin.GET("/vm/diagnostics", service.GetDiagnostics) // read-only diagnostics
+
 	api.GET("/vm/web-title", service.GetWebTitle)    // Get web title
 	admin.POST("/vm/web-title", service.SetWebTitle) // Set web title
 

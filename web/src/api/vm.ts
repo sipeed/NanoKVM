@@ -210,10 +210,14 @@ export function setHostname(hostname: string) {
 export function getWebTitle() {
   return http.get('/api/vm/web-title');
 }
-
 // set WebTitle
 export function setWebTitle(title: string) {
   return http.post('/api/vm/web-title', { title });
+}
+
+// read-only diagnostics
+export function getDiagnostics() {
+  return http.get('/api/vm/diagnostics');
 }
 
 // get mDNS state
