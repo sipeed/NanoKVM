@@ -347,6 +347,15 @@ const zh = {
       },
       appearance: {
         title: '外观',
+        logo: {
+          title: 'Logo',
+          description: '登录页 Logo + 网站图标（png/jpg/gif/svg/ico，最大 1 MiB）',
+          upload: '上传',
+          reset: '重置',
+          saved: 'Logo 已更新',
+          uploadFailed: '上传失败',
+          resetFailed: '重置失败'
+        },
         display: '显示',
         language: '语言',
         languageDesc: '选择界面语言',
