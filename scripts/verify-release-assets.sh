@@ -52,12 +52,22 @@ while IFS= read -r entry; do
         exit 1
     fi
     case "$entry" in
-        "$PACKAGE_ROOT"|"$PACKAGE_ROOT"/*) ;;
+        "$PACKAGE_ROOT"|"$PACKAGE_ROOT"/)
+            echo "[ERROR] archive must not contain a standalone package-root entry: $entry" >&2
+            exit 1
+            ;;
+        "$PACKAGE_ROOT"/*) ;;
         *)
             echo "[ERROR] archive entry is outside $PACKAGE_ROOT/: $entry" >&2
             exit 1
             ;;
     esac
+    # The updater accepts this canonical compatibility directory record: it
+    # cleans to the required root while preserving the root/ prefix required by
+    # older updater builds. Other dot-paths remain forbidden.
+    if [ "$entry" = "$PACKAGE_ROOT/." ] || [ "$entry" = "$PACKAGE_ROOT/./" ]; then
+        continue
+    fi
     case "/$entry/" in
         */../*|*/./*)
             echo "[ERROR] archive entry contains an unsafe path component: $entry" >&2

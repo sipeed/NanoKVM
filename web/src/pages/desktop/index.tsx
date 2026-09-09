@@ -41,7 +41,9 @@ import { ManualRegion } from './screen/manual-region.tsx';
 import { VirtualKeyboard } from './virtual-keyboard';
 
 function getVideoMode() {
-  const defaultVideoMode = window.RTCPeerConnection ? 'h264' : 'mjpeg';
+  // MJPEG is the safe default: it works without WebRTC signaling/ICE support.
+  // H.264 WebRTC remains selectable from the video menu for networks where it works.
+  const defaultVideoMode = 'mjpeg';
 
   const cookieVideoMode = storage.getVideoMode();
   if (!cookieVideoMode || (cookieVideoMode === 'direct' && !window.VideoDecoder)) {

@@ -14,19 +14,28 @@ type UpdateProps = {
   setIsLocked: (isClosable: boolean) => void;
 };
 
+const RESTART_COUNTDOWN_SECONDS = 50;
+
 export const Update = ({ setIsLocked }: UpdateProps) => {
   const { t } = useTranslation();
 
   const [status, setStatus] = useState('');
+  const [restartSeconds, setRestartSeconds] = useState(RESTART_COUNTDOWN_SECONDS);
   const [currentVersion, setCurrentVersion] = useState('');
   const [latestVersion, setLatestVersion] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [isCustomServerEnabled, setIsCustomServerEnabled] = useState(false);
   const [isCustomServerPending, setIsCustomServerPending] = useState(false);
   const versionRequestRef = useRef(0);
+  const restartTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     checkForUpdates();
+    return () => {
+      if (restartTimerRef.current !== null) {
+        window.clearInterval(restartTimerRef.current);
+      }
+    };
   }, []);
 
   function checkForUpdates() {
@@ -60,6 +69,29 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       });
   }
 
+  function startRestartCountdown() {
+    if (restartTimerRef.current !== null) {
+      window.clearInterval(restartTimerRef.current);
+    }
+
+    let secondsRemaining = RESTART_COUNTDOWN_SECONDS;
+    setRestartSeconds(secondsRemaining);
+    setStatus('restarting');
+
+    restartTimerRef.current = window.setInterval(() => {
+      secondsRemaining -= 1;
+      setRestartSeconds(secondsRemaining);
+
+      if (secondsRemaining <= 0) {
+        if (restartTimerRef.current !== null) {
+          window.clearInterval(restartTimerRef.current);
+          restartTimerRef.current = null;
+        }
+        window.location.reload();
+      }
+    }, 1000);
+  }
+
   function update() {
     if (status !== 'outdated' || isCustomServerPending) return;
 
@@ -70,18 +102,33 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
       .update()
       .then((rsp: any) => {
         if (rsp.code !== 0) {
-          setStatus('failed');
-          setErrMsg(t('settings.update.updateFailed'));
+          throw new Error(t('settings.update.updateFailed'));
         }
+        startRestartCountdown();
       })
-      .finally(() => {
-        setTimeout(() => {
-          setIsLocked(false);
-          setErrMsg('');
-
-          window.location.reload();
-        }, 12000);
+      .catch((error: unknown) => {
+        // Some firmware revisions restart the update service before the HTTP
+        // response reaches the browser. Treat that network disconnect as the
+        // expected reboot path, while keeping explicit server errors visible.
+        if (error instanceof TypeError) {
+          startRestartCountdown();
+          return;
+        }
+        setIsLocked(false);
+        setStatus('failed');
+        setErrMsg(error instanceof Error ? error.message : t('settings.update.updateFailed'));
       });
+  }
+
+  if (status === 'restarting') {
+    return (
+      <div className="flex min-h-[460px] flex-col items-center justify-center gap-5 px-6 text-center">
+        <Spin size="large" />
+        <div className="text-xl font-medium text-neutral-800">更新完成，正在重新啟動中</div>
+        <div className="text-4xl font-semibold text-blue-600">{restartSeconds}</div>
+        <div className="text-sm text-neutral-500">秒後將自動重新整理網頁（本次等待 50 秒）</div>
+      </div>
+    );
   }
 
   return (
@@ -103,6 +150,7 @@ export const Update = ({ setIsLocked }: UpdateProps) => {
         setStatus={setStatus}
         setIsLocked={setIsLocked}
         setErrMsg={setErrMsg}
+        onRestarting={startRestartCountdown}
       />
       <Divider className="opacity-50" />
 

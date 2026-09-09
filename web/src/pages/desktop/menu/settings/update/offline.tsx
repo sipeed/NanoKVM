@@ -10,9 +10,10 @@ interface UpdateProps {
   setStatus: (status: string) => void;
   setIsLocked: (isClosable: boolean) => void;
   setErrMsg: (msg: string) => void;
+  onRestarting: () => void;
 }
 
-export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdateProps) => {
+export const Offline = ({ status, setStatus, setIsLocked, setErrMsg, onRestarting }: UpdateProps) => {
   const { t } = useTranslation();
 
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -38,6 +39,14 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
     upload(file);
   }
 
+  function isExpectedRestartDisconnect(error: unknown) {
+    if (error instanceof TypeError) return true;
+    if (error instanceof DOMException) {
+      return error.name === 'NetworkError' || error.name === 'AbortError';
+    }
+    return error instanceof Error && /network|load failed|connection.*lost/i.test(error.message);
+  }
+
   function upload(file: File | null) {
     if (!file) return;
 
@@ -54,7 +63,7 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
       return;
     }
 
-    if (status === 'loading' || status === 'updating') {
+    if (status === 'loading' || status === 'updating' || status === 'restarting') {
       return;
     }
 
@@ -72,7 +81,14 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
         if (rsp.status === 502) return;
         if (!rsp.ok) throw new Error(`HTTP error ${rsp.status}`);
 
-        const rspj = await rsp.json();
+        let rspj: any;
+        try {
+          rspj = await rsp.json();
+        } catch {
+          // A successful response with a truncated body means the updater has
+          // already stopped the old service; continue to the restart screen.
+          return;
+        }
         if (rspj.code !== 0) {
           const message = rspj.msg?.includes('sha256 checksum mismatch')
             ? t('settings.update.offline.checksumMismatch')
@@ -80,13 +96,15 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
           throw new Error(message);
         }
       })
-      .then(() => {
-        setTimeout(() => {
-          setIsLocked(false);
-          window.location.reload();
-        }, 12000);
-      })
+      .then(onRestarting)
       .catch((error: unknown) => {
+        // The updater may close the old HTTP server before fetch receives its
+        // response. A network-level TypeError after upload is therefore the
+        // expected reboot path, not an upload failure.
+        if (isExpectedRestartDisconnect(error)) {
+          onRestarting();
+          return;
+        }
         setIsLocked(false);
         setStatus('failed');
         setErrMsg(
@@ -128,7 +146,10 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
             onChange={handleFileChange}
             className="hidden"
           />
-          <Button disabled={status === 'loading' || status === 'updating'} onClick={handleClick}>
+          <Button
+            disabled={status === 'loading' || status === 'updating' || status === 'restarting'}
+            onClick={handleClick}
+          >
             {t('settings.update.offline.upload')}
           </Button>
         </div>
@@ -136,7 +157,7 @@ export const Offline = ({ status, setStatus, setIsLocked, setErrMsg }: UpdatePro
         <Input
           value={sha256Checksum}
           maxLength={64}
-          disabled={status === 'updating'}
+          disabled={status === 'updating' || status === 'restarting'}
           placeholder={t('settings.update.offline.checksumPlaceholder')}
           onChange={(event) => setSha256Checksum(event.target.value)}
         />

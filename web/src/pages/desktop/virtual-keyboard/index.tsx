@@ -1,306 +1,277 @@
-import { useEffect, useRef, useState } from 'react';
-import { AppleOutlined, WindowsOutlined } from '@ant-design/icons';
-import clsx from 'clsx';
-import { useAtom } from 'jotai';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { useAtom, useSetAtom } from 'jotai';
 import { XIcon } from 'lucide-react';
-import Keyboard, { KeyboardButtonTheme } from 'react-simple-keyboard';
-import { Drawer } from 'vaul';
 
-import 'react-simple-keyboard/build/css/index.css';
-import '@/assets/styles/keyboard.css';
-
-import { ConfigProvider, Segmented, Select, theme } from 'antd';
-import { useMediaQuery } from 'react-responsive';
-
+import { paste } from '@/api/hid.ts';
+import { isKeyboardOpenAtom, keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { getKeycode, getModifierBit } from '@/lib/keymap.ts';
-import * as storage from '@/lib/localstorage.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
-import { isKeyboardOpenAtom } from '@/jotai/keyboard.ts';
 
-import {
-  doubleKeys,
-  keyboardArrowsOptions,
-  keyboardControlPadOptions,
-  keyboardOptions,
-  modifierKeys,
-  specialKeyMap
-} from './virtual-keys.ts';
+type VirtualKey = {
+  code: string;
+  label: string;
+  width?: number;
+};
+
+const modifierCodes = new Set([
+  'ControlLeft',
+  'ControlRight',
+  'ShiftLeft',
+  'ShiftRight',
+  'AltLeft',
+  'AltRight',
+  'MetaLeft',
+  'MetaRight'
+]);
+
+const rows: VirtualKey[][] = [
+  [
+    { code: 'Escape', label: 'Esc' },
+    ...Array.from({ length: 12 }, (_, index) => ({ code: `F${index + 1}`, label: `F${index + 1}` }))
+  ],
+  [
+    { code: 'Backquote', label: '`' },
+    ...Array.from({ length: 10 }, (_, index) => ({ code: `Digit${index + 1}`, label: `${index + 1}` })),
+    { code: 'Digit0', label: '0' },
+    { code: 'Minus', label: '-' },
+    { code: 'Equal', label: '=' },
+    { code: 'Backspace', label: '⌫', width: 2 }
+  ],
+  [
+    { code: 'Tab', label: 'Tab', width: 1.5 },
+    ...'QWERTYUIOP'.split('').map((key) => ({ code: `Key${key}`, label: key })),
+    { code: 'BracketLeft', label: '[' },
+    { code: 'BracketRight', label: ']' },
+    { code: 'Backslash', label: '\\', width: 1.5 }
+  ],
+  [
+    { code: 'CapsLock', label: 'Caps', width: 1.8 },
+    ...'ASDFGHJKL'.split('').map((key) => ({ code: `Key${key}`, label: key })),
+    { code: 'Semicolon', label: ';' },
+    { code: 'Quote', label: "'" },
+    { code: 'Enter', label: 'Enter', width: 2.2 }
+  ],
+  [
+    { code: 'ShiftLeft', label: 'Shift', width: 2.3 },
+    ...'ZXCVBNM'.split('').map((key) => ({ code: `Key${key}`, label: key })),
+    { code: 'Comma', label: ',' },
+    { code: 'Period', label: '.' },
+    { code: 'Slash', label: '/' },
+    { code: 'ShiftRight', label: 'Shift', width: 2.3 }
+  ],
+  [
+    { code: 'ControlLeft', label: 'Ctrl', width: 1.5 },
+    { code: 'MetaLeft', label: 'Win', width: 1.5 },
+    { code: 'AltLeft', label: 'Alt', width: 1.5 },
+    { code: 'Space', label: 'Space', width: 6 },
+    { code: 'AltRight', label: 'Alt', width: 1.5 },
+    { code: 'ContextMenu', label: 'Menu', width: 1.5 },
+    { code: 'ControlRight', label: 'Ctrl', width: 1.5 }
+  ]
+];
+
+const navigationRows: VirtualKey[][] = [
+  [
+    { code: 'Insert', label: 'Ins' },
+    { code: 'Home', label: 'Home' },
+    { code: 'PageUp', label: 'PgUp' },
+    { code: 'Delete', label: 'Del' },
+    { code: 'End', label: 'End' },
+    { code: 'PageDown', label: 'PgDn' }
+  ],
+  [{ code: 'ArrowUp', label: '↑' }],
+  [
+    { code: 'ArrowLeft', label: '←' },
+    { code: 'ArrowDown', label: '↓' },
+    { code: 'ArrowRight', label: '→' }
+  ]
+];
 
 export const VirtualKeyboard = () => {
-  const isBigScreen = useMediaQuery({ minWidth: 850 });
-
   const [isKeyboardOpen, setIsKeyboardOpen] = useAtom(isKeyboardOpenAtom);
-
-  const [keyboardLayout, setKeyboardLayout] = useState('default');
-  const [keyboardSystem, setKeyboardSystem] = useState('win');
-  const [keyboardLanguage, setKeyboardLanguage] = useState('en');
-  const [activeModifierKeys, setActiveModifierKeys] = useState<string[]>([]);
-
-  const keyboardRef = useRef<any>(null);
-
-  const systems = [
-    { value: 'win', icon: <WindowsOutlined /> },
-    { value: 'mac', icon: <AppleOutlined /> }
-  ];
-
-  const languages = [
-    { value: 'en', label: 'English' },
-    { value: 'fr', label: 'French' },
-    { value: 'de', label: 'German' },
-    { value: 'ru', label: 'Russian' },
-    { value: 'ko', label: 'Korean' },
-    { value: 'ja', label: 'Japanese' }
-  ];
+  const setKeyboardLock = useSetAtom(keyboardLockAtom);
+  const [activeModifiers, setActiveModifiers] = useState<string[]>([]);
+  const [isNativeKeyboardOpen, setIsNativeKeyboardOpen] = useState(false);
+  const nativeInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    const system = storage.getKeyboardSystem();
-    if (system && ['win', 'mac'].includes(system)) {
-      setKeyboardSystem(system);
-    }
+    return () => setKeyboardLock({ source: 'native-keyboard', locked: false });
+  }, [setKeyboardLock]);
 
-    const language = storage.getKeyboardLanguage();
-    if (language && languages.some((lng) => lng.value === language)) {
-      setKeyboardLanguage(language);
-    }
-  }, []);
-
-  useEffect(() => {
-    const layoutMap = new Map([
-      ['en', 'default'],
-      ['ru', 'rus'],
-      ['de', 'qwertz'],
-      ['fr', 'azerty'],
-      ['ko', 'ko'],
-      ['ja', 'ja']
-    ]);
-
-    if (keyboardLanguage === 'en' && keyboardSystem === 'mac') {
-      setKeyboardLayout('mac');
-      return;
-    }
-
-    if (layoutMap.has(keyboardLanguage)) {
-      setKeyboardLayout(layoutMap.get(keyboardLanguage)!);
-      return;
-    }
-
-    setKeyboardLayout('default');
-  }, [keyboardSystem, keyboardLanguage]);
-
-  // Press key
-  function onKeyPress(key: string) {
-    if (modifierKeys.includes(key)) {
-      if (activeModifierKeys.includes(key)) {
-        sendModifierKeyDown();
-        sendModifierKeyUp();
-      } else {
-        setActiveModifierKeys([...activeModifierKeys, key]);
-      }
-      return;
-    }
-
-    sendKeydown(key);
+  if (!isKeyboardOpen) {
+    return null;
   }
 
-  // Release key
-  function onKeyReleased(key: string) {
-    if (modifierKeys.includes(key)) {
-      return;
-    }
-
-    sendKeyup();
+  function send(modifier: number, key: number) {
+    client.send(new Uint8Array([MessageEvent.Keyboard, modifier, 0, key, 0, 0, 0, 0, 0]));
   }
 
-  // Send all keys
-  function sendKeydown(key: string) {
-    const code = getKeyboardCode(key);
-    if (!code) {
-      console.log('unknown code: ', key);
-      return;
-    }
-
-    const modifier = sendModifierKeyDown();
-
-    send(modifier, code);
-  }
-
-  function getKeyboardCode(key: string) {
-    // AZERTY: swap A↔Q and Z↔W on French physical positions
-    if (keyboardLanguage === 'fr' && key.endsWith('_azerty')) {
-      const base = key.replace('_azerty', '');
-      if (base === 'KeyA') return getKeycode('KeyQ');
-      if (base === 'KeyQ') return getKeycode('KeyA');
-      if (base === 'KeyZ') return getKeycode('KeyW');
-      if (base === 'KeyW') return getKeycode('KeyZ');
-      // all other labels use their own code
-      return getKeycode(base);
-    }
-
-    if (keyboardLanguage === 'de' && key.endsWith('_qwertz')) {
-      const base = key.replace('_qwertz', '');
-      // Tausch
-      if (base === 'KeyZ') return getKeycode('KeyY');
-      if (base === 'KeyY') return getKeycode('KeyZ');
-      // all other labels use their own code
-      return getKeycode(base);
-    }
-
-    if (keyboardLanguage === 'ko' && key.endsWith('_ko')) {
-      const base = key.replace('_ko', '');
-      return getKeycode(base);
-    }
-
-    if (keyboardLanguage === 'ja' && key.endsWith('_ja')) {
-      const base = key.replace('_ja', '');
-      return getKeycode(base);
-    }
-
-    const specialKey = specialKeyMap.get(key);
-    if (specialKey) {
-      return getKeycode(specialKey);
-    }
-
-    return getKeycode(key);
-  }
-
-  // Release all keys
-  function sendKeyup() {
-    sendModifierKeyUp();
+  function sendNativeKey(code: string) {
+    const keycode = getKeycode(code);
+    if (!keycode) return;
+    send(0, keycode);
     send(0, 0);
   }
 
-  // Send modifier keys
-  function sendModifierKeyDown() {
-    let modifier = 0;
-
-    activeModifierKeys.forEach((modifierKey) => {
-      const key = specialKeyMap.get(modifierKey)!;
-
-      modifier |= getModifierBit(key)!;
-      const code = getKeycode(key)!;
-
-      send(modifier, code);
-    });
-
-    return modifier;
+  function releaseAll() {
+    send(0, 0);
   }
 
-  // Release modifier keys
-  function sendModifierKeyUp() {
-    if (activeModifierKeys.length === 0) return;
-
-    activeModifierKeys.forEach(() => {
-      send(0, 0);
-    });
-
-    setActiveModifierKeys([]);
+  function currentModifierBits() {
+    return activeModifiers.reduce((bits, code) => bits | (getModifierBit(code) || 0), 0);
   }
 
-  function send(modifier: number, code: number) {
-    const data = new Uint8Array([MessageEvent.Keyboard, modifier, 0, code, 0, 0, 0, 0, 0]);
-    client.send(data);
-  }
-
-  function selectSystem(system: string) {
-    setKeyboardSystem(system);
-    storage.setKeyboardSystem(system);
-  }
-
-  function selectLanguage(language: string) {
-    setKeyboardLanguage(language);
-    storage.setKeyboardLanguage(language);
-  }
-
-  function getButtonTheme(): KeyboardButtonTheme[] {
-    const theme = [{ class: 'hg-double', buttons: doubleKeys.join(' ') }];
-
-    if (activeModifierKeys.length > 0) {
-      const buttons = activeModifierKeys.join(' ');
-      theme.push({ class: 'hg-highlight', buttons });
+  function press(key: VirtualKey) {
+    if (modifierCodes.has(key.code)) {
+      setActiveModifiers((current) =>
+        current.includes(key.code) ? current.filter((code) => code !== key.code) : [...current, key.code]
+      );
+      return;
     }
 
-    return theme;
+    const keycode = getKeycode(key.code);
+    if (!keycode) return;
+    send(currentModifierBits(), keycode);
+  }
+
+  function release(key: VirtualKey) {
+    if (modifierCodes.has(key.code)) return;
+    releaseAll();
+    if (activeModifiers.length > 0) setActiveModifiers([]);
+  }
+
+  function renderKey(key: VirtualKey) {
+    const active = activeModifiers.includes(key.code);
+    return (
+      <button
+        className={`min-w-0 flex-1 rounded border border-neutral-300 bg-white px-1 py-2 text-xs font-medium text-neutral-800 shadow-sm hover:bg-neutral-100 active:bg-blue-600 active:text-white ${
+          active ? 'bg-blue-600 text-white' : ''
+        }`}
+        key={key.code}
+        onPointerDown={(event) => {
+          event.preventDefault();
+          press(key);
+        }}
+        onPointerLeave={() => release(key)}
+        onPointerUp={() => release(key)}
+        style={{ flexGrow: key.width || 1 }}
+        type="button"
+      >
+        {key.label}
+      </button>
+    );
+  }
+
+  function openNativeKeyboard() {
+    setIsNativeKeyboardOpen(true);
+    setKeyboardLock({ source: 'native-keyboard', locked: true });
+    // Focus must occur directly in this user gesture for iPadOS Safari to show its keyboard.
+    nativeInputRef.current?.focus();
+  }
+
+  function closeNativeKeyboard() {
+    nativeInputRef.current?.blur();
+    setIsNativeKeyboardOpen(false);
+    setKeyboardLock({ source: 'native-keyboard', locked: false });
+  }
+
+  function submitNativeText(event: FormEvent<HTMLTextAreaElement>) {
+    const input = event.currentTarget;
+    const text = input.value;
+    if (!text) return;
+    input.value = '';
+    void paste(text, 'en');
+  }
+
+  function handleNativeKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      sendNativeKey('Enter');
+    } else if (event.key === 'Backspace' && !event.currentTarget.value) {
+      event.preventDefault();
+      sendNativeKey('Backspace');
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      sendNativeKey('Tab');
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      closeNativeKeyboard();
+    }
+  }
+
+  function closePanel() {
+    closeNativeKeyboard();
+    releaseAll();
+    setActiveModifiers([]);
+    setIsKeyboardOpen(false);
   }
 
   return (
-    <Drawer.Root open={isKeyboardOpen} onOpenChange={setIsKeyboardOpen} modal={false}>
-      <Drawer.Portal>
-        <Drawer.Content
-          className={clsx(
-            'fixed bottom-0 left-0 right-0 z-[999] mx-auto overflow-hidden rounded bg-white outline-none',
-            isBigScreen ? 'w-[820px]' : 'w-[650px]'
-          )}
-        >
-          {/* header */}
-          <div className="flex items-center justify-between px-3 py-1">
-            <ConfigProvider
-              theme={{
-                algorithm: theme.defaultAlgorithm
-              }}
-            >
-              <div className="flex items-center space-x-5">
-                <Select
-                  size="small"
-                  style={{ minWidth: 90 }}
-                  defaultValue={keyboardLanguage}
-                  options={languages}
-                  onChange={selectLanguage}
-                />
-
-                {keyboardLanguage === 'en' && (
-                  <Segmented
-                    size="small"
-                    options={systems}
-                    value={keyboardSystem}
-                    onChange={selectSystem}
-                  />
-                )}
+    <div
+      aria-label="Virtual keyboard"
+      className="fixed bottom-0 left-1/2 z-[999] w-[min(960px,calc(100vw-24px))] -translate-x-1/2 overflow-hidden rounded-t-lg bg-neutral-200 shadow-2xl"
+      role="dialog"
+    >
+      <div className="flex items-center justify-between gap-2 border-b border-neutral-300 bg-white px-3 py-2">
+        <span className="text-sm font-medium text-neutral-700">
+          {isNativeKeyboardOpen ? '本機原生鍵盤' : '虛擬鍵盤'}
+        </span>
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded border border-blue-600 bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100"
+            onClick={isNativeKeyboardOpen ? closeNativeKeyboard : openNativeKeyboard}
+            type="button"
+          >
+            {isNativeKeyboardOpen ? '切換到虛擬鍵盤' : '切換到本機鍵盤'}
+          </button>
+          <button
+            aria-label="Close virtual keyboard"
+            className="rounded p-1 text-neutral-600 hover:bg-neutral-200"
+            onClick={closePanel}
+            type="button"
+          >
+            <XIcon size={18} />
+          </button>
+        </div>
+      </div>
+      <textarea
+        aria-label="Native device keyboard input"
+        autoCapitalize="none"
+        autoCorrect="off"
+        className={
+          isNativeKeyboardOpen
+            ? 'm-3 block h-10 w-[calc(100%-1.5rem)] resize-none rounded border border-blue-500 bg-white px-3 py-2 text-base text-neutral-800 outline-none'
+            : 'absolute bottom-0 left-0 h-px w-px opacity-0'
+        }
+        enterKeyHint="enter"
+        onInput={submitNativeText}
+        onKeyDown={handleNativeKeyDown}
+        placeholder="點這裡或用 iPad／手機原生鍵盤輸入文字"
+        ref={nativeInputRef}
+        spellCheck={false}
+      />
+      {isNativeKeyboardOpen ? (
+        <div className="px-3 pb-3 text-xs text-neutral-600">
+          原生鍵盤模式只顯示文字輸入區；Enter、Tab、Backspace 會送到遠端。需要功能鍵或 Ctrl／Alt／Win 時，請切換回虛擬鍵盤。
+        </div>
+      ) : (
+        <>
+          <div className="space-y-1 p-2">
+            {rows.map((row, index) => (
+              <div className="flex gap-1" key={index}>
+                {row.map(renderKey)}
               </div>
-            </ConfigProvider>
-
-            <div className="flex w-[100px] items-center justify-end">
-              <div
-                className="flex h-[20px] w-[20px] cursor-pointer items-center justify-center rounded text-neutral-600 hover:bg-neutral-300 hover:text-white"
-                onClick={() => setIsKeyboardOpen(false)}
-              >
-                <XIcon size={18} />
-              </div>
-            </div>
+            ))}
           </div>
-
-          <div className="h-px flex-shrink-0 border-b bg-neutral-300" />
-
-          <div data-vaul-no-drag className="keyboardContainer w-full">
-            {/* main keyboard */}
-            <Keyboard
-              buttonTheme={getButtonTheme()}
-              keyboardRef={(r) => (keyboardRef.current = r)}
-              onKeyPress={onKeyPress}
-              onKeyReleased={onKeyReleased}
-              layoutName={keyboardLayout}
-              {...keyboardOptions}
-            />
-
-            {/* control keyboard */}
-            {isBigScreen && (
-              <div className="controlArrows">
-                <Keyboard
-                  onKeyPress={onKeyPress}
-                  onKeyReleased={onKeyReleased}
-                  {...keyboardControlPadOptions}
-                />
-
-                <Keyboard
-                  onKeyPress={onKeyPress}
-                  onKeyReleased={onKeyReleased}
-                  {...keyboardArrowsOptions}
-                />
+          <div className="border-t border-neutral-300 bg-neutral-100 p-2">
+            {navigationRows.map((row, index) => (
+              <div className="mx-auto mb-1 flex w-fit gap-1 last:mb-0" key={index}>
+                {row.map(renderKey)}
               </div>
-            )}
+            ))}
           </div>
-        </Drawer.Content>
-        <Drawer.Overlay />
-      </Drawer.Portal>
-    </Drawer.Root>
+        </>
+      )}
+    </div>
   );
 };

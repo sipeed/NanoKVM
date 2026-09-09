@@ -1,6 +1,8 @@
 import { Resolution } from '@/types';
 
 const LANGUAGE_KEY = 'nano-kvm-language';
+const LANGUAGE_COOKIE = 'nano_kvm_language';
+const LANGUAGE_COOKIE_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
 const VIDEO_MODE_KEY = 'nano-kvm-vide-mode';
 const VIDEO_SCALE_KEY = 'nano-kvm-video-scale';
 const WEB_RESOLUTION_KEY = 'nano-kvm-web-resolution';
@@ -53,12 +55,25 @@ function getWithExpiry(key: string) {
   return item.value;
 }
 
+function getCookie(name: string): string | null {
+  const prefix = `${name}=`;
+  const value = document.cookie
+    .split(';')
+    .map((cookie) => cookie.trim())
+    .find((cookie) => cookie.startsWith(prefix));
+
+  return value ? decodeURIComponent(value.slice(prefix.length)) : null;
+}
+
+// Language is mirrored to a host-wide cookie.  This survives an auth redirect
+// between HTTP and HTTPS, where browser localStorage is intentionally isolated.
 export function getLanguage() {
-  return localStorage.getItem(LANGUAGE_KEY);
+  return getCookie(LANGUAGE_COOKIE) || localStorage.getItem(LANGUAGE_KEY);
 }
 
 export function setLanguage(language: string) {
   localStorage.setItem(LANGUAGE_KEY, language);
+  document.cookie = `${LANGUAGE_COOKIE}=${encodeURIComponent(language)}; Path=/; Max-Age=${LANGUAGE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
 }
 
 export function getVideoMode() {
