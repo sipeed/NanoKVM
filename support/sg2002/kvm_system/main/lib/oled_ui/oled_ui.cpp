@@ -7,6 +7,7 @@ extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
 void OLED_Display_On(void);
 void OLED_Display_Off(void);
+static void oled_set_sleep_state(uint8_t sleeping);
 
 void kvm_init_cube_ui(void)
 {
@@ -372,10 +373,10 @@ void kvm_main_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
 	if(kvm_oled_state.sub_page == 1){
 		// main page (oled sleep)
 		kvm_oled_clear(first_disp || subpage_changed);
-		kvm_oled_state.oled_sleep_state = 1;
+		oled_set_sleep_state(1);
 	} else {
 		// main page
-		kvm_oled_state.oled_sleep_state = 0;
+		oled_set_sleep_state(0);
 		now_ip_type = show_which_ip();
 		kvm_main_disp(first_disp || subpage_changed);
 		kvm_eth_state_disp(now_ip_type, first_disp || subpage_changed);
@@ -547,6 +548,9 @@ void oled_auto_sleep(void)
 		}	
     }
 	
+	if(kvm_oled_state.page != 0){
+		oled_set_sleep_state(0);
+	}
 	if(kvm_oled_state.page == 0){
 		if(kvm_oled_state.oled_sleep_param < OLED_SLEEP_DELAY_MIN){
 			if(sleep_close_signal == 1){
