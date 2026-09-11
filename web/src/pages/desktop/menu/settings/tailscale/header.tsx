@@ -9,6 +9,7 @@ import { Memory } from './memory.tsx';
 import { Swap } from './swap.tsx';
 import type { State } from './types.ts';
 import { Uninstall } from './uninstall.tsx';
+import { Update } from './update.tsx';
 
 type HeaderProps = {
   state: State | undefined;
@@ -95,6 +96,7 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
               <div className="flex min-w-[250px] flex-col">
                 <Memory />
                 <Swap />
+                <Update />
                 <Uninstall onSuccess={onSuccess} />
               </div>
             }
