@@ -59,7 +59,7 @@ printf '%s\n' 'network={' "    ssid=\"$1\"" "    #psk=\"$password\"" \
     '    psk=0123456789abcdef' '}'
 EOF
 
-    for command in wpa_supplicant udhcpc hostapd udhcpd ifconfig ip killall chown
+    for command in wpa_supplicant udhcpc hostapd udhcpd ifconfig ip killall kill chown
     do
         cat > "$BIN_DIR/$command" <<EOF
 #!/bin/sh
@@ -89,6 +89,7 @@ run_action() (
     export NANOKVM_IFCONFIG="$BIN_DIR/ifconfig"
     export NANOKVM_IP="$BIN_DIR/ip"
     export NANOKVM_KILLALL="$BIN_DIR/killall"
+    export NANOKVM_KILL="$BIN_DIR/kill"
     export NANOKVM_CHOWN="$BIN_DIR/chown"
     "$SCRIPT" "$action"
 )
@@ -162,8 +163,7 @@ assert_contains 'ip args=addr flush dev wlan0' "$CALL_LOG"
 assert_not_contains 'ip args=add flush' "$CALL_LOG"
 assert_file "$AP_FLAG"
 
-# Stop uses direct process names rather than three process pipelines and removes
-# every ephemeral state file.
+# Stop targets the AP DHCP PID without killing the USB DHCP server.
 new_case stop
 mkdir -p "$RUN_DIR"
 for file in udhcpd.pid udhcpd.leases wpa_supplicant.conf hostapd.conf udhcpd.conf
@@ -171,15 +171,29 @@ do
     : > "$RUN_DIR/$file"
 done
 printf 'not-a-pid\n' > "$DHCP_PID"
+printf '4242\n' > "$RUN_DIR/udhcpd.pid"
 touch "$AP_FLAG"
 run_action stop
 assert_contains 'killall args=hostapd' "$CALL_LOG"
-assert_contains 'killall args=udhcpd' "$CALL_LOG"
+assert_not_contains 'killall args=udhcpd' "$CALL_LOG"
+assert_contains 'kill args=4242' "$CALL_LOG"
 assert_contains 'killall args=wpa_supplicant' "$CALL_LOG"
 for file in udhcpc.wlan0.pid udhcpd.pid udhcpd.leases wpa_supplicant.conf hostapd.conf udhcpd.conf
 do
     assert_absent "$RUN_DIR/$file"
 done
 assert_absent "$AP_FLAG"
+
+# Never interpret PID 0 (process group), PID 1, or malformed state as a daemon.
+for invalid_pid in 0 1 invalid
+do
+    new_case "invalid-pid-$invalid_pid"
+    mkdir -p "$RUN_DIR"
+    printf '%s\n' "$invalid_pid" > "$RUN_DIR/udhcpd.pid"
+    printf '%s\n' "$invalid_pid" > "$DHCP_PID"
+    run_action stop
+    assert_not_contains 'kill args=' "$CALL_LOG"
+    assert_not_contains 'killall args=udhcpd' "$CALL_LOG"
+done
 
 echo 'S30wifi runtime-state tests passed'

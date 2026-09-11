@@ -16,6 +16,7 @@
 : "${NANOKVM_IFCONFIG:=ifconfig}"
 : "${NANOKVM_IP:=ip}"
 : "${NANOKVM_KILLALL:=killall}"
+: "${NANOKVM_KILL:=kill}"
 : "${NANOKVM_CHOWN:=chown}"
 : "${NANOKVM_WIFI_DHCP_PID:=/run/udhcpc.wlan0.pid}"
 
@@ -169,14 +170,22 @@ ap_start() {
 
 stop() {
     "$NANOKVM_KILLALL" hostapd 2>/dev/null || true
-    "$NANOKVM_KILLALL" udhcpd 2>/dev/null || true
+    # The USB network gadget may run its own udhcpd. Stop only the Wi-Fi AP
+    # instance; a global killall would also break DHCP over USB.
+    if [ -r "$UDHCPD_PID" ]; then
+        ap_pid=$(cat "$UDHCPD_PID")
+        case "$ap_pid" in
+            ''|*[!0-9]*) ;;
+            *) [ "$ap_pid" -le 1 ] || "$NANOKVM_KILL" "$ap_pid" 2>/dev/null || true ;;
+        esac
+    fi
     "$NANOKVM_KILLALL" wpa_supplicant 2>/dev/null || true
 
     if [ -e "$WLAN_DHCP_PID" ]; then
         pid=$(cat "$WLAN_DHCP_PID")
         case "$pid" in
             ''|*[!0-9]*) ;;
-            *) kill "$pid" 2>/dev/null || true ;;
+            *) [ "$pid" -le 1 ] || "$NANOKVM_KILL" "$pid" 2>/dev/null || true ;;
         esac
         rm -f "$WLAN_DHCP_PID"
     fi
