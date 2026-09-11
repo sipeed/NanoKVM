@@ -31,13 +31,16 @@ stop_process() {
     fi
 
     killall -KILL "$process" 2>/dev/null || true
-    wait_for_exit "$process" 2 || true
+    if ! wait_for_exit "$process" 2; then
+        echo "Cannot stop $process; refusing to start a second instance" >&2
+        return 1
+    fi
 }
 
 stop_services() {
     # The server owns VI/VPSS. Let it release MMF before stopping kvm_system.
-    stop_process NanoKVM-Server
-    stop_process kvm_system
+    stop_process NanoKVM-Server || return 1
+    stop_process kvm_system || return 1
     rm -rf /tmp/kvm_system /tmp/server
 }
 
@@ -124,7 +127,7 @@ case "$1" in
    ;;
 
   stop)
-    stop_services
+    stop_services || exit 1
     echo "OK"
    ;;
 
@@ -132,7 +135,7 @@ case "$1" in
     if [ -f /tmp/.nanokvm_migrating ]; then
         exit 0
     fi
-    stop_services
+    stop_services || exit 1
     start_services
 
     sync
