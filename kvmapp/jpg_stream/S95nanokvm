@@ -1,6 +1,11 @@
 #!/bin/sh
 # nanokvm Rev2.1
 
+start_background() {
+    executable="$1"
+    nohup "$executable" </dev/null >/dev/null 2>&1 &
+}
+
 case "$1" in
   start)
     echo -n kvm > /boot/hostname.prefix
@@ -34,7 +39,7 @@ case "$1" in
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
     cp -r /kvmapp/kvm_system /tmp/
-    /tmp/kvm_system/kvm_system &
+    start_background /tmp/kvm_system/kvm_system
 
     # if [ -e /kvmapp/kvm_stream ]
     # then
@@ -43,7 +48,7 @@ case "$1" in
     # fi
     
     cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    start_background /tmp/server/NanoKVM-Server
   ;;
   stop)
     killall kvm_system
@@ -73,7 +78,7 @@ case "$1" in
     rm -r /tmp/server
     
     cp -r /kvmapp/kvm_system /tmp/
-    /tmp/kvm_system/kvm_system &
+    start_background /tmp/kvm_system/kvm_system
 
     # if [ -e /kvmapp/kvm_stream ]
     # then
@@ -82,7 +87,7 @@ case "$1" in
     # fi
     
     cp -r /kvmapp/server /tmp/
-    /tmp/server/NanoKVM-Server &
+    start_background /tmp/server/NanoKVM-Server
 
     sync
 
