@@ -41,7 +41,8 @@ func (s *Service) Terminal(c *gin.Context) {
 		_ = ws.Close()
 	}()
 
-	cmd := exec.Command("/bin/sh")
+	cmd := exec.Command("/bin/sh", "-l")
+	cmd.Dir = "/root"
 	ptmx, err := pty.Start(cmd)
 	if err != nil {
 		log.Errorf("failed to start pty: %s", err)

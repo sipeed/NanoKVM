@@ -76,6 +76,7 @@ start_services() {
 case "$1" in
   start)
     echo -n kvm > /boot/hostname.prefix
+    [ -e /root/.profile ] || printf '%s\n' 'export PS1="\u@\h:\w# "' > /root/.profile
 
     # Copy sensor config if the file exists
     [ -f /mnt/data/sensor_cfg.ini.LT ] && cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
