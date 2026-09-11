@@ -957,7 +957,9 @@ static CVI_S32 _mmf_init(void)
 	 ************************************************/
 	s32Ret = SAMPLE_COMM_VI_GetSizeBySensor(stIniCfg.enSnsType[0], &enPicSize);
 	if (s32Ret != CVI_SUCCESS) {
-		SAMPLE_PRT("SAMPLE_COMM_VI_GetSizeBySensor failed with %#x\n", s32Ret);
+		SAMPLE_PRT("SAMPLE_COMM_VI_GetSizeBySensor failed with %#x "
+			"(parsed sensor=%d, expected LT6911=%d)\n", s32Ret,
+			(int)stIniCfg.enSnsType[0], (int)LONTIUM_LT6911_2M_60FPS_8BIT);
 		return s32Ret;
 	}
 

@@ -116,10 +116,10 @@ for lib in "$ROOT"/server/dl_lib/*; do
     fi
 done
 
-#    The SDK is built from an unpinned MaixCDK checkout, so its dist could one
-#    day add or rename a library (e.g. an soname bump leaving both .409 and
-#    .410 behind) and we would ship a library set nobody reviewed. Require the
-#    shipped names to be exactly the tracked set, and fail loudly otherwise.
+#    The pinned SDK dist could still add or rename a library when its revision
+#    is deliberately updated (e.g. an soname bump leaving both .409 and .410
+#    behind). Require the shipped names to be exactly the tracked set, and fail
+#    loudly otherwise.
 staged_libs=$(cd "$STAGE/server/dl_lib" && ls -1 | LC_ALL=C sort)
 tracked_libs=$(cd "$ROOT/server/dl_lib" && ls -1 | LC_ALL=C sort)
 if [ "$staged_libs" != "$tracked_libs" ]; then
