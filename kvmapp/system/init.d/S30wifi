@@ -2,11 +2,43 @@
 
 . /etc/profile
 
-APFLAG_FILE=/tmp/wifiap
+: "${NANOKVM_WIFI_BOOT_DIR:=/boot}"
+: "${NANOKVM_WIFI_ETC_DIR:=/etc/kvm}"
+: "${NANOKVM_WIFI_KVM_DIR:=/kvmapp/kvm}"
+: "${NANOKVM_WIFI_RUN_DIR:=/run/nanokvm-wifi}"
+: "${NANOKVM_WIFI_AP_FLAG:=/tmp/wifiap}"
+: "${NANOKVM_WIFI_UID_FILE:=/sys/class/cvi-base/base_uid}"
+: "${NANOKVM_WPA_PASSPHRASE:=wpa_passphrase}"
+: "${NANOKVM_WPA_SUPPLICANT:=wpa_supplicant}"
+: "${NANOKVM_UDHCPC:=udhcpc}"
+: "${NANOKVM_HOSTAPD:=hostapd}"
+: "${NANOKVM_UDHCPD:=udhcpd}"
+: "${NANOKVM_IFCONFIG:=ifconfig}"
+: "${NANOKVM_IP:=ip}"
+: "${NANOKVM_KILLALL:=killall}"
+: "${NANOKVM_KILL:=kill}"
+: "${NANOKVM_CHOWN:=chown}"
+: "${NANOKVM_WIFI_DHCP_PID:=/run/udhcpc.wlan0.pid}"
+
+WIFI_SSID_FILE=$NANOKVM_WIFI_ETC_DIR/wifi.ssid
+WIFI_PASS_FILE=$NANOKVM_WIFI_ETC_DIR/wifi.pass
+BOOT_SSID_FILE=$NANOKVM_WIFI_BOOT_DIR/wifi.ssid
+BOOT_PASS_FILE=$NANOKVM_WIFI_BOOT_DIR/wifi.pass
+WPA_CONFIG=$NANOKVM_WIFI_RUN_DIR/wpa_supplicant.conf
+HOSTAPD_CONFIG=$NANOKVM_WIFI_RUN_DIR/hostapd.conf
+UDHCPD_CONFIG=$NANOKVM_WIFI_RUN_DIR/udhcpd.conf
+UDHCPD_PID=$NANOKVM_WIFI_RUN_DIR/udhcpd.pid
+UDHCPD_LEASES=$NANOKVM_WIFI_RUN_DIR/udhcpd.leases
+WLAN_DHCP_PID=$NANOKVM_WIFI_DHCP_PID
+
+prepare_run_dir() {
+    mkdir -p "$NANOKVM_WIFI_RUN_DIR" || return 1
+    chmod 700 "$NANOKVM_WIFI_RUN_DIR" || return 1
+}
 
 gen_hostapd_conf() {
-    ssid="${1}"
-    pass="${2}"
+    ssid=$1
+    pass=$2
     echo "ctrl_interface=/var/run/hostapd"
     echo "ctrl_interface_group=0"
     echo "ssid=${ssid}"
@@ -25,62 +57,83 @@ gen_hostapd_conf() {
 }
 
 gen_udhcpd_conf() {
-    interface=${1}
-    ipv4_prefix=${2}
+    interface=$1
+    ipv4_prefix=$2
     echo "start ${ipv4_prefix}.100"
     echo "end ${ipv4_prefix}.200"
     echo "interface ${interface}"
-    echo "pidfile /var/run/udhcpd.${interface}.pid"
-    echo "lease_file /var/lib/misc/udhcpd.${interface}.leases"
+    echo "pidfile ${UDHCPD_PID}"
+    echo "lease_file ${UDHCPD_LEASES}"
     echo "option subnet 255.255.255.0"
     echo "option lease 864000"
 }
 
-gen_dnsmasq_conf() {
-    ipv4_prefix=${1}
-    echo "bind-interfaces"
-    echo "interface=wlan0"
-    echo "address=/config.kvm/${ipv4_prefix}.1"
-    echo "no-hosts"
-    echo "dhcp-range=${ipv4_prefix}.2,${ipv4_prefix}.254"
-    echo "dhcp-option=6,${ipv4_prefix}.1"
-    echo "dhcp-option=3,${ipv4_prefix}.1"
-    echo "dhcp-authoritative"
+import_boot_credentials() {
+    [ -e "$BOOT_SSID_FILE" ] && [ -e "$BOOT_PASS_FILE" ] || return 0
+
+    echo "Updating WiFi credentials from /boot to /etc/kvm/"
+    mkdir -p "$NANOKVM_WIFI_ETC_DIR" || return 1
+    rm -f "$WIFI_SSID_FILE" "$WIFI_PASS_FILE"
+    mv "$BOOT_SSID_FILE" "$WIFI_SSID_FILE" || return 1
+    mv "$BOOT_PASS_FILE" "$WIFI_PASS_FILE" || return 1
+    "$NANOKVM_CHOWN" root:root "$WIFI_SSID_FILE" "$WIFI_PASS_FILE" || return 1
+    chmod 600 "$WIFI_SSID_FILE" "$WIFI_PASS_FILE" || return 1
+}
+
+write_wpa_config() {
+    ssid=$1
+    pass=$2
+    config_tmp=$WPA_CONFIG.tmp.$$
+
+    # Supplying the password over stdin keeps it out of the process list.
+    # wpa_passphrase includes a plaintext #psk comment; do not retain it.
+    psk_config=$(printf '%s\n' "$pass" | "$NANOKVM_WPA_PASSPHRASE" "$ssid") || return 1
+
+    umask 077
+    {
+        echo "ctrl_interface=/var/run/wpa_supplicant"
+        printf '%s\n' "$psk_config" | sed '/^[[:space:]]*#psk=/d'
+    } > "$config_tmp" || {
+        rm -f "$config_tmp"
+        return 1
+    }
+    mv "$config_tmp" "$WPA_CONFIG" || return 1
 }
 
 start() {
     echo "wifi mode: sta"
-    ssid=""
-    pass=""
-    if [ -e /boot/wifi.ssid ] && [ -e /boot/wifi.pass ]; then
-        echo "Updating WiFi credentials from /boot to /etc/kvm/"
+    import_boot_credentials || return 1
 
-        rm -f /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
+    if [ ! -s "$WIFI_SSID_FILE" ] || [ ! -s "$WIFI_PASS_FILE" ]; then
+        echo "WiFi credentials are not configured; leaving wlan0 idle"
+        return 0
+    fi
 
-        mv /boot/wifi.ssid /etc/kvm/wifi.ssid
-        mv /boot/wifi.pass /etc/kvm/wifi.pass
+    # Credentials created by older releases were world-readable. Tighten them
+    # on every start so upgrading fixes existing installations immediately.
+    "$NANOKVM_CHOWN" root:root "$WIFI_SSID_FILE" "$WIFI_PASS_FILE" || return 1
+    chmod 600 "$WIFI_SSID_FILE" "$WIFI_PASS_FILE" || return 1
 
-        chown root:root /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
-        chmod 644 /etc/kvm/wifi.ssid /etc/kvm/wifi.pass
-    fi
-    if [ -e /etc/kvm/wifi.ssid ]; then
-        ssid=$(cat /etc/kvm/wifi.ssid)
-    fi
-    if [ -e /etc/kvm/wifi.pass ]; then
-        pass=$(cat /etc/kvm/wifi.pass)
-    fi
-    echo "ctrl_interface=/var/run/wpa_supplicant" >/etc/wpa_supplicant.conf
-    wpa_passphrase "$ssid" "$pass" >>/etc/wpa_supplicant.conf
-    wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-    if [ ! -e /boot/wifi.nodhcp ]; then
-        (udhcpc -i wlan0 -t 10 -T 1 -A 5 -b -p /run/udhcpc.wlan0.pid) &
+    ssid=$(cat "$WIFI_SSID_FILE") || return 1
+    pass=$(cat "$WIFI_PASS_FILE") || return 1
+    prepare_run_dir || return 1
+    write_wpa_config "$ssid" "$pass" || {
+        echo "Could not generate WiFi configuration" >&2
+        return 1
+    }
+
+    "$NANOKVM_WPA_SUPPLICANT" -B -i wlan0 -c "$WPA_CONFIG" || return 1
+    if [ ! -e "$NANOKVM_WIFI_BOOT_DIR/wifi.nodhcp" ]; then
+        "$NANOKVM_UDHCPC" -i wlan0 -t 10 -T 1 -A 5 -b -p "$WLAN_DHCP_PID" &
     fi
 }
 
 ap_start() {
     echo "wifi mode: ap"
-    id2=$(printf "%d" 0x$(sha512sum /sys/class/cvi-base/base_uid | head -c 2))
-    id3=$(printf "%d" 0x$(sha512sum /sys/class/cvi-base/base_uid | head -c 4 | tail -c 2))
+    prepare_run_dir || return 1
+
+    id2=$(printf "%d" "0x$(sha512sum "$NANOKVM_WIFI_UID_FILE" | head -c 2)")
+    id3=$(printf "%d" "0x$(sha512sum "$NANOKVM_WIFI_UID_FILE" | head -c 4 | tail -c 2)")
     if [ "$id2" = "$id3" ]; then
         id2=$((id2 + 1))
     fi
@@ -90,66 +143,58 @@ ap_start() {
     if [ "$id3" -ge 255 ]; then
         id3=254
     fi
-    ssid=""
-    pass=""
-    if [ -e /kvmapp/kvm/ap.ssid ]; then
-        ssid=$(cat /kvmapp/kvm/ap.ssid)
+
+    ssid=
+    pass=
+    if [ -e "$NANOKVM_WIFI_KVM_DIR/ap.ssid" ]; then
+        ssid=$(cat "$NANOKVM_WIFI_KVM_DIR/ap.ssid")
     fi
-    if [ -e /kvmapp/kvm/ap.pass ]; then
-        pass=$(cat /kvmapp/kvm/ap.pass)
+    if [ -e "$NANOKVM_WIFI_KVM_DIR/ap.pass" ]; then
+        pass=$(cat "$NANOKVM_WIFI_KVM_DIR/ap.pass")
     fi
-    gen_hostapd_conf "$ssid" "$pass" >/etc/hostapd.conf
+
+    umask 077
+    gen_hostapd_conf "$ssid" "$pass" > "$HOSTAPD_CONFIG" || return 1
     ipv4_prefix=10.$id3.$id2
-    if [ ! -e /etc/udhcpd.wlan0.conf ]; then
-        gen_udhcpd_conf wlan0 "${ipv4_prefix}" >/etc/udhcpd.wlan0.conf
-    fi
-    # gen_dnsmasq_conf "${ipv4_prefix}"  > /etc/dnsmasq.conf
+    gen_udhcpd_conf wlan0 "$ipv4_prefix" > "$UDHCPD_CONFIG" || return 1
 
-    # iptables --policy INPUT ACCEPT
-    # iptables --policy FORWARD ACCEPT
-    # iptables --policy OUTPUT ACCEPT
-    # iptables -F
-    # iptables -t nat -F
-    # iptables -t nat -A PREROUTING -i wlan0 -p udp --dport 53 -j DNAT --to ${ipv4_prefix}.1
+    "$NANOKVM_IFCONFIG" wlan0 up || return 1
+    "$NANOKVM_IP" route del default dev wlan0 2>/dev/null || true
+    "$NANOKVM_IP" addr flush dev wlan0 || return 1
+    "$NANOKVM_IP" addr add "$ipv4_prefix.1/24" dev wlan0 || return 1
+    "$NANOKVM_HOSTAPD" -B -i wlan0 "$HOSTAPD_CONFIG" || return 1
+    "$NANOKVM_UDHCPD" -S "$UDHCPD_CONFIG" || return 1
 
-    ifconfig wlan0 up
-    ip route del default || true
-    ip add flush dev wlan0
-    ip addr add $ipv4_prefix.1/24 dev wlan0
-    # dnsmasq --pid-file=/tmp/dnsmasq.run -C /etc/dnsmasq.conf
-    hostapd -B -i wlan0 /etc/hostapd.conf
-    udhcpd -S /etc/udhcpd.wlan0.conf
-
-    if [ ! -f "$APFLAG_FILE" ]; then
-        touch "$APFLAG_FILE"
-    fi
-
+    touch "$NANOKVM_WIFI_AP_FLAG"
 }
 
 stop() {
-    ps -ef | grep hostapd | grep -v grep | awk '{print $1}' | xargs kill -2 || true
-    ps -ef | grep "udhcpd -S /etc/udhcpd.wlan0.conf" | grep -v grep | awk '{print $1}' | xargs kill -2 || true
-    killall wpa_supplicant || true
-    if [ -e /run/udhcpc.wlan0.pid ]; then
-        kill $(cat /run/udhcpc.wlan0.pid) || true
-        rm -f /run/udhcpc.wlan0.pid
+    "$NANOKVM_KILLALL" hostapd 2>/dev/null || true
+    # The USB network gadget may run its own udhcpd. Stop only the Wi-Fi AP
+    # instance; a global killall would also break DHCP over USB.
+    if [ -r "$UDHCPD_PID" ]; then
+        ap_pid=$(cat "$UDHCPD_PID")
+        case "$ap_pid" in
+            ''|*[!0-9]*) ;;
+            *) [ "$ap_pid" -le 1 ] || "$NANOKVM_KILL" "$ap_pid" 2>/dev/null || true ;;
+        esac
     fi
-    if [ -e /var/run/udhcpd.wlan0.pid ]; then
-        kill $(cat /var/run/udhcpd.wlan0.pid) || true
-        rm -f /var/run/udhcpd.wlan0.pid
-    fi
-    if [ -e /tmp/dnsmasq.run ]; then
-        kill $(cat /tmp/dnsmasq.run) || true
-        rm -f /tmp/dnsmasq.run
-    fi
-    # if [ -e /etc/wpa_supplicant.conf]
-    # then
-    # 	echo > /etc/wpa_supplicant.conf
-    # fi
-    airmon-ng stop wlan0mon || true
+    "$NANOKVM_KILLALL" wpa_supplicant 2>/dev/null || true
 
-    if [ -f "$APFLAG_FILE" ]; then
-        rm "$APFLAG_FILE"
+    if [ -e "$WLAN_DHCP_PID" ]; then
+        pid=$(cat "$WLAN_DHCP_PID")
+        case "$pid" in
+            ''|*[!0-9]*) ;;
+            *) [ "$pid" -le 1 ] || "$NANOKVM_KILL" "$pid" 2>/dev/null || true ;;
+        esac
+        rm -f "$WLAN_DHCP_PID"
+    fi
+
+    rm -f "$UDHCPD_PID" "$UDHCPD_LEASES" "$WPA_CONFIG" \
+        "$HOSTAPD_CONFIG" "$UDHCPD_CONFIG" "$NANOKVM_WIFI_AP_FLAG"
+
+    if [ -e /sys/class/net/wlan0mon ] && command -v airmon-ng >/dev/null 2>&1; then
+        airmon-ng stop wlan0mon || true
     fi
 }
 
@@ -158,13 +203,12 @@ restart() {
     start
 }
 
-if [ "${1}" = "start" ]; then
-    start
-elif [ "${1}" = "stop" ]; then
-    stop
-elif [ "${1}" = "ap" ]; then
-    stop
-    ap_start
-elif [ "${1}" = "restart" ]; then
-    restart
-fi
+case "${1:-}" in
+    start) start ;;
+    stop) stop ;;
+    ap)
+        stop
+        ap_start
+        ;;
+    restart) restart ;;
+esac
