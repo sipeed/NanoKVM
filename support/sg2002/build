@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 export MAIXCDK_PATH="${MAIXCDK_PATH:-$HOME/MaixCDK}"
 export NanoKVM_PATH="${NanoKVM_PATH:-$HOME/NanoKVM}"
 
