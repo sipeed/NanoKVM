@@ -74,72 +74,12 @@ fi
 
 PACKAGE_ROOT="nanokvm_${VERSION}"
 
-# Tailscale is installed on demand from the vendor rather than published as a
-# NanoKVM release asset.  The package must therefore carry a complete,
-# immutable pin and it must still describe the bytes available at the official
-# versioned URL.  Checking the files from the *package* (not the checkout)
-# catches an accidentally omitted metadata file or a packaging layout drift.
-TAILSCALE_VERSION=$(tar -xOzf "$TARBALL" "$PACKAGE_ROOT/system/tailscale/VERSION" 2>/dev/null) || {
-    echo "[ERROR] release tarball does not contain Tailscale VERSION metadata" >&2
-    exit 1
-}
-TAILSCALE_SHA256=$(tar -xOzf "$TARBALL" "$PACKAGE_ROOT/system/tailscale/SHA256" 2>/dev/null) || {
-    echo "[ERROR] release tarball does not contain Tailscale SHA256 metadata" >&2
-    exit 1
-}
-TAILSCALE_SOURCE=$(tar -xOzf "$TARBALL" "$PACKAGE_ROOT/system/tailscale/SOURCE" 2>/dev/null) || {
-    echo "[ERROR] release tarball does not contain Tailscale SOURCE metadata" >&2
-    exit 1
-}
-# Match the device parser's strings.TrimSpace semantics: outer whitespace is
-# harmless, but whitespace inside metadata must fail rather than be silently
-# deleted into a different (and potentially valid) pin.
-TAILSCALE_VERSION=$(printf '%s' "$TAILSCALE_VERSION" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-TAILSCALE_SHA256=$(printf '%s' "$TAILSCALE_SHA256" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-TAILSCALE_SOURCE=$(printf '%s' "$TAILSCALE_SOURCE" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//')
-if ! printf '%s' "$TAILSCALE_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-    echo "[ERROR] invalid pinned Tailscale version '$TAILSCALE_VERSION'" >&2
-    exit 1
-fi
-if ! printf '%s' "$TAILSCALE_SHA256" | grep -Eq '^[0-9a-f]{64}$'; then
-    echo "[ERROR] invalid pinned Tailscale SHA-256" >&2
-    exit 1
-fi
-EXPECTED_TAILSCALE_SOURCE="https://pkgs.tailscale.com/stable/tailscale_${TAILSCALE_VERSION}_riscv64.tgz"
-if [ "$TAILSCALE_SOURCE" != "$EXPECTED_TAILSCALE_SOURCE" ]; then
-    echo "[ERROR] Tailscale SOURCE must be the exact versioned riscv64 vendor URL" >&2
-    exit 1
-fi
-
-# Do not rely on curl's Content-Length-based --max-filesize alone: a chunked
-# response has no length.  head bounds bytes actually retained from every
-# response form; with pipefail curl errors or an over-limit stream still fail
-# the verification rather than being silently accepted.
-TAILSCALE_ARCHIVE=$(mktemp)
-trap 'rm -rf "$NETBIRD_TMP" "${ENTRY_LIST:-}" "${VERBOSE_LIST:-}" "${TAILSCALE_ARCHIVE:-}"' EXIT
-if ! curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --max-time 240 \
-    --max-filesize $((128 << 20)) "$TAILSCALE_SOURCE" \
-    | head -c $(((128 << 20) + 1)) > "$TAILSCALE_ARCHIVE"; then
-    echo "[ERROR] failed to download pinned Tailscale archive" >&2
-    exit 1
-fi
-TAILSCALE_SIZE=$(wc -c < "$TAILSCALE_ARCHIVE" | tr -d '[:space:]')
-if [ "$TAILSCALE_SIZE" -gt $((128 << 20)) ]; then
-    echo "[ERROR] pinned Tailscale archive exceeds device download limit" >&2
-    exit 1
-fi
-ACTUAL_TAILSCALE_SHA256=$(sha256sum "$TAILSCALE_ARCHIVE" | cut -d' ' -f1)
-if [ "$ACTUAL_TAILSCALE_SHA256" != "$TAILSCALE_SHA256" ]; then
-    echo "[ERROR] pinned Tailscale archive SHA-256 does not match package metadata" >&2
-    exit 1
-fi
-
 MAX_PACKAGE_SIZE=$((1 << 30))
 MAX_UNPACKED_SIZE=$((2 << 30))
 MAX_ARCHIVE_ENTRIES=100000
 ENTRY_LIST=$(mktemp)
 VERBOSE_LIST=$(mktemp)
-# EXIT trap is already installed above and covers these too.
+trap 'rm -rf "$NETBIRD_TMP" "${ENTRY_LIST:-}" "${VERBOSE_LIST:-}"' EXIT
 
 if ! tar -tzf "$TARBALL" > "$ENTRY_LIST"; then
     echo "[ERROR] could not list release tarball" >&2

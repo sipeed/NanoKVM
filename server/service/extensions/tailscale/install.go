@@ -20,15 +20,25 @@ import (
 )
 
 const (
-	// PinnedVersionPath and PinnedSHA256Path are shipped with the firmware. The
-	// installer never follows Tailscale's mutable latest URL: an update is an
-	// explicit source change with a release version and checksum that are both
-	// reviewed with the firmware.
-	PinnedVersionPath  = "/kvmapp/system/tailscale/VERSION"
-	PinnedSHA256Path   = "/kvmapp/system/tailscale/SHA256"
-	ReleaseDownloadURL = "https://pkgs.tailscale.com/stable/tailscale_%s_riscv64.tgz"
+	// LatestDownloadURL is Tailscale's own pointer to the current stable
+	// riscv64 build, which is what this device has always installed. It is
+	// deliberately not pinned to a version in the firmware: that would make
+	// every Tailscale release require a NanoKVM release, which is a change to
+	// how an existing feature behaves and does not belong in the change that
+	// adds NetBird.
+	//
+	// The release it resolves to is verified against the checksum Tailscale
+	// publishes next to the archive, so the bytes that reach the device are
+	// still the bytes that server serves.
+	LatestDownloadURL = "https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
+	digestURLSuffix   = ".sha256"
+
+	// A published checksum is 64 hex characters, optionally followed by the
+	// file name. Anything appreciably larger is not that file.
+	maxDigestResponseSize int64 = 4 << 10
 
 	installTimeout                  = 4 * time.Minute
+	metadataTimeout                 = 30 * time.Second
 	maxTailscaleArchiveSize   int64 = 128 << 20
 	maxTailscaleExtractedSize int64 = 256 << 20
 	minTailscaleBinarySize    int64 = 64
@@ -40,6 +50,9 @@ var (
 	installHTTPClient  = &http.Client{Timeout: installTimeout}
 	tailscaleVersionRE = regexp.MustCompile(`^[0-9]+\.[0-9]+\.[0-9]+$`)
 	tailscaleSHA256RE  = regexp.MustCompile(`^[a-f0-9]{64}$`)
+	// The archive name carries the version the redirect resolved to, and
+	// extractArchive checks it against the VERSION inside the archive.
+	tailscaleArchiveRE = regexp.MustCompile(`^tailscale_([0-9]+\.[0-9]+\.[0-9]+)_riscv64\.tgz$`)
 )
 
 type stagedInstall struct {
@@ -87,35 +100,101 @@ func installArtifactsExist(targets [2]string) bool {
 	return false
 }
 
-// stagePinnedInstall reads the immutable firmware metadata before downloading.
-// The version is part of the URL and the archive hash is verified before any
+// stageLatestInstall resolves Tailscale's latest stable riscv64 release, reads
+// the checksum published beside it, and only then downloads. The version comes
+// from the resolved URL rather than from a firmware file, so a Tailscale
+// release needs no firmware release; the checksum still has to match before any
 // executable is extracted or can be promoted.
-func stagePinnedInstall(ctx context.Context, client *http.Client, targets [2]string) (*stagedInstall, error) {
-	version, digest, err := pinnedInstallMetadata(PinnedVersionPath, PinnedSHA256Path)
+func stageLatestInstall(ctx context.Context, client *http.Client, targets [2]string) (*stagedInstall, error) {
+	// Bound the two small metadata requests separately from the transfer:
+	// stageInstall gives the archive its own installTimeout, and a vendor
+	// endpoint that accepts a connection and then stalls must not consume it.
+	metadataCtx, cancel := context.WithTimeout(ctx, metadataTimeout)
+	defer cancel()
+	url, version, err := resolveLatestRelease(metadataCtx, client)
 	if err != nil {
 		return nil, err
 	}
-	return stageInstall(ctx, client, fmt.Sprintf(ReleaseDownloadURL, version), version, digest, targets)
+	digest, err := fetchPublishedDigest(metadataCtx, client, url)
+	if err != nil {
+		return nil, err
+	}
+	return stageInstall(ctx, client, url, version, digest, targets)
 }
 
-func pinnedInstallMetadata(versionPath, digestPath string) (string, string, error) {
-	versionContent, err := os.ReadFile(versionPath)
+// resolveLatestRelease follows the mutable latest URL to the versioned archive
+// it currently points at. HEAD is enough: only the final URL is wanted, and the
+// archive itself is downloaded once, with its checksum already known.
+func resolveLatestRelease(ctx context.Context, client *http.Client) (string, string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodHead, LatestDownloadURL, nil)
 	if err != nil {
-		return "", "", fmt.Errorf("read pinned tailscale version: %w", err)
+		return "", "", err
 	}
-	digestContent, err := os.ReadFile(digestPath)
+	response, err := client.Do(request)
 	if err != nil {
-		return "", "", fmt.Errorf("read pinned tailscale SHA-256: %w", err)
+		return "", "", fmt.Errorf("resolve latest tailscale release: %w", err)
 	}
-	return validatePinnedInstallMetadata(strings.TrimSpace(string(versionContent)), strings.TrimSpace(string(digestContent)))
+	defer func() { _ = response.Body.Close() }()
+	if response.StatusCode != http.StatusOK {
+		return "", "", fmt.Errorf("resolve latest tailscale release: unexpected status %s", response.Status)
+	}
+
+	resolved := response.Request.URL
+	version, err := versionFromArchiveURL(resolved.String())
+	if err != nil {
+		return "", "", err
+	}
+	return resolved.String(), version, nil
 }
 
-func validatePinnedInstallMetadata(version, digest string) (string, string, error) {
+func versionFromArchiveURL(url string) (string, error) {
+	match := tailscaleArchiveRE.FindStringSubmatch(path.Base(url))
+	if match == nil {
+		return "", fmt.Errorf("unexpected tailscale archive name in %q", url)
+	}
+	return match[1], nil
+}
+
+// fetchPublishedDigest reads the .sha256 file Tailscale publishes beside every
+// archive. It is required: without it the download could not be checked at all,
+// and a silent fallback would make an unverified install indistinguishable from
+// a verified one.
+func fetchPublishedDigest(ctx context.Context, client *http.Client, archiveURL string) (string, error) {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, archiveURL+digestURLSuffix, nil)
+	if err != nil {
+		return "", err
+	}
+	response, err := client.Do(request)
+	if err != nil {
+		return "", fmt.Errorf("read published tailscale checksum: %w", err)
+	}
+	defer func() { _ = response.Body.Close() }()
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("read published tailscale checksum: unexpected status %s", response.Status)
+	}
+	content, err := io.ReadAll(io.LimitReader(response.Body, maxDigestResponseSize))
+	if err != nil {
+		return "", fmt.Errorf("read published tailscale checksum: %w", err)
+	}
+	return parsePublishedDigest(string(content))
+}
+
+// parsePublishedDigest accepts both the bare hash and the "<hash>  <name>" form
+// that sha256sum writes, and nothing else.
+func parsePublishedDigest(content string) (string, error) {
+	fields := strings.Fields(content)
+	if len(fields) == 0 || !tailscaleSHA256RE.MatchString(fields[0]) {
+		return "", fmt.Errorf("invalid published tailscale checksum %q", strings.TrimSpace(content))
+	}
+	return fields[0], nil
+}
+
+func validateInstallMetadata(version, digest string) (string, string, error) {
 	if !tailscaleVersionRE.MatchString(version) {
-		return "", "", fmt.Errorf("invalid pinned tailscale version %q", version)
+		return "", "", fmt.Errorf("invalid tailscale version %q", version)
 	}
 	if !tailscaleSHA256RE.MatchString(digest) {
-		return "", "", fmt.Errorf("invalid pinned tailscale SHA-256 %q", digest)
+		return "", "", fmt.Errorf("invalid tailscale SHA-256 %q", digest)
 	}
 	return version, digest, nil
 }
@@ -123,7 +202,7 @@ func validatePinnedInstallMetadata(version, digest string) (string, string, erro
 // Each staged file lives beside its destination so exclusive publication also
 // works when /usr/bin and /usr/sbin are on different filesystems.
 func stageInstall(ctx context.Context, client *http.Client, url, expectedVersion, expectedDigest string, targets [2]string) (stage *stagedInstall, err error) {
-	if _, _, err := validatePinnedInstallMetadata(expectedVersion, expectedDigest); err != nil {
+	if _, _, err := validateInstallMetadata(expectedVersion, expectedDigest); err != nil {
 		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(ctx, installTimeout)
@@ -238,7 +317,7 @@ func verifyArchiveDigest(archivePath, expected string) error {
 		return fmt.Errorf("tailscale archive exceeds %d byte limit", maxTailscaleArchiveSize)
 	}
 	if subtle.ConstantTimeCompare(hash.Sum(nil), expectedBytes) != 1 {
-		return errors.New("tailscale archive SHA-256 does not match firmware pin")
+		return errors.New("tailscale archive SHA-256 does not match the published checksum")
 	}
 	return nil
 }

@@ -12,7 +12,6 @@ on:
       - kvmapp/system/init.d/S98tailscaled
       - kvmapp/system/init.d/S99netbird
       - kvmapp/system/init.d/tests/test_vpn_init_scripts.sh
-      - kvmapp/system/tailscale/**
       - kvmapp/system/netbird/**
   workflow_dispatch:
 

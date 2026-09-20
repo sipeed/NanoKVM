@@ -86,7 +86,7 @@ func (s *Service) Install(c *gin.Context) {
 	vpnpref.Unlock()
 	defer finish()
 
-	stage, err := stagePinnedInstall(ctx, installHTTPClient, [2]string{TailscalePath, TailscaledPath})
+	stage, err := stageLatestInstall(ctx, installHTTPClient, [2]string{TailscalePath, TailscaledPath})
 	if err != nil {
 		rsp.ErrRsp(c, -1, fmt.Sprintf("install failed: %v", err))
 		return

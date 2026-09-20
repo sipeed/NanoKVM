@@ -201,9 +201,9 @@ func TestStageRejectsDigestMismatchBeforePromotion(t *testing.T) {
 	}
 }
 
-func TestPinnedInstallMetadataValidation(t *testing.T) {
+func TestInstallMetadataValidation(t *testing.T) {
 	const digest = "06989538da8f4cb773a43a039e3477caf5c028ba66ff7eaa9809eef37e06654d"
-	if version, gotDigest, err := validatePinnedInstallMetadata("1.102.3", digest); err != nil || version != "1.102.3" || gotDigest != digest {
+	if version, gotDigest, err := validateInstallMetadata("1.102.3", digest); err != nil || version != "1.102.3" || gotDigest != digest {
 		t.Fatalf("valid metadata = (%q, %q, %v)", version, gotDigest, err)
 	}
 	for _, test := range []struct {
@@ -214,30 +214,52 @@ func TestPinnedInstallMetadataValidation(t *testing.T) {
 		{version: "1.102.3", digest: strings.ToUpper(digest)},
 		{version: "1.102.3", digest: "not-a-digest"},
 	} {
-		if _, _, err := validatePinnedInstallMetadata(test.version, test.digest); err == nil {
+		if _, _, err := validateInstallMetadata(test.version, test.digest); err == nil {
 			t.Fatalf("invalid metadata accepted: version=%q digest=%q", test.version, test.digest)
 		}
 	}
 }
 
-func TestPinnedInstallMetadataReadsFirmwareFiles(t *testing.T) {
-	const version = "1.102.3"
+// The version is taken from the archive the latest URL resolved to, so a
+// redirect that lands anywhere else must not be installed.
+func TestVersionFromArchiveURL(t *testing.T) {
+	version, err := versionFromArchiveURL("https://pkgs.tailscale.com/stable/tailscale_1.102.4_riscv64.tgz")
+	if err != nil || version != "1.102.4" {
+		t.Fatalf("versionFromArchiveURL() = (%q, %v)", version, err)
+	}
+	for _, url := range []string{
+		"https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz",
+		"https://pkgs.tailscale.com/stable/tailscale_1.102.4_arm64.tgz",
+		"https://pkgs.tailscale.com/stable/tailscale_1.102_riscv64.tgz",
+		"https://example.invalid/download",
+	} {
+		if version, err := versionFromArchiveURL(url); err == nil {
+			t.Fatalf("versionFromArchiveURL(%q) accepted %q", url, version)
+		}
+	}
+}
+
+func TestParsePublishedDigest(t *testing.T) {
 	const digest = "06989538da8f4cb773a43a039e3477caf5c028ba66ff7eaa9809eef37e06654d"
-	directory := t.TempDir()
-	versionPath := filepath.Join(directory, "VERSION")
-	digestPath := filepath.Join(directory, "SHA256")
-	if err := os.WriteFile(versionPath, []byte(version+"\n"), 0o600); err != nil {
-		t.Fatal(err)
+	for _, content := range []string{
+		digest,
+		digest + "\n",
+		digest + "  tailscale_1.102.3_riscv64.tgz\n",
+	} {
+		got, err := parsePublishedDigest(content)
+		if err != nil || got != digest {
+			t.Fatalf("parsePublishedDigest(%q) = (%q, %v)", content, got, err)
+		}
 	}
-	if err := os.WriteFile(digestPath, []byte(digest+"\n"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	gotVersion, gotDigest, err := pinnedInstallMetadata(versionPath, digestPath)
-	if err != nil || gotVersion != version || gotDigest != digest {
-		t.Fatalf("pinnedInstallMetadata = (%q, %q, %v)", gotVersion, gotDigest, err)
-	}
-	if gotURL := fmt.Sprintf(ReleaseDownloadURL, gotVersion); gotURL != "https://pkgs.tailscale.com/stable/tailscale_1.102.3_riscv64.tgz" {
-		t.Fatalf("pinned URL = %q", gotURL)
+	for _, content := range []string{
+		"",
+		"not-a-digest",
+		strings.ToUpper(digest),
+		"<html>404</html>",
+	} {
+		if got, err := parsePublishedDigest(content); err == nil {
+			t.Fatalf("parsePublishedDigest(%q) accepted %q", content, got)
+		}
 	}
 }
 

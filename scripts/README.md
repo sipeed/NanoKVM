@@ -69,14 +69,13 @@ published prerelease can be promoted.
   `kvmapp/system/netbird/SHA256`, and the firmware accepts only that digest
   rather than bundled: it is ~38 MB and most devices never enable it
 
-Tailscale is also downloaded on demand, but from its vendor's versioned
-archive URL. Its `VERSION`, lowercase archive `SHA256`, and exact `SOURCE` URL
-are firmware metadata in `kvmapp/system/tailscale/`. When updating that pin,
-use an official stable riscv64 release, set `SOURCE` to
-`https://pkgs.tailscale.com/stable/tailscale_<version>_riscv64.tgz`, and record
-the SHA-256 of those exact archive bytes. `verify-release-assets.sh` extracts
-the three files from the OTA package, downloads the bounded HTTPS source, and
-fails the package/release verification if the URL, size, or digest disagree.
+Tailscale is also downloaded on demand, but from its vendor and without a
+firmware pin: the device follows
+`https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz` to the
+versioned archive it currently points at, and verifies those bytes against the
+`.sha256` Tailscale publishes next to them. A Tailscale release therefore needs
+no NanoKVM release. NetBird is different because NanoKVM builds that binary
+itself, so the firmware is the only thing that can attest to it.
 
 The Actions artifact also includes `BUILD_INFO.txt` with the source commit,
 workflow run, immutable builder image digest, and both checksum encodings; that
