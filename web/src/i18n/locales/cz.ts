@@ -315,6 +315,9 @@ const cz = {
       okBtn: 'Ano',
       cancelBtn: 'Ne'
     },
+    reboot: {
+      title: 'Restartujte'
+    },
     settings: {
       title: 'Nastavení',
       mcp: {

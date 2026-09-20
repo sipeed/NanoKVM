@@ -315,6 +315,9 @@ const pt_br = {
       okBtn: 'Sim',
       cancelBtn: 'Não'
     },
+    reboot: {
+      title: 'Reiniciar'
+    },
     settings: {
       title: 'Configurações',
       mcp: {

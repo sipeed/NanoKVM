@@ -315,6 +315,9 @@ const id = {
       okBtn: 'Ya',
       cancelBtn: 'Tidak'
     },
+    reboot: {
+      title: 'Mulai ulang'
+    },
     settings: {
       title: 'Pengaturan',
       mcp: {

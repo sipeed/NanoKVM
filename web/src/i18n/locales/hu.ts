@@ -317,6 +317,9 @@ const hu = {
       okBtn: 'Igen',
       cancelBtn: 'Nem'
     },
+    reboot: {
+      title: 'Újraindítás'
+    },
     settings: {
       title: 'Beállítások',
       mcp: {
