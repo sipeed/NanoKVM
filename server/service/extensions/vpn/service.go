@@ -22,8 +22,8 @@ var tailscaleServiceRunning = func() (bool, error) {
 }
 
 // netbirdCanStartAtBoot is a package seam for the boot-selection policy. The
-// NetBird package owns the firmware-pin check because it owns its version
-// marker format and installation paths.
+// NetBird package owns that check because it owns its version marker format
+// and installation paths.
 var netbirdCanStartAtBoot = netbird.CanStartAtBoot
 
 // These package seams keep the preference transition testable without real
@@ -116,8 +116,8 @@ func (s *Service) SetPreference(c *gin.Context) {
 
 		// The preference write happens after the old tunnel is stopped. Do not
 		// make that destructive transition when its rollback is already known
-		// to be impossible — notably, an old NetBird binary that the current
-		// firmware pin no longer permits us to start.
+		// to be impossible — notably, a NetBird binary with no install marker,
+		// or a Tailscale whose init script is gone.
 		if err := vpnCanResume(other); err != nil {
 			rsp.ErrRsp(c, -3, fmt.Sprintf(
 				"%s is connected, but %s cannot be safely resumed if saving the preference fails: %v",
@@ -184,9 +184,8 @@ func cliFor(vpn string) vpnClient {
 }
 
 // canResume checks whether the stopped client has the static prerequisites for
-// the preference-write rollback. NetBird is special: its resume path must also
-// satisfy the firmware version pin. Tailscale needs the init script that its
-// Resume call will execute.
+// the preference-write rollback: for NetBird, a binary this installer attested;
+// for Tailscale, the init script that its Resume call will execute.
 func canResume(vpn string) error {
 	if vpn == vpnpref.Netbird {
 		return netbird.NewCli().CanResume()

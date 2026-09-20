@@ -578,6 +578,9 @@ const ca = {
         uninstallDesc: 'Esteu segur que voleu desinstal·lar NetBird?',
         uninstallWarning:
           'Si esteu connectat mitjançant NetBird, això tallarà la connexió. No s\'activarà ni se seleccionarà cap altra VPN automàticament; abans d\'accedir remotament, assegureu-vos de disposar d\'una altra via d\'accés o de configurar explícitament una VPN d\'arrencada.',
+        updateAvailable: 'Aquest microprogramari inclou una versió més recent del NetBird',
+        updateHint:
+          'El client instal·lat continua funcionant. Per actualitzar-lo, desinstal·leu el NetBird i torneu a instal·lar-lo. Aquesta operació talla la connexió actual del NetBird, així que feu-ho des de la xarxa local o mitjançant una altra VPN.',
         version: 'Versió',
         disconnect: 'Desconnecta',
         disconnectConfirm: 'Segur que voleu desconnectar?',

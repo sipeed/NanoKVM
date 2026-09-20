@@ -49,13 +49,13 @@ func TestRunningTailscaleUsesDaemonProbeAndFailsClosed(t *testing.T) {
 	}
 }
 
-func TestBootableNetbirdUsesPinAwareEligibility(t *testing.T) {
+func TestBootableNetbirdUsesItsOwnEligibilityCheck(t *testing.T) {
 	original := netbirdCanStartAtBoot
 	t.Cleanup(func() { netbirdCanStartAtBoot = original })
 
 	netbirdCanStartAtBoot = func() bool { return false }
 	if bootable(vpnpref.Netbird) {
-		t.Fatal("bootable(netbird) accepted a NetBird client rejected by its pin-aware eligibility check")
+		t.Fatal("bootable(netbird) accepted a NetBird client its own eligibility check rejected")
 	}
 
 	netbirdCanStartAtBoot = func() bool { return true }
@@ -130,7 +130,7 @@ func TestSetPreferenceDoesNotStopOldVPNWhenRollbackCannotResume(t *testing.T) {
 		if vpn != vpnpref.Netbird {
 			t.Fatalf("rollback preflight requested for %q, want netbird", vpn)
 		}
-		return errors.New("installed netbird version does not match firmware pin")
+		return errors.New("no netbird installation this firmware can vouch for")
 	}
 
 	gin.SetMode(gin.TestMode)

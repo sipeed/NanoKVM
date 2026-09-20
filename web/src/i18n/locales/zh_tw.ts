@@ -564,6 +564,9 @@ const zh_tw = {
         uninstallDesc: '確定要解除安裝 NetBird 嗎？',
         uninstallWarning:
           '如果您正透過 NetBird 連線，此操作會中斷該連線。不會自動啟用或選取其他 VPN；遠端存取前，請確認您有其他連線方式，或明確設定開機 VPN。',
+        updateAvailable: '此韌體隨附更新版本的 NetBird',
+        updateHint:
+          '已安裝的用戶端仍可繼續使用。如需更新，請先解除安裝 NetBird 再重新安裝。此操作會中斷目前的 NetBird 連線，請在區域網路或其他 VPN 下進行。',
         version: '版本',
         disconnect: '中斷連線',
         disconnectConfirm: '確認要中斷連線嗎？',

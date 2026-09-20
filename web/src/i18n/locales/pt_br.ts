@@ -582,6 +582,9 @@ const pt_br = {
         uninstallDesc: 'Tem certeza de que deseja desinstalar NetBird?',
         uninstallWarning:
           'Se você está conectado pelo NetBird, esta conexão será encerrada. Nenhuma outra VPN será ativada ou selecionada automaticamente; antes do acesso remoto, garanta outra via de acesso ou configure explicitamente uma VPN de inicialização.',
+        updateAvailable: 'Este firmware inclui uma versão mais recente do NetBird',
+        updateHint:
+          'O cliente instalado continua funcionando. Para atualizá-lo, desinstale o NetBird e instale novamente. Essa operação encerra a conexão NetBird atual, então faça isso pela rede local ou por outra VPN.',
         version: 'Versão',
         disconnect: 'Desconectar',
         disconnectConfirm: 'Tem certeza de que deseja desconectar?',

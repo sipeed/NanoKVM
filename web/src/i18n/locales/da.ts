@@ -580,6 +580,9 @@ const da = {
         uninstallDesc: 'Er du sikker på, at du vil afinstallere NetBird?',
         uninstallWarning:
           'Hvis du er forbundet via NetBird, afbrydes den forbindelse. Ingen anden VPN aktiveres eller vælges automatisk; sørg for en anden adgangsvej eller konfigurer udtrykkeligt en opstarts-VPN før fjernadgang.',
+        updateAvailable: 'Denne firmware indeholder en nyere NetBird',
+        updateHint:
+          'Den installerede klient fungerer fortsat. Afinstaller NetBird og installer det igen for at opdatere. Det afbryder den nuværende NetBird-forbindelse, så gør det fra det lokale netværk eller via en anden VPN.',
         version: 'Version',
         disconnect: 'Afbryd',
         disconnectConfirm: 'Er du sikker på, at du vil afbryde?',

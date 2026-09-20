@@ -75,13 +75,13 @@ func TestCanResumeRequiresExecutableBinary(t *testing.T) {
 	writeExecutable(t, binaryPath)
 	writeExecutable(t, scriptPath)
 
-	if err := canResume(binaryPath, scriptPath, "1.2.3", "1.2.3"); err != nil {
+	if err := canResume(binaryPath, scriptPath, "1.2.3"); err != nil {
 		t.Fatalf("canResume() with usable artifacts: %v", err)
 	}
 	if err := os.Chmod(binaryPath, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if err := canResume(binaryPath, scriptPath, "1.2.3", "1.2.3"); err == nil {
+	if err := canResume(binaryPath, scriptPath, "1.2.3"); err == nil {
 		t.Fatal("canResume() accepted a non-executable NetBird binary")
 	}
 }
@@ -93,13 +93,13 @@ func TestCanRestartRejectsMissingPrerequisiteBeforeRestart(t *testing.T) {
 	writeExecutable(t, binaryPath)
 	writeExecutable(t, backupPath)
 
-	if err := canRestart(binaryPath, backupPath, "1.2.3", "1.2.3"); err != nil {
+	if err := canRestart(binaryPath, backupPath, "1.2.3"); err != nil {
 		t.Fatalf("canRestart() with usable artifacts: %v", err)
 	}
 	if err := os.Remove(binaryPath); err != nil {
 		t.Fatal(err)
 	}
-	if err := canRestart(binaryPath, backupPath, "1.2.3", "1.2.3"); err == nil {
+	if err := canRestart(binaryPath, backupPath, "1.2.3"); err == nil {
 		t.Fatal("canRestart() accepted a missing binary")
 	}
 }
@@ -115,10 +115,10 @@ func TestCanResumeAndRestartAcceptSymlinkToExecutableBinary(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := canResume(binaryPath, scriptPath, "1.2.3", "1.2.3"); err != nil {
+	if err := canResume(binaryPath, scriptPath, "1.2.3"); err != nil {
 		t.Fatalf("canResume() rejected a symlink to an executable NetBird binary: %v", err)
 	}
-	if err := canRestart(binaryPath, scriptPath, "1.2.3", "1.2.3"); err != nil {
+	if err := canRestart(binaryPath, scriptPath, "1.2.3"); err != nil {
 		t.Fatalf("canRestart() rejected a symlink to an executable NetBird binary: %v", err)
 	}
 }

@@ -93,28 +93,30 @@ func (c *Cli) Restart() error {
 
 // CanResume checks the static prerequisites for resuming the daemon after a
 // failed preference update. SetPreference calls it before stopping the old
-// tunnel: a rollback that is already known to violate the current firmware pin
-// is not a safe rollback at all.
+// tunnel: a rollback that is already known to be impossible is not a safe
+// rollback at all.
 func (c *Cli) CanResume() error {
-	// Resume is a start path used only for preference-write rollback. It must
-	// obey the same firmware pin as explicit Start/Restart rather than reviving
-	// a binary the current firmware no longer attests.
-	return canResume(NetbirdPath, ScriptPath, getPinnedVersion(), getInstalledVersion())
+	// Resume is a start path used only for preference-write rollback. Like
+	// every other start path it requires an attested install, and like every
+	// other start path it does not require that install to be the pinned
+	// release: refusing to resume an older client would leave the device with
+	// the tunnel this rollback exists to restore still down.
+	return canResume(NetbirdPath, ScriptPath, getInstalledVersion())
 }
 
 // CanRestart verifies the pieces Restart needs before its init script can
 // stop a live daemon. The backup script is copied atomically by Restart, so it
 // need only be a regular file; the binary itself must already be executable.
 func (c *Cli) CanRestart() error {
-	return canRestart(NetbirdPath, ScriptBackupPath, getPinnedVersion(), getInstalledVersion())
+	return canRestart(NetbirdPath, ScriptBackupPath, getInstalledVersion())
 }
 
-func canResume(binaryPath, scriptPath, pinnedVersion, installedVersion string) error {
+func canResume(binaryPath, scriptPath, installedVersion string) error {
 	if !isExecutable(binaryPath) {
 		return fmt.Errorf("no usable netbird binary at %s", binaryPath)
 	}
-	if !versionsMatch(pinnedVersion, installedVersion) {
-		return fmt.Errorf("installed netbird version does not match firmware pin")
+	if !installAttested(installedVersion) {
+		return errNetbirdNotAttested
 	}
 	if !isExecutable(scriptPath) {
 		return fmt.Errorf("no usable init script at %s", scriptPath)
@@ -122,12 +124,12 @@ func canResume(binaryPath, scriptPath, pinnedVersion, installedVersion string) e
 	return nil
 }
 
-func canRestart(binaryPath, backupScriptPath, pinnedVersion, installedVersion string) error {
+func canRestart(binaryPath, backupScriptPath, installedVersion string) error {
 	if !isExecutable(binaryPath) {
 		return fmt.Errorf("no usable netbird binary at %s", binaryPath)
 	}
-	if !versionsMatch(pinnedVersion, installedVersion) {
-		return fmt.Errorf("installed netbird version does not match firmware pin")
+	if !installAttested(installedVersion) {
+		return errNetbirdNotAttested
 	}
 	if !isRegularFile(backupScriptPath) {
 		return fmt.Errorf("no usable recovery init script at %s", backupScriptPath)
@@ -181,8 +183,8 @@ func (c *Cli) WaitForSocket(timeout time.Duration) error {
 func (c *Cli) Login() (string, error) {
 	// `netbird up` can bring a tunnel up. Keep the check at the CLI boundary
 	// too, so callers cannot bypass Service.Login's lifecycle policy.
-	if !isUpToDate() {
-		return "", fmt.Errorf("installed netbird version does not match firmware pin")
+	if !installAttested(getInstalledVersion()) {
+		return "", errNetbirdNotAttested
 	}
 	if err := c.WaitForSocket(10 * time.Second); err != nil {
 		return "", err

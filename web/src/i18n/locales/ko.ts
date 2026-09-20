@@ -574,6 +574,9 @@ const ko = {
         uninstallDesc: '정말로 NetBird를 제거할까요?',
         uninstallWarning:
           'NetBird로 접속 중이라면 이 작업으로 연결이 끊깁니다. 다른 VPN이 자동으로 활성화되거나 선택되지 않습니다. 원격 접속 전에 다른 접속 경로를 확보하거나 부팅 VPN을 명시적으로 설정하세요.',
+        updateAvailable: '이 펌웨어에는 더 새로운 NetBird가 포함되어 있습니다',
+        updateHint:
+          '설치된 클라이언트는 계속 사용할 수 있습니다. 업데이트하려면 NetBird를 제거한 뒤 다시 설치하세요. 이 작업은 현재 NetBird 연결을 끊으므로 로컬 네트워크나 다른 VPN에서 진행하세요.',
         version: '버전',
         disconnect: '연결 끊기',
         disconnectConfirm: '연결을 끊으시겠습니까?',

@@ -584,6 +584,9 @@ const ja = {
         uninstallDesc: 'NetBird をアンインストールしてもよろしいですか？',
         uninstallWarning:
           'NetBird 経由で接続している場合、この操作でその接続は切断されます。他の VPN が自動的に有効化または選択されることはありません。リモートアクセスの前に、別の接続手段を確保するか、起動時の VPN を明示的に設定してください。',
+        updateAvailable: 'このファームウェアにはより新しい NetBird が含まれています',
+        updateHint:
+          'インストール済みのクライアントはそのまま使用できます。更新するには NetBird をアンインストールしてから再インストールしてください。この操作は現在の NetBird 接続を切断するため、ローカルネットワークまたは別の VPN から実行してください。',
         version: 'バージョン',
         disconnect: '切断',
         disconnectConfirm: '切断してもよろしいですか？',

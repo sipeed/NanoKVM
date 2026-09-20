@@ -5,21 +5,25 @@ DAEMON_PATH="/usr/bin/netbird"
 PIDFILE="/var/run/$DAEMON.pid"
 LOGDIR="/var/log/netbird"
 LOGFILE="$LOGDIR/netbird.log"
-PINNED_VERSION_FILE="/kvmapp/system/netbird/VERSION"
 INSTALLED_VERSION_FILE="/etc/kvm/netbird.version"
 
-# NetBird's marker is committed only after its validated binary is published.
-# Keep this guard in the init script as well as the Go handlers: direct rc
-# invocation must not bypass the firmware pin after an update or failed install.
+# NetBird's marker is committed only after its validated binary is published,
+# so its presence is what certifies the binary next to it. Keep this guard in
+# the init script as well as the Go handlers: direct rc invocation must not
+# start a binary left behind by a failed install.
+#
+# The marker deliberately does not have to equal the firmware pin. An older
+# client is still one this device installed and validated, and refusing to
+# start it would cut off, at the next firmware update, every device reachable
+# only through NetBird. Updating is offered in the UI instead.
 valid_version() {
     printf '%s\n' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
 }
 
-version_current() {
-    [ -r "$PINNED_VERSION_FILE" ] && [ -r "$INSTALLED_VERSION_FILE" ] || return 1
-    pinned=$(tr -d '[:space:]' < "$PINNED_VERSION_FILE")
+install_attested() {
+    [ -r "$INSTALLED_VERSION_FILE" ] || return 1
     installed=$(tr -d '[:space:]' < "$INSTALLED_VERSION_FILE")
-    valid_version "$pinned" && [ "$pinned" = "$installed" ]
+    valid_version "$installed"
 }
 regular_executable() {
     # Match the Go preflight: accept a link to a regular executable but reject
@@ -242,8 +246,8 @@ case "$1" in
             echo "$DAEMON_PATH not found"
             exit 1
         }
-        version_current || {
-            echo "$DAEMON_PATH does not match the firmware NetBird version"
+        install_attested || {
+            echo "$DAEMON_PATH has no NetBird installation marker"
             exit 1
         }
         daemon_running
@@ -276,14 +280,14 @@ case "$1" in
         exit $?
         ;;
     restart)
-        # Check before stop so a stale daemon is not needlessly interrupted by
-        # a restart which this firmware must refuse to bring back.
+        # Check before stop so a running daemon is not interrupted by a restart
+        # this script would then refuse to complete.
         regular_executable "$DAEMON_PATH" || {
             echo "$DAEMON_PATH not found"
             exit 1
         }
-        version_current || {
-            echo "$DAEMON_PATH does not match the firmware NetBird version"
+        install_attested || {
+            echo "$DAEMON_PATH has no NetBird installation marker"
             exit 1
         }
         "$0" stop || exit $?

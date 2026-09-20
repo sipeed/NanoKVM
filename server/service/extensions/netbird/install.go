@@ -70,6 +70,16 @@ var (
 // promoting a staged update.
 var ErrNetbirdAlreadyInstalled = errors.New("netbird is already installed")
 
+// errNetbirdNotAttested is returned by every start path when the binary on disk
+// carries no version marker from this installer — a partial install, or a file
+// put there by something else. Unlike a version that merely differs from the
+// firmware pin, this one is refused: nothing here vouches for that binary.
+//
+// The repair it names is the one that works. Install refuses to replace a
+// binary that is already present, so only Uninstall — which removes the binary,
+// the marker and the init script — can clear this state.
+var errNetbirdNotAttested = errors.New("no netbird installation this firmware can vouch for; uninstall NetBird and install it again")
+
 // StagedInstall is a downloaded and validated NetBird client. Creating it does
 // not touch /usr/bin/netbird and is safe to do without the VPN lifecycle lock.
 // Promote must be called by the lifecycle owner while that lock is held.
@@ -101,17 +111,22 @@ func isInstalled() bool {
 
 // CanStartAtBoot reports whether the NetBird client is eligible for S95's
 // restore-and-start path. The executable and recovery init script must both be
-// usable, and the installed binary must match a valid version pin from the
-// current firmware. In particular, an old binary left behind by a firmware
-// update must not be selected as the boot VPN.
+// usable, and the installed binary must carry this installer's version marker.
+//
+// It deliberately does not require that marker to equal the firmware pin. A
+// binary older than the pin is still a binary this installer validated and
+// published; refusing to boot it would disconnect, on the next firmware
+// update, exactly those devices that are reachable only through NetBird. The
+// version difference is reported to the UI instead, and it gates updating, not
+// running.
 func CanStartAtBoot() bool {
-	return canStartAtBoot(NetbirdPath, ScriptBackupPath, getPinnedVersion(), getInstalledVersion())
+	return canStartAtBoot(NetbirdPath, ScriptBackupPath, getInstalledVersion())
 }
 
-func canStartAtBoot(binaryPath, scriptPath, pinnedVersion, installedVersion string) bool {
+func canStartAtBoot(binaryPath, scriptPath, installedVersion string) bool {
 	return isExecutable(binaryPath) &&
 		isRegularFile(scriptPath) &&
-		versionsMatch(pinnedVersion, installedVersion)
+		installAttested(installedVersion)
 }
 
 // S95 copies the immutable recovery script to /etc/init.d and chmods that
@@ -639,12 +654,36 @@ func downloadContext(ctx context.Context, target string) error {
 	return nil
 }
 
+// isUpToDate reports whether the installed binary is the one this firmware
+// pins. It decides whether an update is offered — never whether the installed
+// client may run; see CanStartAtBoot.
 func isUpToDate() bool {
 	return versionsMatch(getPinnedVersion(), getInstalledVersion())
 }
 
+// UpdateAvailable reports whether this firmware pins a different NetBird
+// release than the one installed. An unreadable or malformed pin is not an
+// update: there is nothing to offer, and saying otherwise would advertise an
+// upgrade that cannot be performed.
+func UpdateAvailable() bool {
+	pinned := getPinnedVersion()
+	installed := getInstalledVersion()
+	return netbirdVersionRE.MatchString(pinned) &&
+		installAttested(installed) &&
+		pinned != installed
+}
+
+// installAttested reports whether the version marker certifies that this
+// installer published the binary next to it. promote writes the marker only
+// after the validated binary is linked and synced, and rolls that link back if
+// the marker cannot be written (see promote), so a binary without a well-formed
+// marker did not come from here and is not started.
+func installAttested(installed string) bool {
+	return netbirdVersionRE.MatchString(installed)
+}
+
 // versionsMatch is deliberately stricter than a non-empty string comparison:
-// a corrupt marker must never certify a binary as eligible to start.
+// a corrupt marker must never certify a binary as being the pinned release.
 func versionsMatch(pinned, installed string) bool {
 	return netbirdVersionRE.MatchString(pinned) && pinned == installed
 }

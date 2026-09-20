@@ -134,8 +134,8 @@ func (s *Service) Install(c *gin.Context) {
 		return
 	}
 	vpnpref.InvalidateOtherStagedInstalls(generation)
-	if stage == nil && isInstalled() && !isUpToDate() {
-		rsp.ErrRsp(c, -3, "netbird update required; uninstall and install again to replace it safely")
+	if stage == nil && isInstalled() && !installAttested(getInstalledVersion()) {
+		rsp.ErrRsp(c, -3, errNetbirdNotAttested.Error())
 		return
 	}
 	if err := promoteIfNeeded(stage); err != nil {
@@ -216,8 +216,8 @@ func (s *Service) Start(c *gin.Context) {
 		return
 	}
 	vpnpref.InvalidateOtherStagedInstalls(generation)
-	if stage == nil && isInstalled() && !isUpToDate() {
-		rsp.ErrRsp(c, -3, "netbird update required; uninstall and install again to replace it safely")
+	if stage == nil && isInstalled() && !installAttested(getInstalledVersion()) {
+		rsp.ErrRsp(c, -3, errNetbirdNotAttested.Error())
 		return
 	}
 	if err := promoteIfNeeded(stage); err != nil {
@@ -243,12 +243,13 @@ func (s *Service) Restart(c *gin.Context) {
 	}
 	defer vpnpref.Unlock()
 	vpnpref.InvalidateStagedInstalls()
-	// Start and Install already fail closed when a firmware pin no longer
-	// matches the installed binary. Restart is also a start path: checking it
-	// before stopping the current daemon avoids reviving an old client and
-	// avoids needlessly dropping a recoverable connection.
-	if isInstalled() && !isUpToDate() {
-		rsp.ErrRsp(c, -3, "netbird update required; uninstall and install again to replace it safely")
+	// Start and Install already fail closed on a binary this firmware cannot
+	// vouch for. Restart is also a start path: checking before stopping the
+	// current daemon avoids dropping a connection this request could not bring
+	// back. A client merely older than the pin is brought back — the update is
+	// offered in the UI, and refusing here would strand a remote operator.
+	if isInstalled() && !installAttested(getInstalledVersion()) {
+		rsp.ErrRsp(c, -3, errNetbirdNotAttested.Error())
 		return
 	}
 
@@ -293,9 +294,9 @@ func (s *Service) Login(c *gin.Context) {
 	cli := NewCli()
 	vpnpref.InvalidateStagedInstalls()
 	// Login executes `netbird up` and can create a tunnel. Do not let it become
-	// an unchecked start path for a binary which no longer matches this firmware.
-	if isInstalled() && !isUpToDate() {
-		rsp.ErrRsp(c, -3, "netbird update required; uninstall and install again to replace it safely")
+	// an unchecked start path for a binary this firmware cannot vouch for.
+	if isInstalled() && !installAttested(getInstalledVersion()) {
+		rsp.ErrRsp(c, -3, errNetbirdNotAttested.Error())
 		return
 	}
 
@@ -355,8 +356,11 @@ func (s *Service) GetStatus(c *gin.Context) {
 
 	if !running {
 		rsp.OkRspWithData(c, &proto.GetNetbirdStatusRsp{
-			State:   proto.NetbirdNotRunning,
-			Version: getInstalledVersion(),
+			State:            proto.NetbirdNotRunning,
+			Version:          getInstalledVersion(),
+			PinnedVersion:    getPinnedVersion(),
+			InstalledVersion: getInstalledVersion(),
+			UpdateAvailable:  UpdateAvailable(),
 		})
 		return
 	}
@@ -378,10 +382,13 @@ func (s *Service) GetStatus(c *gin.Context) {
 	}
 
 	rsp.OkRspWithData(c, &proto.GetNetbirdStatusRsp{
-		State:   state,
-		Name:    status.FQDN,
-		IP:      getIPv4(status.IP),
-		Version: firstNonEmpty(status.DaemonVersion, getInstalledVersion()),
+		State:            state,
+		Name:             status.FQDN,
+		IP:               getIPv4(status.IP),
+		Version:          firstNonEmpty(status.DaemonVersion, getInstalledVersion()),
+		PinnedVersion:    getPinnedVersion(),
+		InstalledVersion: getInstalledVersion(),
+		UpdateAvailable:  UpdateAvailable(),
 	})
 }
 

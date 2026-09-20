@@ -467,17 +467,72 @@ test_s99_restart_preflights_regular_binary() {
     [ ! -s "$CASE/pidof.log" ] || fail 'S99 restart stopped/inspected daemon before binary preflight'
 }
 
-test_s99_restart_preflights_version_pin() {
-    new_case s99-restart-pin
+# An install marker certifies that the binary beside it was published here.
+# Its absence is the only version-related reason to refuse a start.
+test_s99_restart_preflights_install_marker() {
+    for marker in '' 'not-a-version'; do
+        new_case "s99-restart-marker-${marker:-missing}"
+        prepare_s99
+        make_executable_file "$CASE/usr/bin/netbird"
+        if [ -z "$marker" ]; then
+            rm -f "$CASE/etc/kvm/netbird.version"
+        else
+            printf '%s\n' "$marker" > "$CASE/etc/kvm/netbird.version"
+        fi
+        : > "$CASE/pidof.log"
+
+        if PIDOF_LOG="$CASE/pidof.log" PATH="$CASE/bin:$PATH" "$CASE/S99netbird" restart; then
+            fail 'S99 restart accepted a NetBird binary with no install marker'
+        fi
+        [ ! -s "$CASE/pidof.log" ] || fail 'S99 restart inspected daemon before the install-marker preflight'
+    done
+}
+
+# A firmware update ships a newer pin than the installed client. That client
+# must still be startable: on a device reached only through NetBird, refusing
+# here is what disconnects it, and the update is offered in the UI instead.
+# The fixture's binary is not a real daemon, so the launch itself cannot
+# succeed; what is asserted is that the preflight let the request through to
+# the daemon inspection instead of rejecting it on the version.
+test_s99_restart_accepts_a_release_older_than_the_pin() {
+    new_case s99-restart-older-release
     prepare_s99
     make_executable_file "$CASE/usr/bin/netbird"
-    printf '%s\n' '1.2.4' > "$CASE/etc/kvm/netbird.version"
+    printf '%s\n' '1.2.4' > "$CASE/kvmapp/system/netbird/VERSION"
+    printf '%s\n' '1.2.3' > "$CASE/etc/kvm/netbird.version"
     : > "$CASE/pidof.log"
 
-    if PIDOF_LOG="$CASE/pidof.log" PATH="$CASE/bin:$PATH" "$CASE/S99netbird" restart; then
-        fail 'S99 restart accepted a NetBird binary with a mismatched version pin'
-    fi
-    [ ! -s "$CASE/pidof.log" ] || fail 'S99 restart inspected daemon before version-pin preflight'
+    # The launch fails on the fixture binary; set -e must not end the suite.
+    PIDOF_LOG="$CASE/pidof.log" PATH="$CASE/bin:$PATH" "$CASE/S99netbird" restart >/dev/null 2>&1 || :
+    [ -s "$CASE/pidof.log" ] || \
+        fail 'S99 restart refused a NetBird release older than the firmware pin'
+}
+
+test_s95_selects_netbird_older_than_the_pin() {
+    new_case s95-older-release
+    prepare_s95
+    printf '%s\n' 'tailscale boot script' > "$CASE/etc/init.d/S98tailscaled"
+    make_executable_file "$CASE/usr/bin/netbird"
+    printf '%s\n' '1.2.4' > "$CASE/kvmapp/system/netbird/VERSION"
+    printf '%s\n' '1.2.3' > "$CASE/etc/kvm/netbird.version"
+
+    run_s95 || fail 'S95 failed for a NetBird release older than the firmware pin'
+    cmp "$CASE/etc/init.d/S99netbird" "$CASE/kvmapp/system/init.d/S99netbird" >/dev/null || \
+        fail 'S95 did not publish S99 for a NetBird release older than the firmware pin'
+}
+
+test_s95_rejects_netbird_without_install_marker() {
+    new_case s95-missing-marker
+    prepare_s95
+    printf '%s\n' 'tailscale boot script' > "$CASE/etc/init.d/S98tailscaled"
+    make_executable_file "$CASE/usr/bin/netbird"
+    rm -f "$CASE/etc/kvm/netbird.version"
+
+    run_s95 || fail 'S95 failed while preserving Tailscale for an unattested NetBird binary'
+    grep -Fqx 'tailscale boot script' "$CASE/etc/init.d/S98tailscaled" || \
+        fail 'S95 removed S98 for an unattested NetBird binary'
+    [ ! -e "$CASE/etc/init.d/S99netbird" ] || \
+        fail 'S95 published S99 for an unattested NetBird binary'
 }
 
 test_s98_restart_preflights_regular_binaries() {
@@ -629,7 +684,10 @@ test_s95_restart_restores_netbird_before_next_rc_snapshot
 test_s95_restart_fails_when_vpn_restore_fails
 test_s99_restart_preflights_symlink_binary
 test_s99_restart_preflights_regular_binary
-test_s99_restart_preflights_version_pin
+test_s99_restart_preflights_install_marker
+test_s99_restart_accepts_a_release_older_than_the_pin
+test_s95_selects_netbird_older_than_the_pin
+test_s95_rejects_netbird_without_install_marker
 test_s98_restart_preflights_regular_binaries
 test_s98_restart_preflights_client_regular_file
 test_s98_restart_preflights_symlink_binary

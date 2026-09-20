@@ -579,6 +579,9 @@ const vi = {
         uninstallDesc: 'Bạn có chắc chắn muốn gỡ cài đặt NetBird không?',
         uninstallWarning:
           'Nếu bạn đang kết nối qua NetBird, thao tác này sẽ ngắt kết nối đó. Không có VPN nào khác được tự động bật hoặc chọn; trước khi truy cập từ xa, hãy bảo đảm có cách truy cập khác hoặc chủ động cấu hình VPN khởi động.',
+        updateAvailable: 'Phần mềm điều khiển này đi kèm NetBird phiên bản mới hơn',
+        updateHint:
+          'Ứng dụng đã cài vẫn hoạt động. Để cập nhật, hãy gỡ NetBird rồi cài lại. Thao tác này sẽ ngắt kết nối NetBird hiện tại, vì vậy hãy thực hiện từ mạng nội bộ hoặc qua một VPN khác.',
         version: 'Phiên bản',
         disconnect: 'Ngắt kết nối',
         disconnectConfirm: 'Bạn có chắc muốn ngắt kết nối?',

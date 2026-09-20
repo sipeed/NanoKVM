@@ -102,6 +102,29 @@ export const Netbird = ({ setIsLocked }: NetbirdProps) => {
             </div>
           )}
 
+          {/*
+            A client older than the firmware's pin keeps running, so this is an
+            offer, not a warning. It names the only available update path and
+            what that path costs, because performing it over NetBird itself
+            would cut the operator off.
+          */}
+          {status?.updateAvailable && (
+            <Alert
+              className="mb-4"
+              type="info"
+              showIcon
+              message={t('settings.netbird.updateAvailable')}
+              description={
+                <>
+                  <div>
+                    {status.installedVersion || status.version} → {status.pinnedVersion}
+                  </div>
+                  <div>{t('settings.netbird.updateHint')}</div>
+                </>
+              }
+            />
+          )}
+
           {status?.state === 'notInstall' && (
             <Install setIsLocked={setIsLocked} onSuccess={getStatus} />
           )}

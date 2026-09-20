@@ -584,6 +584,9 @@ const hu = {
         uninstallDesc: 'Biztosan eltávolítja a NetBird alkalmazást?',
         uninstallWarning:
           'Ha NetBirdön keresztül csatlakozik, ez megszakítja a kapcsolatot. Más VPN nem aktiválódik és nem lesz automatikusan kiválasztva; távoli hozzáférés előtt gondoskodjon másik elérési útról, vagy állítson be kifejezetten indítási VPN-t.',
+        updateAvailable: 'Ez a firmware újabb NetBird verziót tartalmaz',
+        updateHint:
+          'A telepített kliens továbbra is működik. A frissítéshez távolítsa el a NetBird alkalmazást, majd telepítse újra. Ez megszakítja a jelenlegi NetBird-kapcsolatot, ezért végezze el helyi hálózatról vagy másik VPN-en keresztül.',
         version: 'Verzió',
         disconnect: 'Bontás',
         disconnectConfirm: 'Biztosan bontja a kapcsolatot?',

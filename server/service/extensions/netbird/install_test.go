@@ -48,7 +48,7 @@ func TestVersionsMatchRequiresAValidPinnedVersion(t *testing.T) {
 	}
 }
 
-func TestCanStartAtBootRequiresUsableFilesAndMatchingPin(t *testing.T) {
+func TestCanStartAtBootRequiresUsableFilesAndAnAttestedInstall(t *testing.T) {
 	directory := t.TempDir()
 	binaryPath := filepath.Join(directory, "netbird")
 	scriptPath := filepath.Join(directory, "S99netbird")
@@ -66,19 +66,41 @@ func TestCanStartAtBootRequiresUsableFilesAndMatchingPin(t *testing.T) {
 		name      string
 		binary    string
 		script    string
-		pinned    string
 		installed string
 		want      bool
 	}{
-		{name: "eligible", binary: binaryPath, script: scriptPath, pinned: "0.77.1", installed: "0.77.1", want: true},
-		{name: "stale installed version", binary: binaryPath, script: scriptPath, pinned: "0.77.2", installed: "0.77.1"},
-		{name: "invalid matching pin", binary: binaryPath, script: scriptPath, pinned: "invalid", installed: "invalid"},
-		{name: "missing binary", binary: filepath.Join(directory, "missing"), script: scriptPath, pinned: "0.77.1", installed: "0.77.1"},
-		{name: "missing script", binary: binaryPath, script: filepath.Join(directory, "missing-script"), pinned: "0.77.1", installed: "0.77.1"},
+		{name: "eligible", binary: binaryPath, script: scriptPath, installed: "0.77.1", want: true},
+		// A release older than the firmware pin is still one this installer
+		// published. Booting it is what keeps a NetBird-only device reachable
+		// across a firmware update.
+		{name: "release older than the pin", binary: binaryPath, script: scriptPath, installed: "0.76.0", want: true},
+		{name: "missing marker", binary: binaryPath, script: scriptPath, installed: ""},
+		{name: "corrupt marker", binary: binaryPath, script: scriptPath, installed: "not-a-version"},
+		{name: "missing binary", binary: filepath.Join(directory, "missing"), script: scriptPath, installed: "0.77.1"},
+		{name: "missing script", binary: binaryPath, script: filepath.Join(directory, "missing-script"), installed: "0.77.1"},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if got := canStartAtBoot(test.binary, test.script, test.pinned, test.installed); got != test.want {
+			if got := canStartAtBoot(test.binary, test.script, test.installed); got != test.want {
 				t.Fatalf("canStartAtBoot() = %t, want %t", got, test.want)
+			}
+		})
+	}
+}
+
+func TestInstallAttestedAcceptsAnyWellFormedMarker(t *testing.T) {
+	for _, test := range []struct {
+		name      string
+		installed string
+		want      bool
+	}{
+		{name: "pinned release", installed: "0.77.1", want: true},
+		{name: "older release", installed: "0.76.0", want: true},
+		{name: "missing marker", installed: ""},
+		{name: "corrupt marker", installed: "not-a-version"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := installAttested(test.installed); got != test.want {
+				t.Fatalf("installAttested(%q) = %t, want %t", test.installed, got, test.want)
 			}
 		})
 	}

@@ -240,14 +240,16 @@ select_vpn() {
     netbird_is_ready=0
     if [ "$vpn_pref" = netbird ]; then
         # The version marker is written only after the validated binary is
-        # published. Do not restore S99 for a stale or uncommitted executable:
-        # a user can explicitly repair it through the UI, but boot must never
-        # silently revive it after a firmware update or interrupted install.
-        pinned_version=$(tr -d '[:space:]' < /kvmapp/system/netbird/VERSION 2>/dev/null)
+        # published, so it is what certifies the executable. Do not restore S99
+        # for an uncommitted install that left no marker; the UI can repair it.
+        #
+        # A marker older than this firmware's pin still starts. The binary it
+        # certifies was installed and validated here, and a device reachable
+        # only through NetBird must not lose that tunnel because a firmware
+        # update shipped a newer pin. The update is offered in the UI instead.
         installed_version=$(tr -d '[:space:]' < /etc/kvm/netbird.version 2>/dev/null)
         if regular_executable /usr/bin/netbird && \
-           valid_netbird_version "$pinned_version" && \
-           [ "$pinned_version" = "$installed_version" ] && \
+           valid_netbird_version "$installed_version" && \
            [ -f /kvmapp/system/init.d/S99netbird ]; then
             netbird_is_ready=1
         fi

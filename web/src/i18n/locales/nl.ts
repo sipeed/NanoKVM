@@ -587,6 +587,9 @@ const nl = {
         uninstallDesc: 'Weet u zeker dat u NetBird wilt verwijderen?',
         uninstallWarning:
           'Als u via NetBird verbonden bent, wordt die verbinding verbroken. Er wordt niet automatisch een andere VPN ingeschakeld of geselecteerd; zorg vóór externe toegang voor een andere toegangsweg of configureer expliciet een opstart-VPN.',
+        updateAvailable: 'Deze firmware bevat een nieuwere NetBird',
+        updateHint:
+          'De geïnstalleerde client blijft werken. Verwijder NetBird en installeer het opnieuw om bij te werken. Daarbij wordt de huidige NetBird-verbinding verbroken, doe dit dus vanaf het lokale netwerk of via een andere VPN.',
         version: 'Versie',
         disconnect: 'Verbreken',
         disconnectConfirm: 'Weet u zeker dat u de verbinding wilt verbreken?',
