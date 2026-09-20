@@ -85,7 +85,9 @@ export const Netbird = ({ setIsLocked }: NetbirdProps) => {
                 className="mb-4"
                 type="warning"
                 showIcon
-                message={t(status ? 'settings.netbird.statusStale' : 'settings.netbird.statusUnknown')}
+                message={t(
+                  status ? 'settings.netbird.statusStale' : 'settings.netbird.statusUnknown'
+                )}
                 description={errMsg}
               />
               <ErrorHelp

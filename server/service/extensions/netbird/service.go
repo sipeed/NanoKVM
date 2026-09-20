@@ -90,7 +90,11 @@ func stageUpdate(parent context.Context) (stage *StagedInstall, generation uint6
 		return nil, 0, nil, fmt.Errorf("netbird is not installed")
 	}
 	if !UpdateAvailable() {
-		return nil, 0, nil, fmt.Errorf("installed netbird is already the version this firmware ships")
+		// Equal versions, or an installed client newer than the pin after a
+		// firmware downgrade. Neither is an update, and replacing a working
+		// client with an older build is not something to do behind a button
+		// labelled "update".
+		return nil, 0, nil, fmt.Errorf("this firmware ships no newer netbird than the installed one")
 	}
 	if !installMu.TryLock() {
 		return nil, 0, nil, fmt.Errorf("a netbird installation is already in progress")

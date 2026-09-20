@@ -585,7 +585,7 @@ const it = {
         uninstall: 'Disinstalla NetBird',
         uninstallDesc: 'Sei sicuro di voler disinstallare NetBird?',
         uninstallWarning:
-          'Se sei connesso tramite NetBird, questa connessione verrà interrotta. Nessun\'altra VPN verrà attivata o selezionata automaticamente; prima dell\'accesso remoto, assicurati di avere un altro modo per accedere o configura esplicitamente una VPN di avvio.',
+          "Se sei connesso tramite NetBird, questa connessione verrà interrotta. Nessun'altra VPN verrà attivata o selezionata automaticamente; prima dell'accesso remoto, assicurati di avere un altro modo per accedere o configura esplicitamente una VPN di avvio.",
         update: 'Aggiorna',
         updateConfirm: 'Aggiornare NetBird adesso?',
         updateWarning:

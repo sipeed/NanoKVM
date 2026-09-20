@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -779,16 +780,39 @@ func isUpToDate() bool {
 	return versionsMatch(getPinnedVersion(), getInstalledVersion())
 }
 
-// UpdateAvailable reports whether this firmware pins a different NetBird
-// release than the one installed. An unreadable or malformed pin is not an
-// update: there is nothing to offer, and saying otherwise would advertise an
-// upgrade that cannot be performed.
+// UpdateAvailable reports whether this firmware pins a NetBird release newer
+// than the one installed. An unreadable or malformed pin is not an update:
+// there is nothing to offer, and saying otherwise would advertise an upgrade
+// that cannot be performed.
+//
+// The comparison is an ordering, not a difference. After a firmware downgrade
+// the installed client is the newer one; calling that an update would both say
+// something false and offer to replace a working client with an older build.
 func UpdateAvailable() bool {
 	pinned := getPinnedVersion()
 	installed := getInstalledVersion()
-	return netbirdVersionRE.MatchString(pinned) &&
-		installAttested(installed) &&
-		pinned != installed
+	if !netbirdVersionRE.MatchString(pinned) || !installAttested(installed) {
+		return false
+	}
+	return compareVersions(pinned, installed) > 0
+}
+
+// compareVersions orders two markers that netbirdVersionRE has accepted, so
+// each is exactly three decimal fields. It returns a negative number when a is
+// older than b, zero when they are equal, and a positive number when a is
+// newer. A field that does not parse — which the regexp does not permit — is
+// treated as 0 rather than failing the caller.
+func compareVersions(a, b string) int {
+	aFields := strings.Split(a, ".")
+	bFields := strings.Split(b, ".")
+	for i := 0; i < len(aFields) && i < len(bFields); i++ {
+		aValue, _ := strconv.Atoi(aFields[i])
+		bValue, _ := strconv.Atoi(bFields[i])
+		if aValue != bValue {
+			return aValue - bValue
+		}
+	}
+	return len(aFields) - len(bFields)
 }
 
 // installAttested reports whether the version marker certifies that this

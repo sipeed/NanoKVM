@@ -87,6 +87,28 @@ func TestCanStartAtBootRequiresUsableFilesAndAnAttestedInstall(t *testing.T) {
 	}
 }
 
+func TestCompareVersionsOrdersReleases(t *testing.T) {
+	for _, test := range []struct {
+		a, b string
+		want int
+	}{
+		{a: "0.77.1", b: "0.77.1"},
+		{a: "0.77.2", b: "0.77.1", want: 1},
+		{a: "0.77.1", b: "0.77.2", want: -1},
+		{a: "0.78.0", b: "0.77.9", want: 1},
+		{a: "1.0.0", b: "0.99.99", want: 1},
+		// Fields are numbers, not text: 10 is newer than 9.
+		{a: "0.77.10", b: "0.77.9", want: 1},
+	} {
+		t.Run(test.a+" vs "+test.b, func(t *testing.T) {
+			got := compareVersions(test.a, test.b)
+			if (got > 0) != (test.want > 0) || (got < 0) != (test.want < 0) {
+				t.Fatalf("compareVersions(%q, %q) = %d, want sign of %d", test.a, test.b, got, test.want)
+			}
+		})
+	}
+}
+
 func TestInstallAttestedAcceptsAnyWellFormedMarker(t *testing.T) {
 	for _, test := range []struct {
 		name      string
