@@ -218,6 +218,12 @@ const se = {
       mountFailed: 'Montering misslyckades',
       mountDesc:
         'I vissa system måste den virtuella disken avmonteras på fjärrvärden innan avbildningen monteras.',
+      diskOnWarn:
+        'Montering av avbildningen stänger av den virtuella disken, så datorn kommer inte åt /data. Fortsätta?',
+      diskOffWarn:
+        'Den virtuella disken är avstängd och måste aktiveras för att montera avbildningen. Datorns USB-enheter ansluts på nytt. Fortsätta?',
+      diskShared:
+        'Den virtuella disken är aktiverad, så /data är skrivskyddad här. Stäng av den för att ta bort eller ladda upp avbildningar.',
       unmountFailed: 'Avmontering misslyckades',
       unmountDesc:
         'I vissa system måste du manuellt mata ut från fjärrvärden innan du avmonterar avbildningen.',
@@ -286,6 +292,8 @@ const se = {
       input: 'Ange en fjärravbildnings-URL',
       ok: 'Ok',
       disabled: '/data partitionen är skrivskyddad, kan inte hämta avbildning',
+      diskShared: 'Stäng av den virtuella disken först och använd sedan nedladdningen.',
+      diskOff: 'Stäng av den virtuella disken',
       uploadbox: 'Släpp filen här eller klicka för att välja',
       inputfile: 'Vänligen ange bildfilen',
       NoISO: 'Ingen ISO',
@@ -444,6 +452,11 @@ const se = {
         hidOnlyDesc: 'Sluta emulera virtuella enheter, behåll bara grundläggande HID kontroll',
         disk: 'Virtuell disk',
         diskDesc: 'Montera virtuell U-disk på fjärrvärden',
+        diskLocked: 'Avstängd medan en avbildning är monterad (aktivering avbryter monteringen)',
+        diskCancelMount:
+          'Att aktivera den virtuella disken avbryter den monterade avbildningen och avbryter en pågående nedladdning eller uppladdning. Fortsätta?',
+        diskBreakDownload:
+          'Att aktivera den virtuella disken avbryter nedladdningen av avbildningar. Fortsätta?',
         network: 'Virtuellt nätverk',
         networkDesc: 'Montera virtuell nätverkskort på fjärrvärden',
         reboot: 'Starta om',

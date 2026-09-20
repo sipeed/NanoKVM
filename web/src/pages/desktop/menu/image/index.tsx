@@ -19,6 +19,8 @@ export const Image = () => {
   const [isMounted, setIsMounted] = useState(false);
   const [mode, setMode] = useState('mass-storage');
 
+  const imageUpdatedEvent = 'nanokvm:image-updated';
+
   const modes = [
     {
       value: 'mass-storage',
@@ -41,6 +43,21 @@ export const Image = () => {
   ];
 
   useEffect(() => {
+    getImageState();
+
+    const handleImageUpdated = () => {
+      getImageState();
+    };
+    window.addEventListener(imageUpdatedEvent, handleImageUpdated);
+
+    return () => {
+      window.removeEventListener(imageUpdatedEvent, handleImageUpdated);
+    };
+  }, []);
+
+  // readers of the mounted image and of the CD-ROM flag: the icon state and the
+  // mode selector here, and the same state in the mount panel
+  function getImageState() {
     api.getMountedImage().then((rsp) => {
       if (rsp.code === 0) {
         setIsMounted(!!rsp.data?.file);
@@ -52,7 +69,7 @@ export const Image = () => {
         setMode(rsp.data?.cdrom === 1 ? 'cd-rom' : 'mass-storage');
       }
     });
-  }, []);
+  }
 
   function toggleModal(open: boolean) {
     setIsModalOpen(open);

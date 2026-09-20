@@ -225,6 +225,12 @@ const fr = {
       mountFailed: "Échec du montage de l'image.",
       mountDesc:
         "Dans certains systèmes, il est nécessaire de déséjecter le disque virtuel sur l'hôte distant avant de monter l'image.",
+      diskOnWarn:
+        "Monter l'image désactive le disque virtuel : l'ordinateur ne peut plus accéder à /data. Continuer ?",
+      diskOffWarn:
+        "Le disque virtuel est désactivé et doit être activé pour monter l'image. Les périphériques USB de l'ordinateur sont réénumérés. Continuer ?",
+      diskShared:
+        'Le disque virtuel est activé, donc /data est en lecture seule ici. Désactivez-le pour supprimer ou envoyer des images.',
       unmountFailed: 'Échec du démontage',
       unmountDesc:
         "Sur certains systèmes, vous devez l'éjecter manuellement de l'hôte distant avant de démonter l'image.",
@@ -293,6 +299,8 @@ const fr = {
       input: 'Veuillez entrer l’URL d’une image distante',
       ok: 'Ok',
       disabled: 'La partition /data est en lecture seule, impossible de télécharger l’image',
+      diskShared: "Désactivez d'abord le disque virtuel, puis utilisez le téléchargement d'images.",
+      diskOff: 'Désactiver le disque virtuel',
       uploadbox: 'Déposez le fichier ici ou cliquez pour sélectionner',
       inputfile: 'Veuillez saisir le fichier image',
       NoISO: 'Aucun ISO',
@@ -452,6 +460,11 @@ const fr = {
           "Arrêtez d'émuler des périphériques virtuels, en ne conservant que le contrôle de base HID",
         disk: 'Disque virtuel',
         diskDesc: "Monter le disque virtuel U sur l'hôte distant",
+        diskLocked: "Désactivé tant qu'une image est montée (l'activer annule le montage)",
+        diskCancelMount:
+          "Activer le disque virtuel annule l'image montée et interrompt un téléchargement ou un envoi d'image en cours. Continuer ?",
+        diskBreakDownload:
+          "Activer le disque virtuel interrompt le téléchargement d'images. Continuer ?",
         network: 'Réseau virtuel',
         networkDesc: "Monter la carte réseau virtuelle sur l'hôte distant",
         reboot: 'Redémarrer',

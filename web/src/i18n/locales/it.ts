@@ -224,6 +224,12 @@ const it = {
       mountFailed: 'Montaggio immagine fallito',
       mountDesc:
         "In alcuni sistemi, è necessario espellere il disco virtuale sull'host remoto prima di montare l'immagine.",
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Smontaggio non riuscito',
       unmountDesc:
         "Su alcuni sistemi, è necessario espellere manualmente l'host remoto prima di smontare l'immagine.",
@@ -292,6 +298,8 @@ const it = {
       input: "Inserisci un'immagine remota URL",
       ok: 'Ok',
       disabled: "La partizione /data è RO, quindi non possiamo scaricare l'immagine",
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Rilascia il file qui o fai clic per selezionarlo',
       inputfile: 'Inserisci il file immagine',
       NoISO: 'Nessuna ISO',
@@ -452,6 +460,10 @@ const it = {
           'Smette di emulare i dispositivi virtuali, mantenendo solo il controllo di base HID',
         disk: 'Disco virtuale',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Rete virtuale',
         networkDesc: 'Monta la scheda di rete virtuale sull’host remoto',
         reboot: 'Riavvia',

@@ -7,6 +7,7 @@ import { DownloadIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { cancelDownloadImage, downloadImage, imageEnabled, statusImage } from '@/api/download.ts';
+import { getVirtualDevice, updateVirtualDevice } from '@/api/virtual-device.ts';
 import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
 
@@ -23,6 +24,8 @@ export const DownloadImage = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [isRemoteDownloading, setIsRemoteDownloading] = useState(false);
   const [diskEnabled, setDiskEnabled] = useState(false);
+  const [isDiskShared, setIsDiskShared] = useState(false);
+  const [isDisablingDisk, setIsDisablingDisk] = useState(false);
   const [popoverKey, setPopoverKey] = useState(0);
 
   const inputRef = useRef<InputRef>(null);
@@ -46,6 +49,34 @@ export const DownloadImage = () => {
       })
       .catch(() => {
         setDiskEnabled(false);
+      });
+
+    // /data is read-only while the virtual disk serves it to the host
+    getVirtualDevice()
+      .then((res) => {
+        setIsDiskShared(!!res.data?.disk);
+      })
+      .catch(() => {
+        setIsDiskShared(false);
+      });
+  }
+
+  // hand /data back to the KVM, which makes the download possible again
+  function disableDisk() {
+    if (isDisablingDisk) return;
+    setIsDisablingDisk(true);
+
+    updateVirtualDevice('disk')
+      .then((rsp) => {
+        if (rsp.code !== 0) {
+          console.log(rsp.msg);
+          return;
+        }
+
+        checkDiskEnabled();
+      })
+      .finally(() => {
+        setIsDisablingDisk(false);
       });
   }
 
@@ -309,7 +340,16 @@ export const DownloadImage = () => {
       <Divider style={{ margin: '10px 0 10px 0' }} />
 
       {!diskEnabled ? (
-        <div className="text-red-500">{t('download.disabled')}</div>
+        isDiskShared ? (
+          <div className="space-y-3">
+            <div className="text-neutral-300">{t('download.diskShared')}</div>
+            <Button type="primary" block loading={isDisablingDisk} onClick={disableDisk}>
+              {t('download.diskOff')}
+            </Button>
+          </div>
+        ) : (
+          <div className="text-red-500">{t('download.disabled')}</div>
+        )
       ) : (
         <div className="space-y-2">
           <div>

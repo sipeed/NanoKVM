@@ -35,7 +35,14 @@ then
         if [ -e /dev/mmcblk0p3 ]
         then
                 mkdir -p /data
-                mount /dev/mmcblk0p3 /data
+                # The partition is the virtual disk. While it is shared as a writable
+                # disk the host is the only writer, so mount it read-only here.
+                if [ -e /boot/usb.disk0 ] && [ ! -e /boot/usb.disk0.ro ] && [ ! -s /boot/usb.disk0 ]
+                then
+                        mount -o ro /dev/mmcblk0p3 /data
+                else
+                        mount /dev/mmcblk0p3 /data
+                fi
         fi
 
         echo "OK"

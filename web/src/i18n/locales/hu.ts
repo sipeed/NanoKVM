@@ -224,6 +224,12 @@ const hu = {
       mountFailed: 'Csatlakoztatás sikertelen',
       mountDesc:
         'Egyes rendszerekben szükséges lehet a virtuális lemez eltávolítása a távoli gépen, mielőtt a képet csatlakoztatja.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'A leválasztás nem sikerült',
       unmountDesc:
         'Egyes rendszereken manuálisan kell kiadnia a távoli gazdagépről a kép leválasztása előtt.',
@@ -292,6 +298,8 @@ const hu = {
       input: 'Adjon meg egy távoli képet URL',
       ok: 'Ok',
       disabled: '/data partíció RO, ezért nem tudjuk letölteni a képet',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Dobja ide a fájlt, vagy kattintson a kiválasztáshoz',
       inputfile: 'Kérjük, írja be a képfájlt',
       NoISO: 'Nincs ISO',
@@ -450,6 +458,10 @@ const hu = {
           'A virtuális eszközök emulálásának leállítása, csak az alapvető HID vezérlés megtartásával',
         disk: 'Virtuális lemez',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuális hálózat',
         networkDesc: 'Virtuális hálózati kártya csatlakoztatása a távoli gazdagépen',
         reboot: 'Újraindítás',

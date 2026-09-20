@@ -220,6 +220,12 @@ const ca = {
       mountMode: 'Mode de muntatge',
       mountFailed: 'Error en muntar',
       mountDesc: 'En alguns sistemes cal expulsar el disc virtual abans de muntar la imatge.',
+      diskOnWarn:
+        "Muntar la imatge desactiva el disc virtual, de manera que l'ordinador ja no pot accedir a /data. Voleu continuar?",
+      diskOffWarn:
+        "El disc virtual està desactivat i cal activar-lo per muntar la imatge. Els dispositius USB de l'ordinador es tornaran a enumerar. Voleu continuar?",
+      diskShared:
+        'El disc virtual està activat, així que /data és només de lectura aquí. Desactiveu-lo per suprimir o pujar imatges.',
       unmountFailed: "No s'ha pogut desmuntar",
       unmountDesc:
         "En alguns sistemes, cal expulsar manualment de l'amfitrió remot abans de desmuntar la imatge.",
@@ -288,6 +294,8 @@ const ca = {
       input: 'Introdueix la URL de la imatge',
       ok: "D'acord",
       disabled: 'La partició /data és només lectura. No es pot descarregar la imatge.',
+      diskShared: "Apagueu primer el disc virtual i després useu la descàrrega d'imatges.",
+      diskOff: 'Apaga el disc virtual',
       uploadbox: 'Deixeu anar el fitxer aquí o feu clic per seleccionar-lo',
       inputfile: "Introduïu el fitxer d'imatge",
       NoISO: 'Cap ISO',
@@ -446,6 +454,11 @@ const ca = {
         hidOnlyDesc: "Deixeu d'emular dispositius virtuals, conservant només el control bàsic HID",
         disk: 'Disc virtual',
         diskDesc: 'Munta un disc U virtual al dispositiu remot',
+        diskLocked: 'Desactivat mentre hi ha una imatge muntada (activar-lo cancel·la el muntatge)',
+        diskCancelMount:
+          "Activar el disc virtual cancel·la la imatge muntada i interromp una descàrrega o pujada d'imatge en curs. Voleu continuar?",
+        diskBreakDownload:
+          "Activar el disc virtual interromp la descàrrega d'imatges. Voleu continuar?",
         network: 'Xarxa virtual',
         networkDesc: 'Munta una targeta de xarxa virtual al dispositiu remot',
         reboot: 'Reinicia',

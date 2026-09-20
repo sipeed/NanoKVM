@@ -223,6 +223,12 @@ const pl = {
       mountFailed: 'Nie udało się zamontować obrazu',
       mountDesc:
         'W niektórych systemach wymagane jest wyjęcie dysku wirtualnego na zdalnym hoście przed zamontowaniem obrazu.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Odmontowanie nie powiodło się',
       unmountDesc:
         'W niektórych systemach należy ręcznie wysunąć obraz ze zdalnego hosta przed odmontowaniem obrazu.',
@@ -291,6 +297,8 @@ const pl = {
       input: 'Proszę wprowadzić zdalny obraz URL',
       ok: 'Ok',
       disabled: '/data partycja to RO, więc nie możemy pobrać obrazu',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Upuść plik tutaj lub kliknij, aby wybrać',
       inputfile: 'Proszę wprowadzić plik obrazu',
       NoISO: 'Brak ISO',
@@ -450,6 +458,10 @@ const pl = {
           'Przestań emulować urządzenia wirtualne, zachowując jedynie podstawową kontrolę HID',
         disk: 'Dysk wirtualny',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Sieć wirtualna',
         networkDesc: 'Zamontuj wirtualną kartę sieciową na zdalnym hoście',
         reboot: 'Uruchom ponownie',

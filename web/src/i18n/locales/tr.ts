@@ -221,6 +221,12 @@ const tr = {
       mountFailed: 'Bağlantı başarısız oldu',
       mountDesc:
         'Bazı sistemlerde, disk imajını bağlamadan önce uzak ana bilgisayardaki sanal diski çıkarmak gerekir.',
+      diskOnWarn:
+        'İmajı bağlamak sanal diski kapatır, böylece bilgisayar /data dizinine erişemez. Devam edilsin mi?',
+      diskOffWarn:
+        'Sanal disk kapalı ve imajı bağlamak için açılması gerekiyor. Bilgisayardaki USB aygıtları yeniden tanımlanır. Devam edilsin mi?',
+      diskShared:
+        'Sanal disk açık, bu nedenle /data burada salt okunur. İmaj silmek veya yüklemek için sanal diski kapatın.',
       unmountFailed: 'Bağlantıyı kesme işlemi başarısız oldu',
       unmountDesc:
         'Bazı sistemlerde, görüntünün bağlantısını kesmeden önce uzak ana bilgisayardan manuel olarak çıkarmanız gerekir.',
@@ -289,6 +295,8 @@ const tr = {
       input: 'Uzak imaj URL’sini girin',
       ok: 'Tamam',
       disabled: '/data bölüntüsü salt okunur modda, disk imajı indirilemiyor.',
+      diskShared: 'Önce sanal diski kapatın, sonra imaj indirmeyi kullanın.',
+      diskOff: 'Sanal diski kapat',
       uploadbox: 'Dosyayı buraya bırakın veya seçmek için tıklayın',
       inputfile: 'Lütfen resim dosyasını giriniz',
       NoISO: 'ISO yok',
@@ -449,6 +457,10 @@ const tr = {
           'Yalnızca temel HID kontrolünü koruyarak sanal aygıtları taklit etmeyi bırakın',
         disk: 'Sanal Disk',
         diskDesc: "Sanal U-disk'i uzak ana bilgisayara bağla",
+        diskLocked: 'Bir imaj bağlıyken kapalı (açmak bağlamayı iptal eder)',
+        diskCancelMount:
+          'Sanal diski açmak, bağlı imajı iptal eder ve sürmekte olan imaj indirme veya yüklemeyi keser. Devam edilsin mi?',
+        diskBreakDownload: 'Sanal diski açmak imaj indirmeyi keser. Devam edilsin mi?',
         network: 'Sanal Ağ',
         networkDesc: 'Sanal ağ kartını uzak ana bilgisayara bağla',
         reboot: 'Yeniden Başlat',
