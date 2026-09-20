@@ -580,9 +580,13 @@ const nb = {
         uninstallDesc: 'Er du sikker på at du vil avinstallere NetBird?',
         uninstallWarning:
           'Hvis du er tilkoblet via NetBird, brytes den forbindelsen. Ingen annen VPN aktiveres eller velges automatisk; sørg for en annen tilgangsvei eller konfigurer en oppstarts-VPN uttrykkelig før fjerntilgang.',
+        update: 'Oppdater',
+        updateConfirm: 'Oppdatere NetBird nå?',
+        updateWarning:
+          'Klienten stoppes mens den byttes ut. Hvis du er tilkoblet via NetBird, brytes den tilkoblingen og den bør komme tilbake når den nye klienten starter.',
         updateAvailable: 'Denne fastvaren inneholder en nyere NetBird',
         updateHint:
-          'Den installerte klienten fortsetter å virke. Avinstaller NetBird og installer på nytt for å oppdatere. Det avbryter den nåværende NetBird-tilkoblingen, så gjør det fra det lokale nettverket eller via et annet VPN.',
+          'Den installerte klienten fortsetter å virke. Oppdateringen erstatter den med versjonen som følger med denne fastvaren.',
         version: 'Versjon',
         disconnect: 'Koble fra',
         disconnectConfirm: 'Er du sikker på at du vil koble fra?',

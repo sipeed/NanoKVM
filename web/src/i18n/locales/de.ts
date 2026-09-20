@@ -588,9 +588,13 @@ const de = {
         uninstallDesc: 'Sind Sie sicher, dass Sie NetBird deinstallieren möchten?',
         uninstallWarning:
           'Wenn Sie über NetBird verbunden sind, wird diese Verbindung beendet. Es wird keine andere VPN automatisch aktiviert oder ausgewählt; stellen Sie vor dem Fernzugriff einen anderen Zugang sicher oder konfigurieren Sie ausdrücklich eine Boot-VPN.',
+        update: 'Aktualisieren',
+        updateConfirm: 'NetBird jetzt aktualisieren?',
+        updateWarning:
+          'Während des Austauschs wird der Client gestoppt. Wenn Sie über NetBird verbunden sind, bricht diese Verbindung ab und sollte zurückkehren, sobald der neue Client startet.',
         updateAvailable: 'Diese Firmware enthält ein neueres NetBird',
         updateHint:
-          'Der installierte Client funktioniert weiterhin. Zum Aktualisieren NetBird deinstallieren und erneut installieren. Dabei wird die aktuelle NetBird-Verbindung getrennt, führen Sie das daher im lokalen Netzwerk oder über ein anderes VPN aus.',
+          'Der installierte Client funktioniert weiterhin. Beim Aktualisieren wird er durch die Version dieser Firmware ersetzt.',
         version: 'Version',
         disconnect: 'Trennen',
         disconnectConfirm: 'Möchten Sie die Verbindung wirklich trennen?',

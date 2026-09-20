@@ -17,6 +17,13 @@ export function install() {
   });
 }
 
+// An update downloads the same client an install does, then swaps it in.
+export function update() {
+  return http.post('/api/extensions/netbird/update', undefined, {
+    timeout: DOWNLOAD_TIMEOUT
+  });
+}
+
 export function uninstall() {
   return http.post('/api/extensions/netbird/uninstall', undefined, {
     timeout: SLOW_CALL_TIMEOUT

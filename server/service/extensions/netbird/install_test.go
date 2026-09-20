@@ -365,6 +365,113 @@ func TestStagedInstallPromoteRollsBackWhenVersionWriteFails(t *testing.T) {
 	}
 }
 
+func TestStagedInstallReplaceSwapsBinaryAndMarker(t *testing.T) {
+	const version = "0.77.1"
+	staged := makeStagedInstall(t, version)
+	directory := t.TempDir()
+	binaryPath := filepath.Join(directory, "netbird")
+	versionPath := filepath.Join(t.TempDir(), "netbird.version")
+	if err := os.WriteFile(binaryPath, []byte("previous"), 0o755); err != nil {
+		t.Fatalf("WriteFile previous binary: %v", err)
+	}
+	if err := os.WriteFile(versionPath, []byte("0.76.0\n"), 0o644); err != nil {
+		t.Fatalf("WriteFile previous marker: %v", err)
+	}
+
+	if err := staged.replace(binaryPath, versionPath); err != nil {
+		t.Fatalf("replace(): %v", err)
+	}
+	binary, err := os.ReadFile(binaryPath)
+	if err != nil {
+		t.Fatalf("ReadFile replaced binary: %v", err)
+	}
+	if string(binary) == "previous" {
+		t.Fatal("replace() left the previous binary in place")
+	}
+	marker, err := os.ReadFile(versionPath)
+	if err != nil {
+		t.Fatalf("ReadFile marker: %v", err)
+	}
+	if string(marker) != version+"\n" {
+		t.Fatalf("marker = %q, want %q", marker, version+"\n")
+	}
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatalf("ReadDir target: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".netbird.") {
+			t.Fatalf("replace() left %s behind", entry.Name())
+		}
+	}
+}
+
+// A replacement interrupted by a power loss leaves a ~40 MB leftover under a
+// pid that will never run again. The next replacement has to reclaim it.
+func TestStagedInstallReplaceClearsLeftoversFromAnotherProcess(t *testing.T) {
+	staged := makeStagedInstall(t, "0.77.1")
+	directory := t.TempDir()
+	binaryPath := filepath.Join(directory, "netbird")
+	versionPath := filepath.Join(t.TempDir(), "netbird.version")
+	if err := os.WriteFile(binaryPath, []byte("previous"), 0o755); err != nil {
+		t.Fatalf("WriteFile previous binary: %v", err)
+	}
+	for _, leftover := range []string{".netbird.new.999", ".netbird.old.999"} {
+		if err := os.WriteFile(filepath.Join(directory, leftover), []byte("stale"), 0o755); err != nil {
+			t.Fatalf("WriteFile leftover: %v", err)
+		}
+	}
+
+	if err := staged.replace(binaryPath, versionPath); err != nil {
+		t.Fatalf("replace(): %v", err)
+	}
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatalf("ReadDir target: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".netbird.") {
+			t.Fatalf("replace() kept the leftover %s", entry.Name())
+		}
+	}
+}
+
+// The reason Replace keeps the old binary aside: a marker that cannot be
+// written must leave the device with the client it had, not with a new binary
+// nothing vouches for and not with no binary at all.
+func TestStagedInstallReplaceRestoresPreviousBinaryWhenMarkerWriteFails(t *testing.T) {
+	staged := makeStagedInstall(t, "0.77.1")
+	directory := t.TempDir()
+	binaryPath := filepath.Join(directory, "netbird")
+	if err := os.WriteFile(binaryPath, []byte("previous"), 0o755); err != nil {
+		t.Fatalf("WriteFile previous binary: %v", err)
+	}
+	blocker := filepath.Join(t.TempDir(), "not-a-directory")
+	if err := os.WriteFile(blocker, []byte("block"), 0o600); err != nil {
+		t.Fatalf("WriteFile blocker: %v", err)
+	}
+
+	if err := staged.replace(binaryPath, filepath.Join(blocker, "netbird.version")); err == nil {
+		t.Fatal("replace() succeeded with an unwritable version path")
+	}
+	binary, err := os.ReadFile(binaryPath)
+	if err != nil {
+		t.Fatalf("ReadFile binary after failed replace: %v", err)
+	}
+	if string(binary) != "previous" {
+		t.Fatalf("binary after failed replace = %q, want the previous one", binary)
+	}
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatalf("ReadDir target: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".netbird.") {
+			t.Fatalf("failed replace() left %s behind", entry.Name())
+		}
+	}
+}
+
 func makeStagedInstall(t *testing.T, version string) *StagedInstall {
 	t.Helper()
 

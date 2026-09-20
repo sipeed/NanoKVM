@@ -12,6 +12,7 @@ import { Install } from './install.tsx';
 import { Login } from './login.tsx';
 import { Run } from './run.tsx';
 import type { Status } from './types.ts';
+import { Update } from './update.tsx';
 
 type NetbirdProps = {
   setIsLocked: (isLocked: boolean) => void;
@@ -104,26 +105,12 @@ export const Netbird = ({ setIsLocked }: NetbirdProps) => {
 
           {/*
             A client older than the firmware's pin keeps running, so this is an
-            offer, not a warning. It names the only available update path and
-            what that path costs, because performing it over NetBird itself
-            would cut the operator off.
+            offer, not a warning. Updating replaces the binary, which means
+            stopping the daemon: the panel says so before the button is used,
+            because on a NetBird-only device that is the connection carrying
+            the request.
           */}
-          {status?.updateAvailable && (
-            <Alert
-              className="mb-4"
-              type="info"
-              showIcon
-              message={t('settings.netbird.updateAvailable')}
-              description={
-                <>
-                  <div>
-                    {status.installedVersion || status.version} → {status.pinnedVersion}
-                  </div>
-                  <div>{t('settings.netbird.updateHint')}</div>
-                </>
-              }
-            />
-          )}
+          {status?.updateAvailable && <Update status={status} onSuccess={getStatus} />}
 
           {status?.state === 'notInstall' && (
             <Install setIsLocked={setIsLocked} onSuccess={getStatus} />

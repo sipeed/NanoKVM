@@ -585,9 +585,13 @@ const en = {
         uninstallDesc: 'Are you sure you want to uninstall NetBird?',
         uninstallWarning:
           'If you are connected through NetBird, this ends that connection. No other VPN is enabled or selected automatically; before remote access, ensure another way in or explicitly configure a boot VPN.',
+        update: 'Update',
+        updateConfirm: 'Update NetBird now?',
+        updateWarning:
+          'The client is stopped while it is replaced. If you are connected through NetBird, that connection drops and should come back once the new client starts.',
         updateAvailable: 'A newer NetBird comes with this firmware',
         updateHint:
-          'The installed client keeps working. To update it, uninstall NetBird and install it again. That ends the current NetBird connection, so do it over the local network or another VPN.',
+          'The installed client keeps working. Updating replaces it with the release this firmware ships.',
         version: 'Version',
         disconnect: 'Disconnect',
         disconnectConfirm: 'Are you sure you want to disconnect?',

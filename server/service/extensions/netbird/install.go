@@ -293,6 +293,106 @@ func (staged *StagedInstall) promote(binaryPath, versionPath string) error {
 	return nil
 }
 
+// Replace publishes a staged binary over an existing installation. Promote
+// refuses to do that: it uses os.Link, which cannot overwrite, because an
+// install must never swap the executable of a daemon that is running.
+//
+// An update is the one case where replacement is the point, so the caller must
+// have stopped the daemon and must hold the VPN lifecycle lock. The old binary
+// is kept aside until the new version marker is durable, so a failure anywhere
+// in the sequence puts the previous client back rather than leaving a device
+// with a binary and a marker that disagree, or with no binary at all.
+func (staged *StagedInstall) Replace() error {
+	return staged.replace(NetbirdPath, InstalledVersionPath)
+}
+
+func (staged *StagedInstall) replace(binaryPath, versionPath string) (err error) {
+	if staged == nil {
+		return fmt.Errorf("nil staged netbird install")
+	}
+	if staged.promoted {
+		return nil
+	}
+	if err := staged.validate(); err != nil {
+		return err
+	}
+
+	binary := filepath.Join(staged.dir, "netbird")
+	if err := os.Chmod(binary, 0o755); err != nil {
+		return fmt.Errorf("chmod staged netbird: %w", err)
+	}
+	// The marker must never certify content that is not on the disk yet.
+	if err := syncFile(binary); err != nil {
+		return fmt.Errorf("sync staged netbird binary: %w", err)
+	}
+
+	directory := filepath.Dir(binaryPath)
+	incoming := filepath.Join(directory, fmt.Sprintf(".netbird.new.%d", os.Getpid()))
+	previous := filepath.Join(directory, fmt.Sprintf(".netbird.old.%d", os.Getpid()))
+	// Leftovers from an interrupted replacement are ~40 MB each on a small root
+	// filesystem, and the process that made them is gone, so its pid will never
+	// clean them up. This runs under the lifecycle lock, so no concurrent
+	// replacement owns them.
+	removeReplacementLeftovers(directory)
+	if err := os.Link(binary, incoming); err != nil {
+		return fmt.Errorf("stage netbird replacement: %w", err)
+	}
+	defer func() {
+		if removeErr := os.Remove(incoming); removeErr != nil && !errors.Is(removeErr, fs.ErrNotExist) {
+			log.Warnf("could not remove netbird replacement stage: %s", removeErr)
+		}
+	}()
+
+	// Keep the old executable reachable under a second name. A hard link, not a
+	// rename: renaming it away would leave /usr/bin/netbird absent until the
+	// next rename lands, and a power loss in that window would leave the device
+	// with no client at all — which for a NetBird-only device means no way back
+	// in. Linking costs nothing (same inode) and makes the publish below a
+	// single rename over an existing name. Restoring is then also one rename.
+	restore := func() {}
+	if err := os.Link(binaryPath, previous); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return fmt.Errorf("set aside installed netbird: %w", err)
+		}
+	} else {
+		defer func() {
+			if removeErr := os.Remove(previous); removeErr != nil && !errors.Is(removeErr, fs.ErrNotExist) {
+				log.Warnf("could not remove the replaced netbird binary: %s", removeErr)
+			}
+		}()
+		restore = func() {
+			if restoreErr := os.Rename(previous, binaryPath); restoreErr != nil {
+				log.Errorf("could not restore the previous netbird binary: %s", restoreErr)
+			}
+		}
+	}
+
+	if err := os.Rename(incoming, binaryPath); err != nil {
+		restore()
+		return fmt.Errorf("publish netbird replacement: %w", err)
+	}
+	if err := syncDirectory(directory); err != nil {
+		restore()
+		return fmt.Errorf("sync netbird binary directory: %w", err)
+	}
+
+	published, err := publishVersion(versionPath, staged.version)
+	if err != nil {
+		if published {
+			// The marker is live and names the new binary, which is already
+			// durable. Restoring the old one now would create the mismatch
+			// this ordering exists to avoid.
+			return fmt.Errorf("publish netbird version after binary replacement: %w", err)
+		}
+		restore()
+		return fmt.Errorf("publish netbird version: %w", err)
+	}
+
+	staged.promoted = true
+	log.Debugf("replaced netbird with %s", staged.version)
+	return nil
+}
+
 // Cleanup removes the private staging workspace. It is safe after Promote:
 // promotion creates a hard link in /usr/bin before this workspace is removed.
 func (staged *StagedInstall) Cleanup() error {
@@ -589,7 +689,25 @@ func validateRISCVELF(path string) error {
 	return nil
 }
 
+// removeReplacementLeftovers clears the staging names Replace uses. It ignores
+// failures: they are reported by the operation that needed the space.
+func removeReplacementLeftovers(directory string) {
+	for _, pattern := range []string{".netbird.new.*", ".netbird.old.*"} {
+		matches, err := filepath.Glob(filepath.Join(directory, pattern))
+		if err != nil {
+			continue
+		}
+		for _, match := range matches {
+			if removeErr := os.Remove(match); removeErr != nil && !errors.Is(removeErr, fs.ErrNotExist) {
+				log.Warnf("could not remove netbird replacement leftover %s: %s", match, removeErr)
+			}
+		}
+	}
+}
+
 func uninstall() error {
+	removeReplacementLeftovers(filepath.Dir(NetbirdPath))
+
 	var removeErrs []error
 	for _, path := range []string{NetbirdPath, InstalledVersionPath, ScriptPath, PidFile} {
 		if err := os.Remove(path); err != nil && !errors.Is(err, fs.ErrNotExist) {

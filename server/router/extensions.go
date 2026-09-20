@@ -32,6 +32,7 @@ func extensionsRouter(r *gin.Engine) {
 	nb := netbird.NewService()
 
 	api.POST("/netbird/install", nb.Install)     // install netbird
+	api.POST("/netbird/update", nb.Update)       // update netbird to the pinned release
 	api.POST("/netbird/uninstall", nb.Uninstall) // uninstall netbird
 	api.GET("/netbird/status", nb.GetStatus)     // get netbird status
 	api.POST("/netbird/down", nb.Down)           // run netbird down

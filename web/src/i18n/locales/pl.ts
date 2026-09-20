@@ -584,9 +584,13 @@ const pl = {
         uninstallDesc: 'Czy na pewno chcesz odinstalować NetBird?',
         uninstallWarning:
           'Jeśli łączysz się przez NetBird, to połączenie zostanie przerwane. Żadna inna sieć VPN nie zostanie automatycznie włączona ani wybrana; przed zdalnym dostępem zapewnij inną drogę dostępu lub jawnie skonfiguruj VPN rozruchowy.',
+        update: 'Aktualizuj',
+        updateConfirm: 'Zaktualizować NetBird teraz?',
+        updateWarning:
+          'Na czas wymiany klient zostanie zatrzymany. Jeśli łączysz się przez NetBird, to połączenie zostanie przerwane i powinno wrócić po uruchomieniu nowego klienta.',
         updateAvailable: 'To oprogramowanie układowe zawiera nowszą wersję NetBird',
         updateHint:
-          'Zainstalowany klient nadal działa. Aby go zaktualizować, odinstaluj NetBird i zainstaluj ponownie. Ta operacja przerwie bieżące połączenie NetBird, więc wykonaj ją z sieci lokalnej lub przez inną sieć VPN.',
+          'Zainstalowany klient nadal działa. Aktualizacja zastąpi go wersją dołączoną do tego oprogramowania układowego.',
         version: 'Wersja',
         disconnect: 'Rozłącz',
         disconnectConfirm: 'Czy na pewno chcesz się rozłączyć?',

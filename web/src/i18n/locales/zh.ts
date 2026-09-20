@@ -567,9 +567,12 @@ const zh = {
         uninstallDesc: '确定要卸载 NetBird 吗？',
         uninstallWarning:
           '如果您正通过 NetBird 连接，此操作会中断该连接。不会自动启用或选择其他 VPN；远程访问前，请确认您有其他连接方式，或明确配置启动 VPN。',
+        update: '更新',
+        updateConfirm: '现在更新 NetBird？',
+        updateWarning:
+          '替换期间客户端会停止运行。如果您正通过 NetBird 连接，该连接会中断，并应在新客户端启动后恢复。',
         updateAvailable: '此固件附带更新版本的 NetBird',
-        updateHint:
-          '已安装的客户端仍可继续使用。如需更新，请先卸载 NetBird 再重新安装。此操作会中断当前的 NetBird 连接，请在局域网或其他 VPN 下进行。',
+        updateHint: '已安装的客户端仍可继续使用。更新会将其替换为此固件附带的版本。',
         version: '版本',
         disconnect: '断开连接',
         disconnectConfirm: '确定要断开连接吗？',

@@ -581,9 +581,13 @@ const cz = {
         uninstallDesc: 'Opravdu chcete odinstalovat NetBird?',
         uninstallWarning:
           'Pokud jste připojeni přes NetBird, toto spojení se ukončí. Jiná VPN se automaticky nezapne ani nevybere; před vzdáleným přístupem si zajistěte jiný způsob přístupu nebo výslovně nastavte VPN při spuštění.',
+        update: 'Aktualizovat',
+        updateConfirm: 'Aktualizovat NetBird nyní?',
+        updateWarning:
+          'Klient je během výměny zastaven. Pokud jste připojeni přes NetBird, toto připojení se přeruší a mělo by se vrátit po spuštění nového klienta.',
         updateAvailable: 'Tento firmware obsahuje novější verzi NetBird',
         updateHint:
-          'Nainstalovaný klient funguje dál. Pro aktualizaci NetBird odinstalujte a znovu nainstalujte. Tato operace ukončí aktuální připojení přes NetBird, proveďte ji proto z místní sítě nebo přes jinou VPN.',
+          'Nainstalovaný klient funguje dál. Aktualizace jej nahradí verzí dodávanou s tímto firmwarem.',
         version: 'Verze',
         disconnect: 'Odpojit',
         disconnectConfirm: 'Opravdu se chcete odpojit?',

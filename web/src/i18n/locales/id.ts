@@ -581,9 +581,13 @@ const id = {
         uninstallDesc: 'Apakah Anda yakin ingin menghapus instalan NetBird?',
         uninstallWarning:
           'Jika Anda terhubung lewat NetBird, koneksi itu akan terputus. VPN lain tidak akan diaktifkan atau dipilih secara otomatis; sebelum akses jarak jauh, pastikan ada jalur akses lain atau konfigurasi VPN saat boot secara eksplisit.',
+        update: 'Perbarui',
+        updateConfirm: 'Perbarui NetBird sekarang?',
+        updateWarning:
+          'Klien dihentikan selama diganti. Jika Anda terhubung melalui NetBird, koneksi itu terputus dan seharusnya kembali setelah klien baru berjalan.',
         updateAvailable: 'Firmware ini menyertakan NetBird versi lebih baru',
         updateHint:
-          'Klien yang terpasang tetap berfungsi. Untuk memperbaruinya, hapus NetBird lalu pasang kembali. Tindakan ini memutus koneksi NetBird saat ini, jadi lakukan dari jaringan lokal atau melalui VPN lain.',
+          'Klien yang terpasang tetap berfungsi. Pembaruan menggantinya dengan versi yang disertakan firmware ini.',
         version: 'Versi',
         disconnect: 'Putuskan',
         disconnectConfirm: 'Yakin ingin memutuskan koneksi?',

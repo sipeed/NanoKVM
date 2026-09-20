@@ -581,9 +581,13 @@ const tr = {
         uninstallDesc: "NetBird'i kaldırmak istediğinizden emin misiniz?",
         uninstallWarning:
           'NetBird üzerinden bağlıysanız bu bağlantı kesilir. Başka bir VPN otomatik olarak etkinleştirilmez veya seçilmez; uzaktan erişimden önce başka bir erişim yolu sağlayın ya da bir önyükleme VPN’ini açıkça yapılandırın.',
+        update: 'Güncelle',
+        updateConfirm: 'NetBird şimdi güncellensin mi?',
+        updateWarning:
+          'Değiştirme sırasında istemci durdurulur. NetBird üzerinden bağlıysanız bu bağlantı kesilir ve yeni istemci başladığında geri gelmelidir.',
         updateAvailable: 'Bu ürün yazılımı daha yeni bir NetBird sürümü içeriyor',
         updateHint:
-          'Kurulu istemci çalışmaya devam eder. Güncellemek için NetBird uygulamasını kaldırıp yeniden kurun. Bu işlem mevcut NetBird bağlantısını keser, bu nedenle yerel ağdan veya başka bir VPN üzerinden yapın.',
+          'Kurulu istemci çalışmaya devam eder. Güncelleme, onu bu ürün yazılımıyla gelen sürümle değiştirir.',
         version: 'Sürüm',
         disconnect: 'Bağlantıyı kes',
         disconnectConfirm: 'Bağlantıyı kesmek istediğinize emin misiniz?',

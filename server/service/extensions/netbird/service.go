@@ -81,6 +81,39 @@ func stageIfNeeded(parent context.Context) (stage *StagedInstall, generation uin
 	return stage, generation, release, nil
 }
 
+// stageUpdate downloads the pinned release while the VPN lifecycle lock is
+// free, exactly like stageIfNeeded. It refuses when there is nothing to update:
+// an update replaces a live installation, which is far more disruptive than an
+// install, and must never run because a pin or marker happened to be unreadable.
+func stageUpdate(parent context.Context) (stage *StagedInstall, generation uint64, release func(), err error) {
+	if !isInstalled() {
+		return nil, 0, nil, fmt.Errorf("netbird is not installed")
+	}
+	if !UpdateAvailable() {
+		return nil, 0, nil, fmt.Errorf("installed netbird is already the version this firmware ships")
+	}
+	if !installMu.TryLock() {
+		return nil, 0, nil, fmt.Errorf("a netbird installation is already in progress")
+	}
+
+	if !vpnpref.TryLock() {
+		installMu.Unlock()
+		return nil, 0, nil, fmt.Errorf("another VPN operation is in progress, please retry")
+	}
+	installContext, generation, finish := vpnpref.BeginStagedInstall(parent)
+	vpnpref.Unlock()
+	release = func() {
+		finish()
+		installMu.Unlock()
+	}
+	stage, err = StageInstallContext(installContext)
+	if err != nil {
+		release()
+		return nil, 0, nil, err
+	}
+	return stage, generation, release, nil
+}
+
 func promoteIfNeeded(stage *StagedInstall) error {
 	if stage == nil {
 		return nil
@@ -160,6 +193,81 @@ func (s *Service) Install(c *gin.Context) {
 	}
 
 	rsp.OkRsp(c)
+}
+
+// Update replaces an installed client with the release this firmware ships.
+//
+// It is the only path that overwrites a NetBird binary, and it is deliberately
+// an explicit user action rather than something a boot or an OTA performs: the
+// daemon has to be stopped for the replacement, so on a device reached through
+// NetBird this briefly drops the tunnel that carries the request. The UI says
+// so before the button is offered. A device that was already bound reconnects
+// when the new daemon starts; that is not verified here, which is why nothing
+// does this on the device's behalf.
+func (s *Service) Update(c *gin.Context) {
+	var rsp proto.Response
+
+	stage, generation, release, err := stageUpdate(c.Request.Context())
+	if err != nil {
+		rsp.ErrRsp(c, -1, fmt.Sprintf("update failed: %v", err))
+		return
+	}
+	defer release()
+	defer func() { _ = stage.Cleanup() }()
+
+	if !lockVPN(c, &rsp) {
+		return
+	}
+	defer vpnpref.Unlock()
+
+	if !vpnpref.StagedInstallCurrent(generation) || c.Request.Context().Err() != nil {
+		rsp.ErrRsp(c, -2, "update was canceled by a newer VPN operation")
+		return
+	}
+	vpnpref.InvalidateOtherStagedInstalls(generation)
+
+	// Stop the runtime, not the installation: StopRuntime leaves S99netbird in
+	// place, so the client comes back at the next boot even if this request
+	// fails after this point.
+	if err := NewCli().StopRuntime(); err != nil {
+		rsp.ErrRsp(c, -3, fmt.Sprintf("update failed: stopping netbird did not complete: %v", err))
+		log.Errorf("failed to stop netbird before update: %s", err)
+		return
+	}
+
+	// A daemon that survived the stop would keep serving from the old inode
+	// while the marker starts naming the new one. Replace only once the stop
+	// is observed to have taken effect.
+	if err := replaceAfterDaemonCheck(NewCli().ServiceRunning, stage.Replace); err != nil {
+		rsp.ErrRsp(c, -4, fmt.Sprintf("update failed: %v", err))
+		log.Errorf("failed to replace netbird: %s", err)
+		return
+	}
+
+	if err := NewCli().Start(); err != nil {
+		// The new binary and marker are committed, so the client is whole; only
+		// this start failed. Report it and leave the recovery actions available
+		// rather than claiming a running daemon.
+		rsp.ErrRsp(c, -5, fmt.Sprintf("netbird was updated, but starting it failed: %v", err))
+		log.Errorf("failed to start netbird after update: %s", err)
+		return
+	}
+
+	rsp.OkRsp(c)
+}
+
+// replaceAfterDaemonCheck mirrors promoteAfterDaemonCheck: it keeps the safety
+// decision testable without a real daemon. An inspection error is treated as a
+// running daemon, because it is not evidence of the opposite.
+func replaceAfterDaemonCheck(serviceRunning func() (bool, error), replace func() error) error {
+	running, err := serviceRunning()
+	if err != nil {
+		return fmt.Errorf("inspect netbird daemon before update: %w", err)
+	}
+	if running {
+		return fmt.Errorf("netbird daemon is still running; refusing to replace its binary")
+	}
+	return replace()
 }
 
 func (s *Service) Uninstall(c *gin.Context) {
