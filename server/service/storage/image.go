@@ -14,20 +14,79 @@ import (
 
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/vm/virtualdisk"
+	"NanoKVM-Server/utils"
 )
 
 const (
 	imageDirectory = "/data"
-	imageNone      = "/dev/mmcblk0p3"
-	cdromFlag      = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
-	mountDevice    = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
-	inquiryString  = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
-	roFlag         = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
+	dataDiskMarker = "/etc/kvm.disk0"
+	formatPending  = "/etc/kvm.disk0.formatting"
+	dataPartition  = "/dev/mmcblk0p3"
 )
+
+var (
+	imageNone     = dataPartition
+	cdromFlag     = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/cdrom"
+	mountDevice   = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/file"
+	inquiryString = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/inquiry_string"
+	roFlag        = "/sys/kernel/config/usb_gadget/g0/functions/mass_storage.disk0/lun.0/ro"
+
+	dataDiskMarkerPath = dataDiskMarker
+	formatPendingPath  = formatPending
+	dataPartitionPath  = dataPartition
+	virtualDiskPath    = "/boot/usb.disk0"
+	dataDirectoryMount = utils.IsMountPoint
+	runShellCommand    = func(command string) error {
+		return exec.Command("sh", "-c", command).Run()
+	}
+)
+
+func mountImagePath(requested string) (string, bool) {
+	requested = strings.TrimSpace(requested)
+	if requested == "" {
+		return "", true
+	}
+	if isDataPartitionPath(requested) {
+		return "", false
+	}
+	return requested, true
+}
+
+func isDataPartitionPath(path string) bool {
+	if path == dataPartitionPath {
+		return true
+	}
+
+	requested, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	partition, err := os.Stat(dataPartitionPath)
+	return err == nil && os.SameFile(requested, partition)
+}
+
+func defaultDataDiskOwned() bool {
+	return virtualdisk.IsDefaultConfigured(virtualdisk.Paths{
+		Config:    virtualDiskPath,
+		Marker:    dataDiskMarkerPath,
+		Pending:   formatPendingPath,
+		Partition: dataPartitionPath,
+	})
+}
+
+func isDataPath(path string) bool {
+	clean := filepath.Clean(path)
+	return clean == imageDirectory || strings.HasPrefix(clean, imageDirectory+string(os.PathSeparator))
+}
 
 func (s *Service) GetImages(c *gin.Context) {
 	var rsp proto.Response
 	var images []string
+	if !dataDirectoryMount(imageDirectory) {
+		rsp.ErrRsp(c, -2, "data disk is not mounted")
+		return
+	}
 
 	err := filepath.Walk(imageDirectory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -63,12 +122,35 @@ func (s *Service) MountImage(c *gin.Context) {
 		return
 	}
 
+	// mount
+	image, ok := mountImagePath(req.File)
+	if !ok {
+		rsp.ErrRsp(c, -2, "data disk is not ready")
+		return
+	}
+	if isDataPath(image) && !dataDirectoryMount(imageDirectory) {
+		rsp.ErrRsp(c, -2, "data disk is not mounted")
+		return
+	}
+
+	h := hid.GetHid()
+	h.Lock()
+	h.CloseNoLock()
+	defer func() {
+		h.OpenNoLock()
+		h.Unlock()
+	}()
+	clearRequested := image == ""
+	if clearRequested && defaultDataDiskOwned() && !dataDirectoryMount(imageDirectory) {
+		image = dataPartitionPath
+	}
+
 	// cdrom and ro flag
 	// set to 0 when unmount image
 	// set to 1 when mount image and the CD-ROM is enabled
-	if req.File == "" || req.Cdrom {
+	if clearRequested || req.Cdrom {
 		flag := "0"
-		if req.File != "" && req.Cdrom {
+		if !clearRequested && req.Cdrom {
 			flag = "1"
 		}
 
@@ -108,25 +190,11 @@ func (s *Service) MountImage(c *gin.Context) {
 		return
 	}
 
-	// mount
-	image := req.File
-	if image == "" {
-		image = imageNone
-	}
-
 	if err := os.WriteFile(mountDevice, []byte(image), 0o666); err != nil {
 		log.Errorf("mount file %s failed: %s", image, err)
 		rsp.ErrRsp(c, -2, "mount image failed")
 		return
 	}
-
-	h := hid.GetHid()
-	h.Lock()
-	h.CloseNoLock()
-	defer func() {
-		h.OpenNoLock()
-		h.Unlock()
-	}()
 
 	// reset usb
 	commands := []string{
@@ -135,7 +203,7 @@ func (s *Service) MountImage(c *gin.Context) {
 	}
 
 	for _, command := range commands {
-		err := exec.Command("sh", "-c", command).Run()
+		err := runShellCommand(command)
 		if err != nil {
 			rsp.ErrRsp(c, -2, "execute command failed")
 			return
@@ -210,6 +278,10 @@ func (s *Service) DeleteImage(c *gin.Context) {
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+	if !dataDirectoryMount(imageDirectory) {
+		rsp.ErrRsp(c, -2, "data disk is not mounted")
 		return
 	}
 

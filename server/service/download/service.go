@@ -39,6 +39,7 @@ var (
 	errDownloadInProgress = errors.New("download in progress")
 	errSHA256Mismatch     = errors.New("sha256 mismatch")
 	validISOFilename      = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+	dataDirectoryMounted  = utils.IsMountPoint
 )
 
 type Service struct {
@@ -151,6 +152,10 @@ func (s *Service) finishDownload(done chan struct{}, status downloadStatus) {
 
 func (s *Service) ImageEnabled(c *gin.Context) {
 	var rsp proto.Response
+	if !dataDirectoryMounted("/data") {
+		rsp.OkRspWithData(c, &proto.ImageEnabledRsp{Enabled: false})
+		return
+	}
 
 	testFile := "/data/.testfile"
 	file, err := os.Create(testFile)
@@ -202,6 +207,10 @@ func (s *Service) StatusImage(c *gin.Context) {
 
 func (s *Service) DownloadImageFile(c *gin.Context) {
 	var rsp proto.Response
+	if !dataDirectoryMounted("/data") {
+		rsp.ErrRsp(c, -1, "data disk is not mounted")
+		return
+	}
 
 	log.Debug("DownloadImageFile")
 	expectedSHA256, err := parseSHA256(c.GetHeader("X-SHA256-Sum"))
@@ -345,6 +354,10 @@ func (s *Service) DownloadImage(c *gin.Context) {
 	filename := filepath.Base(u.Path)
 	if filename == "." || filename == "/" || filename == "" {
 		rsp.ErrRsp(c, -1, "invalid url")
+		return
+	}
+	if !dataDirectoryMounted("/data") {
+		rsp.ErrRsp(c, -1, "data disk is not mounted")
 		return
 	}
 

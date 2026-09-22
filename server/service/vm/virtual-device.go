@@ -10,11 +10,22 @@ import (
 
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/vm/virtualdisk"
 )
 
 const (
 	virtualNetwork = "/boot/usb.rndis0"
 	virtualDisk    = "/boot/usb.disk0"
+	dataDiskMarker = "/etc/kvm.disk0"
+	formatPending  = "/etc/kvm.disk0.formatting"
+	dataPartition  = "/dev/mmcblk0p3"
+)
+
+var (
+	virtualDiskPath    = virtualDisk
+	dataDiskMarkerPath = dataDiskMarker
+	formatPendingPath  = formatPending
+	dataPartitionPath  = dataPartition
 )
 
 var (
@@ -31,13 +42,7 @@ var (
 		"/etc/init.d/S03usbdev start",
 	}
 
-	mountDiskCommands = []string{
-		"touch /boot/usb.disk0",
-		"/etc/init.d/S03usbdev stop",
-		"/etc/init.d/S03usbdev start",
-	}
-
-	unmountDiskCommands = []string{
+	unmountCustomDiskCommands = []string{
 		"/etc/init.d/S03usbdev stop",
 		"rm -rf /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0",
 		"rm /boot/usb.disk0",
@@ -49,7 +54,7 @@ func (s *Service) GetVirtualDevice(c *gin.Context) {
 	var rsp proto.Response
 
 	network, _ := isDeviceExist(virtualNetwork)
-	disk, _ := isDeviceExist(virtualDisk)
+	disk := isVirtualDiskConfigured()
 
 	rsp.OkRspWithData(c, &proto.GetVirtualDeviceRsp{
 		Network: network,
@@ -81,14 +86,7 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 			commands = unmountNetworkCommands
 		}
 	case "disk":
-		device = virtualDisk
-
-		exist, _ := isDeviceExist(device)
-		if !exist {
-			commands = mountDiskCommands
-		} else {
-			commands = unmountDiskCommands
-		}
+		device = virtualDiskPath
 	default:
 		rsp.ErrRsp(c, -2, "invalid arguments")
 		return
@@ -101,6 +99,13 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		h.OpenNoLock()
 		h.Unlock()
 	}()
+	if req.Device == "disk" {
+		if !isVirtualDiskConfigured() && !isDefaultVirtualDiskReady() {
+			rsp.ErrRsp(c, -3, "data disk is not ready")
+			return
+		}
+		commands = virtualDiskCommands()
+	}
 
 	for _, command := range commands {
 		err := exec.Command("sh", "-c", command).Run()
@@ -111,11 +116,48 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 	}
 
 	on, _ := isDeviceExist(device)
+	if req.Device == "disk" {
+		on = isVirtualDiskConfigured()
+	}
 	rsp.OkRspWithData(c, &proto.UpdateVirtualDeviceRsp{
 		On: on,
 	})
 
 	log.Debugf("update virtual device %s success", req.Device)
+}
+
+func virtualDiskCommands() []string {
+	if isVirtualDiskConfigured() && !isDefaultVirtualDiskConfigured() {
+		return unmountCustomDiskCommands
+	}
+	return virtualdisk.ToggleCommands(isVirtualDiskConfigured())
+}
+
+func isDefaultVirtualDiskConfigured() bool {
+	return virtualdisk.IsDefaultConfigured(virtualdisk.Paths{
+		Config:    virtualDiskPath,
+		Marker:    dataDiskMarkerPath,
+		Pending:   formatPendingPath,
+		Partition: dataPartitionPath,
+	})
+}
+
+func isDefaultVirtualDiskReady() bool {
+	return virtualdisk.IsDefaultReady(virtualdisk.Paths{
+		Config:    virtualDiskPath,
+		Marker:    dataDiskMarkerPath,
+		Pending:   formatPendingPath,
+		Partition: dataPartitionPath,
+	})
+}
+
+func isVirtualDiskConfigured() bool {
+	return virtualdisk.IsConfigured(virtualdisk.Paths{
+		Config:    virtualDiskPath,
+		Marker:    dataDiskMarkerPath,
+		Pending:   formatPendingPath,
+		Partition: dataPartitionPath,
+	})
 }
 
 func isDeviceExist(device string) (bool, error) {
