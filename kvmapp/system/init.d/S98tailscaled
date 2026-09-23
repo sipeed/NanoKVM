@@ -267,6 +267,13 @@ case "$1" in
             --port="$PORT" $FLAGS && wait_for_start 5; then
             echo "OK"
             "$CLIENT_PATH" set --accept-dns=false >/dev/null 2>&1 || true
+            # Keep tailscaled out of iptables. Its default anti-spoofing rule
+            # drops every source in 100.64.0.0/10 not arriving on tailscale0 —
+            # which is all of NetBird's traffic on wt0. Applied on every start
+            # so a device configured before this change is fixed at next boot,
+            # not only when someone signs in again. A separate call, so a client
+            # without the flag still gets the DNS setting above.
+            "$CLIENT_PATH" set --netfilter-mode=off >/dev/null 2>&1 || true
             exit 0
         fi
         echo "FAIL"

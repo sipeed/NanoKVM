@@ -173,8 +173,25 @@ func (c *Cli) Stop() error {
 	return nil
 }
 
+// netfilterMode keeps tailscaled out of iptables. With its default ("on") it
+// installs `-A ts-input -s 100.64.0.0/10 ! -i tailscale0 -j DROP`: anti-spoofing
+// that assumes the whole CGNAT range belongs to Tailscale. NetBird allocates from
+// the same range, so that rule drops every packet NetBird delivers on wt0 — the
+// device stays "Connected" in NetBird while nothing reaches it. Measured on a
+// Cube: starting tailscaled cut all inbound NetBird traffic, and removing that
+// one rule restored it.
+//
+// The rule protects little here. NanoKVM routes nothing, INPUT's policy is
+// ACCEPT, and the web UI and SSH are reachable from the LAN regardless, so a
+// spoofed 100.x source gains nothing it did not already have.
+//
+// Every command that writes preferences has to carry it. `tailscale up` refuses
+// to run unless it mentions every non-default setting, so once "off" is stored,
+// an `up` without it fails; `tailscale login` would otherwise apply the default.
+const netfilterMode = "--netfilter-mode=off"
+
 func (c *Cli) Up() error {
-	if err := runProgram(UpTimeout, TailscalePath, "up", "--accept-dns=false"); err != nil {
+	if err := runProgram(UpTimeout, TailscalePath, "up", "--accept-dns=false", netfilterMode); err != nil {
 		return fmt.Errorf("tailscale up: %w", err)
 	}
 	return nil
@@ -210,7 +227,7 @@ func (c *Cli) Status() (*TsStatus, error) {
 }
 
 func (c *Cli) Login() (string, error) {
-	cmd := exec.Command(TailscalePath, "login", "--accept-dns=false", "--timeout=10m")
+	cmd := exec.Command(TailscalePath, "login", "--accept-dns=false", netfilterMode, "--timeout=10m")
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return "", err
