@@ -226,16 +226,25 @@ jobs:
         uses: actions/cache@v4
         with:
           path: build/release/netbird_riscv64.tgz
-          # Version, immutable source commit, firmware-pinned asset digest, the
-          # script and toolchain all define the artifact. Any change must miss
-          # cache and reproduce the digest before it can be released.
-          key: netbird-riscv64-${{ runner.os }}-${{ steps.netbird.outputs.version }}-${{ hashFiles('kvmapp/system/netbird/SOURCE', 'kvmapp/system/netbird/SHA256', 'scripts/build-netbird.sh') }}-go1.25.0
+          # Version, immutable source commit, firmware-pinned asset digest and the
+          # build script define the artifact. Any change must miss cache and
+          # reproduce the digest before it can be released.
+          #
+          # The Go toolchain is not in this key on purpose: which one compiles
+          # the client is decided by the pinned NetBird commit's go.mod, not by
+          # the step below, and that commit is already part of the key through
+          # SOURCE.
+          key: netbird-riscv64-${{ runner.os }}-${{ steps.netbird.outputs.version }}-${{ hashFiles('kvmapp/system/netbird/SOURCE', 'kvmapp/system/netbird/SHA256', 'scripts/build-netbird.sh') }}
 
       - name: Set up Go
         if: steps.netbird-cache.outputs.cache-hit != 'true'
         uses: actions/setup-go@v5
         with:
-          go-version: '1.25.0'
+          # A floor, not the compiler: NetBird 0.77.1 requires go >= 1.25.5, and
+          # Go fetches that toolchain itself. Pinning a lower version here and
+          # calling it the build's toolchain would be a claim the build does not
+          # honour. Keep GOTOOLCHAIN at its default so go.mod stays the authority.
+          go-version: '1.25.5'
 
       - name: Build NetBird client (riscv64)
         if: steps.netbird-cache.outputs.cache-hit != 'true'

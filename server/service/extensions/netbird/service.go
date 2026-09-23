@@ -187,9 +187,11 @@ func (s *Service) Install(c *gin.Context) {
 	// S99netbird runs `netbird service run`; the tunnel is raised by `netbird up`,
 	// which is the login step. On a device that has never been bound — the case
 	// this exists for — the daemon therefore carries no tunnel. A device that was
-	// bound earlier may well reconnect on daemon start; that is not verified here,
-	// and it is accepted: the overlap is user-initiated and ends when the switch
-	// is completed.
+	// bound earlier reconnects on daemon start, keeping its name and address:
+	// measured on a Cube, where an uninstall/install cycle brought the same peer
+	// back with no interactive login, because uninstall does not touch the client
+	// credentials under /etc/netbird. The overlap that creates is user-initiated
+	// and ends when the switch is completed.
 	if err := NewCli().Start(); err != nil {
 		rsp.ErrRsp(c, -2, fmt.Sprintf("start failed: %v", err))
 		log.Errorf("failed to start netbird after install: %s", err)
@@ -206,8 +208,9 @@ func (s *Service) Install(c *gin.Context) {
 // daemon has to be stopped for the replacement, so on a device reached through
 // NetBird this briefly drops the tunnel that carries the request. The UI says
 // so before the button is offered. A device that was already bound reconnects
-// when the new daemon starts; that is not verified here, which is why nothing
-// does this on the device's behalf.
+// when the new daemon starts — measured on a Cube, same peer name and address,
+// no interactive login — but the drop is real, so this stays an explicit action
+// rather than something the firmware performs on the device's behalf.
 func (s *Service) Update(c *gin.Context) {
 	var rsp proto.Response
 
