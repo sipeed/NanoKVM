@@ -8,6 +8,7 @@ import { MouseJiggler } from './mouse-jiggler.tsx';
 import { Oled } from './oled.tsx';
 import { Reboot } from './reboot.tsx';
 import { Ssh } from './ssh.tsx';
+import { UsbIdentity } from './usb-identity.tsx';
 import { VirtualDevices } from './virtual-devices.tsx';
 
 export const Device = () => {
@@ -25,6 +26,9 @@ export const Device = () => {
         <Divider className="opacity-50" />
 
         <VirtualDevices />
+        <Divider className="opacity-50" />
+
+        <UsbIdentity />
         <Divider className="opacity-50" />
 
         <Oled />

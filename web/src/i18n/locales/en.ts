@@ -459,6 +459,23 @@ const en = {
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
+        usbIdentity: {
+          title: 'USB Identity',
+          description: 'Customize the VID/PID and descriptor strings the USB gadget reports to the host',
+          tooltip:
+            'Some hosts key automated provisioning off the USB device identity. Changing these fields does not affect KVM functionality; NanoKVM identifies itself as a generic HID device by default.',
+          vendorId: 'Vendor ID',
+          productId: 'Product ID',
+          manufacturer: 'Manufacturer',
+          product: 'Product Name',
+          serial: 'Serial Number',
+          reset: 'Reset to Default',
+          applyNote: 'Changes take effect after the USB gadget re-enumerates on the host.',
+          invalidId: 'Vendor/Product ID must be 4 hex digits, e.g. 0x3346',
+          invalidString: 'Must be 0-32 printable ASCII characters',
+          saved: 'USB identity updated',
+          saveFailed: 'Failed to update USB identity'
+        },
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
         okBtn: 'Yes',

@@ -78,6 +78,23 @@ type UpdateVirtualDeviceRsp struct {
 	On bool `json:"on"`
 }
 
+type GetUsbIdentityRsp struct {
+	VendorID     string `json:"vendorId"`     // idVendor, e.g. "0x3346"
+	ProductID    string `json:"productId"`    // idProduct, e.g. "0x1009"
+	Manufacturer string `json:"manufacturer"` // iManufacturer string descriptor
+	Product      string `json:"product"`      // iProduct string descriptor
+	Serial       string `json:"serial"`       // iSerialNumber string descriptor
+	IsCustom     bool   `json:"isCustom"`     // true if any field overrides the default
+}
+
+type SetUsbIdentityReq struct {
+	VendorID     string `validate:"omitempty"`
+	ProductID    string `validate:"omitempty"`
+	Manufacturer string `validate:"omitempty"`
+	Product      string `validate:"omitempty"`
+	Serial       string `validate:"omitempty"`
+}
+
 type SetMemoryLimitReq struct {
 	Enabled bool  `validate:"omitempty"`
 	Limit   int64 `validate:"omitempty"`
