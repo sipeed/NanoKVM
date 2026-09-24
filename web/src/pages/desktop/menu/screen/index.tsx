@@ -8,6 +8,7 @@ import * as ls from '@/lib/localstorage';
 import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
 
+import { Codec } from './codec.tsx';
 import { getQualityMap, getScreenType } from './constants.ts';
 import { Fps } from './fps';
 import { FrameDetect } from './frame-detect';
@@ -77,6 +78,7 @@ export const Screen = () => {
   const content = (
     <div className="flex flex-col space-y-1">
       <VideoMode />
+      {!isMjpeg && <Codec />}
       <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />

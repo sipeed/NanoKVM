@@ -3,7 +3,9 @@ package webrtc
 import (
 	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/service/stream"
 	"encoding/json"
+	"net/http"
 	"sync"
 	"time"
 
@@ -32,6 +34,19 @@ func getManager() *WebRTCManager {
 }
 
 func Connect(c *gin.Context) {
+	encoderConfig, err := stream.ParseEncoderConfig(c.Request.URL.Query(), stream.DefaultEncoderConfig())
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	connect(c, encoderConfig)
+}
+
+func ConnectLegacy(c *gin.Context) {
+	connect(c, stream.LegacyEncoderConfig())
+}
+
+func connect(c *gin.Context, encoderConfig stream.EncoderConfig) {
 	// create WebSocket connection
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -52,7 +67,7 @@ func Connect(c *gin.Context) {
 	// create video connection
 	iceServers := createICEServers()
 
-	mediaEngine, err := createMediaEngine()
+	mediaEngine, err := createMediaEngine(encoderConfig)
 	if err != nil {
 		log.Errorf("failed to create h264 media engine: %s", err)
 		return
@@ -69,7 +84,7 @@ func Connect(c *gin.Context) {
 	}()
 
 	// create client
-	client := NewClient(wsConn, videoConn)
+	client := NewClient(wsConn, videoConn, encoderConfig)
 	if err := client.AddTrack(); err != nil {
 		log.Errorf("failed to add track: %s", err)
 		return
@@ -144,11 +159,30 @@ func sendICEServers(client *Client, iceServers []webrtc.ICEServer) error {
 	return client.WriteMessage("ice-servers", string(data))
 }
 
-func createMediaEngine() (*webrtc.MediaEngine, error) {
+func createMediaEngine(config stream.EncoderConfig) (*webrtc.MediaEngine, error) {
 	mediaEngine := &webrtc.MediaEngine{}
+	codec := webrtc.RTPCodecParameters{
+		RTPCodecCapability: webrtc.RTPCodecCapability{
+			MimeType:    webrtc.MimeTypeH264,
+			ClockRate:   90000,
+			SDPFmtpLine: h264SDPFmtpLine,
+			RTCPFeedback: []webrtc.RTCPFeedback{
+				{Type: "goog-remb"},
+				{Type: "ccm", Parameter: "fir"},
+				{Type: "nack"},
+				{Type: "nack", Parameter: "pli"},
+			},
+		},
+		PayloadType: 102,
+	}
+	if config.Codec == stream.VideoCodecH265 {
+		codec.RTPCodecCapability.MimeType = webrtc.MimeTypeH265
+		codec.RTPCodecCapability.SDPFmtpLine = ""
+		codec.PayloadType = 126
+	}
 
-	if err := mediaEngine.RegisterDefaultCodecs(); err != nil {
-		log.Errorf("failed to register default codecs: %s", err)
+	if err := mediaEngine.RegisterCodec(codec, webrtc.RTPCodecTypeVideo); err != nil {
+		log.Errorf("failed to register %s codec: %s", config.Codec, err)
 		return nil, err
 	}
 

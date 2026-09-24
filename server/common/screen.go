@@ -1,6 +1,11 @@
 package common
 
-import "sync"
+import (
+	"os"
+	"strconv"
+	"strings"
+	"sync"
+)
 
 type Screen struct {
 	Width   uint16
@@ -15,6 +20,12 @@ var (
 	screen     *Screen
 	screenOnce sync.Once
 )
+
+var screenFileMap = map[string]string{
+	"fps":        "/kvmapp/kvm/fps",
+	"quality":    "/kvmapp/kvm/qlty",
+	"resolution": "/kvmapp/kvm/res",
+}
 
 // ResolutionMap height to width
 var ResolutionMap = map[uint16]uint16{
@@ -33,64 +44,94 @@ var QualityMap = map[uint16]bool{
 }
 
 var BitRateMap = map[uint16]bool{
-	5000: true,
-	3000: true,
-	2000: true,
-	1000: true,
+	10000: true,
+	5000:  true,
+	3000:  true,
+	2000:  true,
+	1000:  true,
 }
 
 func GetScreen() *Screen {
 	screenOnce.Do(func() {
-		screen = &Screen{
-			Width:   0,
-			Height:  0,
-			Quality: 80,
-			FPS:     30,
-			BitRate: 3000,
-			GOP:     30,
-		}
+		screen = loadScreen(os.ReadFile)
 	})
 
 	return screen
 }
 
 func SetScreen(key string, value int) {
+	setScreenValue(GetScreen(), key, value)
+}
+
+func setScreenValue(target *Screen, key string, value int) {
 	switch key {
 	case "resolution":
 		height := uint16(value)
 		if width, ok := ResolutionMap[height]; ok {
-			screen.Width = width
-			screen.Height = height
+			target.Width = width
+			target.Height = height
 		}
 
 	case "quality":
 		if value > 100 {
-			screen.BitRate = uint16(value)
+			target.BitRate = uint16(value)
 		} else {
-			screen.Quality = uint16(value)
+			target.Quality = uint16(value)
 		}
 
 	case "fps":
-		screen.FPS = validateFPS(value)
+		target.FPS = validateFPS(value)
 
 	case "gop":
-		screen.GOP = uint8(value)
+		target.GOP = uint8(value)
 	}
 }
 
 func CheckScreen() {
-	if _, ok := ResolutionMap[screen.Height]; !ok {
-		screen.Width = 1920
-		screen.Height = 1080
+	checkScreen(GetScreen())
+}
+
+func checkScreen(target *Screen) {
+	if _, ok := ResolutionMap[target.Height]; !ok {
+		target.Width = 1920
+		target.Height = 1080
 	}
 
-	if _, ok := QualityMap[screen.Quality]; !ok {
-		screen.Quality = 80
+	if _, ok := QualityMap[target.Quality]; !ok {
+		target.Quality = 80
 	}
 
-	if _, ok := BitRateMap[screen.BitRate]; !ok {
-		screen.BitRate = 3000
+	if _, ok := BitRateMap[target.BitRate]; !ok {
+		target.BitRate = 3000
 	}
+}
+
+func loadScreen(readFile func(string) ([]byte, error)) *Screen {
+	target := &Screen{
+		Width:   0,
+		Height:  0,
+		Quality: 80,
+		FPS:     30,
+		BitRate: 3000,
+		GOP:     30,
+	}
+
+	for key, path := range screenFileMap {
+		data, err := readFile(path)
+		if err != nil {
+			continue
+		}
+
+		value, err := strconv.Atoi(strings.TrimSpace(string(data)))
+		if err != nil {
+			continue
+		}
+
+		setScreenValue(target, key, value)
+	}
+
+	checkScreen(target)
+	return target
 }
 
 func validateFPS(fps int) int {
