@@ -485,6 +485,28 @@ const se = {
           description: 'Aktivera HTTPS-protokoll',
           tip: 'Observera: Användning av HTTPS kan öka fördröjningen, särskilt med MJPEG-läge.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Välj DHCP eller konfigurera en permanent statisk IPv4-adress",
+          dhcp: "DHCP",
+          static: "Statisk",
+          ipv4: "IPv4-konfiguration",
+          dhcpDescription: "IP-adress och gateway hämtas automatiskt via DHCP",
+          staticDescription: "Inställningarna tillämpas omedelbart och behålls efter omstart",
+          ipAddress: "IP-adress",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Nätmask",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Ange en giltig IPv4-adress, nätmask och gateway",
+          save: "Spara",
+          unsaved: "Osparade ändringar",
+          savedStatic: "Statisk adress sparad. Anslut igen på {{address}}.",
+          savedDhcp: "DHCP aktiverat. Anslut igen med adressen som routern har tilldelat.",
+          saveFailed: "Det gick inte att spara Ethernet-inställningarna",
+          loadFailed: "Det gick inte att läsa in Ethernet-inställningarna"
+        },
         dns: {
           title: 'DNS',
           description: 'Konfigurera DNS-servrar för NanoKVM',

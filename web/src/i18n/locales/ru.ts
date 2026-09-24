@@ -490,6 +490,28 @@ const ru = {
           description: 'Включить протокол HTTPS',
           tip: 'Имейте в виду: использование HTTPS может увеличить задержку, особенно в режиме видео MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Выберите DHCP или настройте постоянный статический IPv4-адрес",
+          dhcp: "DHCP",
+          static: "Статический",
+          ipv4: "Настройка IPv4",
+          dhcpDescription: "IP-адрес и шлюз автоматически получаются по DHCP",
+          staticDescription: "Настройки применяются немедленно и сохраняются после перезагрузки",
+          ipAddress: "IP-адрес",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Маска подсети",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Шлюз",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Введите корректные IPv4-адрес, маску подсети и шлюз",
+          save: "Сохранить",
+          unsaved: "Несохранённые изменения",
+          savedStatic: "Статический адрес сохранён. Повторно подключитесь по адресу {{address}}.",
+          savedDhcp: "DHCP включён. Повторно подключитесь, используя адрес, назначенный маршрутизатором.",
+          saveFailed: "Не удалось сохранить настройки Ethernet",
+          loadFailed: "Не удалось загрузить настройки Ethernet"
+        },
         dns: {
           title: 'DNS',
           description: 'Настройка DNS-серверов для NanoKVM',

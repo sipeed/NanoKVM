@@ -496,6 +496,28 @@ const de = {
           description: 'HTTPS-Protokoll aktivieren',
           tip: 'Hinweis: Die Verwendung von HTTPS kann die Latenz erhöhen, besonders im MJPEG-Videomodus.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Ethernet-IPv4-Verbindung konfigurieren.",
+          dhcp: "DHCP",
+          static: "Statisch",
+          ipv4: "IPv4",
+          dhcpDescription: "IP-Adresse automatisch über DHCP beziehen.",
+          staticDescription: "IP-Adresse manuell konfigurieren.",
+          ipAddress: "IP-Adresse",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Subnetzmaske",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Ungültige IP-Adresse",
+          save: "Speichern",
+          unsaved: "Ungespeicherte Änderungen",
+          savedStatic: "Statische IP-Adresse {{address}} gespeichert.",
+          savedDhcp: "DHCP-Konfiguration gespeichert.",
+          saveFailed: "Konfiguration konnte nicht gespeichert werden.",
+          loadFailed: "Konfiguration konnte nicht geladen werden."
+        },
         dns: {
           title: 'DNS',
           description: 'DNS-Server für NanoKVM konfigurieren',
