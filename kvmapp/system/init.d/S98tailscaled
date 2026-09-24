@@ -1,89 +1,318 @@
 #!/bin/sh
 
 DAEMON="tailscaled"
+DAEMON_PATH="/usr/sbin/$DAEMON"
+CLIENT_PATH="/usr/bin/tailscale"
 PIDFILE="/var/run/$DAEMON.pid"
-
-# Set the port to listen on for incoming VPN packets.
-# Remote nodes will automatically be informed about the new port number,
-# but you might want to configure this in order to set external firewall
-# settings.
 PORT="41641"
-
-# Extra flags you might want to pass to tailscaled.
 FLAGS=""
 
-# You need tailscaled at /usr/sbin to server, and tailscale at /usr/bin to operate
-# STATIC version needed. Download page at https://pkgs.tailscale.com/stable/#static
-PKG_URL_LATEST="https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz"
-[ ! -x /usr/sbin/$DAEMON ] &&
-    echo "/usr/sbin/$DAEMON not found, please download it from $PKG_URL_LATEST" &&
-    echo "Then unpack it, copy $DAEMON to /usr/sbin and copy tailscale to /usr/bin" &&
-    exit 1
-VERSION=$(/usr/sbin/$DAEMON --version|sed -n '1p'|xargs echo -n)
-
-[ -x /usr/bin/tailscale ] ||
-    (echo "/usr/bin/tailscale not found, your installation of tailscale may be broken" && exit 1)
-
-# Clean up old forwarding configuration if it exists
-if [ -f /etc/sysctl.d/99-tailscale.conf ]; then
-    echo "Found old forwarding configuration, cleaning up..."
-    rm -f /etc/sysctl.d/99-tailscale.conf
-    sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1
-    sysctl -w net.ipv6.conf.all.forwarding=0 >/dev/null 2>&1
-    echo "Cleanup completed. IPv4/IPv6 forwarding disabled."
-
-    # Trigger IPv6 address renewal on all interfaces
-    for iface in $(ls /sys/class/net/ | grep -v lo); do
-        echo 0 > /proc/sys/net/ipv6/conf/$iface/forwarding 2>/dev/null
-        sysctl -w net.ipv6.conf.$iface.accept_ra=2 >/dev/null 2>&1
+# A pid file is advisory only: it can survive a crash and its PID can later be
+# reused. Verify /proc/<pid>/exe before signalling anything. The "(deleted)"
+# form is still a live daemon and must be stopped before an uninstall/switch.
+canonical_daemon_path() {
+    daemon_path="$1"
+    daemon_hops=0
+    while [ -L "$daemon_path" ]; do
+        daemon_hops=$((daemon_hops + 1))
+        [ "$daemon_hops" -le 40 ] || return 1
+        daemon_target=$(readlink "$daemon_path" 2>/dev/null) || return 1
+        case "$daemon_target" in
+            /*) daemon_path="$daemon_target" ;;
+            *) daemon_path="$(dirname "$daemon_path")/$daemon_target" ;;
+        esac
     done
 
-    echo "If you need exit node features, please configure manually."
-fi
+    daemon_dir=$(dirname "$daemon_path")
+    daemon_base=$(basename "$daemon_path")
+    if [ -d "$daemon_dir" ]; then
+        daemon_dir=$(cd -P "$daemon_dir" 2>/dev/null && pwd) || return 1
+    fi
+    printf '%s/%s\n' "$daemon_dir" "$daemon_base"
+}
+
+is_daemon_pid() {
+    pid="$1"
+    case "$pid" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    expected=$(canonical_daemon_path "$DAEMON_PATH") || return 2
+    target=$(readlink "/proc/$pid/exe" 2>/dev/null) || {
+        # A PID which has exited is safe to ignore.  If its /proc directory
+        # still exists, however, do not mistake an unreadable identity for an
+        # absent daemon: callers must not remove/replace its executable.
+        [ -e "/proc/$pid" ] && return 2
+        return 1
+    }
+    [ "$target" = "$expected" ] || [ "$target" = "$expected (deleted)" ]
+}
+
+daemon_pids() {
+    expected=$(canonical_daemon_path "$DAEMON_PATH") || return 2
+    alias=$(basename "$DAEMON_PATH")
+    target=$(basename "$expected")
+    # pidof sees the invoked symlink alias, whereas procfs resolves that
+    # alias to its target. Search both launch forms, then verify procfs.
+    if [ "$alias" = "$target" ]; then
+        pids=$(pidof "$alias" 2>/dev/null)
+    else
+        pids=$(pidof "$alias" "$target" 2>/dev/null)
+    fi
+    case $? in
+        0) ;;
+        # pidof uses 1 to report that no process matched.  Any other failure
+        # leaves process identity unknown and must not be mistaken for absence.
+        1) return 0 ;;
+        *) return 2 ;;
+    esac
+
+    for pid in $pids; do
+        is_daemon_pid "$pid"
+        case $? in
+            0) printf '%s\n' "$pid" ;;
+            1) ;;
+            *) return 2 ;;
+        esac
+    done
+    return 0
+}
+
+daemon_running() {
+    pids=$(daemon_pids) || return 2
+    [ -n "$pids" ]
+}
+
+wait_for_start() {
+    timeout="$1"
+    elapsed=0
+    while :; do
+        daemon_running
+        case $? in
+            0) return 0 ;;
+            2) return 2 ;;
+        esac
+        [ "$elapsed" -ge "$timeout" ] && return 1
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+}
+
+wait_for_exit() {
+    timeout="$1"
+    elapsed=0
+    while :; do
+        daemon_running
+        case $? in
+            1) return 0 ;;
+            2) return 2 ;;
+        esac
+        [ "$elapsed" -ge "$timeout" ] && return 1
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+}
+
+signal_daemons() {
+    signal="$1"
+    pids=$(daemon_pids) || return 2
+    [ -n "$pids" ] || return 0
+
+    for pid in $pids; do
+        # Re-check immediately before kill to avoid acting on a recycled PID.
+        is_daemon_pid "$pid"
+        case $? in
+            0) ;;
+            1) continue ;;
+            *) return 2 ;;
+        esac
+        kill -"$signal" "$pid" 2>/dev/null || {
+            is_daemon_pid "$pid"
+            case $? in
+                0) return 1 ;;
+                1) ;;
+                *) return 2 ;;
+            esac
+        }
+    done
+    return 0
+}
+
+regular_executable() {
+    # Match the Go preflight: accept a link to a regular executable but reject
+    # a directory, broken link, or a non-executable regular file.
+    [ -f "$1" ] && [ -x "$1" ]
+}
+
+start_prerequisites_present() {
+    regular_executable "$DAEMON_PATH" && regular_executable "$CLIENT_PATH"
+}
+
+stop_daemon() {
+    printf "Stopping %s: " "$DAEMON"
+    daemon_running
+    case $? in
+        1)
+            rm -f "$PIDFILE"
+            echo "not running"
+            return 0
+            ;;
+        2)
+            echo "FAIL (cannot inspect daemon safely)"
+            return 1
+            ;;
+    esac
+
+    signal_daemons TERM
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    if [ "$result" -eq 0 ]; then
+        wait_for_exit 10
+        result=$?
+        [ "$result" -eq 0 ] && {
+            rm -f "$PIDFILE"
+            echo "OK"
+
+            # Cleanup is useful but a failure after confirmed process termination must
+            # not lie that Stop failed (and make callers retry an already safe stop).
+            if regular_executable "$DAEMON_PATH"; then
+                "$DAEMON_PATH" --cleanup >/dev/null 2>&1 || true
+            fi
+            return 0
+        }
+        [ "$result" -eq 2 ] && {
+            echo "FAIL (cannot inspect daemon safely)"
+            return 1
+        }
+    fi
+
+    signal_daemons KILL
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    wait_for_exit 5
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    [ "$result" -eq 0 ] || {
+        echo "FAIL"
+        return 1
+    }
+    rm -f "$PIDFILE"
+    echo "OK"
+
+    # Cleanup is useful but a failure after confirmed process termination must
+    # not lie that Stop failed (and make callers retry an already safe stop).
+    if regular_executable "$DAEMON_PATH"; then
+        "$DAEMON_PATH" --cleanup >/dev/null 2>&1 || true
+    fi
+    return 0
+}
 
 case "$1" in
-        start)
-                if [ -f /etc/kvm/GOMEMLIMIT ]; then
-                     value=$(cat /etc/kvm/GOMEMLIMIT)
-                     export GOMEMLIMIT="${value}MiB"
-                else
-                     export GOMEMLIMIT=512MiB
-                fi
+    start)
+        regular_executable "$DAEMON_PATH" || {
+            echo "$DAEMON_PATH not found; install Tailscale from Settings to use the firmware-pinned client"
+            exit 1
+        }
+        regular_executable "$CLIENT_PATH" || {
+            echo "$CLIENT_PATH not found; reinstall Tailscale from Settings to use the firmware-pinned client"
+            exit 1
+        }
 
-                echo "GOMEMLIMIT set to ${GOMEMLIMIT}"
-
-                # Ensure directories exist
-                mkdir -p /var/lib/tailscale /var/run/tailscale
-
-                printf "Starting $DAEMON[$VERSION]: "
-                start-stop-daemon -S -bmq -p "$PIDFILE" -x "/usr/sbin/$DAEMON" -- \
-                    --state=/var/lib/tailscale/tailscaled.state \
-                    --socket=/var/run/tailscale/tailscaled.sock \
-                    --port=${PORT} \
-                    $FLAGS
-                if [ $? = 0 ]; then
-                    sleep 5
-                    echo "OK"
-                    tailscale set --accept-dns=false
-                else
-                    echo "FAIL"
-                fi
+        daemon_running
+        case $? in
+            0)
+                echo "$DAEMON already running"
+                exit 0
                 ;;
-        stop)
-                printf "Stopping $DAEMON: "
-                start-stop-daemon -K -p "$PIDFILE"
-                [ $? = 0 ]  && (echo "OK"; rm -f "$PIDFILE") || echo "FAIL"
-                printf "cleaning tailscaled: "
-                /usr/sbin/$DAEMON --cleanup >/dev/null 2>&1
-                [ $? = 0 ] && echo "OK" || echo "FAIL"
-                ;;
-        restart|reload)
-                $0 stop
-                $0 start
-                ;;
-        *)
-                echo "Usage: $0 {start|stop|restart}"
+            2)
+                echo "Cannot inspect $DAEMON safely"
                 exit 1
-esac
+                ;;
+        esac
+        rm -f "$PIDFILE"
 
-exit 0
+        # Clean up old forwarding configuration if it exists.
+        if [ -f /etc/sysctl.d/99-tailscale.conf ]; then
+            echo "Found old forwarding configuration, cleaning up..."
+            rm -f /etc/sysctl.d/99-tailscale.conf
+            sysctl -w net.ipv4.ip_forward=0 >/dev/null 2>&1
+            sysctl -w net.ipv6.conf.all.forwarding=0 >/dev/null 2>&1
+            for iface in $(ls /sys/class/net/ 2>/dev/null | grep -v lo); do
+                echo 0 > "/proc/sys/net/ipv6/conf/$iface/forwarding" 2>/dev/null
+                sysctl -w "net.ipv6.conf.$iface.accept_ra=2" >/dev/null 2>&1
+            done
+        fi
+
+        if [ -f /etc/kvm/GOMEMLIMIT ]; then
+            value=$(cat /etc/kvm/GOMEMLIMIT)
+            export GOMEMLIMIT="${value}MiB"
+        else
+            export GOMEMLIMIT=512MiB
+        fi
+
+        mkdir -p /var/lib/tailscale /var/run/tailscale
+        version=$($DAEMON_PATH --version 2>/dev/null | sed -n '1p' | xargs echo -n)
+        printf "Starting %s[%s]: " "$DAEMON" "$version"
+        if start-stop-daemon -S -bmq -p "$PIDFILE" -x "$DAEMON_PATH" -- \
+            --state=/var/lib/tailscale/tailscaled.state \
+            --socket=/var/run/tailscale/tailscaled.sock \
+            --port="$PORT" $FLAGS && wait_for_start 5; then
+            echo "OK"
+            "$CLIENT_PATH" set --accept-dns=false >/dev/null 2>&1 || true
+            # Keep tailscaled out of iptables. Its default anti-spoofing rule
+            # drops every source in 100.64.0.0/10 not arriving on tailscale0 —
+            # which is all of NetBird's traffic on wt0. Applied on every start
+            # so a device configured before this change is fixed at next boot,
+            # not only when someone signs in again. A separate call, so a client
+            # without the flag still gets the DNS setting above.
+            "$CLIENT_PATH" set --netfilter-mode=off >/dev/null 2>&1 || true
+            exit 0
+        fi
+        echo "FAIL"
+        exit 1
+        ;;
+    stop)
+        stop_daemon
+        exit $?
+        ;;
+    restart|reload)
+        # Check before stop: a direct init-script restart must not interrupt a
+        # live daemon when the installed files cannot start it again.
+        start_prerequisites_present || {
+            echo "Tailscale installation is missing a regular executable"
+            exit 1
+        }
+        "$0" stop || exit $?
+        "$0" start
+        exit $?
+        ;;
+    status)
+        daemon_running
+        case $? in
+            0)
+                echo "$DAEMON is running"
+                exit 0
+                ;;
+            1)
+                echo "$DAEMON is not running"
+                exit 1
+                ;;
+            *)
+                echo "Cannot inspect $DAEMON safely"
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac

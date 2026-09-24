@@ -501,6 +501,10 @@ const zh = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: '开机自启',
+        autostartConfirm: '将开机自启切换为 Tailscale？NetBird 将被停止。',
+        autostartWarning:
+          '请先确认可以通过 Tailscale 访问本设备。停止 NetBird 会中断您当前使用的连接。',
         memory: {
           title: '内存优化',
           tip: '当内存占用超过限制时，会更积极地执行垃圾回收来尝试释放内存。需重启 Tailscale 后生效。'
@@ -512,6 +516,8 @@ const zh = {
         restart: '取定要重启 Tailscale 吗？',
         stop: '确定要停止 Tailscale 吗？',
         stopDesc: '退出 Tailscale 并禁用开机自动启动。',
+        stopWarning:
+          '如果您正通过 Tailscale 连接，此操作会中断该连接。它不会自行恢复，请确认您还有其他连接方式。',
         loading: '加载中...',
         notInstall: '未检测到 Tailscale，请先安装',
         install: '安装',
@@ -538,8 +544,60 @@ const zh = {
         logoutDesc: '确定要退出吗？',
         uninstall: '卸载 Tailscale',
         uninstallDesc: '确定要卸载 Tailscale 吗？',
+        uninstallWarning:
+          '如果您正通过 Tailscale 连接，此操作会中断该连接。它不会自行恢复，请确认您还有其他连接方式。',
         okBtn: '确认',
         cancelBtn: '取消'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: '开机自启',
+        autostartConfirm: '将开机自启切换为 NetBird？Tailscale 将被停止。',
+        autostartWarning:
+          '请先确认可以通过 NetBird 访问本设备。停止 Tailscale 会中断您当前使用的连接。',
+        restart: '确定要重启 NetBird 吗？',
+        stop: '确定要停止 NetBird 吗？',
+        stopDesc: '停止 NetBird 服务。若开机自启仍启用，重启后会再次启动。',
+        stopWarning:
+          '如果您正通过 NetBird 连接，此操作会中断该连接。只要 NetBird 的开机自启仍启用，重启后会恢复。',
+        loading: '加载中...',
+        notInstall: '未检测到 NetBird，请先安装',
+        install: '安装',
+        installing: '安装中',
+        notRunning: 'NetBird 尚未运行，请先执行启动操作',
+        run: '启动',
+        notLogin: '该设备尚未绑定，请点击登录并将这台设备绑定到您的账号。',
+        urlPeriod: '该链接10分钟内有效',
+        login: '登录',
+        loginSuccess: '登录完成',
+        enable: '启用 NetBird',
+        deviceName: '设备名称',
+        deviceIP: '设备地址',
+        uninstall: '卸载 NetBird',
+        uninstallDesc: '确定要卸载 NetBird 吗？',
+        uninstallWarning:
+          '如果您正通过 NetBird 连接，此操作会中断该连接。不会自动启用或选择其他 VPN；远程访问前，请确认您有其他连接方式，或明确配置启动 VPN。',
+        update: '更新',
+        updateConfirm: '现在更新 NetBird？',
+        updateWarning:
+          '替换期间客户端会停止运行。如果您正通过 NetBird 连接，该连接会中断，并应在新客户端启动后恢复。',
+        updateAvailable: '此固件附带更新版本的 NetBird',
+        updateHint: '已安装的客户端仍可继续使用。更新会将其替换为此固件附带的版本。',
+        version: '版本',
+        disconnect: '断开连接',
+        disconnectConfirm: '确定要断开连接吗？',
+        okBtn: '确认',
+        cancelBtn: '取消',
+        error: {
+          title: 'NetBird 操作失败',
+          intro: '错误详情：',
+          stepWait: '1. 等待 10-15 秒后重试。',
+          stepRestartUI: '2. 点击下方的「重启服务」。',
+          stepRestartSSH: '3. 如仍无效，执行：/etc/init.d/S99netbird restart',
+          stepReboot: '4. 只有在以上步骤都无效时才重启 NanoKVM。',
+          restartButton: '重启服务',
+          refreshButton: '刷新状态'
+        }
       },
       update: {
         title: '检查更新',

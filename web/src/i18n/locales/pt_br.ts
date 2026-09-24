@@ -515,6 +515,10 @@ const pt_br = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Início automático',
+        autostartConfirm: 'Mudar o início automático para o Tailscale? O NetBird será parado.',
+        autostartWarning:
+          'Verifique primeiro se você consegue acessar este dispositivo pelo Tailscale. Parar o NetBird encerra a conexão que você está usando agora.',
         memory: {
           title: 'Otimização de memória',
           tip: 'Quando o uso de memória excede o limite, a coleta de lixo é realizada de forma mais agressiva para tentar liberar memória. Recomenda-se definir para 75MB se estiver usando Tailscale. É necessário reiniciar o Tailscale para que a alteração tenha efeito.'
@@ -526,6 +530,8 @@ const pt_br = {
         restart: 'Reiniciar Tailscale?',
         stop: 'Parar Tailscale?',
         stopDesc: 'Sair do Tailscale e desabilitar a inicialização automática no boot.',
+        stopWarning:
+          'Se você está conectado pelo Tailscale, esta conexão será encerrada. Ela não volta sozinha — garanta que você tem outra via de acesso.',
         loading: 'Carregando...',
         notInstall: 'Tailscale não encontrado! Por favor, instale.',
         install: 'Instalar',
@@ -553,8 +559,63 @@ const pt_br = {
         logoutDesc: 'Tem certeza de que deseja sair?',
         uninstall: 'Desinstalar Tailscale',
         uninstallDesc: 'Tem certeza de que deseja desinstalar Tailscale?',
+        uninstallWarning:
+          'Se você está conectado pelo Tailscale, esta conexão será encerrada. Ela não volta sozinha — garanta que você tem outra via de acesso.',
         okBtn: 'Sim',
         cancelBtn: 'Não'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Início automático',
+        autostartConfirm: 'Mudar o início automático para o NetBird? O Tailscale será parado.',
+        autostartWarning:
+          'Verifique primeiro se você consegue acessar este dispositivo pelo NetBird. Parar o Tailscale encerra a conexão que você está usando agora.',
+        restart: 'Reiniciar NetBird?',
+        stop: 'Parar NetBird?',
+        stopDesc:
+          'Interrompe o serviço NetBird. Ele será iniciado novamente na próxima inicialização se o início automático estiver ativo.',
+        stopWarning:
+          'Se você está conectado pelo NetBird, esta conexão será encerrada. Ela volta na próxima inicialização enquanto o início automático do NetBird estiver ativo.',
+        loading: 'Carregando...',
+        notInstall: 'NetBird não encontrado! Por favor, instale.',
+        install: 'Instalar',
+        installing: 'Instalando',
+        notRunning: 'NetBird não está em execução. Por favor, inicie-o para continuar.',
+        run: 'Iniciar',
+        notLogin:
+          'O dispositivo ainda não foi vinculado. Por favor, faça login e vincule este dispositivo à sua conta.',
+        urlPeriod: 'Esta URL é válida por 10 minutos',
+        login: 'Login',
+        loginSuccess: 'Login Bem-sucedido',
+        enable: 'Habilitar NetBird',
+        deviceName: 'Nome do Dispositivo',
+        deviceIP: 'IP do Dispositivo',
+        uninstall: 'Desinstalar NetBird',
+        uninstallDesc: 'Tem certeza de que deseja desinstalar NetBird?',
+        uninstallWarning:
+          'Se você está conectado pelo NetBird, esta conexão será encerrada. Nenhuma outra VPN será ativada ou selecionada automaticamente; antes do acesso remoto, garanta outra via de acesso ou configure explicitamente uma VPN de inicialização.',
+        update: 'Atualizar',
+        updateConfirm: 'Atualizar o NetBird agora?',
+        updateWarning:
+          'O cliente é parado durante a substituição. Se você estiver conectado pelo NetBird, essa conexão cai e deve voltar quando o novo cliente iniciar.',
+        updateAvailable: 'Este firmware inclui uma versão mais recente do NetBird',
+        updateHint:
+          'O cliente instalado continua funcionando. A atualização o substitui pela versão que acompanha este firmware.',
+        version: 'Versão',
+        disconnect: 'Desconectar',
+        disconnectConfirm: 'Tem certeza de que deseja desconectar?',
+        okBtn: 'Sim',
+        cancelBtn: 'Não',
+        error: {
+          title: 'A operação do NetBird falhou',
+          intro: 'Detalhes do erro:',
+          stepWait: '1. Aguarde 10-15 segundos e tente novamente.',
+          stepRestartUI: '2. Clique em “Reiniciar serviço” abaixo.',
+          stepRestartSSH: '3. Se necessário, execute: /etc/init.d/S99netbird restart',
+          stepReboot: '4. Reinicie o NanoKVM apenas se os passos acima não resolverem.',
+          restartButton: 'Reiniciar serviço',
+          refreshButton: 'Atualizar status'
+        }
       },
       update: {
         title: 'Verificar Atualizações',

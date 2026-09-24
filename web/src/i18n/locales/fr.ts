@@ -520,6 +520,10 @@ const fr = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Démarrage automatique',
+        autostartConfirm: 'Basculer le démarrage automatique sur Tailscale ? NetBird sera arrêté.',
+        autostartWarning:
+          "Vérifiez d'abord que cet appareil est joignable via Tailscale. L'arrêt de NetBird coupera la connexion que vous utilisez actuellement.",
         memory: {
           title: 'Optimisation de la mémoire',
           tip: "Lorsque l'utilisation de la mémoire dépasse la limite, la collecte des ordures est effectuée plus agressivement pour essayer de libérer de la mémoire. Il est recommandé de définir à 50MB si vous utilisez Tailscale. Un redémarrage de Tailscale est nécessaire pour que le changement prenne effet."
@@ -531,6 +535,8 @@ const fr = {
         restart: 'Êtes-vous sûr de vouloir redémarrer Tailscale ?',
         stop: 'Êtes-vous sûr de vouloir arrêter Tailscale ?',
         stopDesc: 'Arrêtez Tailscale et désactivez son démarrage automatique.',
+        stopWarning:
+          "Si vous êtes connecté via Tailscale, cette connexion sera coupée. Elle ne reviendra pas d'elle-même : assurez-vous d'avoir un autre accès.",
         loading: 'Chargement...',
         notInstall: "Tailscale non trouvé ! Veuillez l'installer.",
         install: 'Installer',
@@ -558,8 +564,62 @@ const fr = {
         logoutDesc: 'Êtes-vous sûr de vouloir vous déconnecter?',
         uninstall: 'Désinstaller Tailscale',
         uninstallDesc: 'Êtes-vous sûr de vouloir désinstaller Tailscale?',
+        uninstallWarning:
+          "Si vous êtes connecté via Tailscale, cette connexion sera coupée. Elle ne reviendra pas d'elle-même : assurez-vous d'avoir un autre accès.",
         okBtn: 'Oui',
         cancelBtn: 'Non'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Démarrage automatique',
+        autostartConfirm: 'Basculer le démarrage automatique sur NetBird ? Tailscale sera arrêté.',
+        autostartWarning:
+          "Vérifiez d'abord que cet appareil est joignable via NetBird. L'arrêt de Tailscale coupera la connexion que vous utilisez actuellement.",
+        restart: 'Êtes-vous sûr de vouloir redémarrer NetBird ?',
+        stop: 'Êtes-vous sûr de vouloir arrêter NetBird ?',
+        stopDesc:
+          'Arrête le service NetBird. Il redémarrera au prochain démarrage si le démarrage automatique reste activé.',
+        stopWarning:
+          'Si vous êtes connecté via NetBird, cette connexion sera coupée. Elle reviendra au prochain démarrage tant que le démarrage automatique de NetBird est actif.',
+        loading: 'Chargement...',
+        notInstall: "NetBird non trouvé ! Veuillez l'installer.",
+        install: 'Installer',
+        installing: 'Installation',
+        notRunning: "NetBird n'est pas en cours d'exécution. Veuillez le démarrer pour continuer.",
+        run: 'Début',
+        notLogin: "L'appareil n'est pas relié. Connectez-vous et liez cet appareil à votre compte.",
+        urlPeriod: "L'URL est valide pendant 10 minutes",
+        login: 'Connexion',
+        loginSuccess: 'Connexion réussie',
+        enable: 'Démarrer NetBird',
+        deviceName: "Nom de l'appareil",
+        deviceIP: "IP de l'appareil",
+        uninstall: 'Désinstaller NetBird',
+        uninstallDesc: 'Êtes-vous sûr de vouloir désinstaller NetBird?',
+        uninstallWarning:
+          "Si vous êtes connecté via NetBird, cette connexion sera coupée. Aucun autre VPN ne sera activé ni sélectionné automatiquement ; avant un accès distant, assurez-vous d'avoir un autre moyen d'accès ou configurez explicitement un VPN de démarrage.",
+        update: 'Mettre à jour',
+        updateConfirm: 'Mettre à jour NetBird maintenant ?',
+        updateWarning:
+          'Le client est arrêté pendant le remplacement. Si vous êtes connecté via NetBird, cette connexion sera coupée et devrait revenir une fois le nouveau client démarré.',
+        updateAvailable: 'Ce micrologiciel inclut une version plus récente de NetBird',
+        updateHint:
+          'Le client installé continue de fonctionner. La mise à jour le remplace par la version fournie avec ce micrologiciel.',
+        version: 'Version',
+        disconnect: 'Déconnecter',
+        disconnectConfirm: 'Voulez-vous vraiment vous déconnecter ?',
+        okBtn: 'Oui',
+        cancelBtn: 'Non',
+        error: {
+          title: "Échec de l'opération NetBird",
+          intro: "Détails de l'erreur :",
+          stepWait: '1. Patientez 10 à 15 secondes puis réessayez.',
+          stepRestartUI: '2. Cliquez sur « Redémarrer le service » ci-dessous.',
+          stepRestartSSH: '3. Si nécessaire, exécutez : /etc/init.d/S99netbird restart',
+          stepReboot: "4. Ne redémarrez le NanoKVM que si les étapes ci-dessus n'ont rien donné.",
+          restartButton: 'Redémarrer le service',
+          refreshButton: "Actualiser l'état"
+        }
       },
       update: {
         title: 'Vérifier les mises à jour',

@@ -509,6 +509,10 @@ const ko = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: '자동 시작',
+        autostartConfirm: '자동 시작을 Tailscale로 전환할까요? NetBird가 중지됩니다.',
+        autostartWarning:
+          '먼저 Tailscale로 이 장치에 접속할 수 있는지 확인하세요. NetBird를 중지하면 지금 사용 중인 연결이 끊깁니다.',
         memory: {
           title: '메모리 최적화',
           tip: '메모리 사용량이 제한을 초과하면 가비지 컬렉션이 더 적극적으로 실행되어 메모리를 확보하려고 시도합니다. Tailscale을 사용할 경우 50MB로 설정하는 것이 좋습니다. 변경 사항을 적용하려면 Tailscale을 다시 시작해야 합니다.'
@@ -520,6 +524,8 @@ const ko = {
         restart: '정말로 Tailscale을 다시 시작하시겠습니까?',
         stop: '정말로 Tailscale을 중지하시겠습니까?',
         stopDesc: 'Tailscale에서 로그아웃하고 자동 시작을 비활성화합니다.',
+        stopWarning:
+          'Tailscale로 접속 중이라면 그 연결이 끊깁니다. 저절로 복구되지 않습니다. 다른 접속 경로가 있는지 확인하세요.',
         loading: '불러오는 중...',
         notInstall: 'Tailscale이 없습니다. 설치해주세요.',
         install: '설치',
@@ -546,8 +552,62 @@ const ko = {
         logoutDesc: '정말로 로그아웃 하시겠습니까?',
         uninstall: 'Tailscale 제거',
         uninstallDesc: '정말로 Tailscale을 제거할까요?',
+        uninstallWarning:
+          'Tailscale로 접속 중이라면 그 연결이 끊깁니다. 저절로 복구되지 않습니다. 다른 접속 경로가 있는지 확인하세요.',
         okBtn: '네',
         cancelBtn: '아니오'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: '자동 시작',
+        autostartConfirm: '자동 시작을 NetBird로 전환할까요? Tailscale이 중지됩니다.',
+        autostartWarning:
+          '먼저 NetBird로 이 장치에 접속할 수 있는지 확인하세요. Tailscale을 중지하면 지금 사용 중인 연결이 끊깁니다.',
+        restart: '정말로 NetBird를 다시 시작하시겠습니까?',
+        stop: '정말로 NetBird를 중지하시겠습니까?',
+        stopDesc:
+          'NetBird 서비스를 중지합니다. 자동 시작이 켜져 있으면 다음 부팅 때 다시 시작됩니다.',
+        stopWarning:
+          'NetBird로 접속 중이라면 그 연결이 끊깁니다. NetBird 자동 시작이 켜져 있으면 다음 부팅 때 복구됩니다.',
+        loading: '불러오는 중...',
+        notInstall: 'NetBird가 없습니다. 설치해주세요.',
+        install: '설치',
+        installing: '설치중',
+        notRunning: 'NetBird가 실행되고 있지 않습니다. 계속하려면 시작해 주세요.',
+        run: '시작',
+        notLogin: '이 기기는 현재 연동 되지 않았습니다. 로그인해서 계정에 이 장치를 연동하세요.',
+        urlPeriod: '이 주소는 10분간 유효합니다.',
+        login: '로그인',
+        loginSuccess: '로그인 성공',
+        enable: 'NetBird 활성화',
+        deviceName: '장치 이름',
+        deviceIP: '장치 IP',
+        uninstall: 'NetBird 제거',
+        uninstallDesc: '정말로 NetBird를 제거할까요?',
+        uninstallWarning:
+          'NetBird로 접속 중이라면 이 작업으로 연결이 끊깁니다. 다른 VPN이 자동으로 활성화되거나 선택되지 않습니다. 원격 접속 전에 다른 접속 경로를 확보하거나 부팅 VPN을 명시적으로 설정하세요.',
+        update: '업데이트',
+        updateConfirm: '지금 NetBird를 업데이트할까요?',
+        updateWarning:
+          '교체하는 동안 클라이언트가 중지됩니다. NetBird로 연결되어 있다면 그 연결은 끊어지며, 새 클라이언트가 시작되면 복구됩니다.',
+        updateAvailable: '이 펌웨어에는 더 새로운 NetBird가 포함되어 있습니다',
+        updateHint:
+          '설치된 클라이언트는 계속 사용할 수 있습니다. 업데이트하면 이 펌웨어에 포함된 버전으로 교체됩니다.',
+        version: '버전',
+        disconnect: '연결 끊기',
+        disconnectConfirm: '연결을 끊으시겠습니까?',
+        okBtn: '네',
+        cancelBtn: '아니오',
+        error: {
+          title: 'NetBird 작업 실패',
+          intro: '오류 세부 정보:',
+          stepWait: '1. 10~15초 기다린 후 다시 시도하세요.',
+          stepRestartUI: '2. 아래의 ‘서비스 재시작’을 클릭하세요.',
+          stepRestartSSH: '3. 필요하면 실행: /etc/init.d/S99netbird restart',
+          stepReboot: '4. 위 단계로 해결되지 않을 때만 NanoKVM을 재부팅하세요.',
+          restartButton: '서비스 재시작',
+          refreshButton: '상태 새로 고침'
+        }
       },
       update: {
         title: '업데이트 확인',

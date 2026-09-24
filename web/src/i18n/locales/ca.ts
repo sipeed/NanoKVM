@@ -514,6 +514,10 @@ const ca = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Inici automàtic',
+        autostartConfirm: "Canviar l'inici automàtic a Tailscale? S'aturarà NetBird.",
+        autostartWarning:
+          'Comproveu primer que podeu accedir a aquest dispositiu per Tailscale. Aturar NetBird tallarà la connexió que utilitzeu ara.',
         memory: {
           title: 'Optimització de memòria',
           tip: 'Quan es supera el límit de memòria, es fa una neteja més agressiva. Recomanat: 75MB si uses Tailscale. Requereix reiniciar Tailscale.'
@@ -525,6 +529,8 @@ const ca = {
         restart: 'Reiniciar Tailscale?',
         stop: 'Aturar Tailscale?',
         stopDesc: 'Tanca la sessió de Tailscale i desactiva l’inici automàtic en arrencar.',
+        stopWarning:
+          "Si esteu connectat mitjançant Tailscale, això tallarà la connexió. No es restablirà per si sola: assegureu-vos de tenir una altra via d'accés.",
         loading: 'Carregant...',
         notInstall: 'Tailscale no instal·lat! Instal·la-ho.',
         install: 'Instal·la',
@@ -551,8 +557,62 @@ const ca = {
         logoutDesc: 'Segur que vols tancar sessió?',
         uninstall: 'Desinstal·la Tailscale',
         uninstallDesc: 'Esteu segur que voleu desinstal·lar Tailscale?',
+        uninstallWarning:
+          "Si esteu connectat mitjançant Tailscale, això tallarà la connexió. No es restablirà per si sola: assegureu-vos de tenir una altra via d'accés.",
         okBtn: 'Sí',
         cancelBtn: 'No'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Inici automàtic',
+        autostartConfirm: "Canviar l'inici automàtic a NetBird? S'aturarà Tailscale.",
+        autostartWarning:
+          'Comproveu primer que podeu accedir a aquest dispositiu per NetBird. Aturar Tailscale tallarà la connexió que utilitzeu ara.',
+        restart: 'Reiniciar NetBird?',
+        stop: 'Aturar NetBird?',
+        stopDesc:
+          "Atura el servei NetBird. Es tornarà a iniciar en arrencar si l'inici automàtic segueix actiu.",
+        stopWarning:
+          "Si esteu connectat mitjançant NetBird, això tallarà la connexió. Es restablirà a la propera arrencada mentre l'inici automàtic de NetBird estigui actiu.",
+        loading: 'Carregant...',
+        notInstall: 'NetBird no instal·lat! Instal·la-ho.',
+        install: 'Instal·la',
+        installing: 'Instal·lant',
+        notRunning: "NetBird no s'està executant. Si us plau, inicieu-lo per continuar.",
+        run: 'Comença',
+        notLogin: 'El dispositiu no està vinculat. Inicia sessió per vincular-lo.',
+        urlPeriod: 'Aquesta URL és vàlida durant 10 minuts',
+        login: 'Inicia sessió',
+        loginSuccess: 'Sessió iniciada correctament',
+        enable: 'Activa NetBird',
+        deviceName: 'Nom del dispositiu',
+        deviceIP: 'IP del dispositiu',
+        uninstall: 'Desinstal·la NetBird',
+        uninstallDesc: 'Esteu segur que voleu desinstal·lar NetBird?',
+        uninstallWarning:
+          "Si esteu connectat mitjançant NetBird, això tallarà la connexió. No s'activarà ni se seleccionarà cap altra VPN automàticament; abans d'accedir remotament, assegureu-vos de disposar d'una altra via d'accés o de configurar explícitament una VPN d'arrencada.",
+        update: 'Actualitza',
+        updateConfirm: 'Voleu actualitzar el NetBird ara?',
+        updateWarning:
+          'El client s’atura mentre se substitueix. Si esteu connectat mitjançant el NetBird, aquesta connexió es tallarà i hauria de tornar quan arrenqui el client nou.',
+        updateAvailable: 'Aquest microprogramari inclou una versió més recent del NetBird',
+        updateHint:
+          'El client instal·lat continua funcionant. L’actualització el substitueix per la versió que inclou aquest microprogramari.',
+        version: 'Versió',
+        disconnect: 'Desconnecta',
+        disconnectConfirm: 'Segur que voleu desconnectar?',
+        okBtn: 'Sí',
+        cancelBtn: 'No',
+        error: {
+          title: "Ha fallat l'operació de NetBird",
+          intro: "Detalls de l'error:",
+          stepWait: '1. Espereu 10-15 segons i torneu-ho a provar.',
+          stepRestartUI: '2. Feu clic a «Reinicia el servei» a sota.',
+          stepRestartSSH: '3. Si cal, executeu: /etc/init.d/S99netbird restart',
+          stepReboot: '4. Reinicieu el NanoKVM només si els passos anteriors no ajuden.',
+          restartButton: 'Reinicia el servei',
+          refreshButton: "Actualitza l'estat"
+        }
       },
       update: {
         title: 'Comprova actualitzacions',

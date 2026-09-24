@@ -517,6 +517,10 @@ const hu = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Automatikus indítás',
+        autostartConfirm: 'Átváltja az automatikus indítást Tailscale-re? A NetBird leáll.',
+        autostartWarning:
+          'Előbb ellenőrizze, hogy eléri-e az eszközt Tailscale útján. A NetBird leállítása megszakítja a most használt kapcsolatot.',
         memory: {
           title: 'Memóriaoptimalizálás',
           tip: "When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. it's recommended to set to 50MB if using Tailscale. A Tailscale restart is required for the change to take effect."
@@ -528,6 +532,8 @@ const hu = {
         restart: 'Are you sure to restart Tailscale?',
         stop: 'Are you sure to stop Tailscale?',
         stopDesc: 'Log out Tailscale and disable its automatic startup on boot.',
+        stopWarning:
+          'Ha Tailscale útján csatlakozik, ez megszakítja a kapcsolatot. Magától nem tér vissza — gondoskodjon másik hozzáférési útról.',
         loading: 'Betöltés...',
         notInstall: 'Tailscale nem található! Kérem, telepítse.',
         install: 'Telepítés',
@@ -555,8 +561,63 @@ const hu = {
         logoutDesc: 'Biztos, hogy ki szeretne jelentkezni?',
         uninstall: 'Eltávolítás Tailscale',
         uninstallDesc: 'Biztosan eltávolítja a Tailscale alkalmazást?',
+        uninstallWarning:
+          'Ha Tailscale útján csatlakozik, ez megszakítja a kapcsolatot. Magától nem tér vissza — gondoskodjon másik hozzáférési útról.',
         okBtn: 'Yes',
         cancelBtn: 'No'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Automatikus indítás',
+        autostartConfirm: 'Átváltja az automatikus indítást NetBirdre? A Tailscale leáll.',
+        autostartWarning:
+          'Előbb ellenőrizze, hogy eléri-e az eszközt NetBird útján. A Tailscale leállítása megszakítja a most használt kapcsolatot.',
+        restart: 'Are you sure to restart NetBird?',
+        stop: 'Are you sure to stop NetBird?',
+        stopDesc:
+          'Leállítja a NetBird szolgáltatást. Bekapcsolt automatikus indítás mellett a következő indításkor újraindul.',
+        stopWarning:
+          'Ha NetBird útján csatlakozik, ez megszakítja a kapcsolatot. A következő indításkor visszatér, amíg a NetBird automatikus indítása be van kapcsolva.',
+        loading: 'Betöltés...',
+        notInstall: 'NetBird nem található! Kérem, telepítse.',
+        install: 'Telepítés',
+        installing: 'Telepítés folyamatban',
+        notRunning: 'NetBird nem fut. Kérjük, indítsa el a folytatáshoz.',
+        run: 'Indítás',
+        notLogin:
+          'Az eszköz még nincs kötve. Kérem, jelentkezzen be és kösse az eszközt a fiókjához.',
+        urlPeriod: 'Ez az url 10 percig érvényes',
+        login: 'Bejelentkezés',
+        loginSuccess: 'Sikeres bejelentkezés',
+        enable: 'NetBird engedélyezése',
+        deviceName: 'Eszköz neve',
+        deviceIP: 'Eszköz IP',
+        uninstall: 'Eltávolítás NetBird',
+        uninstallDesc: 'Biztosan eltávolítja a NetBird alkalmazást?',
+        uninstallWarning:
+          'Ha NetBirdön keresztül csatlakozik, ez megszakítja a kapcsolatot. Más VPN nem aktiválódik és nem lesz automatikusan kiválasztva; távoli hozzáférés előtt gondoskodjon másik elérési útról, vagy állítson be kifejezetten indítási VPN-t.',
+        update: 'Frissítés',
+        updateConfirm: 'Frissíti most a NetBirdöt?',
+        updateWarning:
+          'A csere idejére a kliens leáll. Ha NetBirden keresztül csatlakozik, ez a kapcsolat megszakad, és az új kliens elindulása után vissza kell térnie.',
+        updateAvailable: 'Ez a firmware újabb NetBird verziót tartalmaz',
+        updateHint:
+          'A telepített kliens továbbra is működik. A frissítés lecseréli arra a verzióra, amelyet ez a firmware tartalmaz.',
+        version: 'Verzió',
+        disconnect: 'Bontás',
+        disconnectConfirm: 'Biztosan bontja a kapcsolatot?',
+        okBtn: 'Yes',
+        cancelBtn: 'No',
+        error: {
+          title: 'A NetBird művelet sikertelen',
+          intro: 'Hiba részletei:',
+          stepWait: '1. Várjon 10-15 másodpercet, majd próbálja újra.',
+          stepRestartUI: '2. Kattintson lent a „Szolgáltatás újraindítása” gombra.',
+          stepRestartSSH: '3. Ha szükséges, futtassa: /etc/init.d/S99netbird restart',
+          stepReboot: '4. A NanoKVM-et csak akkor indítsa újra, ha a fentiek nem segítettek.',
+          restartButton: 'Szolgáltatás újraindítása',
+          refreshButton: 'Állapot frissítése'
+        }
       },
       update: {
         title: 'Frissítés keresése',

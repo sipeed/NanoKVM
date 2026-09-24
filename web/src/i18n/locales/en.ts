@@ -512,6 +512,12 @@ const en = {
       },
       tailscale: {
         title: 'Tailscale',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to Tailscale? NetBird will be stopped.',
+        autostartWarning:
+          'Check that you can reach this device over Tailscale first. Stopping NetBird ends the connection you are using now.',
+        preferenceUnknown: 'Autostart result is unknown. Checking the device state…',
+        preferenceNotChanged: 'Autostart was not changed.',
         memory: {
           title: 'Memory optimization',
           tip: 'When memory usage exceeds the limit, garbage collection is performed more aggressively to attempt to free up memory. A Tailscale restart is required for the change to take effect.'
@@ -523,6 +529,8 @@ const en = {
         restart: 'Restart Tailscale?',
         stop: 'Stop Tailscale?',
         stopDesc: 'Log out Tailscale and disable automatic startup on boot.',
+        stopWarning:
+          'If you are connected through Tailscale, this ends that connection. It will not come back on its own — make sure you have another way in.',
         loading: 'Loading...',
         notInstall: 'Tailscale not found! Please install.',
         install: 'Install',
@@ -550,8 +558,67 @@ const en = {
         logoutDesc: 'Are you sure you want to logout?',
         uninstall: 'Uninstall Tailscale',
         uninstallDesc: 'Are you sure you want to uninstall Tailscale?',
+        uninstallWarning:
+          'If you are connected through Tailscale, this ends that connection. It will not come back on its own — make sure you have another way in.',
         okBtn: 'Yes',
         cancelBtn: 'No'
+      },
+      netbird: {
+        title: 'NetBird',
+        autostart: 'Autostart',
+        autostartConfirm: 'Switch autostart to NetBird? Tailscale will be stopped.',
+        autostartWarning:
+          'Check that you can reach this device over NetBird first. Stopping Tailscale ends the connection you are using now.',
+        preferenceUnknown: 'Autostart result is unknown. Checking the device state…',
+        preferenceNotChanged: 'Autostart was not changed.',
+        restart: 'Restart NetBird?',
+        stop: 'Stop NetBird?',
+        stopDesc:
+          'Stop the NetBird service. It starts again on the next boot while NetBird autostart is on.',
+        stopWarning:
+          'If you are connected through NetBird, this ends that connection. It comes back at the next boot while NetBird autostart is on.',
+        loading: 'Loading...',
+        statusUnknown: 'NetBird status is unknown',
+        statusStale: 'Showing the last confirmed NetBird status',
+        notInstall: 'NetBird is not installed.',
+        install: 'Install',
+        installing: 'Installing',
+        notRunning: 'NetBird service is not running.',
+        run: 'Start',
+        notLogin:
+          'The device has not been bound yet. Please login and bind this device to your account.',
+        urlPeriod: 'This url is valid for 10 minutes',
+        login: 'Login',
+        loginSuccess: 'I have logged in',
+        enable: 'Enable NetBird',
+        deviceName: 'Device Name',
+        deviceIP: 'Device IP',
+        uninstall: 'Uninstall NetBird',
+        uninstallDesc: 'Are you sure you want to uninstall NetBird?',
+        uninstallWarning:
+          'If you are connected through NetBird, this ends that connection. No other VPN is enabled or selected automatically; before remote access, ensure another way in or explicitly configure a boot VPN.',
+        update: 'Update',
+        updateConfirm: 'Update NetBird now?',
+        updateWarning:
+          'The client is stopped while it is replaced. If you are connected through NetBird, that connection drops and should come back once the new client starts.',
+        updateAvailable: 'A newer NetBird comes with this firmware',
+        updateHint:
+          'The installed client keeps working. Updating replaces it with the release this firmware ships.',
+        version: 'Version',
+        disconnect: 'Disconnect',
+        disconnectConfirm: 'Are you sure you want to disconnect?',
+        okBtn: 'Yes',
+        cancelBtn: 'No',
+        error: {
+          title: 'NetBird operation failed',
+          intro: 'Error details:',
+          stepWait: '1. Wait 10-15 seconds and retry the action.',
+          stepRestartUI: '2. Click "Restart Service" below.',
+          stepRestartSSH: '3. If needed, run: /etc/init.d/S99netbird restart',
+          stepReboot: '4. Reboot NanoKVM only if the steps above do not help.',
+          restartButton: 'Restart Service',
+          refreshButton: 'Refresh Status'
+        }
       },
       update: {
         title: 'Check for Updates',
