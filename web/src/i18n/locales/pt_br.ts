@@ -222,6 +222,12 @@ const pt_br = {
       mountFailed: 'Falha na Montagem',
       mountDesc:
         'Em alguns sistemas, é necessário ejetar o disco virtual no host remoto antes de montar a imagem.',
+      diskOnWarn:
+        'Montar a imagem desliga o disco virtual, então o computador não pode mais acessar /data. Continuar?',
+      diskOffWarn:
+        'O disco virtual está desligado e precisa ser ativado para montar a imagem. Os dispositivos USB do computador são reconectados. Continuar?',
+      diskShared:
+        'O disco virtual está ativado, então /data é somente leitura aqui. Desative-o para excluir ou enviar imagens.',
       unmountFailed: 'Falha na desmontagem',
       unmountDesc:
         'Em alguns sistemas, é necessário ejetar manualmente do host remoto antes de desmontar a imagem.',
@@ -290,6 +296,8 @@ const pt_br = {
       input: 'Por favor, digite uma URL de imagem remota',
       ok: 'Ok',
       disabled: 'A partição /data é RO, então não podemos baixar a imagem',
+      diskShared: 'Desligue primeiro o disco virtual e depois use o download de imagens.',
+      diskOff: 'Desligar o disco virtual',
       uploadbox: 'Solte o arquivo aqui ou clique para selecionar',
       inputfile: 'Por favor insira o arquivo de imagem',
       NoISO: 'Sem ISO',
@@ -448,6 +456,10 @@ const pt_br = {
         hidOnlyDesc: 'Pare de emular dispositivos virtuais, mantendo apenas o controle básico HID',
         disk: 'Disco Virtual',
         diskDesc: 'Montar U-disk virtual no host remoto',
+        diskLocked: 'Desligado enquanto uma imagem estiver montada (ligá-lo cancela a montagem)',
+        diskCancelMount:
+          'Ativar o disco virtual cancela a imagem montada e interrompe um download ou upload de imagem em andamento. Continuar?',
+        diskBreakDownload: 'Ativar o disco virtual interrompe o download de imagens. Continuar?',
         network: 'Rede Virtual',
         networkDesc: 'Montar placa de rede virtual no host remoto',
         reboot: 'Reiniciar',

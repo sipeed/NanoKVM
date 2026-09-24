@@ -220,6 +220,12 @@ const vi = {
       mountMode: 'Chế độ gắn kết',
       mountFailed: 'Mount thất bại',
       mountDesc: 'Trong một số hệ thống, cần phải eject đĩa ảo trên máy remote trước khi mount.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Tháo lắp không thành công',
       unmountDesc:
         'Trên một số hệ thống, bạn cần đẩy hình ảnh ra khỏi máy chủ từ xa theo cách thủ công trước khi ngắt kết nối hình ảnh.',
@@ -288,6 +294,8 @@ const vi = {
       input: 'Vui lòng nhập hình ảnh từ xa URL',
       ok: 'OK',
       disabled: '/data phân vùng là RO nên không tải được image',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Thả file vào đây hoặc bấm vào để chọn',
       inputfile: 'Vui lòng nhập File hình ảnh',
       NoISO: 'Không có ISO',
@@ -445,6 +453,10 @@ const vi = {
         hidOnlyDesc: 'Dừng mô phỏng các thiết bị ảo, chỉ giữ lại điều khiển HID cơ bản',
         disk: 'Đĩa ảo',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Mạng ảo',
         networkDesc: 'Gắn card mạng ảo trên máy chủ từ xa',
         reboot: 'Khởi động lại',

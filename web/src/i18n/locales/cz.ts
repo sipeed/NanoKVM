@@ -222,6 +222,12 @@ const cz = {
       mountFailed: 'Připojení se nezdařilo',
       mountDesc:
         'V některých systémech je nutné před připojením obrazu vysunout virtuální disk na vzdáleném hostiteli.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Odpojení se nezdařilo',
       unmountDesc:
         'Na některých systémech se musíte před odpojením obrazu ručně vysunout ze vzdáleného hostitele.',
@@ -290,6 +296,8 @@ const cz = {
       input: 'Zadejte prosím vzdálený obrázek URL',
       ok: 'OK',
       disabled: 'Oddíl /data je RO, takže obrázek nelze stáhnout',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Přetáhněte soubor sem nebo kliknutím vyberte',
       inputfile: 'Zadejte soubor obrázku',
       NoISO: 'Žádné ISO',
@@ -447,6 +455,10 @@ const cz = {
         hidOnlyDesc: 'Zastavit emulaci virtuálních zařízení a zachovat pouze základní ovládání HID',
         disk: 'Virtuální disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuální síť',
         networkDesc: 'Připojit virtuální síťovou kartu na vzdáleném hostiteli',
         reboot: 'Restartujte',

@@ -134,11 +134,15 @@ start_usb_dev(){
             mkdir functions/mass_storage.disk0
             ln -s functions/mass_storage.disk0 configs/c.1/
             echo 1 > functions/mass_storage.disk0/lun.0/removable
+            # The LUN flags survive a restart of this script, so they are always set:
+            # a mounted image leaves them read-only and in CD-ROM mode.
             if [ -e /boot/usb.disk0.ro ]
             then
                     echo 1 > functions/mass_storage.disk0/lun.0/ro
-                    echo 0 > functions/mass_storage.disk0/lun.0/cdrom
+            else
+                    echo 0 > functions/mass_storage.disk0/lun.0/ro
             fi
+            echo 0 > functions/mass_storage.disk0/lun.0/cdrom
             echo "NanoKVM USB Mass Storage0520" > functions/mass_storage.disk0/lun.0/inquiry_string
             disk=$(cat /boot/usb.disk0)
             if [ -z "${disk}" ]

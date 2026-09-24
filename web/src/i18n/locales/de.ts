@@ -226,6 +226,12 @@ const de = {
       mountFailed: 'Einbinden fehlgeschlagen',
       mountDesc:
         'In einigen Systemen ist es notwendig, die virtuelle Festplatte auf dem entfernten Host auszuwerfen, bevor das Image eingebunden werden kann.',
+      diskOnWarn:
+        'Beim Einbinden des Images wird das virtuelle Laufwerk ausgeschaltet, sodass der Computer nicht mehr auf /data zugreifen kann. Fortfahren?',
+      diskOffWarn:
+        'Das virtuelle Laufwerk ist ausgeschaltet und muss zum Einbinden des Images aktiviert werden. Die USB-Geräte am Computer werden neu erkannt. Fortfahren?',
+      diskShared:
+        'Das virtuelle Laufwerk ist aktiv, daher ist /data hier schreibgeschützt. Deaktivieren Sie es, um Images zu löschen oder hochzuladen.',
       unmountFailed: 'Das Aufheben der Bereitstellung ist fehlgeschlagen',
       unmountDesc:
         'Auf einigen Systemen müssen Sie das Image manuell vom Remote-Host auswerfen, bevor Sie die Bereitstellung aufheben.',
@@ -295,6 +301,9 @@ const de = {
       ok: 'Ok',
       disabled:
         '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
+      diskShared:
+        'Schalten Sie zuerst das virtuelle Laufwerk aus und verwenden Sie dann den Image-Download.',
+      diskOff: 'Virtuelles Laufwerk ausschalten',
       uploadbox: 'Datei hier ablegen oder klicken zum Auswählen',
       inputfile: 'Bitte geben Sie die Datei für das Systemabbild an',
       NoISO: 'Keine ISO',
@@ -454,6 +463,11 @@ const de = {
           'Hören Sie auf, virtuelle Geräte zu emulieren, und behalten Sie nur die grundlegende HID-Steuerung bei',
         disk: 'Virtuelle Festplatte',
         diskDesc: 'Binde das virtuelle U-Laufwerk an den entfernten Host',
+        diskLocked: 'Aus, solange ein Image eingebunden ist (Einschalten bricht die Einbindung ab)',
+        diskCancelMount:
+          'Das Aktivieren des virtuellen Laufwerks bricht das eingebundene Image ab und unterbricht einen laufenden Image-Download oder -Upload. Fortfahren?',
+        diskBreakDownload:
+          'Das Aktivieren des virtuellen Laufwerks unterbricht den Image-Download. Fortfahren?',
         network: 'Virtuelles Netzwerk',
         networkDesc: 'Binde die virtuelle Netzwerkkarte an den entfernten Host',
         reboot: 'Neustarten',

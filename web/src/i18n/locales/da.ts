@@ -221,6 +221,12 @@ const da = {
       mountFailed: 'Montering af diskbillede mislykkedes',
       mountDesc:
         'På nogle systemer kan det være nødvendigt at skubbe den virtuelle disk ud på fjerncomputeren før du kan montere diskbilledet.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Afmontering mislykkedes',
       unmountDesc:
         'På nogle systemer skal du manuelt skubbe ud fra fjernværten, før du afmonterer billedet.',
@@ -289,6 +295,8 @@ const da = {
       input: 'Indtast venligst et fjernbillede URL',
       ok: 'OK',
       disabled: '/data partitionen er RO, så vi kan ikke downloade billedet',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Slip filen her, eller klik for at vælge',
       inputfile: 'Indtast venligst billedfilen',
       NoISO: 'Ingen ISO',
@@ -446,6 +454,10 @@ const da = {
           'Stop med at emulere virtuelle enheder, og behold kun grundlæggende HID kontrol',
         disk: 'Virtuel disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuelt netværk',
         networkDesc: 'Monter det virtuelle netværkskort på den eksterne vært',
         reboot: 'Genstart',

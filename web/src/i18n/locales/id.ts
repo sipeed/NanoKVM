@@ -222,6 +222,12 @@ const id = {
       mountFailed: 'Pemasangan Gagal',
       mountDesc:
         'Di beberapa sistem, perlu mengeluarkan disk virtual pada host jarak jauh sebelum memasang gambar.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Pelepasan gagal',
       unmountDesc:
         'Pada beberapa sistem, Anda perlu mengeluarkan secara manual dari host jarak jauh sebelum melepas gambar.',
@@ -290,6 +296,8 @@ const id = {
       input: 'Silakan masukkan gambar jarak jauh URL',
       ok: 'Ok',
       disabled: 'Partisi /data adalah RO, jadi kami tidak dapat mengunduh gambarnya',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Letakkan file di sini atau klik untuk memilih',
       inputfile: 'Silakan masukkan File gambar',
       NoISO: 'Tidak ada ISO',
@@ -447,6 +455,10 @@ const id = {
         hidOnlyDesc: 'Berhenti meniru perangkat virtual, hanya mempertahankan kontrol dasar HID',
         disk: 'Disk virtual',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Jaringan virtual',
         networkDesc: 'Pasang kartu jaringan virtual pada host jarak jauh',
         reboot: 'Mulai ulang',

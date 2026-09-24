@@ -10,6 +10,7 @@ import (
 
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/service/storage"
 )
 
 const (
@@ -49,11 +50,10 @@ func (s *Service) GetVirtualDevice(c *gin.Context) {
 	var rsp proto.Response
 
 	network, _ := isDeviceExist(virtualNetwork)
-	disk, _ := isDeviceExist(virtualDisk)
 
 	rsp.OkRspWithData(c, &proto.GetVirtualDeviceRsp{
 		Network: network,
-		Disk:    disk,
+		Disk:    diskAttached(),
 	})
 	log.Debugf("get virtual device success")
 }
@@ -83,11 +83,18 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 	case "disk":
 		device = virtualDisk
 
-		exist, _ := isDeviceExist(device)
-		if !exist {
-			commands = mountDiskCommands
-		} else {
+		if diskAttached() {
 			commands = unmountDiskCommands
+		} else {
+			// the host writes the partition from now on. A mounted image is released by
+			// the restarted gadget, which attaches the raw partition again.
+			if err := storage.SetDataWritable(false); err != nil {
+				log.Errorf("make /data read-only failed: %s", err)
+				rsp.ErrRsp(c, -3, "make /data read-only failed")
+				return
+			}
+
+			commands = mountDiskCommands
 		}
 	default:
 		rsp.ErrRsp(c, -2, "invalid arguments")
@@ -110,12 +117,27 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		}
 	}
 
+	// the disk is gone from the host, the KVM writes /data itself again
+	if device == virtualDisk && !diskAttached() {
+		if err := storage.SetDataWritable(true); err != nil {
+			log.Errorf("make /data writable failed: %s", err)
+		}
+	}
+
 	on, _ := isDeviceExist(device)
 	rsp.OkRspWithData(c, &proto.UpdateVirtualDeviceRsp{
 		On: on,
 	})
 
 	log.Debugf("update virtual device %s success", req.Device)
+}
+
+// diskAttached reports whether the virtual disk is enabled and the /data
+// partition is currently shared with the host. A virtual disk that serves an
+// image, or nothing at all, counts as disabled.
+func diskAttached() bool {
+	enabled, _ := isDeviceExist(virtualDisk)
+	return enabled && storage.DataDiskAttached()
 }
 
 func isDeviceExist(device string) (bool, error) {

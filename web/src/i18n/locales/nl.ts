@@ -225,6 +225,12 @@ const nl = {
       mountFailed: 'Koppelen mislukt',
       mountDesc:
         'In sommige systemen is het noodzakelijk om de virtuele schijf op de externe host uit te werpen voordat het image wordt gekoppeld.',
+      diskOnWarn:
+        'Het koppelen van de image schakelt de virtuele schijf uit, zodat de computer geen toegang meer heeft tot /data. Doorgaan?',
+      diskOffWarn:
+        'De virtuele schijf staat uit en moet aan staan om de image te koppelen. De USB-apparaten op de computer worden opnieuw herkend. Doorgaan?',
+      diskShared:
+        'De virtuele schijf staat aan, dus /data is hier alleen-lezen. Schakel deze uit om images te verwijderen of te uploaden.',
       unmountFailed: 'Ontkoppelen mislukt',
       unmountDesc:
         'Op sommige systemen moet u de image handmatig uitwerpen van de externe host voordat u de image ontkoppelt.',
@@ -293,6 +299,8 @@ const nl = {
       input: 'Voer een externe afbeelding in URL',
       ok: 'Ok',
       disabled: '/data partitie is RO, dus we kunnen de afbeelding niet downloaden',
+      diskShared: 'Schakel eerst de virtuele schijf uit en gebruik daarna de image-download.',
+      diskOff: 'Virtuele schijf uitschakelen',
       uploadbox: 'Zet het bestand hier neer of klik om te selecteren',
       inputfile: 'Voer het afbeeldingsbestand in',
       NoISO: 'Geen ISO',
@@ -453,6 +461,11 @@ const nl = {
           'Stop met het emuleren van virtuele apparaten en behoud alleen de basisbesturing van HID',
         disk: 'Virtuele schijf',
         diskDesc: 'Koppel virtuele U-schijf aan de externe host',
+        diskLocked: 'Uit zolang een image is gekoppeld (aanzetten breekt het koppelen af)',
+        diskCancelMount:
+          'Het inschakelen van de virtuele schijf breekt de gekoppelde image af en onderbreekt een lopende image-download of -upload. Doorgaan?',
+        diskBreakDownload:
+          'Het inschakelen van de virtuele schijf onderbreekt de image-download. Doorgaan?',
         network: 'Virtueel Netwerk',
         networkDesc: 'Koppel virtueel netwerk kaart aan de externe host',
         reboot: 'Opnieuw opstarten',

@@ -222,6 +222,12 @@ const nb = {
       mountFailed: 'Montering feilet',
       mountDesc:
         'På noen systemer er det nødvendig å koble fra den virtuelle disken på den eksterne verten før man kan montere arkivfilen.',
+      diskOnWarn:
+        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
+      diskOffWarn:
+        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
+      diskShared:
+        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
       unmountFailed: 'Avmontering mislyktes',
       unmountDesc:
         'På noen systemer må du manuelt løse ut fra den eksterne verten før du demonterer bildet.',
@@ -290,6 +296,8 @@ const nb = {
       input: 'Vennligst skriv inn et eksternt bilde URL',
       ok: 'Ok',
       disabled: '/data partisjonen er RO, så vi kan ikke laste ned bildet',
+      diskShared: 'Turn the virtual disk off first, then use the image download.',
+      diskOff: 'Turn off the virtual disk',
       uploadbox: 'Slipp filen her eller klikk for å velge',
       inputfile: 'Vennligst skriv inn bildefilen',
       NoISO: 'Ingen ISO',
@@ -446,6 +454,10 @@ const nb = {
         hidOnlyDesc: 'Slutt å emulere virtuelle enheter, behold bare grunnleggende HID-kontroll',
         disk: 'Virtuell disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuelt nettverk',
         networkDesc: 'Monter virtuelt nettverkskort på den eksterne verten',
         reboot: 'Start på nytt',
