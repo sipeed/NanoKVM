@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
 import { getBaseUrl } from '@/lib/service.ts';
+import { setVideoMode } from '@/lib/localstorage.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 
 import { ScreenViewport } from './viewport.tsx';
@@ -38,6 +39,7 @@ export const H264Webrtc = () => {
   const videoOfferSent = useRef(false);
   const videoIceCandidates = useRef<RTCIceCandidate[]>([]);
   const translationRef = useRef(t);
+  const fallbackToMjpeg = useRef(false);
 
   useEffect(() => {
     translationRef.current = t;
@@ -81,6 +83,16 @@ export const H264Webrtc = () => {
       console.error(`WebRTC connection failed: ${reason}`, error);
       showConnectionFailureNotification();
       setIsLoading(false);
+
+      // Do not strand the user on an empty desktop when WebRTC signaling/ICE
+      // cannot connect. Persist the compatible mode before reload so this is
+      // a one-way fallback, not a WebRTC↔MJPEG reload loop.
+      if (!fallbackToMjpeg.current) {
+        fallbackToMjpeg.current = true;
+        setVideoMode('mjpeg');
+        window.setTimeout(() => window.location.reload(), 250);
+        return;
+      }
 
       if (reconnectTimer) {
         return;

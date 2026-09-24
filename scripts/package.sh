@@ -166,35 +166,46 @@ printf '0'       > "$STAGE/kvm/res"
 mkdir -p "$STAGE/jpg_stream/dl_lib" "$STAGE/kvm_system/dl_lib"
 
 # --- archive -----------------------------------------------------------------
-# Normalise owner and timestamps so the same source tree yields the same
-# tarball, which makes the published sha512 verifiable after the fact.
+# The device updater requires a top-level directory record, but older updater
+# builds reject the bare record "nanokvm_2.5.2".  Emit "nanokvm_2.5.2/." as
+# the directory record: it normalizes to the expected root in current builds
+# and still begins with "nanokvm_2.5.2/" for older builds.
+# Add every staged child beneath that prefix after that record. Python's tarfile
+# gives identical archive semantics on GNU tar and macOS bsdtar while keeping
+# owner, mode, and timestamps explicit.
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-$(git -C "$ROOT" log -1 --format=%ct 2>/dev/null || echo 0)}"
-
-find "$STAGE" -exec touch -d "@$SOURCE_DATE_EPOCH" {} + 2>/dev/null \
-    || find "$STAGE" -exec touch -t "$(date -r "$SOURCE_DATE_EPOCH" +%Y%m%d%H%M.%S)" {} + 2>/dev/null \
-    || echo "[WARN] could not normalise timestamps"
 
 echo "[INFO] creating $(basename "$TARBALL")"
 rm -f "$TARBALL"
+python3 - "$STAGE" "$TARBALL" "$SOURCE_DATE_EPOCH" "nanokvm_$VERSION" <<'PY'
+import gzip
+import sys
+import tarfile
+from pathlib import Path
 
-# Read the version into a variable first: piping through head can hand tar a
-# SIGPIPE, and under "set -o pipefail" that would silently select the bsdtar
-# branch on a GNU system, quietly losing reproducibility.
-tar_version="$(tar --version 2>/dev/null || true)"
+stage = Path(sys.argv[1])
+tarball = Path(sys.argv[2])
+mtime = int(sys.argv[3])
+prefix = sys.argv[4]
 
-if [ "${tar_version#*GNU}" != "$tar_version" ]; then
-    tar --format=gnu --sort=name \
-        --owner=0 --group=0 --numeric-owner \
-        --mtime="@$SOURCE_DATE_EPOCH" \
-        -C "$OUT" -cf - "nanokvm_$VERSION" \
-        | gzip -n -9 > "$TARBALL"
-else
-    # bsdtar (macOS): no --sort/--mtime, so the archive is not byte-reproducible.
-    echo "[WARN] GNU tar not found; archive will not be byte-reproducible"
-    tar --uid 0 --gid 0 --uname '' --gname '' \
-        -C "$OUT" -cf - "nanokvm_$VERSION" \
-        | gzip -n -9 > "$TARBALL"
-fi
+
+def normalize(info: tarfile.TarInfo) -> tarfile.TarInfo:
+    info.uid = 0
+    info.gid = 0
+    info.uname = ''
+    info.gname = ''
+    info.mtime = mtime
+    return info
+
+with tarball.open('wb') as raw, gzip.GzipFile(fileobj=raw, mode='wb', mtime=mtime) as compressed:
+    with tarfile.open(fileobj=compressed, mode='w', format=tarfile.GNU_FORMAT) as archive:
+        root = tarfile.TarInfo(f'{prefix}/.')
+        root.type = tarfile.DIRTYPE
+        root.mode = 0o755
+        archive.addfile(normalize(root))
+        for child in sorted(stage.iterdir(), key=lambda item: item.name):
+            archive.add(child, arcname=f'{prefix}/{child.name}', recursive=True, filter=normalize)
+PY
 
 # --- manifest ----------------------------------------------------------------
 # update.go compares base64(raw sha512), not the hex digest.

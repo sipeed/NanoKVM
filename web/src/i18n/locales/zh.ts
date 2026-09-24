@@ -474,6 +474,28 @@ const zh = {
           description: '启用 HTTPS 协议',
           tip: '注意：使用 HTTPS 可能导致延迟增加，特别是在 MJPEG 视频模式下。'
         },
+        ethernet: {
+          title: "以太网 IPv4",
+          description: "选择 DHCP 或配置重启后仍会保留的静态 IPv4 地址",
+          dhcp: "DHCP",
+          static: "静态",
+          ipv4: "IPv4 配置",
+          dhcpDescription: "IP 地址和网关将通过 DHCP 自动获取",
+          staticDescription: "设置会立即应用，并在重启后保留",
+          ipAddress: "IP 地址",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "子网掩码",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "网关",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "请输入有效的 IPv4 地址、子网掩码和网关",
+          save: "保存",
+          unsaved: "未保存的更改",
+          savedStatic: "静态地址已保存。请通过 {{address}} 重新连接。",
+          savedDhcp: "已启用 DHCP。请使用路由器分配的地址重新连接。",
+          saveFailed: "保存以太网设置失败",
+          loadFailed: "加载以太网设置失败"
+        },
         dns: {
           title: 'DNS',
           description: '配置 NanoKVM 使用的 DNS 服务器',

@@ -487,6 +487,28 @@ const id = {
           description: 'Aktifkan protokol HTTPS',
           tip: 'Perhatian: Menggunakan HTTPS dapat meningkatkan latensi, terutama pada mode video MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Konfigurasikan koneksi Ethernet IPv4.",
+          dhcp: "DHCP",
+          static: "Statis",
+          ipv4: "IPv4",
+          dhcpDescription: "Dapatkan alamat IP secara otomatis melalui DHCP.",
+          staticDescription: "Konfigurasikan alamat IP secara manual.",
+          ipAddress: "Alamat IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Masker subnet",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Alamat IP tidak valid",
+          save: "Simpan",
+          unsaved: "Perubahan belum disimpan",
+          savedStatic: "Alamat IP statis {{address}} telah disimpan.",
+          savedDhcp: "Konfigurasi DHCP telah disimpan.",
+          saveFailed: "Gagal menyimpan konfigurasi.",
+          loadFailed: "Gagal memuat konfigurasi."
+        },
         dns: {
           title: 'DNS',
           description: 'Konfigurasi server DNS untuk NanoKVM',

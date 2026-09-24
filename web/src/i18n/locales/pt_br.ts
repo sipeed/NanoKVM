@@ -488,6 +488,28 @@ const pt_br = {
           description: 'Habilitar protocolo HTTPS',
           tip: 'Atenção: O uso de HTTPS pode aumentar a latência, especialmente com o modo de vídeo MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Escolha DHCP ou configure um endereço IPv4 estático persistente",
+          dhcp: "DHCP",
+          static: "Estático",
+          ipv4: "Configuração IPv4",
+          dhcpDescription: "O endereço IP e o gateway são obtidos automaticamente via DHCP",
+          staticDescription: "As configurações são aplicadas imediatamente e mantidas após a reinicialização",
+          ipAddress: "Endereço IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Máscara de sub-rede",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Insira um endereço IPv4, uma máscara de sub-rede e um gateway válidos",
+          save: "Salvar",
+          unsaved: "Alterações não salvas",
+          savedStatic: "Endereço estático salvo. Reconecte-se em {{address}}.",
+          savedDhcp: "DHCP ativado. Reconecte-se usando o endereço atribuído pelo roteador.",
+          saveFailed: "Falha ao salvar as configurações de Ethernet",
+          loadFailed: "Falha ao carregar as configurações de Ethernet"
+        },
         dns: {
           title: 'DNS',
           description: 'Configurar servidores DNS para o NanoKVM',

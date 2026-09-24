@@ -482,6 +482,28 @@ const ko = {
           description: 'HTTPS 프로토콜 활성화',
           tip: '주의: HTTPS 사용 시 특히 MJPEG 비디오 모드에서 지연 시간이 증가할 수 있습니다.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Ethernet IPv4 연결을 구성합니다.",
+          dhcp: "DHCP",
+          static: "고정",
+          ipv4: "IPv4",
+          dhcpDescription: "DHCP를 통해 IP 주소를 자동으로 가져옵니다.",
+          staticDescription: "IP 주소를 수동으로 구성합니다.",
+          ipAddress: "IP 주소",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "서브넷 마스크",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "게이트웨이",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "유효하지 않은 IP 주소",
+          save: "저장",
+          unsaved: "저장되지 않은 변경 사항",
+          savedStatic: "고정 IP 주소 {{address}}가 저장되었습니다.",
+          savedDhcp: "DHCP 구성이 저장되었습니다.",
+          saveFailed: "구성을 저장하지 못했습니다.",
+          loadFailed: "구성을 불러오지 못했습니다."
+        },
         dns: {
           title: 'DNS',
           description: 'NanoKVM의 DNS 서버 설정',

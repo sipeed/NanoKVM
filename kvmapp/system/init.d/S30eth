@@ -52,7 +52,9 @@ start() {
             arping -Dqc2 -Ieth0 "$addr" || continue
             ip a add "$inet" brd + dev eth0
             ip r add default via "$gw" dev eth0
-            echo -e "nameserver $gw" >> /etc/resolv.conf
+            if [ "$(cat /etc/kvm/network/dns.mode 2>/dev/null)" != "manual" ]; then
+                echo -e "nameserver $gw" >> /etc/resolv.conf
+            fi
             break
         done < /boot/eth.nodhcp
 
@@ -70,9 +72,9 @@ start() {
 }
 
 stop() {
-    [ ! -e "/run/udhcpc.eth0.pid" ] && exit 1
-    kill "$(cat /run/udhcpc.eth0.pid)"
-    rm /run/udhcpc.eth0.pid
+    [ -f "/run/udhcpc.eth0.pid" ] || return 0
+    kill "$(cat /run/udhcpc.eth0.pid)" 2>/dev/null || true
+    rm -f /run/udhcpc.eth0.pid
 }
 
 case "$1" in

@@ -41,7 +41,9 @@ import { ManualRegion } from './screen/manual-region.tsx';
 import { VirtualKeyboard } from './virtual-keyboard';
 
 function getVideoMode() {
-  const defaultVideoMode = window.RTCPeerConnection ? 'h264' : 'mjpeg';
+  // Prefer low-latency H.264 WebRTC when no explicit preference was saved.
+  // If signaling or ICE fails, H264Webrtc persists a one-way MJPEG fallback.
+  const defaultVideoMode = 'h264';
 
   const cookieVideoMode = storage.getVideoMode();
   if (!cookieVideoMode || (cookieVideoMode === 'direct' && !window.VideoDecoder)) {
