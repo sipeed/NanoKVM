@@ -145,6 +145,7 @@ const nb = {
       dropdownGerman: 'tysk',
       dropdownFrench: 'Fransk',
       dropdownRussian: 'russisk',
+      dropdownSpanish: 'Spansk',
       shortcut: {
         title: 'Snarveier',
         custom: 'Egendefinert',

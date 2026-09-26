@@ -147,6 +147,7 @@ const nl = {
       dropdownGerman: 'Duits',
       dropdownFrench: 'Frans',
       dropdownRussian: 'Russisch',
+      dropdownSpanish: 'Spaans',
       shortcut: {
         title: 'Snelkoppelingen',
         custom: 'Aangepast',

@@ -146,6 +146,7 @@ const hu = {
       dropdownGerman: 'német',
       dropdownFrench: 'francia',
       dropdownRussian: 'orosz',
+      dropdownSpanish: 'spanyol',
       shortcut: {
         title: 'Parancsikonok',
         custom: 'Egyedi',
