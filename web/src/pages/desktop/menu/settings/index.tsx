@@ -4,6 +4,7 @@ import { Badge, Modal, Tooltip } from 'antd';
 import clsx from 'clsx';
 import { useSetAtom } from 'jotai';
 import {
+  ActivityIcon,
   BadgeInfoIcon,
   BotIcon,
   CircleArrowUpIcon,
@@ -27,6 +28,7 @@ import { About } from './about';
 import { Account } from './account';
 import { Appearance } from './appearance';
 import { Device } from './device';
+import { Diagnostics } from './diagnostics';
 import { MCP } from './mcp';
 import { Network } from './network';
 import { Tailscale } from './tailscale';
@@ -53,6 +55,7 @@ export const Settings = () => {
       ? [
           { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
           { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
+          { id: 'diagnostics', icon: <ActivityIcon size={16} />, component: <Diagnostics /> },
           { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
           {
             id: 'tailscale',
