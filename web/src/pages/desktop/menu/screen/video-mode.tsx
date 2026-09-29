@@ -8,8 +8,8 @@ import { setVideoMode as setCookie } from '@/lib/localstorage.ts';
 import { videoModeAtom } from '@/jotai/screen.ts';
 
 const videoModes = [
-  { key: 'direct', name: 'H.264 (Direct)' },
-  { key: 'h264', name: 'H.264 (WebRTC)' },
+  { key: 'direct', name: 'Direct' },
+  { key: 'h264', name: 'WebRTC' },
   { key: 'mjpeg', name: 'MJPEG' }
 ];
 
@@ -47,7 +47,7 @@ export const VideoMode = () => {
         >
           <div className="flex cursor-not-allowed select-none items-center rounded py-1.5 pl-1 pr-5 text-neutral-500 hover:bg-neutral-700/70">
             <div className="flex h-[14px] w-[20px] items-end text-blue-500"></div>
-            <span>H.264 (Direct)</span>
+            <span>Direct</span>
           </div>
         </Tooltip>
       )}

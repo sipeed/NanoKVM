@@ -36,14 +36,24 @@ echo -e "${GREEN}[OK] All dependencies found.${NC}"
 # ------------------------------------------------------------------------------
 # Step 2: Build the Binary
 # ------------------------------------------------------------------------------
-echo -e "${YELLOW}[INFO] Starting cross-compilation for RISC-V 64-bit (BoringCrypto enabled)...${NC}"
+echo -e "${YELLOW}[INFO] Starting cross-compilation for RISC-V 64-bit...${NC}"
 
 export CGO_ENABLED=1
 export GOOS=linux
 export GOARCH=riscv64
-export GOEXPERIMENT=boringcrypto
 export CC="$CC_COMPILER"
 export CGO_CFLAGS="$CGO_CFLAGS_OPTS"
+
+# A release build compiles libkvm immediately before the server and stages it
+# under kvmapp/. Link against that fresh ABI instead of the tracked development
+# copy in server/dl_lib, while keeping the latter as a standalone-build fallback.
+LINK_LIB_DIR="$PWD/dl_lib"
+FRESH_LIB_DIR="$PWD/../kvmapp/server/dl_lib"
+if [ -f "$FRESH_LIB_DIR/libkvm.so" ]; then
+    LINK_LIB_DIR="$FRESH_LIB_DIR"
+fi
+bash "$PWD/../scripts/verify-video-libs.sh" "$LINK_LIB_DIR"
+export CGO_LDFLAGS="-L$LINK_LIB_DIR -Wl,-rpath-link,$LINK_LIB_DIR -Wl,-rpath-link,$PWD/dl_lib ${CGO_LDFLAGS:-}"
 
 go build -o "$BINARY_NAME" -v
 

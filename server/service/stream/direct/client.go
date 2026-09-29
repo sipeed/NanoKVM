@@ -188,6 +188,13 @@ func (q *frameQueue) requestResync() {
 	q.mutex.Unlock()
 }
 
+func (q *frameQueue) markDiscontinuity() {
+	q.mutex.Lock()
+	q.clearFramesLocked()
+	q.waitingForKeyframe = true
+	q.mutex.Unlock()
+}
+
 func (q *frameQueue) close() {
 	q.mutex.Lock()
 	q.closed = true
@@ -270,6 +277,10 @@ func (c *client) offer(frame *outboundFrame) {
 	c.queue.offer(frame)
 }
 
+func (c *client) markDiscontinuity() {
+	c.queue.markDiscontinuity()
+}
+
 func (c *client) handleControl(messageType int, data []byte) {
 	if messageType != websocket.BinaryMessage || len(data) == 0 {
 		return
@@ -288,13 +299,21 @@ func (c *client) handleControl(messageType int, data []byte) {
 	}
 }
 
-func newOutboundFrame(isKeyFrame bool, timestamp int64, data []byte) *outboundFrame {
-	payload := make([]byte, 9+len(data))
+func newOutboundFrame(isKeyFrame bool, timestamp int64, storage []byte, data []byte) *outboundFrame {
+	reuseStorage := len(storage) == 9+len(data)
+	if reuseStorage && len(data) != 0 {
+		reuseStorage = &storage[9] == &data[0]
+	}
+
+	payload := storage
+	if !reuseStorage {
+		payload = make([]byte, 9+len(data))
+		copy(payload[9:], data)
+	}
 	if isKeyFrame {
 		payload[0] = 1
 	}
 	binary.LittleEndian.PutUint64(payload[1:9], uint64(timestamp))
-	copy(payload[9:], data)
 
 	return &outboundFrame{
 		key:       isKeyFrame,

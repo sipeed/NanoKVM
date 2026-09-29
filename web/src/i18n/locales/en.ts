@@ -64,6 +64,8 @@ const en = {
       scale: 'Scale',
       title: 'Screen',
       video: 'Video Mode',
+      codec: 'Codec',
+      unsupported: 'unsupported',
       videoDirectTips: 'Enable HTTPS in "Settings > Device" to use this mode',
       resolution: 'Resolution',
       controlRegion: {
@@ -110,6 +112,10 @@ const en = {
       frameDetectTip:
         "Calculate the difference between frames. Stop transmitting video stream when no changes are detected on the remote host's screen.",
       resetHdmi: 'Reset HDMI',
+      encoderError: 'Video encoder error',
+      encoderUnsupported: 'The selected codec is not supported by this browser in this mode.',
+      encoderConflict:
+        'Another viewer is using different encoder settings. Close it or select the same settings.',
       mixedH264: {
         title: 'H.264 stream conflict',
         description:

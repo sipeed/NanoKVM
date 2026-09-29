@@ -53,10 +53,12 @@ RUN cd /tmp/go_cache \
 FROM base_apt AS sdk
 
 ENV HOME="/home/$DOCKER_USER"
+ARG MAIXCDK_REV=30f4b8b7e3f66ded9cfa64fb081b46e30bc27248
 
 RUN cd ~ \
     && git clone https://github.com/Sipeed/MaixCDK \
     && cd MaixCDK \
+    && git checkout "$MAIXCDK_REV" \
     && python3 -m venv . \
     && . ./bin/activate \
     && pip install -U -r requirements.txt 

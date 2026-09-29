@@ -3,6 +3,7 @@ package direct
 import (
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/stream"
+	"net/http"
 	"strconv"
 	"time"
 
@@ -22,6 +23,19 @@ var (
 )
 
 func Connect(c *gin.Context) {
+	config, err := stream.ParseEncoderConfig(c.Request.URL.Query(), stream.DefaultEncoderConfig())
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+	connect(c, config)
+}
+
+func ConnectLegacy(c *gin.Context) {
+	connect(c, stream.LegacyEncoderConfig())
+}
+
+func connect(c *gin.Context, config stream.EncoderConfig) {
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Errorf("failed to upgrade to websocket: %s", err)
@@ -33,24 +47,25 @@ func Connect(c *gin.Context) {
 	if flowWindow, err := strconv.Atoi(c.Query("flow")); err == nil && flowWindow > 0 {
 		client.queue.enableFlowControl(flowWindow)
 	}
-	defer func() {
-		streamer.removeClient(client)
-		client.close()
-		client.wait()
-		log.Debugf("h264 websocket disconnected: %s", ws.RemoteAddr())
-	}()
-	log.Debugf("h264 websocket connected: %s", ws.RemoteAddr())
-
 	ws.SetReadLimit(64)
 	_ = ws.SetReadDeadline(time.Now().Add(pongWait))
 	ws.SetPongHandler(func(string) error {
 		return ws.SetReadDeadline(time.Now().Add(pongWait))
 	})
 
-	streamer.addClient(client)
-
-	unregisterMode := stream.RegisterH264Mode(stream.H264ModeDirect)
-	defer unregisterMode()
+	if err := streamer.addClient(client, config); err != nil {
+		message := websocket.FormatCloseMessage(websocket.ClosePolicyViolation, err.Error())
+		_ = ws.WriteControl(websocket.CloseMessage, message, time.Now().Add(time.Second))
+		client.close()
+		return
+	}
+	defer func() {
+		streamer.removeClient(client)
+		client.close()
+		client.wait()
+		log.Debugf("direct video websocket disconnected: %s", ws.RemoteAddr())
+	}()
+	log.Debugf("direct video websocket connected: %s", ws.RemoteAddr())
 
 	for {
 		messageType, data, err := ws.ReadMessage()

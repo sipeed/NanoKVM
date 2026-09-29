@@ -15,10 +15,10 @@ typedef struct {
 	int h;
 	int fmt;
 	uint8_t jpg_quality;	// jpeg
-	int gop;				// h264
-	int intput_fps;			// h264
-	int output_fps;			// h264
-	int bitrate;			// h264
+	int gop;				// h264/h265
+	int intput_fps;			// h264/h265
+	int output_fps;			// h264/h265
+	int bitrate;			// h264/h265
 } mmf_venc_cfg_t;
 
 // init sys
@@ -45,6 +45,9 @@ void mmf_get_vi_vflip(int ch, bool *en);
 
 // get vi frame
 int mmf_vi_frame_pop(int ch, void **data, int *len, int *width, int *height, int *format);
+// Lease a VI frame without mapping it into CPU address space. The frame can be
+// submitted to an H.264 encoder with mmf_venc_push_vi().
+int mmf_vi_frame_pop_native(int ch, int *len, int *width, int *height, int *format);
 void mmf_vi_frame_free(int ch);
 // Release the current VI frame immediately. mmf_vi_frame_free() defers
 // release so the frame can be sent directly to VENC without a second copy.
@@ -59,12 +62,14 @@ int mmf_enc_jpg_init(int ch, int w, int h, int format, int quality);
 int mmf_enc_jpg_deinit(int ch);
 int mmf_enc_jpg_push(int ch, uint8_t *data, int w, int h, int format);
 int mmf_enc_jpg_push_with_quality(int ch, uint8_t *data, int w, int h, int format, int quality);
+int mmf_enc_jpg_push_vi_with_quality(int ch, int vi_ch, int quality);
 int mmf_enc_jpg_pop(int ch, uint8_t **data, int *size);
 int mmf_enc_jpg_free(int ch);
 int mmf_add_venc_channel(int ch, mmf_venc_cfg_t *cfg);
 int mmf_del_venc_channel(int ch);
 int mmf_del_venc_channel_all();
 int mmf_venc_push(int ch, uint8_t *data, int w, int h, int format);
+int mmf_venc_push_vi(int ch, int vi_ch);
 int mmf_venc_pop(int ch, mmf_stream_t *stream);
 int mmf_venc_free(int ch);
 

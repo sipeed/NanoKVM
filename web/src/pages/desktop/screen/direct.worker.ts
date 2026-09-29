@@ -27,10 +27,13 @@ const frameQueue = new Queue<VideoFrame>();
 const frameChannel = new MessageChannel();
 
 type WorkerMessage = {
-  type: 'h264' | 'stop';
+  type: 'video' | 'stop';
+  codec?: 'h264' | 'h265';
   canvas?: OffscreenCanvas;
   url?: string;
 };
+
+let codec: 'h264' | 'h265' = 'h264';
 
 frameChannel.port1.onmessage = () => {
   flushScheduled = false;
@@ -38,14 +41,15 @@ frameChannel.port1.onmessage = () => {
 };
 
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
-  const { type, canvas: offscreenCanvas, url } = event.data;
+  const { type, codec: requestedCodec, canvas: offscreenCanvas, url } = event.data;
 
   switch (type) {
-    case 'h264':
-      if (!offscreenCanvas || !url) {
+    case 'video':
+      if (!offscreenCanvas || !url || !requestedCodec) {
         return;
       }
 
+      codec = requestedCodec;
       canvas = offscreenCanvas;
       reportedFrameWidth = 0;
       reportedFrameHeight = 0;
@@ -103,7 +107,7 @@ function connect() {
       }
     };
 
-    nextSocket.onclose = () => {
+    nextSocket.onclose = (event) => {
       if (socket !== nextSocket) {
         return;
       }
@@ -113,10 +117,16 @@ function connect() {
       pendingAckTimestamp = null;
       decodeBackpressured = false;
       resetDecoder();
+
+      if (event.code === 1008) {
+        stopped = true;
+        reportFatalError('encoder-conflict', event.reason);
+        return;
+      }
       scheduleReconnect();
     };
   } catch (error) {
-    console.error('Failed to create Direct H264 WebSocket:', error);
+    console.error(`Failed to create Direct ${codec.toUpperCase()} WebSocket:`, error);
     scheduleReconnect();
   }
 }
@@ -188,7 +198,9 @@ function handleWsMessage(message: ArrayBuffer) {
 
 function createDecoder(): VideoDecoder | null {
   if (!self.VideoDecoder) {
-    console.log('Error: WebCodecs API not supported in this worker.');
+    reportFatalError('unsupported-codec');
+    stopped = true;
+    disconnect();
     return null;
   }
 
@@ -212,7 +224,7 @@ function createDecoder(): VideoDecoder | null {
       releaseDecodeBackpressure(configuredDecoder);
     };
     instance.configure({
-      codec: 'avc1.42E02A',
+      codec: codec === 'h265' ? 'hev1.1.6.L120.B0' : 'avc1.42E02A',
       hardwareAcceleration: 'prefer-hardware',
       optimizeForLatency: true
     });
@@ -221,9 +233,16 @@ function createDecoder(): VideoDecoder | null {
     if (instance && instance.state !== 'closed') {
       instance.close();
     }
-    console.log(err);
+    console.error(`Failed to configure the Direct ${codec.toUpperCase()} decoder:`, err);
+    reportFatalError('unsupported-codec');
+    stopped = true;
+    disconnect();
     return null;
   }
+}
+
+function reportFatalError(code: 'encoder-conflict' | 'unsupported-codec', detail?: string) {
+  self.postMessage({ type: 'stream-error', code, detail });
 }
 
 function handleDecodedFrame(source: VideoDecoder | null, frame: VideoFrame) {
@@ -279,7 +298,7 @@ function processFrameQueue() {
     try {
       renderFrame(frame);
     } catch (error) {
-      console.error('Failed to render Direct H264 frame:', error);
+      console.error(`Failed to render Direct ${codec.toUpperCase()} frame:`, error);
       requestStreamResync();
       resetDecoder();
       return;

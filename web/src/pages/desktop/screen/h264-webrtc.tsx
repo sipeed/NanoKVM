@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import { encoderCodecQuery, getEncoderCodec, supportsWebRTCH265 } from '@/lib/encoder.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 
@@ -44,7 +45,10 @@ export const H264Webrtc = () => {
   }, [t]);
 
   useEffect(() => {
-    const url = `${getBaseUrl('ws')}/api/stream/h264`;
+    const requestedCodec = getEncoderCodec();
+    const codec = requestedCodec === 'h265' && !supportsWebRTCH265() ? 'h264' : requestedCodec;
+    const query = encoderCodecQuery(codec);
+    const url = `${getBaseUrl('ws')}/api/stream/video?${query}`;
     const ws = new W3cWebSocket(url);
     const videoElement = videoRef.current;
 
@@ -52,6 +56,7 @@ export const H264Webrtc = () => {
     let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let disposed = false;
+    let terminalFailure = false;
 
     const showConnectionFailureNotification = () => {
       notificationApi.error({
@@ -74,7 +79,7 @@ export const H264Webrtc = () => {
     };
 
     const scheduleReconnect = (reason: string, error?: unknown) => {
-      if (disposed) {
+      if (disposed || terminalFailure) {
         return;
       }
 
@@ -228,7 +233,9 @@ export const H264Webrtc = () => {
     };
 
     ws.onclose = () => {
-      scheduleReconnect('the signaling WebSocket closed');
+      if (!terminalFailure) {
+        scheduleReconnect('the signaling WebSocket closed');
+      }
     };
 
     ws.onmessage = (event) => {
@@ -255,6 +262,22 @@ export const H264Webrtc = () => {
             }
             break;
           }
+          case 'video-error':
+            terminalFailure = true;
+            cancelReconnect();
+            setIsLoading(false);
+            if (msg.data) console.error('WebRTC video stream rejected:', msg.data);
+            notificationApi.error({
+              key: WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY,
+              message: translationRef.current('screen.encoderError'),
+              description: translationRef.current('screen.encoderConflict'),
+              placement: 'topRight',
+              duration: null
+            });
+            video?.close();
+            video = null;
+            ws.close();
+            break;
           case 'heartbeat':
             break;
           default:

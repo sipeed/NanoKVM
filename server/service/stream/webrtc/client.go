@@ -1,6 +1,7 @@
 package webrtc
 
 import (
+	"NanoKVM-Server/service/stream"
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
@@ -12,11 +13,12 @@ import (
 
 const h264SDPFmtpLine = "level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=4d001f"
 
-func NewClient(ws *websocket.Conn, videoConn *webrtc.PeerConnection) *Client {
+func NewClient(ws *websocket.Conn, videoConn *webrtc.PeerConnection, config stream.EncoderConfig) *Client {
 	return &Client{
-		ws:    ws,
-		video: videoConn,
-		mutex: sync.Mutex{},
+		ws:     ws,
+		video:  videoConn,
+		config: config,
+		mutex:  sync.Mutex{},
 	}
 }
 
@@ -69,12 +71,19 @@ func (c *Client) ReadMessage() (*Message, error) {
 }
 
 func (c *Client) AddTrack() error {
+	mimeType := webrtc.MimeTypeH264
+	sdpFmtpLine := h264SDPFmtpLine
+	if c.config.Codec == stream.VideoCodecH265 {
+		mimeType = webrtc.MimeTypeH265
+		sdpFmtpLine = ""
+	}
+
 	// video track
 	videoTrack, err := webrtc.NewTrackLocalStaticRTP(
 		webrtc.RTPCodecCapability{
-			MimeType:    webrtc.MimeTypeH264,
+			MimeType:    mimeType,
 			ClockRate:   90000,
-			SDPFmtpLine: h264SDPFmtpLine,
+			SDPFmtpLine: sdpFmtpLine,
 		},
 		"video",
 		"pion-video",
