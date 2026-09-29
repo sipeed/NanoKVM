@@ -491,6 +491,28 @@ const ja = {
           description: 'HTTPS プロトコルを有効にする',
           tip: '注意：HTTPS を使用すると、特に MJPEG ビデオモードで遅延が増加する可能性があります。'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Ethernet IPv4 接続を設定します。",
+          dhcp: "DHCP",
+          static: "固定",
+          ipv4: "IPv4",
+          dhcpDescription: "DHCP を使用して IP アドレスを自動的に取得します。",
+          staticDescription: "IP アドレスを手動で設定します。",
+          ipAddress: "IP アドレス",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "サブネットマスク",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "ゲートウェイ",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "無効な IP アドレスです",
+          save: "保存",
+          unsaved: "未保存の変更",
+          savedStatic: "固定 IP アドレス {{address}} を保存しました。",
+          savedDhcp: "DHCP 設定を保存しました。",
+          saveFailed: "設定を保存できませんでした。",
+          loadFailed: "設定を読み込めませんでした。"
+        },
         dns: {
           title: 'DNS',
           description: 'NanoKVM の DNS サーバーを設定',

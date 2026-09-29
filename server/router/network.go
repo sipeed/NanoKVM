@@ -31,4 +31,6 @@ func networkRouter(r *gin.Engine) {
 	admin.POST("/network/wifi/disconnect", service.DisconnectWifi) // disconnect Wi-Fi
 	admin.GET("/network/dns", service.GetDNS)                      // get DNS configuration
 	admin.POST("/network/dns", service.SetDNS)                     // set DNS configuration
+	admin.GET("/network/ethernet", service.GetEthernet)            // get Ethernet IPv4 configuration
+	admin.POST("/network/ethernet", service.SetEthernet)           // set Ethernet IPv4 configuration
 }

@@ -487,6 +487,28 @@ const ca = {
           description: 'Activa el protocol HTTPS',
           tip: 'Atenció: Usar HTTPS pot augmentar la latència, sobretot amb vídeo MJPEG.'
         },
+        ethernet: {
+          title: "IPv4 Ethernet",
+          description: "Configureu la connexió IPv4 d'Ethernet.",
+          dhcp: "DHCP",
+          static: "Estàtica",
+          ipv4: "IPv4",
+          dhcpDescription: "Obteniu automàticament una adreça IP mitjançant DHCP.",
+          staticDescription: "Configureu manualment l'adreça IP.",
+          ipAddress: "Adreça IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Màscara de subxarxa",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Passarel·la",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Adreça IP no vàlida",
+          save: "Desa",
+          unsaved: "Canvis no desats",
+          savedStatic: "S'ha desat l'adreça IP estàtica {{address}}.",
+          savedDhcp: "S'ha desat la configuració DHCP.",
+          saveFailed: "No s'ha pogut desar la configuració.",
+          loadFailed: "No s'ha pogut carregar la configuració."
+        },
         dns: {
           title: 'DNS',
           description: 'Configura els servidors DNS per a NanoKVM',

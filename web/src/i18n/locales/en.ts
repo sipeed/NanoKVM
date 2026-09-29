@@ -485,6 +485,28 @@ const en = {
           description: 'Enable HTTPS protocol',
           tip: 'Be aware: Using HTTPS can increase latency, especially with MJPEG video mode.'
         },
+        ethernet: {
+          title: 'Ethernet IPv4',
+          description: 'Choose DHCP or configure a persistent static IPv4 address',
+          dhcp: 'DHCP',
+          static: 'Static',
+          ipv4: 'IPv4 Configuration',
+          dhcpDescription: 'IP address and gateway are obtained automatically from DHCP',
+          staticDescription: 'Settings are applied immediately and retained after a reboot',
+          ipAddress: 'IP Address',
+          addressPlaceholder: '192.168.10.32',
+          subnetMask: 'Subnet Mask',
+          subnetMaskPlaceholder: '255.255.255.0',
+          gateway: 'Gateway',
+          gatewayPlaceholder: '192.168.10.1',
+          invalid: 'Enter a valid IPv4 address, subnet mask, and gateway',
+          save: 'Save',
+          unsaved: 'Unsaved changes',
+          savedStatic: 'Static address saved. Reconnect at {{address}}.',
+          savedDhcp: 'DHCP enabled. Reconnect using the address assigned by your router.',
+          saveFailed: 'Failed to save Ethernet settings',
+          loadFailed: 'Failed to load Ethernet settings'
+        },
         dns: {
           title: 'DNS',
           description: 'Configure DNS servers for NanoKVM',

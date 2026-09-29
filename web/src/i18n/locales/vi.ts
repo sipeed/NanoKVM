@@ -485,6 +485,28 @@ const vi = {
           description: 'Bật giao thức HTTPS',
           tip: 'Lưu ý: Sử dụng HTTPS có thể tăng độ trễ, đặc biệt trong chế độ video MJPEG.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Chọn DHCP hoặc cấu hình địa chỉ IPv4 tĩnh cố định",
+          dhcp: "DHCP",
+          static: "Tĩnh",
+          ipv4: "Cấu hình IPv4",
+          dhcpDescription: "Địa chỉ IP và cổng kết nối được tự động nhận từ DHCP",
+          staticDescription: "Các cài đặt được áp dụng ngay và được giữ lại sau khi khởi động lại",
+          ipAddress: "Địa chỉ IP",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Mặt nạ mạng con",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Cổng kết nối",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Nhập địa chỉ IPv4, mặt nạ mạng con và cổng kết nối hợp lệ",
+          save: "Lưu",
+          unsaved: "Thay đổi chưa lưu",
+          savedStatic: "Đã lưu địa chỉ tĩnh. Kết nối lại tại {{address}}.",
+          savedDhcp: "Đã bật DHCP. Kết nối lại bằng địa chỉ do bộ định tuyến của bạn cấp.",
+          saveFailed: "Không thể lưu cài đặt Ethernet",
+          loadFailed: "Không thể tải cài đặt Ethernet"
+        },
         dns: {
           title: 'DNS',
           description: 'Cấu hình máy chủ DNS cho NanoKVM',

@@ -486,6 +486,28 @@ const da = {
           description: 'Aktiver HTTPS-protokol',
           tip: 'Bemærk: Brug af HTTPS kan øge forsinkelsen, især med MJPEG-videotilstand.'
         },
+        ethernet: {
+          title: "Ethernet IPv4",
+          description: "Konfigurer Ethernet IPv4-forbindelsen.",
+          dhcp: "DHCP",
+          static: "Statisk",
+          ipv4: "IPv4",
+          dhcpDescription: "Hent automatisk en IP-adresse via DHCP.",
+          staticDescription: "Konfigurer IP-adressen manuelt.",
+          ipAddress: "IP-adresse",
+          addressPlaceholder: "192.168.10.32",
+          subnetMask: "Subnetmaske",
+          subnetMaskPlaceholder: "255.255.255.0",
+          gateway: "Gateway",
+          gatewayPlaceholder: "192.168.10.1",
+          invalid: "Ugyldig IP-adresse",
+          save: "Gem",
+          unsaved: "Ikke-gemte ændringer",
+          savedStatic: "Den statiske IP-adresse {{address}} er gemt.",
+          savedDhcp: "DHCP-konfigurationen er gemt.",
+          saveFailed: "Konfigurationen kunne ikke gemmes.",
+          loadFailed: "Konfigurationen kunne ikke indlæses."
+        },
         dns: {
           title: 'DNS',
           description: 'Konfigurer DNS-servere til NanoKVM',
