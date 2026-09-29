@@ -1,8 +1,13 @@
 import { http } from '@/lib/http.ts';
 
+// Tailscale is downloaded and validated on the device before it is published.
+// The server bounds that work to four minutes, so Http's shared 60s timeout
+// must not abort the request context mid-install.
+const INSTALL_TIMEOUT = 6 * 60 * 1000;
+
 // install tailscale
 export function install() {
-  return http.post('/api/extensions/tailscale/install');
+  return http.post('/api/extensions/tailscale/install', undefined, { timeout: INSTALL_TIMEOUT });
 }
 
 // uninstall tailscale
