@@ -64,18 +64,20 @@ cd "$NANOKVM_PATH/support/sg2002"
 echo "::endgroup::"
 
 echo "::group::support: build kvm_system"
+./build kvm_system clean
 ./build kvm_system
 ./build kvm_system add_to_kvmapp
 echo "::endgroup::"
 
 echo "::group::support: build kvm_vision (libkvm.so)"
+./build kvm_vision clean
 ./build kvm_vision
 ./build kvm_vision add_to_kvmapp
 echo "::endgroup::"
 
 echo "::group::server: cross-compile NanoKVM-Server"
 cd "$NANOKVM_PATH/server"
-./build.sh
+GOFLAGS="-ldflags=-s" ./build.sh
 echo "::endgroup::"
 
 # support/sg2002/build reports "Build Error!" without a non-zero exit status for
