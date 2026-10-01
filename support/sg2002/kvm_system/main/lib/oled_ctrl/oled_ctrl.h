@@ -341,6 +341,13 @@ const uint8_t oled_sipeed_logo[32] = {
 0x66,0x66,0x66,0x66,0x66,0x70,0xfe,0x78,0xfe,0x7d,0xfc,0x3f,0xf8,0x1f,0x00,0x00
 };
 int oled_exist(void);
+void OLED_Display_On();
+void OLED_Display_Off();
+bool OLED_PrepareFrame();
+bool OLED_EnterSleep();
+bool OLED_CommitAndWake();
+void OLED_SetLayoutOffset(int8_t offset);
+void OLED_SetVerticalOffset(uint8_t offset);
 void OLED_Clear(void);
 void OLED_Fill(void);
 void OLED_Init(void);
@@ -351,10 +358,10 @@ void OLED_ColorTurn(uint8_t i);
 void OLED_ShowError(uint8_t x,uint8_t y,uint8_t _state);
 void OLED_ShowCharTurn(uint8_t x,uint8_t y,char chr,uint8_t sizey);
 void OLED_ShowNum(uint8_t x, uint8_t y, uint8_t num, uint8_t len, uint8_t sizey);
-void OLED_ShowString(uint8_t x, uint8_t y, char *chr, uint8_t sizey);
-void OLED_ShowStringTurn(uint8_t x, uint8_t y, char *chr, uint8_t sizey);
-void OLED_ShowStringtoend(uint8_t x, uint8_t y, char *chr, uint8_t sizey, uint8_t end);
-void OLED_ShowString_AlignRight(uint8_t x_end, uint8_t y, char *chr, uint8_t size);
+void OLED_ShowString(uint8_t x, uint8_t y, const char *chr, uint8_t sizey);
+void OLED_ShowStringTurn(uint8_t x, uint8_t y, const char *chr, uint8_t sizey);
+void OLED_ShowStringtoend(uint8_t x, uint8_t y, const char *chr, uint8_t sizey, uint8_t end);
+void OLED_ShowString_AlignRight(uint8_t x_end, uint8_t y, const char *chr, uint8_t size);
 void OLED_ROW(uint8_t _EN);
 void OLED_ShowKVMLogo();
 void OLED_ShowLogo();

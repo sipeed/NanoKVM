@@ -89,7 +89,7 @@ type GetMemoryLimitRsp struct {
 }
 
 type SetOledReq struct {
-	Sleep int `validate:"omitempty"`
+	Sleep *int `json:"sleep"`
 }
 
 type GetOLEDRsp struct {

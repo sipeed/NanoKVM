@@ -26,17 +26,11 @@ void* thread_oled_handle(void * arg)
 	OLED_ColorTurn(0);		//0正常显示 1 反色显示
 	OLED_DisplayTurn(0);	//0正常显示 1 屏幕翻转显示
 	OLED_Clear();
-	if(kvm_oled_state.ue_patch_state == 1){
-		kvm_show_UE();
-		while(kvm_sys_state.oled_thread_running){
-			time::sleep_ms(100);
-		}
-		OLED_Clear();
-	}
 
     while(kvm_sys_state.oled_thread_running)
     {
-		oled_auto_sleep();
+		// This thread is the only owner of OLED I2C and power transitions.
+		oled_policy_tick();
 		// printf("[kvmd]thread_oled_handle - while\n");
 		uint8_t page_changed = (kvm_oled_state.page == kvm_sys_state.page)? 0:1;
 		uint8_t subpage_changed = (kvm_oled_state.sub_page == kvm_sys_state.sub_page)? 0:1;
@@ -47,29 +41,39 @@ void* thread_oled_handle(void * arg)
 		kvm_oled_state.sub_page = kvm_sys_state.sub_page;
 
 
-		switch(kvm_oled_state.page){
-			case 0 : // main page
-				kvm_main_ui_disp(page_changed, subpage_changed);
-				break;
-			case 1 : // wifi config page
-				kvm_wifi_config_ui_disp(page_changed, subpage_changed);
-				break;
-			default:
-				OLED_Clear();
+		if(oled_is_awake()){
+			if(kvm_oled_state.ue_patch_state == 1){
+				if(kvm_oled_state.force_full_redraw) kvm_show_UE();
+				kvm_oled_state.force_full_redraw = 0;
+			} else {
+				switch(kvm_oled_state.page){
+					case 0 : // main page
+						kvm_main_ui_disp(page_changed, subpage_changed);
+						break;
+					case 1 : // wifi config page
+						kvm_wifi_config_ui_disp(page_changed, subpage_changed);
+						break;
+					default:
+						OLED_Clear();
+				}
+			}
+			oled_finish_frame();
 		}
 		time::sleep_ms(OLED_DELAY);
     }
-	OLED_Clear();
+	OLED_EnterSleep();
 	kvm_sys_state.oled_thread_running = -1;
+	return NULL;
 }
 
 void* thread_key_handle(void * arg)
 {
-	uint64_t __attribute__((unused)) press_time;
+	uint64_t press_time = 0;
 	uint32_t press_cycle;
 	int fd = open ("/dev/input/event0", O_RDONLY);
 	if (fd == -1) {
 		kvm_sys_state.key_thread_running = 0;
+		return NULL;
 	}
 	struct input_event event;
 
@@ -79,11 +83,11 @@ void* thread_key_handle(void * arg)
 		if (event.type == EV_KEY) {
 			if (event.value == 1){
 				// printf ("[kvmk]按键按下\n");
-				press_time = time::time_ms();
-			} else if (event.value == 0){
+				press_time = time::ticks_ms();
+			} else if (event.value == 0 && press_time != 0){
 				oled_auto_sleep_time_update();
 				// printf ("[kvmk]按键抬起\n");
-				press_cycle = time::time_ms() - press_time;
+				press_cycle = time::ticks_ms() - press_time;
 				if(press_cycle >= KEY_LONGLONG_PRESS){
 					kvm_reset_password();
 				} else if (press_cycle >= KEY_LONG_PRESS && press_cycle < KEY_LONGLONG_PRESS){
@@ -93,18 +97,23 @@ void* thread_key_handle(void * arg)
 					if(kvm_sys_state.wifi_state == -2){
 						kvm_sys_state.page = 0;
 						kvm_sys_state.sub_page = 0;
+						kvm_sys_state.oled_manual_off = 0;
+						press_time = 0;
 						continue;
 					}
 					switch(kvm_sys_state.page){
 						case 0:	// main page
 							kvm_sys_state.page = 1;
 							kvm_sys_state.sub_page = 0;
+							kvm_sys_state.oled_manual_off = 0;
+							oled_note_wifi_activity();
 							break;
 						case 1:	// wifi coonfig page
 							system("/etc/init.d/S30wifi restart");
 							kvm_sys_state.page = 0;
 							kvm_sys_state.sub_page = 0;
 							kvm_sys_state.wifi_config_process = -1;
+							kvm_sys_state.oled_manual_off = 0;
 							break;
 					}
 				} else {
@@ -115,10 +124,18 @@ void* thread_key_handle(void * arg)
 					// printf ("[kvmk]sub_page = %d\n", kvm_sys_state.sub_page);
 					switch(kvm_sys_state.page){
 						case 0:	// main page
-							if(kvm_sys_state.sub_page == 0) kvm_sys_state.sub_page = 1;
-							else kvm_sys_state.sub_page = 0;
+							// The main-page short press is a stable manual power
+							// latch; sub_page now belongs exclusively to Wi-Fi.
+							if(kvm_oled_state.oled_sleep_state){
+								// Wake an automatically sleeping panel and consume this
+								// press instead of immediately turning it back off.
+								kvm_sys_state.oled_manual_off = 0;
+							} else {
+								kvm_sys_state.oled_manual_off = kvm_sys_state.oled_manual_off ? 0 : 1;
+							}
 							break;
 						case 1:	// wifi coonfig page
+							oled_note_wifi_activity();
 							switch(kvm_sys_state.wifi_config_process){
 								case 1:	// QR1<->TEXT2
 									if(kvm_sys_state.sub_page == 1) kvm_sys_state.sub_page = 2;
@@ -135,11 +152,14 @@ void* thread_key_handle(void * arg)
 							break;
 					}
 				}
+				press_time = 0;
 			}
 		}
 		time::sleep_ms(KEY_DELAY);
-    }
+	}
+	close(fd);
 	kvm_sys_state.key_thread_running = 0;
+	return NULL;
 }
 
 void* thread_sys_handle(void * arg)
@@ -170,18 +190,21 @@ void* thread_sys_handle(void * arg)
 		auto_remove_temp_watchdog();
     }
 	kvm_sys_state.sys_thread_running = 0;
+	return NULL;
 }
 
 int main(int argc, char* argv[])
 {
     // Catch SIGINT signal(e.g. Ctrl + C), and set exit flag to true.
-    signal(SIGINT, [](int sig){ 
+	auto stop_handler = [](int sig){
 	kvm_sys_state.oled_thread_running = 0;
 	kvm_sys_state.key_thread_running = 0;
 	kvm_sys_state.sys_thread_running = 0;
 	app::set_exit_flag(true); 
 	log::info("[kvms]Prepare to exit\n");
-	});	
+	};
+	signal(SIGINT, stop_handler);
+	signal(SIGTERM, stop_handler);
 
 	pthread_t sys_state_thread;
 	pthread_t display_thread;
@@ -259,6 +282,8 @@ int main(int argc, char* argv[])
 	kvm_sys_state.sys_thread_running = 0;
 	kvm_sys_state.oled_thread_running = 0;
 	kvm_sys_state.key_thread_running = 0;
-	while(kvm_sys_state.oled_thread_running != -1) time::sleep_ms(100);
+	if(OLED_state == 1){
+		while(kvm_sys_state.oled_thread_running != -1) time::sleep_ms(100);
+	}
 }
 
