@@ -1,0 +1,56 @@
+#!/bin/sh
+
+KO_DIR="${NANOKVM_KO_DIR:-/mnt/system/ko}"
+SDIO_DEVICES_DIR="${NANOKVM_SDIO_DEVICES_DIR:-/sys/bus/sdio/devices}"
+INSMOD="${NANOKVM_INSMOD:-insmod}"
+
+load_aic8800() {
+	"$INSMOD" "$KO_DIR/3rd/aic8800_bsp.ko"
+	"$INSMOD" "$KO_DIR/3rd/aic8800_fdrv.ko"
+}
+
+load_rtl8733bs() {
+	"$INSMOD" "$KO_DIR/3rd/8733bs.ko"
+}
+
+if [ "$1" = "start" ]
+then
+	. /etc/profile
+	printf "load wifi kernel module: "
+	"$INSMOD" "$KO_DIR/cfg80211.ko"
+
+	sdio_aliases=""
+	for alias_file in "$SDIO_DEVICES_DIR"/*/modalias
+	do
+		[ -r "$alias_file" ] || continue
+		sdio_aliases="$sdio_aliases $(cat "$alias_file")"
+	done
+
+	load_aic=0
+	load_rtl=0
+	case "$sdio_aliases" in
+		*v5449d0145*|*v544Ad0146*|*vC8A1d0082*|*vC8A1dC08D*)
+			load_aic=1
+			;;
+	esac
+	case "$sdio_aliases" in
+		*v024CdB73A*|*v024CdB733*)
+			load_rtl=1
+			;;
+	esac
+
+	# Preserve support for new or unrecognised boards. This is the old boot
+	# behaviour, but known boards avoid retaining an unused multi-megabyte
+	# driver for the lifetime of the system.
+	if [ "$load_aic" -eq 0 ] && [ "$load_rtl" -eq 0 ]
+	then
+		load_aic=1
+		load_rtl=1
+	fi
+
+	[ "$load_aic" -eq 0 ] || load_aic8800
+	[ "$load_rtl" -eq 0 ] || load_rtl8733bs
+
+	echo "OK"
+	exit 0
+fi

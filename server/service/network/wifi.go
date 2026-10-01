@@ -166,12 +166,12 @@ func (s *Service) DisconnectWifi(c *gin.Context) {
 }
 
 func connect(ssid string, password string) error {
-	if err := os.WriteFile(WiFiSSID, []byte(ssid), 0o644); err != nil {
+	if err := writePrivateFile(WiFiSSID, []byte(ssid)); err != nil {
 		log.Errorf("failed to save wifi ssid: %s", err)
 		return err
 	}
 
-	if err := os.WriteFile(WiFiPasswd, []byte(password), 0o644); err != nil {
+	if err := writePrivateFile(WiFiPasswd, []byte(password)); err != nil {
 		log.Errorf("failed to save wifi password: %s", err)
 		return err
 	}
@@ -182,6 +182,16 @@ func connect(ssid string, password string) error {
 	}
 
 	return nil
+}
+
+func writePrivateFile(path string, data []byte) error {
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		return err
+	}
+
+	// WriteFile preserves the mode of an existing file, so explicitly tighten
+	// credentials created by older releases with mode 0644.
+	return os.Chmod(path, 0o600)
 }
 
 func isSupported() bool {
