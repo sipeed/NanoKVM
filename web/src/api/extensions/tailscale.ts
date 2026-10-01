@@ -49,3 +49,13 @@ export function login() {
 export function logout() {
   return http.post('/api/extensions/tailscale/logout');
 }
+
+// get installed and latest stable tailscale versions
+export function getVersion() {
+  return http.get('/api/extensions/tailscale/version');
+}
+
+// update tailscale to the latest stable version
+export function update() {
+  return http.post('/api/extensions/tailscale/update', undefined, { timeout: 10 * 60 * 1000 });
+}

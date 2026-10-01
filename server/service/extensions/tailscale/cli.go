@@ -3,6 +3,7 @@ package tailscale
 import (
 	"NanoKVM-Server/utils"
 	"bufio"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,14 +11,27 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 )
 
 const (
 	ScriptPath       = "/etc/init.d/S98tailscaled"
 	ScriptBackupPath = "/kvmapp/system/init.d/S98tailscaled"
+
+	daemonStatePollInterval = 100 * time.Millisecond
 )
 
 type Cli struct{}
+
+type TsVersion struct {
+	Current string
+	Latest  string
+}
+
+type tailscaleVersionJSON struct {
+	MajorMinorPatch string `json:"majorMinorPatch"`
+	Upstream        string `json:"upstream"`
+}
 
 type TsStatus struct {
 	BackendState string `json:"BackendState"`
@@ -60,6 +74,36 @@ func (c *Cli) Restart() error {
 
 	command := strings.Join(commands, " && ")
 	return exec.Command("sh", "-c", command).Run()
+}
+
+// RestartAfterUpdate waits for the old daemon to exit before starting the new
+// binary. S98tailscaled reports success as soon as start-stop-daemon sends the
+// stop signal, so invoking its restart action directly can briefly run two
+// tailscaled processes after an update.
+func (c *Cli) RestartAfterUpdate(ctx context.Context) error {
+	return restartAfterUpdate(ctx, c.Stop, c.Start, c.IsRunning)
+}
+
+func restartAfterUpdate(ctx context.Context, stop, start func() error, isRunning func() bool) error {
+	if isRunning() {
+		if err := stop(); err != nil && isRunning() {
+			return fmt.Errorf("stop tailscale after update: %w", err)
+		}
+	}
+
+	if err := waitForDaemonState(ctx, false, daemonStatePollInterval, isRunning); err != nil {
+		return fmt.Errorf("wait for tailscaled to stop: %w", err)
+	}
+
+	if err := start(); err != nil {
+		return fmt.Errorf("start tailscale after update: %w", err)
+	}
+
+	if err := waitForDaemonState(ctx, true, daemonStatePollInterval, isRunning); err != nil {
+		return fmt.Errorf("wait for tailscaled to start: %w", err)
+	}
+
+	return nil
 }
 
 func (c *Cli) Stop() error {
@@ -144,4 +188,94 @@ func (c *Cli) Login() (string, error) {
 func (c *Cli) Logout() error {
 	command := "tailscale logout"
 	return exec.Command("sh", "-c", command).Run()
+}
+
+func (c *Cli) Version(ctx context.Context, includeUpstream bool) (*TsVersion, error) {
+	args := []string{"version", "--json"}
+	if includeUpstream {
+		args = append(args, "--upstream")
+	}
+
+	output, err := exec.CommandContext(ctx, TailscalePath, args...).CombinedOutput()
+	if err != nil {
+		return nil, commandError("get tailscale version", output, err)
+	}
+
+	return parseVersion(output, includeUpstream)
+}
+
+func (c *Cli) Update(ctx context.Context) error {
+	output, err := exec.CommandContext(
+		ctx,
+		TailscalePath,
+		"update",
+		"--yes",
+		"--track=stable",
+	).CombinedOutput()
+	if err != nil {
+		return commandError("update tailscale", output, err)
+	}
+
+	return nil
+}
+
+func (c *Cli) IsRunning() bool {
+	return exec.Command("pidof", "tailscaled").Run() == nil
+}
+
+func waitForDaemonState(ctx context.Context, wantRunning bool, pollInterval time.Duration, isRunning func() bool) error {
+	if isRunning() == wantRunning {
+		return nil
+	}
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-ticker.C:
+			if isRunning() == wantRunning {
+				return nil
+			}
+		}
+	}
+}
+
+func parseVersion(output []byte, requireUpstream bool) (*TsVersion, error) {
+	// Some Tailscale builds print a warning before their JSON output.
+	if index := strings.IndexByte(string(output), '{'); index >= 0 {
+		output = output[index:]
+	}
+
+	var version tailscaleVersionJSON
+	if err := json.Unmarshal(output, &version); err != nil {
+		return nil, fmt.Errorf("parse tailscale version: %w", err)
+	}
+	if version.MajorMinorPatch == "" {
+		return nil, errors.New("parse tailscale version: current version is missing")
+	}
+	if requireUpstream && version.Upstream == "" {
+		return nil, errors.New("parse tailscale version: upstream version is missing")
+	}
+
+	return &TsVersion{
+		Current: version.MajorMinorPatch,
+		Latest:  version.Upstream,
+	}, nil
+}
+
+func commandError(action string, output []byte, err error) error {
+	const maxOutputLength = 2048
+
+	message := strings.TrimSpace(string(output))
+	if len(message) > maxOutputLength {
+		message = message[:maxOutputLength]
+	}
+	if message == "" {
+		return fmt.Errorf("%s: %w", action, err)
+	}
+
+	return fmt.Errorf("%s: %w: %s", action, err, message)
 }

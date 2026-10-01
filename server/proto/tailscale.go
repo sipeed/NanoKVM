@@ -20,3 +20,14 @@ type GetTailscaleStatusRsp struct {
 type LoginTailscaleRsp struct {
 	Url string `json:"url"`
 }
+
+type GetTailscaleVersionRsp struct {
+	Current string `json:"current"`
+	Latest  string `json:"latest"`
+}
+
+type UpdateTailscaleRsp struct {
+	Current    string `json:"current"`
+	Updated    bool   `json:"updated"`
+	Restarting bool   `json:"restarting"`
+}
