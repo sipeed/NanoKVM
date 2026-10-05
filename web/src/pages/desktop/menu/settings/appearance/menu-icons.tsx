@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Switch } from 'antd';
+import { Switch, Tooltip } from 'antd';
 import { useAtom } from 'jotai';
 import {
   DiscIcon,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import * as api from '@/api/vm.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { Robot } from '@/components/icons/robot.tsx';
@@ -22,6 +24,21 @@ export const MenuIcons = () => {
   const { account } = useAuth();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
+
+  // When picoclaw is disabled (no /etc/kvm/enable-picoclaw) its menu icon
+  // toggle is forced off + disabled — the menu button is hidden anyway.
+  const [picoclawEnabled, setPicoclawEnabled] = useState(true);
+
+  useEffect(() => {
+    api
+      .getServices()
+      .then((rsp) => {
+        if (rsp.data?.services?.picoclaw) {
+          setPicoclawEnabled(rsp.data.services.picoclaw.enabled);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const items = [
     { key: 'image', icon: <DiscIcon size={16} /> },
@@ -60,21 +77,35 @@ export const MenuIcons = () => {
       </div>
 
       <div className="mt-5 flex flex-col space-y-5">
-        {items.map((item) => (
-          <div key={item.key} className="flex items-center justify-between">
-            <div className="flex items-center space-x-2 text-neutral-400">
-              {item.icon}
-              <span className="text-neutral-300">
-                {item.label ? t(item.label) : t(`${item.key}.title`)}
-              </span>
-            </div>
-
+        {items.map((item) => {
+          const isPicoclawDisabled = item.key === 'picoclaw' && !picoclawEnabled;
+          const switchEl = (
             <Switch
-              value={!menuDisabledItems.includes(item.key)}
+              value={isPicoclawDisabled ? false : !menuDisabledItems.includes(item.key)}
+              disabled={isPicoclawDisabled}
               onChange={() => updateItems(item.key)}
             />
-          </div>
-        ))}
+          );
+
+          return (
+            <div key={item.key} className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-neutral-400">
+                {item.icon}
+                <span className="text-neutral-300">
+                  {item.label ? t(item.label) : t(`${item.key}.title`)}
+                </span>
+              </div>
+
+              {isPicoclawDisabled ? (
+                <Tooltip title={t('settings.appearance.menuBar.picoclawDisabled')} placement="left">
+                  {switchEl}
+                </Tooltip>
+              ) : (
+                switchEl
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

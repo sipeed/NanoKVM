@@ -321,6 +321,9 @@ func (s *Service) UninstallRuntime(c *gin.Context) {
 	}
 	_ = os.Remove(picoclawBinaryPath)
 	_ = os.RemoveAll(picoclawCacheDir)
+	// Uninstall fully resets the toggle state too, so the UI no longer
+	// shows picoclaw as enabled.
+	_ = os.Remove(picoclawEnableFlag)
 
 	s.runtime.Set(RuntimeStatus{
 		Ready:           false,

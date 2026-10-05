@@ -224,6 +224,11 @@ stop_service() {
 
 case "$1" in
   start)
+    # Disabled by default. Enable with: touch /etc/kvm/enable-picoclaw
+    [ -f /etc/kvm/enable-picoclaw ] || {
+      echo "picoclaw disabled (create /etc/kvm/enable-picoclaw to enable)"
+      exit 0
+    }
     start_service
     ;;
 
@@ -233,6 +238,11 @@ case "$1" in
     ;;
 
   onboard)
+    # Disabled by default. Enable with: touch /etc/kvm/enable-picoclaw
+    [ -f /etc/kvm/enable-picoclaw ] || {
+      echo "picoclaw disabled (create /etc/kvm/enable-picoclaw to enable)"
+      exit 0
+    }
     onboard_service
     ;;
 

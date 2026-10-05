@@ -43,6 +43,11 @@ fi
 
 case "$1" in
         start)
+                # Disabled by default. Enable with: touch /etc/kvm/enable-tailscale
+                [ -f /etc/kvm/enable-tailscale ] || {
+                    echo "tailscaled disabled (create /etc/kvm/enable-tailscale to enable)"
+                    exit 0
+                }
                 if [ -f /etc/kvm/GOMEMLIMIT ]; then
                      value=$(cat /etc/kvm/GOMEMLIMIT)
                      export GOMEMLIMIT="${value}MiB"

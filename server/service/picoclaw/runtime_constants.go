@@ -12,6 +12,7 @@ const (
 	picoclawChecksumURL     = "https://cdn.sipeed.com/nanokvm/resources/picoclaw/v0.2.8/sha512.txt"
 	etcInitPicoclawScript   = "/etc/init.d/S96picoclaw"
 	kvmappPicoclawScript    = "/kvmapp/system/init.d/S96picoclaw"
+	picoclawEnableFlag      = "/etc/kvm/enable-picoclaw"
 	picoclawStartTimeout    = 15 * time.Second
 	picoclawStopTimeout     = 15 * time.Second
 	picoclawOnboardTimeout  = 60 * time.Second

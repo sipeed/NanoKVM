@@ -20,6 +20,7 @@ type SidebarHeaderProps = {
   isTogglingRuntime: boolean;
   actionDisabled?: boolean;
   runtimeActionDisabled?: boolean;
+  runtimeStartDisabled?: boolean;
   agentProfile?: string;
   isSwitchingAgent?: boolean;
   isHistoryOpen?: boolean;
@@ -41,6 +42,7 @@ export const SidebarHeader = ({
   isTogglingRuntime,
   actionDisabled,
   runtimeActionDisabled,
+  runtimeStartDisabled,
   agentProfile,
   isSwitchingAgent,
   isHistoryOpen,
@@ -182,7 +184,7 @@ export const SidebarHeader = ({
                 </>
               ) : isModelConfigured ? (
                 <Button
-                  disabled={isRuntimeActionDisabled || isTogglingRuntime}
+                  disabled={runtimeStartDisabled || isTogglingRuntime}
                   loading={isTogglingRuntime}
                   onClick={() => void onToggleRuntime()}
                   title={runtimeToggleTitle || t('picoclaw.config.startRuntime')}
