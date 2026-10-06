@@ -158,3 +158,5 @@ Please keep your pull requests small and focused to facilitate easier review and
 ## 📜 License
 
 This project is licensed under the GPL-3.0 License. See [LICENSE](LICENSE) for details.
+
+See [SD card layout](docs/storage-layout.md) for root/data partition placement and card capacity guidance.
