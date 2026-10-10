@@ -326,6 +326,9 @@ const fr = {
       okBtn: 'Oui',
       cancelBtn: 'Non'
     },
+    reboot: {
+      title: 'Redémarrer'
+    },
     settings: {
       title: 'Paramètres',
       mcp: {

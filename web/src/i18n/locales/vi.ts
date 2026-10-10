@@ -321,6 +321,9 @@ const vi = {
       okBtn: 'Có',
       cancelBtn: 'Không'
     },
+    reboot: {
+      title: 'Khởi động lại'
+    },
     settings: {
       title: 'Cài đặt',
       mcp: {

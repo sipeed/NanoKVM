@@ -323,6 +323,9 @@ const en = {
       okBtn: 'Yes',
       cancelBtn: 'No'
     },
+    reboot: {
+      title: 'Reboot'
+    },
     settings: {
       title: 'Settings',
       mcp: {

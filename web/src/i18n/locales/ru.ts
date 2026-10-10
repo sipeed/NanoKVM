@@ -323,6 +323,9 @@ const ru = {
       okBtn: 'Да',
       cancelBtn: 'Нет'
     },
+    reboot: {
+      title: 'Перезагрузка'
+    },
     settings: {
       title: 'Настройки',
       mcp: {

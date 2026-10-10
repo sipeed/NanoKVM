@@ -329,6 +329,9 @@ const de = {
       okBtn: 'Ja',
       cancelBtn: 'Nein'
     },
+    reboot: {
+      title: 'Neustarten'
+    },
     settings: {
       title: 'Einstellungen',
       mcp: {
