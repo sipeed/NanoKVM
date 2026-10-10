@@ -90,6 +90,10 @@ func (s *Service) startRuntimeContext(ctx context.Context) (string, string, *Pic
 	startCtx, cancel := context.WithTimeout(ctx, picoclawStartTimeout)
 	defer cancel()
 
+	// The S96picoclaw init script refuses to start unless the enable flag
+	// exists — create it so the UI-driven start works.
+	_ = os.WriteFile(picoclawEnableFlag, []byte(""), 0o644)
+
 	output, execErr := exec.CommandContext(startCtx, "sh", "-c", command).CombinedOutput()
 	trimmedOutput := strings.TrimSpace(string(output))
 	if execErr != nil {
@@ -185,6 +189,7 @@ func (s *Service) stopRuntime() (string, string, *PicoclawError) {
 	defer cancel()
 
 	output, execErr := exec.CommandContext(ctx, "sh", "-c", command).CombinedOutput()
+	_ = os.Remove(picoclawEnableFlag)
 	trimmedOutput := strings.TrimSpace(string(output))
 	if execErr != nil {
 		status := RuntimeStatus{

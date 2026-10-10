@@ -8,6 +8,7 @@ export type PicoclawRunState = 'idle' | 'busy';
 
 export type PicoclawRuntimeStatus = {
   ready: boolean;
+  enabled: boolean;
   installed: boolean;
   installing: boolean;
   install_progress?: number;

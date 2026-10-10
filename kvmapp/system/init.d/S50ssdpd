@@ -12,6 +12,11 @@ DAEMON_ARGS=""
 
 # shellcheck disable=SC2086
 start() {
+        # Disabled by default. Enable with: touch /etc/kvm/enable-ssdpd
+        [ -f /etc/kvm/enable-ssdpd ] || {
+                echo "ssdpd disabled (create /etc/kvm/enable-ssdpd to enable)"
+                exit 0
+        }
         printf 'Starting %s: ' "$DAEMON"
         if start-stop-daemon -S -q -p "$PIDFILE" -x "$DAEMON" -- $DAEMON_ARGS; then
                 echo "OK"
