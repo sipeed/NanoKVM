@@ -39,6 +39,13 @@ export const router = createHashRouter([
               const { Terminal } = await import('./pages/terminal');
               return { Component: Terminal };
             }
+          },
+          {
+            path: 'storage',
+            lazy: async () => {
+              const { Storage } = await import('./pages/storage');
+              return { Component: Storage };
+            }
           }
         ]
       },

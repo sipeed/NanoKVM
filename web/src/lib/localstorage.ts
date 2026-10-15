@@ -211,7 +211,15 @@ export function setMenuDisabledItems(items: string[]) {
 
 export function getMenuDisabledItems(): string[] {
   const value = localStorage.getItem(MENU_DISABLED_ITEMS_KEY);
-  return value ? JSON.parse(value) : [];
+  if (!value) return [];
+
+  const items: string[] = JSON.parse(value);
+
+  // The image and download entries were merged into one storage entry, so a
+  // hidden icon stays hidden instead of reappearing.
+  return Array.from(
+    new Set(items.map((item) => (item === 'image' || item === 'download' ? 'storage' : item)))
+  );
 }
 
 export function getMenuDisplayMode(): string {

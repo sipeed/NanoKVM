@@ -5,7 +5,8 @@ const zh_tw = {
       login: '登入',
       changePassword: '更改密碼',
       terminal: '終端機',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: '映像檔掛載 / 檔案共享'
     },
     auth: {
       login: '登入',
@@ -37,7 +38,10 @@ const zh_tw = {
         change2: '網頁登入密碼',
         change3: 'root user 密碼 (SSH登入密碼)',
         change4: '如果您忘記密碼，需要長按 NanoKVM 上的 BOOT 按鍵來重設密碼。'
-      }
+      },
+      placeholderCurrentPassword: '請輸入目前密碼',
+      passwordLength: '密碼長度必須為 8 到 72 個字元',
+      invalidCurrentPassword: '目前密碼錯誤'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -205,39 +209,81 @@ const zh_tw = {
         disable: '停用 HID-Only 模式'
       }
     },
-    image: {
-      title: '映像檔',
-      loading: '載入中...',
-      empty: '未找到任何內容',
-      mountMode: '掛載模式',
-      mountFailed: '掛載失敗',
-      mountDesc: '在某些系統中，需要在遠端主機中彈出虛擬硬碟後再掛載映像檔。',
-      diskOnWarn: '掛載映像檔會關閉虛擬隨身碟，電腦將無法再存取 /data 目錄。是否繼續？',
-      diskOffWarn:
-        '虛擬隨身碟目前已關閉，需要先開啟才能掛載映像檔，電腦上的 USB 裝置會短暫斷開重連。是否繼續？',
-      diskShared: '虛擬隨身碟已開啟，本機 /data 為唯讀；關閉虛擬隨身碟後才能刪除或上傳映像檔。',
-      unmountFailed: '解除安裝失敗',
-      unmountDesc: '在某些系統中，需要在遠端主機中手動彈出後再解除安裝映像。',
-      refresh: '重新整理映像檔列表',
-      attention: '注意',
-      deleteConfirm: '確定要刪除該映像檔嗎？',
-      okBtn: '確定',
-      cancelBtn: '取消',
-      tips: {
-        title: '如何上傳',
-        usb1: '透過 USB 將 NanoKVM 連接到您的電腦。',
-        usb2: '確保已安裝虛擬磁碟（設定 - 虛擬磁碟）。',
-        usb3: '開啟電腦上的虛擬磁碟，將映象檔案複製到虛擬磁碟的根目錄下。',
-        scp1: '確保 NanoKVM 和您的電腦位於同一區域網路。',
-        scp2: '開啟電腦上的終端機，使用 SCP 指令將映像檔案上傳到 NanoKVM 的 /data 目錄下。',
-        scp3: '範例：scp your-image-path root@your-nanokvm-ip:/data',
-        tfCard: 'microSD 卡',
-        tf1: '此方法適用於 Linux 系統',
-        tf2: '從 NanoKVM 拔出 microSD 卡（FULL 版本請先拆開外殼）。',
-        tf3: '使用 USB 讀卡機將 microSD 卡連接至電腦。',
-        tf4: '將映像檔複製到 microSD 卡的 /data 目錄下。',
-        tf5: '將 microSD 卡重新插回 NanoKVM。'
-      }
+    storage: {
+      title: '映像檔掛載 / 檔案共享',
+      empty: '還沒有映像檔。可以上傳 ISO/IMG，也可以讓受控裝置拷到這張磁碟上。',
+      notAttached: '尚未裝載任何媒體',
+      attached: '已裝載：{{name}}',
+      eject: '彈出',
+      mount: '裝載',
+      mountMode: '裝載模式',
+      openManager: '開啟檔案管理員',
+      refresh: '重新整理',
+      delete: '刪除',
+      deleteTitle: '刪除媒體',
+      deleteConfirm: '確定刪除 {{name}}？裡面的檔案會一起遺失。',
+      downloadImage: '下載映像檔',
+      typePartition: '共享檔案',
+      volumeLabel: '可移除磁碟',
+      groups: {
+        share: '檔案共享',
+        images: '映像檔'
+      },
+      failed: '操作失敗',
+      hidOnly: 'HID-Only 模式：虛擬隨身碟無法使用',
+      disabled: '虛擬隨身碟未啟用（設定 - 設備）',
+      force: {
+        title: '強制收回媒體？',
+        desc: '受控裝置還掛著這個媒體。強制收回會讓 USB 裝置重新列舉，它還沒寫入磁碟的資料可能會遺失。',
+        menuHint: '受控裝置正在使用該媒體，請到檔案管理員頁面強制收回。'
+      },
+      job: {
+        running: '正在處理 {{name}}'
+      },
+      enableDisk: {
+        title: '啟用虛擬隨身碟？',
+        desc: '裝載媒體需要虛擬隨身碟，目前它是關閉的。現在啟用？受控裝置的鍵盤與滑鼠會短暫中斷。',
+        menuHint: '虛擬隨身碟未啟用，請到 設定 - 設備 開啟。'
+      },
+      add: {
+        title: '新增媒體',
+        upload: '上傳 ISO / IMG',
+        fromUrl: '從 URL 下載',
+        url: '映像檔網址',
+        urlRequired: '請輸入映像檔網址',
+        onlyImages: '只能掛載 .iso 和 .img 檔案',
+        uploadFailed: '上傳失敗',
+        downloadFailed: '下載失敗',
+        blocked: '受控裝置正在使用這張磁碟'
+      },
+      files: {
+        selectMedium: '選擇一個媒體，查看裡面的檔案。',
+        reasonAttached: '該媒體正裝載給受控裝置使用。',
+        reasonAttachedHint: '請先彈出：受控裝置必須釋放這張磁碟，裡面的檔案才能讀取。',
+        reasonNotBrowsable: '這個媒體裡的檔案系統無法在網頁端開啟。',
+        reasonNoLoop: '本機不支援掛載磁碟映像檔（核心未啟用 loop）。',
+        reasonISOImage: 'ISO 光碟映像檔不支援在網頁端瀏覽目錄，映像檔本身仍可正常掛載給受控裝置',
+        empty: '這個資料夾是空的',
+        noMatch: '沒有符合的檔案',
+        free: '剩餘 {{size}}',
+        search: '搜尋目前資料夾',
+        sort: {
+          name: '名稱',
+          size: '大小',
+          type: '類型',
+          asc: '升冪',
+          desc: '降冪'
+        },
+        upload: '上傳檔案到媒體',
+        uploading: '正在上傳…',
+        uploadFailed: '上傳失敗',
+        download: '下載',
+        delete: '刪除',
+        deleteTitle: '刪除檔案',
+        deleteConfirm: '確定從媒體中刪除 {{name}}？'
+      },
+      yes: '確定',
+      no: '取消'
     },
     script: {
       title: '指令碼',
@@ -279,21 +325,10 @@ const zh_tw = {
       ok: '確定'
     },
     download: {
-      title: '下载映像檔',
-      input: '請輸入映像檔的下載 URL',
-      ok: '確定',
       disabled: '/data 為唯讀目錄，無法下載映像檔',
-      diskShared: '請先關閉虛擬隨身碟功能，再使用映像檔下載功能',
-      diskOff: '關閉虛擬隨身碟功能',
-      uploadbox: '將檔案拖曳到此處或按一下選擇',
-      inputfile: '請輸入映像檔案',
-      NoISO: '無 ISO',
       sha256: 'SHA-256（可選）',
       sha256Placeholder: '請輸入 64 位元 SHA-256 校驗和',
       invalidSHA256: 'SHA-256 必須是 64 位元十六進位字串',
-      failed: '下載失敗',
-      success: '下載成功',
-      checksumFailed: '下載失敗：SHA-256 校驗失敗',
       cancel: '取消',
       cancelFailed: '取消下載失敗'
     },
@@ -439,16 +474,17 @@ const zh_tw = {
         hidOnlyDesc: '停止模擬虛擬設備，僅保留基礎 HID 控制',
         disk: '虛擬隨身碟',
         diskDesc: '在遠端主機上連接虛擬隨身碟',
-        diskLocked: '掛載映像檔期間已關閉（開啟會取消映像檔掛載）',
-        diskCancelMount:
-          '開啟虛擬隨身碟會取消目前掛載的映像檔，並中斷正在進行的映像檔下載或上傳，是否繼續？',
-        diskBreakDownload: '開啟虛擬隨身碟會中斷映像檔下載功能，是否繼續？',
         network: '虛擬網卡',
         networkDesc: '在遠端主機上新增虛擬網卡',
         reboot: '重新啟動',
         rebootDesc: '您確定要重新啟動 NanoKVM?',
         okBtn: '確定',
-        cancelBtn: '取消'
+        cancelBtn: '取消',
+        diskLocked: '掛載映像檔期間已關閉（開啟會取消映像檔掛載）',
+        diskCancelMount:
+          '開啟虛擬隨身碟會取消目前掛載的映像檔，並中斷正在進行的映像檔下載或上傳，是否繼續？',
+        diskBreakDownload: '開啟虛擬隨身碟會中斷映像檔下載功能，是否繼續？',
+        attention: '注意'
       },
       network: {
         title: '網路',
@@ -584,7 +620,28 @@ const zh_tw = {
         logoutBtn: '登出',
         logoutDesc: '您確定要登出嗎?',
         okBtn: '確定',
-        cancelBtn: '取消'
+        cancelBtn: '取消',
+        role: '角色',
+        roles: {
+          admin: '管理員',
+          user: '一般使用者'
+        },
+        users: {
+          title: '使用者管理',
+          create: '建立使用者',
+          enabled: '已啟用',
+          disabled: '已停用',
+          deviceOwner: '裝置擁有者',
+          resetPassword: '重設密碼',
+          delete: '刪除',
+          deleteConfirm: '刪除此使用者並撤銷其全部工作階段？',
+          created: '使用者已建立',
+          deleted: '使用者已刪除',
+          passwordUpdated: '密碼已更新',
+          loadFailed: '載入使用者失敗',
+          saveFailed: '儲存使用者失敗',
+          deleteFailed: '刪除使用者失敗'
+        }
       }
     },
     picoclaw: {

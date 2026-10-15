@@ -5,7 +5,8 @@ const ca = {
       login: 'Inici de sessió',
       changePassword: 'Canviar contrasenya',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Imatges i compartició de fitxers'
     },
     auth: {
       login: 'Inici de sessió',
@@ -39,7 +40,10 @@ const ca = {
         change2: "Contrasenya d'inici de sessió web",
         change3: 'Contrasenya root del sistema (inici de sessió SSH)',
         change4: 'Per restablir les contrasenyes, mantingues premut el botó BOOT del NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Contrasenya actual',
+      passwordLength: 'La contrasenya ha de tenir entre 8 i 72 caràcters',
+      invalidCurrentPassword: 'La contrasenya actual no és correcta'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -213,42 +217,85 @@ const ca = {
         disable: 'Desactiva mode només HID'
       }
     },
-    image: {
-      title: 'Imatges',
-      loading: 'Carregant...',
-      empty: "No s'ha trobat res",
+    storage: {
+      title: 'Imatges i compartició de fitxers',
+      empty:
+        "Encara no hi ha imatges. Puja una ISO o una IMG, o copia'n una al disc des de l'ordinador remot.",
+      notAttached: 'Cap dispositiu muntat',
+      attached: 'Muntat: {{name}}',
+      eject: 'Expulsa',
+      mount: 'Munta',
       mountMode: 'Mode de muntatge',
-      mountFailed: 'Error en muntar',
-      mountDesc: 'En alguns sistemes cal expulsar el disc virtual abans de muntar la imatge.',
-      diskOnWarn:
-        "Muntar la imatge desactiva el disc virtual, de manera que l'ordinador ja no pot accedir a /data. Voleu continuar?",
-      diskOffWarn:
-        "El disc virtual està desactivat i cal activar-lo per muntar la imatge. Els dispositius USB de l'ordinador es tornaran a enumerar. Voleu continuar?",
-      diskShared:
-        'El disc virtual està activat, així que /data és només de lectura aquí. Desactiveu-lo per suprimir o pujar imatges.',
-      unmountFailed: "No s'ha pogut desmuntar",
-      unmountDesc:
-        "En alguns sistemes, cal expulsar manualment de l'amfitrió remot abans de desmuntar la imatge.",
-      refresh: 'Actualitza la llista',
-      attention: 'Atenció',
-      deleteConfirm: 'Esteu segur que voleu suprimir aquesta imatge?',
-      okBtn: 'Sí',
-      cancelBtn: 'No',
-      tips: {
-        title: 'Com pujar imatges',
-        usb1: 'Connecta el NanoKVM al teu ordinador via USB.',
-        usb2: "Assegura't que el disc virtual està muntat (Configuració - Disc Virtual).",
-        usb3: "Obre el disc virtual i copia la imatge a l'arrel.",
-        scp1: 'Comprova que el NanoKVM i el teu ordinador estan a la mateixa xarxa.',
-        scp2: 'Obre un terminal i usa SCP per pujar la imatge al directori /data del NanoKVM.',
-        scp3: 'Exemple: scp ruta-de-la-imatge root@ip-del-nanokvm:/data',
-        tfCard: 'Targeta TF',
-        tf1: 'Mètode disponible a sistemes GNU/Linux',
-        tf2: 'Extreu la targeta TF del NanoKVM (versió FULL, cal obrir la carcassa).',
-        tf3: "Introdueix la targeta en un lector i connecta'l a l'ordinador.",
-        tf4: 'Copia la imatge al directori /data de la targeta.',
-        tf5: 'Reintrodueix la targeta al NanoKVM.'
-      }
+      openManager: 'Obre el gestor de fitxers',
+      refresh: 'Actualitza',
+      delete: 'Elimina',
+      deleteTitle: 'Elimina el suport',
+      deleteConfirm: 'Voleu eliminar {{name}}? Els fitxers que conté es perdran.',
+      downloadImage: 'Baixa la imatge',
+      typePartition: 'Fitxers compartits',
+      volumeLabel: 'Disc extraïble',
+      groups: {
+        share: 'Compartició de fitxers',
+        images: 'Imatges'
+      },
+      failed: "L'operació ha fallat",
+      hidOnly: 'Mode només HID: el disc virtual no està disponible',
+      disabled: 'El disc virtual està desactivat (Configuració - Dispositiu)',
+      force: {
+        title: 'Voleu recuperar el suport per la força?',
+        desc: "L'ordinador remot encara fa servir aquest suport. Recuperar-lo torna a enumerar el dispositiu USB i pot perdre tot el que encara no ha escrit al disc.",
+        menuHint:
+          "L'ordinador remot fa servir aquest suport. Obriu el gestor de fitxers per recuperar-lo per la força."
+      },
+      job: {
+        running: "S'està processant {{name}}"
+      },
+      enableDisk: {
+        title: 'Voleu activar el disc virtual?',
+        desc: "Per muntar un suport cal el disc virtual, que ara està desactivat. Voleu activar-lo? El teclat i el ratolí de l'ordinador remot es desconnectaran un moment.",
+        menuHint: 'El disc virtual està desactivat. Activeu-lo a Configuració - Dispositiu.'
+      },
+      add: {
+        title: 'Afegeix un suport',
+        upload: 'Puja una ISO o IMG',
+        fromUrl: "Baixa des d'una URL",
+        url: 'URL de la imatge',
+        urlRequired: 'Introduïu una URL',
+        onlyImages: 'Només es poden muntar fitxers .iso i .img',
+        uploadFailed: 'La pujada ha fallat',
+        downloadFailed: 'La baixada ha fallat',
+        blocked: "L'ordinador remot fa servir el disc"
+      },
+      files: {
+        selectMedium: 'Seleccioneu un suport per veure els fitxers que conté.',
+        reasonAttached: "Aquest suport està connectat a l'ordinador remot.",
+        reasonAttachedHint:
+          "Expulseu-lo primer: l'ordinador remot ha d'alliberar el disc abans que se'n puguin llegir els fitxers.",
+        reasonNotBrowsable: 'Aquest suport conté un sistema de fitxers que el gestor no pot obrir.',
+        reasonNoLoop: 'Aquest dispositiu no pot muntar imatges de disc (sense suport de loop).',
+        reasonISOImage:
+          "Una imatge ISO 9660 no es pot navegar aquí. Es pot muntar igualment a l'ordinador remot.",
+        empty: 'Aquesta carpeta és buida',
+        noMatch: 'Cap fitxer coincideix amb la cerca.',
+        free: '{{size}} lliures',
+        search: 'Cerca en aquesta carpeta',
+        sort: {
+          name: 'Nom',
+          size: 'Mida',
+          type: 'Tipus',
+          asc: 'Ascendent',
+          desc: 'Descendent'
+        },
+        upload: 'Puja un fitxer al suport',
+        uploading: "S'està pujant…",
+        uploadFailed: 'La pujada ha fallat',
+        download: 'Baixa',
+        delete: 'Elimina',
+        deleteTitle: 'Elimina el fitxer',
+        deleteConfirm: 'Voleu eliminar {{name}} del suport?'
+      },
+      yes: 'Sí',
+      no: 'No'
     },
     script: {
       title: 'Scripts',
@@ -290,21 +337,10 @@ const ca = {
       ok: "D'acord"
     },
     download: {
-      title: "Descarregador d'imatges",
-      input: 'Introdueix la URL de la imatge',
-      ok: "D'acord",
       disabled: 'La partició /data és només lectura. No es pot descarregar la imatge.',
-      diskShared: "Apagueu primer el disc virtual i després useu la descàrrega d'imatges.",
-      diskOff: 'Apaga el disc virtual',
-      uploadbox: 'Deixeu anar el fitxer aquí o feu clic per seleccionar-lo',
-      inputfile: "Introduïu el fitxer d'imatge",
-      NoISO: 'Cap ISO',
       sha256: 'SHA-256 (opcional)',
       sha256Placeholder: 'Introduïu una suma de verificació SHA-256 de 64 caràcters',
       invalidSHA256: 'SHA-256 ha de ser una cadena hexadecimal de 64 caràcters',
-      failed: 'Descàrrega fallida',
-      success: 'Descàrrega correcta',
-      checksumFailed: 'Descàrrega fallida: ha fallat la verificació SHA-256',
       cancel: 'Cancel·la',
       cancelFailed: 'No sha pogut cancel·lar la descàrrega'
     },
@@ -454,17 +490,18 @@ const ca = {
         hidOnlyDesc: "Deixeu d'emular dispositius virtuals, conservant només el control bàsic HID",
         disk: 'Disc virtual',
         diskDesc: 'Munta un disc U virtual al dispositiu remot',
-        diskLocked: 'Desactivat mentre hi ha una imatge muntada (activar-lo cancel·la el muntatge)',
-        diskCancelMount:
-          "Activar el disc virtual cancel·la la imatge muntada i interromp una descàrrega o pujada d'imatge en curs. Voleu continuar?",
-        diskBreakDownload:
-          "Activar el disc virtual interromp la descàrrega d'imatges. Voleu continuar?",
         network: 'Xarxa virtual',
         networkDesc: 'Munta una targeta de xarxa virtual al dispositiu remot',
         reboot: 'Reinicia',
         rebootDesc: 'Segur que vols reiniciar el NanoKVM?',
         okBtn: 'Sí',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        diskLocked: 'Desactivat mentre hi ha una imatge muntada (activar-lo cancel·la el muntatge)',
+        diskCancelMount:
+          "Activar el disc virtual cancel·la la imatge muntada i interromp una descàrrega o pujada d'imatge en curs. Voleu continuar?",
+        diskBreakDownload:
+          "Activar el disc virtual interromp la descàrrega d'imatges. Voleu continuar?",
+        attention: 'Atenció'
       },
       network: {
         title: 'Xarxa',
@@ -603,7 +640,28 @@ const ca = {
         logoutBtn: 'Tanca sessió',
         logoutDesc: 'Segur que vols tancar sessió?',
         okBtn: 'Sí',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        role: 'Rol',
+        roles: {
+          admin: 'Administrador',
+          user: 'Usuari'
+        },
+        users: {
+          title: 'Usuaris',
+          create: 'Crea un usuari',
+          enabled: 'Activat',
+          disabled: 'Desactivat',
+          deviceOwner: 'Propietari del dispositiu',
+          resetPassword: 'Restableix la contrasenya',
+          delete: 'Elimina',
+          deleteConfirm: 'Voleu eliminar aquest usuari i revocar totes les seves sessions?',
+          created: 'Usuari creat',
+          deleted: 'Usuari eliminat',
+          passwordUpdated: 'Contrasenya actualitzada',
+          loadFailed: "No s'han pogut carregar els usuaris",
+          saveFailed: "No s'ha pogut desar l'usuari",
+          deleteFailed: "No s'ha pogut eliminar l'usuari"
+        }
       }
     },
     picoclaw: {

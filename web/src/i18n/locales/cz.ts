@@ -5,7 +5,8 @@ const cz = {
       login: 'Přihlášení',
       changePassword: 'Změna hesla',
       terminal: 'Terminál',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Obrázky a sdílení souborů'
     },
     auth: {
       login: 'Přihlášení',
@@ -40,7 +41,10 @@ const cz = {
         change2: 'Heslo pro webové přihlášení',
         change3: 'Heslo systémového uživatele root (heslo pro přihlášení SSH)',
         change4: 'Chcete-li hesla resetovat, podržte tlačítko BOOT na NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Současné heslo',
+      passwordLength: 'Heslo musí mít 8 až 72 znaků',
+      invalidCurrentPassword: 'Současné heslo není správné'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -214,43 +218,86 @@ const cz = {
         disable: 'Zakázat režim HID-Only'
       }
     },
-    image: {
-      title: 'Obrázky',
-      loading: 'Načítání...',
-      empty: 'Nic nenalezeno',
+    storage: {
+      title: 'Obrázky a sdílení souborů',
+      empty:
+        'Zatím žádné obrazy. Nahrajte ISO nebo IMG, nebo zkopírujte obraz na disk ze vzdáleného počítače.',
+      notAttached: 'Nic není připojeno',
+      attached: 'Připojeno: {{name}}',
+      eject: 'Vysunout',
+      mount: 'Připojit',
       mountMode: 'Režim připojení',
-      mountFailed: 'Připojení se nezdařilo',
-      mountDesc:
-        'V některých systémech je nutné před připojením obrazu vysunout virtuální disk na vzdáleném hostiteli.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Odpojení se nezdařilo',
-      unmountDesc:
-        'Na některých systémech se musíte před odpojením obrazu ručně vysunout ze vzdáleného hostitele.',
-      refresh: 'Obnovte seznam obrázků',
-      attention: 'Pozor',
-      deleteConfirm: 'Opravdu chcete smazat tento obrázek?',
-      okBtn: 'Ano',
-      cancelBtn: 'Ne',
-      tips: {
-        title: 'Jak nahrát',
-        usb1: 'Připojte NanoKVM k vašemu počítači přes USB.',
-        usb2: 'Ujistěte se, že je virtuální disk připojen (Nastavení - Virtuální disk).',
-        usb3: 'Otevřete virtuální disk na vašem počítači a zkopírujte soubor s obrazem do kořenového adresáře virtuálního disku.',
-        scp1: 'Ujistěte se, že jsou NanoKVM a váš počítač ve stejné místní síti.',
-        scp2: 'Otevřete terminál na vašem počítači a použijte příkaz SCP pro nahrání souboru s obrazem do adresáře /data na zařízení NanoKVM.',
-        scp3: 'Příklad: scp cesta-k-vašemu-obrazu root@ip-nanokvm:/data',
-        tfCard: 'SD Karta',
-        tf1: 'Tato metoda je podporována na systémech Linux',
-        tf2: 'Vyjměte SD kartu z NanoKVM (u plné verze nejprve rozložte krabičku).',
-        tf3: 'Vložte SD kartu do čtečky karet a připojte ji k vašemu počítači.',
-        tf4: 'Zkopírujte soubor s obrazem do adresáře /data na SD kartě.',
-        tf5: 'Vložte SD kartu zpět do NanoKVM.'
-      }
+      openManager: 'Otevřít správce souborů',
+      refresh: 'Obnovit',
+      delete: 'Smazat',
+      deleteTitle: 'Smazat médium',
+      deleteConfirm: 'Smazat {{name}}? Soubory v něm budou ztraceny.',
+      downloadImage: 'Stáhnout obraz',
+      typePartition: 'Sdílené soubory',
+      volumeLabel: 'Vyměnitelný disk',
+      groups: {
+        share: 'Sdílení souborů',
+        images: 'Obrázky'
+      },
+      failed: 'Operace se nezdařila',
+      hidOnly: 'Režim pouze HID: virtuální disk není k dispozici',
+      disabled: 'Virtuální disk je vypnutý (Nastavení - Zařízení)',
+      force: {
+        title: 'Vzít médium zpět násilím?',
+        desc: 'Vzdálený počítač toto médium stále používá. Vzetí zpět znovu vyjmenuje zařízení USB a může ztratit vše, co ještě nezapsal na disk.',
+        menuHint:
+          'Vzdálený počítač toto médium používá. Otevřete správce souborů a vezměte ho zpět násilím.'
+      },
+      job: {
+        running: 'Zpracovává se {{name}}'
+      },
+      enableDisk: {
+        title: 'Zapnout virtuální disk?',
+        desc: 'K připojení média je potřeba virtuální disk, který je nyní vypnutý. Zapnout ho? Klávesnice a myš vzdáleného počítače se na okamžik odpojí.',
+        menuHint: 'Virtuální disk je vypnutý. Zapněte ho v Nastavení - Zařízení.'
+      },
+      add: {
+        title: 'Přidat médium',
+        upload: 'Nahrát ISO nebo IMG',
+        fromUrl: 'Stáhnout z adresy URL',
+        url: 'Adresa URL obrazu',
+        urlRequired: 'Zadejte adresu URL',
+        onlyImages: 'Připojit lze pouze soubory .iso a .img',
+        uploadFailed: 'Nahrání se nezdařilo',
+        downloadFailed: 'Stažení se nezdařilo',
+        blocked: 'Vzdálený počítač disk používá'
+      },
+      files: {
+        selectMedium: 'Vyberte médium a prohlédněte si soubory v něm.',
+        reasonAttached: 'Toto médium je připojeno ke vzdálenému počítači.',
+        reasonAttachedHint:
+          'Nejprve ho vysuňte: vzdálený počítač musí disk uvolnit, než bude možné jeho soubory přečíst.',
+        reasonNotBrowsable:
+          'Toto médium obsahuje souborový systém, který správce nedokáže otevřít.',
+        reasonNoLoop: 'Toto zařízení nedokáže připojit obrazy disků (chybí podpora loop).',
+        reasonISOImage:
+          'Obraz ISO 9660 zde nelze procházet. Lze ho ale připojit ke vzdálenému počítači.',
+        empty: 'Tato složka je prázdná',
+        noMatch: 'Vyhledávání neodpovídá žádný soubor.',
+        free: '{{size}} volných',
+        search: 'Hledat v této složce',
+        sort: {
+          name: 'Název',
+          size: 'Velikost',
+          type: 'Typ',
+          asc: 'Vzestupně',
+          desc: 'Sestupně'
+        },
+        upload: 'Nahrát soubor do média',
+        uploading: 'Nahrávání…',
+        uploadFailed: 'Nahrání se nezdařilo',
+        download: 'Stáhnout',
+        delete: 'Smazat',
+        deleteTitle: 'Smazat soubor',
+        deleteConfirm: 'Smazat {{name}} z média?'
+      },
+      yes: 'Ano',
+      no: 'Ne'
     },
     script: {
       title: 'Skript',
@@ -292,21 +339,10 @@ const cz = {
       ok: 'OK'
     },
     download: {
-      title: 'Stahovač obrazů',
-      input: 'Zadejte prosím vzdálený obrázek URL',
-      ok: 'OK',
       disabled: 'Oddíl /data je RO, takže obrázek nelze stáhnout',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Přetáhněte soubor sem nebo kliknutím vyberte',
-      inputfile: 'Zadejte soubor obrázku',
-      NoISO: 'Žádné ISO',
       sha256: 'SHA-256 (volitelné)',
       sha256Placeholder: 'Zadejte 64znakový kontrolní součet SHA-256',
       invalidSHA256: 'SHA-256 musí být 64znakový hexadecimální řetězec',
-      failed: 'Stažení se nezdařilo',
-      success: 'Stažení proběhlo úspěšně',
-      checksumFailed: 'Stažení se nezdařilo: ověření SHA-256 selhalo',
       cancel: 'Zrušit',
       cancelFailed: 'Stažení se nepodařilo zrušit'
     },
@@ -455,16 +491,17 @@ const cz = {
         hidOnlyDesc: 'Zastavit emulaci virtuálních zařízení a zachovat pouze základní ovládání HID',
         disk: 'Virtuální disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuální síť',
         networkDesc: 'Připojit virtuální síťovou kartu na vzdáleném hostiteli',
         reboot: 'Restartujte',
         rebootDesc: 'Opravdu chcete restartovat NanoKVM?',
         okBtn: 'Ano',
-        cancelBtn: 'Ne'
+        cancelBtn: 'Ne',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Pozor'
       },
       network: {
         title: 'Síť',
@@ -603,7 +640,28 @@ const cz = {
         logoutBtn: 'Odhlásit',
         logoutDesc: 'Opravdu se chcete odhlásit?',
         okBtn: 'Ano',
-        cancelBtn: 'Ne'
+        cancelBtn: 'Ne',
+        role: 'Role',
+        roles: {
+          admin: 'Administrátor',
+          user: 'Uživatel'
+        },
+        users: {
+          title: 'Uživatelé',
+          create: 'Vytvořit uživatele',
+          enabled: 'Zapnuto',
+          disabled: 'Vypnuto',
+          deviceOwner: 'Vlastník zařízení',
+          resetPassword: 'Obnovit heslo',
+          delete: 'Smazat',
+          deleteConfirm: 'Smazat tohoto uživatele a zrušit všechny jeho relace?',
+          created: 'Uživatel vytvořen',
+          deleted: 'Uživatel smazán',
+          passwordUpdated: 'Heslo aktualizováno',
+          loadFailed: 'Uživatele se nepodařilo načíst',
+          saveFailed: 'Uživatele se nepodařilo uložit',
+          deleteFailed: 'Uživatele se nepodařilo smazat'
+        }
       }
     },
     picoclaw: {

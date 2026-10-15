@@ -15,9 +15,7 @@ import { useMenuBounds } from '@/hooks/useMenuBounds.ts';
 import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 
 import { KeyboardLedStatus } from '../keyboard-led-status';
-import { DownloadImage } from './download.tsx';
 import { Fullscreen } from './fullscreen';
-import { Image } from './image';
 import { Keyboard } from './keyboard';
 import { Mouse } from './mouse';
 import { Collapse, Expand } from './operations';
@@ -26,6 +24,7 @@ import { Power } from './power';
 import { Screen } from './screen';
 import { Script } from './script';
 import { Settings } from './settings';
+import { Storage } from './storage';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
 
@@ -118,14 +117,13 @@ export const Menu = () => {
             <Mouse />
             <Divider type="vertical" />
 
-            {isAdmin && isEnabled('image') && <Image />}
-            {isAdmin && isEnabled('download') && <DownloadImage />}
+            {isAdmin && isEnabled('storage') && <Storage />}
             {isAdmin && isEnabled('terminal') && <Terminal />}
             {isAdmin && isEnabled('script') && <Script />}
             {isEnabled('wol') && <Wol />}
 
             {(isEnabled('wol') ||
-              (isAdmin && ['image', 'download', 'script', 'terminal'].some(isEnabled))) && (
+              (isAdmin && ['storage', 'script', 'terminal'].some(isEnabled))) && (
               <Divider type="vertical" />
             )}
 

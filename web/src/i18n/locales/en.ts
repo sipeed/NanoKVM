@@ -4,6 +4,7 @@ const en = {
       desktop: 'Remote Desktop',
       login: 'Login',
       changePassword: 'Change Password',
+      storage: 'Images & File sharing',
       terminal: 'Terminal',
       wifi: 'Wi-Fi'
     },
@@ -214,43 +215,85 @@ const en = {
         disable: 'Disable HID-Only mode'
       }
     },
-    image: {
-      title: 'Images',
-      loading: 'Loading...',
-      empty: 'Nothing Found',
+    storage: {
+      title: 'Images & File sharing',
+      empty:
+        'No images yet. Upload an ISO or IMG, or copy one onto the disk from the target machine.',
+      notAttached: 'Nothing mounted',
+      attached: 'Mounted: {{name}}',
+      eject: 'Eject',
+      mount: 'Mount',
       mountMode: 'Mount mode',
-      mountFailed: 'Mount failed',
-      mountDesc:
-        'On some systems, you need to eject the virtual disk from the remote host before mounting the image.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Unmount failed',
-      unmountDesc:
-        'On some systems, you need to manually eject from the remote host before unmounting the image.',
-      refresh: 'Refresh the image list',
-      attention: 'Attention',
-      deleteConfirm: 'Are you sure you want to delete this image?',
-      okBtn: 'Yes',
-      cancelBtn: 'No',
-      tips: {
-        title: 'How to upload',
-        usb1: 'Connect the NanoKVM to your computer via USB.',
-        usb2: 'Ensure that the virtual disk is mounted (Settings - Virtual Disk).',
-        usb3: 'Open the virtual disk on your computer and copy the image file to the root directory of the virtual disk.',
-        scp1: 'Make sure the NanoKVM and your computer are on the same local network.',
-        scp2: 'Open a terminal on your computer and use the SCP command to upload the image file to the /data directory on the NanoKVM.',
-        scp3: 'Example: scp your-image-path root@your-nanokvm-ip:/data',
-        tfCard: 'TF Card',
-        tf1: 'This method is supported on Linux system',
-        tf2: 'Get TF card from the NanoKVM (for the FULL version, disassemble the case first).',
-        tf3: 'Insert the TF card into a card reader and connect it to your computer.',
-        tf4: 'Copy the image file to the /data directory on the TF card.',
-        tf5: 'Insert the TF card into the NanoKVM.'
-      }
+      openManager: 'Open file manager',
+      refresh: 'Refresh',
+      delete: 'Delete',
+      deleteTitle: 'Delete medium',
+      deleteConfirm: 'Delete {{name}}? The files inside it are lost.',
+      downloadImage: 'Download the image',
+      typePartition: 'Shared files',
+      volumeLabel: 'Removable disk',
+      groups: {
+        share: 'File sharing',
+        images: 'Images'
+      },
+      failed: 'Operation failed',
+      hidOnly: 'HID-only mode: the virtual disk is unavailable',
+      disabled: 'The virtual disk is disabled (Settings - Device)',
+      force: {
+        title: 'Take the medium back by force?',
+        desc: 'The target machine is still using this medium. Taking it back re-enumerates the USB device and can lose whatever it has not written to disk yet.',
+        menuHint:
+          'The target machine is using this medium. Open the file manager to take it back by force.'
+      },
+      job: {
+        running: 'Working on {{name}}'
+      },
+      enableDisk: {
+        title: 'Enable the virtual disk?',
+        desc: 'Mounting a medium needs the virtual disk, which is currently switched off. Enable it now? The keyboard and mouse of the target machine will disconnect for a moment.',
+        menuHint: 'The virtual disk is disabled. Enable it in Settings - Device.'
+      },
+      add: {
+        title: 'Add media',
+        upload: 'Upload an ISO or IMG',
+        fromUrl: 'Download from a URL',
+        url: 'Image URL',
+        urlRequired: 'Please enter a URL',
+        onlyImages: 'Only .iso and .img files can be mounted',
+        uploadFailed: 'Upload failed',
+        downloadFailed: 'Download failed',
+        blocked: 'The target machine is using the disk'
+      },
+      files: {
+        selectMedium: 'Select a medium to browse the files inside it.',
+        reasonAttached: 'This medium is attached to the target machine.',
+        reasonAttachedHint:
+          'Eject it first: the target machine has to release the disk before its files can be read.',
+        reasonNotBrowsable: 'This medium holds a filesystem the file manager cannot open.',
+        reasonNoLoop: 'This device cannot mount disk images (no loop support).',
+        reasonISOImage:
+          'An ISO 9660 image cannot be browsed here. It can still be mounted to the target machine.',
+        empty: 'This folder is empty',
+        noMatch: 'No files match the search.',
+        free: '{{size}} free',
+        search: 'Search this folder',
+        sort: {
+          name: 'Name',
+          size: 'Size',
+          type: 'Type',
+          asc: 'Ascending',
+          desc: 'Descending'
+        },
+        upload: 'Upload a file into the medium',
+        uploading: 'Uploading…',
+        uploadFailed: 'Upload failed',
+        download: 'Download',
+        delete: 'Delete',
+        deleteTitle: 'Delete file',
+        deleteConfirm: 'Delete {{name}} from the medium?'
+      },
+      yes: 'Yes',
+      no: 'No'
     },
     script: {
       title: 'Scripts',
@@ -292,21 +335,10 @@ const en = {
       ok: 'Ok'
     },
     download: {
-      title: 'Image Downloader',
-      input: 'Please enter a remote image URL',
-      ok: 'Ok',
       disabled: '/data partition is RO, so we cannot download the image',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Drop file here or click to select',
-      inputfile: 'Please enter the image File',
-      NoISO: 'No ISO',
       sha256: 'SHA-256 (optional)',
       sha256Placeholder: 'Enter a 64-character SHA-256 checksum',
       invalidSHA256: 'SHA-256 must be a 64-character hexadecimal string',
-      failed: 'Download failed',
-      success: 'Download successful',
-      checksumFailed: 'Download failed: SHA-256 verification failed',
       cancel: 'Cancel',
       cancelFailed: 'Failed to cancel download'
     },
@@ -453,16 +485,17 @@ const en = {
         hidOnlyDesc: 'Stop emulating virtual devices, retaining only basic HID control',
         disk: 'Virtual Disk',
         diskDesc: 'Mount SD card on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtual Network',
         networkDesc: 'Mount virtual network card on the remote host',
         reboot: 'Reboot',
         rebootDesc: 'Are you sure you want to reboot NanoKVM?',
         okBtn: 'Yes',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Attention'
       },
       network: {
         title: 'Network',

@@ -5,7 +5,8 @@ const fr = {
       login: 'Connexion',
       changePassword: 'Changer le mot de passe',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Images et partage de fichiers'
     },
     auth: {
       login: 'Connexion',
@@ -41,7 +42,10 @@ const fr = {
         change3: 'Mot de passe racine du système (mot de passe de connexion SSH)',
         change4:
           'Pour réinitialiser les mots de passe, appuyez et maintenez enfoncé le bouton BOOT sur le NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Mot de passe actuel',
+      passwordLength: 'Le mot de passe doit contenir entre 8 et 72 caractères',
+      invalidCurrentPassword: 'Le mot de passe actuel est incorrect'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -217,43 +221,87 @@ const fr = {
         disable: 'Désactiver le mode HID uniquement'
       }
     },
-    image: {
-      title: 'Images',
-      loading: 'Chargement',
-      empty: 'Vide',
+    storage: {
+      title: 'Images et partage de fichiers',
+      empty:
+        "Aucune image pour l'instant. Envoyez une ISO ou une IMG, ou copiez-en une sur le disque depuis la machine distante.",
+      notAttached: 'Rien de monté',
+      attached: 'Monté : {{name}}',
+      eject: 'Éjecter',
+      mount: 'Monter',
       mountMode: 'Mode de montage',
-      mountFailed: "Échec du montage de l'image.",
-      mountDesc:
-        "Dans certains systèmes, il est nécessaire de déséjecter le disque virtuel sur l'hôte distant avant de monter l'image.",
-      diskOnWarn:
-        "Monter l'image désactive le disque virtuel : l'ordinateur ne peut plus accéder à /data. Continuer ?",
-      diskOffWarn:
-        "Le disque virtuel est désactivé et doit être activé pour monter l'image. Les périphériques USB de l'ordinateur sont réénumérés. Continuer ?",
-      diskShared:
-        'Le disque virtuel est activé, donc /data est en lecture seule ici. Désactivez-le pour supprimer ou envoyer des images.',
-      unmountFailed: 'Échec du démontage',
-      unmountDesc:
-        "Sur certains systèmes, vous devez l'éjecter manuellement de l'hôte distant avant de démonter l'image.",
-      refresh: 'Actualiser la liste des images',
-      attention: 'Attention',
-      deleteConfirm: 'Etes-vous sûr de vouloir supprimer cette image?',
-      okBtn: 'Oui',
-      cancelBtn: 'Non',
-      tips: {
-        title: 'Comment télécharger',
-        usb1: 'Connectez le NanoKVM à votre ordinateur via USB.',
-        usb2: 'Assurez-vous que le disque virtuel est monté (Paramètres - Disque virtuel).',
-        usb3: 'Ouvrez le disque virtuel sur votre ordinateur et copiez le fichier image dans le répertoire racine du disque virtuel.',
-        scp1: 'Assurez-vous que le NanoKVM et votre ordinateur sont sur le même réseau local.',
-        scp2: 'Ouvrez un terminal sur votre ordinateur et utilisez la commande SCP pour copier le fichier image dans le répertoire /data du NanoKVM.',
-        scp3: 'Exemple : scp chemin-de-votre-image root@ip-de-votre-nanokvm:/data',
-        tfCard: 'Carte TF',
-        tf1: 'Cette méthode est adaptée aux systèmes Linux.',
-        tf2: 'Retirez la carte TF du NanoKVM (Pour la version FULL, il est nécessaire de retirer le boîtier).',
-        tf3: 'Insérez la carte TF dans un lecteur de carte et connectez-la à votre ordinateur.',
-        tf4: 'Copiez le fichier image dans le répertoire /data de la carte TF sur votre ordinateur.',
-        tf5: 'Réinsérez la carte TF dans le NanoKVM.'
-      }
+      openManager: 'Ouvrir le gestionnaire de fichiers',
+      refresh: 'Actualiser',
+      delete: 'Supprimer',
+      deleteTitle: 'Supprimer le support',
+      deleteConfirm: "Supprimer {{name}} ? Les fichiers qu'il contient seront perdus.",
+      downloadImage: "Télécharger l'image",
+      typePartition: 'Fichiers partagés',
+      volumeLabel: 'Disque amovible',
+      groups: {
+        share: 'Partage de fichiers',
+        images: 'Images'
+      },
+      failed: "L'opération a échoué",
+      hidOnly: 'Mode HID uniquement : le disque virtuel est indisponible',
+      disabled: 'Le disque virtuel est désactivé (Paramètres - Appareil)',
+      force: {
+        title: 'Reprendre le support de force ?',
+        desc: "La machine distante utilise encore ce support. Le reprendre réénumère le périphérique USB et peut perdre tout ce qu'elle n'a pas encore écrit sur le disque.",
+        menuHint:
+          'La machine distante utilise ce support. Ouvrez le gestionnaire de fichiers pour le reprendre de force.'
+      },
+      job: {
+        running: 'Traitement de {{name}}'
+      },
+      enableDisk: {
+        title: 'Activer le disque virtuel ?',
+        desc: "Monter un support nécessite le disque virtuel, actuellement désactivé. L'activer maintenant ? Le clavier et la souris de la machine distante seront brièvement déconnectés.",
+        menuHint: 'Le disque virtuel est désactivé. Activez-le dans Paramètres - Appareil.'
+      },
+      add: {
+        title: 'Ajouter un support',
+        upload: 'Envoyer une ISO ou une IMG',
+        fromUrl: 'Télécharger depuis une URL',
+        url: "URL de l'image",
+        urlRequired: 'Veuillez saisir une URL',
+        onlyImages: 'Seuls les fichiers .iso et .img peuvent être montés',
+        uploadFailed: "Échec de l'envoi",
+        downloadFailed: 'Échec du téléchargement',
+        blocked: 'La machine distante utilise le disque'
+      },
+      files: {
+        selectMedium: "Sélectionnez un support pour parcourir les fichiers qu'il contient.",
+        reasonAttached: 'Ce support est connecté à la machine distante.',
+        reasonAttachedHint:
+          "Éjectez-le d'abord : la machine distante doit libérer le disque avant que ses fichiers puissent être lus.",
+        reasonNotBrowsable:
+          'Ce support contient un système de fichiers que le gestionnaire ne peut pas ouvrir.',
+        reasonNoLoop:
+          "Cet appareil ne peut pas monter d'images disque (pas de prise en charge de loop).",
+        empty: 'Ce dossier est vide',
+        reasonISOImage:
+          'Une image ISO 9660 ne peut pas être parcourue ici. Elle peut toujours être montée sur la machine distante.',
+        noMatch: 'Aucun fichier ne correspond à la recherche.',
+        free: '{{size}} libres',
+        search: 'Rechercher dans ce dossier',
+        sort: {
+          name: 'Nom',
+          size: 'Taille',
+          type: 'Type',
+          asc: 'Croissant',
+          desc: 'Décroissant'
+        },
+        upload: 'Envoyer un fichier sur le support',
+        uploading: 'Envoi…',
+        uploadFailed: "Échec de l'envoi",
+        download: 'Télécharger',
+        delete: 'Supprimer',
+        deleteTitle: 'Supprimer le fichier',
+        deleteConfirm: 'Supprimer {{name}} du support ?'
+      },
+      yes: 'Oui',
+      no: 'Non'
     },
     script: {
       title: 'Script',
@@ -295,21 +343,10 @@ const fr = {
       ok: 'Ok'
     },
     download: {
-      title: 'Télécharger l’image',
-      input: 'Veuillez entrer l’URL d’une image distante',
-      ok: 'Ok',
       disabled: 'La partition /data est en lecture seule, impossible de télécharger l’image',
-      diskShared: "Désactivez d'abord le disque virtuel, puis utilisez le téléchargement d'images.",
-      diskOff: 'Désactiver le disque virtuel',
-      uploadbox: 'Déposez le fichier ici ou cliquez pour sélectionner',
-      inputfile: 'Veuillez saisir le fichier image',
-      NoISO: 'Aucun ISO',
       sha256: 'SHA-256 (facultatif)',
       sha256Placeholder: 'Saisissez une somme de contrôle SHA-256 de 64 caractères',
       invalidSHA256: 'SHA-256 doit être une chaîne hexadécimale de 64 caractères',
-      failed: 'Échec du téléchargement',
-      success: 'Téléchargement réussi',
-      checksumFailed: 'Échec du téléchargement : échec de la vérification SHA-256',
       cancel: 'Annuler',
       cancelFailed: 'Impossible d’annuler le téléchargement'
     },
@@ -460,17 +497,18 @@ const fr = {
           "Arrêtez d'émuler des périphériques virtuels, en ne conservant que le contrôle de base HID",
         disk: 'Disque virtuel',
         diskDesc: "Monter le disque virtuel U sur l'hôte distant",
-        diskLocked: "Désactivé tant qu'une image est montée (l'activer annule le montage)",
-        diskCancelMount:
-          "Activer le disque virtuel annule l'image montée et interrompt un téléchargement ou un envoi d'image en cours. Continuer ?",
-        diskBreakDownload:
-          "Activer le disque virtuel interrompt le téléchargement d'images. Continuer ?",
         network: 'Réseau virtuel',
         networkDesc: "Monter la carte réseau virtuelle sur l'hôte distant",
         reboot: 'Redémarrer',
         rebootDesc: 'Êtes-vous sûr de vouloir redémarrer NanoKVM?',
         okBtn: 'Oui',
-        cancelBtn: 'Non'
+        cancelBtn: 'Non',
+        diskLocked: "Désactivé tant qu'une image est montée (l'activer annule le montage)",
+        diskCancelMount:
+          "Activer le disque virtuel annule l'image montée et interrompt un téléchargement ou un envoi d'image en cours. Continuer ?",
+        diskBreakDownload:
+          "Activer le disque virtuel interrompt le téléchargement d'images. Continuer ?",
+        attention: 'Attention'
       },
       network: {
         title: 'Réseau',
@@ -611,7 +649,28 @@ const fr = {
         logoutBtn: 'Déconnexion',
         logoutDesc: 'Êtes-vous sûr de vouloir vous déconnecter?',
         okBtn: 'Oui',
-        cancelBtn: 'Non'
+        cancelBtn: 'Non',
+        role: 'Rôle',
+        roles: {
+          admin: 'Administrateur',
+          user: 'Utilisateur'
+        },
+        users: {
+          title: 'Utilisateurs',
+          create: 'Créer un utilisateur',
+          enabled: 'Activé',
+          disabled: 'Désactivé',
+          deviceOwner: "Propriétaire de l'appareil",
+          resetPassword: 'Réinitialiser le mot de passe',
+          delete: 'Supprimer',
+          deleteConfirm: 'Supprimer cet utilisateur et révoquer toutes ses sessions ?',
+          created: 'Utilisateur créé',
+          deleted: 'Utilisateur supprimé',
+          passwordUpdated: 'Mot de passe mis à jour',
+          loadFailed: 'Échec du chargement des utilisateurs',
+          saveFailed: "Échec de l'enregistrement de l'utilisateur",
+          deleteFailed: "Échec de la suppression de l'utilisateur"
+        }
       }
     },
     picoclaw: {

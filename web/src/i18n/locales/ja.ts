@@ -5,7 +5,8 @@ const ja = {
       login: 'ログイン',
       changePassword: 'パスワード変更',
       terminal: 'ターミナル',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'イメージとファイル共有'
     },
     auth: {
       login: 'ログイン',
@@ -39,7 +40,10 @@ const ja = {
         change3: 'システム root パスワード（SSH ログインパスワード）',
         change4:
           'パスワードを忘れた場合は、NanoKVM の BOOT ボタンを長押ししてパスワードをリセットする必要があります。'
-      }
+      },
+      placeholderCurrentPassword: '現在のパスワード',
+      passwordLength: 'パスワードは 8〜72 文字である必要があります',
+      invalidCurrentPassword: '現在のパスワードが正しくありません'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -214,43 +218,86 @@ const ja = {
         disable: 'HID-Only モードを無効化'
       }
     },
-    image: {
-      title: 'イメージ',
-      loading: '読み込み中',
-      empty: 'イメージファイルがありません',
+    storage: {
+      title: 'イメージとファイル共有',
+      empty:
+        'イメージはまだありません。ISO または IMG をアップロードするか、ターゲットマシンからディスクにコピーしてください。',
+      notAttached: '何もマウントされていません',
+      attached: 'マウント中: {{name}}',
+      eject: '取り出す',
+      mount: 'マウント',
       mountMode: 'マウントモード',
-      mountFailed: 'マウントに失敗しました',
-      mountDesc:
-        '一部のシステムでは、イメージをマウントする前にリモートホストで仮想ディスクをアンマウントする必要があります。',
-      diskOnWarn:
-        'イメージをマウントすると仮想ディスクがオフになり、コンピュータから /data にアクセスできなくなります。続行しますか？',
-      diskOffWarn:
-        '仮想ディスクがオフになっているため、イメージのマウントには有効化が必要です。コンピュータの USB デバイスが再接続されます。続行しますか？',
-      diskShared:
-        '仮想ディスクが有効なため、このデバイスの /data は読み取り専用です。イメージを削除またはアップロードするには仮想ディスクを無効にしてください。',
-      unmountFailed: 'アンマウントに失敗しました',
-      unmountDesc:
-        '一部のシステムでは、イメージをアンマウントする前にリモートホストから手動で取り出す必要があります。',
-      refresh: 'イメージリストを更新',
-      attention: '注意',
-      deleteConfirm: 'このイメージを削除してもよろしいですか？',
-      okBtn: 'はい',
-      cancelBtn: 'いいえ',
-      tips: {
-        title: 'アップロード方法',
-        usb1: 'NanoKVM を USB 経由でコンピュータに接続します；',
-        usb2: '仮想ディスクがマウントされていることを確認します（設定 - 仮想ディスク）；',
-        usb3: 'コンピュータ上で仮想ディスクを開き、イメージファイルを仮想ディスクのルートディレクトリにコピーします。',
-        scp1: 'NanoKVM とコンピュータが同じローカルエリアネットワークに接続されていることを確認します；',
-        scp2: 'コンピュータでターミナルを開き、SCP コマンドを使用してイメージファイルを NanoKVM の /data ディレクトリにアップロードします。',
-        scp3: '例：scp your-image-path root@your-nanokvm-ip:/data',
-        tfCard: 'TF カード',
-        tf1: 'この方法は Linux システムでサポートされています',
-        tf2: 'NanoKVM から TF カードを取り出します（フルバージョンでは、まずケースを分解してください）；',
-        tf3: 'TF カードをカードリーダーに挿入してコンピュータに接続します；',
-        tf4: 'コンピューターから TF カードの /data ディレクトリにイメージファイルをコピーします；',
-        tf5: 'TF カードを NanoKVM に挿入します。'
-      }
+      openManager: 'ファイルマネージャーを開く',
+      refresh: '更新',
+      delete: '削除',
+      deleteTitle: 'メディアを削除',
+      deleteConfirm: '{{name}} を削除しますか？中のファイルは失われます。',
+      downloadImage: 'イメージをダウンロード',
+      typePartition: '共有ファイル',
+      volumeLabel: 'リムーバブルディスク',
+      groups: {
+        share: 'ファイル共有',
+        images: 'イメージ'
+      },
+      failed: '操作に失敗しました',
+      hidOnly: 'HID のみのモード: 仮想ディスクは利用できません',
+      disabled: '仮想ディスクは無効です (設定 - デバイス)',
+      force: {
+        title: 'メディアを強制的に取り戻しますか？',
+        desc: 'ターゲットマシンがまだこのメディアを使用しています。取り戻すと USB デバイスが再列挙され、まだディスクに書き込まれていない内容が失われる可能性があります。',
+        menuHint:
+          'ターゲットマシンがこのメディアを使用しています。ファイルマネージャーを開いて強制的に取り戻してください。'
+      },
+      job: {
+        running: '{{name}} を処理中'
+      },
+      enableDisk: {
+        title: '仮想ディスクを有効にしますか？',
+        desc: 'メディアをマウントするには仮想ディスクが必要ですが、現在は無効です。今すぐ有効にしますか？ターゲットマシンのキーボードとマウスが一時的に切断されます。',
+        menuHint: '仮想ディスクは無効です。設定 - デバイスで有効にしてください。'
+      },
+      add: {
+        title: 'メディアを追加',
+        upload: 'ISO または IMG をアップロード',
+        fromUrl: 'URL からダウンロード',
+        url: 'イメージの URL',
+        urlRequired: 'URL を入力してください',
+        onlyImages: 'マウントできるのは .iso と .img ファイルのみです',
+        uploadFailed: 'アップロードに失敗しました',
+        downloadFailed: 'ダウンロードに失敗しました',
+        blocked: 'ターゲットマシンがディスクを使用しています'
+      },
+      files: {
+        selectMedium: 'メディアを選択すると中のファイルを閲覧できます。',
+        reasonAttached: 'このメディアはターゲットマシンに接続されています。',
+        reasonAttachedHint:
+          '先に取り出してください。ターゲットマシンがディスクを解放するまでファイルは読み取れません。',
+        reasonNotBrowsable:
+          'このメディアにはファイルマネージャーで開けないファイルシステムが含まれています。',
+        reasonNoLoop: 'このデバイスはディスクイメージをマウントできません (loop サポートなし)。',
+        reasonISOImage:
+          'ISO 9660 イメージの中身はここでは閲覧できません。ターゲットマシンへのマウントは可能です。',
+        empty: 'このフォルダは空です',
+        noMatch: '検索に一致するファイルはありません。',
+        free: '空き {{size}}',
+        search: 'このフォルダを検索',
+        sort: {
+          name: '名前',
+          size: 'サイズ',
+          type: '種類',
+          asc: '昇順',
+          desc: '降順'
+        },
+        upload: 'メディアにファイルをアップロード',
+        uploading: 'アップロード中…',
+        uploadFailed: 'アップロードに失敗しました',
+        download: 'ダウンロード',
+        delete: '削除',
+        deleteTitle: 'ファイルを削除',
+        deleteConfirm: '{{name}} をメディアから削除しますか？'
+      },
+      yes: 'はい',
+      no: 'いいえ'
     },
     script: {
       title: 'スクリプト',
@@ -292,22 +339,11 @@ const ja = {
       ok: 'OK'
     },
     download: {
-      title: 'イメージダウンローダー',
-      input: 'リモートイメージの URL を入力してください',
-      ok: 'OK',
       disabled:
         '/data パーティションは読み取り専用であり、イメージのダウンロードには使用できません',
-      diskShared: '先に仮想ディスクをオフにしてから、イメージのダウンロードを使用してください。',
-      diskOff: '仮想ディスクをオフにする',
-      uploadbox: 'ここにファイルをドロップするか、クリックして選択してください',
-      inputfile: '画像ファイルを入力してください',
-      NoISO: 'ISO なし',
       sha256: 'SHA-256（任意）',
       sha256Placeholder: '64 文字の SHA-256 チェックサムを入力してください',
       invalidSHA256: 'SHA-256 は 64 文字の 16 進数文字列である必要があります',
-      failed: 'ダウンロードに失敗しました',
-      success: 'ダウンロードに成功しました',
-      checksumFailed: 'ダウンロードに失敗しました：SHA-256 検証に失敗しました',
       cancel: 'キャンセル',
       cancelFailed: 'ダウンロードのキャンセルに失敗しました'
     },
@@ -458,17 +494,18 @@ const ja = {
           'このモードでは仮想デバイスはマウントされなくなり、基本的な HID 制御機能のみが保持されます。',
         disk: '仮想ディスク',
         diskDesc: 'リモートホストに仮想 USB ドライブをマウントする',
-        diskLocked: 'イメージのマウント中はオフです（オンにするとマウントが解除されます）',
-        diskCancelMount:
-          '仮想ディスクを有効にすると、マウント中のイメージは解除され、進行中のイメージのダウンロード/アップロードも中断されます。続行しますか？',
-        diskBreakDownload:
-          '仮想ディスクを有効にすると、イメージのダウンロードが中断されます。続行しますか？',
         network: '仮想ネットワークカード',
         networkDesc: 'リモートホストに仮想ネットワークカードをマウントする',
         reboot: '再起動',
         rebootDesc: 'NanoKVM を再起動してもよろしいですか?',
         okBtn: 'はい',
-        cancelBtn: 'いいえ'
+        cancelBtn: 'いいえ',
+        diskLocked: 'イメージのマウント中はオフです（オンにするとマウントが解除されます）',
+        diskCancelMount:
+          '仮想ディスクを有効にすると、マウント中のイメージは解除され、進行中のイメージのダウンロード/アップロードも中断されます。続行しますか？',
+        diskBreakDownload:
+          '仮想ディスクを有効にすると、イメージのダウンロードが中断されます。続行しますか？',
+        attention: '注意'
       },
       network: {
         title: 'ネットワーク',
@@ -609,7 +646,28 @@ const ja = {
         logoutBtn: 'ログアウト',
         logoutDesc: 'ログアウトしてもよろしいですか？',
         okBtn: 'はい',
-        cancelBtn: 'いいえ'
+        cancelBtn: 'いいえ',
+        role: '役割',
+        roles: {
+          admin: '管理者',
+          user: 'ユーザー'
+        },
+        users: {
+          title: 'ユーザー',
+          create: 'ユーザーを作成',
+          enabled: '有効',
+          disabled: '無効',
+          deviceOwner: 'デバイスの所有者',
+          resetPassword: 'パスワードをリセット',
+          delete: '削除',
+          deleteConfirm: 'このユーザーを削除し、すべてのセッションを取り消しますか？',
+          created: 'ユーザーを作成しました',
+          deleted: 'ユーザーを削除しました',
+          passwordUpdated: 'パスワードを更新しました',
+          loadFailed: 'ユーザーを読み込めませんでした',
+          saveFailed: 'ユーザーを保存できませんでした',
+          deleteFailed: 'ユーザーを削除できませんでした'
+        }
       }
     },
     picoclaw: {

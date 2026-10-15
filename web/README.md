@@ -15,6 +15,7 @@ src
 ├── pages              // web pages
 │    ├── auth             // login and password
 │    ├── desktop          // remote desktop
+│    ├── storage          // virtual media and the files inside them
 │    └── terminal         // web terminal
 ├── router.tsx         // routers
 └── types              // types

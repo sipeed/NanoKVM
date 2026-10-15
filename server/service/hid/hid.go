@@ -146,6 +146,18 @@ func (h *Hid) OpenNoLockWithRetry(timeout, delay time.Duration) error {
 	return openNoLockWithRetry(h.OpenNoLock, timeout, delay)
 }
 
+// ReopenAfterRebind reopens the HID devices after the USB gadget was
+// re-enumerated. The hidg nodes take a moment to come back, so the reopen is
+// retried. Devices built without HID (/boot/disable_hid) have nothing to open,
+// and a failure here must not turn a successful gadget operation into an
+// error, so it is only logged.
+func ReopenAfterRebind() {
+	h := GetHid()
+	if err := h.OpenNoLockWithRetry(hidReopenTimeout, hidReopenRetryDelay); err != nil {
+		log.Errorf("reopen HID devices after USB rebind failed: %s", err)
+	}
+}
+
 func openNoLockWithRetry(open func() error, timeout, delay time.Duration) error {
 	if timeout <= 0 {
 		return open()

@@ -5,7 +5,8 @@ const de = {
       login: 'Anmelden',
       changePassword: 'Passwort ändern',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Abbilder & Dateifreigabe'
     },
     auth: {
       login: 'Anmelden',
@@ -40,7 +41,10 @@ const de = {
         change3: 'System root Passwort (SSH Anmelde-Passwort)',
         change4:
           'Um die Passwörter zurückzusetzen, drücken und halten Sie den BOOT Knopf auf dem NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Aktuelles Passwort',
+      passwordLength: 'Das Passwort muss zwischen 8 und 72 Zeichen lang sein',
+      invalidCurrentPassword: 'Das aktuelle Passwort ist falsch'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -218,50 +222,95 @@ const de = {
         disable: 'HID-Only Modus deaktivieren'
       }
     },
-    image: {
-      title: 'Bilder',
-      loading: 'Lädt...',
-      empty: 'Nichts gefunden',
+    storage: {
+      title: 'Abbilder & Dateifreigabe',
+      empty:
+        'Noch keine Abbilder. Laden Sie eine ISO oder IMG hoch oder kopieren Sie eine vom Zielrechner auf die Festplatte.',
+      notAttached: 'Nichts eingebunden',
+      attached: 'Eingebunden: {{name}}',
+      eject: 'Auswerfen',
+      mount: 'Einbinden',
       mountMode: 'Mount-Modus',
-      mountFailed: 'Einbinden fehlgeschlagen',
-      mountDesc:
-        'In einigen Systemen ist es notwendig, die virtuelle Festplatte auf dem entfernten Host auszuwerfen, bevor das Image eingebunden werden kann.',
-      diskOnWarn:
-        'Beim Einbinden des Images wird das virtuelle Laufwerk ausgeschaltet, sodass der Computer nicht mehr auf /data zugreifen kann. Fortfahren?',
-      diskOffWarn:
-        'Das virtuelle Laufwerk ist ausgeschaltet und muss zum Einbinden des Images aktiviert werden. Die USB-Geräte am Computer werden neu erkannt. Fortfahren?',
-      diskShared:
-        'Das virtuelle Laufwerk ist aktiv, daher ist /data hier schreibgeschützt. Deaktivieren Sie es, um Images zu löschen oder hochzuladen.',
-      unmountFailed: 'Das Aufheben der Bereitstellung ist fehlgeschlagen',
-      unmountDesc:
-        'Auf einigen Systemen müssen Sie das Image manuell vom Remote-Host auswerfen, bevor Sie die Bereitstellung aufheben.',
-      refresh: 'Bilder aktualisieren',
-      attention: 'Achtung',
-      deleteConfirm: 'Sind Sie sicher, dass Sie dieses Bild löschen möchten?',
-      okBtn: 'Ja',
-      cancelBtn: 'Nein',
-      tips: {
-        title: 'So laden Sie Dateien hoch',
-        usb1: 'Verbinden Sie den NanoKVM über USB mit Ihrem Computer.',
-        usb2: 'Stellen Sie sicher, dass die virtuelle Festplatte eingebunden ist (Einstellungen – Virtuelle Festplatte).',
-        usb3: 'Öffnen Sie die virtuelle Festplatte auf Ihrem Computer und kopieren Sie die Image-Datei in das Stammverzeichnis der virtuellen Festplatte.',
-        scp1: 'Stellen Sie sicher, dass sich der NanoKVM und Ihr Computer im selben lokalen Netzwerk befinden.',
-        scp2: 'Öffnen Sie ein Terminal auf Ihrem Computer und verwenden Sie den SCP-Befehl, um die Image-Datei in das Verzeichnis /data auf dem NanoKVM hochzuladen.',
-        scp3: 'Beispiel: scp your-image-path root@your-nanokvm-ip:/data',
-        tfCard: 'TF-Karte',
-        tf1: 'Diese Methode wird unter Linux-Systemen unterstützt.',
-        tf2: 'Entnehmen Sie die TF-Karte aus dem NanoKVM (bei der FULL-Version muss zuvor das Gehäuse geöffnet werden).',
-        tf3: 'Stecken Sie die TF-Karte in einen Kartenleser und verbinden Sie diesen mit Ihrem Computer.',
-        tf4: 'Kopieren Sie die Image-Datei in das Verzeichnis /data auf der TF-Karte.',
-        tf5: 'Setzen Sie die TF-Karte wieder in den NanoKVM ein.'
-      }
+      openManager: 'Dateimanager öffnen',
+      refresh: 'Aktualisieren',
+      delete: 'Löschen',
+      deleteTitle: 'Medium löschen',
+      deleteConfirm: '{{name}} löschen? Die darin enthaltenen Dateien gehen verloren.',
+      downloadImage: 'Abbild herunterladen',
+      typePartition: 'Freigegebene Dateien',
+      volumeLabel: 'Wechseldatenträger',
+      groups: {
+        share: 'Dateifreigabe',
+        images: 'Abbilder'
+      },
+      failed: 'Vorgang fehlgeschlagen',
+      hidOnly: 'HID-Modus: Das virtuelle Laufwerk ist nicht verfügbar',
+      disabled: 'Das virtuelle Laufwerk ist deaktiviert (Einstellungen - Gerät)',
+      force: {
+        title: 'Medium mit Gewalt zurückholen?',
+        desc: 'Der Zielrechner verwendet dieses Medium noch. Beim Zurückholen wird das USB-Gerät neu aufgelistet, und alles, was noch nicht auf den Datenträger geschrieben wurde, kann verloren gehen.',
+        menuHint:
+          'Der Zielrechner verwendet dieses Medium. Öffnen Sie den Dateimanager, um es mit Gewalt zurückzuholen.'
+      },
+      job: {
+        running: '{{name}} wird bearbeitet'
+      },
+      enableDisk: {
+        title: 'Virtuelles Laufwerk aktivieren?',
+        desc: 'Zum Einbinden eines Mediums wird das virtuelle Laufwerk benötigt, das derzeit ausgeschaltet ist. Jetzt aktivieren? Tastatur und Maus des Zielrechners werden kurz getrennt.',
+        menuHint:
+          'Das virtuelle Laufwerk ist deaktiviert. Aktivieren Sie es unter Einstellungen - Gerät.'
+      },
+      add: {
+        title: 'Medium hinzufügen',
+        upload: 'ISO oder IMG hochladen',
+        fromUrl: 'Von einer URL herunterladen',
+        url: 'Abbild-URL',
+        urlRequired: 'Bitte geben Sie eine URL ein',
+        onlyImages: 'Nur .iso- und .img-Dateien können eingebunden werden',
+        uploadFailed: 'Hochladen fehlgeschlagen',
+        downloadFailed: 'Herunterladen fehlgeschlagen',
+        blocked: 'Der Zielrechner verwendet die Festplatte'
+      },
+      files: {
+        selectMedium: 'Wählen Sie ein Medium, um die darin enthaltenen Dateien zu durchsuchen.',
+        reasonAttached: 'Dieses Medium ist mit dem Zielrechner verbunden.',
+        reasonAttachedHint:
+          'Werfen Sie es zuerst aus: Der Zielrechner muss die Festplatte freigeben, bevor ihre Dateien gelesen werden können.',
+        reasonNotBrowsable:
+          'Dieses Medium enthält ein Dateisystem, das der Dateimanager nicht öffnen kann.',
+        reasonNoLoop:
+          'Dieses Gerät kann keine Datenträgerabbilder einbinden (keine Loop-Unterstützung).',
+        reasonISOImage:
+          'Ein ISO-9660-Abbild lässt sich hier nicht durchsuchen. Es kann weiterhin am Zielrechner eingebunden werden.',
+        empty: 'Dieser Ordner ist leer',
+        noMatch: 'Keine Datei entspricht der Suche.',
+        free: '{{size}} frei',
+        search: 'Diesen Ordner durchsuchen',
+        sort: {
+          name: 'Name',
+          size: 'Größe',
+          type: 'Typ',
+          asc: 'Aufsteigend',
+          desc: 'Absteigend'
+        },
+        upload: 'Eine Datei auf das Medium hochladen',
+        uploading: 'Wird hochgeladen…',
+        uploadFailed: 'Hochladen fehlgeschlagen',
+        download: 'Herunterladen',
+        delete: 'Löschen',
+        deleteTitle: 'Datei löschen',
+        deleteConfirm: '{{name}} vom Medium löschen?'
+      },
+      yes: 'Ja',
+      no: 'Nein'
     },
     script: {
       title: 'Skripte',
       upload: 'Hochladen',
       run: 'Ausführen',
       runBackground: 'Im Hintergrund ausführen',
-      runFailed: '',
+      runFailed: 'Ausführung fehlgeschlagen',
       attention: 'Achtung',
       delDesc: 'Möchten Sie diese Datei wirklich löschen?',
       confirm: 'Ja',
@@ -296,23 +345,11 @@ const de = {
       ok: 'Ok'
     },
     download: {
-      title: 'Systemabbild Downloader',
-      input: 'Bitte geben Sie die URL für das Remote-Systemabbild ein',
-      ok: 'Ok',
       disabled:
         '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
-      diskShared:
-        'Schalten Sie zuerst das virtuelle Laufwerk aus und verwenden Sie dann den Image-Download.',
-      diskOff: 'Virtuelles Laufwerk ausschalten',
-      uploadbox: 'Datei hier ablegen oder klicken zum Auswählen',
-      inputfile: 'Bitte geben Sie die Datei für das Systemabbild an',
-      NoISO: 'Keine ISO',
       sha256: 'SHA-256 (optional)',
       sha256Placeholder: 'Geben Sie eine 64-stellige SHA-256-Prüfsumme ein',
       invalidSHA256: 'SHA-256 muss eine 64-stellige Hexadezimalzeichenfolge sein',
-      failed: 'Download fehlgeschlagen',
-      success: 'Download erfolgreich',
-      checksumFailed: 'Download fehlgeschlagen: SHA-256-Prüfung fehlgeschlagen',
       cancel: 'Abbrechen',
       cancelFailed: 'Download konnte nicht abgebrochen werden'
     },
@@ -463,17 +500,18 @@ const de = {
           'Hören Sie auf, virtuelle Geräte zu emulieren, und behalten Sie nur die grundlegende HID-Steuerung bei',
         disk: 'Virtuelle Festplatte',
         diskDesc: 'Binde das virtuelle U-Laufwerk an den entfernten Host',
-        diskLocked: 'Aus, solange ein Image eingebunden ist (Einschalten bricht die Einbindung ab)',
-        diskCancelMount:
-          'Das Aktivieren des virtuellen Laufwerks bricht das eingebundene Image ab und unterbricht einen laufenden Image-Download oder -Upload. Fortfahren?',
-        diskBreakDownload:
-          'Das Aktivieren des virtuellen Laufwerks unterbricht den Image-Download. Fortfahren?',
         network: 'Virtuelles Netzwerk',
         networkDesc: 'Binde die virtuelle Netzwerkkarte an den entfernten Host',
         reboot: 'Neustarten',
         rebootDesc: 'Sind Sie sicher dass Sie NanoKVM neustarten möchten?',
         okBtn: 'Ja',
-        cancelBtn: 'Nein'
+        cancelBtn: 'Nein',
+        diskLocked: 'Aus, solange ein Image eingebunden ist (Einschalten bricht die Einbindung ab)',
+        diskCancelMount:
+          'Das Aktivieren des virtuellen Laufwerks bricht das eingebundene Image ab und unterbricht einen laufenden Image-Download oder -Upload. Fortfahren?',
+        diskBreakDownload:
+          'Das Aktivieren des virtuellen Laufwerks unterbricht den Image-Download. Fortfahren?',
+        attention: 'Achtung'
       },
       network: {
         title: 'Netzwerk',
@@ -614,7 +652,28 @@ const de = {
         logoutBtn: 'Abmelden',
         logoutDesc: 'Möchten Sie sich wirklich abmelden?',
         okBtn: 'Ja',
-        cancelBtn: 'Nein'
+        cancelBtn: 'Nein',
+        role: 'Rolle',
+        roles: {
+          admin: 'Administrator',
+          user: 'Benutzer'
+        },
+        users: {
+          title: 'Benutzer',
+          create: 'Benutzer erstellen',
+          enabled: 'Aktiviert',
+          disabled: 'Deaktiviert',
+          deviceOwner: 'Geräteeigentümer',
+          resetPassword: 'Passwort zurücksetzen',
+          delete: 'Löschen',
+          deleteConfirm: 'Diesen Benutzer löschen und alle seine Sitzungen widerrufen?',
+          created: 'Benutzer erstellt',
+          deleted: 'Benutzer gelöscht',
+          passwordUpdated: 'Passwort aktualisiert',
+          loadFailed: 'Benutzer konnten nicht geladen werden',
+          saveFailed: 'Benutzer konnte nicht gespeichert werden',
+          deleteFailed: 'Benutzer konnte nicht gelöscht werden'
+        }
       }
     },
     picoclaw: {

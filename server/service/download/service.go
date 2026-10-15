@@ -2,6 +2,7 @@ package download
 
 import (
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/storage"
 	"NanoKVM-Server/utils"
 	"bytes"
 	"context"
@@ -14,10 +15,8 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -52,23 +51,53 @@ var (
 	errDownloadInProgress = errors.New("download in progress")
 	errSHA256Mismatch     = errors.New("sha256 mismatch")
 	errUnsupportedImage   = errors.New("unsupported image format: expected an ISO 9660/UDF image or a raw disk image")
-	validISOFilename      = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
 )
 
+// maxUploadBytes caps a single upload even when the client lies about its
+// length, so a runaway request cannot fill the card before the free space
+// check has had its say.
+const maxUploadBytes = 8 << 30
+
 type Service struct {
-	downloadMutex      sync.Mutex
-	downloadCancel     context.CancelFunc
-	downloadDone       chan struct{}
-	downloadStatus     downloadStatus
-	downloadFile       string
-	downloadPercentage string
+	downloadMutex  sync.Mutex
+	downloadCancel context.CancelFunc
+	downloadDone   chan struct{}
+	downloadStatus downloadStatus
+	downloadFile   string
+	downloadLoaded int64
+	downloadTotal  int64
 }
 
 func NewService() *Service {
 	// A running transfer cannot survive a server restart, so any remaining lock
 	// file is stale at this point.
 	_ = os.Remove(transferSentinelPath)
+	removeStaleTransfers()
+
 	return &Service{downloadStatus: downloadStatusIdle}
+}
+
+// removeStaleTransfers deletes the temporary files of uploads and downloads
+// that a restart interrupted. They are hidden and can be hundreds of
+// megabytes, so leaving them behind would quietly fill the card.
+func removeStaleTransfers() {
+	entries, err := os.ReadDir("/data")
+	if err != nil {
+		return
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() || !strings.HasPrefix(entry.Name(), ".nanokvm-") {
+			continue
+		}
+
+		path := filepath.Join("/data", entry.Name())
+		if err := os.Remove(path); err != nil {
+			log.Errorf("remove stale transfer %s failed: %s", path, err)
+		} else {
+			log.Infof("removed stale transfer %s", path)
+		}
+	}
 }
 
 func (s *Service) CancelDownloadImage(c *gin.Context) {
@@ -122,7 +151,8 @@ func (s *Service) beginDownload(file string, cancel context.CancelFunc) (chan st
 	s.downloadDone = done
 	s.downloadStatus = downloadStatusInProgress
 	s.downloadFile = file
-	s.downloadPercentage = ""
+	s.downloadLoaded = 0
+	s.downloadTotal = 0
 
 	return done, nil
 }
@@ -136,12 +166,13 @@ func (s *Service) setDownloadFile(done chan struct{}, file string) {
 	}
 }
 
-func (s *Service) setDownloadProgress(done chan struct{}, percentage string) {
+func (s *Service) setDownloadProgress(done chan struct{}, loaded, total int64) {
 	s.downloadMutex.Lock()
 	defer s.downloadMutex.Unlock()
 
 	if s.downloadDone == done {
-		s.downloadPercentage = percentage
+		s.downloadLoaded = loaded
+		s.downloadTotal = total
 	}
 }
 
@@ -156,7 +187,8 @@ func (s *Service) finishDownload(done chan struct{}, status downloadStatus) {
 	s.downloadDone = nil
 	s.downloadStatus = status
 	s.downloadFile = ""
-	s.downloadPercentage = ""
+	s.downloadLoaded = 0
+	s.downloadTotal = 0
 	_ = os.Remove(transferSentinelPath)
 	s.downloadMutex.Unlock()
 
@@ -253,13 +285,16 @@ func (s *Service) StatusImage(c *gin.Context) {
 	s.downloadMutex.Lock()
 	status := s.downloadStatus
 	file := s.downloadFile
-	percentage := s.downloadPercentage
+	loaded := s.downloadLoaded
+	total := s.downloadTotal
 	s.downloadMutex.Unlock()
 
 	rsp.OkRspWithData(c, &proto.StatusImageRsp{
 		Status:     string(status),
 		File:       file,
-		Percentage: percentage,
+		Percentage: utils.FormatPercentage(loaded, total),
+		Loaded:     loaded,
+		Total:      total,
 	})
 }
 
@@ -267,6 +302,14 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 	var rsp proto.Response
 
 	log.Debug("DownloadImageFile")
+
+	// Everything below lands on the data partition, which the target machine
+	// owns whenever the emulated disk is attached to it.
+	if err := storage.EnsureDataPartitionWritable(); err != nil {
+		rsp.ErrRsp(c, -1, err.Error())
+		return
+	}
+
 	expectedSHA256, err := parseSHA256(c.GetHeader("X-SHA256-Sum"))
 	if err != nil {
 		rsp.ErrRsp(c, -1, err.Error())
@@ -289,6 +332,16 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 	defer func() {
 		s.finishDownload(done, finalStatus)
 	}()
+
+	// The whole body is written to the data partition, so refuse an upload the
+	// card cannot hold, and cap the request even when the client lies about
+	// its length. Both have to happen before the multipart reader is created:
+	// it keeps reading from the body it was handed.
+	if err := ensureImageSpace(imageDirectory, c.Request.ContentLength); err != nil {
+		rsp.ErrRsp(c, -1, err.Error())
+		return
+	}
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxUploadBytes)
 
 	reader, err := c.Request.MultipartReader()
 	if err != nil {
@@ -313,7 +366,8 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		}
 
 		filename := part.FileName()
-		if err := validateISOFilename(filename); err != nil {
+		if err := validateImageFilename(filename); err != nil {
+			_ = part.Close()
 			log.Warnf("reject uploaded image %q: %s", filename, err)
 			rsp.ErrRsp(c, -1, err.Error())
 			return
@@ -332,21 +386,24 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		defer os.Remove(tempPath)
 
 		hasher := sha256.New()
-		lw := newLoggingWriter(io.MultiWriter(out, hasher), c.Request.ContentLength, func(percentage string) {
-			s.setDownloadProgress(done, percentage)
+		lw := utils.NewProgressWriter(io.MultiWriter(out, hasher), c.Request.ContentLength, func(loaded, total int64) {
+			s.setDownloadProgress(done, loaded, total)
 		})
-		defer lw.stopTicker()
-
-		// Check the volume descriptors while streaming, so an unusable image is
-		// rejected in seconds instead of after the whole upload.
+		// The volume descriptors are read first and checked while streaming, so
+		// an unusable image is rejected in seconds instead of after the whole
+		// upload.
 		head := make([]byte, imageHeaderSize)
 		headSize, readErr := io.ReadFull(part, head)
 		if readErr != nil && readErr != io.ErrUnexpectedEOF && readErr != io.EOF {
+			_ = part.Close()
+			_ = out.Close()
 			log.Errorf("read uploaded image %q failed: %s", filename, readErr)
 			rsp.ErrRsp(c, -1, "write failed")
 			return
 		}
 		if !isSupportedImage(head[:headSize]) {
+			_ = part.Close()
+			_ = out.Close()
 			log.Warnf("reject uploaded image %q: %s", filename, errUnsupportedImage)
 			rsp.ErrRsp(c, -1, errUnsupportedImage.Error())
 			return
@@ -356,9 +413,11 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		if copyErr == nil {
 			_, copyErr = io.Copy(lw, part)
 		}
-		closeErr := out.Close()
-		if copyErr != nil || closeErr != nil {
-			log.Errorf("write uploaded image %q failed: %s", filename, errors.Join(copyErr, closeErr))
+		lw.Stop()
+		partCloseErr := part.Close()
+		outCloseErr := out.Close()
+		if copyErr != nil || partCloseErr != nil || outCloseErr != nil {
+			log.Errorf("write uploaded image %q failed: %s", filename, errors.Join(copyErr, partCloseErr, outCloseErr))
 			rsp.ErrRsp(c, -1, "write failed")
 			return
 		}
@@ -370,6 +429,10 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		}
 
 		outPath := filepath.Join(imageDirectory, filename)
+		if err := ensureReplaceable(outPath); err != nil {
+			rsp.ErrRsp(c, -1, err.Error())
+			return
+		}
 		if err := os.Rename(tempPath, outPath); err != nil {
 			rsp.ErrRsp(c, -1, "cannot install uploaded image")
 			return
@@ -387,18 +450,24 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 	rsp.ErrRsp(c, -1, "file is required")
 }
 
-func validateISOFilename(filename string) error {
-	if filename == "" {
-		return errors.New("no filename")
+// validateImageFilename accepts what the emulated disk can expose: ISO images
+// and raw disk images. The name never reaches the filesystem unchecked, and
+// the rules are the ones a FAT volume can hold, so a medium named the same way
+// is reachable from the file manager too.
+func validateImageFilename(filename string) error {
+	if !utils.IsMediaFile(filename) {
+		return errors.New("only .iso and .img files allowed")
 	}
-	if filepath.Base(filename) != filename || strings.Contains(filename, "..") {
-		return errors.New("invalid filename")
-	}
-	if !strings.HasSuffix(strings.ToLower(filename), ".iso") {
-		return errors.New("only .iso files allowed")
-	}
-	if !validISOFilename.MatchString(filename) {
-		return errors.New("invalid filename")
+	return utils.ValidateFileName(filename)
+}
+
+// ensureReplaceable refuses to write over an image the target machine is
+// using. The emulated disk keeps reading the inode it opened, so replacing the
+// file under it leaves the target machine and the web UI disagreeing about
+// what the medium holds.
+func ensureReplaceable(path string) error {
+	if storage.IsAttached(path) {
+		return fmt.Errorf("%s is attached to the target machine; eject it there first", filepath.Base(path))
 	}
 	return nil
 }
@@ -411,6 +480,11 @@ func (s *Service) DownloadImage(c *gin.Context) {
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	if err := storage.EnsureDataPartitionWritable(); err != nil {
+		rsp.ErrRsp(c, -1, err.Error())
 		return
 	}
 
@@ -442,8 +516,8 @@ func (s *Service) DownloadImage(c *gin.Context) {
 	go func() {
 		defer cancel()
 
-		if err := s.downloadRemoteImage(ctx, req.File, expectedSHA256, filename, func(percentage string) {
-			s.setDownloadProgress(done, percentage)
+		if err := s.downloadRemoteImage(ctx, req.File, expectedSHA256, filename, func(loaded, total int64) {
+			s.setDownloadProgress(done, loaded, total)
 		}); err != nil {
 			if errors.Is(err, context.Canceled) {
 				log.Debug("Image download canceled")
@@ -488,7 +562,7 @@ func (s *Service) downloadRemoteImage(
 	rawURL string,
 	expectedSHA256 []byte,
 	filename string,
-	onProgress func(string),
+	onProgress func(loaded, total int64),
 ) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
 	if err != nil {
@@ -513,9 +587,9 @@ func (s *Service) downloadRemoteImage(
 	defer os.Remove(tempPath)
 
 	hasher := sha256.New()
-	lw := newLoggingWriter(io.MultiWriter(tempFile, hasher), resp.ContentLength, onProgress)
+	lw := utils.NewProgressWriter(io.MultiWriter(tempFile, hasher), resp.ContentLength, onProgress)
 	_, copyErr := io.Copy(lw, resp.Body)
-	lw.stopTicker()
+	lw.Stop()
 	closeErr := tempFile.Close()
 	if ctx.Err() != nil {
 		return ctx.Err()
@@ -535,69 +609,12 @@ func (s *Service) downloadRemoteImage(
 	}
 
 	destPath := filepath.Join(imageDirectory, filename)
+	if err := ensureReplaceable(destPath); err != nil {
+		return err
+	}
 	if err := os.Rename(tempPath, destPath); err != nil {
 		return fmt.Errorf("install downloaded image failed: %w", err)
 	}
 
 	return nil
-}
-
-type loggingWriter struct {
-	writer     io.Writer
-	total      atomic.Int64
-	totalSize  int64
-	ticker     *time.Ticker
-	done       chan struct{}
-	stopOnce   sync.Once
-	onProgress func(string)
-}
-
-func newLoggingWriter(writer io.Writer, totalSize int64, onProgress func(string)) *loggingWriter {
-	lw := &loggingWriter{
-		writer:     writer,
-		totalSize:  totalSize,
-		onProgress: onProgress,
-	}
-	lw.startTicker()
-	return lw
-}
-
-func (lw *loggingWriter) startTicker() {
-	lw.ticker = time.NewTicker(2500 * time.Millisecond)
-	lw.done = make(chan struct{})
-	go func() {
-		for {
-			select {
-			case <-lw.done:
-				return
-			case <-lw.ticker.C:
-				lw.updateProgress()
-			}
-		}
-	}()
-}
-
-func (lw *loggingWriter) stopTicker() {
-	if lw == nil {
-		return
-	}
-	lw.stopOnce.Do(func() {
-		lw.ticker.Stop()
-		close(lw.done)
-	})
-}
-
-func (lw *loggingWriter) updateProgress() {
-	if lw.totalSize <= 0 || lw.onProgress == nil {
-		return
-	}
-
-	percentage := float64(lw.total.Load()) / float64(lw.totalSize) * 100
-	lw.onProgress(fmt.Sprintf("%.2f%%", percentage))
-}
-
-func (lw *loggingWriter) Write(p []byte) (int, error) {
-	n, err := lw.writer.Write(p)
-	lw.total.Add(int64(n))
-	return n, err
 }

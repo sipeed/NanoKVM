@@ -13,4 +13,6 @@ type StatusImageRsp struct {
 	Status     string `json:"status"`
 	File       string `json:"file"`
 	Percentage string `json:"percentage"`
+	Loaded     int64  `json:"loaded"` // bytes transferred so far
+	Total      int64  `json:"total"`  // expected bytes, 0 when unknown
 }

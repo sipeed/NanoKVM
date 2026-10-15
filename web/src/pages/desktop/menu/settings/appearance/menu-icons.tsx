@@ -2,9 +2,8 @@ import { useAuth } from '@/contexts/auth.ts';
 import { Switch } from 'antd';
 import { useAtom } from 'jotai';
 import {
-  DiscIcon,
-  DownloadIcon,
   FileJsonIcon,
+  HardDriveIcon,
   MaximizeIcon,
   NetworkIcon,
   PowerIcon,
@@ -24,8 +23,7 @@ export const MenuIcons = () => {
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
   const items = [
-    { key: 'image', icon: <DiscIcon size={16} /> },
-    { key: 'download', icon: <DownloadIcon size={16} /> },
+    { key: 'storage', icon: <HardDriveIcon size={16} /> },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
     { key: 'script', icon: <FileJsonIcon size={16} /> },
     { key: 'wol', icon: <NetworkIcon size={16} /> },
@@ -35,8 +33,7 @@ export const MenuIcons = () => {
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
   ].filter(
     (item) =>
-      account.role === 'admin' ||
-      !['image', 'download', 'terminal', 'script', 'picoclaw'].includes(item.key)
+      account.role === 'admin' || !['storage', 'terminal', 'script', 'picoclaw'].includes(item.key)
   );
 
   function updateItems(key: string) {

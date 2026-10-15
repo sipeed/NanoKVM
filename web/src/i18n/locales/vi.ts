@@ -5,7 +5,8 @@ const vi = {
       login: 'Đăng nhập',
       changePassword: 'Đổi mật khẩu',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Hình ảnh và chia sẻ tệp'
     },
     auth: {
       login: 'Đăng nhập',
@@ -39,7 +40,10 @@ const vi = {
         change2: 'Mật khẩu đăng nhập web',
         change3: 'Mật khẩu root hệ thống (mật khẩu đăng nhập SSH)',
         change4: 'Để đặt lại mật khẩu, hãy nhấn và giữ nút BOOT trên NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Mật khẩu hiện tại',
+      passwordLength: 'Mật khẩu phải từ 8 đến 72 ký tự',
+      invalidCurrentPassword: 'Mật khẩu hiện tại không đúng'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -213,42 +217,84 @@ const vi = {
         disable: 'Tắt chế độ HID-Chỉ'
       }
     },
-    image: {
-      title: 'Hình ảnh',
-      loading: 'Đang tải...',
-      empty: 'Không tìm thấy',
+    storage: {
+      title: 'Hình ảnh và chia sẻ tệp',
+      empty:
+        'Chưa có hình ảnh nào. Hãy tải lên tệp ISO hoặc IMG, hoặc sao chép một tệp vào đĩa từ máy đích.',
+      notAttached: 'Chưa gắn kết gì',
+      attached: 'Đã gắn kết: {{name}}',
+      eject: 'Đẩy ra',
+      mount: 'Gắn kết',
       mountMode: 'Chế độ gắn kết',
-      mountFailed: 'Mount thất bại',
-      mountDesc: 'Trong một số hệ thống, cần phải eject đĩa ảo trên máy remote trước khi mount.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Tháo lắp không thành công',
-      unmountDesc:
-        'Trên một số hệ thống, bạn cần đẩy hình ảnh ra khỏi máy chủ từ xa theo cách thủ công trước khi ngắt kết nối hình ảnh.',
-      refresh: 'Làm mới danh sách hình ảnh',
-      attention: 'Chú ý',
-      deleteConfirm: 'Bạn có chắc chắn muốn xóa hình ảnh này không?',
-      okBtn: 'Có',
-      cancelBtn: 'Không',
-      tips: {
-        title: 'Cách tải lên',
-        usb1: 'Kết nối NanoKVM với máy tính của bạn qua USB.',
-        usb2: 'Đảm bảo rằng đĩa ảo đã được gắn kết (Cài đặt - Đĩa ảo).',
-        usb3: 'Mở đĩa ảo trên máy tính của bạn và sao chép vào thư mục gốc của đĩa ảo.',
-        scp1: 'Đảm bảo NanoKVM và máy tính của bạn đang trên cùng một mạng nội bộ.',
-        scp2: 'Mở terminal trên máy tính và sử dụng lệnh SCP để tải đĩa ảo lên thư mục /data trên NanoKVM.',
-        scp3: 'Ví dụ: scp đường-dẫn-image root@ip-của-nanokvm:/data',
-        tfCard: 'Thẻ TF',
-        tf1: 'Phương pháp này được hỗ trợ trên hệ thống Linux',
-        tf2: 'Lấy thẻ TF từ NanoKVM (với phiên bản FULL, hãy tháo vỏ trước).',
-        tf3: 'Chèn thẻ TF vào đầu đọc thẻ và kết nối với máy tính của bạn.',
-        tf4: 'Sao chép tệp hình ảnh vào thư mục /data trên thẻ TF.',
-        tf5: 'Chèn thẻ TF vào NanoKVM.'
-      }
+      openManager: 'Mở trình quản lý tệp',
+      refresh: 'Làm mới',
+      delete: 'Xóa',
+      deleteTitle: 'Xóa phương tiện',
+      deleteConfirm: 'Xóa {{name}}? Các tệp bên trong sẽ bị mất.',
+      downloadImage: 'Tải hình ảnh xuống',
+      typePartition: 'Tệp chia sẻ',
+      volumeLabel: 'Đĩa di động',
+      groups: {
+        share: 'Chia sẻ tệp',
+        images: 'Hình ảnh'
+      },
+      failed: 'Thao tác không thành công',
+      hidOnly: 'Chế độ chỉ HID: đĩa ảo không khả dụng',
+      disabled: 'Đĩa ảo đang tắt (Cài đặt - Thiết bị)',
+      force: {
+        title: 'Cưỡng chế lấy lại phương tiện?',
+        desc: 'Máy đích vẫn đang dùng phương tiện này. Lấy lại sẽ liệt kê lại thiết bị USB và có thể mất những gì nó chưa ghi vào đĩa.',
+        menuHint: 'Máy đích đang dùng phương tiện này. Mở trình quản lý tệp để cưỡng chế lấy lại.'
+      },
+      job: {
+        running: 'Đang xử lý {{name}}'
+      },
+      enableDisk: {
+        title: 'Bật đĩa ảo?',
+        desc: 'Việc gắn kết phương tiện cần đĩa ảo, hiện đang tắt. Bật ngay bây giờ? Bàn phím và chuột của máy đích sẽ ngắt kết nối trong giây lát.',
+        menuHint: 'Đĩa ảo đang tắt. Hãy bật trong Cài đặt - Thiết bị.'
+      },
+      add: {
+        title: 'Thêm phương tiện',
+        upload: 'Tải lên tệp ISO hoặc IMG',
+        fromUrl: 'Tải xuống từ URL',
+        url: 'URL hình ảnh',
+        urlRequired: 'Vui lòng nhập URL',
+        onlyImages: 'Chỉ có thể gắn kết tệp .iso và .img',
+        uploadFailed: 'Tải lên không thành công',
+        downloadFailed: 'Tải xuống không thành công',
+        blocked: 'Máy đích đang dùng đĩa'
+      },
+      files: {
+        selectMedium: 'Chọn một phương tiện để xem các tệp bên trong.',
+        reasonAttached: 'Phương tiện này đang gắn với máy đích.',
+        reasonAttachedHint:
+          'Hãy đẩy ra trước: máy đích phải nhả đĩa trước khi có thể đọc các tệp của nó.',
+        reasonNotBrowsable: 'Phương tiện này chứa hệ thống tệp mà trình quản lý không mở được.',
+        reasonNoLoop: 'Thiết bị này không gắn kết được ảnh đĩa (không có hỗ trợ loop).',
+        reasonISOImage:
+          'Không thể duyệt nội dung ảnh ISO 9660 tại đây. Ảnh vẫn có thể được gắn kết vào máy đích.',
+        empty: 'Thư mục này trống',
+        noMatch: 'Không có tệp nào khớp với tìm kiếm.',
+        free: '{{size}} trống',
+        search: 'Tìm trong thư mục này',
+        sort: {
+          name: 'Tên',
+          size: 'Kích thước',
+          type: 'Loại',
+          asc: 'Tăng dần',
+          desc: 'Giảm dần'
+        },
+        upload: 'Tải một tệp lên phương tiện',
+        uploading: 'Đang tải lên…',
+        uploadFailed: 'Tải lên không thành công',
+        download: 'Tải xuống',
+        delete: 'Xóa',
+        deleteTitle: 'Xóa tệp',
+        deleteConfirm: 'Xóa {{name}} khỏi phương tiện?'
+      },
+      yes: 'Có',
+      no: 'Không'
     },
     script: {
       title: 'Script',
@@ -290,21 +336,10 @@ const vi = {
       ok: 'OK'
     },
     download: {
-      title: 'Trình tải xuống hình ảnh',
-      input: 'Vui lòng nhập hình ảnh từ xa URL',
-      ok: 'OK',
       disabled: '/data phân vùng là RO nên không tải được image',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Thả file vào đây hoặc bấm vào để chọn',
-      inputfile: 'Vui lòng nhập File hình ảnh',
-      NoISO: 'Không có ISO',
       sha256: 'SHA-256 (tùy chọn)',
       sha256Placeholder: 'Nhập mã kiểm tra SHA-256 gồm 64 ký tự',
       invalidSHA256: 'SHA-256 phải là chuỗi thập lục phân gồm 64 ký tự',
-      failed: 'Tải xuống thất bại',
-      success: 'Tải xuống thành công',
-      checksumFailed: 'Tải xuống thất bại: xác minh SHA-256 không thành công',
       cancel: 'Hủy',
       cancelFailed: 'Không thể hủy tải xuống'
     },
@@ -453,16 +488,17 @@ const vi = {
         hidOnlyDesc: 'Dừng mô phỏng các thiết bị ảo, chỉ giữ lại điều khiển HID cơ bản',
         disk: 'Đĩa ảo',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Mạng ảo',
         networkDesc: 'Gắn card mạng ảo trên máy chủ từ xa',
         reboot: 'Khởi động lại',
         rebootDesc: 'Bạn có chắc chắn muốn khởi động lại NanoKVM không?',
         okBtn: 'Có',
-        cancelBtn: 'Không'
+        cancelBtn: 'Không',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Chú ý'
       },
       network: {
         title: 'Mạng',
@@ -602,7 +638,28 @@ const vi = {
         logoutBtn: 'Đăng xuất',
         logoutDesc: 'Bạn có chắc chắn muốn đăng xuất không?',
         okBtn: 'Có',
-        cancelBtn: 'Không'
+        cancelBtn: 'Không',
+        role: 'Vai trò',
+        roles: {
+          admin: 'Quản trị viên',
+          user: 'Người dùng'
+        },
+        users: {
+          title: 'Người dùng',
+          create: 'Tạo người dùng',
+          enabled: 'Đã bật',
+          disabled: 'Đã tắt',
+          deviceOwner: 'Chủ sở hữu thiết bị',
+          resetPassword: 'Đặt lại mật khẩu',
+          delete: 'Xóa',
+          deleteConfirm: 'Xóa người dùng này và thu hồi mọi phiên của họ?',
+          created: 'Đã tạo người dùng',
+          deleted: 'Đã xóa người dùng',
+          passwordUpdated: 'Đã cập nhật mật khẩu',
+          loadFailed: 'Không tải được người dùng',
+          saveFailed: 'Không lưu được người dùng',
+          deleteFailed: 'Không xóa được người dùng'
+        }
       }
     },
     picoclaw: {

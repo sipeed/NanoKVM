@@ -5,7 +5,8 @@ const pl = {
       login: 'Logowanie',
       changePassword: 'Zmień Hasło',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Obrazy i udostępnianie plików'
     },
     auth: {
       login: 'Logowanie',
@@ -40,7 +41,10 @@ const pl = {
         change2: 'Hasło logowania web',
         change3: 'Hasło roota systemu (hasło logowania SSH)',
         change4: 'Aby zresetować hasła, naciśnij i przytrzymaj przycisk BOOT na NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Bieżące hasło',
+      passwordLength: 'Hasło musi mieć od 8 do 72 znaków',
+      invalidCurrentPassword: 'Bieżące hasło jest nieprawidłowe'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -215,43 +219,84 @@ const pl = {
         disable: 'Wyłącz tryb HID-Tylko'
       }
     },
-    image: {
-      title: 'Obrazy',
-      loading: 'Ładowanie...',
-      empty: 'Nic nie znaleziono',
+    storage: {
+      title: 'Obrazy i udostępnianie plików',
+      empty:
+        'Nie ma jeszcze obrazów. Prześlij plik ISO lub IMG albo skopiuj go na dysk ze zdalnego komputera.',
+      notAttached: 'Nic nie jest zamontowane',
+      attached: 'Zamontowano: {{name}}',
+      eject: 'Wysuń',
+      mount: 'Zamontuj',
       mountMode: 'Tryb montowania',
-      mountFailed: 'Nie udało się zamontować obrazu',
-      mountDesc:
-        'W niektórych systemach wymagane jest wyjęcie dysku wirtualnego na zdalnym hoście przed zamontowaniem obrazu.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Odmontowanie nie powiodło się',
-      unmountDesc:
-        'W niektórych systemach należy ręcznie wysunąć obraz ze zdalnego hosta przed odmontowaniem obrazu.',
-      refresh: 'Odśwież listę obrazów',
-      attention: 'Uwaga',
-      deleteConfirm: 'Czy na pewno chcesz usunąć to zdjęcie?',
-      okBtn: 'Tak',
-      cancelBtn: 'Nie',
-      tips: {
-        title: 'Jak przesłać obrazy',
-        usb1: 'Podłącz urządzenie NanoKVM do komputera przez USB.',
-        usb2: 'Upewnij się, że dysk wirtualny jest zamontowany (Ustawienia - Dysk wirtualny).',
-        usb3: 'Otwórz dysk wirtualny na swoim komputerze i skopiuj plik obrazu do katalogu głównego dysku wirtualnego.',
-        scp1: 'Upewnij się że NanoKVM i twój komputer są na tej samej sieci lokalnej.',
-        scp2: 'Otwórz terminal na komputerze i użyj komendę SCP aby przesłać obraz do katalogu /data na NanoKVM.',
-        scp3: 'Przykład: scp lokalizacja-zrodlowego-obrazu root@ip-twojego-nanokvm:/data',
-        tfCard: 'Karta SD',
-        tf1: 'Ta metoda jest obsługiwana w systemie Linux',
-        tf2: 'Usuń kartę SD od NanoKVM (dla wersji FULL, rozbierz obudowę najpierw).',
-        tf3: 'Włóż kartę SD do czytnika kart i podłącz do twojego komputera.',
-        tf4: 'Kopjuj obraz do katalogu /data na karcie SD.',
-        tf5: 'Włóż kartę SD do NanoKVM.'
-      }
+      openManager: 'Otwórz menedżer plików',
+      refresh: 'Odśwież',
+      delete: 'Usuń',
+      deleteTitle: 'Usuń nośnik',
+      deleteConfirm: 'Usunąć {{name}}? Znajdujące się w nim pliki zostaną utracone.',
+      downloadImage: 'Pobierz obraz',
+      typePartition: 'Udostępnione pliki',
+      volumeLabel: 'Dysk wymienny',
+      groups: {
+        share: 'Udostępnianie plików',
+        images: 'Obrazy'
+      },
+      failed: 'Operacja nie powiodła się',
+      hidOnly: 'Tryb tylko HID: dysk wirtualny jest niedostępny',
+      disabled: 'Dysk wirtualny jest wyłączony (Ustawienia - Urządzenie)',
+      force: {
+        title: 'Odebrać nośnik siłą?',
+        desc: 'Zdalny komputer nadal używa tego nośnika. Odebranie go ponownie wyliczy urządzenie USB i może utracić wszystko, czego jeszcze nie zapisało na dysku.',
+        menuHint: 'Zdalny komputer używa tego nośnika. Otwórz menedżer plików, aby odebrać go siłą.'
+      },
+      job: {
+        running: 'Przetwarzanie {{name}}'
+      },
+      enableDisk: {
+        title: 'Włączyć dysk wirtualny?',
+        desc: 'Do zamontowania nośnika potrzebny jest dysk wirtualny, który jest teraz wyłączony. Włączyć go? Klawiatura i mysz zdalnego komputera rozłączą się na chwilę.',
+        menuHint: 'Dysk wirtualny jest wyłączony. Włącz go w Ustawienia - Urządzenie.'
+      },
+      add: {
+        title: 'Dodaj nośnik',
+        upload: 'Prześlij plik ISO lub IMG',
+        fromUrl: 'Pobierz z adresu URL',
+        url: 'Adres URL obrazu',
+        urlRequired: 'Podaj adres URL',
+        onlyImages: 'Można montować tylko pliki .iso i .img',
+        uploadFailed: 'Przesyłanie nie powiodło się',
+        downloadFailed: 'Pobieranie nie powiodło się',
+        blocked: 'Zdalny komputer używa dysku'
+      },
+      files: {
+        selectMedium: 'Wybierz nośnik, aby przeglądać znajdujące się na nim pliki.',
+        reasonAttached: 'Ten nośnik jest podłączony do zdalnego komputera.',
+        reasonAttachedHint:
+          'Najpierw go wysuń: zdalny komputer musi zwolnić dysk, zanim będzie można odczytać jego pliki.',
+        reasonNotBrowsable: 'Ten nośnik zawiera system plików, którego menedżer nie może otworzyć.',
+        reasonNoLoop: 'To urządzenie nie może montować obrazów dysków (brak obsługi loop).',
+        reasonISOImage:
+          'Obrazu ISO 9660 nie można tu przeglądać. Nadal można go zamontować na zdalnym komputerze.',
+        empty: 'Ten folder jest pusty',
+        noMatch: 'Żaden plik nie pasuje do wyszukiwania.',
+        free: '{{size}} wolne',
+        search: 'Szukaj w tym folderze',
+        sort: {
+          name: 'Nazwa',
+          size: 'Rozmiar',
+          type: 'Typ',
+          asc: 'Rosnąco',
+          desc: 'Malejąco'
+        },
+        upload: 'Prześlij plik na nośnik',
+        uploading: 'Przesyłanie…',
+        uploadFailed: 'Przesyłanie nie powiodło się',
+        download: 'Pobierz',
+        delete: 'Usuń',
+        deleteTitle: 'Usuń plik',
+        deleteConfirm: 'Usunąć {{name}} z nośnika?'
+      },
+      yes: 'Tak',
+      no: 'Nie'
     },
     script: {
       title: 'Skrypty',
@@ -293,21 +338,10 @@ const pl = {
       ok: 'Ok'
     },
     download: {
-      title: 'Narzędzie do pobierania obrazów',
-      input: 'Proszę wprowadzić zdalny obraz URL',
-      ok: 'Ok',
       disabled: '/data partycja to RO, więc nie możemy pobrać obrazu',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Upuść plik tutaj lub kliknij, aby wybrać',
-      inputfile: 'Proszę wprowadzić plik obrazu',
-      NoISO: 'Brak ISO',
       sha256: 'SHA-256 (opcjonalnie)',
       sha256Placeholder: 'Wprowadź 64-znakową sumę kontrolną SHA-256',
       invalidSHA256: 'SHA-256 musi być 64-znakowym ciągiem szesnastkowym',
-      failed: 'Pobieranie nie powiodło się',
-      success: 'Pobieranie zakończone pomyślnie',
-      checksumFailed: 'Pobieranie nie powiodło się: weryfikacja SHA-256 nie powiodła się',
       cancel: 'Anuluj',
       cancelFailed: 'Nie udało się anulować pobierania'
     },
@@ -458,16 +492,17 @@ const pl = {
           'Przestań emulować urządzenia wirtualne, zachowując jedynie podstawową kontrolę HID',
         disk: 'Dysk wirtualny',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Sieć wirtualna',
         networkDesc: 'Zamontuj wirtualną kartę sieciową na zdalnym hoście',
         reboot: 'Uruchom ponownie',
         rebootDesc: 'Czy na pewno chcesz ponownie uruchomić NanoKVM?',
         okBtn: 'Tak',
-        cancelBtn: 'Nie'
+        cancelBtn: 'Nie',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Uwaga'
       },
       network: {
         title: 'Sieć',
@@ -606,7 +641,28 @@ const pl = {
         logoutBtn: 'Wyloguj',
         logoutDesc: 'Czy na pewno chcesz się wylogować?',
         okBtn: 'Tak',
-        cancelBtn: 'Nie'
+        cancelBtn: 'Nie',
+        role: 'Rola',
+        roles: {
+          admin: 'Administrator',
+          user: 'Użytkownik'
+        },
+        users: {
+          title: 'Użytkownicy',
+          create: 'Utwórz użytkownika',
+          enabled: 'Włączony',
+          disabled: 'Wyłączony',
+          deviceOwner: 'Właściciel urządzenia',
+          resetPassword: 'Zresetuj hasło',
+          delete: 'Usuń',
+          deleteConfirm: 'Usunąć tego użytkownika i unieważnić wszystkie jego sesje?',
+          created: 'Utworzono użytkownika',
+          deleted: 'Usunięto użytkownika',
+          passwordUpdated: 'Zaktualizowano hasło',
+          loadFailed: 'Nie udało się wczytać użytkowników',
+          saveFailed: 'Nie udało się zapisać użytkownika',
+          deleteFailed: 'Nie udało się usunąć użytkownika'
+        }
       }
     },
     picoclaw: {
