@@ -14,7 +14,9 @@ import (
 // read-only here: remounting keeps every writer on this side away from the
 // filesystem, not just the file manager that checks openMedium first.
 // Mounting an image read-only hands the partition back to this side, and so
-// does releasing the medium.
+// does releasing the medium. Every read-only to writable transition drops the
+// cache built while the target owned the partition before writers are allowed
+// back in; callers must not remount it writable first and clean up afterwards.
 func SetDataWritable(writable bool) error {
 	var stat unix.Statfs_t
 	if err := unix.Statfs(mediaDirectory, &stat); err != nil {
@@ -28,6 +30,11 @@ func SetDataWritable(writable bool) error {
 	option := "rw"
 	if !writable {
 		option = "ro"
+	} else {
+		// The target may have changed both file data and allocation metadata
+		// while it owned the block device. Invalidate that view before the
+		// filesystem becomes writable, on every path that hands it back.
+		dropAllPartitionCaches()
 	}
 
 	if err := exec.Command("mount", "-o", "remount,"+option, mediaDirectory).Run(); err != nil {

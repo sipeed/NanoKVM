@@ -229,6 +229,8 @@ const hu = {
       eject: 'Kiadás',
       mount: 'Csatlakoztatás',
       mountMode: 'Felszerelési mód',
+      mountModeDisk: 'Mass storage',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Fájlkezelő megnyitása',
       refresh: 'Frissítés',
       delete: 'Törlés',
@@ -265,9 +267,13 @@ const hu = {
         url: 'A kép URL-címe',
         urlRequired: 'Adjon meg egy URL-t',
         onlyImages: 'Csak .iso és .img fájlok csatlakoztathatók',
+        dropHint: 'Húzzon ide egy ISO vagy IMG fájlt, vagy kattintson a kiválasztáshoz',
+        cdromOnlyIso: 'CD-ROM csak ISO 9660 képet tartalmazhat',
         uploadFailed: 'A feltöltés nem sikerült',
         downloadFailed: 'A letöltés nem sikerült',
-        blocked: 'A célgép használja a lemezt'
+        blocked: 'A célgép használja a lemezt',
+        copyHint:
+          'A képet SCP-vel is a data partícióra másolhatja, vagy a célgépről is átmásolhatja.'
       },
       files: {
         selectMedium: 'Válasszon adathordozót a rajta lévő fájlok megtekintéséhez.',
@@ -341,7 +347,8 @@ const hu = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partíció RO, ezért nem tudjuk letölteni a képet',
+      disabled:
+        'A data partíció írásvédett, amíg a célgép használja: új kép nem írható rá, a meglévő fájlok viszont letölthetők.',
       sha256: 'SHA-256 (opcionális)',
       sha256Placeholder: 'Adjon meg egy 64 karakteres SHA-256 ellenőrzőösszeget',
       invalidSHA256: 'A SHA-256 értékének 64 karakteres hexadecimális karakterláncnak kell lennie',

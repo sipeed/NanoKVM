@@ -227,6 +227,8 @@ const cz = {
       eject: 'Vysunout',
       mount: 'Připojit',
       mountMode: 'Režim připojení',
+      mountModeDisk: 'Hromadné úložiště',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Otevřít správce souborů',
       refresh: 'Obnovit',
       delete: 'Smazat',
@@ -263,9 +265,13 @@ const cz = {
         url: 'Adresa URL obrazu',
         urlRequired: 'Zadejte adresu URL',
         onlyImages: 'Připojit lze pouze soubory .iso a .img',
+        dropHint: 'Přetáhněte sem ISO nebo IMG, nebo klikněte pro výběr souboru',
+        cdromOnlyIso: 'CD-ROM může obsahovat pouze obraz ISO 9660',
         uploadFailed: 'Nahrání se nezdařilo',
         downloadFailed: 'Stažení se nezdařilo',
-        blocked: 'Vzdálený počítač disk používá'
+        blocked: 'Vzdálený počítač disk používá',
+        copyHint:
+          'Obraz můžete také zkopírovat do datového oddílu přes SCP nebo ze vzdáleného počítače.'
       },
       files: {
         selectMedium: 'Vyberte médium a prohlédněte si soubory v něm.',
@@ -339,7 +345,8 @@ const cz = {
       ok: 'OK'
     },
     download: {
-      disabled: 'Oddíl /data je RO, takže obrázek nelze stáhnout',
+      disabled:
+        'Datový oddíl je po dobu používání vzdáleným počítačem pouze pro čtení: nové obrazy nelze zapsat, stávající soubory lze stále stáhnout.',
       sha256: 'SHA-256 (volitelné)',
       sha256Placeholder: 'Zadejte 64znakový kontrolní součet SHA-256',
       invalidSHA256: 'SHA-256 musí být 64znakový hexadecimální řetězec',

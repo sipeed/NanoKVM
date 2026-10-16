@@ -64,13 +64,17 @@ func (s *Service) beginJob(ctx context.Context, name string) (chan struct{}, err
 		case <-waiter:
 			// Our turn; the loop tries to claim the slot.
 		case <-ctx.Done():
-			s.dropWaiter(waiter)
+			s.abandonWaiter(waiter)
 			return nil, ctx.Err()
 		}
 	}
 }
 
-func (s *Service) dropWaiter(waiter chan struct{}) {
+// abandonWaiter drops a waiter whose client went away. A waiter that is still
+// queued only has to leave the queue; one that was already handed the turn
+// (finishJob closed its channel) has to pass it on, or the transfers waiting
+// behind it would sit there until their own clients gave up too.
+func (s *Service) abandonWaiter(waiter chan struct{}) {
 	s.jobMutex.Lock()
 	defer s.jobMutex.Unlock()
 
@@ -79,6 +83,11 @@ func (s *Service) dropWaiter(waiter chan struct{}) {
 			s.jobWaiters = append(s.jobWaiters[:i], s.jobWaiters[i+1:]...)
 			return
 		}
+	}
+
+	if s.jobDone == nil && len(s.jobWaiters) > 0 {
+		close(s.jobWaiters[0])
+		s.jobWaiters = s.jobWaiters[1:]
 	}
 }
 

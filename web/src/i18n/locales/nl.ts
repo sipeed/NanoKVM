@@ -230,6 +230,8 @@ const nl = {
       eject: 'Uitwerpen',
       mount: 'Koppelen',
       mountMode: 'Montagemodus',
+      mountModeDisk: 'Massopslag',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Bestandsbeheer openen',
       refresh: 'Vernieuwen',
       delete: 'Verwijderen',
@@ -266,9 +268,13 @@ const nl = {
         url: 'URL van de afbeelding',
         urlRequired: 'Voer een URL in',
         onlyImages: 'Alleen .iso- en .img-bestanden kunnen worden gekoppeld',
+        dropHint: 'Sleep een ISO of IMG hierheen, of klik om een bestand te kiezen',
+        cdromOnlyIso: 'Een CD-ROM kan alleen een ISO 9660-image bevatten',
         uploadFailed: 'Uploaden mislukt',
         downloadFailed: 'Downloaden mislukt',
-        blocked: 'De doelcomputer gebruikt de schijf'
+        blocked: 'De doelcomputer gebruikt de schijf',
+        copyHint:
+          'Je kunt een image ook via SCP naar de datapartitie kopiëren, of vanaf de doelcomputer.'
       },
       files: {
         selectMedium: 'Kies een medium om de bestanden erin te bekijken.',
@@ -342,7 +348,8 @@ const nl = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partitie is RO, dus we kunnen de afbeelding niet downloaden',
+      disabled:
+        'De datapartitie is alleen-lezen zolang de doelcomputer hem gebruikt: nieuwe images kunnen niet worden geschreven, bestaande bestanden zijn nog wel te downloaden.',
       sha256: 'SHA-256 (optioneel)',
       sha256Placeholder: 'Voer een SHA-256-controlesom van 64 tekens in',
       invalidSHA256: 'SHA-256 moet een hexadecimale tekenreeks van 64 tekens zijn',

@@ -231,6 +231,8 @@ const de = {
       eject: 'Auswerfen',
       mount: 'Einbinden',
       mountMode: 'Mount-Modus',
+      mountModeDisk: 'Massenspeicher',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Dateimanager öffnen',
       refresh: 'Aktualisieren',
       delete: 'Löschen',
@@ -268,9 +270,13 @@ const de = {
         url: 'Abbild-URL',
         urlRequired: 'Bitte geben Sie eine URL ein',
         onlyImages: 'Nur .iso- und .img-Dateien können eingebunden werden',
+        dropHint: 'Ziehen Sie eine ISO oder IMG hierher oder klicken Sie, um eine Datei zu wählen',
+        cdromOnlyIso: 'Ein CD-ROM kann nur ein ISO-9660-Abbild enthalten',
         uploadFailed: 'Hochladen fehlgeschlagen',
         downloadFailed: 'Herunterladen fehlgeschlagen',
-        blocked: 'Der Zielrechner verwendet die Festplatte'
+        blocked: 'Der Zielrechner verwendet die Festplatte',
+        copyHint:
+          'Sie können ein Abbild auch per SCP auf die Datenpartition kopieren oder vom Zielrechner aus.'
       },
       files: {
         selectMedium: 'Wählen Sie ein Medium, um die darin enthaltenen Dateien zu durchsuchen.',
@@ -346,7 +352,7 @@ const de = {
     },
     download: {
       disabled:
-        '/data Partition ist nur-lesbar, daher kann das Systemabbild nicht heruntergeladen werden',
+        'Die Datenpartition ist schreibgeschützt, solange der Zielrechner sie verwendet: Neue Abbilder lassen sich nicht ablegen, vorhandene Dateien aber weiterhin herunterladen.',
       sha256: 'SHA-256 (optional)',
       sha256Placeholder: 'Geben Sie eine 64-stellige SHA-256-Prüfsumme ein',
       invalidSHA256: 'SHA-256 muss eine 64-stellige Hexadezimalzeichenfolge sein',

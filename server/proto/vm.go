@@ -72,6 +72,10 @@ type GetVirtualDeviceRsp struct {
 
 type UpdateVirtualDeviceReq struct {
 	Device string `validate:"required"`
+	// Enable turns the device on or off instead of toggling it. A caller that
+	// says "enable" must not switch a running device off because it happened to
+	// be already on.
+	Enable *bool `json:"enable"`
 }
 
 type UpdateVirtualDeviceRsp struct {

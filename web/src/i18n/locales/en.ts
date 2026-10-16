@@ -224,6 +224,8 @@ const en = {
       eject: 'Eject',
       mount: 'Mount',
       mountMode: 'Mount mode',
+      mountModeDisk: 'Mass storage',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Open file manager',
       refresh: 'Refresh',
       delete: 'Delete',
@@ -260,9 +262,13 @@ const en = {
         url: 'Image URL',
         urlRequired: 'Please enter a URL',
         onlyImages: 'Only .iso and .img files can be mounted',
+        dropHint: 'Drag an ISO or IMG here, or click to choose a file',
+        cdromOnlyIso: 'A CD-ROM can only carry an ISO 9660 image',
         uploadFailed: 'Upload failed',
         downloadFailed: 'Download failed',
-        blocked: 'The target machine is using the disk'
+        blocked: 'The target machine is using the disk',
+        copyHint:
+          'You can also copy an image into the data partition over SCP, or from the target machine.'
       },
       files: {
         selectMedium: 'Select a medium to browse the files inside it.',
@@ -335,7 +341,8 @@ const en = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partition is RO, so we cannot download the image',
+      disabled:
+        'The data partition is read-only while the target machine uses it: new images cannot be written, existing files can still be downloaded.',
       sha256: 'SHA-256 (optional)',
       sha256Placeholder: 'Enter a 64-character SHA-256 checksum',
       invalidSHA256: 'SHA-256 must be a 64-character hexadecimal string',

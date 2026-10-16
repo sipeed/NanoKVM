@@ -222,6 +222,8 @@ const ko = {
       eject: '꺼내기',
       mount: '마운트',
       mountMode: '마운트 모드',
+      mountModeDisk: '대용량 저장소',
+      mountModeCdrom: 'CD-ROM',
       openManager: '파일 관리자 열기',
       refresh: '새로 고침',
       delete: '삭제',
@@ -258,9 +260,13 @@ const ko = {
         url: '이미지 URL',
         urlRequired: 'URL을 입력하세요',
         onlyImages: '.iso 및 .img 파일만 마운트할 수 있습니다',
+        dropHint: 'ISO 또는 IMG를 여기로 끌어오거나 클릭하여 파일을 선택하세요',
+        cdromOnlyIso: 'CD-ROM에는 ISO 9660 이미지만 넣을 수 있습니다',
         uploadFailed: '업로드 실패',
         downloadFailed: '다운로드 실패',
-        blocked: '대상 컴퓨터가 디스크를 사용 중입니다'
+        blocked: '대상 컴퓨터가 디스크를 사용 중입니다',
+        copyHint:
+          'SCP로 데이터 파티션에 이미지를 복사하거나 대상 컴퓨터에서 직접 복사할 수도 있습니다.'
       },
       files: {
         selectMedium: '미디어를 선택하면 안에 있는 파일을 볼 수 있습니다.',
@@ -332,7 +338,8 @@ const ko = {
       ok: '확인'
     },
     download: {
-      disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.',
+      disabled:
+        '대상 컴퓨터가 사용하는 동안 데이터 파티션은 읽기 전용입니다. 새 이미지는 쓸 수 없지만 기존 파일은 내려받을 수 있습니다.',
       sha256: 'SHA-256 (선택 사항)',
       sha256Placeholder: '64자 SHA-256 체크섬을 입력하세요',
       invalidSHA256: 'SHA-256은 64자의 16진수 문자열이어야 합니다',

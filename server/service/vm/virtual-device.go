@@ -69,36 +69,81 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 
 	var device string
 	var commands []string
+	preparePartition := false
 
+	// A caller that says which state it wants gets that state; a caller that
+	// does not is toggling, the way this endpoint has always worked.
 	switch req.Device {
 	case "network":
 		device = virtualNetwork
 
 		exist, _ := isDeviceExist(device)
-		if !exist {
+		enable := !exist
+		if req.Enable != nil {
+			enable = *req.Enable
+		}
+		if enable && !exist {
 			commands = mountNetworkCommands
-		} else {
+		} else if !enable && exist {
 			commands = unmountNetworkCommands
+		}
+		if len(commands) > 0 {
+			// Restarting the gadget for a network change also makes the boot
+			// script attach whatever /boot/usb.disk0 names. When the virtual
+			// disk is enabled that is the raw data partition by default, so
+			// this transition needs the same protection as a disk mount.
+			diskEnabled, err := isDeviceExist(virtualDisk)
+			if err != nil {
+				rsp.ErrRsp(c, -3, "check virtual disk failed")
+				return
+			}
+			preparePartition = diskEnabled
 		}
 	case "disk":
 		device = virtualDisk
 
-		if diskAttached() {
-			commands = unmountDiskCommands
-		} else {
-			// the host writes the partition from now on. A mounted image is released by
-			// the restarted gadget, which attaches the raw partition again.
+		attached := diskAttached()
+		enable := !attached
+		if req.Enable != nil {
+			enable = *req.Enable
+		}
+		// Asking for the state that already holds changes nothing: a caller
+		// that says "enable" must not switch off a running share.
+		if enable != attached {
+			if attached {
+				commands = unmountDiskCommands
+			} else {
+				// The restarted gadget attaches the raw partition. The actual
+				// read-only transition happens under the media operation lock
+				// below, before any script can expose the partition.
+				preparePartition = true
+				commands = mountDiskCommands
+			}
+		}
+	default:
+		rsp.ErrRsp(c, -2, "invalid arguments")
+		return
+	}
+
+	if len(commands) > 0 && (device == virtualDisk || preparePartition) {
+		unlock, err := storage.LockVirtualDiskTransition()
+		if err != nil {
+			rsp.ErrRsp(c, -3, err.Error())
+			return
+		}
+		defer unlock()
+
+		if preparePartition {
+			// The host writes the partition from now on. A mounted image is
+			// released by the restarted gadget, which attaches the raw
+			// partition again. This must happen before the script can expose
+			// that partition, including when the script is changing networking.
 			if err := storage.SetDataWritable(false); err != nil {
 				log.Errorf("make /data read-only failed: %s", err)
 				rsp.ErrRsp(c, -3, "make /data read-only failed")
 				return
 			}
-
-			commands = mountDiskCommands
 		}
-	default:
-		rsp.ErrRsp(c, -2, "invalid arguments")
-		return
 	}
 
 	h := hid.GetHid()

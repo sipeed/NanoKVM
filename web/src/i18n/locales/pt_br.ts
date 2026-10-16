@@ -227,6 +227,8 @@ const pt_br = {
       eject: 'Ejetar',
       mount: 'Montar',
       mountMode: 'Modo de montagem',
+      mountModeDisk: 'Armazenamento em massa',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Abrir o gerenciador de arquivos',
       refresh: 'Atualizar',
       delete: 'Excluir',
@@ -263,9 +265,13 @@ const pt_br = {
         url: 'URL da imagem',
         urlRequired: 'Informe uma URL',
         onlyImages: 'Só é possível montar arquivos .iso e .img',
+        dropHint: 'Arraste uma ISO ou IMG aqui, ou clique para escolher um arquivo',
+        cdromOnlyIso: 'Um CD-ROM só pode conter uma imagem ISO 9660',
         uploadFailed: 'Falha no envio',
         downloadFailed: 'Falha no download',
-        blocked: 'A máquina remota está usando o disco'
+        blocked: 'A máquina remota está usando o disco',
+        copyHint:
+          'Você também pode copiar uma imagem para a partição de dados via SCP, ou a partir da máquina remota.'
       },
       files: {
         selectMedium: 'Selecione uma mídia para ver os arquivos dentro dela.',
@@ -339,7 +345,8 @@ const pt_br = {
       ok: 'Ok'
     },
     download: {
-      disabled: 'A partição /data é RO, então não podemos baixar a imagem',
+      disabled:
+        'A partição de dados fica somente leitura enquanto a máquina remota a usa: novas imagens não podem ser gravadas, mas os arquivos existentes continuam podendo ser baixados.',
       sha256: 'SHA-256 (opcional)',
       sha256Placeholder: 'Digite um checksum SHA-256 de 64 caracteres',
       invalidSHA256: 'SHA-256 deve ser uma sequência hexadecimal de 64 caracteres',

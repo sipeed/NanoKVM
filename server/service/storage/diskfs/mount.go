@@ -29,9 +29,9 @@ const MountRoot = "/run/nanokvm/media"
 // scanning them all is cheaper than parsing losetup output.
 const loopDeviceLimit = 8
 
-// uploadPrefix marks a partially written upload inside a medium. It is deleted
-// on failure, and renamed into place on success.
-const uploadPrefix = ".kvm-upload-"
+// UploadPrefix marks a partially written upload inside a medium. It is deleted
+// on failure, renamed into place on success, and never handed out as a file.
+const UploadPrefix = ".kvm-upload-"
 
 // Image is a mounted medium. Handles are reference counted, because a download
 // may stream for minutes while the file list is refreshed, and both have to
@@ -56,6 +56,11 @@ type mount struct {
 var (
 	mountsMu sync.Mutex
 	mounts   = map[string]*mount{}
+	// readers counts direct readers of a medium's file: an image download
+	// streams the file itself rather than a mount. A writable mount would
+	// tear the stream those readers see, so it is refused while any of them
+	// is active. Guarded by mountsMu, so the check and the mount stay one step.
+	readers = map[string]int{}
 )
 
 // Mount opens the filesystem inside a medium and returns a handle to it. The
@@ -88,6 +93,12 @@ func Mount(imagePath string, writable bool) (Image, error) {
 		return &handle{mount: existing}, nil
 	}
 
+	// A direct reader holds no mount, so it does not show up above; a write
+	// would tear the stream it is reading.
+	if writable && readers[imagePath] > 0 {
+		return nil, fmt.Errorf("%w: %s is being read", ErrBusy, imagePath)
+	}
+
 	attached, err := attach(imagePath, kind, writable)
 	if err != nil {
 		return nil, err
@@ -96,6 +107,34 @@ func Mount(imagePath string, writable bool) (Image, error) {
 	mounts[imagePath] = attached
 
 	return &handle{mount: attached}, nil
+}
+
+// AcquireReadPin marks a medium's file as being read directly, outside a
+// mount, and refuses while the file manager holds the medium open for
+// writing: the stream would otherwise serve a file that changes underneath
+// it. The returned function releases the pin and is safe to call twice.
+func AcquireReadPin(imagePath string) (func(), error) {
+	mountsMu.Lock()
+	defer mountsMu.Unlock()
+
+	if existing, ok := mounts[imagePath]; ok && existing.writable {
+		return nil, fmt.Errorf("%w: %s is open for writing", ErrBusy, imagePath)
+	}
+
+	readers[imagePath]++
+
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			mountsMu.Lock()
+			defer mountsMu.Unlock()
+
+			readers[imagePath]--
+			if readers[imagePath] <= 0 {
+				delete(readers, imagePath)
+			}
+		})
+	}, nil
 }
 
 // MountedImages lists the media the file manager currently holds open.
@@ -366,7 +405,7 @@ func writeFile(root, rel string, r io.Reader) (int64, error) {
 		return 0, fmt.Errorf("%s already exists", rel)
 	}
 
-	tempPath := filepath.Join(filepath.Dir(full), uploadPrefix+randomSuffix())
+	tempPath := filepath.Join(filepath.Dir(full), UploadPrefix+randomSuffix())
 	file, err := os.OpenFile(tempPath, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return 0, err
@@ -401,7 +440,10 @@ func removeFile(root, rel string) error {
 		return errors.New("refusing to remove the medium root")
 	}
 
-	return os.Remove(full)
+	// A directory goes with everything it holds: the web UI confirms the
+	// delete first, and answering an explicit yes with "directory not empty"
+	// helps no one. ResolveInside keeps the walk inside the medium.
+	return os.RemoveAll(full)
 }
 
 func (h *handle) Close() error {

@@ -228,6 +228,8 @@ const pl = {
       eject: 'Wysuń',
       mount: 'Zamontuj',
       mountMode: 'Tryb montowania',
+      mountModeDisk: 'Pamięć masowa',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Otwórz menedżer plików',
       refresh: 'Odśwież',
       delete: 'Usuń',
@@ -263,9 +265,13 @@ const pl = {
         url: 'Adres URL obrazu',
         urlRequired: 'Podaj adres URL',
         onlyImages: 'Można montować tylko pliki .iso i .img',
+        dropHint: 'Przeciągnij tutaj plik ISO lub IMG albo kliknij, aby go wybrać',
+        cdromOnlyIso: 'CD-ROM może zawierać wyłącznie obraz ISO 9660',
         uploadFailed: 'Przesyłanie nie powiodło się',
         downloadFailed: 'Pobieranie nie powiodło się',
-        blocked: 'Zdalny komputer używa dysku'
+        blocked: 'Zdalny komputer używa dysku',
+        copyHint:
+          'Obraz możesz też skopiować do partycji danych przez SCP albo ze zdalnego komputera.'
       },
       files: {
         selectMedium: 'Wybierz nośnik, aby przeglądać znajdujące się na nim pliki.',
@@ -338,7 +344,8 @@ const pl = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partycja to RO, więc nie możemy pobrać obrazu',
+      disabled:
+        'Partycja danych jest tylko do odczytu, dopóki używa jej zdalny komputer: nie można zapisać nowych obrazów, ale istniejące pliki nadal można pobierać.',
       sha256: 'SHA-256 (opcjonalnie)',
       sha256Placeholder: 'Wprowadź 64-znakową sumę kontrolną SHA-256',
       invalidSHA256: 'SHA-256 musi być 64-znakowym ciągiem szesnastkowym',

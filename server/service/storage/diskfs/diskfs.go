@@ -79,6 +79,10 @@ type Caps struct {
 // ErrUnsupported reports a missing device capability.
 var ErrUnsupported = errors.New("unsupported on this device")
 
+// ErrBusy reports a medium that cannot be handed out the way the caller
+// asked: a write meets a direct reader, or a direct read meets a writer.
+var ErrBusy = errors.New("the medium is busy")
+
 // Probe reports the device's media capabilities. The answer cannot change
 // while the server runs, and the listing asks for it on every poll, so it is
 // computed once.

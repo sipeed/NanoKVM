@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Form, Input, Modal, Tooltip } from 'antd';
-import { LinkIcon, LoaderCircleIcon, UploadIcon, XIcon } from 'lucide-react';
+import { Button, Form, Input, Modal, Tooltip } from 'antd';
+import clsx from 'clsx';
+import { LinkIcon, UploadIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as downloadApi from '@/api/download.ts';
@@ -15,7 +16,11 @@ type Props = {
   onError: (message: string, description?: string) => void;
 };
 
-type Transfer = {
+// An image arriving from the browser or from a URL, reported by the image
+// downloader's status endpoint. The page renders it at the top, in the same
+// place and shape as a media job, instead of a separate hint inside the
+// image group.
+export type Transfer = {
   name: string;
   percentage: string;
   // Bytes transferred so far and the expected total; total is 0 while the
@@ -36,7 +41,13 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
 
   const [isUrlOpen, setIsUrlOpen] = useState(false);
   const [transfer, setTransfer] = useState<Transfer | null>(null);
-  const [isDataWritable, setIsDataWritable] = useState(true);
+  // The server verifies the checksum of an upload when the client sends one;
+  // a browser cannot hash gigabytes before sending them, so the expected sum is
+  // typed in instead.
+  const [checksum, setChecksum] = useState('');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const [urlForm] = Form.useForm();
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -76,14 +87,6 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
     return () => clearInterval(timer);
   }, [onChanged]);
 
-  // The data partition is mounted read-only on some builds, and nothing can be
-  // stored there until it is not.
-  useEffect(() => {
-    void downloadApi.imageEnabled().then((rsp) => {
-      if (rsp.code === 0) setIsDataWritable(rsp.data?.enabled !== false);
-    });
-  }, []);
-
   async function cancel() {
     const rsp = await downloadApi.cancelDownloadImage();
     if (rsp.code !== 0) {
@@ -104,6 +107,16 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
       return;
     }
 
+    const sum = checksum.trim();
+    if (sum && !sha256Pattern.test(sum)) {
+      onError(t('download.invalidSHA256'));
+      return;
+    }
+
+    // Close the picker before starting the transfer so progress and errors are
+    // visible in the media list. Invalid files and checksums stay in the dialog.
+    closeUpload();
+
     polling.current = true;
     setTransfer({
       name: file.name,
@@ -122,6 +135,7 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
       const response = await fetch(`${getBaseUrl('http')}/api/download/file`, {
         method: 'POST',
         body: form,
+        headers: sum ? { 'X-SHA256-Sum': sum } : undefined,
         credentials: import.meta.env.VITE_WITH_CREDENTIALS === 'false' ? 'omit' : 'include'
       });
       const rsp = await response.json();
@@ -139,8 +153,6 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
       polling.current = false;
       setTransfer(null);
       onError(t('storage.add.uploadFailed'));
-    } finally {
-      if (imageInputRef.current) imageInputRef.current.value = '';
     }
   }
 
@@ -170,9 +182,30 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
     urlForm.resetFields();
   }
 
-  // The buttons belong in the image group's title row, the messages belong
-  // below it, and the dialogs are rendered by the page. Keeping them apart is
-  // what keeps a long status line from squeezing the group title.
+  function closeUpload() {
+    setIsUploadOpen(false);
+    setPendingFile(null);
+    setChecksum('');
+    setIsDragging(false);
+  }
+
+  // The dialog's area takes a click (choose a file) and a drop, so an image can
+  // come from a file manager window as well.
+  const dropProps = {
+    onDragOver: (event: React.DragEvent) => {
+      event.preventDefault();
+      if (!dataOwned) setIsDragging(true);
+    },
+    onDragLeave: () => setIsDragging(false),
+    onDrop: (event: React.DragEvent) => {
+      event.preventDefault();
+      setIsDragging(false);
+      if (dataOwned) return;
+      setPendingFile(event.dataTransfer?.files?.[0] ?? null);
+    }
+  };
+
+  // The buttons belong in the image group's title row.
   const actions = (
     <div className="flex items-center space-x-1">
       <Tooltip title={dataOwned ? t('storage.add.blocked') : t('storage.add.upload')}>
@@ -180,7 +213,7 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
           size="small"
           icon={<UploadIcon size={14} />}
           disabled={dataOwned}
-          onClick={() => imageInputRef.current?.click()}
+          onClick={() => setIsUploadOpen(true)}
         />
       </Tooltip>
       <Tooltip title={dataOwned ? t('storage.add.blocked') : t('storage.add.fromUrl')}>
@@ -194,51 +227,6 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
     </div>
   );
 
-  const status = (
-    <>
-      {!isDataWritable && (
-        <Alert type="warning" showIcon className="text-xs" message={t('download.disabled')} />
-      )}
-
-      {transfer && (
-        <Alert
-          type={transfer.failed ? 'error' : 'info'}
-          showIcon
-          icon={
-            transfer.failed ? undefined : <LoaderCircleIcon size={12} className="animate-spin" />
-          }
-          message={
-            transfer.failed ? (
-              transfer.message || t('storage.failed')
-            ) : (
-              <span className="flex items-center space-x-2 text-xs">
-                <span className="min-w-0 flex-1 truncate" title={transfer.name}>
-                  {transfer.name}
-                </span>
-                <span className="shrink-0 text-neutral-400">
-                  {transfer.percentage}
-                  {transfer.total > 0 &&
-                    ` · ${formatSize(transfer.loaded)} / ${formatSize(transfer.total)}`}
-                </span>
-              </span>
-            )
-          }
-          action={
-            transfer.cancellable && (
-              <Button
-                type="text"
-                size="small"
-                icon={<XIcon size={12} />}
-                title={t('download.cancel')}
-                onClick={() => void cancel()}
-              />
-            )
-          }
-        />
-      )}
-    </>
-  );
-
   const overlays = (
     <>
       <input
@@ -246,8 +234,53 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
         type="file"
         accept=".iso,.img"
         className="hidden"
-        onChange={(event) => void uploadImage(event.target.files?.[0] ?? null)}
+        onChange={(event) => {
+          setPendingFile(event.target.files?.[0] ?? null);
+          if (imageInputRef.current) imageInputRef.current.value = '';
+        }}
       />
+
+      <Modal
+        title={t('storage.add.title')}
+        open={isUploadOpen}
+        okText={t('storage.yes')}
+        cancelText={t('storage.no')}
+        okButtonProps={{ disabled: !pendingFile }}
+        onOk={() => void uploadImage(pendingFile)}
+        onCancel={closeUpload}
+      >
+        <div className="flex flex-col space-y-3">
+          {/* Clicking chooses a file, dropping one works the same way. */}
+          <div
+            {...dropProps}
+            onClick={() => imageInputRef.current?.click()}
+            className={clsx(
+              'flex h-24 cursor-pointer items-center justify-center rounded border border-dashed px-4 text-center text-xs',
+              isDragging
+                ? 'border-blue-500 text-blue-400'
+                : 'border-neutral-700 text-neutral-500 hover:border-neutral-500'
+            )}
+          >
+            {pendingFile ? (
+              <span className="truncate" title={pendingFile.name}>
+                {pendingFile.name} · {formatSize(pendingFile.size)}
+              </span>
+            ) : (
+              <span>{t('storage.add.dropHint')}</span>
+            )}
+          </div>
+
+          <div className="flex flex-col space-y-1">
+            <span className="text-xs text-neutral-500">{t('download.sha256')}</span>
+            <Input
+              allowClear
+              placeholder={t('download.sha256Placeholder')}
+              value={checksum}
+              onChange={(event) => setChecksum(event.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         title={t('storage.add.fromUrl')}
@@ -284,5 +317,5 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
     </>
   );
 
-  return { actions, status, overlays };
+  return { actions, transfer, cancelTransfer: cancel, overlays };
 }

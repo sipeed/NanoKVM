@@ -37,6 +37,7 @@ type MediaStateRsp struct {
 	Rel     string   `json:"rel"`     // rel of the attached medium, when it is an image
 	HidOnly bool     `json:"hidOnly"` // the gadget has no mass storage at all
 	Open    []string `json:"open"`    // media the file manager currently holds open
+	Cdrom   bool     `json:"cdrom"`   // the attached medium is served as a CD-ROM
 }
 
 type MediaRefReq struct {

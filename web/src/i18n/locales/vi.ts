@@ -226,6 +226,8 @@ const vi = {
       eject: 'Đẩy ra',
       mount: 'Gắn kết',
       mountMode: 'Chế độ gắn kết',
+      mountModeDisk: 'Lưu trữ hàng loạt',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Mở trình quản lý tệp',
       refresh: 'Làm mới',
       delete: 'Xóa',
@@ -261,9 +263,12 @@ const vi = {
         url: 'URL hình ảnh',
         urlRequired: 'Vui lòng nhập URL',
         onlyImages: 'Chỉ có thể gắn kết tệp .iso và .img',
+        dropHint: 'Kéo tệp ISO hoặc IMG vào đây, hoặc bấm để chọn tệp',
+        cdromOnlyIso: 'CD-ROM chỉ có thể chứa ảnh ISO 9660',
         uploadFailed: 'Tải lên không thành công',
         downloadFailed: 'Tải xuống không thành công',
-        blocked: 'Máy đích đang dùng đĩa'
+        blocked: 'Máy đích đang dùng đĩa',
+        copyHint: 'Bạn cũng có thể sao chép ảnh vào phân vùng dữ liệu qua SCP, hoặc từ máy đích.'
       },
       files: {
         selectMedium: 'Chọn một phương tiện để xem các tệp bên trong.',
@@ -336,7 +341,8 @@ const vi = {
       ok: 'OK'
     },
     download: {
-      disabled: '/data phân vùng là RO nên không tải được image',
+      disabled:
+        'Phân vùng dữ liệu ở chế độ chỉ đọc khi máy đích đang dùng: không ghi được ảnh mới, nhưng vẫn tải xuống được các tệp hiện có.',
       sha256: 'SHA-256 (tùy chọn)',
       sha256Placeholder: 'Nhập mã kiểm tra SHA-256 gồm 64 ký tự',
       invalidSHA256: 'SHA-256 phải là chuỗi thập lục phân gồm 64 ký tự',

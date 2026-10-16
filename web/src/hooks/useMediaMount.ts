@@ -63,6 +63,11 @@ export function useMediaMount({ onError, onNeedEnableDisk, onNeedForce, onChange
       onNeedForce(() => retry({ ...opts, force: true, prompt: false }));
       return;
     }
+    if (rsp.code === api.codeNotOptical) {
+      // The list the page was showing is older than the medium it names.
+      onError(t('storage.add.cdromOnlyIso'));
+      return;
+    }
 
     onError(rsp.msg);
   }

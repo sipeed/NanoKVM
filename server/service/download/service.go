@@ -3,6 +3,7 @@ package download
 import (
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/storage"
+	"NanoKVM-Server/service/storage/diskfs"
 	"NanoKVM-Server/utils"
 	"bytes"
 	"context"
@@ -36,12 +37,12 @@ const (
 
 	imageDirectory = "/data"
 
-	// ISO 9660 and UDF volume descriptors live in sector 16 of the image.
-	volumeDescriptorOffset = 0x8001
-	volumeDescriptorSize   = 5
-	// Only the descriptors are read before the image is stored, so an unusable
-	// image is rejected without transferring all of it.
-	imageHeaderSize = volumeDescriptorOffset + volumeDescriptorSize
+	// transferTempPrefix marks the partial files of the uploads and downloads
+	// this service writes. The file manager hides and refuses them (its own
+	// downloadTempPrefix in service/storage), and a restart sweeps whatever a
+	// transfer left behind.
+	transferTempPrefix = ".nanokvm-"
+
 	// Keep /data from filling up completely: the exFAT metadata and the USB
 	// mass-storage export still need room while the image is written.
 	imageFreeReserve = 128 << 20
@@ -50,7 +51,6 @@ const (
 var (
 	errDownloadInProgress = errors.New("download in progress")
 	errSHA256Mismatch     = errors.New("sha256 mismatch")
-	errUnsupportedImage   = errors.New("unsupported image format: expected an ISO 9660/UDF image or a raw disk image")
 )
 
 // maxUploadBytes caps a single upload even when the client lies about its
@@ -79,25 +79,29 @@ func NewService() *Service {
 
 // removeStaleTransfers deletes the temporary files of uploads and downloads
 // that a restart interrupted. They are hidden and can be hundreds of
-// megabytes, so leaving them behind would quietly fill the card.
+// megabytes, so leaving them behind would quietly fill the card - and the
+// file manager refuses to delete them itself, because it cannot tell a stale
+// one from one a running transfer owns. A file upload into the shared folder
+// writes its temporary next to its target, so the whole tree is walked, not
+// just the root.
 func removeStaleTransfers() {
-	entries, err := os.ReadDir("/data")
-	if err != nil {
-		return
-	}
-
-	for _, entry := range entries {
-		if entry.IsDir() || !strings.HasPrefix(entry.Name(), ".nanokvm-") {
-			continue
+	_ = filepath.Walk(imageDirectory, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
 		}
 
-		path := filepath.Join("/data", entry.Name())
+		if !strings.HasPrefix(info.Name(), transferTempPrefix) &&
+			!strings.HasPrefix(info.Name(), diskfs.UploadPrefix) {
+			return nil
+		}
+
 		if err := os.Remove(path); err != nil {
 			log.Errorf("remove stale transfer %s failed: %s", path, err)
 		} else {
 			log.Infof("removed stale transfer %s", path)
 		}
-	}
+		return nil
+	})
 }
 
 func (s *Service) CancelDownloadImage(c *gin.Context) {
@@ -210,49 +214,6 @@ func (s *Service) ImageEnabled(c *gin.Context) {
 	rsp.OkRspWithData(c, &proto.ImageEnabledRsp{Enabled: true})
 }
 
-// isSupportedImage reports whether the uploaded image can be exposed through
-// the USB mass-storage gadget. ISO 9660 images and UDF bridges, which is what
-// bootable installer ISOs are normally built as, carry "CD001" in the volume
-// descriptor sector, while UDF-only images carry "BEA01" there.
-func isSupportedImage(head []byte) bool {
-	if len(head) >= volumeDescriptorOffset+volumeDescriptorSize {
-		switch string(head[volumeDescriptorOffset : volumeDescriptorOffset+volumeDescriptorSize]) {
-		case "CD001", "BEA01":
-			return true
-		}
-	}
-
-	return looksLikeDiskImage(head)
-}
-
-// looksLikeDiskImage reports whether the image starts with a partition table or
-// a filesystem that a target machine can mount on its own, which covers raw
-// disk images such as macOS installers converted from a DMG.
-func looksLikeDiskImage(head []byte) bool {
-	if len(head) < 0x200 {
-		return false
-	}
-
-	if len(head) >= 0x208 && string(head[0x200:0x208]) == "EFI PART" { // GPT header
-		return true
-	}
-
-	if len(head) >= 0x24 && string(head[0x20:0x24]) == "NXSB" { // APFS container superblock
-		return true
-	}
-
-	if len(head) >= 0x402 {
-		switch string(head[0x400:0x402]) { // HFS+/HFS volume header
-		case "H+", "BD":
-			return true
-		}
-	}
-
-	// MBR partition table. FAT, exFAT and NTFS volume images carry the same
-	// signature in their boot sector.
-	return head[0x1FE] == 0x55 && head[0x1FF] == 0xAA
-}
-
 // ensureImageSpace rejects an upload that cannot fit into dir, keeping a small
 // reserve for filesystem metadata and for the USB mass-storage export.
 func ensureImageSpace(dir string, contentLength int64) error {
@@ -304,11 +265,15 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 	log.Debug("DownloadImageFile")
 
 	// Everything below lands on the data partition, which the target machine
-	// owns whenever the emulated disk is attached to it.
-	if err := storage.EnsureDataPartitionWritable(); err != nil {
+	// owns whenever the emulated disk is attached to it. Hold that ownership
+	// decision for the whole transfer: a mount must wait instead of remounting
+	// /data underneath an upload that is already streaming.
+	releaseDataPartitionWrite, err := storage.BeginDataPartitionWrite()
+	if err != nil {
 		rsp.ErrRsp(c, -1, err.Error())
 		return
 	}
+	defer releaseDataPartitionWrite()
 
 	expectedSHA256, err := parseSHA256(c.GetHeader("X-SHA256-Sum"))
 	if err != nil {
@@ -333,14 +298,9 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		s.finishDownload(done, finalStatus)
 	}()
 
-	// The whole body is written to the data partition, so refuse an upload the
-	// card cannot hold, and cap the request even when the client lies about
-	// its length. Both have to happen before the multipart reader is created:
-	// it keeps reading from the body it was handed.
-	if err := ensureImageSpace(imageDirectory, c.Request.ContentLength); err != nil {
-		rsp.ErrRsp(c, -1, err.Error())
-		return
-	}
+	// The whole body is written to the data partition, so cap the request even
+	// when the client lies about its length. This has to happen before the
+	// multipart reader is created: it keeps reading from the body it was handed.
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, maxUploadBytes)
 
 	reader, err := c.Request.MultipartReader()
@@ -376,7 +336,7 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 
 		// The rejection paths below return without draining the request body: the
 		// client stops uploading as soon as the response arrives.
-		out, err := os.CreateTemp(imageDirectory, ".nanokvm-upload-*")
+		out, err := os.CreateTemp(imageDirectory, transferTempPrefix+"upload-*")
 		if err != nil {
 			log.Errorf("cannot create temporary file in %s: %s", imageDirectory, err)
 			rsp.ErrRsp(c, -1, "cannot create temporary file")
@@ -389,30 +349,10 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		lw := utils.NewProgressWriter(io.MultiWriter(out, hasher), c.Request.ContentLength, func(loaded, total int64) {
 			s.setDownloadProgress(done, loaded, total)
 		})
-		// The volume descriptors are read first and checked while streaming, so
-		// an unusable image is rejected in seconds instead of after the whole
-		// upload.
-		head := make([]byte, imageHeaderSize)
-		headSize, readErr := io.ReadFull(part, head)
-		if readErr != nil && readErr != io.ErrUnexpectedEOF && readErr != io.EOF {
-			_ = part.Close()
-			_ = out.Close()
-			log.Errorf("read uploaded image %q failed: %s", filename, readErr)
-			rsp.ErrRsp(c, -1, "write failed")
-			return
-		}
-		if !isSupportedImage(head[:headSize]) {
-			_ = part.Close()
-			_ = out.Close()
-			log.Warnf("reject uploaded image %q: %s", filename, errUnsupportedImage)
-			rsp.ErrRsp(c, -1, errUnsupportedImage.Error())
-			return
-		}
-
-		_, copyErr := lw.Write(head[:headSize])
-		if copyErr == nil {
-			_, copyErr = io.Copy(lw, part)
-		}
+		// The name already said what this has to be: .iso or .img. The bytes
+		// are taken as they come; a file that turns out not to be an image
+		// fails when it is mounted, not while it is stored.
+		_, copyErr := io.Copy(lw, part)
 		lw.Stop()
 		partCloseErr := part.Close()
 		outCloseErr := out.Close()
@@ -429,12 +369,8 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		}
 
 		outPath := filepath.Join(imageDirectory, filename)
-		if err := ensureReplaceable(outPath); err != nil {
+		if err := storage.InstallImage(tempPath, outPath); err != nil {
 			rsp.ErrRsp(c, -1, err.Error())
-			return
-		}
-		if err := os.Rename(tempPath, outPath); err != nil {
-			rsp.ErrRsp(c, -1, "cannot install uploaded image")
 			return
 		}
 
@@ -461,17 +397,6 @@ func validateImageFilename(filename string) error {
 	return utils.ValidateFileName(filename)
 }
 
-// ensureReplaceable refuses to write over an image the target machine is
-// using. The emulated disk keeps reading the inode it opened, so replacing the
-// file under it leaves the target machine and the web UI disagreeing about
-// what the medium holds.
-func ensureReplaceable(path string) error {
-	if storage.IsAttached(path) {
-		return fmt.Errorf("%s is attached to the target machine; eject it there first", filepath.Base(path))
-	}
-	return nil
-}
-
 func (s *Service) DownloadImage(c *gin.Context) {
 	var req proto.DownloadImageReq
 	var rsp proto.Response
@@ -480,11 +405,6 @@ func (s *Service) DownloadImage(c *gin.Context) {
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, -1, "invalid arguments")
-		return
-	}
-
-	if err := storage.EnsureDataPartitionWritable(); err != nil {
-		rsp.ErrRsp(c, -1, err.Error())
 		return
 	}
 
@@ -505,15 +425,26 @@ func (s *Service) DownloadImage(c *gin.Context) {
 		return
 	}
 
+	// The download runs after this handler returns, and its temporary file is
+	// on the same partition the raw medium exposes. Keep the partition reserved
+	// until the goroutine has installed or removed that file.
+	releaseDataPartitionWrite, err := storage.BeginDataPartitionWrite()
+	if err != nil {
+		rsp.ErrRsp(c, -1, err.Error())
+		return
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	done, err := s.beginDownload(req.File, cancel)
 	if err != nil {
+		releaseDataPartitionWrite()
 		cancel()
 		rsp.ErrRsp(c, -1, err.Error())
 		return
 	}
 
 	go func() {
+		defer releaseDataPartitionWrite()
 		defer cancel()
 
 		if err := s.downloadRemoteImage(ctx, req.File, expectedSHA256, filename, func(loaded, total int64) {
@@ -579,7 +510,14 @@ func (s *Service) downloadRemoteImage(
 		return fmt.Errorf("download request returned status %d", resp.StatusCode)
 	}
 
-	tempFile, err := os.CreateTemp(imageDirectory, ".nanokvm-download-*")
+	// The response headers say how large the image is: refuse it now instead
+	// of filling the partition and failing at the end. An unknown length
+	// (chunked responses) skips the check and is caught by the write itself.
+	if err := ensureImageSpace(imageDirectory, resp.ContentLength); err != nil {
+		return err
+	}
+
+	tempFile, err := os.CreateTemp(imageDirectory, transferTempPrefix+"download-*")
 	if err != nil {
 		return fmt.Errorf("create temporary image failed: %w", err)
 	}
@@ -609,11 +547,8 @@ func (s *Service) downloadRemoteImage(
 	}
 
 	destPath := filepath.Join(imageDirectory, filename)
-	if err := ensureReplaceable(destPath); err != nil {
+	if err := storage.InstallImage(tempPath, destPath); err != nil {
 		return err
-	}
-	if err := os.Rename(tempPath, destPath); err != nil {
-		return fmt.Errorf("install downloaded image failed: %w", err)
 	}
 
 	return nil

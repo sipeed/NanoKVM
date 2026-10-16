@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -66,9 +65,12 @@ func (s *Service) MountImage(c *gin.Context) {
 		}
 	}
 
-	if diskfs.IsMounted(backing) {
-		respondError(c, errMediumBusy)
-		return
+	if req.Cdrom {
+		kind, err := diskfs.Detect(backing)
+		if err != nil || kind != diskfs.KindISO9660 {
+			respondError(c, fmt.Errorf("%w: %s", errNotOptical, req.File))
+			return
+		}
 	}
 
 	// An image is always served read-only, the raw partition is not.
@@ -140,21 +142,7 @@ func (s *Service) DeleteImage(c *gin.Context) {
 		return
 	}
 
-	status, err := readDiskStatus()
-	if err != nil {
-		respondError(c, err)
-		return
-	}
-	if status.State == diskStateImage && status.Backing == target {
-		respondError(c, errMediumAttached)
-		return
-	}
-	if diskfs.IsMounted(target) {
-		respondError(c, errMediumBusy)
-		return
-	}
-
-	if err := os.Remove(target); err != nil {
+	if err := deleteMedium(target); err != nil {
 		log.Errorf("failed to remove file %s: %s", target, err)
 		respondError(c, err)
 		return

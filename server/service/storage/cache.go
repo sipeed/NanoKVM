@@ -8,6 +8,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+
+	"NanoKVM-Server/service/storage/diskfs"
 )
 
 // The shared files medium is the data partition block device handed to the
@@ -44,10 +46,11 @@ const (
 )
 
 var (
-	partitionCacheMu    sync.Mutex
-	partitionLastChange time.Time
-	partitionListeners  []func()
-	partitionWatchOnce  sync.Once
+	partitionCacheMu     sync.Mutex
+	partitionLastChange  time.Time
+	partitionBrowsedPath string
+	partitionListeners   []func()
+	partitionWatchOnce   sync.Once
 )
 
 // startPartitionWatcher starts the periodic refresh of the shared files view.
@@ -74,17 +77,30 @@ func watchPartitionChanges() {
 
 		// The signature is taken after the drop, so it compares what a listing
 		// would show now. It is what tells a transfer in progress - the sizes
-		// grow - from an idle medium.
-		if signature := partitionSignature(); signature != lastSignature {
-			lastSignature = signature
-
-			partitionCacheMu.Lock()
-			partitionLastChange = time.Now()
-			partitionCacheMu.Unlock()
+		// grow - from an idle medium, and it is also what keeps an idle shared
+		// folder from making the web UI re-read it every second.
+		signature := partitionSignature()
+		if signature == lastSignature {
+			continue
 		}
+		lastSignature = signature
+
+		partitionCacheMu.Lock()
+		partitionLastChange = time.Now()
+		partitionCacheMu.Unlock()
 
 		notifyPartitionListeners()
 	}
+}
+
+// SetPartitionBrowsePath tells the watcher which directory of the shared
+// folder the web UI is showing. A change inside a subdirectory does not move
+// the folder's own signature, so the directory being browsed is watched too.
+// An empty path stops watching a directory.
+func SetPartitionBrowsePath(browsePath string) {
+	partitionCacheMu.Lock()
+	partitionBrowsedPath = browsePath
+	partitionCacheMu.Unlock()
 }
 
 // SubscribePartitionChanges registers fn for "the shared files view was
@@ -135,12 +151,30 @@ func invalidatePartitionCache() {
 	dropPartitionCaches()
 }
 
-// partitionSignature summarizes the shared folder itself, which is where files
-// are exchanged: a transfer in progress changes it as the sizes grow. Names,
-// sizes and timestamps are all compared, because a copy changes the size of an
-// entry it already added.
+// partitionSignature summarizes what a listing would show: the shared folder
+// itself, which is where files are exchanged, and the directory the file
+// browser has open. Names, sizes and timestamps are all compared, because a
+// copy changes the size of an entry it already added.
 func partitionSignature() string {
-	entries, err := os.ReadDir(mediaDirectory)
+	partitionCacheMu.Lock()
+	browsed := partitionBrowsedPath
+	partitionCacheMu.Unlock()
+
+	signature := directorySignature(mediaDirectory)
+	if browsed == "" || browsed == "/" {
+		return signature
+	}
+
+	dir, err := diskfs.ResolveInside(mediaDirectory, browsed)
+	if err != nil {
+		return signature
+	}
+
+	return signature + directorySignature(dir)
+}
+
+func directorySignature(dir string) string {
+	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return ""
 	}
@@ -159,9 +193,23 @@ func partitionSignature() string {
 
 // dropPartitionCaches drops the dentries and inodes, which is what makes a
 // listing see the target machine's entries and sizes. Dirty pages survive a
-// drop, so gadget writes still in flight are not lost.
+// drop, so gadget writes still in flight are not lost. The value is 2 plus 4:
+// the extra bit is what keeps the kernel from logging a line every second,
+// which is how a mount lasting a day used to fill the log on the data
+// partition.
 func dropPartitionCaches() {
-	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte("2"), 0); err != nil {
+	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte("6"), 0); err != nil {
+		log.Warnf("drop stale caches failed: %s", err)
+	}
+}
+
+// dropAllPartitionCaches throws away everything this side cached of the data
+// partition, page cache included: it runs when the partition stops being
+// served to the target machine, where a stale page written back would land on
+// top of what the target machine just wrote. 7 is 3 (page cache, dentries and
+// inodes) plus 4, so the drop is not logged either.
+func dropAllPartitionCaches() {
+	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte("7"), 0); err != nil {
 		log.Warnf("drop stale caches failed: %s", err)
 	}
 }

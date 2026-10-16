@@ -1,9 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Breadcrumb, Button, Empty, Input, Modal, Select, Tooltip } from 'antd';
+import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { App, Breadcrumb, Button, Empty, Input, Select, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
   CircleAlertIcon,
   DownloadIcon,
   FolderIcon,
@@ -53,6 +55,34 @@ function isImageName(name: string): boolean {
   return lower.endsWith('.iso') || lower.endsWith('.img');
 }
 
+// The names a running transfer gives its temporaries (the server-side
+// diskfs.UploadPrefix and the image transfer prefix). They are the only
+// dot-prefixed names hidden: anything else starting with a dot is the user's
+// own file, and hiding it makes the browser lie about a folder.
+const transferTempPrefixes = ['.kvm-upload-', '.nanokvm-'];
+
+function childPath(parent: string, name: string): string {
+  return parent === '/' ? `/${name}` : `${parent}/${name}`;
+}
+
+function sortEntries(entries: api.MediaFileEntry[], sortKey: SortKey, sortAsc: boolean) {
+  return [...entries].sort((a, b) => {
+    // Folders stay ahead of files; the chosen key sorts inside each group.
+    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+
+    let compared: number;
+    if (sortKey === 'size') {
+      compared = a.size - b.size;
+    } else if (sortKey === 'type') {
+      compared = extension(a.name).localeCompare(extension(b.name));
+    } else {
+      compared = a.name.localeCompare(b.name);
+    }
+    if (compared === 0) compared = a.name.localeCompare(b.name);
+    return sortAsc ? compared : -compared;
+  });
+}
+
 // The share group's toolbar is returned on its own so the page can pin it to
 // the group's title row, mirroring the image group's buttons. Its buttons
 // always target the shared files, whether or not they are the medium being
@@ -75,10 +105,13 @@ export function useFileBrowser({
   onError
 }: Props) {
   const { t } = useTranslation();
+  const { modal } = App.useApp();
 
   const [files, setFiles] = useState<api.MediaFiles | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [busy, setBusy] = useState('');
+  const [expandedDirs, setExpandedDirs] = useState<Record<string, api.MediaFiles>>({});
+  const [expandingDirs, setExpandingDirs] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState('');
   const [sortKey, setSortKey] = useState<SortKey>('name');
   const [sortAsc, setSortAsc] = useState(true);
@@ -97,24 +130,46 @@ export function useFileBrowser({
     [canBrowse, media]
   );
 
+  // The medium list is re-read on a timer, which hands this panel a new object
+  // for the same medium every few seconds. The listing hangs on the medium's
+  // identity - its type and id - not on that object, or every poll would
+  // re-list the folder and clear the search.
+  const mediaType = media?.type;
+  const mediaRel = media?.rel;
+
+  // Every listing carries a number: an answer that arrives after a newer
+  // request belongs to a folder the user has already left.
+  const listingId = useRef(0);
+  const expandedGeneration = useRef(0);
+
   const refresh = useCallback(async () => {
-    if (!media || !canBrowse) {
+    if (!mediaType || !canBrowse) {
       setFiles(null);
       return;
     }
 
+    const id = ++listingId.current;
     setIsLoading(true);
     try {
-      const rsp = await api.listMediaFiles({ type: media.type, rel: media.rel, path });
+      const rsp = await api.listMediaFiles({ type: mediaType, rel: mediaRel ?? '', path });
+      if (id !== listingId.current) return;
       if (rsp.code === 0) {
         setFiles(rsp.data);
       } else {
         onError(rsp.msg);
       }
     } finally {
-      setIsLoading(false);
+      if (id === listingId.current) setIsLoading(false);
     }
-  }, [media, path, canBrowse, onError]);
+  }, [mediaType, mediaRel, path, canBrowse, onError]);
+
+  // An upload or a delete finishes long after the render that started it, so
+  // those continuations refresh through this ref: they must re-read what the
+  // user is looking at now, not the folder they were looking at before.
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -124,39 +179,81 @@ export function useFileBrowser({
   // folder would mostly produce empty-looking listings.
   useEffect(() => {
     setQuery('');
-  }, [media, path]);
+  }, [mediaType, mediaRel, path]);
+
+  // Expanded directories belong to the folder and medium that loaded them.
+  // A storage notification also invalidates them because the target machine
+  // may have changed their contents.
+  useEffect(() => {
+    expandedGeneration.current += 1;
+    setExpandedDirs({});
+    setExpandingDirs({});
+  }, [mediaType, mediaRel, path, changeSignal]);
 
   // On the emulated volume, the images are shown in the image list instead:
-  // this browser is for the files being exchanged. Names starting with a dot
-  // are this device's own temporary files.
-  const entries = (files?.entries ?? []).filter((entry) => {
-    if (entry.name.startsWith('.')) return false;
+  // this browser is for the files being exchanged.
+  function isEntryVisible(entry: api.MediaFileEntry): boolean {
+    if (transferTempPrefixes.some((prefix) => entry.name.startsWith(prefix))) return false;
     return !(media?.type === 'partition' && !entry.isDir && isImageName(entry.name));
-  });
+  }
+
+  const entries = (files?.entries ?? []).filter(isEntryVisible);
 
   const trimmedQuery = query.trim().toLowerCase();
-  const visibleEntries = [
-    ...(trimmedQuery
+  const visibleEntries = sortEntries(
+    trimmedQuery
       ? entries.filter((entry) => entry.name.toLowerCase().includes(trimmedQuery))
-      : entries)
-  ].sort((a, b) => {
-    // Folders stay ahead of files; the chosen key sorts inside each group.
-    if (a.isDir !== b.isDir) return a.isDir ? -1 : 1;
+      : entries,
+    sortKey,
+    sortAsc
+  );
 
-    let compared: number;
-    if (sortKey === 'size') {
-      compared = a.size - b.size;
-    } else if (sortKey === 'type') {
-      compared = extension(a.name).localeCompare(extension(b.name));
-    } else {
-      compared = a.name.localeCompare(b.name);
+  function openDir(directoryPath: string) {
+    onPathChange(directoryPath);
+  }
+
+  async function toggleDir(directoryPath: string) {
+    if (expandedDirs[directoryPath]) {
+      setExpandedDirs((current) => {
+        const next = { ...current };
+        for (const key of Object.keys(next)) {
+          if (key === directoryPath || key.startsWith(`${directoryPath}/`)) {
+            delete next[key];
+          }
+        }
+        return next;
+      });
+      return;
     }
-    if (compared === 0) compared = a.name.localeCompare(b.name);
-    return sortAsc ? compared : -compared;
-  });
+    if (expandingDirs[directoryPath] || !mediaType) return;
 
-  function openDir(name: string) {
-    onPathChange(path === '/' ? `/${name}` : `${path}/${name}`);
+    const generation = expandedGeneration.current;
+    setExpandingDirs((current) => ({ ...current, [directoryPath]: true }));
+    try {
+      const rsp = await api.listMediaFiles({
+        type: mediaType,
+        rel: mediaRel ?? '',
+        path: directoryPath
+      });
+      if (generation !== expandedGeneration.current) return;
+      if (rsp.code !== 0) {
+        onError(rsp.msg);
+        return;
+      }
+      setExpandedDirs((current) => ({ ...current, [directoryPath]: rsp.data }));
+    } catch {
+      if (generation === expandedGeneration.current) {
+        onError(t('storage.failed'));
+      }
+    } finally {
+      if (generation === expandedGeneration.current) {
+        setExpandingDirs((current) => {
+          const next = { ...current };
+          delete next[directoryPath];
+          return next;
+        });
+      }
+    }
   }
 
   function openParent() {
@@ -175,8 +272,8 @@ export function useFileBrowser({
     try {
       const rsp = await api.uploadMediaFile(target.type, target.rel, dir, file);
       if (rsp.code === 0) {
-        if (isBrowsed(target)) {
-          await refresh();
+        if (isBrowsed(target) && dir === path) {
+          await refreshRef.current();
         } else {
           onMediaChanged();
         }
@@ -191,23 +288,29 @@ export function useFileBrowser({
     }
   }
 
-  function confirmDelete(entry: api.MediaFileEntry) {
+  function confirmDelete(entry: api.MediaFileEntry, target: string) {
     if (!media) return;
 
-    Modal.confirm({
-      title: t('storage.files.deleteTitle'),
-      content: t('storage.files.deleteConfirm', { name: entry.name }),
+    modal.confirm({
+      // A folder goes with everything it holds, so its confirm says so; the
+      // file confirm stays the plain question.
+      title: entry.isDir ? t('storage.files.delete') : t('storage.files.deleteTitle'),
+      content: entry.isDir
+        ? t('storage.deleteConfirm', { name: entry.name })
+        : t('storage.files.deleteConfirm', { name: entry.name }),
       okText: t('storage.yes'),
       cancelText: t('storage.no'),
       okButtonProps: { danger: true },
       onOk: async () => {
-        const target = path === '/' ? `/${entry.name}` : `${path}/${entry.name}`;
         const rsp = await api.deleteMediaFile({ type: media.type, rel: media.rel, path: target });
         if (rsp.code !== 0) {
           onError(rsp.msg);
           return;
         }
-        await refresh();
+        expandedGeneration.current += 1;
+        setExpandedDirs({});
+        setExpandingDirs({});
+        await refreshRef.current();
       }
     });
   }
@@ -253,6 +356,124 @@ export function useFileBrowser({
       onChange={(event) => void upload(event.target.files?.[0] ?? null)}
     />
   );
+
+  function renderEntryRows(
+    rows: api.MediaFileEntry[],
+    parentPath: string,
+    depth: number,
+    writing: boolean | undefined
+  ): ReactNode {
+    return rows.map((entry) => {
+      const fullPath = childPath(parentPath, entry.name);
+      const expanded = entry.isDir ? expandedDirs[fullPath] : undefined;
+      const childEntries = expanded
+        ? sortEntries(expanded.entries.filter(isEntryVisible), sortKey, sortAsc)
+        : [];
+
+      return (
+        <Fragment key={fullPath}>
+          <div
+            className="group flex items-center justify-between px-3 py-2 text-sm hover:bg-neutral-800/60"
+            style={{ paddingLeft: 12 + depth * 16 }}
+          >
+            <div
+              className={clsx(
+                'flex min-w-0 flex-1 items-center space-x-2',
+                entry.isDir && 'cursor-pointer'
+              )}
+              onClick={() => entry.isDir && openDir(fullPath)}
+            >
+              {entry.isDir ? (
+                <>
+                  <Button
+                    type="text"
+                    size="small"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center"
+                    icon={
+                      expandingDirs[fullPath] ? (
+                        <LoaderCircleIcon size={14} className="animate-spin" />
+                      ) : expanded ? (
+                        <ChevronDownIcon size={14} />
+                      ) : (
+                        <ChevronRightIcon size={14} />
+                      )
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void toggleDir(fullPath);
+                    }}
+                  />
+                  <FolderIcon size={14} className="shrink-0 text-neutral-400" />
+                </>
+              ) : (
+                <>
+                  <span className="h-6 w-6 shrink-0" />
+                  <FileTypeIcon name={entry.name} />
+                </>
+              )}
+              <span
+                className={clsx('truncate', entry.isDir ? 'text-neutral-200' : 'text-neutral-300')}
+                title={entry.name}
+              >
+                {entry.name}
+              </span>
+            </div>
+
+            <div className="flex shrink-0 items-center space-x-3">
+              <span className="text-xs text-neutral-500">
+                {entry.isDir ? (
+                  ''
+                ) : entry.size === 0 && writing ? (
+                  <span className="text-blue-500">{t('storage.files.uploading')}</span>
+                ) : (
+                  formatSize(entry.size)
+                )}
+              </span>
+              <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
+                {!entry.isDir && (
+                  <Button
+                    type="text"
+                    size="small"
+                    href={api.mediaFileDownloadUrl(media!.type, media!.rel, fullPath)}
+                    download
+                    icon={<DownloadIcon size={14} />}
+                    title={t('storage.files.download')}
+                  />
+                )}
+                <Button
+                  type="text"
+                  size="small"
+                  danger={canWrite}
+                  disabled={!canWrite}
+                  icon={<Trash2Icon size={14} />}
+                  title={canWrite ? t('storage.files.delete') : t('storage.add.blocked')}
+                  onClick={() => canWrite && confirmDelete(entry, fullPath)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {expandingDirs[fullPath] && (
+            <div
+              className="flex items-center px-3 py-2 text-neutral-500"
+              style={{ paddingLeft: 40 + depth * 16 }}
+            >
+              <LoaderCircleIcon size={14} className="animate-spin" />
+            </div>
+          )}
+          {expanded && childEntries.length === 0 && (
+            <div
+              className="px-3 py-2 text-sm text-neutral-500"
+              style={{ paddingLeft: 40 + depth * 16 }}
+            >
+              {t('storage.files.empty')}
+            </div>
+          )}
+          {expanded && renderEntryRows(childEntries, fullPath, depth + 1, expanded.writing)}
+        </Fragment>
+      );
+    });
+  }
 
   const body =
     !media || !canBrowse ? (
@@ -303,72 +524,7 @@ export function useFileBrowser({
                 <span>..</span>
               </div>
             )}
-            {visibleEntries.map((entry) => (
-              <div
-                key={entry.name}
-                className="group flex items-center justify-between px-3 py-2 text-sm hover:bg-neutral-800/60"
-              >
-                <div
-                  className={clsx(
-                    'flex min-w-0 flex-1 items-center space-x-2',
-                    entry.isDir && 'cursor-pointer'
-                  )}
-                  onClick={() => entry.isDir && openDir(entry.name)}
-                >
-                  {entry.isDir ? (
-                    <FolderIcon size={14} className="shrink-0 text-neutral-400" />
-                  ) : (
-                    <FileTypeIcon name={entry.name} />
-                  )}
-                  <span
-                    className={clsx(
-                      'truncate',
-                      entry.isDir ? 'text-neutral-200' : 'text-neutral-300'
-                    )}
-                    title={entry.name}
-                  >
-                    {entry.name}
-                  </span>
-                </div>
-
-                <div className="flex shrink-0 items-center space-x-3">
-                  <span className="text-xs text-neutral-500">
-                    {entry.isDir ? (
-                      ''
-                    ) : entry.size === 0 && files?.writing ? (
-                      <span className="text-blue-500">{t('storage.files.uploading')}</span>
-                    ) : (
-                      formatSize(entry.size)
-                    )}
-                  </span>
-                  <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-                    {!entry.isDir && (
-                      <Button
-                        type="text"
-                        size="small"
-                        href={api.mediaFileDownloadUrl(
-                          media.type,
-                          media.rel,
-                          path === '/' ? `/${entry.name}` : `${path}/${entry.name}`
-                        )}
-                        download
-                        icon={<DownloadIcon size={14} />}
-                        title={t('storage.files.download')}
-                      />
-                    )}
-                    <Button
-                      type="text"
-                      size="small"
-                      danger={canWrite}
-                      disabled={!canWrite}
-                      icon={<Trash2Icon size={14} />}
-                      title={canWrite ? t('storage.files.delete') : t('storage.add.blocked')}
-                      onClick={() => canWrite && confirmDelete(entry)}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+            {renderEntryRows(visibleEntries, path, 0, files?.writing)}
             {visibleEntries.length === 0 && (
               <div className="px-3 py-3 text-center text-sm text-neutral-500">
                 {t('storage.files.noMatch')}

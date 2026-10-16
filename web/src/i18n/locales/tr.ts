@@ -226,6 +226,8 @@ const tr = {
       eject: 'Çıkar',
       mount: 'Bağla',
       mountMode: 'Montaj modu',
+      mountModeDisk: 'Yığın depolama',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Dosya yöneticisini aç',
       refresh: 'Yenile',
       delete: 'Sil',
@@ -262,9 +264,12 @@ const tr = {
         url: "İmaj URL'si",
         urlRequired: 'Lütfen bir URL girin',
         onlyImages: 'Yalnızca .iso ve .img dosyaları bağlanabilir',
+        dropHint: 'ISO veya IMG dosyasını buraya sürükleyin ya da seçmek için tıklayın',
+        cdromOnlyIso: 'Bir CD-ROM yalnızca ISO 9660 imajı taşıyabilir',
         uploadFailed: 'Yükleme başarısız oldu',
         downloadFailed: 'İndirme başarısız oldu',
-        blocked: 'Hedef makine diski kullanıyor'
+        blocked: 'Hedef makine diski kullanıyor',
+        copyHint: 'İmajı SCP ile veri bölümüne ya da hedef makineden doğrudan kopyalayabilirsiniz.'
       },
       files: {
         selectMedium: 'Dosyalarını görmek için bir ortam seçin.',
@@ -337,7 +342,8 @@ const tr = {
       ok: 'Tamam'
     },
     download: {
-      disabled: '/data bölüntüsü salt okunur modda, disk imajı indirilemiyor.',
+      disabled:
+        'Veri bölümü, hedef makine kullandığı sürece salt okunurdur: yeni imaj yazılamaz, mevcut dosyalar indirilebilir.',
       sha256: 'SHA-256 (isteğe bağlı)',
       sha256Placeholder: '64 karakterlik SHA-256 sağlama toplamını girin',
       invalidSHA256: 'SHA-256, 64 karakterlik bir onaltılık dize olmalıdır',

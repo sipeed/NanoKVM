@@ -227,6 +227,8 @@ const nb = {
       eject: 'Løs ut',
       mount: 'Monter',
       mountMode: 'Monteringsmodus',
+      mountModeDisk: 'Masselagring',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Åpne filbehandler',
       refresh: 'Oppdater',
       delete: 'Slett',
@@ -263,9 +265,12 @@ const nb = {
         url: 'URL til bildet',
         urlRequired: 'Skriv inn en URL',
         onlyImages: 'Bare .iso- og .img-filer kan monteres',
+        dropHint: 'Dra en ISO eller IMG hit, eller klikk for å velge en fil',
+        cdromOnlyIso: 'En CD-ROM kan bare inneholde et ISO 9660-bilde',
         uploadFailed: 'Opplasting mislyktes',
         downloadFailed: 'Nedlasting mislyktes',
-        blocked: 'Målmaskinen bruker disken'
+        blocked: 'Målmaskinen bruker disken',
+        copyHint: 'Du kan også kopiere et bilde til datapartisjonen via SCP, eller fra målmaskinen.'
       },
       files: {
         selectMedium: 'Velg et medium for å se filene på det.',
@@ -339,7 +344,8 @@ const nb = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partisjonen er RO, så vi kan ikke laste ned bildet',
+      disabled:
+        'Datapartisjonen er skrivebeskyttet mens målmaskinen bruker den: nye bilder kan ikke skrives, men eksisterende filer kan fortsatt lastes ned.',
       sha256: 'SHA-256 (valgfritt)',
       sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
       invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',

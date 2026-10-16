@@ -1,17 +1,20 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/proto"
+	"NanoKVM-Server/service/storage/diskfs"
 	"NanoKVM-Server/utils"
 )
 
@@ -22,6 +25,11 @@ import (
 // uploadMaxBytes is a hard ceiling for a single upload, so a runaway request
 // cannot fill the medium before the free space check has had its say.
 const uploadMaxBytes = 8 << 30
+
+// downloadTempPrefix is what the image downloader names the file it is writing
+// while it is in flight. Like diskfs.UploadPrefix it is hidden from a listing
+// and must survive until the transfer finishes.
+const downloadTempPrefix = ".nanokvm-"
 
 func (s *Service) ListMediaFiles(c *gin.Context) {
 	var rsp proto.Response
@@ -35,7 +43,13 @@ func (s *Service) ListMediaFiles(c *gin.Context) {
 	}
 
 	if mediaType == proto.MediaTypePartition {
+		// The watcher pushes "the shared files changed" for the folder the UI
+		// has open, which is not necessarily its root, so it is told which one
+		// that is. Listing anything else stops that watch.
+		SetPartitionBrowsePath(dir)
 		invalidatePartitionCache()
+	} else {
+		SetPartitionBrowsePath("")
 	}
 
 	image, err := openMedium(mediaType, rel, false)
@@ -110,7 +124,7 @@ func (s *Service) DownloadMediaFile(c *gin.Context) {
 
 	// The download streams straight out of the mounted image; ServeContent adds
 	// range support and the headers a browser download needs.
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", path.Base(entryPath)))
+	c.Header("Content-Disposition", attachmentHeader(path.Base(entryPath)))
 	c.Header("Content-Type", "application/octet-stream")
 	http.ServeContent(c.Writer, c.Request, entry.Name, entry.ModTime, file)
 }
@@ -140,12 +154,23 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 	}
 	defer closeMedia(image)
 
-	if free, _, err := image.StatFS(); err == nil && size > 0 && uint64(size) > free {
-		respondError(c, fmt.Errorf("%w: the medium has %d MiB free", errNoSpace, free>>20))
-		return
+	// A chunked request states no length, so the free space is what has to cap
+	// it instead: without that, an upload that never ends could fill the medium.
+	limit := int64(uploadMaxBytes)
+	limitedBySpace := false
+	if _, free, err := image.StatFS(); err == nil {
+		if size > 0 {
+			if uint64(size) > free {
+				respondError(c, fmt.Errorf("%w: the medium has %d MiB free", errNoSpace, free>>20))
+				return
+			}
+		} else if free < uint64(limit) {
+			limit = int64(free)
+			limitedBySpace = true
+		}
 	}
 
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, uploadMaxBytes)
+	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, limit)
 
 	reader, err := c.Request.MultipartReader()
 	if err != nil {
@@ -192,6 +217,13 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 	written, err := image.Write(target, io.TeeReader(part, progress))
 	if err != nil {
 		s.finishJob(done, jobStateFailed, err.Error())
+
+		var tooLarge *http.MaxBytesError
+		if limitedBySpace && errors.As(err, &tooLarge) {
+			respondError(c, fmt.Errorf("%w: the medium could not hold the upload", errNoSpace))
+			return
+		}
+
 		respondError(c, err)
 		return
 	}
@@ -220,7 +252,33 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 		return
 	}
 
-	image, err := openMedium(req.Type, req.Rel, true)
+	// Our own transfer temporaries are not files to manage: deleting one while
+	// its transfer writes it loses the data silently.
+	if name := path.Base(entryPath); strings.HasPrefix(name, diskfs.UploadPrefix) || strings.HasPrefix(name, downloadTempPrefix) {
+		respondError(c, fmt.Errorf("refusing to delete %s: it belongs to a running transfer", name))
+		return
+	}
+
+	// Deleting through the shared partition has no loop mount to keep the
+	// gadget away. Hold the operation lock until the unlink is done so a
+	// concurrent mount cannot attach the file after the attachment check.
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	// A file the target machine is being served as its medium must not vanish
+	// under it: the gadget keeps reading the inode it opened, so the target
+	// machine would be left with a medium whose contents are already gone. A
+	// directory is removed recursively, so the check covers everything below
+	// the path as well, not just the path itself.
+	if req.Type == proto.MediaTypePartition {
+		full := filepath.Join(mediaDirectory, filepath.FromSlash(entryPath))
+		if IsAttached(full) || attachedMediumInside(full) {
+			respondError(c, errMediumAttached)
+			return
+		}
+	}
+
+	image, err := openMediumLocked(req.Type, req.Rel, true)
 	if err != nil {
 		respondError(c, err)
 		return

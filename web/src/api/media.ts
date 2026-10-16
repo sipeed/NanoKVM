@@ -30,6 +30,8 @@ export interface MediaStateInfo {
   rel?: string;
   hidOnly: boolean;
   open: string[];
+  // True while the attached medium is served as a CD-ROM.
+  cdrom: boolean;
 }
 
 export interface MediaFileEntry {
@@ -67,6 +69,8 @@ export const codeMediumLocked = -11;
 export const codeMediumBusy = -12;
 export const codeNotBrowsable = -13;
 export const codeInsufficientSpace = -14;
+// A CD-ROM was asked for a medium that is not an ISO 9660 image.
+export const codeNotOptical = -15;
 
 export function getMedia() {
   return http.get('/api/storage/media');
@@ -105,9 +109,13 @@ export function deleteMediaFile(data: { type: MediaType; rel: string; path: stri
   return http.post('/api/storage/media/files/delete', data);
 }
 
-// enable/disable the emulated USB disk (Settings - Device)
-export function setVirtualDevice(device: 'network' | 'disk') {
-  return http.post('/api/vm/device/virtual', { device });
+// enable/disable the emulated USB disk (Settings - Device). Without `enable`
+// the server toggles, which is only what a switch wants.
+export function setVirtualDevice(device: 'network' | 'disk', enable?: boolean) {
+  return http.post(
+    '/api/vm/device/virtual',
+    enable === undefined ? { device } : { device, enable }
+  );
 }
 
 export function mediaQuery(type: MediaType, rel: string, path = ''): string {

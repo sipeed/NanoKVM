@@ -217,6 +217,8 @@ const zh = {
       eject: '弹出',
       mount: '装载',
       mountMode: '装载模式',
+      mountModeDisk: '磁盘模式',
+      mountModeCdrom: '光盘模式',
       openManager: '打开文件管理器',
       refresh: '刷新',
       delete: '删除',
@@ -252,9 +254,12 @@ const zh = {
         url: '镜像地址',
         urlRequired: '请输入镜像地址',
         onlyImages: '只能挂载 .iso 和 .img 文件',
+        dropHint: '把 ISO / IMG 拖到这里，或点击选择文件',
+        cdromOnlyIso: '光盘模式只能挂载 ISO 光盘镜像',
         uploadFailed: '上传失败',
         downloadFailed: '下载失败',
-        blocked: '被控机正在使用这张盘'
+        blocked: '被控机正在使用这张盘',
+        copyHint: '也可以通过 SCP 把镜像放进数据分区，或在被控机上直接拷贝。'
       },
       files: {
         selectMedium: '选择一个介质,查看里面的文件。',
@@ -325,7 +330,7 @@ const zh = {
       ok: '确定'
     },
     download: {
-      disabled: '/data 是只读分区，无法下载镜像',
+      disabled: '共享文件夹正被被控机使用，/data 当前只读：不能写入新镜像，已有文件仍可正常下载。',
       sha256: 'SHA-256（可选）',
       sha256Placeholder: '请输入 64 位 SHA-256 校验和',
       invalidSHA256: 'SHA-256 必须是 64 位十六进制字符串',

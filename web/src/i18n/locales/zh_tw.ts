@@ -217,6 +217,8 @@ const zh_tw = {
       eject: '彈出',
       mount: '裝載',
       mountMode: '裝載模式',
+      mountModeDisk: '磁碟模式',
+      mountModeCdrom: '光碟模式',
       openManager: '開啟檔案管理員',
       refresh: '重新整理',
       delete: '刪除',
@@ -252,9 +254,12 @@ const zh_tw = {
         url: '映像檔網址',
         urlRequired: '請輸入映像檔網址',
         onlyImages: '只能掛載 .iso 和 .img 檔案',
+        dropHint: '把 ISO / IMG 拖到這裡，或點擊選擇檔案',
+        cdromOnlyIso: '光碟模式只能掛載 ISO 光碟映像檔',
         uploadFailed: '上傳失敗',
         downloadFailed: '下載失敗',
-        blocked: '受控裝置正在使用這張磁碟'
+        blocked: '受控裝置正在使用這張磁碟',
+        copyHint: '也可以透過 SCP 把映像檔放進資料分割區，或在受控裝置上直接複製。'
       },
       files: {
         selectMedium: '選擇一個媒體，查看裡面的檔案。',
@@ -325,7 +330,8 @@ const zh_tw = {
       ok: '確定'
     },
     download: {
-      disabled: '/data 為唯讀目錄，無法下載映像檔',
+      disabled:
+        '共享資料夾正被受控裝置使用，/data 目前唯讀：無法寫入新映像檔，既有檔案仍可正常下載。',
       sha256: 'SHA-256（可選）',
       sha256Placeholder: '請輸入 64 位元 SHA-256 校驗和',
       invalidSHA256: 'SHA-256 必須是 64 位元十六進位字串',

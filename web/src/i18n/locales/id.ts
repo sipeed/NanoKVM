@@ -226,6 +226,8 @@ const id = {
       eject: 'Keluarkan',
       mount: 'Pasang',
       mountMode: 'Mode pemasangan',
+      mountModeDisk: 'Penyimpanan massal',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Buka pengelola file',
       refresh: 'Segarkan',
       delete: 'Hapus',
@@ -262,9 +264,13 @@ const id = {
         url: 'URL gambar',
         urlRequired: 'Masukkan URL',
         onlyImages: 'Hanya file .iso dan .img yang dapat dipasang',
+        dropHint: 'Seret ISO atau IMG ke sini, atau klik untuk memilih file',
+        cdromOnlyIso: 'CD-ROM hanya dapat berisi citra ISO 9660',
         uploadFailed: 'Unggahan gagal',
         downloadFailed: 'Unduhan gagal',
-        blocked: 'Komputer target sedang menggunakan disk'
+        blocked: 'Komputer target sedang menggunakan disk',
+        copyHint:
+          'Anda juga dapat menyalin citra ke partisi data lewat SCP, atau dari komputer target.'
       },
       files: {
         selectMedium: 'Pilih media untuk melihat file di dalamnya.',
@@ -338,7 +344,8 @@ const id = {
       ok: 'Ok'
     },
     download: {
-      disabled: 'Partisi /data adalah RO, jadi kami tidak dapat mengunduh gambarnya',
+      disabled:
+        'Partisi data bersifat hanya-baca selama komputer target memakainya: citra baru tidak dapat ditulis, file yang ada tetap dapat diunduh.',
       sha256: 'SHA-256 (opsional)',
       sha256Placeholder: 'Masukkan checksum SHA-256 64 karakter',
       invalidSHA256: 'SHA-256 harus berupa string heksadesimal 64 karakter',

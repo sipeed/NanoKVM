@@ -223,6 +223,8 @@ const se = {
       eject: 'Mata ut',
       mount: 'Montera',
       mountMode: 'Monteringsläge',
+      mountModeDisk: 'Massminne',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Öppna filhanteraren',
       refresh: 'Uppdatera',
       delete: 'Ta bort',
@@ -259,9 +261,13 @@ const se = {
         url: 'URL till avbildningen',
         urlRequired: 'Ange en URL',
         onlyImages: 'Bara .iso- och .img-filer kan monteras',
+        dropHint: 'Dra en ISO eller IMG hit, eller klicka för att välja en fil',
+        cdromOnlyIso: 'En CD-ROM kan bara innehålla en ISO 9660-avbildning',
         uploadFailed: 'Uppladdningen misslyckades',
         downloadFailed: 'Nedladdningen misslyckades',
-        blocked: 'Måldatorn använder disken'
+        blocked: 'Måldatorn använder disken',
+        copyHint:
+          'Du kan också kopiera en avbildning till datapartitionen via SCP, eller från måldatorn.'
       },
       files: {
         selectMedium: 'Välj ett medium för att visa filerna på det.',
@@ -334,7 +340,8 @@ const se = {
       ok: 'Ok'
     },
     download: {
-      disabled: '/data partitionen är skrivskyddad, kan inte hämta avbildning',
+      disabled:
+        'Datapartitionen är skrivskyddad medan måldatorn använder den: nya avbildningar kan inte skrivas, men befintliga filer går fortfarande att hämta.',
       sha256: 'SHA-256 (valfrie)',
       sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
       invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',

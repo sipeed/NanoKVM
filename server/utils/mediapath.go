@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -85,7 +86,65 @@ func ResolveMediaID(id string) (string, error) {
 		return "", fmt.Errorf("%w: %s is not a disk image", ErrInvalidMediaID, id)
 	}
 
-	return filepath.Join(MediaDirectory, rel), nil
+	return canonicalMediaPath(MediaDirectory, rel)
+}
+
+// CanonicalMediaPath resolves an absolute medium path to the spelling used by
+// the directory entries on disk. Like ResolveMediaID, it rejects paths outside
+// MediaDirectory and names that are not disk images.
+func CanonicalMediaPath(name string) (string, error) {
+	rel, err := filepath.Rel(MediaDirectory, filepath.Clean(name))
+	if err != nil || !filepath.IsLocal(rel) {
+		return "", fmt.Errorf("%w: %s is outside %s", ErrInvalidMediaID, name, MediaDirectory)
+	}
+
+	return ResolveMediaID(filepath.ToSlash(rel))
+}
+
+// canonicalMediaPath resolves every existing component to its on-disk name.
+// exFAT lookups are case-insensitive, while Go string comparisons are not: an
+// all-lower-case request and an upper-case request can name the same medium.
+// Prefer an exact match so this also remains deterministic on a case-sensitive
+// filesystem, and reject ambiguous folds instead of choosing between files.
+// A missing component is kept as requested so callers can still create a new
+// image or report the original not-found error.
+func canonicalMediaPath(root, rel string) (string, error) {
+	segments := strings.Split(filepath.ToSlash(rel), "/")
+	current := root
+
+	for i, segment := range segments {
+		entries, err := os.ReadDir(current)
+		if err != nil {
+			if os.IsNotExist(err) {
+				parts := append([]string{current}, segments[i:]...)
+				return filepath.Join(parts...), nil
+			}
+			return "", fmt.Errorf("resolve medium path %s: %w", filepath.Join(root, rel), err)
+		}
+
+		matches := make([]string, 0, 1)
+		for _, entry := range entries {
+			if entry.Name() == segment {
+				matches = []string{segment}
+				break
+			}
+			if strings.EqualFold(entry.Name(), segment) {
+				matches = append(matches, entry.Name())
+			}
+		}
+
+		if len(matches) > 1 {
+			return "", fmt.Errorf("%w: %s has more than one case-insensitive match", ErrInvalidMediaID, filepath.Join(root, rel))
+		}
+		if len(matches) == 0 {
+			parts := append([]string{current}, segments[i:]...)
+			return filepath.Join(parts...), nil
+		}
+
+		current = filepath.Join(current, matches[0])
+	}
+
+	return current, nil
 }
 
 // ValidateMediumPath normalizes a path inside a mounted medium and returns it

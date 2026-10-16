@@ -4,10 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
+	"sync/atomic"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -30,6 +33,7 @@ const (
 	codeMediumBusy        = -12
 	codeNotBrowsable      = -13
 	codeInsufficientSpace = -14
+	codeNotOptical        = -15
 )
 
 // partitionDevice is the whole data partition. It is what the emulated disk
@@ -41,12 +45,52 @@ const partitionDevice = "/dev/mmcblk0p3"
 // hands to the target machine, so nothing secret belongs in it.
 const mediaDirectory = utils.MediaDirectory
 
+// mediumOperationMu serializes the two things that must not interleave: the
+// file manager opening a medium and the gadget serving one.
+var mediumOperationMu sync.Mutex
+
+// partitionWriteRefs counts long-running writes that land directly on the
+// data partition. The counter alone is atomic because a handle releases it
+// after openMedium has returned; taking the reference still happens under
+// mediumOperationMu, together with the gadget-state check, so a mount cannot
+// slip between the two.
+var partitionWriteRefs atomic.Int64
+
+// LockVirtualDiskTransition serializes a gadget transition with the media API.
+// It applies to disk and network changes because both restart the gadget and
+// can make the boot script expose the raw partition. The returned function
+// releases the lock and must be deferred by the caller. A transition is refused
+// while the file manager holds an image: exposing the raw partition would
+// otherwise let the target machine overwrite the image underneath its loop
+// device.
+func LockVirtualDiskTransition() (func(), error) {
+	mediumOperationMu.Lock()
+	if err := ensureNoOpenImages(); err != nil {
+		mediumOperationMu.Unlock()
+		return nil, err
+	}
+	if partitionWriteRefs.Load() > 0 {
+		mediumOperationMu.Unlock()
+		return nil, errMediumBusy
+	}
+
+	return mediumOperationMu.Unlock, nil
+}
+
+func ensureNoOpenImages() error {
+	if len(diskfs.MountedImages()) > 0 {
+		return errMediumBusy
+	}
+	return nil
+}
+
 var (
 	errStorageDisabled = errors.New("the virtual disk is disabled on this device")
 	errPartitionOwned  = errors.New("the data partition is attached to the target machine")
 	errMediumAttached  = errors.New("the medium is attached to the target machine")
 	errMediumBusy      = errors.New("the medium is in use by the file manager")
 	errNoSpace         = errors.New("not enough space on the data partition")
+	errNotOptical      = errors.New("a CD-ROM can only carry an ISO 9660 image")
 	errNotAMedium      = errors.New("the data partition has no file manager of its own")
 )
 
@@ -77,10 +121,17 @@ func (s *Service) GetMediaState(c *gin.Context) {
 		return
 	}
 
+	cdrom, err := readLunBool(lunCDRomFlag)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+
 	state := &proto.MediaStateRsp{
 		State:   string(status.State),
 		HidOnly: status.HidOnly,
 		Open:    openMediaIDs(),
+		Cdrom:   cdrom,
 	}
 
 	switch status.State {
@@ -130,33 +181,40 @@ func (s *Service) DeleteMedia(c *gin.Context) {
 		return
 	}
 
-	status, err := readDiskStatus()
-	if err != nil {
+	if err := deleteMedium(backing); err != nil {
 		respondError(c, err)
-		return
-	}
-	if status.State == diskStateImage && status.Backing == backing {
-		// Deleting the file the gadget is using would leave it reading a
-		// deleted inode.
-		respondError(c, errMediumAttached)
-		return
-	}
-	if diskfs.IsMounted(backing) {
-		respondError(c, errMediumBusy)
-		return
-	}
-	if status.State == diskStatePartition {
-		respondError(c, errPartitionOwned)
-		return
-	}
-
-	if err := os.Remove(backing); err != nil {
-		respondError(c, fmt.Errorf("remove %s: %w", req.Rel, err))
 		return
 	}
 
 	rsp.OkRsp(c)
 	log.Debugf("delete medium %s success", req.Rel)
+}
+
+// deleteMedium keeps the state checks and the unlink in the same critical
+// section as gadget attachment. Otherwise a concurrent mount can attach the
+// file after the check and leave the gadget reading a deleted inode.
+func deleteMedium(backing string) error {
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	status, err := readDiskStatus()
+	if err != nil {
+		return err
+	}
+	if status.State == diskStateImage && status.Backing == backing {
+		return errMediumAttached
+	}
+	if status.State == diskStatePartition {
+		return errPartitionOwned
+	}
+	if diskfs.IsMounted(backing) {
+		return errMediumBusy
+	}
+
+	if err := os.Remove(backing); err != nil {
+		return fmt.Errorf("remove %s: %w", backing, err)
+	}
+	return nil
 }
 
 func (s *Service) MountMedia(c *gin.Context) {
@@ -186,6 +244,18 @@ func (s *Service) MountMedia(c *gin.Context) {
 	if diskfs.IsMounted(backing) {
 		respondError(c, errMediumBusy)
 		return
+	}
+
+	// A CD-ROM is an optical disc, so its medium has to hold an ISO 9660
+	// filesystem: the gadget then reports 2048 byte sectors, and a partition or
+	// any other filesystem read that way is what the target machine reports as
+	// a corrupt disc.
+	if req.Cdrom {
+		kind, err := diskfs.Detect(backing)
+		if err != nil || kind != diskfs.KindISO9660 {
+			respondError(c, fmt.Errorf("%w: %s", errNotOptical, req.Rel))
+			return
+		}
 	}
 
 	// An image is always served read-only: the target machine must not write the
@@ -222,6 +292,28 @@ func (s *Service) EjectMedia(c *gin.Context) {
 // attachMedium is the whole mount path: refuse a relabeling that changes
 // nothing, then run the kernel's required sequence with the HID devices closed.
 func (s *Service) attachMedium(backing string, cdrom, ro, force bool) error {
+	// Mounting here and serving the medium to the target machine are two sides
+	// of one decision: without the lock, an upload into an image can be opening
+	// it read-write while the gadget starts serving the same file.
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	if backing == partitionDevice {
+		// Every image lives on the partition. Handing that partition to the
+		// target while any image has a loop mount would give both sides the
+		// same blocks, even though the partition itself is not in mounts. A
+		// direct partition write has no loop mount to check, so it carries an
+		// explicit reference instead.
+		if err := ensureNoOpenImages(); err != nil {
+			return err
+		}
+		if partitionWriteRefs.Load() > 0 {
+			return errMediumBusy
+		}
+	} else if diskfs.IsMounted(backing) {
+		return errMediumBusy
+	}
+
 	status, err := readDiskStatus()
 	if err != nil {
 		return err
@@ -240,7 +332,7 @@ func (s *Service) attachMedium(backing string, cdrom, ro, force bool) error {
 		}
 	}
 
-	return withHIDLock(func() error {
+	err = withHIDLock(func() error {
 		err := attach(backing, cdrom, ro)
 		if errors.Is(err, ErrMediumLocked) && force {
 			// The target machine holds the medium; re-enumerating the gadget
@@ -252,9 +344,35 @@ func (s *Service) attachMedium(backing string, cdrom, ro, force bool) error {
 		}
 		return err
 	})
+	if err != nil {
+		// attach may have changed /data before a later step failed. Base the
+		// rollback on the state that was actually left behind, not on the
+		// state in which the transition started.
+		if restoreErr := restoreDataAfterFailedAttach(); restoreErr != nil {
+			return errors.Join(err, restoreErr)
+		}
+	}
+	return err
+}
+
+func restoreDataAfterFailedAttach() error {
+	status, err := readDiskStatus()
+	if err != nil {
+		return fmt.Errorf("read medium state after failed mount: %w", err)
+	}
+	if status.State == diskStatePartition {
+		return nil
+	}
+	if err := SetDataWritable(true); err != nil {
+		return fmt.Errorf("restore %s writable after failed mount: %w", mediaDirectory, err)
+	}
+	return nil
 }
 
 func (s *Service) detachMedium(force bool) error {
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
 	status, err := readDiskStatus()
 	if err != nil {
 		return err
@@ -322,20 +440,24 @@ func (s *Service) DownloadMedia(c *gin.Context) {
 		respondError(c, err)
 		return
 	}
-	if status.State == diskStatePartition {
-		respondError(c, errPartitionOwned)
-		return
-	}
+	// Downloading is reading, and a read-only data partition is still readable:
+	// the target machine owning the partition does not stop this side from
+	// streaming an image file out of it. Its contents may change while it is
+	// being served, which is the same caveat the file browser has.
 	if status.State == diskStateImage && status.Backing == backing {
 		respondError(c, errMediumAttached)
 		return
 	}
 	// A file manager write may be in flight; streaming the image now would
-	// hand out a file that changes underneath the download.
-	if diskfs.IsMounted(backing) {
-		respondError(c, errMediumBusy)
+	// hand out a file that changes underneath the download. The pin refuses a
+	// writable mount for the whole stream, so the check cannot go stale between
+	// here and the open the way a one-shot IsMounted lookup did.
+	releasePin, err := diskfs.AcquireReadPin(backing)
+	if err != nil {
+		respondError(c, err)
 		return
 	}
+	defer releasePin()
 
 	file, err := os.Open(backing)
 	if err != nil {
@@ -352,7 +474,7 @@ func (s *Service) DownloadMedia(c *gin.Context) {
 		return
 	}
 
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filepath.Base(backing)))
+	c.Header("Content-Disposition", attachmentHeader(filepath.Base(backing)))
 	c.Header("Content-Type", "application/octet-stream")
 	http.ServeContent(c.Writer, c.Request, info.Name(), info.ModTime(), file)
 }
@@ -459,12 +581,64 @@ func openMediaIDs() []string {
 	return ids
 }
 
+// InstallImage atomically replaces destPath with a downloaded or uploaded
+// image. The same lock used by gadget and file-manager operations covers both
+// the checks and the rename, so the destination cannot become attached or
+// loop-mounted in between.
+func InstallImage(tempPath, destPath string) error {
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	canonicalDest, err := utils.CanonicalMediaPath(destPath)
+	if err != nil {
+		return err
+	}
+	destPath = canonicalDest
+
+	status, err := readDiskStatus()
+	if err != nil {
+		return err
+	}
+	return installImage(tempPath, destPath, status, diskfs.IsMounted(destPath))
+}
+
+func installImage(tempPath, destPath string, status diskStatus, mounted bool) error {
+	if status.State == diskStatePartition {
+		return ErrDataPartitionInUse
+	}
+	if status.State == diskStateImage && status.Backing == destPath {
+		return fmt.Errorf("%s is attached to the target machine; eject it there first", filepath.Base(destPath))
+	}
+	if mounted {
+		return fmt.Errorf("%w: %s", errMediumBusy, filepath.Base(destPath))
+	}
+
+	if err := os.Rename(tempPath, destPath); err != nil {
+		return fmt.Errorf("install image %s: %w", filepath.Base(destPath), err)
+	}
+	return nil
+}
+
 // openMedium returns a handle for a medium that is safe to touch. Everything
 // that reads or writes a medium's filesystem goes through here, so the two
 // ways to corrupt an image - writing it while the target machine owns it, and
 // writing it while the whole data partition is attached - are refused in one
 // place.
 func openMedium(mediaType, rel string, writable bool) (diskfs.Image, error) {
+	// The check and the mount are one step: the gadget must not start serving a
+	// medium between the two, or this side ends up writing a filesystem the
+	// target machine is reading.
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	return openMediumLocked(mediaType, rel, writable)
+}
+
+// openMediumLocked is openMedium for a caller that already holds
+// mediumOperationMu. Keeping the lock until a subsequent operation finishes
+// is necessary when a check alone does not protect that operation, as with a
+// file delete through the shared partition.
+func openMediumLocked(mediaType, rel string, writable bool) (diskfs.Image, error) {
 	status, err := readDiskStatus()
 	if err != nil {
 		return nil, err
@@ -483,8 +657,15 @@ func openMedium(mediaType, rel string, writable bool) (diskfs.Image, error) {
 
 	if mediaType == proto.MediaTypePartition {
 		// The partition needs no loop device: the emulated disk already hands
-		// this very directory to the target machine.
-		return diskfs.OpenDirectory(mediaDirectory)
+		// this very directory to the target machine. A writable handle has to
+		// outlive this mutex: without the reference, a mount could take the
+		// partition away after open and interrupt the write it returned for.
+		image, err := diskfs.OpenDirectory(mediaDirectory)
+		if err != nil || !writable {
+			return image, err
+		}
+		partitionWriteRefs.Add(1)
+		return &dataPartitionWriteHandle{Image: image}, nil
 	}
 
 	backing, err := utils.ResolveMediaID(rel)
@@ -498,29 +679,107 @@ func openMedium(mediaType, rel string, writable bool) (diskfs.Image, error) {
 	return diskfs.Mount(backing, writable)
 }
 
+// dataPartitionWriteHandle keeps the raw partition marked busy until the
+// write that opened it has finished and closed the handle.
+type dataPartitionWriteHandle struct {
+	diskfs.Image
+	released atomic.Bool
+}
+
+func (h *dataPartitionWriteHandle) Close() error {
+	err := h.Image.Close()
+	if h.released.CompareAndSwap(false, true) {
+		partitionWriteRefs.Add(-1)
+	}
+	return err
+}
+
+// BeginDataPartitionWrite reserves the data partition for a transfer that does
+// not go through a medium handle, such as writing a whole image download. The
+// reference is taken while the state is checked, then held until release runs;
+// handing the raw partition to the target machine is refused in between.
+func BeginDataPartitionWrite() (func(), error) {
+	mediumOperationMu.Lock()
+	status, err := readDiskStatus()
+	if err != nil {
+		mediumOperationMu.Unlock()
+		return nil, err
+	}
+	if status.State == diskStatePartition {
+		mediumOperationMu.Unlock()
+		return nil, ErrDataPartitionInUse
+	}
+	partitionWriteRefs.Add(1)
+	mediumOperationMu.Unlock()
+
+	var once sync.Once
+	return func() {
+		once.Do(func() {
+			partitionWriteRefs.Add(-1)
+		})
+	}, nil
+}
+
 // releaseDataPartition hands /data back to this side: it is read-only while the
 // emulated disk serves the raw partition, and writable again once no medium or
 // a read-only image is attached.
 func releaseDataPartition() {
+	// SetDataWritable drops the target-owned cache before remounting read-write.
 	if err := SetDataWritable(true); err != nil {
 		log.Warnf("make %s writable failed: %s", mediaDirectory, err)
 	}
+}
+
+// attachmentHeader builds the Content-Disposition of a download the way
+// browsers want it: an ASCII fallback for everything old, plus the real name
+// percent-encoded, because a file name is not necessarily ASCII and %q would
+// send a Go-quoted string instead of a name.
+func attachmentHeader(name string) string {
+	fallback := strings.Map(func(r rune) rune {
+		if r < 0x20 || r > 0x7e || r == '"' || r == '\\' {
+			return '_'
+		}
+		return r
+	}, name)
+
+	encoded := strings.ReplaceAll(url.PathEscape(name), "'", "%27")
+
+	return fmt.Sprintf("attachment; filename=%q; filename*=UTF-8''%s", fallback, encoded)
 }
 
 // ErrDataPartitionInUse reports a write that would land on the data partition
 // while the target machine owns it.
 var ErrDataPartitionInUse = errors.New("the data partition is attached to the target machine; eject it first")
 
-// EnsureDataPartitionWritable refuses a write into the data partition while
-// the emulated disk hands it to the target machine. Both sides cache the exFAT
-// allocation tables, so a write from here can overwrite the target machine's
-// view of which clusters are in use.
+// EnsureDataPartitionWritable performs the one-shot form of the partition
+// ownership check. Anything that keeps writing after the check has to hold
+// BeginDataPartitionWrite instead, or the partition can be mounted in between.
 func EnsureDataPartitionWritable() error {
-	if IsAttached(partitionDevice) {
-		return ErrDataPartitionInUse
+	release, err := BeginDataPartitionWrite()
+	if err != nil {
+		return err
+	}
+	release()
+	return nil
+}
+
+// attachedMediumInside reports whether a medium that must not vanish - one
+// the target machine holds, or one the file manager keeps mounted - lives
+// inside dir. A recursive delete of dir would take that medium with it.
+func attachedMediumInside(dir string) bool {
+	prefix := dir + string(filepath.Separator)
+
+	status, err := readDiskStatus()
+	if err == nil && status.Backing != "" && strings.HasPrefix(status.Backing, prefix) {
+		return true
 	}
 
-	return nil
+	for _, path := range diskfs.MountedImages() {
+		if strings.HasPrefix(path, prefix) {
+			return true
+		}
+	}
+	return false
 }
 
 // IsAttached reports whether the emulated disk is currently backed by path.
@@ -528,6 +787,10 @@ func EnsureDataPartitionWritable() error {
 // using the inode it opened, so renaming over it leaves the target machine
 // reading a file the rest of the system can no longer see.
 func IsAttached(path string) bool {
+	if canonical, err := utils.CanonicalMediaPath(path); err == nil {
+		path = canonical
+	}
+
 	status, err := readDiskStatus()
 	if err != nil {
 		return false
@@ -547,12 +810,14 @@ func respondError(c *gin.Context, err error) {
 	case errors.Is(err, ErrMediumLocked):
 		rsp.ErrRsp(c, codeMediumLocked, err.Error())
 	case errors.Is(err, errPartitionOwned), errors.Is(err, errMediumAttached),
-		errors.Is(err, errMediumBusy):
+		errors.Is(err, errMediumBusy), errors.Is(err, diskfs.ErrBusy):
 		rsp.ErrRsp(c, codeMediumBusy, err.Error())
 	case errors.Is(err, diskfs.ErrUnsupported), errors.Is(err, errNotAMedium):
 		rsp.ErrRsp(c, codeNotBrowsable, err.Error())
 	case errors.Is(err, errNoSpace), errors.Is(err, errTooManyJobs):
 		rsp.ErrRsp(c, codeInsufficientSpace, err.Error())
+	case errors.Is(err, errNotOptical):
+		rsp.ErrRsp(c, codeNotOptical, err.Error())
 	default:
 		rsp.ErrRsp(c, codeOperationFailed, err.Error())
 	}

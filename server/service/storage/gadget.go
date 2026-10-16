@@ -13,6 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/service/hid"
+	"NanoKVM-Server/utils"
 )
 
 // The emulated USB disk is one LUN of the configfs mass storage function.
@@ -104,6 +105,12 @@ func readDiskStatus() (diskStatus, error) {
 	default:
 		status.State = diskStateImage
 		status.Backing = config.backing
+		// A running gadget may still report an alias used before this process
+		// started. Normalize it too, so every operation compares the same
+		// exFAT directory entry rather than just the same string.
+		if canonical, err := utils.CanonicalMediaPath(config.backing); err == nil {
+			status.Backing = canonical
+		}
 	}
 
 	return status, nil
@@ -151,12 +158,22 @@ func readLunBool(path string) (bool, error) {
 
 // eject detaches the medium, which the target machine sees as a media removal.
 func eject() error {
-	// The device keeps the name it was built with while nothing is attached.
+	// The flags outlive the medium: the kernel only lets them change while
+	// nothing is attached, and a stale CD-ROM flag would describe the next
+	// medium wrongly (a restart of the boot script resets them for the same
+	// reason). The device also keeps the name it was built with while nothing
+	// is attached.
 	if err := writeLunAttr(lunInquiry, inquiryData("USB Mass Storage")); err != nil {
 		log.Warnf("restore inquiry string failed: %s", err)
 	}
 	if err := writeLunAttr(usbProductAttr, usbProductName); err != nil {
 		log.Warnf("restore usb product failed: %s", err)
+	}
+	if err := writeLunAttr(lunROFlag, boolAttr(false)); err != nil {
+		log.Warnf("reset read-only flag failed: %s", err)
+	}
+	if err := writeLunAttr(lunCDRomFlag, boolAttr(false)); err != nil {
+		log.Warnf("reset cdrom flag failed: %s", err)
 	}
 
 	// A zero length write never reaches the kernel, so an empty line is what

@@ -1,13 +1,15 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Button, Modal, notification, Tooltip } from 'antd';
+import { Alert, App, Button, Modal, notification, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
+  DiscIcon,
   DownloadIcon,
   HardDriveIcon,
   LoaderCircleIcon,
   PlugIcon,
   Trash2Icon,
-  UnplugIcon
+  UnplugIcon,
+  XIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -46,14 +48,19 @@ const MediaGroup = ({
 export const Storage = () => {
   const { t } = useTranslation();
   const [notificationApi, contextHolder] = notification.useNotification();
+  const { modal } = App.useApp();
 
   const [media, setMedia] = useState<api.MediaItem[]>([]);
   const [caps, setCaps] = useState<api.MediaCapabilities>({ loop: true });
   const [state, setState] = useState<api.MediaStateInfo>({
     state: 'none',
     hidOnly: false,
-    open: []
+    open: [],
+    cdrom: false
   });
+  // The mode the next mount uses. It follows what is attached, so the control
+  // shows the mode the target machine is looking at rather than a stale choice.
+  const [mountAsCdrom, setMountAsCdrom] = useState(false);
   const [selected, setSelected] = useState<string>(''); // "<type>:<rel>"
   const [isLoading, setIsLoading] = useState(true);
   const [storageSignal, setStorageSignal] = useState(0);
@@ -99,6 +106,12 @@ export const Storage = () => {
     const timer = setInterval(() => void refresh(), statePollInterval);
     return () => clearInterval(timer);
   }, [refresh]);
+
+  useEffect(() => {
+    if (state.state === 'image' || state.state === 'partition') {
+      setMountAsCdrom(state.cdrom);
+    }
+  }, [state.state, state.cdrom]);
 
   // The server refreshes the shared files view on a timer while the target
   // machine owns the partition and pushes a storage event, which is how the
@@ -154,7 +167,9 @@ export const Storage = () => {
         title: t('storage.enableDisk.title'),
         description: t('storage.enableDisk.desc'),
         ok: async () => {
-          const rsp = await api.setVirtualDevice('disk');
+          // Ask for the state, do not toggle: the disk being off is why this
+          // dialog appeared, and a toggle would be wrong if that changed.
+          const rsp = await api.setVirtualDevice('disk', true);
           if (rsp.code !== 0) {
             notifyError(rsp.msg);
             return;
@@ -220,8 +235,44 @@ export const Storage = () => {
     return '';
   })();
 
+  // A download the browser starts on its own saves whatever comes back, so a
+  // refused request ends up as a file named after the URL. The status is asked
+  // for first - one byte of the image, aborted as soon as the headers arrive -
+  // and a refusal is reported the way the rest of the page reports errors.
+  async function downloadImage(item: api.MediaItem) {
+    const url = api.mediaImageDownloadUrl(item.rel);
+    const controller = new AbortController();
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        headers: { Range: 'bytes=0-0' },
+        signal: controller.signal
+      });
+    } catch {
+      notifyError(t('storage.failed'));
+      return;
+    }
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null);
+      controller.abort();
+      notifyError(data?.msg ?? `${response.status} ${response.statusText}`);
+      return;
+    }
+
+    controller.abort();
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   function confirmDelete(item: api.MediaItem) {
-    Modal.confirm({
+    modal.confirm({
       title: t('storage.deleteTitle'),
       content: t('storage.deleteConfirm', { name: item.name }),
       okText: t('storage.yes'),
@@ -265,6 +316,60 @@ export const Storage = () => {
     return '';
   }, [media, state, t]);
 
+  // Every transfer the page runs is shown at the top in one shape: the media
+  // job (a file written into a medium) and an image arriving from the browser
+  // or a URL. They used to be two differently styled hints in two places.
+  function renderTransfer(transfer: {
+    name: string;
+    percentage: string;
+    loaded: number;
+    total: number;
+    failed: boolean;
+    message?: string;
+    onCancel?: () => void;
+  }) {
+    return (
+      <Alert
+        className="mb-3"
+        type={transfer.failed ? 'error' : 'info'}
+        showIcon
+        icon={
+          transfer.failed ? undefined : (
+            <LoaderCircleIcon size={14} className="animate-spin" />
+          )
+        }
+        message={
+          transfer.failed ? (
+            transfer.message || t('storage.failed')
+          ) : (
+            <span className="flex items-center space-x-2">
+              <span className="min-w-0 truncate" title={transfer.name}>
+                {t('storage.job.running', { name: transfer.name })}
+              </span>
+              {transfer.total > 0 && (
+                <span className="shrink-0 text-neutral-400">
+                  {transfer.percentage} · {formatSize(transfer.loaded)} /{' '}
+                  {formatSize(transfer.total)}
+                </span>
+              )}
+            </span>
+          )
+        }
+        action={
+          transfer.onCancel && (
+            <Button
+              type="text"
+              size="small"
+              icon={<XIcon size={12} />}
+              title={t('download.cancel')}
+              onClick={transfer.onCancel}
+            />
+          )
+        }
+      />
+    );
+  }
+
   return (
     <div className="h-screen w-screen bg-neutral-950 p-6 text-neutral-200">
       <Head title={t('head.storage')} />
@@ -304,34 +409,30 @@ export const Storage = () => {
           </div>
         </div>
 
-        {job && (
-          <Alert
-            className="mb-3"
-            type={job.status === 'failed' ? 'error' : 'info'}
-            showIcon
-            icon={
-              job.status === 'failed' ? undefined : (
-                <LoaderCircleIcon size={14} className="animate-spin" />
-              )
-            }
-            message={
-              job.status === 'failed' ? (
-                job.message || t('storage.failed')
-              ) : (
-                <span className="flex items-center space-x-2">
-                  <span className="min-w-0 truncate" title={job.name}>
-                    {t('storage.job.running', { name: job.name })}
-                  </span>
-                  {job.total > 0 && (
-                    <span className="shrink-0 text-neutral-400">
-                      {job.percentage} · {formatSize(job.loaded)} / {formatSize(job.total)}
-                    </span>
-                  )}
-                </span>
-              )
-            }
-          />
-        )}
+        {job &&
+          renderTransfer({
+            name: job.name,
+            percentage: job.percentage,
+            loaded: job.loaded,
+            total: job.total,
+            failed: job.status === 'failed',
+            message: job.message
+          })}
+        {addMedia.transfer &&
+          renderTransfer({
+            name: addMedia.transfer.name,
+            percentage: addMedia.transfer.percentage,
+            loaded: addMedia.transfer.loaded,
+            total: addMedia.transfer.total,
+            failed: addMedia.transfer.failed,
+            message: addMedia.transfer.message,
+            // Cancelling a finished download only earns an error from the
+            // server, so the button goes away with the failure.
+            onCancel:
+              addMedia.transfer.cancellable && !addMedia.transfer.failed
+                ? () => void addMedia.cancelTransfer()
+                : undefined
+          })}
 
         <Modal
           title={confirm?.title}
@@ -350,6 +451,38 @@ export const Storage = () => {
 
         <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] gap-6">
           <div className="flex min-h-0 flex-col space-y-3">
+            <div className="flex items-center justify-between px-2">
+              <span className="text-xs uppercase tracking-wide text-neutral-500">
+                {t('storage.mountMode')}
+              </span>
+              <Segmented
+                size="small"
+                value={mountAsCdrom ? 'cdrom' : 'disk'}
+                disabled={busy !== '' || state.state === 'unsupported'}
+                onChange={(value) => setMountAsCdrom(value === 'cdrom')}
+                options={[
+                  {
+                    value: 'disk',
+                    label: (
+                      <div className="flex items-center space-x-1">
+                        <HardDriveIcon size={14} />
+                        <span>{t('storage.mountModeDisk')}</span>
+                      </div>
+                    )
+                  },
+                  {
+                    value: 'cdrom',
+                    label: (
+                      <div className="flex items-center space-x-1">
+                        <DiscIcon size={14} />
+                        <span>{t('storage.mountModeCdrom')}</span>
+                      </div>
+                    )
+                  }
+                ]}
+              />
+            </div>
+
             <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-auto">
               {isLoading ? (
                 <div className="flex flex-1 items-center justify-center text-neutral-500">
@@ -362,11 +495,13 @@ export const Storage = () => {
                   </MediaGroup>
 
                   <MediaGroup title={t('storage.groups.images')} action={addMedia.actions}>
-                    {addMedia.status}
                     {images.length === 0 ? (
-                      <span className="px-2 py-1 text-xs text-neutral-500">
-                        {t('storage.empty')}
-                      </span>
+                      <div className="flex flex-col space-y-1 px-2 py-1">
+                        <span className="text-xs text-neutral-500">{t('storage.empty')}</span>
+                        <span className="text-xs text-neutral-600">
+                          {t('storage.add.copyHint')}
+                        </span>
+                      </div>
                     ) : (
                       renderRows(images)
                     )}
@@ -397,7 +532,11 @@ export const Storage = () => {
                 selected === key && 'bg-neutral-800/70',
                 item.attached && 'text-blue-500'
               )}
-              onClick={() => setSelected(key)}
+              onClick={() => {
+                // The listing must not ask the new medium for the old path.
+                setBrowsePath('/');
+                setSelected(key);
+              }}
             >
               <div className="flex min-w-0 flex-1 items-center space-x-2">
                 <MediaIcon item={item} className="shrink-0" />
@@ -426,34 +565,47 @@ export const Storage = () => {
                     />
                   </Tooltip>
                 ) : (
-                  <Tooltip title={t('storage.mount')}>
+                  <Tooltip
+                    title={
+                      mountAsCdrom && item.fs !== 'iso9660'
+                        ? t('storage.add.cdromOnlyIso')
+                        : t('storage.mount')
+                    }
+                  >
                     <Button
                       type="text"
                       size="small"
                       loading={isBusy}
+                      disabled={mountAsCdrom && item.fs !== 'iso9660'}
                       icon={<PlugIcon size={14} />}
-                      onClick={() => void mount(item)}
+                      onClick={() => void mount(item, mountAsCdrom)}
                     />
                   </Tooltip>
                 )}
 
                 {item.type === 'image' && (
                   <>
-                    <Tooltip title={t('storage.downloadImage')}>
+                    <Tooltip
+                      title={item.attached ? t('storage.add.blocked') : t('storage.downloadImage')}
+                    >
                       <Button
                         type="text"
                         size="small"
-                        href={api.mediaImageDownloadUrl(item.rel)}
-                        download
+                        disabled={item.attached}
                         icon={<DownloadIcon size={14} />}
+                        onClick={() => void downloadImage(item)}
                       />
                     </Tooltip>
-                    <Tooltip title={dataOwned ? t('storage.add.blocked') : t('storage.delete')}>
+                    <Tooltip
+                      title={
+                        dataOwned || item.attached ? t('storage.add.blocked') : t('storage.delete')
+                      }
+                    >
                       <Button
                         type="text"
                         size="small"
                         danger
-                        disabled={dataOwned}
+                        disabled={dataOwned || item.attached}
                         icon={<Trash2Icon size={14} />}
                         onClick={() => confirmDelete(item)}
                       />

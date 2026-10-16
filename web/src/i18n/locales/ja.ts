@@ -227,6 +227,8 @@ const ja = {
       eject: '取り出す',
       mount: 'マウント',
       mountMode: 'マウントモード',
+      mountModeDisk: 'マスストレージ',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'ファイルマネージャーを開く',
       refresh: '更新',
       delete: '削除',
@@ -263,9 +265,13 @@ const ja = {
         url: 'イメージの URL',
         urlRequired: 'URL を入力してください',
         onlyImages: 'マウントできるのは .iso と .img ファイルのみです',
+        dropHint: 'ISO または IMG をここにドロップするか、クリックしてファイルを選択',
+        cdromOnlyIso: 'CD-ROM には ISO 9660 イメージしか載せられません',
         uploadFailed: 'アップロードに失敗しました',
         downloadFailed: 'ダウンロードに失敗しました',
-        blocked: 'ターゲットマシンがディスクを使用しています'
+        blocked: 'ターゲットマシンがディスクを使用しています',
+        copyHint:
+          'イメージは SCP でデータパーティションにコピーするか、ターゲットマシンから直接コピーすることもできます。'
       },
       files: {
         selectMedium: 'メディアを選択すると中のファイルを閲覧できます。',
@@ -340,7 +346,7 @@ const ja = {
     },
     download: {
       disabled:
-        '/data パーティションは読み取り専用であり、イメージのダウンロードには使用できません',
+        'ターゲットマシンが使用している間、データパーティションは読み取り専用です。新しいイメージは書き込めませんが、既存のファイルはダウンロードできます。',
       sha256: 'SHA-256（任意）',
       sha256Placeholder: '64 文字の SHA-256 チェックサムを入力してください',
       invalidSHA256: 'SHA-256 は 64 文字の 16 進数文字列である必要があります',

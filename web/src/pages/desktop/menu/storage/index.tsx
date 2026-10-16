@@ -27,7 +27,8 @@ export const Storage = () => {
   const [state, setState] = useState<api.MediaStateInfo>({
     state: 'none',
     hidOnly: false,
-    open: []
+    open: [],
+    cdrom: false
   });
   const [mode, setMode] = useState<'mass-storage' | 'cd-rom'>('mass-storage');
 
@@ -55,13 +56,21 @@ export const Storage = () => {
     void refresh();
   }, []);
 
+  // The list can change while the target machine owns the partition - that is
+  // the only time it can change without this page doing anything - so the poll
+  // runs then as well, not only while nothing is attached.
   useEffect(() => {
-    const timer = setInterval(() => {
-      if (state.state !== 'none') return;
-      void refresh();
-    }, 5000);
+    const timer = setInterval(() => void refresh(), 5000);
     return () => clearInterval(timer);
-  }, [state.state]);
+  }, []);
+
+  // The mode control follows the attached medium, so it shows what the target
+  // machine is actually looking at instead of the last choice made here.
+  useEffect(() => {
+    if (state.state === 'image' || state.state === 'partition') {
+      setMode(state.cdrom ? 'cd-rom' : 'mass-storage');
+    }
+  }, [state.state, state.cdrom]);
 
   function handleOpenChange(open: boolean) {
     if (open) void refresh();
@@ -88,7 +97,7 @@ export const Storage = () => {
       label: (
         <div className="flex items-center space-x-1">
           <HardDriveIcon size={14} />
-          <span>Mass Storage</span>
+          <span>{t('storage.mountModeDisk')}</span>
         </div>
       )
     },
@@ -97,7 +106,7 @@ export const Storage = () => {
       label: (
         <div className="flex items-center space-x-1">
           <DiscIcon size={14} />
-          <span>CD ROM</span>
+          <span>{t('storage.mountModeCdrom')}</span>
         </div>
       )
     }
@@ -147,7 +156,7 @@ export const Storage = () => {
               value={mode}
               options={modes}
               onChange={(value) => setMode(value as 'mass-storage' | 'cd-rom')}
-              disabled={state.state === 'unsupported'}
+              disabled={state.state === 'unsupported' || busy !== ''}
             />
           </div>
 

@@ -226,6 +226,8 @@ const ca = {
       eject: 'Expulsa',
       mount: 'Munta',
       mountMode: 'Mode de muntatge',
+      mountModeDisk: 'Emmagatzematge massiu',
+      mountModeCdrom: 'CD-ROM',
       openManager: 'Obre el gestor de fitxers',
       refresh: 'Actualitza',
       delete: 'Elimina',
@@ -262,9 +264,13 @@ const ca = {
         url: 'URL de la imatge',
         urlRequired: 'Introduïu una URL',
         onlyImages: 'Només es poden muntar fitxers .iso i .img',
+        dropHint: 'Arrossegueu una ISO o IMG aquí, o feu clic per triar un fitxer',
+        cdromOnlyIso: 'Un CD-ROM només pot contenir una imatge ISO 9660',
         uploadFailed: 'La pujada ha fallat',
         downloadFailed: 'La baixada ha fallat',
-        blocked: "L'ordinador remot fa servir el disc"
+        blocked: "L'ordinador remot fa servir el disc",
+        copyHint:
+          "També podeu copiar una imatge a la partició de dades per SCP, o des de l'ordinador remot."
       },
       files: {
         selectMedium: 'Seleccioneu un suport per veure els fitxers que conté.',
@@ -337,7 +343,8 @@ const ca = {
       ok: "D'acord"
     },
     download: {
-      disabled: 'La partició /data és només lectura. No es pot descarregar la imatge.',
+      disabled:
+        "La partició de dades és només de lectura mentre l'ordinador remot la fa servir: no s'hi poden escriure imatges noves, però els fitxers existents es poden baixar.",
       sha256: 'SHA-256 (opcional)',
       sha256Placeholder: 'Introduïu una suma de verificació SHA-256 de 64 caràcters',
       invalidSHA256: 'SHA-256 ha de ser una cadena hexadecimal de 64 caràcters',
