@@ -249,6 +249,22 @@ const ca = {
         menuHint:
           "L'ordinador remot fa servir aquest suport. Obriu el gestor de fitxers per recuperar-lo per la força."
       },
+      tips: {
+        title: 'Com pujar imatges',
+        usb1: 'Connecta el NanoKVM al teu ordinador via USB.',
+        usb2: "En aquesta pàgina, munta els fitxers compartits en mode d'emmagatzematge massiu.",
+        usb3: "Obre el disc virtual i copia la imatge a l'arrel.",
+        usb4: 'Expulsa el disc quan acabi la còpia: la imatge apareixerà llavors a la llista.',
+        scp1: 'Comprova que el NanoKVM i el teu ordinador estan a la mateixa xarxa.',
+        scp2: 'Obre un terminal i usa SCP per pujar la imatge al directori /data del NanoKVM.',
+        scp3: 'Exemple: scp ruta-de-la-imatge root@ip-del-nanokvm:/data',
+        tfCard: 'Targeta TF',
+        tf1: 'Mètode disponible a sistemes GNU/Linux',
+        tf2: 'Extreu la targeta TF del NanoKVM (versió FULL, cal obrir la carcassa).',
+        tf3: "Introdueix la targeta en un lector i connecta'l a l'ordinador.",
+        tf4: 'Copia la imatge al directori /data de la targeta.',
+        tf5: 'Reintrodueix la targeta al NanoKVM.'
+      },
       job: {
         running: "S'està processant {{name}}"
       },
@@ -268,6 +284,10 @@ const ca = {
         cdromOnlyIso: 'Un CD-ROM només pot contenir una imatge ISO 9660',
         uploadFailed: 'La pujada ha fallat',
         downloadFailed: 'La baixada ha fallat',
+        uploading: "S'està pujant {{name}}",
+        downloading: "S'està baixant {{name}}",
+        done: '{{name}} està llest',
+        checksumFailed: 'La imatge no coincideix amb la suma de verificació SHA-256.',
         blocked: "L'ordinador remot fa servir el disc",
         copyHint:
           "També podeu copiar una imatge a la partició de dades per SCP, o des de l'ordinador remot."
@@ -293,6 +313,9 @@ const ca = {
           desc: 'Descendent'
         },
         upload: 'Puja un fitxer al suport',
+        deleteFolderTitle: 'Suprimeix la carpeta',
+        deleteFolderConfirm:
+          'Voleu suprimir la carpeta {{name}} i tot el que conté? Aquesta acció no es pot desfer.',
         uploading: "S'està pujant…",
         uploadFailed: 'La pujada ha fallat',
         download: 'Baixa',

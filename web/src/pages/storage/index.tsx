@@ -1,7 +1,9 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, App, Button, Modal, notification, Segmented, Tooltip } from 'antd';
+import { Alert, App, Button, Collapse, Modal, notification, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
+  CheckIcon,
+  CircleHelpIcon,
   DiscIcon,
   DownloadIcon,
   HardDriveIcon,
@@ -21,9 +23,29 @@ import { useMediaMount } from '@/hooks/useMediaMount.ts';
 import { Head } from '@/components/head.tsx';
 
 import { useAddMedia } from './use-add-media.tsx';
-import { useFileBrowser } from './use-file-browser.tsx';
+import { useFileBrowser, type FileUpload } from './use-file-browser.tsx';
 
 const statePollInterval = 5000;
+
+// The failed media job the user closed. The server keeps a failed job's state
+// until the next job starts, so without this it would come back on every visit.
+const dismissedJobKey = 'nanokvm-storage-dismissed-job';
+
+function readDismissedJob(): string {
+  try {
+    return localStorage.getItem(dismissedJobKey) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+function jobKey(job: api.MediaStatus): string {
+  return `${job.name}\n${job.message}`;
+}
+
+function baseName(name: string): string {
+  return name.split('/').filter(Boolean).pop() ?? name;
+}
 
 // A titled block in the medium list: the emulated disk is one thing, the image
 // library is another, and mixing them in one list made both harder to read.
@@ -72,6 +94,11 @@ export const Storage = () => {
     ok: () => void | Promise<void>;
   } | null>(null);
   const lastStatus = useRef<api.MediaStatus['status']>('idle');
+  const [dismissedJob, setDismissedJob] = useState(readDismissedJob);
+  const [isTipsOpen, setIsTipsOpen] = useState(false);
+  // Names of file uploads the user cancelled: the server records the aborted
+  // request as a failed job, which is not news to the user who stopped it.
+  const cancelledUploads = useRef(new Set<string>());
 
   // Both callbacks are handed to children that poll with them in their
   // dependency lists: a new identity on every render would tear the intervals
@@ -87,18 +114,27 @@ export const Storage = () => {
     [notificationApi, t]
   );
 
+  // This runs on a timer, so a request that fails (the device rebooting, the
+  // network dropping) is left to the next round instead of raising a
+  // notification every few seconds.
   const refresh = useCallback(async () => {
-    const rsp = await api.getMedia();
-    if (rsp.code === 0) {
-      setMedia(rsp.data?.media ?? []);
-      setCaps(rsp.data?.capabilities ?? { loop: true });
-    }
+    try {
+      const rsp = await api.getMedia();
+      if (rsp.code === 0) {
+        setMedia(rsp.data?.media ?? []);
+        setCaps(rsp.data?.capabilities ?? { loop: true });
+      }
 
-    const stateRsp = await api.getMediaState();
-    if (stateRsp.code === 0) {
-      setState(stateRsp.data);
+      const stateRsp = await api.getMediaState();
+      if (stateRsp.code === 0) {
+        setState(stateRsp.data);
+      }
+    } catch {
+      // Retried by the poll.
     }
   }, []);
+
+  const refreshMedia = useCallback(() => void refresh(), [refresh]);
 
   useEffect(() => {
     void refresh().finally(() => setIsLoading(false));
@@ -134,7 +170,12 @@ export const Storage = () => {
     let cancelled = false;
 
     async function poll() {
-      const rsp = await api.getMediaStatus();
+      let rsp;
+      try {
+        rsp = await api.getMediaStatus();
+      } catch {
+        return;
+      }
       if (cancelled || rsp.code !== 0) return;
 
       const status: api.MediaStatus = rsp.data;
@@ -143,6 +184,9 @@ export const Storage = () => {
         await refresh();
       }
       lastStatus.current = status.status;
+      if (status.status === 'in_progress') {
+        cancelledUploads.current.delete(baseName(status.name));
+      }
 
       // A finished job leaves its last state behind for the next caller to
       // read, so only a running or failed one belongs on screen.
@@ -183,7 +227,7 @@ export const Storage = () => {
         description: t('storage.force.desc'),
         ok: retry
       }),
-    onChanged: () => void refresh()
+    onChanged: refreshMedia
   });
 
   // The target machine holding the data partition is what keeps this page
@@ -193,7 +237,7 @@ export const Storage = () => {
 
   const addMedia = useAddMedia({
     dataOwned,
-    onChanged: () => void refresh(),
+    onChanged: refreshMedia,
     onError: notifyError
   });
 
@@ -227,7 +271,7 @@ export const Storage = () => {
 
     if (!caps.loop) return 'noLoop';
     if (!selectedMedia.browsable) {
-      return selectedMedia.fs === 'iso9660' ? 'isoImage' : 'notBrowsable';
+      return api.isOpticalImage(selectedMedia) ? 'isoImage' : 'notBrowsable';
     }
     // An image is mounted as a block device to be read, and a block device the
     // target machine is writing underneath is not something to browse.
@@ -247,6 +291,7 @@ export const Storage = () => {
     try {
       response = await fetch(url, {
         headers: { Range: 'bytes=0-0' },
+        credentials: api.fetchCredentials(),
         signal: controller.signal
       });
     } catch {
@@ -279,7 +324,13 @@ export const Storage = () => {
       cancelText: t('storage.no'),
       okButtonProps: { danger: true },
       onOk: async () => {
-        const rsp = await api.deleteMedia({ type: item.type, rel: item.rel });
+        let rsp;
+        try {
+          rsp = await api.deleteMedia({ type: item.type, rel: item.rel });
+        } catch {
+          notifyError(t('storage.failed'));
+          return;
+        }
         if (rsp.code !== 0) {
           notifyError(rsp.msg);
           return;
@@ -298,7 +349,7 @@ export const Storage = () => {
     path: browsePath,
     onPathChange: setBrowsePath,
     changeSignal: storageSignal,
-    onMediaChanged: () => void refresh(),
+    onMediaChanged: refreshMedia,
     onError: notifyError
   });
 
@@ -320,33 +371,41 @@ export const Storage = () => {
   // job (a file written into a medium) and an image arriving from the browser
   // or a URL. They used to be two differently styled hints in two places.
   function renderTransfer(transfer: {
-    name: string;
+    key: string;
+    label: string;
     percentage: string;
     loaded: number;
     total: number;
-    failed: boolean;
+    state: 'running' | 'success' | 'failed';
     message?: string;
     onCancel?: () => void;
+    onClose?: () => void;
   }) {
+    const failed = transfer.state === 'failed';
     return (
       <Alert
+        key={transfer.key}
         className="mb-3"
-        type={transfer.failed ? 'error' : 'info'}
+        type={failed ? 'error' : transfer.state === 'success' ? 'success' : 'info'}
         showIcon
         icon={
-          transfer.failed ? undefined : (
+          failed ? undefined : transfer.state === 'success' ? (
+            <CheckIcon size={14} />
+          ) : (
             <LoaderCircleIcon size={14} className="animate-spin" />
           )
         }
+        closable={failed && !!transfer.onClose}
+        onClose={transfer.onClose}
         message={
-          transfer.failed ? (
+          failed ? (
             transfer.message || t('storage.failed')
           ) : (
             <span className="flex items-center space-x-2">
-              <span className="min-w-0 truncate" title={transfer.name}>
-                {t('storage.job.running', { name: transfer.name })}
+              <span className="min-w-0 truncate" title={transfer.label}>
+                {transfer.label}
               </span>
-              {transfer.total > 0 && (
+              {transfer.state === 'running' && transfer.total > 0 && (
                 <span className="shrink-0 text-neutral-400">
                   {transfer.percentage} · {formatSize(transfer.loaded)} /{' '}
                   {formatSize(transfer.total)}
@@ -369,6 +428,85 @@ export const Storage = () => {
       />
     );
   }
+
+  function dismissJob(key: string) {
+    setDismissedJob(key);
+    try {
+      localStorage.setItem(dismissedJobKey, key);
+    } catch {
+      // Remembered for this visit only.
+    }
+  }
+
+  // A file upload from the browser is the media job the server reports, so
+  // the job carries that upload's cancel button. Uploads still waiting for
+  // the job slot are shown on their own.
+  const jobUpload =
+    job?.status === 'in_progress'
+      ? browser.uploads.find((upload) => upload.name === baseName(job.name))
+      : undefined;
+  const waitingUploads = browser.uploads.filter((upload) => upload !== jobUpload);
+  const showJob =
+    !!job &&
+    !(
+      job.status === 'failed' &&
+      (dismissedJob === jobKey(job) || cancelledUploads.current.has(baseName(job.name)))
+    );
+
+  function cancelUpload(upload: FileUpload) {
+    cancelledUploads.current.add(upload.name);
+    upload.cancel();
+  }
+
+  const addTransfer = addMedia.transfer;
+  const addTransferLabel = !addTransfer
+    ? ''
+    : addTransfer.state === 'success'
+      ? t('storage.add.done', { name: addTransfer.name })
+      : addTransfer.kind === 'upload'
+        ? t('storage.add.uploading', { name: addTransfer.name })
+        : t('storage.add.downloading', { name: addTransfer.name });
+
+  const tipItems = [
+    {
+      key: 'usb',
+      label: 'USB',
+      children: (
+        <ul className="list-decimal pl-5">
+          <li>{t('storage.tips.usb1')}</li>
+          <li>{t('storage.tips.usb2')}</li>
+          <li>{t('storage.tips.usb3')}</li>
+          <li>{t('storage.tips.usb4')}</li>
+        </ul>
+      )
+    },
+    {
+      key: 'scp',
+      label: 'SCP',
+      children: (
+        <ul className="list-decimal pl-5">
+          <li>{t('storage.tips.scp1')}</li>
+          <li>{t('storage.tips.scp2')}</li>
+          <li>{t('storage.tips.scp3')}</li>
+        </ul>
+      )
+    },
+    {
+      key: 'tf',
+      label: t('storage.tips.tfCard'),
+      children: (
+        <>
+          <p className="text-sm text-neutral-400">{t('storage.tips.tf1')}</p>
+          <ul className="list-decimal pl-5">
+            <li>{t('storage.tips.tf2')}</li>
+            <li>{t('storage.tips.tf3')}</li>
+            <li>{t('storage.tips.tf4')}</li>
+            <li>{t('storage.tips.tf5')}</li>
+          </ul>
+        </>
+      )
+    }
+  ];
 
   return (
     <div className="h-screen w-screen bg-neutral-950 p-6 text-neutral-200">
@@ -410,29 +548,63 @@ export const Storage = () => {
         </div>
 
         {job &&
+          showJob &&
           renderTransfer({
-            name: job.name,
+            key: 'job',
+            label: t('storage.job.running', { name: job.name }),
             percentage: job.percentage,
             loaded: job.loaded,
             total: job.total,
-            failed: job.status === 'failed',
-            message: job.message
+            state: job.status === 'failed' ? 'failed' : 'running',
+            message: job.message,
+            onCancel: jobUpload ? () => cancelUpload(jobUpload) : undefined,
+            onClose: () => dismissJob(jobKey(job))
           })}
-        {addMedia.transfer &&
+        {waitingUploads.map((upload) =>
           renderTransfer({
-            name: addMedia.transfer.name,
-            percentage: addMedia.transfer.percentage,
-            loaded: addMedia.transfer.loaded,
-            total: addMedia.transfer.total,
-            failed: addMedia.transfer.failed,
-            message: addMedia.transfer.message,
-            // Cancelling a finished download only earns an error from the
-            // server, so the button goes away with the failure.
+            key: `upload-${upload.id}`,
+            label: t('storage.add.uploading', { name: upload.name }),
+            percentage: '',
+            loaded: 0,
+            total: 0,
+            state: 'running',
+            onCancel: () => cancelUpload(upload)
+          })
+        )}
+        {addTransfer &&
+          renderTransfer({
+            key: `add-${addTransfer.id}`,
+            label: addTransferLabel,
+            percentage: addTransfer.percentage,
+            loaded: addTransfer.loaded,
+            total: addTransfer.total,
+            state: addTransfer.state,
+            message: addTransfer.message,
+            // Cancelling a finished transfer only earns an error from the
+            // server, so the button goes away once it ends.
             onCancel:
-              addMedia.transfer.cancellable && !addMedia.transfer.failed
+              addTransfer.cancellable && addTransfer.state === 'running'
                 ? () => void addMedia.cancelTransfer()
-                : undefined
+                : undefined,
+            onClose: addMedia.dismissTransfer
           })}
+
+        <Modal
+          title={t('storage.tips.title')}
+          open={isTipsOpen}
+          width={520}
+          footer={null}
+          centered
+          onCancel={() => setIsTipsOpen(false)}
+        >
+          <Collapse
+            accordion
+            items={tipItems}
+            bordered={false}
+            defaultActiveKey={['usb']}
+            style={{ backgroundColor: 'transparent' }}
+          />
+        </Modal>
 
         <Modal
           title={confirm?.title}
@@ -494,7 +666,22 @@ export const Storage = () => {
                     {renderRows(volumeMedia)}
                   </MediaGroup>
 
-                  <MediaGroup title={t('storage.groups.images')} action={addMedia.actions}>
+                  <MediaGroup
+                    title={t('storage.groups.images')}
+                    action={
+                      <div className="flex items-center space-x-1">
+                        <Tooltip title={t('storage.tips.title')}>
+                          <Button
+                            size="small"
+                            type="text"
+                            icon={<CircleHelpIcon size={14} />}
+                            onClick={() => setIsTipsOpen(true)}
+                          />
+                        </Tooltip>
+                        {addMedia.actions}
+                      </div>
+                    }
+                  >
                     {images.length === 0 ? (
                       <div className="flex flex-col space-y-1 px-2 py-1">
                         <span className="text-xs text-neutral-500">{t('storage.empty')}</span>
@@ -567,7 +754,7 @@ export const Storage = () => {
                 ) : (
                   <Tooltip
                     title={
-                      mountAsCdrom && item.fs !== 'iso9660'
+                      mountAsCdrom && !api.isOpticalImage(item)
                         ? t('storage.add.cdromOnlyIso')
                         : t('storage.mount')
                     }
@@ -576,7 +763,7 @@ export const Storage = () => {
                       type="text"
                       size="small"
                       loading={isBusy}
-                      disabled={mountAsCdrom && item.fs !== 'iso9660'}
+                      disabled={mountAsCdrom && !api.isOpticalImage(item)}
                       icon={<PlugIcon size={14} />}
                       onClick={() => void mount(item, mountAsCdrom)}
                     />

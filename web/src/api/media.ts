@@ -20,6 +20,12 @@ export interface MediaItem {
   modifiedAt: string;
 }
 
+// An optical image is one the emulated disk can carry as a CD-ROM: an ISO 9660
+// image or a UDF one, which the server reports under its own file system name.
+export function isOpticalImage(item: MediaItem): boolean {
+  return item.fs === 'iso9660' || item.fs === 'udf';
+}
+
 export interface MediaCapabilities {
   loop: boolean;
 }
@@ -140,13 +146,20 @@ export function mediaImageDownloadUrl(rel: string): string {
   return `${getBaseUrl('http')}/api/storage/media/download?${mediaQuery('image', rel)}`;
 }
 
+// The fetch requests below carry the session cookie the way the axios client
+// does: VITE_WITH_CREDENTIALS=false is the only setting that leaves it out.
+export function fetchCredentials(): RequestCredentials {
+  return import.meta.env.VITE_WITH_CREDENTIALS === 'false' ? 'omit' : 'include';
+}
+
 // Uploads use fetch rather than the axios client: the request can outlive the
 // client's timeout, and the progress comes from the status endpoint.
 export async function uploadMediaFile(
   type: MediaType,
   rel: string,
   path: string,
-  file: File
+  file: File,
+  signal?: AbortSignal
 ): Promise<{ code: number; msg: string; data: unknown }> {
   const form = new FormData();
   form.append('file', file, file.name);
@@ -155,7 +168,8 @@ export async function uploadMediaFile(
   const response = await fetch(url, {
     method: 'POST',
     body: form,
-    credentials: import.meta.env.VITE_WITH_CREDENTIALS === 'false' ? 'omit' : 'include'
+    credentials: fetchCredentials(),
+    signal
   });
 
   return response.json();

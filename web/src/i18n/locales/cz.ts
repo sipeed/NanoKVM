@@ -250,6 +250,22 @@ const cz = {
         menuHint:
           'Vzdálený počítač toto médium používá. Otevřete správce souborů a vezměte ho zpět násilím.'
       },
+      tips: {
+        title: 'Jak nahrát',
+        usb1: 'Připojte NanoKVM k vašemu počítači přes USB.',
+        usb2: 'Na této stránce připojte sdílené soubory v režimu velkokapacitního úložiště.',
+        usb3: 'Otevřete virtuální disk na vašem počítači a zkopírujte soubor s obrazem do kořenového adresáře virtuálního disku.',
+        usb4: 'Po dokončení kopírování disk vysuňte: obraz se pak objeví v seznamu.',
+        scp1: 'Ujistěte se, že jsou NanoKVM a váš počítač ve stejné místní síti.',
+        scp2: 'Otevřete terminál na vašem počítači a použijte příkaz SCP pro nahrání souboru s obrazem do adresáře /data na zařízení NanoKVM.',
+        scp3: 'Příklad: scp cesta-k-vašemu-obrazu root@ip-nanokvm:/data',
+        tfCard: 'SD Karta',
+        tf1: 'Tato metoda je podporována na systémech Linux',
+        tf2: 'Vyjměte SD kartu z NanoKVM (u plné verze nejprve rozložte krabičku).',
+        tf3: 'Vložte SD kartu do čtečky karet a připojte ji k vašemu počítači.',
+        tf4: 'Zkopírujte soubor s obrazem do adresáře /data na SD kartě.',
+        tf5: 'Vložte SD kartu zpět do NanoKVM.'
+      },
       job: {
         running: 'Zpracovává se {{name}}'
       },
@@ -269,6 +285,10 @@ const cz = {
         cdromOnlyIso: 'CD-ROM může obsahovat pouze obraz ISO 9660',
         uploadFailed: 'Nahrání se nezdařilo',
         downloadFailed: 'Stažení se nezdařilo',
+        uploading: 'Nahrávání {{name}}',
+        downloading: 'Stahování {{name}}',
+        done: '{{name}} je připraven',
+        checksumFailed: 'Obraz neodpovídá kontrolnímu součtu SHA-256.',
         blocked: 'Vzdálený počítač disk používá',
         copyHint:
           'Obraz můžete také zkopírovat do datového oddílu přes SCP nebo ze vzdáleného počítače.'
@@ -295,6 +315,8 @@ const cz = {
           desc: 'Sestupně'
         },
         upload: 'Nahrát soubor do média',
+        deleteFolderTitle: 'Smazat složku',
+        deleteFolderConfirm: 'Smazat složku {{name}} a celý její obsah? Tuto akci nelze vrátit.',
         uploading: 'Nahrávání…',
         uploadFailed: 'Nahrání se nezdařilo',
         download: 'Stáhnout',

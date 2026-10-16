@@ -249,6 +249,22 @@ const id = {
         menuHint:
           'Komputer target sedang menggunakan media ini. Buka pengelola file untuk mengambilnya kembali dengan paksa.'
       },
+      tips: {
+        title: 'Cara mengunggah',
+        usb1: 'Hubungkan NanoKVM ke komputer Anda melalui USB.',
+        usb2: 'Di halaman ini, pasang berkas bersama dalam mode penyimpanan massal.',
+        usb3: 'Buka disk virtual di komputer Anda dan salin file gambar ke direktori root disk virtual.',
+        usb4: 'Keluarkan disk setelah penyalinan selesai: image kemudian muncul di daftar.',
+        scp1: 'Pastikan NanoKVM dan komputer Anda berada di jaringan lokal yang sama.',
+        scp2: 'Buka terminal di komputer Anda dan gunakan perintah SCP untuk mengunggah file gambar ke direktori /data di NanoKVM.',
+        scp3: 'Contoh: scp jalur-gambar-anda root@ip-nanokvm-anda:/data',
+        tfCard: 'Kartu TF',
+        tf1: 'Metode ini didukung di sistem linux',
+        tf2: 'Dapatkan Kartu TF dari NanoKVM (untuk versi LENGKAP, bongkar casingnya terlebih dahulu).',
+        tf3: 'Masukkan Kartu TF ke pembaca kartu dan hubungkan ke komputer Anda.',
+        tf4: 'Salin berkas gambar ke direktori /data pada Kartu TF.',
+        tf5: 'Masukkan Kartu TF ke dalam NanoKVM.'
+      },
       job: {
         running: 'Memproses {{name}}'
       },
@@ -268,6 +284,10 @@ const id = {
         cdromOnlyIso: 'CD-ROM hanya dapat berisi citra ISO 9660',
         uploadFailed: 'Unggahan gagal',
         downloadFailed: 'Unduhan gagal',
+        uploading: 'Mengunggah {{name}}',
+        downloading: 'Mengunduh {{name}}',
+        done: '{{name}} siap',
+        checksumFailed: 'Image tidak cocok dengan checksum SHA-256.',
         blocked: 'Komputer target sedang menggunakan disk',
         copyHint:
           'Anda juga dapat menyalin citra ke partisi data lewat SCP, atau dari komputer target.'
@@ -294,6 +314,9 @@ const id = {
           desc: 'Turun'
         },
         upload: 'Unggah file ke media',
+        deleteFolderTitle: 'Hapus folder',
+        deleteFolderConfirm:
+          'Hapus folder {{name}} beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.',
         uploading: 'Mengunggah…',
         uploadFailed: 'Unggahan gagal',
         download: 'Unduh',

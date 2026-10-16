@@ -251,6 +251,22 @@ const es = {
         menuHint:
           'El equipo remoto está usando este medio. Abre el gestor de archivos para recuperarlo por la fuerza.'
       },
+      tips: {
+        title: 'Cómo subir imágenes',
+        usb1: 'Conecta el NanoKVM a tu computadora mediante USB.',
+        usb2: 'En esta página, monta los archivos compartidos en modo de almacenamiento masivo.',
+        usb3: 'Abre el disco virtual en tu computadora y copia el archivo de imagen en el directorio raíz del disco virtual.',
+        usb4: 'Expulsa el disco cuando termine la copia: la imagen aparecerá entonces en la lista.',
+        scp1: 'Asegúrate de que el NanoKVM y tu computadora estén en la misma red local.',
+        scp2: 'Abre una terminal en tu computadora y usa el comando SCP para subir el archivo de imagen al directorio /data en el NanoKVM.',
+        scp3: 'Ejemplo: scp tu-ruta-de-imagen root@tu-ip-del-nanokvm:/data',
+        tfCard: 'Tarjeta SD',
+        tf1: 'Este método es compatible con el sistema Linux',
+        tf2: 'Obtén la tarjeta SD del NanoKVM (para la versión FULL, desmonta la carcasa primero).',
+        tf3: 'Inserta la tarjeta SD en un lector de tarjetas y conéctalo a tu computadora.',
+        tf4: 'Copia el archivo de imagen en el directorio /data de la tarjeta SD.',
+        tf5: 'Inserta la tarjeta SD en el NanoKVM.'
+      },
       job: {
         running: 'Procesando {{name}}'
       },
@@ -270,6 +286,10 @@ const es = {
         cdromOnlyIso: 'Un CD-ROM solo puede contener una imagen ISO 9660',
         uploadFailed: 'La subida ha fallado',
         downloadFailed: 'La descarga ha fallado',
+        uploading: 'Subiendo {{name}}',
+        downloading: 'Descargando {{name}}',
+        done: '{{name}} está listo',
+        checksumFailed: 'La imagen no coincide con la suma de comprobación SHA-256.',
         blocked: 'El equipo remoto está usando el disco',
         copyHint:
           'También puedes copiar una imagen a la partición de datos por SCP, o desde el equipo remoto.'
@@ -296,6 +316,9 @@ const es = {
           desc: 'Descendente'
         },
         upload: 'Subir un archivo al medio',
+        deleteFolderTitle: 'Eliminar carpeta',
+        deleteFolderConfirm:
+          '¿Eliminar la carpeta {{name}} y todo su contenido? Esta acción no se puede deshacer.',
         uploading: 'Subiendo…',
         uploadFailed: 'La subida ha fallado',
         download: 'Descargar',

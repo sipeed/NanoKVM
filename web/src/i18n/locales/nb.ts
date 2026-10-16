@@ -250,6 +250,22 @@ const nb = {
         menuHint:
           'Målmaskinen bruker dette mediet. Åpne filbehandleren for å ta det tilbake med makt.'
       },
+      tips: {
+        title: 'Hvordan laste opp',
+        usb1: 'Koble til NanoKVM-enheten til din datamaskin med USB.',
+        usb2: 'Monter de delte filene i masselagringsmodus på denne siden.',
+        usb3: 'Åpne den virtuelle disken på datamaskinen din og kopier arkivfilen til rot-mappen på den virtuelle disken.',
+        usb4: 'Løs ut disken når kopieringen er ferdig: bildet vises da i listen.',
+        scp1: 'Sikre at NanoKVM-enheten og datamaskinen din er tilkoblet det samme lokale nettverket.',
+        scp2: 'Åpne en terminal på datamaskinen din og bruk SCP-kommandoen til å laste opp arkivfilen til mappen /data på NanoKVM-enheten.',
+        scp3: 'Eksempel: scp sti-til-din-arkivfil root@din-nanokvm-ip:/data',
+        tfCard: 'TF-kort',
+        tf1: 'Denne metoden er støttet på datamskiner med Linux',
+        tf2: 'Ta TF-kortet ut av NanoKVM-enheten (hvis du har FULL-versjonen, demonter kabinettet først).',
+        tf3: 'Sett inn TF-kortet i en kortleser og koble den til datamaskinen din.',
+        tf4: 'Kopiér arkivfilen til mappen /data på TF-kortet.',
+        tf5: 'Sett inn TF-kortet i NanoKVM-enheten.'
+      },
       job: {
         running: 'Arbeider med {{name}}'
       },
@@ -269,6 +285,10 @@ const nb = {
         cdromOnlyIso: 'En CD-ROM kan bare inneholde et ISO 9660-bilde',
         uploadFailed: 'Opplasting mislyktes',
         downloadFailed: 'Nedlasting mislyktes',
+        uploading: 'Laster opp {{name}}',
+        downloading: 'Laster ned {{name}}',
+        done: '{{name}} er klar',
+        checksumFailed: 'Bildet samsvarer ikke med SHA-256-kontrollsummen.',
         blocked: 'Målmaskinen bruker disken',
         copyHint: 'Du kan også kopiere et bilde til datapartisjonen via SCP, eller fra målmaskinen.'
       },
@@ -294,6 +314,8 @@ const nb = {
           desc: 'Synkende'
         },
         upload: 'Last opp en fil til mediet',
+        deleteFolderTitle: 'Slett mappe',
+        deleteFolderConfirm: 'Slette mappen {{name}} og alt innholdet? Dette kan ikke angres.',
         uploading: 'Laster opp…',
         uploadFailed: 'Opplasting mislyktes',
         download: 'Last ned',

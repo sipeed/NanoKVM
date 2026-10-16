@@ -229,7 +229,7 @@ const hu = {
       eject: 'Kiadás',
       mount: 'Csatlakoztatás',
       mountMode: 'Felszerelési mód',
-      mountModeDisk: 'Mass storage',
+      mountModeDisk: 'Háttértár',
       mountModeCdrom: 'CD-ROM',
       openManager: 'Fájlkezelő megnyitása',
       refresh: 'Frissítés',
@@ -252,6 +252,22 @@ const hu = {
         menuHint:
           'A célgép használja ezt az adathordozót. Nyissa meg a fájlkezelőt az erővel történő visszavételhez.'
       },
+      tips: {
+        title: 'Hogyan tölts fel képeket',
+        usb1: 'Csatlakoztassa a NanoKVM-t a számítógépéhez USB-n keresztül.',
+        usb2: 'Ezen az oldalon csatolja a megosztott fájlokat háttértár módban.',
+        usb3: 'Nyissa meg a virtuális lemezt a számítógépén, és másolja a kép fájlt a virtuális lemez gyökérkönyvtárába.',
+        usb4: 'A másolás végeztével adja ki a lemezt: a lemezkép ezután megjelenik a listában.',
+        scp1: 'Győződjön meg róla, hogy a NanoKVM és a számítógépe ugyanazon a helyi hálózaton van.',
+        scp2: 'Nyisson meg egy terminált a számítógépén, és használja az SCP parancsot a kép fájl feltöltésére a /data könyvtárba a NanoKVM-en.',
+        scp3: 'Példa: scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF Kártya',
+        tf1: 'Ez a módszer támogatott Linux rendszeren',
+        tf2: 'Vegye ki a TF kártyát a NanoKVM-ből (a TELJES verzióhoz, először szedje szét a házat).',
+        tf3: 'Helyezze a TF kártyát egy kártyaolvasóba, és csatlakoztassa a számítógépéhez.',
+        tf4: 'Másolja a képfájlt a TF kártya /data könyvtárába.',
+        tf5: 'Helyezze vissza a TF kártyát a NanoKVM-be.'
+      },
       job: {
         running: '{{name}} feldolgozása'
       },
@@ -271,6 +287,10 @@ const hu = {
         cdromOnlyIso: 'CD-ROM csak ISO 9660 képet tartalmazhat',
         uploadFailed: 'A feltöltés nem sikerült',
         downloadFailed: 'A letöltés nem sikerült',
+        uploading: '{{name}} feltöltése',
+        downloading: '{{name}} letöltése',
+        done: '{{name}} elkészült',
+        checksumFailed: 'A lemezkép nem egyezik a SHA-256 ellenőrzőösszeggel.',
         blocked: 'A célgép használja a lemezt',
         copyHint:
           'A képet SCP-vel is a data partícióra másolhatja, vagy a célgépről is átmásolhatja.'
@@ -297,6 +317,9 @@ const hu = {
           desc: 'Csökkenő'
         },
         upload: 'Fájl feltöltése az adathordozóra',
+        deleteFolderTitle: 'Mappa törlése',
+        deleteFolderConfirm:
+          'Törli a(z) {{name}} mappát és a teljes tartalmát? Ez nem vonható vissza.',
         uploading: 'Feltöltés…',
         uploadFailed: 'A feltöltés nem sikerült',
         download: 'Letöltés',

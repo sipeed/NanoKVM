@@ -65,6 +65,14 @@ function childPath(parent: string, name: string): string {
   return parent === '/' ? `/${name}` : `${parent}/${name}`;
 }
 
+// A browser upload in flight. The page shows it next to the media job that
+// reports its progress, with a button that aborts the request.
+export type FileUpload = {
+  id: number;
+  name: string;
+  cancel: () => void;
+};
+
 function sortEntries(entries: api.MediaFileEntry[], sortKey: SortKey, sortAsc: boolean) {
   return [...entries].sort((a, b) => {
     // Folders stay ahead of files; the chosen key sorts inside each group.
@@ -107,9 +115,15 @@ export function useFileBrowser({
   const { t } = useTranslation();
   const { modal } = App.useApp();
 
-  const [files, setFiles] = useState<api.MediaFiles | null>(null);
+  // A listing remembers the medium and folder it was read from: right after
+  // the user moves elsewhere it still holds the old entries, and acting on
+  // those under the new path would download or delete the wrong file.
+  const [listing, setListing] = useState<{ key: string; files: api.MediaFiles } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [busy, setBusy] = useState('');
+  // Every upload running from this panel, so two uploads in a row do not
+  // share one busy flag and each one can be cancelled on its own.
+  const [uploads, setUploads] = useState<(FileUpload & { targetType: api.MediaType })[]>([]);
+  const uploadId = useRef(0);
   const [expandedDirs, setExpandedDirs] = useState<Record<string, api.MediaFiles>>({});
   const [expandingDirs, setExpandingDirs] = useState<Record<string, boolean>>({});
   const [query, setQuery] = useState('');
@@ -136,6 +150,8 @@ export function useFileBrowser({
   // re-list the folder and clear the search.
   const mediaType = media?.type;
   const mediaRel = media?.rel;
+  const locationKey = `${mediaType ?? ''}:${mediaRel ?? ''}:${path}`;
+  const files = listing?.key === locationKey ? listing.files : null;
 
   // Every listing carries a number: an answer that arrives after a newer
   // request belongs to a folder the user has already left.
@@ -143,25 +159,31 @@ export function useFileBrowser({
   const expandedGeneration = useRef(0);
 
   const refresh = useCallback(async () => {
+    // Leaving for a medium that cannot be browsed still has to outdate a
+    // listing in flight for the previous one.
+    const id = ++listingId.current;
     if (!mediaType || !canBrowse) {
-      setFiles(null);
+      setListing(null);
+      setIsLoading(false);
       return;
     }
 
-    const id = ++listingId.current;
+    const key = `${mediaType}:${mediaRel ?? ''}:${path}`;
     setIsLoading(true);
     try {
       const rsp = await api.listMediaFiles({ type: mediaType, rel: mediaRel ?? '', path });
       if (id !== listingId.current) return;
       if (rsp.code === 0) {
-        setFiles(rsp.data);
+        setListing({ key, files: rsp.data });
       } else {
         onError(rsp.msg);
       }
+    } catch {
+      if (id === listingId.current) onError(t('storage.failed'));
     } finally {
       if (id === listingId.current) setIsLoading(false);
     }
-  }, [mediaType, mediaRel, path, canBrowse, onError]);
+  }, [mediaType, mediaRel, path, canBrowse, onError, t]);
 
   // An upload or a delete finishes long after the render that started it, so
   // those continuations refresh through this ref: they must re-read what the
@@ -267,10 +289,17 @@ export function useFileBrowser({
     uploadTarget.current = null;
     if (!file || !pending) return;
 
+    if (inputRef.current) inputRef.current.value = '';
+
     const { target, dir } = pending;
-    setBusy(`upload:${target.type}`);
+    const id = ++uploadId.current;
+    const controller = new AbortController();
+    setUploads((current) => [
+      ...current,
+      { id, name: file.name, targetType: target.type, cancel: () => controller.abort() }
+    ]);
     try {
-      const rsp = await api.uploadMediaFile(target.type, target.rel, dir, file);
+      const rsp = await api.uploadMediaFile(target.type, target.rel, dir, file, controller.signal);
       if (rsp.code === 0) {
         if (isBrowsed(target) && dir === path) {
           await refreshRef.current();
@@ -281,10 +310,10 @@ export function useFileBrowser({
         onError(rsp.msg);
       }
     } catch {
-      onError(t('storage.files.uploadFailed'));
+      // A cancelled upload is what the user asked for, not a failure.
+      if (!controller.signal.aborted) onError(t('storage.files.uploadFailed'));
     } finally {
-      setBusy('');
-      if (inputRef.current) inputRef.current.value = '';
+      setUploads((current) => current.filter((item) => item.id !== id));
     }
   }
 
@@ -294,15 +323,21 @@ export function useFileBrowser({
     modal.confirm({
       // A folder goes with everything it holds, so its confirm says so; the
       // file confirm stays the plain question.
-      title: entry.isDir ? t('storage.files.delete') : t('storage.files.deleteTitle'),
+      title: entry.isDir ? t('storage.files.deleteFolderTitle') : t('storage.files.deleteTitle'),
       content: entry.isDir
-        ? t('storage.deleteConfirm', { name: entry.name })
+        ? t('storage.files.deleteFolderConfirm', { name: entry.name })
         : t('storage.files.deleteConfirm', { name: entry.name }),
       okText: t('storage.yes'),
       cancelText: t('storage.no'),
       okButtonProps: { danger: true },
       onOk: async () => {
-        const rsp = await api.deleteMediaFile({ type: media.type, rel: media.rel, path: target });
+        let rsp;
+        try {
+          rsp = await api.deleteMediaFile({ type: media.type, rel: media.rel, path: target });
+        } catch {
+          onError(t('storage.failed'));
+          return;
+        }
         if (rsp.code !== 0) {
           onError(rsp.msg);
           return;
@@ -325,7 +360,7 @@ export function useFileBrowser({
             size="small"
             icon={<UploadIcon size={14} />}
             disabled={!canWrite}
-            loading={busy === `upload:${target.type}`}
+            loading={uploads.some((item) => item.targetType === target.type)}
             onClick={() => {
               uploadTarget.current = { target, dir };
               inputRef.current?.click();
@@ -605,5 +640,10 @@ export function useFileBrowser({
     </div>
   );
 
-  return { toolbar: shareToolbar, content, overlays };
+  return {
+    toolbar: shareToolbar,
+    content,
+    overlays,
+    uploads: uploads.map(({ id, name, cancel }) => ({ id, name, cancel }))
+  };
 }

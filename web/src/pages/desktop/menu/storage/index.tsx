@@ -31,6 +31,7 @@ export const Storage = () => {
     cdrom: false
   });
   const [mode, setMode] = useState<'mass-storage' | 'cd-rom'>('mass-storage');
+  const [isOpen, setIsOpen] = useState(false);
 
   const { mount, eject, busy } = useMediaMount({
     onError: (message, description) =>
@@ -41,14 +42,18 @@ export const Storage = () => {
   });
 
   async function refresh() {
-    const rsp = await api.getMedia();
-    if (rsp.code === 0) {
-      setMedia(rsp.data?.media ?? []);
-    }
+    try {
+      const rsp = await api.getMedia();
+      if (rsp.code === 0) {
+        setMedia(rsp.data?.media ?? []);
+      }
 
-    const stateRsp = await api.getMediaState();
-    if (stateRsp.code === 0) {
-      setState(stateRsp.data);
+      const stateRsp = await api.getMediaState();
+      if (stateRsp.code === 0) {
+        setState(stateRsp.data);
+      }
+    } catch {
+      // Retried on the next open or poll.
     }
   }
 
@@ -56,13 +61,15 @@ export const Storage = () => {
     void refresh();
   }, []);
 
-  // The list can change while the target machine owns the partition - that is
-  // the only time it can change without this page doing anything - so the poll
-  // runs then as well, not only while nothing is attached.
+  // The list can change while the target machine owns the partition, so it is
+  // re-read while the panel is open. Only then: listing the media while the
+  // target machine owns the partition makes the server drop its caches, which
+  // is not worth paying for a panel nobody is looking at.
   useEffect(() => {
+    if (!isOpen) return;
     const timer = setInterval(() => void refresh(), 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isOpen]);
 
   // The mode control follows the attached medium, so it shows what the target
   // machine is actually looking at instead of the last choice made here.
@@ -73,6 +80,7 @@ export const Storage = () => {
   }, [state.state, state.cdrom]);
 
   function handleOpenChange(open: boolean) {
+    setIsOpen(open);
     if (open) void refresh();
   }
 

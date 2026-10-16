@@ -245,6 +245,22 @@ const ko = {
         menuHint:
           '대상 컴퓨터가 이 미디어를 사용하고 있습니다. 파일 관리자를 열어 강제로 되찾으세요.'
       },
+      tips: {
+        title: '업로드 방법',
+        usb1: 'USB를 통해 NanoKVM을 컴퓨터에 연결하세요.',
+        usb2: '이 페이지에서 공유 파일을 대용량 저장 장치 모드로 마운트합니다.',
+        usb3: '컴퓨터에서 가상 디스크를 열고 이미지 파일을 가상 디스크의 루트 디렉토리로 복사하세요.',
+        usb4: '복사가 끝나면 디스크를 꺼냅니다. 그러면 이미지가 목록에 나타납니다.',
+        scp1: 'NanoKVM과 컴퓨터가 동일한 로컬 네트워크에 있는지 확인하세요.',
+        scp2: '컴퓨터에서 터미널을 열고 SCP 명령을 사용하여 이미지 파일을 NanoKVM의 /data 디렉터리에 업로드하세요.',
+        scp3: '예시: scp [이미지 파일 경로] root@[NanoKVM IP 주소]:/data',
+        tfCard: 'TF 카드',
+        tf1: '이 방법은 Linux 시스템에서 지원됩니다',
+        tf2: 'NanoKVM에서 TF 카드를 가져옵니다(전체 버전의 경우 먼저 케이스를 분해하세요).',
+        tf3: 'TF 카드를 카드 리더기에 삽입하고 컴퓨터에 연결하세요.',
+        tf4: '이미지 파일을 TF 카드의 /data 디렉터리에 복사하세요.',
+        tf5: 'TF 카드를 NanoKVM에 삽입하세요.'
+      },
       job: {
         running: '{{name}} 처리 중'
       },
@@ -264,6 +280,10 @@ const ko = {
         cdromOnlyIso: 'CD-ROM에는 ISO 9660 이미지만 넣을 수 있습니다',
         uploadFailed: '업로드 실패',
         downloadFailed: '다운로드 실패',
+        uploading: '{{name}} 업로드 중',
+        downloading: '{{name}} 다운로드 중',
+        done: '{{name}} 준비 완료',
+        checksumFailed: '이미지가 SHA-256 체크섬과 일치하지 않습니다.',
         blocked: '대상 컴퓨터가 디스크를 사용 중입니다',
         copyHint:
           'SCP로 데이터 파티션에 이미지를 복사하거나 대상 컴퓨터에서 직접 복사할 수도 있습니다.'
@@ -288,6 +308,9 @@ const ko = {
           desc: '내림차순'
         },
         upload: '미디어에 파일 업로드',
+        deleteFolderTitle: '폴더 삭제',
+        deleteFolderConfirm:
+          '폴더 {{name}}와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.',
         uploading: '업로드 중…',
         uploadFailed: '업로드 실패',
         download: '다운로드',

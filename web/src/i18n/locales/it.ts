@@ -252,6 +252,22 @@ const it = {
         menuHint:
           'La macchina remota sta usando questo supporto. Apri il gestore file per riprenderlo con la forza.'
       },
+      tips: {
+        title: 'Come caricare',
+        usb1: 'Collega il NanoKVM al tuo computer tramite USB.',
+        usb2: 'In questa pagina, monta i file condivisi in modalità archiviazione di massa.',
+        usb3: 'Apri il disk virtuale sul tuo computer e copia il file immagine nella directory principale del disk.',
+        usb4: "Espelli il disco al termine della copia: l'immagine comparirà nell'elenco.",
+        scp1: 'Assicurati che il NanoKVM e il tuo computer siano sulla stessa rete locale.',
+        scp2: 'Apri un terminale sul tuo computer e usa il comando SCP per caricare il file immagine nella directory /data del NanoKVM.',
+        scp3: 'Esempio: scp il-tuo-percorso-immagine root@il-tuo-ip-nanokvm:/data',
+        tfCard: 'Scheda TF',
+        tf1: 'Questo metodo è supportato su sistemi Linux',
+        tf2: 'Recupera la scheda TF dal NanoKVM (per la versione FULL, smonta prima il case).',
+        tf3: 'Inserisci la scheda TF in un lettore di schede e collegala al tuo computer.',
+        tf4: 'Copia il file immagine nella directory /data sulla scheda TF.',
+        tf5: 'Inserisci la scheda TF nel NanoKVM.'
+      },
       job: {
         running: 'Elaborazione di {{name}}'
       },
@@ -271,6 +287,10 @@ const it = {
         cdromOnlyIso: 'Un CD-ROM può contenere solo un’immagine ISO 9660',
         uploadFailed: 'Caricamento non riuscito',
         downloadFailed: 'Download non riuscito',
+        uploading: 'Caricamento di {{name}}',
+        downloading: 'Download di {{name}}',
+        done: '{{name}} è pronto',
+        checksumFailed: "L'immagine non corrisponde al checksum SHA-256.",
         blocked: 'La macchina remota sta usando il disco',
         copyHint:
           "Puoi anche copiare un'immagine nella partizione dati via SCP, o dalla macchina remota."
@@ -297,6 +317,9 @@ const it = {
           desc: 'Decrescente'
         },
         upload: 'Carica un file nel supporto',
+        deleteFolderTitle: 'Elimina cartella',
+        deleteFolderConfirm:
+          "Eliminare la cartella {{name}} e tutto il suo contenuto? L'operazione non può essere annullata.",
         uploading: 'Caricamento…',
         uploadFailed: 'Caricamento non riuscito',
         download: 'Scarica',

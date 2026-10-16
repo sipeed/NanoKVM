@@ -249,6 +249,22 @@ const tr = {
         menuHint:
           'Hedef makine bu ortamı kullanıyor. Zorla geri almak için dosya yöneticisini açın.'
       },
+      tips: {
+        title: 'Nasıl yüklenir',
+        usb1: "NanoKVM'i bilgisayarınıza USB ile bağlayın.",
+        usb2: 'Bu sayfada paylaşılan dosyaları yığın depolama modunda bağlayın.',
+        usb3: 'Sanal diski bilgisayarınızda açın ve disk imajı dosyanızı sanal diskin kök dizinine kopyalayın.',
+        usb4: 'Kopyalama bitince diski çıkarın: imaj ardından listede görünür.',
+        scp1: 'NanoKVM ve bilgisayarınızın aynı yerel ağda bulunduğundan emin olun.',
+        scp2: "Bilgisayarınızda uçbirimi açın ve disk imajı dosyanını SCP komudunu kullanarak NanoKVM'in /data dizinine yükleyin.",
+        scp3: 'Örnek: scp senin-disk-imajı-dizinin root@senin-nanokvm-ip:/data',
+        tfCard: 'micro SD kart',
+        tf1: 'Bu yöntem Linux sistemlerde desteklenmektedir.',
+        tf2: "NanoKVM'den micro SD kartı çıkartın(TAM sürüm için öncelikle kutuyu sökün).",
+        tf3: 'micro SD kartı kart okuyucusuna takın ve bilgisayarınıza bağlayın.',
+        tf4: 'Disk imajı dosyanını micro SD kartın /data dizinine kopyalayın.',
+        tf5: "micro SD kartı NanoKVM'e geri yerleştirin."
+      },
       job: {
         running: '{{name}} işleniyor'
       },
@@ -268,6 +284,10 @@ const tr = {
         cdromOnlyIso: 'Bir CD-ROM yalnızca ISO 9660 imajı taşıyabilir',
         uploadFailed: 'Yükleme başarısız oldu',
         downloadFailed: 'İndirme başarısız oldu',
+        uploading: '{{name}} yükleniyor',
+        downloading: '{{name}} indiriliyor',
+        done: '{{name}} hazır',
+        checksumFailed: 'İmaj, SHA-256 sağlama toplamıyla eşleşmiyor.',
         blocked: 'Hedef makine diski kullanıyor',
         copyHint: 'İmajı SCP ile veri bölümüne ya da hedef makineden doğrudan kopyalayabilirsiniz.'
       },
@@ -292,6 +312,9 @@ const tr = {
           desc: 'Azalan'
         },
         upload: 'Ortama dosya yükle',
+        deleteFolderTitle: 'Klasörü sil',
+        deleteFolderConfirm:
+          '{{name}} klasörü ve içindeki her şey silinsin mi? Bu işlem geri alınamaz.',
         uploading: 'Yükleniyor…',
         uploadFailed: 'Yükleme başarısız oldu',
         download: 'İndir',

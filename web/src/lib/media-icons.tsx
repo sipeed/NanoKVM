@@ -10,7 +10,7 @@ import {
   HardDriveIcon
 } from 'lucide-react';
 
-import type { MediaItem } from '@/api/media.ts';
+import { isOpticalImage, type MediaItem } from '@/api/media.ts';
 import { extension } from '@/lib/file-names.ts';
 
 // The glyphs the storage page and the desktop menu draw for media and for the
@@ -22,7 +22,7 @@ export function MediaIcon({ item, className }: { item: MediaItem; className?: st
   if (item.type === 'partition') {
     return <FolderSyncIcon size={14} className={className} />;
   }
-  if (item.fs === 'iso9660') {
+  if (isOpticalImage(item)) {
     return <DiscIcon size={14} className={className} />;
   }
   return <HardDriveIcon size={14} className={className} />;

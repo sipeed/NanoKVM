@@ -239,6 +239,22 @@ const zh_tw = {
         desc: '受控裝置還掛著這個媒體。強制收回會讓 USB 裝置重新列舉，它還沒寫入磁碟的資料可能會遺失。',
         menuHint: '受控裝置正在使用該媒體，請到檔案管理員頁面強制收回。'
       },
+      tips: {
+        title: '如何上傳',
+        usb1: '透過 USB 將 NanoKVM 連接到您的電腦。',
+        usb2: '在本頁面以大容量儲存模式掛載共享檔案；',
+        usb3: '開啟電腦上的虛擬磁碟，將映象檔案複製到虛擬磁碟的根目錄下。',
+        usb4: '複製完成後退出磁碟，映像檔隨後會出現在清單中。',
+        scp1: '確保 NanoKVM 和您的電腦位於同一區域網路。',
+        scp2: '開啟電腦上的終端機，使用 SCP 指令將映像檔案上傳到 NanoKVM 的 /data 目錄下。',
+        scp3: '範例：scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'microSD 卡',
+        tf1: '此方法適用於 Linux 系統',
+        tf2: '從 NanoKVM 拔出 microSD 卡（FULL 版本請先拆開外殼）。',
+        tf3: '使用 USB 讀卡機將 microSD 卡連接至電腦。',
+        tf4: '將映像檔複製到 microSD 卡的 /data 目錄下。',
+        tf5: '將 microSD 卡重新插回 NanoKVM。'
+      },
       job: {
         running: '正在處理 {{name}}'
       },
@@ -258,6 +274,10 @@ const zh_tw = {
         cdromOnlyIso: '光碟模式只能掛載 ISO 光碟映像檔',
         uploadFailed: '上傳失敗',
         downloadFailed: '下載失敗',
+        uploading: '正在上傳 {{name}}',
+        downloading: '正在下載 {{name}}',
+        done: '{{name}} 已就緒',
+        checksumFailed: '映像檔與 SHA-256 校驗值不符。',
         blocked: '受控裝置正在使用這張磁碟',
         copyHint: '也可以透過 SCP 把映像檔放進資料分割區，或在受控裝置上直接複製。'
       },
@@ -280,6 +300,8 @@ const zh_tw = {
           desc: '降冪'
         },
         upload: '上傳檔案到媒體',
+        deleteFolderTitle: '刪除資料夾',
+        deleteFolderConfirm: '刪除資料夾 {{name}} 及其中的所有內容？此操作無法復原。',
         uploading: '正在上傳…',
         uploadFailed: '上傳失敗',
         download: '下載',

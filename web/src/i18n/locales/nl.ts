@@ -253,6 +253,22 @@ const nl = {
         menuHint:
           'De doelcomputer gebruikt dit medium. Open het bestandsbeheer om het met geweld terug te halen.'
       },
+      tips: {
+        title: 'Hoe te uploaden',
+        usb1: 'Verbind de NanoKVM met uw computer via USB.',
+        usb2: 'Koppel op deze pagina de gedeelde bestanden in massaopslagmodus.',
+        usb3: 'Open de virtuele schijf op uw computer en kopieer het imagebestand naar de hoofdmap van de virtuele schijf.',
+        usb4: 'Werp de schijf uit als het kopiëren klaar is: de image verschijnt dan in de lijst.',
+        scp1: 'Zorg ervoor dat de NanoKVM en uw computer zich in hetzelfde lokale netwerk bevinden.',
+        scp2: 'Open een terminal op uw computer en gebruik het SCP-commando om het imagebestand te uploaden naar de /data directory op de NanoKVM.',
+        scp3: 'Voorbeeld: scp uw-image-pad root@uw-nanokvm-ip:/data',
+        tfCard: 'TF-kaart',
+        tf1: 'Deze methode wordt ondersteund op Linux-systemen',
+        tf2: 'Haal de TF-kaart uit de NanoKVM (voor de VOLLEDIGE versie, demonteer eerst de behuizing).',
+        tf3: 'Plaats de TF-kaart in een kaartlezer en verbind deze met uw computer.',
+        tf4: 'Kopieer het imagebestand naar de /data directory op de TF-kaart.',
+        tf5: 'Plaats de TF-kaart terug in de NanoKVM.'
+      },
       job: {
         running: 'Bezig met {{name}}'
       },
@@ -272,6 +288,10 @@ const nl = {
         cdromOnlyIso: 'Een CD-ROM kan alleen een ISO 9660-image bevatten',
         uploadFailed: 'Uploaden mislukt',
         downloadFailed: 'Downloaden mislukt',
+        uploading: '{{name}} wordt geüpload',
+        downloading: '{{name}} wordt gedownload',
+        done: '{{name}} is klaar',
+        checksumFailed: 'De image komt niet overeen met de SHA-256-controlesom.',
         blocked: 'De doelcomputer gebruikt de schijf',
         copyHint:
           'Je kunt een image ook via SCP naar de datapartitie kopiëren, of vanaf de doelcomputer.'
@@ -298,6 +318,9 @@ const nl = {
           desc: 'Aflopend'
         },
         upload: 'Een bestand naar het medium uploaden',
+        deleteFolderTitle: 'Map verwijderen',
+        deleteFolderConfirm:
+          'De map {{name}} en alles erin verwijderen? Dit kan niet ongedaan worden gemaakt.',
         uploading: 'Uploaden…',
         uploadFailed: 'Uploaden mislukt',
         download: 'Downloaden',

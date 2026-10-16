@@ -246,6 +246,22 @@ const se = {
         menuHint:
           'Måldatorn använder mediet. Öppna filhanteraren för att ta tillbaka det med tvång.'
       },
+      tips: {
+        title: 'Hur man laddar upp',
+        usb1: 'Anslut NanoKVM till din dator via USB.',
+        usb2: 'Montera de delade filerna i masslagringsläge på den här sidan.',
+        usb3: 'Öppna den virtuella disken på din dator och kopiera avbildningsfilen till rotkatalogen.',
+        usb4: 'Mata ut disken när kopieringen är klar: avbilden visas då i listan.',
+        scp1: 'Säkerställ att NanoKVM och din dator är på samma lokala nätverk.',
+        scp2: 'Öppna en terminal på din dator och använd SCP-kommandot för att ladda upp avbildningen till /data på NanoKVM.',
+        scp3: 'Exempel: scp din-avbildningssökväg root@din-nanokvm-ip:/data',
+        tfCard: 'TF-kort',
+        tf1: 'Denna metod stöds på Linux-system',
+        tf2: 'Ta ut TF-kortet från NanoKVM (för FULL-versionen, öppna chassit först).',
+        tf3: 'Sätt in TF-kortet i en kortläsare och anslut till din dator.',
+        tf4: 'Kopiera avbildningsfilen till /data på TF-kortet.',
+        tf5: 'Sätt in TF-kortet i NanoKVM.'
+      },
       job: {
         running: 'Arbetar med {{name}}'
       },
@@ -265,6 +281,10 @@ const se = {
         cdromOnlyIso: 'En CD-ROM kan bara innehålla en ISO 9660-avbildning',
         uploadFailed: 'Uppladdningen misslyckades',
         downloadFailed: 'Nedladdningen misslyckades',
+        uploading: 'Laddar upp {{name}}',
+        downloading: 'Laddar ner {{name}}',
+        done: '{{name}} är klar',
+        checksumFailed: 'Avbilden matchar inte SHA-256-kontrollsumman.',
         blocked: 'Måldatorn använder disken',
         copyHint:
           'Du kan också kopiera en avbildning till datapartitionen via SCP, eller från måldatorn.'
@@ -290,6 +310,8 @@ const se = {
           desc: 'Fallande'
         },
         upload: 'Ladda upp en fil till mediet',
+        deleteFolderTitle: 'Ta bort mapp',
+        deleteFolderConfirm: 'Ta bort mappen {{name}} och allt innehåll? Detta kan inte ångras.',
         uploading: 'Laddar upp…',
         uploadFailed: 'Uppladdningen misslyckades',
         download: 'Hämta',

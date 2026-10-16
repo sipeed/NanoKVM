@@ -248,6 +248,22 @@ const vi = {
         desc: 'Máy đích vẫn đang dùng phương tiện này. Lấy lại sẽ liệt kê lại thiết bị USB và có thể mất những gì nó chưa ghi vào đĩa.',
         menuHint: 'Máy đích đang dùng phương tiện này. Mở trình quản lý tệp để cưỡng chế lấy lại.'
       },
+      tips: {
+        title: 'Cách tải lên',
+        usb1: 'Kết nối NanoKVM với máy tính của bạn qua USB.',
+        usb2: 'Trên trang này, gắn các tệp chia sẻ ở chế độ lưu trữ dung lượng lớn.',
+        usb3: 'Mở đĩa ảo trên máy tính của bạn và sao chép vào thư mục gốc của đĩa ảo.',
+        usb4: 'Đẩy đĩa ra khi sao chép xong: ảnh đĩa sẽ xuất hiện trong danh sách.',
+        scp1: 'Đảm bảo NanoKVM và máy tính của bạn đang trên cùng một mạng nội bộ.',
+        scp2: 'Mở terminal trên máy tính và sử dụng lệnh SCP để tải đĩa ảo lên thư mục /data trên NanoKVM.',
+        scp3: 'Ví dụ: scp đường-dẫn-image root@ip-của-nanokvm:/data',
+        tfCard: 'Thẻ TF',
+        tf1: 'Phương pháp này được hỗ trợ trên hệ thống Linux',
+        tf2: 'Lấy thẻ TF từ NanoKVM (với phiên bản FULL, hãy tháo vỏ trước).',
+        tf3: 'Chèn thẻ TF vào đầu đọc thẻ và kết nối với máy tính của bạn.',
+        tf4: 'Sao chép tệp hình ảnh vào thư mục /data trên thẻ TF.',
+        tf5: 'Chèn thẻ TF vào NanoKVM.'
+      },
       job: {
         running: 'Đang xử lý {{name}}'
       },
@@ -267,6 +283,10 @@ const vi = {
         cdromOnlyIso: 'CD-ROM chỉ có thể chứa ảnh ISO 9660',
         uploadFailed: 'Tải lên không thành công',
         downloadFailed: 'Tải xuống không thành công',
+        uploading: 'Đang tải lên {{name}}',
+        downloading: 'Đang tải xuống {{name}}',
+        done: '{{name}} đã sẵn sàng',
+        checksumFailed: 'Ảnh đĩa không khớp với mã kiểm tra SHA-256.',
         blocked: 'Máy đích đang dùng đĩa',
         copyHint: 'Bạn cũng có thể sao chép ảnh vào phân vùng dữ liệu qua SCP, hoặc từ máy đích.'
       },
@@ -291,6 +311,9 @@ const vi = {
           desc: 'Giảm dần'
         },
         upload: 'Tải một tệp lên phương tiện',
+        deleteFolderTitle: 'Xóa thư mục',
+        deleteFolderConfirm:
+          'Xóa thư mục {{name}} và toàn bộ nội dung bên trong? Không thể hoàn tác thao tác này.',
         uploading: 'Đang tải lên…',
         uploadFailed: 'Tải lên không thành công',
         download: 'Tải xuống',

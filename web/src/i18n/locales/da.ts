@@ -249,6 +249,22 @@ const da = {
         menuHint:
           'Målcomputeren bruger dette medie. Åbn filhåndteringen for at tage det tilbage med magt.'
       },
+      tips: {
+        title: 'Sådan uploader du',
+        usb1: 'Forbind din NanoKVM til din computer via USB.',
+        usb2: 'Montér de delte filer i masselagringstilstand på denne side.',
+        usb3: 'Åben den virtuelle disk på din computer og kopier diskbilledet til roden af den virtuelle disk.',
+        usb4: 'Skub disken ud, når kopieringen er færdig: billedet vises derefter på listen.',
+        scp1: 'Kontroller at din NanoKVM og din computer er på samme lokale netværk.',
+        scp2: 'Åben en terminal på din computer og brug SCP-kommandoen for at uploade diskbilledet til /data mappen på din NanoKVM.',
+        scp3: 'Eksempel: scp sti-til-dit-diskbillede root@din-nanokvm-ip:/data',
+        tfCard: 'microSD-kort',
+        tf1: 'Denne metode er understøttet af Linux systemer',
+        tf2: 'Tag microSD-kortet ud af din NanoKVM (for den fulde version af NanoKVM skal du åbne enheden for at kunne tage microSD-kortet ud).',
+        tf3: 'Indsæt microSD-kortet i en kortlæser og tilslut den til en computer.',
+        tf4: 'Kopier diskbilledet til /data mappen på microSD-kortet.',
+        tf5: 'Skub microSD-kortet ud og indsæt microSD-kortet i din NanoKVM.'
+      },
       job: {
         running: 'Arbejder på {{name}}'
       },
@@ -268,6 +284,10 @@ const da = {
         cdromOnlyIso: 'En CD-ROM kan kun indeholde et ISO 9660-diskbillede',
         uploadFailed: 'Upload mislykkedes',
         downloadFailed: 'Download mislykkedes',
+        uploading: 'Uploader {{name}}',
+        downloading: 'Downloader {{name}}',
+        done: '{{name}} er klar',
+        checksumFailed: 'Billedet stemmer ikke overens med SHA-256-kontrolsummen.',
         blocked: 'Målcomputeren bruger disken',
         copyHint:
           'Du kan også kopiere et diskbillede til datapartitionen via SCP eller fra målcomputeren.'
@@ -294,6 +314,8 @@ const da = {
           desc: 'Faldende'
         },
         upload: 'Upload en fil til mediet',
+        deleteFolderTitle: 'Slet mappe',
+        deleteFolderConfirm: 'Slet mappen {{name}} og alt dens indhold? Dette kan ikke fortrydes.',
         uploading: 'Uploader…',
         uploadFailed: 'Upload mislykkedes',
         download: 'Download',

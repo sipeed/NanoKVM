@@ -250,6 +250,22 @@ const pl = {
         desc: 'Zdalny komputer nadal używa tego nośnika. Odebranie go ponownie wyliczy urządzenie USB i może utracić wszystko, czego jeszcze nie zapisało na dysku.',
         menuHint: 'Zdalny komputer używa tego nośnika. Otwórz menedżer plików, aby odebrać go siłą.'
       },
+      tips: {
+        title: 'Jak przesłać obrazy',
+        usb1: 'Podłącz urządzenie NanoKVM do komputera przez USB.',
+        usb2: 'Na tej stronie zamontuj udostępnione pliki w trybie pamięci masowej.',
+        usb3: 'Otwórz dysk wirtualny na swoim komputerze i skopiuj plik obrazu do katalogu głównego dysku wirtualnego.',
+        usb4: 'Po zakończeniu kopiowania wysuń dysk: obraz pojawi się wtedy na liście.',
+        scp1: 'Upewnij się że NanoKVM i twój komputer są na tej samej sieci lokalnej.',
+        scp2: 'Otwórz terminal na komputerze i użyj komendę SCP aby przesłać obraz do katalogu /data na NanoKVM.',
+        scp3: 'Przykład: scp lokalizacja-zrodlowego-obrazu root@ip-twojego-nanokvm:/data',
+        tfCard: 'Karta SD',
+        tf1: 'Ta metoda jest obsługiwana w systemie Linux',
+        tf2: 'Usuń kartę SD od NanoKVM (dla wersji FULL, rozbierz obudowę najpierw).',
+        tf3: 'Włóż kartę SD do czytnika kart i podłącz do twojego komputera.',
+        tf4: 'Kopjuj obraz do katalogu /data na karcie SD.',
+        tf5: 'Włóż kartę SD do NanoKVM.'
+      },
       job: {
         running: 'Przetwarzanie {{name}}'
       },
@@ -269,6 +285,10 @@ const pl = {
         cdromOnlyIso: 'CD-ROM może zawierać wyłącznie obraz ISO 9660',
         uploadFailed: 'Przesyłanie nie powiodło się',
         downloadFailed: 'Pobieranie nie powiodło się',
+        uploading: 'Przesyłanie {{name}}',
+        downloading: 'Pobieranie {{name}}',
+        done: '{{name}} jest gotowy',
+        checksumFailed: 'Obraz nie zgadza się z sumą kontrolną SHA-256.',
         blocked: 'Zdalny komputer używa dysku',
         copyHint:
           'Obraz możesz też skopiować do partycji danych przez SCP albo ze zdalnego komputera.'
@@ -294,6 +314,9 @@ const pl = {
           desc: 'Malejąco'
         },
         upload: 'Prześlij plik na nośnik',
+        deleteFolderTitle: 'Usuń folder',
+        deleteFolderConfirm:
+          'Usunąć folder {{name}} wraz z całą zawartością? Tej operacji nie można cofnąć.',
         uploading: 'Przesyłanie…',
         uploadFailed: 'Przesyłanie nie powiodło się',
         download: 'Pobierz',

@@ -250,6 +250,22 @@ const pt_br = {
         menuHint:
           'A máquina remota está usando esta mídia. Abra o gerenciador de arquivos para retomá-la à força.'
       },
+      tips: {
+        title: 'Como fazer upload',
+        usb1: 'Conecte o NanoKVM ao seu computador via USB.',
+        usb2: 'Nesta página, monte os arquivos compartilhados no modo de armazenamento em massa.',
+        usb3: 'Abra o disco virtual no seu computador e copie o arquivo de imagem para o diretório raiz do disco virtual.',
+        usb4: 'Ejete o disco quando a cópia terminar: a imagem aparecerá na lista.',
+        scp1: 'Certifique-se de que o NanoKVM e seu computador estão na mesma rede local.',
+        scp2: 'Abra um terminal no seu computador e use o comando SCP para fazer upload do arquivo de imagem para o diretório /data no NanoKVM.',
+        scp3: 'Exemplo: scp seu-caminho-da-imagem root@seu-ip-nanokvm:/data',
+        tfCard: 'Cartão TF',
+        tf1: 'Este método é suportado em sistemas Linux',
+        tf2: 'Remova o cartão TF do NanoKVM (para a versão FULL, desmonte a caixa primeiro).',
+        tf3: 'Insira o cartão TF em um leitor de cartão e conecte-o ao seu computador.',
+        tf4: 'Copie o arquivo de imagem para o diretório /data no cartão TF.',
+        tf5: 'Insira o cartão TF no NanoKVM.'
+      },
       job: {
         running: 'Processando {{name}}'
       },
@@ -269,6 +285,10 @@ const pt_br = {
         cdromOnlyIso: 'Um CD-ROM só pode conter uma imagem ISO 9660',
         uploadFailed: 'Falha no envio',
         downloadFailed: 'Falha no download',
+        uploading: 'Enviando {{name}}',
+        downloading: 'Baixando {{name}}',
+        done: '{{name}} está pronto',
+        checksumFailed: 'A imagem não corresponde ao checksum SHA-256.',
         blocked: 'A máquina remota está usando o disco',
         copyHint:
           'Você também pode copiar uma imagem para a partição de dados via SCP, ou a partir da máquina remota.'
@@ -295,6 +315,9 @@ const pt_br = {
           desc: 'Decrescente'
         },
         upload: 'Enviar um arquivo para a mídia',
+        deleteFolderTitle: 'Excluir pasta',
+        deleteFolderConfirm:
+          'Excluir a pasta {{name}} e todo o seu conteúdo? Esta ação não pode ser desfeita.',
         uploading: 'Enviando…',
         uploadFailed: 'Falha no envio',
         download: 'Baixar',

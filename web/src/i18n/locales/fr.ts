@@ -253,6 +253,22 @@ const fr = {
         menuHint:
           'La machine distante utilise ce support. Ouvrez le gestionnaire de fichiers pour le reprendre de force.'
       },
+      tips: {
+        title: 'Comment télécharger',
+        usb1: 'Connectez le NanoKVM à votre ordinateur via USB.',
+        usb2: 'Sur cette page, montez les fichiers partagés en mode stockage de masse.',
+        usb3: 'Ouvrez le disque virtuel sur votre ordinateur et copiez le fichier image dans le répertoire racine du disque virtuel.',
+        usb4: "Éjectez le disque une fois la copie terminée : l'image apparaît alors dans la liste.",
+        scp1: 'Assurez-vous que le NanoKVM et votre ordinateur sont sur le même réseau local.',
+        scp2: 'Ouvrez un terminal sur votre ordinateur et utilisez la commande SCP pour copier le fichier image dans le répertoire /data du NanoKVM.',
+        scp3: 'Exemple : scp chemin-de-votre-image root@ip-de-votre-nanokvm:/data',
+        tfCard: 'Carte TF',
+        tf1: 'Cette méthode est adaptée aux systèmes Linux.',
+        tf2: 'Retirez la carte TF du NanoKVM (Pour la version FULL, il est nécessaire de retirer le boîtier).',
+        tf3: 'Insérez la carte TF dans un lecteur de carte et connectez-la à votre ordinateur.',
+        tf4: 'Copiez le fichier image dans le répertoire /data de la carte TF sur votre ordinateur.',
+        tf5: 'Réinsérez la carte TF dans le NanoKVM.'
+      },
       job: {
         running: 'Traitement de {{name}}'
       },
@@ -272,6 +288,10 @@ const fr = {
         cdromOnlyIso: 'Un CD-ROM ne peut contenir qu’une image ISO 9660',
         uploadFailed: "Échec de l'envoi",
         downloadFailed: 'Échec du téléchargement',
+        uploading: 'Envoi de {{name}}',
+        downloading: 'Téléchargement de {{name}}',
+        done: '{{name}} est prêt',
+        checksumFailed: "L'image ne correspond pas à la somme de contrôle SHA-256.",
         blocked: 'La machine distante utilise le disque',
         copyHint:
           'Vous pouvez aussi copier une image dans la partition de données via SCP, ou depuis la machine distante.'
@@ -299,6 +319,9 @@ const fr = {
           desc: 'Décroissant'
         },
         upload: 'Envoyer un fichier sur le support',
+        deleteFolderTitle: 'Supprimer le dossier',
+        deleteFolderConfirm:
+          'Supprimer le dossier {{name}} et tout son contenu ? Cette action est irréversible.',
         uploading: 'Envoi…',
         uploadFailed: "Échec de l'envoi",
         download: 'Télécharger',

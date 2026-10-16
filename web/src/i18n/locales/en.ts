@@ -247,6 +247,22 @@ const en = {
         menuHint:
           'The target machine is using this medium. Open the file manager to take it back by force.'
       },
+      tips: {
+        title: 'How to upload',
+        usb1: 'Connect the NanoKVM to your computer via USB.',
+        usb2: 'On this page, mount the shared files in mass storage mode.',
+        usb3: 'Open the virtual disk on your computer and copy the image file to the root directory of the virtual disk.',
+        usb4: 'Eject the disk when the copy is done: the image then shows up in the list.',
+        scp1: 'Make sure the NanoKVM and your computer are on the same local network.',
+        scp2: 'Open a terminal on your computer and use the SCP command to upload the image file to the /data directory on the NanoKVM.',
+        scp3: 'Example: scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF Card',
+        tf1: 'This method is supported on Linux system',
+        tf2: 'Get TF card from the NanoKVM (for the FULL version, disassemble the case first).',
+        tf3: 'Insert the TF card into a card reader and connect it to your computer.',
+        tf4: 'Copy the image file to the /data directory on the TF card.',
+        tf5: 'Insert the TF card into the NanoKVM.'
+      },
       job: {
         running: 'Working on {{name}}'
       },
@@ -266,6 +282,10 @@ const en = {
         cdromOnlyIso: 'A CD-ROM can only carry an ISO 9660 image',
         uploadFailed: 'Upload failed',
         downloadFailed: 'Download failed',
+        uploading: 'Uploading {{name}}',
+        downloading: 'Downloading {{name}}',
+        done: '{{name}} is ready',
+        checksumFailed: 'The image does not match the SHA-256 checksum.',
         blocked: 'The target machine is using the disk',
         copyHint:
           'You can also copy an image into the data partition over SCP, or from the target machine.'
@@ -291,6 +311,9 @@ const en = {
           desc: 'Descending'
         },
         upload: 'Upload a file into the medium',
+        deleteFolderTitle: 'Delete folder',
+        deleteFolderConfirm:
+          'Delete the folder {{name}} and everything inside it? This cannot be undone.',
         uploading: 'Uploading…',
         uploadFailed: 'Upload failed',
         download: 'Download',

@@ -254,6 +254,22 @@ const de = {
         menuHint:
           'Der Zielrechner verwendet dieses Medium. Öffnen Sie den Dateimanager, um es mit Gewalt zurückzuholen.'
       },
+      tips: {
+        title: 'So laden Sie Dateien hoch',
+        usb1: 'Verbinden Sie den NanoKVM über USB mit Ihrem Computer.',
+        usb2: 'Binden Sie auf dieser Seite die freigegebenen Dateien im Massenspeicher-Modus ein.',
+        usb3: 'Öffnen Sie die virtuelle Festplatte auf Ihrem Computer und kopieren Sie die Image-Datei in das Stammverzeichnis der virtuellen Festplatte.',
+        usb4: 'Werfen Sie das Laufwerk nach dem Kopieren aus: Danach erscheint das Image in der Liste.',
+        scp1: 'Stellen Sie sicher, dass sich der NanoKVM und Ihr Computer im selben lokalen Netzwerk befinden.',
+        scp2: 'Öffnen Sie ein Terminal auf Ihrem Computer und verwenden Sie den SCP-Befehl, um die Image-Datei in das Verzeichnis /data auf dem NanoKVM hochzuladen.',
+        scp3: 'Beispiel: scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF-Karte',
+        tf1: 'Diese Methode wird unter Linux-Systemen unterstützt.',
+        tf2: 'Entnehmen Sie die TF-Karte aus dem NanoKVM (bei der FULL-Version muss zuvor das Gehäuse geöffnet werden).',
+        tf3: 'Stecken Sie die TF-Karte in einen Kartenleser und verbinden Sie diesen mit Ihrem Computer.',
+        tf4: 'Kopieren Sie die Image-Datei in das Verzeichnis /data auf der TF-Karte.',
+        tf5: 'Setzen Sie die TF-Karte wieder in den NanoKVM ein.'
+      },
       job: {
         running: '{{name}} wird bearbeitet'
       },
@@ -274,6 +290,10 @@ const de = {
         cdromOnlyIso: 'Ein CD-ROM kann nur ein ISO-9660-Abbild enthalten',
         uploadFailed: 'Hochladen fehlgeschlagen',
         downloadFailed: 'Herunterladen fehlgeschlagen',
+        uploading: '{{name}} wird hochgeladen',
+        downloading: '{{name}} wird heruntergeladen',
+        done: '{{name}} ist bereit',
+        checksumFailed: 'Das Image stimmt nicht mit der SHA-256-Prüfsumme überein.',
         blocked: 'Der Zielrechner verwendet die Festplatte',
         copyHint:
           'Sie können ein Abbild auch per SCP auf die Datenpartition kopieren oder vom Zielrechner aus.'
@@ -301,6 +321,9 @@ const de = {
           desc: 'Absteigend'
         },
         upload: 'Eine Datei auf das Medium hochladen',
+        deleteFolderTitle: 'Ordner löschen',
+        deleteFolderConfirm:
+          'Den Ordner {{name}} mit seinem gesamten Inhalt löschen? Dies kann nicht rückgängig gemacht werden.',
         uploading: 'Wird hochgeladen…',
         uploadFailed: 'Hochladen fehlgeschlagen',
         download: 'Herunterladen',

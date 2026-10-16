@@ -239,6 +239,22 @@ const zh = {
         desc: '被控机还挂着这个介质。强制收回会让 USB 设备重新枚举,它还没写盘的数据可能丢失。',
         menuHint: '被控机正在使用该介质,请到文件管理器页面强制收回。'
       },
+      tips: {
+        title: '如何上传',
+        usb1: '将 NanoKVM 通过 USB 连接到你的电脑；',
+        usb2: '在本页面以大容量存储模式挂载共享文件；',
+        usb3: '在电脑上打开虚拟硬盘，将镜像文件拷贝到虚拟硬盘的根目录下。',
+        usb4: '拷贝完成后弹出磁盘，镜像随后会出现在列表中。',
+        scp1: '确保 NanoKVM 和你的电脑在同一个局域网内；',
+        scp2: '在电脑上打开终端软件，使用 SCP 命令将镜像文件上传到 NanoKVM 的 /data 目录。',
+        scp3: '示例：scp your-image-path root@your-nanokvm-ip:/data',
+        tfCard: 'TF 卡',
+        tf1: '该方式适用于 Linux 系统',
+        tf2: '将 TF 卡从 NanoKVM 中取出（FULL 版本需要先拆开外壳）；',
+        tf3: '将 TF 卡插入读卡器并连接到你的电脑；',
+        tf4: '从电脑上拷贝镜像文件到 TF 卡的 /data 目录下；',
+        tf5: '将 TF 卡重新插入 NanoKVM。'
+      },
       job: {
         running: '正在处理 {{name}}'
       },
@@ -258,6 +274,10 @@ const zh = {
         cdromOnlyIso: '光盘模式只能挂载 ISO 光盘镜像',
         uploadFailed: '上传失败',
         downloadFailed: '下载失败',
+        uploading: '正在上传 {{name}}',
+        downloading: '正在下载 {{name}}',
+        done: '{{name}} 已就绪',
+        checksumFailed: '镜像与 SHA-256 校验值不符。',
         blocked: '被控机正在使用这张盘',
         copyHint: '也可以通过 SCP 把镜像放进数据分区，或在被控机上直接拷贝。'
       },
@@ -280,6 +300,8 @@ const zh = {
           desc: '降序'
         },
         upload: '上传文件到介质',
+        deleteFolderTitle: '删除文件夹',
+        deleteFolderConfirm: '删除文件夹 {{name}} 及其中的全部内容？此操作无法撤销。',
         uploading: '正在上传…',
         uploadFailed: '上传失败',
         download: '下载',
