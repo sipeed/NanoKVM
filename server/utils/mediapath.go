@@ -101,6 +101,19 @@ func CanonicalMediaPath(name string) (string, error) {
 	return ResolveMediaID(filepath.ToSlash(rel))
 }
 
+// CanonicalPathInside resolves rel, a path already checked by
+// ValidateMediumPath, to the spelling the directory entries under root use.
+// Unlike CanonicalMediaPath it accepts directories and arbitrary files: a
+// delete has to compare what it removes against the canonical paths of the
+// attached and mounted media, and "IMAGES" names the same exFAT directory as
+// "images".
+func CanonicalPathInside(root, rel string) (string, error) {
+	if rel == "" || rel == "/" {
+		return root, nil
+	}
+	return canonicalMediaPath(root, filepath.FromSlash(rel))
+}
+
 // canonicalMediaPath resolves every existing component to its on-disk name.
 // exFAT lookups are case-insensitive, while Go string comparisons are not: an
 // all-lower-case request and an upper-case request can name the same medium.

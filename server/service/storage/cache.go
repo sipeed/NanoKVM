@@ -191,25 +191,44 @@ func directorySignature(dir string) string {
 	return signature.String()
 }
 
+// drop_caches values. The sysctl only accepts 1 to 4 (the 5.10 table caps it
+// with extra2 = 4), so a combined value such as 6 is refused with EINVAL and
+// drops nothing. Bit 4 is written once on its own instead: it sets a sticky
+// flag in fs/drop_caches.c that keeps every later drop out of the kernel log,
+// which is how a share lasting a day used to fill the log on the data
+// partition.
+const (
+	dropCachesQuiet   = "4" // stop logging drops from now on
+	dropCachesDentry  = "2" // dentries and inodes
+	dropCachesAllData = "3" // page cache, dentries and inodes
+)
+
+var dropCachesQuietOnce sync.Once
+
+func dropCaches(value string) {
+	dropCachesQuietOnce.Do(func() {
+		writeDropCaches(dropCachesQuiet)
+	})
+	writeDropCaches(value)
+}
+
+func writeDropCaches(value string) {
+	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte(value), 0); err != nil {
+		log.Warnf("drop stale caches (%s) failed: %s", value, err)
+	}
+}
+
 // dropPartitionCaches drops the dentries and inodes, which is what makes a
 // listing see the target machine's entries and sizes. Dirty pages survive a
-// drop, so gadget writes still in flight are not lost. The value is 2 plus 4:
-// the extra bit is what keeps the kernel from logging a line every second,
-// which is how a mount lasting a day used to fill the log on the data
-// partition.
+// drop, so gadget writes still in flight are not lost.
 func dropPartitionCaches() {
-	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte("6"), 0); err != nil {
-		log.Warnf("drop stale caches failed: %s", err)
-	}
+	dropCaches(dropCachesDentry)
 }
 
 // dropAllPartitionCaches throws away everything this side cached of the data
 // partition, page cache included: it runs when the partition stops being
 // served to the target machine, where a stale page written back would land on
-// top of what the target machine just wrote. 7 is 3 (page cache, dentries and
-// inodes) plus 4, so the drop is not logged either.
+// top of what the target machine just wrote.
 func dropAllPartitionCaches() {
-	if err := os.WriteFile("/proc/sys/vm/drop_caches", []byte("7"), 0); err != nil {
-		log.Warnf("drop stale caches failed: %s", err)
-	}
+	dropCaches(dropCachesAllData)
 }

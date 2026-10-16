@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -25,11 +24,6 @@ import (
 // uploadMaxBytes is a hard ceiling for a single upload, so a runaway request
 // cannot fill the medium before the free space check has had its say.
 const uploadMaxBytes = 8 << 30
-
-// downloadTempPrefix is what the image downloader names the file it is writing
-// while it is in flight. Like diskfs.UploadPrefix it is hidden from a listing
-// and must survive until the transfer finishes.
-const downloadTempPrefix = ".nanokvm-"
 
 func (s *Service) ListMediaFiles(c *gin.Context) {
 	var rsp proto.Response
@@ -252,10 +246,19 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 		return
 	}
 
-	// Our own transfer temporaries are not files to manage: deleting one while
-	// its transfer writes it loses the data silently.
-	if name := path.Base(entryPath); strings.HasPrefix(name, diskfs.UploadPrefix) || strings.HasPrefix(name, downloadTempPrefix) {
-		respondError(c, fmt.Errorf("refusing to delete %s: it belongs to a running transfer", name))
+	// Our own transfer temporaries are not files to manage while a transfer
+	// runs: deleting one its transfer is writing loses the data silently. One
+	// found with no transfer running was left by an interrupted one, and the
+	// user may clear it.
+	if name := path.Base(entryPath); diskfs.IsTransferTemp(name) && TransferInProgress() {
+		respondError(c, fmt.Errorf("%w: %s belongs to a running transfer", errMediumBusy, name))
+		return
+	}
+
+	// A directory is removed with everything below it, the temporary of an
+	// upload into it included.
+	if target, ok := s.activeJobTarget(); ok && pathWithin(target, entryPath) {
+		respondError(c, fmt.Errorf("%w: an upload into %s is running", errMediumBusy, entryPath))
 		return
 	}
 
@@ -267,13 +270,25 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 
 	// A file the target machine is being served as its medium must not vanish
 	// under it: the gadget keeps reading the inode it opened, so the target
-	// machine would be left with a medium whose contents are already gone. A
-	// directory is removed recursively, so the check covers everything below
-	// the path as well, not just the path itself.
+	// machine would be left with a medium whose contents are already gone. An
+	// image the file manager has mounted is just as much in use. A directory
+	// is removed recursively, so the check covers everything below the path as
+	// well. The path is resolved to its on-disk spelling first: exFAT folds
+	// case, so "IMAGES" is the directory the attached "images/win.iso" is in.
 	if req.Type == proto.MediaTypePartition {
-		full := filepath.Join(mediaDirectory, filepath.FromSlash(entryPath))
-		if IsAttached(full) || attachedMediumInside(full) {
-			respondError(c, errMediumAttached)
+		full, err := utils.CanonicalPathInside(mediaDirectory, entryPath)
+		if err != nil {
+			respondError(c, err)
+			return
+		}
+		// Not knowing what the gadget serves is no reason to assume nothing.
+		status, err := readDiskStatus()
+		if err != nil {
+			respondError(c, fmt.Errorf("refusing to delete %s: %w", entryPath, err))
+			return
+		}
+		if err := deleteGuard(full, status.Backing, diskfs.MountedImages()); err != nil {
+			respondError(c, err)
 			return
 		}
 	}

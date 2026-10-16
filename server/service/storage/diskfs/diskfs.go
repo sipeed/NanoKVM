@@ -32,6 +32,7 @@ const (
 	KindFAT16   Kind = "fat16"
 	KindFAT12   Kind = "fat12"
 	KindISO9660 Kind = "iso9660"
+	KindUDF     Kind = "udf"
 	KindUnknown Kind = "unknown"
 )
 
@@ -46,6 +47,12 @@ func (k Kind) Browsable() bool {
 	}
 }
 
+// Optical reports whether the medium holds a disc filesystem, which is what a
+// CD-ROM has to carry: the gadget reports 2048 byte sectors for it.
+func (k Kind) Optical() bool {
+	return k == KindISO9660 || k == KindUDF
+}
+
 // FileSystem is the type name the kernel mount needs. vfat covers every FAT
 // variant (msdos is the subset without long names).
 func (k Kind) FileSystem() string {
@@ -56,6 +63,8 @@ func (k Kind) FileSystem() string {
 		return "vfat"
 	case KindISO9660:
 		return "iso9660"
+	case KindUDF:
+		return "udf"
 	default:
 		return ""
 	}
@@ -140,15 +149,45 @@ func Detect(imagePath string) (Kind, error) {
 		}
 	}
 
-	// ISO 9660 keeps its identifier 32 KiB into the image.
-	if _, err := file.Seek(0x8001, io.SeekStart); err == nil {
-		magic := make([]byte, 5)
-		if _, err := io.ReadFull(file, magic); err == nil && string(magic) == "CD001" {
-			return KindISO9660, nil
+	return detectOptical(file), nil
+}
+
+// opticalSectorSize is the sector size of a disc, and udfVRSDescriptors the
+// number of volume structure descriptors looked at. A UDF disc keeps its
+// volume recognition sequence right after any ISO 9660 descriptors, and a
+// handful of sectors covers both.
+const (
+	opticalSectorSize = 2048
+	udfVRSDescriptors = 32
+)
+
+// detectOptical walks the volume recognition area 32 KiB into the image. An
+// ISO 9660 primary descriptor ("CD001") in the first slot is the common case;
+// a pure UDF disc, which many recent installers ship as, has no ISO 9660
+// descriptor at all and is only recognized by its NSR02/NSR03 descriptor.
+func detectOptical(file io.ReaderAt) Kind {
+	id := make([]byte, 5)
+	for i := 0; i < udfVRSDescriptors; i++ {
+		offset := int64(0x8000 + i*opticalSectorSize + 1)
+		if _, err := file.ReadAt(id, offset); err != nil {
+			break
+		}
+
+		switch string(id) {
+		case "CD001":
+			if i == 0 {
+				return KindISO9660
+			}
+		case "NSR02", "NSR03":
+			return KindUDF
+		case "BEA01", "TEA01", "BOOT2", "CDW02":
+		default:
+			// The sequence ends at the first slot that is no descriptor.
+			return KindUnknown
 		}
 	}
 
-	return KindUnknown, nil
+	return KindUnknown
 }
 
 func isFATLabel(label []byte) bool {

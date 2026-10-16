@@ -34,6 +34,9 @@ func SetDataWritable(writable bool) error {
 		// The target may have changed both file data and allocation metadata
 		// while it owned the block device. Invalidate that view before the
 		// filesystem becomes writable, on every path that hands it back.
+		// A remount does not recount exFAT's used clusters (counted only at
+		// mount), so free space stays stale and freeing what the target wrote
+		// can underflow that count until /data is mounted afresh.
 		dropAllPartitionCaches()
 	}
 

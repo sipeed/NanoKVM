@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -90,7 +89,7 @@ var (
 	errMediumAttached  = errors.New("the medium is attached to the target machine")
 	errMediumBusy      = errors.New("the medium is in use by the file manager")
 	errNoSpace         = errors.New("not enough space on the data partition")
-	errNotOptical      = errors.New("a CD-ROM can only carry an ISO 9660 image")
+	errNotOptical      = errors.New("a CD-ROM can only carry an ISO 9660 or UDF image")
 	errNotAMedium      = errors.New("the data partition has no file manager of its own")
 )
 
@@ -121,10 +120,15 @@ func (s *Service) GetMediaState(c *gin.Context) {
 		return
 	}
 
-	cdrom, err := readLunBool(lunCDRomFlag)
-	if err != nil {
-		respondError(c, err)
-		return
+	// With the virtual disk off the LUN may not exist at all, and that state
+	// is exactly what the web UI needs to see to offer turning it on.
+	cdrom := false
+	if status.State != diskStateUnsupported {
+		cdrom, err = readLunBool(lunCDRomFlag)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			respondError(c, err)
+			return
+		}
 	}
 
 	state := &proto.MediaStateRsp{
@@ -246,13 +250,13 @@ func (s *Service) MountMedia(c *gin.Context) {
 		return
 	}
 
-	// A CD-ROM is an optical disc, so its medium has to hold an ISO 9660
-	// filesystem: the gadget then reports 2048 byte sectors, and a partition or
-	// any other filesystem read that way is what the target machine reports as
-	// a corrupt disc.
+	// A CD-ROM is an optical disc, so its medium has to hold a disc
+	// filesystem (ISO 9660 or UDF): the gadget then reports 2048 byte sectors,
+	// and a partition or any other filesystem read that way is what the target
+	// machine reports as a corrupt disc.
 	if req.Cdrom {
 		kind, err := diskfs.Detect(backing)
-		if err != nil || kind != diskfs.KindISO9660 {
+		if err != nil || !kind.Optical() {
 			respondError(c, fmt.Errorf("%w: %s", errNotOptical, req.Rel))
 			return
 		}
@@ -643,9 +647,10 @@ func openMediumLocked(mediaType, rel string, writable bool) (diskfs.Image, error
 	if err != nil {
 		return nil, err
 	}
-	if status.State == diskStateUnsupported {
-		return nil, errStorageDisabled
-	}
+	// A disabled virtual disk (diskStateUnsupported) is not refused here: with
+	// nothing shared, the data partition is this side's alone and can be
+	// browsed as usual, and an image needs no gadget to be mounted here.
+	//
 	// While the data partition is attached, the target machine owns every
 	// medium - they all live on it - so nothing from here may write into one:
 	// the two sides cache the exFAT allocation tables independently, and a
@@ -742,9 +747,35 @@ func attachmentHeader(name string) string {
 		return r
 	}, name)
 
-	encoded := strings.ReplaceAll(url.PathEscape(name), "'", "%27")
+	return fmt.Sprintf("attachment; filename=%q; filename*=UTF-8''%s", fallback, rfc5987Encode(name))
+}
 
-	return fmt.Sprintf("attachment; filename=%q; filename*=UTF-8''%s", fallback, encoded)
+// rfc5987Encode percent-encodes every byte that is not an RFC 5987 attr-char.
+// url.PathEscape is not that set: it leaves "=", ":", "@" and friends alone,
+// which a strict parser reads as the end of the value.
+func rfc5987Encode(value string) string {
+	const hex = "0123456789ABCDEF"
+
+	var encoded strings.Builder
+	for i := 0; i < len(value); i++ {
+		b := value[i]
+		if isAttrChar(b) {
+			encoded.WriteByte(b)
+			continue
+		}
+		encoded.WriteByte('%')
+		encoded.WriteByte(hex[b>>4])
+		encoded.WriteByte(hex[b&0x0f])
+	}
+	return encoded.String()
+}
+
+func isAttrChar(b byte) bool {
+	switch {
+	case b >= 'A' && b <= 'Z', b >= 'a' && b <= 'z', b >= '0' && b <= '9':
+		return true
+	}
+	return strings.IndexByte("!#$&+-.^_`|~", b) >= 0
 }
 
 // ErrDataPartitionInUse reports a write that would land on the data partition
@@ -763,23 +794,29 @@ func EnsureDataPartitionWritable() error {
 	return nil
 }
 
-// attachedMediumInside reports whether a medium that must not vanish - one
-// the target machine holds, or one the file manager keeps mounted - lives
-// inside dir. A recursive delete of dir would take that medium with it.
-func attachedMediumInside(dir string) bool {
-	prefix := dir + string(filepath.Separator)
-
-	status, err := readDiskStatus()
-	if err == nil && status.Backing != "" && strings.HasPrefix(status.Backing, prefix) {
-		return true
+// deleteGuard decides whether removing target, the canonical path of a file
+// or directory, would take away a medium that must not vanish: the one the
+// target machine is served (backing) or one the file manager keeps mounted. A
+// directory delete is recursive, so a medium anywhere below target counts.
+func deleteGuard(target, backing string, mounted []string) error {
+	if backing != "" && pathWithin(backing, target) {
+		return errMediumAttached
 	}
-
-	for _, path := range diskfs.MountedImages() {
-		if strings.HasPrefix(path, prefix) {
-			return true
+	for _, path := range mounted {
+		if pathWithin(path, target) {
+			return errMediumBusy
 		}
 	}
-	return false
+	return nil
+}
+
+// pathWithin reports whether path is dir or lies below it. Both sides are
+// compared upper-cased, the way exFAT matches names, so a spelling that only
+// differs in case cannot slip past a check that the canonical lookup missed.
+func pathWithin(path, dir string) bool {
+	path = strings.ToUpper(path)
+	dir = strings.ToUpper(strings.TrimSuffix(dir, "/"))
+	return path == dir || strings.HasPrefix(path, dir+"/")
 }
 
 // IsAttached reports whether the emulated disk is currently backed by path.

@@ -102,15 +102,26 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 	case "disk":
 		device = virtualDisk
 
-		attached := diskAttached()
-		enable := !attached
+		// The settings switch toggles: it reads "on" only while the raw
+		// partition is served, so turning it on while an image is mounted
+		// cancels that mount, which the UI confirms first. An explicit enable
+		// is a request for the virtual disk to exist at all, so it compares
+		// against that instead and leaves a served image alone.
+		enabled, err := isDeviceExist(device)
+		if err != nil {
+			rsp.ErrRsp(c, -3, "check virtual disk failed")
+			return
+		}
+		current := diskAttached()
+		enable := !current
 		if req.Enable != nil {
+			current = enabled
 			enable = *req.Enable
 		}
 		// Asking for the state that already holds changes nothing: a caller
 		// that says "enable" must not switch off a running share.
-		if enable != attached {
-			if attached {
+		if enable != current {
+			if current {
 				commands = unmountDiskCommands
 			} else {
 				// The restarted gadget attaches the raw partition. The actual
@@ -154,19 +165,28 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		h.Unlock()
 	}()
 
+	var commandErr error
 	for _, command := range commands {
-		err := exec.Command("sh", "-c", command).Run()
-		if err != nil {
-			rsp.ErrRsp(c, -3, "operation failed")
-			return
+		if commandErr = exec.Command("sh", "-c", command).Run(); commandErr != nil {
+			log.Errorf("run %q failed: %s", command, commandErr)
+			break
 		}
 	}
 
-	// the disk is gone from the host, the KVM writes /data itself again
-	if device == virtualDisk && !diskAttached() {
+	// Whatever the scripts got to, /data belongs to this side again unless
+	// the raw partition really is served to the target machine now. That
+	// covers a failed script, which may have stopped before re-attaching the
+	// partition it was made read-only for, and a network change, after which
+	// the restarted gadget may serve the partition or not.
+	if len(commands) > 0 && (device == virtualDisk || preparePartition) && !diskAttached() {
 		if err := storage.SetDataWritable(true); err != nil {
 			log.Errorf("make /data writable failed: %s", err)
 		}
+	}
+
+	if commandErr != nil {
+		rsp.ErrRsp(c, -3, "operation failed")
+		return
 	}
 
 	on, _ := isDeviceExist(device)

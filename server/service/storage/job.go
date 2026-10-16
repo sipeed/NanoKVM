@@ -3,7 +3,10 @@ package storage
 import (
 	"context"
 	"errors"
+	"sync/atomic"
 	"time"
+
+	"NanoKVM-Server/utils"
 )
 
 type jobState string
@@ -24,6 +27,27 @@ const jobProgressInterval = 2500 * time.Millisecond
 const maxQueuedJobs = 8
 
 var errTooManyJobs = errors.New("too many transfers are already queued")
+
+// activeJobs counts the file manager transfers holding a job slot, across
+// every Service, so code outside the handlers can tell whether a transfer
+// temporary may still be written.
+var activeJobs atomic.Int32
+
+// TransferInProgress reports whether any transfer that writes a temporary
+// file can be running: a file manager upload holds a job slot, the image
+// downloader and the updater hold the transfer lock file. A temporary found
+// while this is false was left behind by an interrupted transfer.
+func TransferInProgress() bool {
+	return activeJobs.Load() > 0 || pathExists(utils.TransferSentinelPath)
+}
+
+// activeJobTarget returns the path the running upload writes, if any.
+func (s *Service) activeJobTarget() (string, bool) {
+	s.jobMutex.Lock()
+	defer s.jobMutex.Unlock()
+
+	return s.jobName, s.jobDone != nil
+}
 
 // beginJob claims the single media job slot, queueing behind whatever is
 // running instead of refusing: the user asked for a file to be written, and
@@ -46,6 +70,7 @@ func (s *Service) beginJob(ctx context.Context, name string) (chan struct{}, err
 			s.jobLoaded = 0
 			s.jobTotal = 0
 			s.jobMessage = ""
+			activeJobs.Add(1)
 			s.jobMutex.Unlock()
 
 			return done, nil
@@ -109,6 +134,7 @@ func (s *Service) finishJob(done chan struct{}, state jobState, message string) 
 	}
 
 	s.jobDone = nil
+	activeJobs.Add(-1)
 	s.jobState = state
 	s.jobLoaded = 0
 	s.jobTotal = 0

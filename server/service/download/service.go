@@ -38,10 +38,10 @@ const (
 	imageDirectory = "/data"
 
 	// transferTempPrefix marks the partial files of the uploads and downloads
-	// this service writes. The file manager hides and refuses them (its own
-	// downloadTempPrefix in service/storage), and a restart sweeps whatever a
-	// transfer left behind.
-	transferTempPrefix = ".nanokvm-"
+	// this service writes. The file manager hides them and refuses to delete
+	// them while a transfer runs (diskfs.IsTransferTemp), and a restart sweeps
+	// whatever a transfer left behind.
+	transferTempPrefix = diskfs.DownloadTempPrefix
 
 	// Keep /data from filling up completely: the exFAT metadata and the USB
 	// mass-storage export still need room while the image is written.
@@ -72,36 +72,52 @@ func NewService() *Service {
 	// A running transfer cannot survive a server restart, so any remaining lock
 	// file is stale at this point.
 	_ = os.Remove(transferSentinelPath)
-	removeStaleTransfers()
+	go removeStaleTransfers()
 
 	return &Service{downloadStatus: downloadStatusIdle}
 }
 
 // removeStaleTransfers deletes the temporary files of uploads and downloads
 // that a restart interrupted. They are hidden and can be hundreds of
-// megabytes, so leaving them behind would quietly fill the card - and the
-// file manager refuses to delete them itself, because it cannot tell a stale
-// one from one a running transfer owns. A file upload into the shared folder
+// megabytes, and hidden from the file manager, so leaving them behind would
+// quietly fill the card. A file upload into the shared folder
 // writes its temporary next to its target, so the whole tree is walked, not
 // just the root.
+//
+// The walk covers the whole data partition, so it runs in the background, and
+// a transfer may start while it does: only names one of our transfers would
+// generate are collected, and each is removed only while no transfer runs. A
+// transfer started after the walk writes a fresh name the walk never saw.
+// While the target machine owns the partition it is read-only here, and the
+// sweep waits for the next start.
 func removeStaleTransfers() {
+	var stat unix.Statfs_t
+	if err := unix.Statfs(imageDirectory, &stat); err != nil || stat.Flags&unix.ST_RDONLY != 0 {
+		return
+	}
+
+	var stale []string
 	_ = filepath.Walk(imageDirectory, func(path string, info os.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return nil
 		}
-
-		if !strings.HasPrefix(info.Name(), transferTempPrefix) &&
-			!strings.HasPrefix(info.Name(), diskfs.UploadPrefix) {
-			return nil
+		if diskfs.IsTransferTemp(info.Name()) {
+			stale = append(stale, path)
 		}
+		return nil
+	})
 
+	for _, path := range stale {
+		if storage.TransferInProgress() {
+			log.Infof("leave stale transfer %s: a transfer is running", path)
+			continue
+		}
 		if err := os.Remove(path); err != nil {
 			log.Errorf("remove stale transfer %s failed: %s", path, err)
 		} else {
 			log.Infof("removed stale transfer %s", path)
 		}
-		return nil
-	})
+	}
 }
 
 func (s *Service) CancelDownloadImage(c *gin.Context) {
@@ -238,6 +254,26 @@ func ensureImageSpace(dir string, contentLength int64) error {
 	}
 
 	return nil
+}
+
+// imageSpaceLimit is how many bytes a download may write into dir: its
+// announced length, which ensureImageSpace has already checked, or else what
+// fits while keeping the reserve.
+func imageSpaceLimit(dir string, contentLength int64) (int64, error) {
+	if contentLength >= 0 {
+		return contentLength, nil
+	}
+
+	var stat unix.Statfs_t
+	if err := unix.Statfs(dir, &stat); err != nil {
+		return 0, fmt.Errorf("cannot read free space of %s: %w", dir, err)
+	}
+
+	available := uint64(stat.Bavail) * uint64(stat.Bsize)
+	if available <= imageFreeReserve {
+		return 0, fmt.Errorf("not enough space in %s: %d MiB available", dir, available>>20)
+	}
+	return int64(available - imageFreeReserve), nil
 }
 
 func (s *Service) StatusImage(c *gin.Context) {
@@ -517,6 +553,14 @@ func (s *Service) downloadRemoteImage(
 		return err
 	}
 
+	// A response without a length is capped by the free space instead, so a
+	// server that never stops sending cannot fill the partition. One byte more
+	// than the cap is read to tell "exactly fits" from "does not fit".
+	limit, err := imageSpaceLimit(imageDirectory, resp.ContentLength)
+	if err != nil {
+		return err
+	}
+
 	tempFile, err := os.CreateTemp(imageDirectory, transferTempPrefix+"download-*")
 	if err != nil {
 		return fmt.Errorf("create temporary image failed: %w", err)
@@ -526,7 +570,7 @@ func (s *Service) downloadRemoteImage(
 
 	hasher := sha256.New()
 	lw := utils.NewProgressWriter(io.MultiWriter(tempFile, hasher), resp.ContentLength, onProgress)
-	_, copyErr := io.Copy(lw, resp.Body)
+	written, copyErr := io.Copy(lw, io.LimitReader(resp.Body, limit+1))
 	lw.Stop()
 	closeErr := tempFile.Close()
 	if ctx.Err() != nil {
@@ -537,6 +581,15 @@ func (s *Service) downloadRemoteImage(
 	}
 	if closeErr != nil {
 		return fmt.Errorf("close downloaded image failed: %w", closeErr)
+	}
+	if written > limit {
+		return fmt.Errorf("not enough space in %s for the downloaded image", imageDirectory)
+	}
+	// net/http already fails a body shorter than its Content-Length and cuts
+	// a longer one off, but an image that is not the size the server
+	// announced is not one to install either way.
+	if resp.ContentLength >= 0 && written != resp.ContentLength {
+		return fmt.Errorf("downloaded image is %d bytes, the server announced %d", written, resp.ContentLength)
 	}
 
 	if expectedSHA256 != nil && !bytes.Equal(hasher.Sum(nil), expectedSHA256) {

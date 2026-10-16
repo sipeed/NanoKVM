@@ -158,7 +158,19 @@ func readLunBool(path string) (bool, error) {
 
 // eject detaches the medium, which the target machine sees as a media removal.
 func eject() error {
-	// The flags outlive the medium: the kernel only lets them change while
+	// The medium goes first. While it is attached the kernel refuses ro but
+	// takes cdrom=0 and a new name, so resetting those first would relabel a
+	// medium the target machine still holds whenever the detach itself then
+	// fails with EBUSY. A zero length write never reaches the kernel, so an
+	// empty line is what actually detaches the medium.
+	if err := writeLunAttr(lunMountDevice, "\n"); err != nil {
+		if errors.Is(err, syscall.EBUSY) {
+			return ErrMediumLocked
+		}
+		return fmt.Errorf("eject medium: %w", err)
+	}
+
+	// The flags outlive the medium: the kernel only lets ro change while
 	// nothing is attached, and a stale CD-ROM flag would describe the next
 	// medium wrongly (a restart of the boot script resets them for the same
 	// reason). The device also keeps the name it was built with while nothing
@@ -174,15 +186,6 @@ func eject() error {
 	}
 	if err := writeLunAttr(lunCDRomFlag, boolAttr(false)); err != nil {
 		log.Warnf("reset cdrom flag failed: %s", err)
-	}
-
-	// A zero length write never reaches the kernel, so an empty line is what
-	// actually detaches the medium.
-	if err := writeLunAttr(lunMountDevice, "\n"); err != nil {
-		if errors.Is(err, syscall.EBUSY) {
-			return ErrMediumLocked
-		}
-		return fmt.Errorf("eject medium: %w", err)
 	}
 
 	return nil

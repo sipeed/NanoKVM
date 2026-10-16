@@ -67,7 +67,7 @@ func (s *Service) MountImage(c *gin.Context) {
 
 	if req.Cdrom {
 		kind, err := diskfs.Detect(backing)
-		if err != nil || kind != diskfs.KindISO9660 {
+		if err != nil || !kind.Optical() {
 			respondError(c, fmt.Errorf("%w: %s", errNotOptical, req.File))
 			return
 		}

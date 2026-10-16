@@ -33,6 +33,29 @@ const loopDeviceLimit = 8
 // on failure, renamed into place on success, and never handed out as a file.
 const UploadPrefix = ".kvm-upload-"
 
+// DownloadTempPrefix is what the image downloader (service/download) names
+// the file it is writing while the transfer runs, through os.CreateTemp with
+// "upload-*" or "download-*" after it.
+const DownloadTempPrefix = ".nanokvm-"
+
+// IsTransferTemp reports whether name is exactly what one of our transfers
+// names its partial file: UploadPrefix plus randomSuffix's eight hex digits,
+// or DownloadTempPrefix plus the decimal number os.CreateTemp puts in place of
+// the "*". A user's own file that merely starts the same way is not one.
+func IsTransferTemp(name string) bool {
+	if rest, ok := strings.CutPrefix(name, UploadPrefix); ok {
+		return len(rest) == 8 && strings.Trim(rest, "0123456789abcdef") == ""
+	}
+	if rest, ok := strings.CutPrefix(name, DownloadTempPrefix); ok {
+		for _, kind := range []string{"upload-", "download-"} {
+			if digits, ok := strings.CutPrefix(rest, kind); ok {
+				return digits != "" && strings.Trim(digits, "0123456789") == ""
+			}
+		}
+	}
+	return false
+}
+
 // Image is a mounted medium. Handles are reference counted, because a download
 // may stream for minutes while the file list is refreshed, and both have to
 // see the same mount.
@@ -176,7 +199,10 @@ func attach(imagePath string, kind Kind, writable bool) (*mount, error) {
 		return nil, err
 	}
 
-	flags := uintptr(unix.MS_NOEXEC | unix.MS_NOSUID | unix.MS_NODEV)
+	// Neither exFAT nor FAT can hold a symlink, but the image is untrusted
+	// and the server runs as root: refusing to follow one keeps any path
+	// inside the mount from resolving outside it, whatever the filesystem.
+	flags := uintptr(unix.MS_NOEXEC | unix.MS_NOSUID | unix.MS_NODEV | unix.MS_NOSYMFOLLOW)
 	if !writable {
 		flags |= unix.MS_RDONLY
 	}
@@ -353,6 +379,11 @@ func listDir(root, rel string) ([]Entry, error) {
 
 	entries := make([]Entry, 0, len(dirents))
 	for _, dirent := range dirents {
+		// A partial transfer is not a file yet, and deleting it from the web
+		// UI would lose the data being written.
+		if IsTransferTemp(dirent.Name()) {
+			continue
+		}
 		info, err := dirent.Info()
 		if err != nil {
 			continue
@@ -376,17 +407,21 @@ func openFile(root, rel string) (io.ReadSeekCloser, Entry, error) {
 		return nil, Entry{}, err
 	}
 
-	info, err := os.Stat(full)
+	// The entry is opened before it is looked at, and a symlink is refused
+	// rather than followed, so what is checked is what gets streamed.
+	file, err := os.OpenFile(full, os.O_RDONLY|unix.O_NOFOLLOW, 0)
 	if err != nil {
 		return nil, Entry{}, err
-	}
-	if info.IsDir() {
-		return nil, Entry{}, fmt.Errorf("%s is a directory", rel)
 	}
 
-	file, err := os.Open(full)
+	info, err := file.Stat()
 	if err != nil {
+		_ = file.Close()
 		return nil, Entry{}, err
+	}
+	if !info.Mode().IsRegular() {
+		_ = file.Close()
+		return nil, Entry{}, fmt.Errorf("%s is not a regular file", rel)
 	}
 
 	return file, entryOf(info), nil
