@@ -105,12 +105,14 @@ case "$1" in
     iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
     iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
-    # Logo selection
+    # Logo selection: /boot/logo.ico is the persistent custom logo (uploaded
+    # via the Appearance tab). Always re-apply it so it survives app updates;
+    # back up the packaged default once so reset can restore it.
     if [ -f /boot/logo.ico ]; then
         if [ ! -f /kvmapp/server/web/original.ico ]; then
             mv /kvmapp/server/web/sipeed.ico /kvmapp/server/web/original.ico
-            cp /boot/logo.ico /kvmapp/server/web/sipeed.ico
         fi
+        cp /boot/logo.ico /kvmapp/server/web/sipeed.ico
     else
         if [ -f /kvmapp/server/web/original.ico ]; then
             mv /kvmapp/server/web/original.ico /kvmapp/server/web/sipeed.ico

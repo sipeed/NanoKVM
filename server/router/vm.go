@@ -61,8 +61,11 @@ func vmRouter(r *gin.Engine) {
 	admin.GET("/vm/mouse-jiggler", service.GetMouseJiggler)   // get mouse jiggler
 	admin.POST("/vm/mouse-jiggler/", service.SetMouseJiggler) // set mouse jiggler
 
-	api.GET("/vm/hostname", service.GetHostname)    // Get Hostname
-	admin.POST("/vm/hostname", service.SetHostname) // Set Hostname
+	api.GET("/vm/hostname", service.GetHostname)     // Get Hostname
+	admin.POST("/vm/hostname", service.SetHostname)  // Set Hostname
+
+	admin.POST("/vm/logo", service.SetLogo)         // upload login logo / favicon
+	admin.POST("/vm/logo/reset", service.ResetLogo) // restore default logo
 
 	api.GET("/vm/web-title", service.GetWebTitle)    // Get web title
 	admin.POST("/vm/web-title", service.SetWebTitle) // Set web title
