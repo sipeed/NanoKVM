@@ -3,8 +3,7 @@
 using namespace maix;
 using namespace maix::sys;
 using namespace maix::peripheral;
-i2c::I2C oled_alpha(1, i2c::Mode::MASTER);
-i2c::I2C oled_beta(5, i2c::Mode::MASTER);
+i2c::I2C *oled_i2c;	// opened by oled_exist(); i2c-5 does not exist on alpha
 
 uint8_t OLED_state = 0;
 uint8_t kvm_hw_ver = 0;
@@ -18,19 +17,7 @@ void oled_write_register(uint8_t mode, uint8_t data)
 
 		buf[0] = mode;
 		buf[1] = data;
-		if(kvm_hw_ver == 0){
-			if(oled_alpha.writeto(OLED_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-				return;
-			}
-		} else if(kvm_hw_ver == 1){
-			if(oled_beta.writeto(OLED_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-				return;
-			}
-		} else if(kvm_hw_ver == 2){
-			if(oled_beta.writeto(OLED_PCIe_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-				return;
-			}
-		}
+		oled_i2c->writeto(kvm_hw_ver == 2 ? OLED_PCIe_ADDR : OLED_ADDR, buf, 2);
 		return;
 	}
 	return;
@@ -53,24 +40,19 @@ int oled_exist(void)
 		else if(RW_Data[0] == 'p') kvm_hw_ver = 2;
 	}
 
+	try {
+		oled_i2c = new i2c::I2C(kvm_hw_ver == 0 ? 1 : 5, i2c::Mode::MASTER);
+	} catch (const std::exception &e) {
+		printf("%s\r\n", e.what());
+		return 0;
+	}
+
 	uint8_t buf[2];
 
 	buf[0] = OLED_CMD;
 	buf[1] = 0xAE;
-	if(kvm_hw_ver == 0){
-		if(oled_alpha.writeto(OLED_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-			return 0;
-		}
-	} else if(kvm_hw_ver == 1){
-		printf("beta\r\n");
-		if(oled_beta.writeto(OLED_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-			return 0;
-		}
-	} else if(kvm_hw_ver == 2){
-		printf("PCIe\r\n");
-		if(oled_beta.writeto(OLED_PCIe_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
-			return 0;
-		}
+	if(oled_i2c->writeto(kvm_hw_ver == 2 ? OLED_PCIe_ADDR : OLED_ADDR, buf, 2) == (int)-err::Err::ERR_IO){
+		return 0;
 	}
 	return 1;
 }
