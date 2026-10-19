@@ -1,6 +1,7 @@
 #!/bin/sh
 # nanokvm Rev3.1
 
+
 wait_for_exit() {
     process="$1"
     timeout="$2"
@@ -73,6 +74,216 @@ start_services() {
     fi
 }
 
+# Only one VPN may run at a time: the device has too little RAM for both.
+#
+# This runs at S95, before rc reaches S98tailscaled and S99netbird, so the
+# selected client is started by rc as usual and only the other one has to go.
+#
+# The two directions are not symmetric, for a reason outside this script:
+# kvm_system's new_app_init() runs `rm -f /etc/init.d/S99*` after an application
+# update. The glob does not reach S98tailscaled, which that same function instead
+# refreshes from /kvmapp when it is already present. So S99 usually goes missing
+# because that rm ran, and restoring it is what keeps NetBird alive across an
+# update, while S98 goes missing only when something removed it deliberately —
+# Cli.Stop() does exactly that, and for Tailscale the UI says stopping disables
+# autostart. For NetBird the UI says the opposite: stopping is "stop now", and
+# the preference file stays the authority on what runs at boot.
+valid_netbird_version() {
+    printf '%s\n' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+}
+
+regular_executable() {
+    # `-f` rejects directories and broken links while retaining the established
+    # os.Stat-compatible behavior for a link to an executable file.
+    [ -f "$1" ] && [ -x "$1" ]
+}
+
+# A power loss can occur after S98 was atomically hidden but before the staged
+# S99 was atomically published.  Restore a hidden S98 if NetBird is not ready:
+# a missing staged S99 can itself be the interrupted operation, and removing
+# S99 must not also lose the still-bootable Tailscale fallback.  A valid,
+# already-published S99 instead proves its backup is stale successful cleanup;
+# restoring it briefly could leave both clients active if a later copy fails.
+recover_interrupted_vpn_boot_script_transaction() {
+    netbird_is_ready="$1"
+    tailscale_script=/etc/init.d/S98tailscaled
+    netbird_script=/etc/init.d/S99netbird
+
+    for tailscale_script_backup in /etc/init.d/.S98tailscaled.old.*; do
+        # An unmatched glob is left literal by POSIX sh.  `-L` also catches a
+        # dangling link so it can never be mistaken for absent transaction
+        # state.
+        [ -e "$tailscale_script_backup" ] || [ -L "$tailscale_script_backup" ] || continue
+        transaction_id=${tailscale_script_backup##*.old.}
+        netbird_script_tmp="/etc/init.d/.S99netbird.new.$transaction_id"
+
+        # Never publish the staged script on a later boot.  If S98 is already
+        # present, it is the current safe fallback and this hidden copy is
+        # redundant.  If valid NetBird is already bootable through S99, this
+        # is stale successful cleanup and must stay hidden until removed.
+        if [ -e "$tailscale_script" ] || [ -L "$tailscale_script" ]; then
+            if [ -L "$tailscale_script" ] || [ ! -f "$tailscale_script" ]; then
+                echo "Current Tailscale boot script is not a regular file" >&2
+                return 1
+            fi
+            if ! rm -f "$tailscale_script_backup"; then
+                echo "Failed to clean recovered VPN boot-script transaction" >&2
+                return 1
+            fi
+        elif [ "$netbird_is_ready" = 1 ] && regular_executable "$netbird_script"; then
+            if ! rm -f "$tailscale_script_backup"; then
+                echo "Failed to clean obsolete Tailscale boot-script backup" >&2
+                return 1
+            fi
+        else
+            if [ -L "$tailscale_script_backup" ] || [ ! -f "$tailscale_script_backup" ]; then
+                echo "Interrupted Tailscale boot-script backup is not a regular file" >&2
+                return 1
+            fi
+            if ! mv -f "$tailscale_script_backup" "$tailscale_script"; then
+                echo "Failed to restore interrupted Tailscale boot-script transaction" >&2
+                return 1
+            fi
+        fi
+
+        # A cleanup failure is non-fatal: the stage is hidden, S98 is already
+        # present, and a future boot will retry this cleanup as an orphan.
+        if [ -e "$netbird_script_tmp" ] || [ -L "$netbird_script_tmp" ]; then
+            rm -f "$netbird_script_tmp" || \
+                echo "Failed to remove interrupted NetBird boot-script stage" >&2
+        fi
+    done
+
+    # A previous recovery may have restored S98 and then lost power before it
+    # removed the stage.  It is never safe to promote an orphaned stage.
+    for netbird_script_tmp in /etc/init.d/.S99netbird.new.*; do
+        [ -e "$netbird_script_tmp" ] || [ -L "$netbird_script_tmp" ] || continue
+        rm -f "$netbird_script_tmp" || \
+            echo "Failed to remove orphaned NetBird boot-script stage" >&2
+    done
+    return 0
+}
+
+# Keep the old boot scripts intact until the replacement is completely ready.
+# /etc/init.d and the temporary files are on the same filesystem, so each mv
+# below is atomic. A failed publish restores the hidden S98 before returning;
+# rc never sees a partially copied script.
+install_netbird_boot_script() {
+    netbird_script=/etc/init.d/S99netbird
+    netbird_script_tmp="/etc/init.d/.S99netbird.new.$$"
+    tailscale_script=/etc/init.d/S98tailscaled
+    tailscale_script_backup="/etc/init.d/.S98tailscaled.old.$$"
+    tailscale_was_installed=0
+
+    if ! rm -f "$netbird_script_tmp" "$tailscale_script_backup"; then
+        echo "Failed to prepare VPN boot-script transaction" >&2
+        return 1
+    fi
+    if ! cp -f /kvmapp/system/init.d/S99netbird "$netbird_script_tmp" || \
+       ! chmod 755 "$netbird_script_tmp"; then
+        rm -f "$netbird_script_tmp"
+        return 1
+    fi
+
+    # mv SOURCE DEST moves SOURCE *into* DEST when DEST is a directory. Do not
+    # let a damaged S99 path turn a successful switch into a hidden file below
+    # that directory after S98 has been staged.
+    if [ -e "$netbird_script" ] || [ -L "$netbird_script" ]; then
+        if [ -L "$netbird_script" ] || [ ! -f "$netbird_script" ]; then
+            echo "NetBird boot-script destination is not a regular file" >&2
+            rm -f "$netbird_script_tmp"
+            return 1
+        fi
+    fi
+    # Hide S98 before publishing S99. If publishing fails, put it back before
+    # returning, so an I/O error cannot turn a selected Tailscale boot into no
+    # VPN boot script at all.
+    if [ -e "$tailscale_script" ] || [ -L "$tailscale_script" ]; then
+        if [ -L "$tailscale_script" ] || [ ! -f "$tailscale_script" ]; then
+            echo "Tailscale boot-script source is not a regular file" >&2
+            rm -f "$netbird_script_tmp"
+            return 1
+        fi
+        if ! mv -f "$tailscale_script" "$tailscale_script_backup"; then
+            echo "Failed to stage Tailscale boot script; preserving existing VPN boot scripts" >&2
+            rm -f "$netbird_script_tmp"
+            return 1
+        fi
+        tailscale_was_installed=1
+    fi
+
+    if ! mv -f "$netbird_script_tmp" "$netbird_script"; then
+        echo "Failed to publish NetBird boot script; restoring Tailscale boot script" >&2
+        if [ "$tailscale_was_installed" -eq 1 ] && \
+           ! mv -f "$tailscale_script_backup" "$tailscale_script"; then
+            echo "Failed to restore Tailscale boot script after NetBird publish failure" >&2
+        fi
+        rm -f "$netbird_script_tmp"
+        return 1
+    fi
+
+    # A failed cleanup leaves only a hidden, non-rc backup; the new selection
+    # is already safely published, so do not report it as a failed switch.
+    if [ "$tailscale_was_installed" -eq 1 ]; then
+        rm -f "$tailscale_script_backup" || \
+            echo "Failed to remove obsolete Tailscale boot-script backup" >&2
+    fi
+    return 0
+}
+
+select_vpn() {
+    vpn_pref="tailscale"
+    if [ -f /etc/kvm/vpn ]; then
+        vpn_pref=$(cat /etc/kvm/vpn 2>/dev/null | tr -d '[:space:]')
+    fi
+
+    netbird_is_ready=0
+    if [ "$vpn_pref" = netbird ]; then
+        # The version marker is written only after the validated binary is
+        # published, so it is what certifies the executable. Do not restore S99
+        # for an uncommitted install that left no marker; the UI can repair it.
+        #
+        # A marker older than this firmware's pin still starts. The binary it
+        # certifies was installed and validated here, and a device reachable
+        # only through NetBird must not lose that tunnel because a firmware
+        # update shipped a newer pin. The update is offered in the UI instead.
+        installed_version=$(tr -d '[:space:]' < /etc/kvm/netbird.version 2>/dev/null)
+        if regular_executable /usr/bin/netbird && \
+           valid_netbird_version "$installed_version" && \
+           [ -f /kvmapp/system/init.d/S99netbird ]; then
+            netbird_is_ready=1
+        fi
+    fi
+
+    if ! recover_interrupted_vpn_boot_script_transaction "$netbird_is_ready"; then
+        echo "Failed to recover interrupted VPN boot-script transaction" >&2
+        return 1
+    fi
+
+    case "$vpn_pref" in
+      netbird)
+        if [ "$netbird_is_ready" = 1 ]; then
+            # The helper stages S98 before atomically publishing S99, and
+            # restores S98 if publishing fails. This preserves a bootable VPN
+            # selection across storage errors.
+            if ! install_netbird_boot_script; then
+                echo "Failed to install NetBird boot script; preserving existing VPN boot scripts" >&2
+                return 1
+            fi
+        else
+            # Preference is deliberately not rewritten by Uninstall. If its
+            # selected client is absent, do not also disable a working
+            # Tailscale boot script: LAN-only management remains valid and a
+            # surviving Tailscale installation is a safe boot fallback.
+            rm -f /etc/init.d/S99netbird
+        fi
+        ;;
+      *)
+        rm -f /etc/init.d/S99netbird
+        ;;
+    esac
+}
+
 case "$1" in
   start)
     echo -n kvm > /boot/hostname.prefix
@@ -119,6 +330,7 @@ case "$1" in
 
     # Start services
     start_services
+    select_vpn
    ;;
 
   stop)
@@ -132,6 +344,18 @@ case "$1" in
     fi
     stop_services
     start_services
+
+    # An application migration removes S99* while start_services() waits for
+    # kvm_system. Restore the persisted VPN selection before returning: the
+    # next boot expands /etc/init.d/S??* before it reaches S95, so waiting
+    # until that boot would make the restored hook miss the rc run.
+    if ! select_vpn; then
+        # Do not report a completed OTA restart if the selected hook could
+        # not be restored. The next boot would otherwise silently omit it.
+        sync
+        echo "FAIL"
+        exit 1
+    fi
 
     sync
     echo "OK"

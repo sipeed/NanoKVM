@@ -8,7 +8,8 @@ over the air: `nanokvm_<version>.tar.gz` plus its `latest.json` manifest.
 | `build-in-container.sh` | Builds every riscv64 artifact (`kvm_system`, `libkvm.so`, `NanoKVM-Server`). Runs inside the `nanokvm-builder` image only. |
 | `package.sh` | Stages the package tree, creates the tarball, and writes `latest.json`. |
 | `compare-release.sh` | Diffs a freshly built package against the currently published one. Informational. |
-| `verify-release-assets.sh` | Checks the three GitHub Release assets before publishing or promotion. |
+| `build-netbird.sh` | Cross-compiles the pinned NetBird client for riscv64 and packs it as a release asset. |
+| `verify-release-assets.sh` | Checks the four GitHub Release assets before publishing or promotion. |
 | `verify-release-tag.sh` | Requires an annotated numeric tag whose commit is on `main`. |
 
 ## What the updater expects
@@ -55,7 +56,7 @@ make package VERSION=2.4.4 # build/release/{nanokvm_2.4.4.tar.gz,latest.json}
 In CI this runs as the **NanoKVM Package** workflow. Pull requests and manual
 runs only create Actions artifacts. For a public release, run **NanoKVM Create
 Tag**, then run **NanoKVM Release** and choose prerelease, stable, or promotion.
-Publishing attaches three assets:
+Publishing attaches four assets:
 
 Publishing is one-shot: an existing Release or draft is an error, and only a
 published prerelease can be promoted.
@@ -63,6 +64,18 @@ published prerelease can be promoted.
 - `nanokvm_<version>.tar.gz`
 - `latest.json`
 - `sha256.txt`
+- `netbird_riscv64.tgz` — the NetBird client, downloaded by the device on demand;
+  its source commit and SHA-256 are pinned in `kvmapp/system/netbird/SOURCE` and
+  `kvmapp/system/netbird/SHA256`, and the firmware accepts only that digest
+  rather than bundled: it is ~38 MB and most devices never enable it
+
+Tailscale is also downloaded on demand, but from its vendor and without a
+firmware pin: the device follows
+`https://pkgs.tailscale.com/stable/tailscale_latest_riscv64.tgz` to the
+versioned archive it currently points at, and verifies those bytes against the
+`.sha256` Tailscale publishes next to them. A Tailscale release therefore needs
+no NanoKVM release. NetBird is different because NanoKVM builds that binary
+itself, so the firmware is the only thing that can attest to it.
 
 The Actions artifact also includes `BUILD_INFO.txt` with the source commit,
 workflow run, immutable builder image digest, and both checksum encodings; that

@@ -1,0 +1,318 @@
+#!/bin/sh
+
+DAEMON="netbird"
+DAEMON_PATH="/usr/bin/netbird"
+PIDFILE="/var/run/$DAEMON.pid"
+LOGDIR="/var/log/netbird"
+LOGFILE="$LOGDIR/netbird.log"
+INSTALLED_VERSION_FILE="/etc/kvm/netbird.version"
+
+# NetBird's marker is committed only after its validated binary is published,
+# so its presence is what certifies the binary next to it. Keep this guard in
+# the init script as well as the Go handlers: direct rc invocation must not
+# start a binary left behind by a failed install.
+#
+# The marker deliberately does not have to equal the firmware pin. An older
+# client is still one this device installed and validated, and refusing to
+# start it would cut off, at the next firmware update, every device reachable
+# only through NetBird. Updating is offered in the UI instead.
+valid_version() {
+    printf '%s\n' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+}
+
+install_attested() {
+    [ -r "$INSTALLED_VERSION_FILE" ] || return 1
+    installed=$(tr -d '[:space:]' < "$INSTALLED_VERSION_FILE")
+    valid_version "$installed"
+}
+regular_executable() {
+    # Match the Go preflight: accept a link to a regular executable but reject
+    # a directory, broken link, or a non-executable regular file.
+    [ -f "$1" ] && [ -x "$1" ]
+}
+
+ensure_tun() {
+    [ -d /dev/net ] || mkdir -p /dev/net
+    if [ ! -c /dev/net/tun ]; then
+        [ -x /sbin/modprobe ] && modprobe tun 2>/dev/null || true
+        [ -f /lib/modules/tun.ko ] && insmod /lib/modules/tun.ko 2>/dev/null || true
+        mknod /dev/net/tun c 10 200 2>/dev/null || true
+        chmod 0755 /dev/net/tun 2>/dev/null || true
+    fi
+}
+
+# A firmware installation may intentionally use a symlink for the executable.
+# /proc/<pid>/exe reports its final target, not the launch alias. Resolve a
+# bounded chain ourselves, retaining a missing final leaf so a live process
+# from an unlinked target remains identifiable as " (deleted)". BusyBox
+# readlink -f does not preserve all dangling relative-link cases.
+canonical_daemon_path() {
+    daemon_path="$1"
+    daemon_hops=0
+    while [ -L "$daemon_path" ]; do
+        daemon_hops=$((daemon_hops + 1))
+        [ "$daemon_hops" -le 40 ] || return 1
+        daemon_target=$(readlink "$daemon_path" 2>/dev/null) || return 1
+        case "$daemon_target" in
+            /*) daemon_path="$daemon_target" ;;
+            *) daemon_path="$(dirname "$daemon_path")/$daemon_target" ;;
+        esac
+    done
+
+    daemon_dir=$(dirname "$daemon_path")
+    daemon_base=$(basename "$daemon_path")
+    if [ -d "$daemon_dir" ]; then
+        daemon_dir=$(cd -P "$daemon_dir" 2>/dev/null && pwd) || return 1
+    fi
+    printf '%s/%s\n' "$daemon_dir" "$daemon_base"
+}
+
+# Do not trust PIDFILE or process name alone. A stale PID can point at an
+# unrelated process, while a deleted executable can still be a live NetBird
+# daemon. /proc/exe gives both identity and the latter case.
+is_daemon_pid() {
+    pid="$1"
+    case "$pid" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+    expected=$(canonical_daemon_path "$DAEMON_PATH") || return 2
+    target=$(readlink "/proc/$pid/exe" 2>/dev/null) || {
+        # A gone PID is safe to ignore, but a live /proc directory with an
+        # unreadable exe must fail closed rather than be reported as stopped.
+        [ -e "/proc/$pid" ] && return 2
+        return 1
+    }
+    [ "$target" = "$expected" ] || [ "$target" = "$expected (deleted)" ] || return 1
+    cmdline=$(tr '\000' ' ' < "/proc/$pid/cmdline" 2>/dev/null) || {
+        [ -e "/proc/$pid" ] && return 2
+        return 1
+    }
+    case " $cmdline " in
+        *" service run "*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+daemon_pids() {
+    expected=$(canonical_daemon_path "$DAEMON_PATH") || return 2
+    alias=$(basename "$DAEMON_PATH")
+    target=$(basename "$expected")
+    # Linux records the invoked symlink alias as the process name pidof sees,
+    # while procfs resolves it to the target. Search both so a daemon launched
+    # by this hook or directly from the target reaches the identity check.
+    if [ "$alias" = "$target" ]; then
+        pids=$(pidof "$alias" 2>/dev/null)
+    else
+        pids=$(pidof "$alias" "$target" 2>/dev/null)
+    fi
+    case $? in
+        0) ;;
+        # Exit 1 is the documented no-match result.  Other pidof errors make
+        # daemon state uncertain, so callers must fail closed.
+        1) return 0 ;;
+        *) return 2 ;;
+    esac
+
+    for pid in $pids; do
+        is_daemon_pid "$pid"
+        case $? in
+            0) printf '%s\n' "$pid" ;;
+            1) ;;
+            *) return 2 ;;
+        esac
+    done
+    return 0
+}
+
+daemon_running() {
+    pids=$(daemon_pids) || return 2
+    [ -n "$pids" ]
+}
+
+wait_for_start() {
+    timeout="$1"
+    elapsed=0
+    while :; do
+        daemon_running
+        case $? in
+            0) return 0 ;;
+            2) return 2 ;;
+        esac
+        [ "$elapsed" -ge "$timeout" ] && return 1
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+}
+
+wait_for_exit() {
+    timeout="$1"
+    elapsed=0
+    while :; do
+        daemon_running
+        case $? in
+            1) return 0 ;;
+            2) return 2 ;;
+        esac
+        [ "$elapsed" -ge "$timeout" ] && return 1
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+}
+
+signal_daemons() {
+    signal="$1"
+    pids=$(daemon_pids) || return 2
+    [ -n "$pids" ] || return 0
+
+    for pid in $pids; do
+        # Re-check immediately before kill to reduce the PID-reuse race.
+        is_daemon_pid "$pid"
+        case $? in
+            0) ;;
+            1) continue ;;
+            *) return 2 ;;
+        esac
+        kill -"$signal" "$pid" 2>/dev/null || {
+            is_daemon_pid "$pid"
+            case $? in
+                0) return 1 ;;
+                1) ;;
+                *) return 2 ;;
+            esac
+        }
+    done
+    return 0
+}
+
+stop_daemon() {
+    printf "Stopping %s: " "$DAEMON"
+    daemon_running
+    case $? in
+        1)
+            rm -f "$PIDFILE"
+            echo "not running"
+            return 0
+            ;;
+        2)
+            echo "FAIL (cannot inspect daemon safely)"
+            return 1
+            ;;
+    esac
+
+    signal_daemons TERM
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    if [ "$result" -eq 0 ]; then
+        wait_for_exit 10
+        result=$?
+        [ "$result" -eq 0 ] && {
+            rm -f "$PIDFILE"
+            echo "OK"
+            return 0
+        }
+        [ "$result" -eq 2 ] && {
+            echo "FAIL (cannot inspect daemon safely)"
+            return 1
+        }
+    fi
+
+    signal_daemons KILL
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    wait_for_exit 5
+    result=$?
+    [ "$result" -eq 2 ] && {
+        echo "FAIL (cannot inspect daemon safely)"
+        return 1
+    }
+    [ "$result" -eq 0 ] || {
+        echo "FAIL"
+        return 1
+    }
+    rm -f "$PIDFILE"
+    echo "OK"
+    return 0
+}
+
+case "$1" in
+    start)
+        regular_executable "$DAEMON_PATH" || {
+            echo "$DAEMON_PATH not found"
+            exit 1
+        }
+        install_attested || {
+            echo "$DAEMON_PATH has no NetBird installation marker"
+            exit 1
+        }
+        daemon_running
+        case $? in
+            0)
+                echo "$DAEMON already running"
+                exit 0
+                ;;
+            2)
+                echo "Cannot inspect $DAEMON safely"
+                exit 1
+                ;;
+        esac
+        rm -f "$PIDFILE"
+
+        mkdir -p /var/run "$LOGDIR"
+        ensure_tun
+        export GOMEMLIMIT=30MiB
+
+        printf "Starting %s (GOMEMLIMIT=%s): " "$DAEMON" "$GOMEMLIMIT"
+        if start-stop-daemon -S -bmq -p "$PIDFILE" -x "$DAEMON_PATH" -- service run >>"$LOGFILE" 2>&1 && wait_for_start 5; then
+            echo "OK"
+            exit 0
+        fi
+        echo "FAIL"
+        exit 1
+        ;;
+    stop)
+        stop_daemon
+        exit $?
+        ;;
+    restart)
+        # Check before stop so a running daemon is not interrupted by a restart
+        # this script would then refuse to complete.
+        regular_executable "$DAEMON_PATH" || {
+            echo "$DAEMON_PATH not found"
+            exit 1
+        }
+        install_attested || {
+            echo "$DAEMON_PATH has no NetBird installation marker"
+            exit 1
+        }
+        "$0" stop || exit $?
+        "$0" start
+        exit $?
+        ;;
+    status)
+        daemon_running
+        case $? in
+            0)
+                echo "$DAEMON is running"
+                exit 0
+                ;;
+            1)
+                echo "$DAEMON is not running"
+                exit 1
+                ;;
+            *)
+                echo "Cannot inspect $DAEMON safely"
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
