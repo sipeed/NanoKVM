@@ -1,3 +1,4 @@
+import { useAuth } from '@/contexts/auth.ts';
 import { Divider } from 'antd';
 import { useTranslation } from 'react-i18next';
 
@@ -12,6 +13,7 @@ import { VirtualDevices } from './virtual-devices.tsx';
 
 export const Device = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
 
   return (
     <>
@@ -24,8 +26,13 @@ export const Device = () => {
         <Hdmi />
         <Divider className="opacity-50" />
 
-        <VirtualDevices />
-        <Divider className="opacity-50" />
+        {/* Virtual devices share the virtual-media API, so they follow the media.mount permission */}
+        {hasPermission('media.mount') && (
+          <>
+            <VirtualDevices />
+            <Divider className="opacity-50" />
+          </>
+        )}
 
         <Oled />
         <MouseJiggler />

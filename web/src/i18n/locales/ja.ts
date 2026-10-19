@@ -62,6 +62,11 @@ const ja = {
         verifyBtn: '確認する'
       }
     },
+    desktop: {
+      readOnly: '閲覧のみ',
+      readOnlyTip:
+        'このアカウントは対象マシンへキーボードやマウスの入力を行えないため、コンソールは画面の表示のみになります。'
+    },
     screen: {
       scale: '倍率',
       title: '画面',
@@ -695,7 +700,29 @@ const ja = {
           passwordUpdated: 'パスワードを更新しました',
           loadFailed: 'ユーザーを読み込めませんでした',
           saveFailed: 'ユーザーを保存できませんでした',
-          deleteFailed: 'ユーザーを削除できませんでした'
+          deleteFailed: 'ユーザーを削除できませんでした',
+          editPermissions: '権限'
+        },
+        permissions: {
+          title: '権限',
+          consoleGroup: 'コンソール',
+          manageGroup: '管理',
+          consoleView: 'コンソールを表示',
+          consoleControl: 'キーボードとマウス',
+          power: '電源操作',
+          mediaMount: 'イメージをマウントして読み取り',
+          mediaManage: 'イメージライブラリを管理',
+          terminal: 'ターミナルとスクリプト',
+          device: 'デバイス設定',
+          network: 'ネットワーク設定',
+          update: 'システムアップデート',
+          mcp: 'MCP サービス',
+          mcpNote:
+            'MCP サービスはデバイス全体で有効な API キーを発行し、Web セッション外からキーボード・マウス操作とスクリーンショット取得を行えます。この権限を取り消しても、キーを再生成するまで有効なままです。',
+          tailscale: 'Tailscale',
+          ai: 'AI アシスタント',
+          aiNote:
+            'AI アシスタントはローカルの内部インターフェース経由でデバイスを操作し、他の権限による制限を受けません。そのため、この権限を付与することは実質的にデバイスの完全な制御を意味します。'
         }
       }
     },

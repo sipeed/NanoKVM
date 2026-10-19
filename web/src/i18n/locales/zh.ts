@@ -59,6 +59,10 @@ const zh = {
         verifyBtn: '验证'
       }
     },
+    desktop: {
+      readOnly: '只读',
+      readOnlyTip: '当前账户没有键鼠操作权限，无法向目标机发送键盘和鼠标事件，控制台仅显示画面。'
+    },
     screen: {
       scale: '缩放',
       title: '屏幕',
@@ -667,7 +671,29 @@ const zh = {
           passwordUpdated: '密码已更新',
           loadFailed: '加载用户失败',
           saveFailed: '保存用户失败',
-          deleteFailed: '删除用户失败'
+          deleteFailed: '删除用户失败',
+          editPermissions: '权限'
+        },
+        permissions: {
+          title: '功能权限',
+          consoleGroup: '控制台操作',
+          manageGroup: '设备管理',
+          consoleView: '查看画面',
+          consoleControl: '键鼠操作',
+          power: '电源控制',
+          mediaMount: '挂载与读取镜像',
+          mediaManage: '镜像与文件管理',
+          terminal: '终端与脚本',
+          device: '设备设置',
+          network: '网络设置',
+          update: '系统更新',
+          mcp: 'MCP 服务',
+          mcpNote:
+            'MCP 服务会下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；即使撤销此权限，该 Key 仍然有效，直到重新生成。',
+          tailscale: 'Tailscale',
+          ai: 'AI 助手',
+          aiNote:
+            'AI 助手通过本地内部接口操作设备，不受其他权限限制，因此授予此项相当于授予完整的设备控制权。'
         }
       }
     },

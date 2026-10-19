@@ -27,9 +27,11 @@ const (
 	clientHeartbeatTimeout = 90 * time.Second
 )
 
-func NewClient(ws *websocket.Conn) *Client {
+func NewClient(ws *websocket.Conn, readOnly bool, username string) *Client {
 	client := &Client{
 		ws:                ws,
+		readOnly:          readOnly,
+		username:          username,
 		hid:               hid.GetHid(),
 		manual:            inputcontrol.NewManualSession(controlmode.GetManager(), inputcontrol.GetCoordinator()),
 		keyboard:          make(chan hid.QueuedReport, 200),
@@ -85,6 +87,9 @@ func (c *Client) Read() error {
 		switch data[0] {
 		case Heartbeat:
 		case KeyboardEvent:
+			if c.readOnly {
+				continue
+			}
 			report := data[1:]
 			if len(report) != 8 {
 				log.Debugf("invalid manual keyboard report: %v", report)
@@ -92,6 +97,9 @@ func (c *Client) Read() error {
 			}
 			c.queueManualReport(c.keyboard, inputcontrol.ManualKeyboard, report, keyboardReportHeld(report), true)
 		case MouseEvent:
+			if c.readOnly {
+				continue
+			}
 			report := data[1:]
 			if len(report) != 4 && len(report) != 6 {
 				log.Debugf("invalid manual mouse report: %v", report)

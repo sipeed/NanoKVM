@@ -62,6 +62,11 @@ const id = {
         verifyBtn: 'Verifikasi'
       }
     },
+    desktop: {
+      readOnly: 'Hanya lihat',
+      readOnlyTip:
+        'Akun ini tidak dapat mengirim input keyboard atau tikus ke mesin target, sehingga konsol hanya menampilkan layar.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Layar',
@@ -689,7 +694,29 @@ const id = {
           passwordUpdated: 'Kata sandi diperbarui',
           loadFailed: 'Gagal memuat pengguna',
           saveFailed: 'Gagal menyimpan pengguna',
-          deleteFailed: 'Gagal menghapus pengguna'
+          deleteFailed: 'Gagal menghapus pengguna',
+          editPermissions: 'Izin'
+        },
+        permissions: {
+          title: 'Izin',
+          consoleGroup: 'Konsol',
+          manageGroup: 'Administrasi',
+          consoleView: 'Lihat konsol',
+          consoleControl: 'Keyboard dan tikus',
+          power: 'Kontrol daya',
+          mediaMount: 'Pasang dan baca gambar',
+          mediaManage: 'Kelola pustaka gambar',
+          terminal: 'Terminal dan skrip',
+          device: 'Pengaturan perangkat',
+          network: 'Pengaturan jaringan',
+          update: 'Pembaruan sistem',
+          mcp: 'Layanan MCP',
+          mcpNote:
+            'Layanan MCP menerbitkan kunci API tingkat perangkat yang mengendalikan keyboard, tikus, dan tangkapan layar di luar sesi web, dan tetap berfungsi setelah izin ini dicabut sampai kuncinya dibuat ulang.',
+          tailscale: 'Tailscale',
+          ai: 'Asisten AI',
+          aiNote:
+            'Asisten AI mengakses perangkat melalui antarmuka internal lokal yang tidak dibatasi oleh izin lain, sehingga izin ini pada praktiknya setara dengan kendali penuh atas perangkat.'
         }
       }
     },

@@ -62,6 +62,11 @@ const ca = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Només lectura',
+      readOnlyTip:
+        'Aquest compte no pot enviar entrada de teclat ni de ratolí a la màquina objectiu, de manera que la consola només mostra la pantalla.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -690,7 +695,29 @@ const ca = {
           passwordUpdated: 'Contrasenya actualitzada',
           loadFailed: "No s'han pogut carregar els usuaris",
           saveFailed: "No s'ha pogut desar l'usuari",
-          deleteFailed: "No s'ha pogut eliminar l'usuari"
+          deleteFailed: "No s'ha pogut eliminar l'usuari",
+          editPermissions: 'Permisos'
+        },
+        permissions: {
+          title: 'Permisos',
+          consoleGroup: 'Consola',
+          manageGroup: 'Administració',
+          consoleView: 'Veure la consola',
+          consoleControl: 'Teclat i ratolí',
+          power: "Control d'energia",
+          mediaMount: 'Muntar i llegir imatges',
+          mediaManage: "Gestionar la biblioteca d'imatges",
+          terminal: 'Terminal i scripts',
+          device: 'Configuració del dispositiu',
+          network: 'Configuració de la xarxa',
+          update: 'Actualització del sistema',
+          mcp: 'Servei MCP',
+          mcpNote:
+            "El servei MCP emet una clau API d'abast del dispositiu que controla el teclat, el ratolí i les captures fora de la sessió web, i continua funcionant després de revocar aquest permís fins que es regeneri la clau.",
+          tailscale: 'Tailscale',
+          ai: "Assistent d'IA",
+          aiNote:
+            "L'assistent d'IA accedeix al dispositiu mitjançant una interfície interna local que no està limitada per la resta de permisos, de manera que aquest permís equival a un control complet del dispositiu."
         }
       }
     },

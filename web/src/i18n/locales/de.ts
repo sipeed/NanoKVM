@@ -64,6 +64,11 @@ const de = {
         verifyBtn: 'Überprüfen'
       }
     },
+    desktop: {
+      readOnly: 'Nur Ansehen',
+      readOnlyTip:
+        'Dieses Konto kann keine Tastatur- oder Mauseingaben an den Zielrechner senden, daher zeigt die Konsole nur das Bild.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Bildschirm',
@@ -701,7 +706,29 @@ const de = {
           passwordUpdated: 'Passwort aktualisiert',
           loadFailed: 'Benutzer konnten nicht geladen werden',
           saveFailed: 'Benutzer konnte nicht gespeichert werden',
-          deleteFailed: 'Benutzer konnte nicht gelöscht werden'
+          deleteFailed: 'Benutzer konnte nicht gelöscht werden',
+          editPermissions: 'Berechtigungen'
+        },
+        permissions: {
+          title: 'Berechtigungen',
+          consoleGroup: 'Konsole',
+          manageGroup: 'Verwaltung',
+          consoleView: 'Konsole anzeigen',
+          consoleControl: 'Tastatur und Maus',
+          power: 'Energiesteuerung',
+          mediaMount: 'Abbilder einbinden und lesen',
+          mediaManage: 'Abbild-Bibliothek verwalten',
+          terminal: 'Terminal und Skripte',
+          device: 'Geräteeinstellungen',
+          network: 'Netzwerkeinstellungen',
+          update: 'Systemaktualisierung',
+          mcp: 'MCP-Dienst',
+          mcpNote:
+            'Der MCP-Dienst stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; er funktioniert auch nach dem Entzug dieser Berechtigung weiter, bis der Schlüssel neu erzeugt wird.',
+          tailscale: 'Tailscale',
+          ai: 'KI-Assistent',
+          aiNote:
+            'Der KI-Assistent erreicht das Gerät über eine lokale interne Schnittstelle, die nicht durch die übrigen Berechtigungen eingeschränkt wird; diese Berechtigung entspricht daher praktisch der vollständigen Gerätekontrolle.'
         }
       }
     },

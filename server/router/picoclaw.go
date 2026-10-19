@@ -42,7 +42,7 @@ func PicoclawLoopbackHTTPAllowedPaths() []string {
 func picoclawRouter(r *gin.Engine, service *picoclaw.Service) {
 	frontendAPI := r.Group(picoclawBasePath).Use(
 		middleware.CheckToken(),
-		middleware.RequireRole(authn.RoleAdmin),
+		middleware.RequirePermission(authn.PermAi),
 	)
 	localAPI := r.Group(picoclawBasePath).Use(middleware.CheckLoopbackInternalToken())
 

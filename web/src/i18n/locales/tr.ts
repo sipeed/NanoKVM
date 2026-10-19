@@ -63,6 +63,11 @@ const tr = {
         verifyBtn: 'Doğrula'
       }
     },
+    desktop: {
+      readOnly: 'Yalnızca izleme',
+      readOnlyTip:
+        'Bu hesap hedef makineye klavye veya fare girişi gönderemez; bu nedenle konsol yalnızca ekranı gösterir.'
+    },
     screen: {
       scale: 'Ölçek',
       title: 'Ekran',
@@ -689,7 +694,29 @@ const tr = {
           passwordUpdated: 'Şifre güncellendi',
           loadFailed: 'Kullanıcılar yüklenemedi',
           saveFailed: 'Kullanıcı kaydedilemedi',
-          deleteFailed: 'Kullanıcı silinemedi'
+          deleteFailed: 'Kullanıcı silinemedi',
+          editPermissions: 'İzinler'
+        },
+        permissions: {
+          title: 'İzinler',
+          consoleGroup: 'Konsol',
+          manageGroup: 'Yönetim',
+          consoleView: 'Konsolu görüntüle',
+          consoleControl: 'Klavye ve fare',
+          power: 'Güç denetimi',
+          mediaMount: 'İmajları bağla ve oku',
+          mediaManage: 'İmaj kütüphanesini yönet',
+          terminal: 'Uçbirim ve betikler',
+          device: 'Cihaz ayarları',
+          network: 'Ağ ayarları',
+          update: 'Sistem güncellemesi',
+          mcp: 'MCP Hizmeti',
+          mcpNote:
+            'MCP hizmeti, web oturumu dışında klavye, fare ve ekran görüntülerini denetleyen cihaz genelinde geçerli bir API anahtarı verir; bu anahtar, izin kaldırıldıktan sonra da yeniden oluşturulana kadar çalışmaya devam eder.',
+          tailscale: 'Tailscale',
+          ai: 'AI asistanı',
+          aiNote:
+            'AI asistanı cihaza, diğer izinlerle sınırlandırılmayan yerel bir dahili arayüz üzerinden erişir; bu nedenle bu izin fiilen cihaz üzerinde tam denetim anlamına gelir.'
         }
       }
     },

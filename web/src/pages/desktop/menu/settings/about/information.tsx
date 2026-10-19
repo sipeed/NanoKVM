@@ -25,7 +25,7 @@ type Info = {
 
 export const Information = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [information, setInformation] = useState<Info>();
 
@@ -108,7 +108,7 @@ export const Information = () => {
           <span>{information ? information.application : '-'}</span>
         </div>
 
-        <Hostname editable={account.role === 'admin'} />
+        <Hostname editable={hasPermission('device')} />
       </div>
     </>
   );

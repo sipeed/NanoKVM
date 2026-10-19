@@ -63,6 +63,11 @@ const pl = {
         verifyBtn: 'Sprawdź'
       }
     },
+    desktop: {
+      readOnly: 'Tylko podgląd',
+      readOnlyTip:
+        'To konto nie może wysyłać danych z klawiatury ani myszy do maszyny docelowej, dlatego konsola tylko wyświetla ekran.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Ekran',
@@ -691,7 +696,29 @@ const pl = {
           passwordUpdated: 'Zaktualizowano hasło',
           loadFailed: 'Nie udało się wczytać użytkowników',
           saveFailed: 'Nie udało się zapisać użytkownika',
-          deleteFailed: 'Nie udało się usunąć użytkownika'
+          deleteFailed: 'Nie udało się usunąć użytkownika',
+          editPermissions: 'Uprawnienia'
+        },
+        permissions: {
+          title: 'Uprawnienia',
+          consoleGroup: 'Konsola',
+          manageGroup: 'Administracja',
+          consoleView: 'Wyświetl konsolę',
+          consoleControl: 'Klawiatura i mysz',
+          power: 'Sterowanie zasilaniem',
+          mediaMount: 'Zamontuj i odczytaj obrazy',
+          mediaManage: 'Zarządzaj biblioteką obrazów',
+          terminal: 'Terminal i skrypty',
+          device: 'Ustawienia urządzenia',
+          network: 'Ustawienia sieci',
+          update: 'Aktualizacja systemu',
+          mcp: 'Usługa MCP',
+          mcpNote:
+            'Usługa MCP wydaje klucz API obowiązujący dla całego urządzenia, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją WWW; działa on nadal po odebraniu tego uprawnienia, dopóki klucz nie zostanie wygenerowany ponownie.',
+          tailscale: 'Tailscale',
+          ai: 'Asystent AI',
+          aiNote:
+            'Asystent AI uzyskuje dostęp do urządzenia przez lokalny interfejs wewnętrzny, którego nie ograniczają pozostałe uprawnienia, więc to uprawnienie w praktyce oznacza pełną kontrolę nad urządzeniem.'
         }
       }
     },

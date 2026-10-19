@@ -33,6 +33,16 @@ func (m *Manager) RemoveClient(ws *websocket.Conn) {
 	delete(m.clients, ws)
 }
 
+// NotifyUser sends an event to every connection owned by the user, e.g. to
+// tell the frontend that account permissions changed.
+func (m *Manager) NotifyUser(username string, event string, data string) {
+	for _, client := range m.GetClients() {
+		if client.username == username {
+			_ = client.Write(event, data)
+		}
+	}
+}
+
 func (m *Manager) GetClients() []*Client {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()

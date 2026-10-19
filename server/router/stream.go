@@ -1,6 +1,7 @@
 package router
 
 import (
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/service/stream/direct"
 	"NanoKVM-Server/service/stream/mjpeg"
@@ -10,7 +11,7 @@ import (
 )
 
 func streamRouter(r *gin.Engine) {
-	api := r.Group("/api").Use(middleware.CheckToken())
+	api := r.Group("/api").Use(middleware.CheckToken(), middleware.RequirePermission(authn.PermConsoleView))
 
 	api.GET("/stream/mjpeg", mjpeg.Connect)                      // mjpeg stream
 	api.POST("/stream/mjpeg/detect", mjpeg.UpdateFrameDetect)    // update frame detect

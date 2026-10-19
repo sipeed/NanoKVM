@@ -2,9 +2,24 @@ import { http } from '@/lib/http';
 
 export type UserRole = 'admin' | 'user';
 
+export type Permission =
+  | 'console.view'
+  | 'console.control'
+  | 'power'
+  | 'media.mount'
+  | 'media.manage'
+  | 'terminal'
+  | 'device'
+  | 'network'
+  | 'update'
+  | 'mcp'
+  | 'tailscale'
+  | 'ai';
+
 export type Account = {
   username: string;
   role: UserRole;
+  permissions: Permission[];
 };
 
 export type User = Account & {
@@ -40,11 +55,23 @@ export function getUsers() {
   return http.get('/api/auth/users');
 }
 
-export function createUser(username: string, password: string, role: UserRole) {
-  return http.post('/api/auth/users', { username, password, role });
+export function getPermissions() {
+  return http.get('/api/auth/permissions');
 }
 
-export function updateUser(username: string, data: Partial<Pick<User, 'role' | 'enabled'>>) {
+export function createUser(
+  username: string,
+  password: string,
+  role: UserRole,
+  permissions?: Permission[]
+) {
+  return http.post('/api/auth/users', { username, password, role, permissions });
+}
+
+export function updateUser(
+  username: string,
+  data: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>
+) {
   return http.request({
     method: 'put',
     url: `/api/auth/users/${encodeURIComponent(username)}`,

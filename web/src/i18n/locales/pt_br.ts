@@ -62,6 +62,11 @@ const pt_br = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Somente leitura',
+      readOnlyTip:
+        'Esta conta não pode enviar entrada de teclado ou mouse para a máquina de destino, portanto o console apenas exibe a tela.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Tela',
@@ -691,7 +696,29 @@ const pt_br = {
           passwordUpdated: 'Senha atualizada',
           loadFailed: 'Falha ao carregar os usuários',
           saveFailed: 'Falha ao salvar o usuário',
-          deleteFailed: 'Falha ao excluir o usuário'
+          deleteFailed: 'Falha ao excluir o usuário',
+          editPermissions: 'Permissões'
+        },
+        permissions: {
+          title: 'Permissões',
+          consoleGroup: 'Console',
+          manageGroup: 'Administração',
+          consoleView: 'Ver console',
+          consoleControl: 'Teclado e mouse',
+          power: 'Controle de energia',
+          mediaMount: 'Montar e ler imagens',
+          mediaManage: 'Gerenciar a biblioteca de imagens',
+          terminal: 'Terminal e scripts',
+          device: 'Configurações do dispositivo',
+          network: 'Configurações de rede',
+          update: 'Atualização do sistema',
+          mcp: 'Serviço MCP',
+          mcpNote:
+            'O serviço MCP emite uma chave de API válida para todo o dispositivo que controla teclado, mouse e capturas fora da sessão web, e ela continua funcionando após a revogação desta permissão até que a chave seja regenerada.',
+          tailscale: 'Tailscale',
+          ai: 'Assistente de IA',
+          aiNote:
+            'O assistente de IA acessa o dispositivo por uma interface interna local que não é limitada pelas demais permissões, portanto esta permissão equivale, na prática, ao controle total do dispositivo.'
         }
       }
     },

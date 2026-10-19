@@ -5,6 +5,7 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { w3cwebsocket as W3cWebSocket } from 'websocket';
 
+import { notifyAuthRefresh } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
 
@@ -90,6 +91,19 @@ export const H264Webrtc = () => {
         reconnectTimer = null;
         setConnectionAttempt((attempt) => attempt + 1);
       }, WEBRTC_RECONNECT_DELAY);
+    };
+
+    // A 4403 close means permissions changed but the login is still valid:
+    // reconnect quickly and quietly instead of alarming the user.
+    const scheduleSilentReconnect = () => {
+      if (disposed || reconnectTimer) {
+        return;
+      }
+
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        setConnectionAttempt((attempt) => attempt + 1);
+      }, 500);
     };
 
     const sendMsg = (event: string, data: string) => {
@@ -227,7 +241,12 @@ export const H264Webrtc = () => {
       scheduleReconnect('the signaling WebSocket returned an error', error);
     };
 
-    ws.onclose = () => {
+    ws.onclose = (event) => {
+      if (event?.code === 4403) {
+        notifyAuthRefresh();
+        scheduleSilentReconnect();
+        return;
+      }
       scheduleReconnect('the signaling WebSocket closed');
     };
 

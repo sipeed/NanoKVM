@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Divider } from 'antd';
 import { useSetAtom } from 'jotai';
 import { MouseIcon } from 'lucide-react';
@@ -23,6 +24,13 @@ import { Speed } from './speed.tsx';
 
 export const Mouse = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  // HID mode and the HID reset are device settings: the API rejects them
+  // without the grant, so the menu must not offer them either.
+  const canDevice = hasPermission('device');
+  // The input region maps pointer motion onto the target screen, so changing
+  // it is part of input control.
+  const canControl = hasPermission('console.control');
 
   const setMouseStyle = useSetAtom(mouseStyleAtom);
   const setMouseMode = useSetAtom(mouseModeAtom);
@@ -57,11 +65,11 @@ export const Mouse = () => {
       <MouseMode />
       <Direction />
       <Speed />
-      <Divider style={{ margin: '10px 0' }} />
+      {(canControl || canDevice) && <Divider style={{ margin: '10px 0' }} />}
 
-      <OriginalResolution />
-      <HidMode />
-      <ResetHid />
+      {canControl && <OriginalResolution />}
+      {canDevice && <HidMode />}
+      {canDevice && <ResetHid />}
     </div>
   );
 

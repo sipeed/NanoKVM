@@ -34,8 +34,12 @@ import { Update } from './update';
 
 export const Settings = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
-  const isAdmin = account.role === 'admin';
+  const { hasPermission } = useAuth();
+  const canDevice = hasPermission('device');
+  const canNetwork = hasPermission('network');
+  const canUpdate = hasPermission('update');
+  const canMcp = hasPermission('mcp');
+  const canTailscale = hasPermission('tailscale');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -49,16 +53,24 @@ export const Settings = () => {
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
-    ...(isAdmin
+    ...(canDevice
+      ? [{ id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> }]
+      : []),
+    ...(canNetwork
+      ? [{ id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> }]
+      : []),
+    ...(canMcp ? [{ id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> }] : []),
+    ...(canTailscale
       ? [
-          { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
-          { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
-          { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
           {
             id: 'tailscale',
             icon: <TailscaleIcon />,
             component: <Tailscale setIsLocked={setIsLocked} />
-          },
+          }
+        ]
+      : []),
+    ...(canUpdate
+      ? [
           {
             id: 'update',
             icon: <CircleArrowUpIcon size={16} />,
@@ -70,12 +82,12 @@ export const Settings = () => {
   ];
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!canUpdate) return;
     const skip = ls.getSkipUpdate();
     if (!skip) {
       checkForUpdates();
     }
-  }, [isAdmin]);
+  }, [canUpdate]);
 
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });

@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { App, Breadcrumb, Button, Empty, Input, Select, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
@@ -114,6 +115,11 @@ export function useFileBrowser({
 }: Props) {
   const { t } = useTranslation();
   const { modal } = App.useApp();
+  const { hasPermission } = useAuth();
+  const canMount = hasPermission('media.mount');
+  const canManage = hasPermission('media.manage');
+  // Managing the library requires inspecting it: both roles may read.
+  const canRead = canMount || canManage;
 
   // A listing remembers the medium and folder it was read from: right after
   // the user moves elsewhere it still holds the old entries, and acting on
@@ -355,18 +361,20 @@ export function useFileBrowser({
 
     return (
       <div className="flex shrink-0 items-center space-x-1">
-        <Tooltip title={canWrite ? t('storage.files.upload') : t('storage.add.blocked')}>
-          <Button
-            size="small"
-            icon={<UploadIcon size={14} />}
-            disabled={!canWrite}
-            loading={uploads.some((item) => item.targetType === target.type)}
-            onClick={() => {
-              uploadTarget.current = { target, dir };
-              inputRef.current?.click();
-            }}
-          />
-        </Tooltip>
+        {canManage && (
+          <Tooltip title={canWrite ? t('storage.files.upload') : t('storage.add.blocked')}>
+            <Button
+              size="small"
+              icon={<UploadIcon size={14} />}
+              disabled={!canWrite}
+              loading={uploads.some((item) => item.targetType === target.type)}
+              onClick={() => {
+                uploadTarget.current = { target, dir };
+                inputRef.current?.click();
+              }}
+            />
+          </Tooltip>
+        )}
         <Tooltip title={t('storage.refresh')}>
           <Button
             size="small"
@@ -465,7 +473,7 @@ export function useFileBrowser({
                 )}
               </span>
               <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-                {!entry.isDir && (
+                {!entry.isDir && canRead && (
                   <Button
                     type="text"
                     size="small"
@@ -475,15 +483,17 @@ export function useFileBrowser({
                     title={t('storage.files.download')}
                   />
                 )}
-                <Button
-                  type="text"
-                  size="small"
-                  danger={canWrite}
-                  disabled={!canWrite}
-                  icon={<Trash2Icon size={14} />}
-                  title={canWrite ? t('storage.files.delete') : t('storage.add.blocked')}
-                  onClick={() => canWrite && confirmDelete(entry, fullPath)}
-                />
+                {canManage && (
+                  <Button
+                    type="text"
+                    size="small"
+                    danger={canWrite}
+                    disabled={!canWrite}
+                    icon={<Trash2Icon size={14} />}
+                    title={canWrite ? t('storage.files.delete') : t('storage.add.blocked')}
+                    onClick={() => canWrite && confirmDelete(entry, fullPath)}
+                  />
+                )}
               </div>
             </div>
           </div>

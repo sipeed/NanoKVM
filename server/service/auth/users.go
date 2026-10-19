@@ -14,6 +14,11 @@ import (
 
 var errInvalidPassword = errors.New("invalid password")
 
+// SessionNotifier pushes an account event to a user's live connections. It is
+// wired to the websocket manager during router setup; kept as a hook so this
+// package does not depend on the cgo-based HID stack.
+var SessionNotifier func(username, event, data string)
+
 func (s *Service) ListUsers(c *gin.Context) {
 	var rsp proto.Response
 	users, err := authn.DefaultStore.List()
@@ -27,10 +32,18 @@ func (s *Service) ListUsers(c *gin.Context) {
 			Username:      user.Username,
 			Role:          string(user.Role),
 			Enabled:       user.Enabled,
+			Permissions:   permissionStrings(user.Permissions),
 			SystemAccount: user.SystemAccount,
 		})
 	}
 	rsp.OkRspWithData(c, &proto.ListUsersRsp{Users: result})
+}
+
+func (s *Service) ListPermissions(c *gin.Context) {
+	var rsp proto.Response
+	rsp.OkRspWithData(c, &proto.ListPermissionsRsp{
+		Permissions: permissionStrings(authn.PermissionCatalog()),
+	})
 }
 
 func (s *Service) CreateUser(c *gin.Context) {
@@ -45,8 +58,13 @@ func (s *Service) CreateUser(c *gin.Context) {
 		rsp.ErrRsp(c, -2, err.Error())
 		return
 	}
-	if err = authn.DefaultStore.Create(req.Username, password, authn.Role(req.Role)); err != nil {
+	permissions, err := parsePermissions(req.Permissions)
+	if err != nil {
 		rsp.ErrRsp(c, -3, err.Error())
+		return
+	}
+	if err = authn.DefaultStore.Create(req.Username, password, authn.Role(req.Role), permissions...); err != nil {
+		rsp.ErrRsp(c, -4, err.Error())
 		return
 	}
 	rsp.OkRsp(c)
@@ -56,7 +74,7 @@ func (s *Service) CreateUser(c *gin.Context) {
 func (s *Service) UpdateUser(c *gin.Context) {
 	var req proto.UpdateUserReq
 	var rsp proto.Response
-	if err := proto.ParseFormRequest(c, &req); err != nil || (req.Role == nil && req.Enabled == nil) {
+	if err := proto.ParseFormRequest(c, &req); err != nil || (req.Role == nil && req.Enabled == nil && req.Permissions == nil) {
 		rsp.ErrRsp(c, -1, "invalid parameters")
 		return
 	}
@@ -66,12 +84,49 @@ func (s *Service) UpdateUser(c *gin.Context) {
 		role := authn.Role(*req.Role)
 		patch.Role = &role
 	}
+	if req.Permissions != nil {
+		permissions, err := parsePermissions(*req.Permissions)
+		if err != nil {
+			rsp.ErrRsp(c, -2, err.Error())
+			return
+		}
+		patch.Permissions = &permissions
+	}
 	username := c.Param("username")
-	if _, err := authn.DefaultStore.Update(principal.Username, username, patch); err != nil {
+	permissionsOnly := req.Permissions != nil && req.Role == nil && req.Enabled == nil
+	var oldPermissions []authn.Permission
+	if permissionsOnly {
+		oldUser, err := authn.DefaultStore.Get(username)
+		if err != nil {
+			rsp.ErrRsp(c, -2, err.Error())
+			return
+		}
+		oldPermissions = authn.EffectivePermissions(oldUser)
+	}
+	updated, err := authn.DefaultStore.Update(principal.Username, username, patch)
+	if err != nil {
 		rsp.ErrRsp(c, -2, err.Error())
 		return
 	}
-	middleware.RevokeUserSessions(username)
+	if !permissionsOnly {
+		// Role and enabled changes invalidate the login itself.
+		middleware.RevokeUserSessions(username)
+	} else {
+		// Permission changes keep the login valid: drop only the long-lived
+		// connections whose in-memory state depends on what changed, and let the
+		// frontend refresh its account state in place. Revoked grants have to
+		// reconnect to stop using the feature, and granted ones have to reconnect
+		// to pick up capabilities cached at connect time (the console socket
+		// remembers whether it is read-only). Unrelated connections stay
+		// untouched.
+		if SessionNotifier != nil {
+			SessionNotifier(username, "auth", "refresh")
+		}
+		changed := permissionsChanged(oldPermissions, authn.EffectivePermissions(updated))
+		if channels := channelsForPermissions(changed); len(channels) > 0 {
+			middleware.RefreshUserSessions(username, channels...)
+		}
+	}
 	rsp.OkRsp(c)
 	log.Infof("user updated: %s", username)
 }
@@ -113,6 +168,76 @@ func (s *Service) ChangeUserPassword(c *gin.Context) {
 	middleware.RevokeUserSessions(username)
 	rsp.OkRsp(c)
 	log.Infof("password reset for user: %s", username)
+}
+
+// permissionsChanged returns the grants that were added or removed. Both
+// directions matter: a revoked grant must stop reaching the feature, while a
+// granted one must reconnect to pick up state cached per connection.
+func permissionsChanged(oldPermissions, newPermissions []authn.Permission) []authn.Permission {
+	changed := make([]authn.Permission, 0, len(oldPermissions))
+	for _, old := range oldPermissions {
+		if !hasPermission(newPermissions, old) {
+			changed = append(changed, old)
+		}
+	}
+	for _, current := range newPermissions {
+		if !hasPermission(oldPermissions, current) {
+			changed = append(changed, current)
+		}
+	}
+	return changed
+}
+
+func hasPermission(permissions []authn.Permission, permission authn.Permission) bool {
+	for _, candidate := range permissions {
+		if candidate == permission {
+			return true
+		}
+	}
+	return false
+}
+
+// channelsForPermissions maps permissions that changed to the long-lived
+// connection channels that must reconnect to take effect. Permissions without
+// connection state (media, network, ...) are enforced per-request and need no
+// teardown.
+func channelsForPermissions(permissions []authn.Permission) []string {
+	channels := make([]string, 0, 2)
+	for _, permission := range permissions {
+		switch permission {
+		case authn.PermConsoleView:
+			channels = append(channels, middleware.SessionChannelConsole, middleware.SessionChannelStream)
+		case authn.PermConsoleControl:
+			channels = append(channels, middleware.SessionChannelConsole)
+		case authn.PermTerminal:
+			channels = append(channels, middleware.SessionChannelTerminal)
+		case authn.PermAi:
+			channels = append(channels, middleware.SessionChannelAi)
+		}
+	}
+	return channels
+}
+
+func parsePermissions(raw []string) ([]authn.Permission, error) {
+	if raw == nil {
+		return nil, nil
+	}
+	permissions := make([]authn.Permission, 0, len(raw))
+	for _, item := range raw {
+		permissions = append(permissions, authn.Permission(item))
+	}
+	if err := authn.ValidatePermissions(permissions); err != nil {
+		return nil, err
+	}
+	return permissions, nil
+}
+
+func permissionStrings(permissions []authn.Permission) []string {
+	strings := make([]string, 0, len(permissions))
+	for _, permission := range permissions {
+		strings = append(strings, string(permission))
+	}
+	return strings
 }
 
 func decodePassword(encrypted string) (string, error) {

@@ -66,8 +66,28 @@ turn:
 
 NanoKVM uses two device-wide roles:
 
-- `admin`: KVM access plus user, system, network, update, storage, terminal, script, MCP, and PicoClaw administration.
-- `user`: KVM video, keyboard, mouse, paste, power/reset, and Wake-on-LAN access.
+- `admin`: everything below, plus user management.
+- `user`: only what the account is granted. Grants are grouped per feature: `console.view`,
+  `console.control`, `power`, `media.mount`, `media.manage`, `terminal`, `device`, `network`,
+  `update`, `mcp`, `tailscale`, and `ai`.
+
+`console.view` is required for every regular user, because nothing in the web UI renders without
+it; it is therefore always granted and pinned in the account editor. Media access splits along the
+trust boundary: `media.mount` attaches a medium to the target machine and reads it, while
+`media.manage` changes the library contents (uploads, deletes, and exchanging files with the
+target machine).
+
+Five grants reach further than their names suggest and are effectively full device control, so
+grant them only to accounts you trust with the whole device:
+
+- `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
+- `device` can enable SSH, which also means root, and can reboot the device.
+- `update` installs firmware and application packages.
+- `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
+  outside the web session, and the key keeps working after this grant is revoked until it is
+  regenerated; the account editor warns about this one.
+- `ai` drives the device through the local loopback interface, which the other grants do not
+  restrict; the account editor warns about this one too.
 
 Administrators manage accounts from **Settings > Account**. Account data remains in
 `/etc/kvm/pwd`; the server migrates the legacy single-account JSON format in place and writes
@@ -77,12 +97,20 @@ Users must confirm their current password when changing it themselves; administr
 non-owner users from the account manager. Only the device owner can change the device owner's
 password, because that password is also synchronized to the Linux root account.
 
-All authenticated sessions are backed by the current account state. Disabling, deleting,
-changing the role or password of a user invalidates that user's HTTP and real-time connections
-without affecting other users. Multiple users may watch and control the KVM concurrently; input
-uses the existing cooperative HID coordinator, so simultaneous input can interleave.
-Video mode, quality, resolution, and MJPEG frame-detection controls remain shared KVM
-operations; when several users adjust them concurrently, the latest change applies device-wide.
+All authenticated sessions are backed by the current account state: every request is authorized
+against the account file, so a revoked grant stops working immediately without re-issuing a login.
+Disabling, deleting, changing the role or changing the password of a user invalidates that user's
+HTTP and real-time connections without affecting other users. A permission change keeps the login
+valid and only drops the long-lived connections whose cached state depends on what changed
+(console, video stream, terminal, AI), so those clients reconnect with the new grants. Multiple
+users may watch and control the KVM concurrently; input uses the existing cooperative HID
+coordinator, so simultaneous input can interleave. A user without `console.control` keeps the
+video and the menu for its other grants, but the console rejects keyboard and mouse reports and
+the web UI marks the session as view only.
+Video mode, quality, resolution, and MJPEG frame-detection controls require only `console.view`
+and stay shared KVM operations; when several users adjust them concurrently, the latest change
+applies device-wide. `console.control` is input only: keyboard, mouse, paste, and the input region
+that maps pointer motion onto the target screen.
 
 ## Compile & Deploy
 

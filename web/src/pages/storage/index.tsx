@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Alert, App, Button, Collapse, Modal, notification, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
@@ -69,6 +70,11 @@ const MediaGroup = ({
 
 export const Storage = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canMount = hasPermission('media.mount');
+  const canManage = hasPermission('media.manage');
+  // Managing the library requires inspecting it: both roles may read.
+  const canRead = canMount || canManage;
   const [notificationApi, contextHolder] = notification.useNotification();
   const { modal } = App.useApp();
 
@@ -534,14 +540,16 @@ export const Storage = () => {
                 <span className="text-blue-500">
                   {t('storage.attached', { name: attachedName })}
                 </span>
-                <Button
-                  size="small"
-                  icon={<UnplugIcon size={14} />}
-                  loading={busy === 'eject'}
-                  onClick={() => void eject()}
-                >
-                  {t('storage.eject')}
-                </Button>
+                {canMount && (
+                  <Button
+                    size="small"
+                    icon={<UnplugIcon size={14} />}
+                    loading={busy === 'eject'}
+                    onClick={() => void eject()}
+                  >
+                    {t('storage.eject')}
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -678,7 +686,7 @@ export const Storage = () => {
                             onClick={() => setIsTipsOpen(true)}
                           />
                         </Tooltip>
-                        {addMedia.actions}
+                        {canManage && addMedia.actions}
                       </div>
                     }
                   >
@@ -742,61 +750,70 @@ export const Storage = () => {
                 className="flex shrink-0 items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(event) => event.stopPropagation()}
               >
-                {item.attached ? (
-                  <Tooltip title={t('storage.eject')}>
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<UnplugIcon size={14} />}
-                      onClick={() => void eject()}
-                    />
-                  </Tooltip>
-                ) : (
-                  <Tooltip
-                    title={
-                      mountAsCdrom && !api.isOpticalImage(item)
-                        ? t('storage.add.cdromOnlyIso')
-                        : t('storage.mount')
-                    }
-                  >
-                    <Button
-                      type="text"
-                      size="small"
-                      loading={isBusy}
-                      disabled={mountAsCdrom && !api.isOpticalImage(item)}
-                      icon={<PlugIcon size={14} />}
-                      onClick={() => void mount(item, mountAsCdrom)}
-                    />
-                  </Tooltip>
-                )}
-
-                {item.type === 'image' && (
-                  <>
-                    <Tooltip
-                      title={item.attached ? t('storage.add.blocked') : t('storage.downloadImage')}
-                    >
+                {canMount &&
+                  (item.attached ? (
+                    <Tooltip title={t('storage.eject')}>
                       <Button
                         type="text"
                         size="small"
-                        disabled={item.attached}
-                        icon={<DownloadIcon size={14} />}
-                        onClick={() => void downloadImage(item)}
+                        icon={<UnplugIcon size={14} />}
+                        onClick={() => void eject()}
                       />
                     </Tooltip>
+                  ) : (
                     <Tooltip
                       title={
-                        dataOwned || item.attached ? t('storage.add.blocked') : t('storage.delete')
+                        mountAsCdrom && !api.isOpticalImage(item)
+                          ? t('storage.add.cdromOnlyIso')
+                          : t('storage.mount')
                       }
                     >
                       <Button
                         type="text"
                         size="small"
-                        danger
-                        disabled={dataOwned || item.attached}
-                        icon={<Trash2Icon size={14} />}
-                        onClick={() => confirmDelete(item)}
+                        loading={isBusy}
+                        disabled={mountAsCdrom && !api.isOpticalImage(item)}
+                        icon={<PlugIcon size={14} />}
+                        onClick={() => void mount(item, mountAsCdrom)}
                       />
                     </Tooltip>
+                  ))}
+
+                {item.type === 'image' && (
+                  <>
+                    {canRead && (
+                      <Tooltip
+                        title={
+                          item.attached ? t('storage.add.blocked') : t('storage.downloadImage')
+                        }
+                      >
+                        <Button
+                          type="text"
+                          size="small"
+                          disabled={item.attached}
+                          icon={<DownloadIcon size={14} />}
+                          onClick={() => void downloadImage(item)}
+                        />
+                      </Tooltip>
+                    )}
+                    {canManage && (
+                      <Tooltip
+                        title={
+                          dataOwned || item.attached
+                            ? t('storage.add.blocked')
+                            : t('storage.delete')
+                        }
+                      >
+                        <Button
+                          type="text"
+                          size="small"
+                          danger
+                          disabled={dataOwned || item.attached}
+                          icon={<Trash2Icon size={14} />}
+                          onClick={() => confirmDelete(item)}
+                        />
+                      </Tooltip>
+                    )}
                   </>
                 )}
               </div>

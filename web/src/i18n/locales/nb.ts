@@ -63,6 +63,11 @@ const nb = {
         verifyBtn: 'Bekreft'
       }
     },
+    desktop: {
+      readOnly: 'Kun visning',
+      readOnlyTip:
+        'Denne kontoen kan ikke sende tastatur- eller musinndata til målmaskinen, så konsollen viser bare skjermen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skjerm',
@@ -687,7 +692,29 @@ const nb = {
           passwordUpdated: 'Passord oppdatert',
           loadFailed: 'Kunne ikke laste brukere',
           saveFailed: 'Kunne ikke lagre brukeren',
-          deleteFailed: 'Kunne ikke slette brukeren'
+          deleteFailed: 'Kunne ikke slette brukeren',
+          editPermissions: 'Tillatelser'
+        },
+        permissions: {
+          title: 'Tillatelser',
+          consoleGroup: 'Konsoll',
+          manageGroup: 'Administrasjon',
+          consoleView: 'Se konsoll',
+          consoleControl: 'Tastatur og mus',
+          power: 'Strømstyring',
+          mediaMount: 'Monter og les diskbilder',
+          mediaManage: 'Administrer diskbildbibliotek',
+          terminal: 'Terminal og skript',
+          device: 'Enhetsinnstillinger',
+          network: 'Nettverksinnstillinger',
+          update: 'Systemoppdatering',
+          mcp: 'MCP-tjeneste',
+          mcpNote:
+            'MCP-tjenesten utsteder en enhetsdekkende API-nøkkel som styrer tastatur, mus og skjermbilder utenfor nettsesjonen, og den virker fortsatt etter at denne tillatelsen er tilbakekalt, helt til nøkkelen genereres på nytt.',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          aiNote:
+            'AI-assistenten når enheten via et lokalt internt grensesnitt som ikke begrenses av de øvrige tillatelsene, så denne tillatelsen tilsvarer i praksis full kontroll over enheten.'
         }
       }
     },

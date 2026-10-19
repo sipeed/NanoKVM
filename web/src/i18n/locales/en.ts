@@ -61,6 +61,11 @@ const en = {
         verifyBtn: 'Verify'
       }
     },
+    desktop: {
+      readOnly: 'View Only',
+      readOnlyTip:
+        'This account cannot send keyboard or mouse input to the target machine, so the console only shows the screen.'
+    },
     screen: {
       scale: 'Scale',
       title: 'Screen',
@@ -683,7 +688,29 @@ const en = {
           passwordUpdated: 'Password updated',
           loadFailed: 'Failed to load users',
           saveFailed: 'Failed to save user',
-          deleteFailed: 'Failed to delete user'
+          deleteFailed: 'Failed to delete user',
+          editPermissions: 'Permissions'
+        },
+        permissions: {
+          title: 'Permissions',
+          consoleGroup: 'Console',
+          manageGroup: 'Administration',
+          consoleView: 'View Console',
+          consoleControl: 'Keyboard & Mouse',
+          power: 'Power Control',
+          mediaMount: 'Mount & Read Media',
+          mediaManage: 'Manage Media Library',
+          terminal: 'Terminal & Scripts',
+          device: 'Device Settings',
+          network: 'Network Settings',
+          update: 'System Update',
+          mcp: 'MCP Service',
+          mcpNote:
+            'The MCP service issues a device-wide API key that controls the keyboard, mouse and screenshots outside the web session, and it keeps working after this grant is revoked until the key is regenerated.',
+          tailscale: 'Tailscale',
+          ai: 'AI Assistant',
+          aiNote:
+            'The AI assistant reaches the device through a local internal interface that is not limited by the other permissions, so this grant is effectively full device control.'
         }
       }
     },

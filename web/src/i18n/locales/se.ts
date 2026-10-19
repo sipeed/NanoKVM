@@ -60,6 +60,11 @@ const se = {
         verifyBtn: 'Verifiera'
       }
     },
+    desktop: {
+      readOnly: 'Endast visning',
+      readOnlyTip:
+        'Det här kontot kan inte skicka tangentbords- eller musindata till målmaskinen, så konsolen visar bara skärmen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skärm',
@@ -685,7 +690,29 @@ const se = {
           passwordUpdated: 'Lösenordet uppdaterat',
           loadFailed: 'Kunde inte läsa in användare',
           saveFailed: 'Kunde inte spara användaren',
-          deleteFailed: 'Kunde inte ta bort användaren'
+          deleteFailed: 'Kunde inte ta bort användaren',
+          editPermissions: 'Behörigheter'
+        },
+        permissions: {
+          title: 'Behörigheter',
+          consoleGroup: 'Konsol',
+          manageGroup: 'Administration',
+          consoleView: 'Visa konsol',
+          consoleControl: 'Tangentbord och mus',
+          power: 'Strömstyrning',
+          mediaMount: 'Montera och läs avbildningar',
+          mediaManage: 'Hantera avbildningsbibliotek',
+          terminal: 'Terminal och skript',
+          device: 'Enhetsinställningar',
+          network: 'Nätverksinställningar',
+          update: 'Systemuppdatering',
+          mcp: 'MCP-tjänst',
+          mcpNote:
+            'MCP-tjänsten utfärdar en enhetsomfattande API-nyckel som styr tangentbord, mus och skärmbilder utanför webbsessionen, och den fortsätter att fungera efter att den här behörigheten återkallats tills nyckeln genereras om.',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          aiNote:
+            'AI-assistenten når enheten via ett lokalt internt gränssnitt som inte begränsas av de övriga behörigheterna, så denna behörighet motsvarar i praktiken full kontroll över enheten.'
         }
       }
     },

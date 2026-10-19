@@ -17,12 +17,61 @@ export const handlers = [
     }
     return HttpResponse.json({
       code: 0,
-      data: { username: 'admin', role: 'admin' }
+      data: { username: 'admin', role: 'admin', permissions: [] }
     });
   }),
   http.post('/api/auth/logout', () => {
     isLoggedIn = false;
     return HttpResponse.json({ code: 0 });
+  }),
+  http.get('/api/auth/users', () => {
+    return HttpResponse.json({
+      code: 0,
+      data: {
+        users: [
+          {
+            username: 'admin',
+            role: 'admin',
+            enabled: true,
+            permissions: [],
+            systemAccount: true
+          },
+          {
+            username: 'watermeko',
+            role: 'user',
+            enabled: true,
+            permissions: ['console.view', 'console.control', 'power']
+          },
+          {
+            username: 'test',
+            role: 'user',
+            enabled: false,
+            permissions: ['console.view']
+          }
+        ]
+      }
+    });
+  }),
+  http.get('/api/auth/permissions', () => {
+    return HttpResponse.json({
+      code: 0,
+      data: {
+        permissions: [
+          'console.view',
+          'console.control',
+          'power',
+          'media.mount',
+          'media.manage',
+          'terminal',
+          'device',
+          'network',
+          'update',
+          'mcp',
+          'tailscale',
+          'ai'
+        ]
+      }
+    });
   })
 ];
 export const worker = setupWorker(...handlers);

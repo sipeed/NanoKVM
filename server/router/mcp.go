@@ -26,7 +26,7 @@ func mcpRouter(r *gin.Engine, control *controlmode.Manager, picoclawService *pic
 	)
 	management := r.Group("/api/mcp").Use(
 		middleware.CheckToken(),
-		middleware.RequireRole(authn.RoleAdmin),
+		middleware.RequirePermission(authn.PermMcp),
 	)
 	management.GET("/config", service.GetConfig)
 	management.POST("/config", service.SetConfig)

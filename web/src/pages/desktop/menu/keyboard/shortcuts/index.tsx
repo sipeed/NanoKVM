@@ -13,7 +13,7 @@ import type { Shortcut as ShortcutInterface } from './types.ts';
 
 export const Shortcuts = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -114,7 +114,7 @@ export const Shortcuts = () => {
 
       <Divider style={{ margin: '5px 0 5px 0' }} />
 
-      {account.role === 'admin' && (
+      {hasPermission('device') && (
         <Recorder
           shortcuts={customShortcuts}
           addShortcut={addShortcut}

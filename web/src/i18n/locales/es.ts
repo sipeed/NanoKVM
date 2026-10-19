@@ -63,6 +63,11 @@ const es = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Solo lectura',
+      readOnlyTip:
+        'Esta cuenta no puede enviar entrada de teclado ni de ratón al equipo de destino, por lo que la consola solo muestra la pantalla.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -698,7 +703,29 @@ const es = {
           passwordUpdated: 'Contraseña actualizada',
           loadFailed: 'No se pudieron cargar los usuarios',
           saveFailed: 'No se pudo guardar el usuario',
-          deleteFailed: 'No se pudo eliminar el usuario'
+          deleteFailed: 'No se pudo eliminar el usuario',
+          editPermissions: 'Permisos'
+        },
+        permissions: {
+          title: 'Permisos',
+          consoleGroup: 'Consola',
+          manageGroup: 'Administración',
+          consoleView: 'Ver la consola',
+          consoleControl: 'Teclado y ratón',
+          power: 'Control de energía',
+          mediaMount: 'Montar y leer imágenes',
+          mediaManage: 'Gestionar la biblioteca de imágenes',
+          terminal: 'Consola y scripts',
+          device: 'Ajustes del dispositivo',
+          network: 'Ajustes de red',
+          update: 'Actualización del sistema',
+          mcp: 'Servicio MCP',
+          mcpNote:
+            'El servicio MCP emite una clave API de ámbito del dispositivo que controla el teclado, el ratón y las capturas fuera de la sesión web, y sigue funcionando tras revocar este permiso hasta que se regenere la clave.',
+          tailscale: 'Tailscale',
+          ai: 'Asistente de IA',
+          aiNote:
+            'El asistente de IA accede al dispositivo mediante una interfaz interna local que no está limitada por los demás permisos, por lo que este permiso equivale en la práctica al control total del dispositivo.'
         }
       }
     },

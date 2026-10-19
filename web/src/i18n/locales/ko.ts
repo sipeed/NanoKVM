@@ -61,6 +61,11 @@ const ko = {
         verifyBtn: '확인'
       }
     },
+    desktop: {
+      readOnly: '보기 전용',
+      readOnlyTip:
+        '이 계정은 대상 컴퓨터로 키보드나 마우스 입력을 보낼 수 없으므로 콘솔은 화면만 표시합니다.'
+    },
     screen: {
       scale: '규모',
       title: '화면',
@@ -681,7 +686,29 @@ const ko = {
           passwordUpdated: '비밀번호 업데이트됨',
           loadFailed: '사용자를 불러오지 못했습니다',
           saveFailed: '사용자를 저장하지 못했습니다',
-          deleteFailed: '사용자를 삭제하지 못했습니다'
+          deleteFailed: '사용자를 삭제하지 못했습니다',
+          editPermissions: '권한'
+        },
+        permissions: {
+          title: '권한',
+          consoleGroup: '콘솔',
+          manageGroup: '관리',
+          consoleView: '콘솔 보기',
+          consoleControl: '키보드 및 마우스',
+          power: '전원 제어',
+          mediaMount: '이미지 마운트 및 읽기',
+          mediaManage: '이미지 라이브러리 관리',
+          terminal: '터미널 및 스크립트',
+          device: '장치 설정',
+          network: '네트워크 설정',
+          update: '시스템 업데이트',
+          mcp: 'MCP 서비스',
+          mcpNote:
+            'MCP 서비스는 장치 전체에 유효한 API 키를 발급하며, 이 키로 웹 세션 외부에서 키보드·마우스 조작과 스크린샷 촬영이 가능합니다. 이 권한을 취소해도 키를 재생성할 때까지 계속 유효합니다.',
+          tailscale: 'Tailscale',
+          ai: 'AI 어시스턴트',
+          aiNote:
+            'AI 어시스턴트는 다른 권한의 제한을 받지 않는 로컬 내부 인터페이스를 통해 장치를 제어하므로, 이 권한은 사실상 장치에 대한 완전한 제어 권한입니다.'
         }
       }
     },

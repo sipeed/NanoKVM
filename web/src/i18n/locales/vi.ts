@@ -62,6 +62,11 @@ const vi = {
         verifyBtn: 'Xác minh'
       }
     },
+    desktop: {
+      readOnly: 'Chỉ xem',
+      readOnlyTip:
+        'Tài khoản này không thể gửi dữ liệu bàn phím hoặc chuột tới máy đích, vì vậy console chỉ hiển thị màn hình.'
+    },
     screen: {
       scale: 'Quy mô',
       title: 'Màn hình',
@@ -687,7 +692,29 @@ const vi = {
           passwordUpdated: 'Đã cập nhật mật khẩu',
           loadFailed: 'Không tải được người dùng',
           saveFailed: 'Không lưu được người dùng',
-          deleteFailed: 'Không xóa được người dùng'
+          deleteFailed: 'Không xóa được người dùng',
+          editPermissions: 'Quyền'
+        },
+        permissions: {
+          title: 'Quyền',
+          consoleGroup: 'Console',
+          manageGroup: 'Quản trị',
+          consoleView: 'Xem console',
+          consoleControl: 'Bàn phím và chuột',
+          power: 'Điều khiển nguồn',
+          mediaMount: 'Gắn kết và đọc hình ảnh',
+          mediaManage: 'Quản lý thư viện hình ảnh',
+          terminal: 'Terminal và tập lệnh',
+          device: 'Cài đặt thiết bị',
+          network: 'Cài đặt mạng',
+          update: 'Cập nhật hệ thống',
+          mcp: 'Dịch vụ MCP',
+          mcpNote:
+            'Dịch vụ MCP cấp một khóa API áp dụng cho toàn thiết bị, cho phép điều khiển bàn phím, chuột và chụp màn hình ngoài phiên web; khóa này vẫn hoạt động sau khi thu hồi quyền cho đến khi khóa được tạo lại.',
+          tailscale: 'Tailscale',
+          ai: 'Trợ lý AI',
+          aiNote:
+            'Trợ lý AI truy cập thiết bị qua một giao diện nội bộ cục bộ không bị giới hạn bởi các quyền khác, vì vậy quyền này trên thực tế tương đương với toàn quyền điều khiển thiết bị.'
         }
       }
     },

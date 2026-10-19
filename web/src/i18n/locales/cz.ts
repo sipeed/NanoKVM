@@ -63,6 +63,11 @@ const cz = {
         verifyBtn: 'Ověřte'
       }
     },
+    desktop: {
+      readOnly: 'Pouze prohlížení',
+      readOnlyTip:
+        'Tento účet nemůže odesílat vstup z klávesnice a myši do cílového počítače, proto konzole pouze zobrazuje obrazovku.'
+    },
     screen: {
       scale: 'Měřítko',
       title: 'Obrazovka',
@@ -689,7 +694,29 @@ const cz = {
           passwordUpdated: 'Heslo aktualizováno',
           loadFailed: 'Uživatele se nepodařilo načíst',
           saveFailed: 'Uživatele se nepodařilo uložit',
-          deleteFailed: 'Uživatele se nepodařilo smazat'
+          deleteFailed: 'Uživatele se nepodařilo smazat',
+          editPermissions: 'Oprávnění'
+        },
+        permissions: {
+          title: 'Oprávnění',
+          consoleGroup: 'Konzole',
+          manageGroup: 'Správa',
+          consoleView: 'Zobrazit konzoli',
+          consoleControl: 'Klávesnice a myš',
+          power: 'Ovládání napájení',
+          mediaMount: 'Připojit a číst obrazy',
+          mediaManage: 'Spravovat knihovnu obrazů',
+          terminal: 'Terminál a skripty',
+          device: 'Nastavení zařízení',
+          network: 'Nastavení sítě',
+          update: 'Aktualizace systému',
+          mcp: 'Služba MCP',
+          mcpNote:
+            'Služba MCP vystaví API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení, a po zrušení tohoto oprávnění funguje dál, dokud se klíč nevygeneruje znovu.',
+          tailscale: 'Tailscale',
+          ai: 'AI asistent',
+          aiNote:
+            'AI asistent přistupuje k zařízení přes lokální interní rozhraní, které není omezeno ostatními oprávněními, takže toto oprávnění ve skutečnosti znamená plnou kontrolu nad zařízením.'
         }
       }
     },

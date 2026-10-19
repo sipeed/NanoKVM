@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Splitter } from 'antd';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAuth } from '@/contexts/auth.ts';
+import { Splitter, Tooltip } from 'antd';
+import { useAtom, useSetAtom } from 'jotai';
+import { LockIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
 
@@ -53,6 +55,9 @@ function getVideoMode() {
 
 export const Desktop = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canControl = hasPermission('console.control');
+  const canAi = hasPermission('ai');
   const isBigScreen = useMediaQuery({ minWidth: 850 });
   const [activeVideoMode] = useState(getVideoMode);
   const [picoclawSidebarWidth, setPicoclawSidebarWidth] = useState(420);
@@ -66,7 +71,22 @@ export const Desktop = () => {
   const setManualRegions = useSetAtom(manualRegionsAtom);
   const setSelectedManualRegion = useSetAtom(selectedManualRegionAtom);
   const setSelectedOriginalResolution = useSetAtom(selectedOriginalResolutionAtom);
-  const isPicoclawChatOpen = useAtomValue(picoclawChatOpenAtom);
+  const [isPicoclawChatOpen, setPicoclawChatOpen] = useAtom(picoclawChatOpenAtom);
+
+  // Losing the ai grant closes the chat: its socket is dropped with the
+  // grant, so leaving the sidebar open would only show send failures.
+  useEffect(() => {
+    if (!canAi && isPicoclawChatOpen) {
+      setPicoclawChatOpen(false);
+    }
+  }, [canAi, isPicoclawChatOpen, setPicoclawChatOpen]);
+
+  // Declared before the connection effect so the gate is in place before the
+  // console socket can send anything. Kept separate from it because a
+  // permission change must not tear the connection down on its own.
+  useEffect(() => {
+    client.setViewOnly(!canControl);
+  }, [canControl]);
 
   useEffect(() => {
     client.connect();
@@ -141,7 +161,9 @@ export const Desktop = () => {
     let cleared = false;
     let validationTimer: ReturnType<typeof setTimeout> | null = null;
     function validateMediaSize() {
-      if (cleared) {
+      // Dropping a stale input region is an input-mapping write, so it needs
+      // console.control. A watcher must not fire one on every resolution change.
+      if (!canControl || cleared) {
         return;
       }
 
@@ -188,6 +210,7 @@ export const Desktop = () => {
       target.removeEventListener('resize', validateMediaSize);
     };
   }, [
+    canControl,
     controlRegionMode,
     inputRegion,
     resolution,
@@ -223,6 +246,14 @@ export const Desktop = () => {
                 <div className="relative h-full min-h-0 w-full min-w-0 overflow-hidden bg-black">
                   <Screen />
                   <CaptureStatusOverlay status={captureStatus} />
+                  {!canControl && (
+                    <Tooltip title={t('desktop.readOnlyTip')}>
+                      <div className="absolute left-2 top-2 z-10 flex items-center space-x-1 rounded bg-black/70 px-2 py-1 text-xs text-neutral-200 backdrop-blur">
+                        <LockIcon size={12} />
+                        <span>{t('desktop.readOnly')}</span>
+                      </div>
+                    </Tooltip>
+                  )}
                 </div>
               </Splitter.Panel>
               <Splitter.Panel
@@ -239,8 +270,8 @@ export const Desktop = () => {
           <AutoRegion />
           <ManualRegion />
           <InputRegionOverlay />
-          <Mouse />
-          <Keyboard />
+          {canControl && <Mouse />}
+          {canControl && <Keyboard />}
         </div>
       )}
 

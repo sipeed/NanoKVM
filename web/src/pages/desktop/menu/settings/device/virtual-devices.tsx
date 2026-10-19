@@ -101,14 +101,20 @@ export const VirtualDevices = () => {
     setIsConfirmOpen(true);
   }
 
-  // a transfer writes to /data, which the host takes over
+  // A transfer writes to /data, which the host takes over. Reading the status
+  // is allowed to media.mount, but cancelling it needs media.manage: failing to
+  // stop one must not block the toggle, the server rejects it on its own.
   async function stopTransfer() {
-    const rsp = await statusImage();
-    if (rsp.code !== 0 || rsp.data?.status !== 'in_progress') return;
+    try {
+      const rsp = await statusImage();
+      if (rsp.code !== 0 || rsp.data?.status !== 'in_progress') return;
 
-    const cancel = await cancelDownloadImage();
-    if (cancel.code !== 0) {
-      console.log(cancel.msg);
+      const cancel = await cancelDownloadImage();
+      if (cancel.code !== 0) {
+        console.log(cancel.msg);
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 

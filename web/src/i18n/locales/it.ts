@@ -63,6 +63,11 @@ const it = {
         verifyBtn: 'Verifica'
       }
     },
+    desktop: {
+      readOnly: 'Solo visualizzazione',
+      readOnlyTip:
+        'Questo account non può inviare input da tastiera o mouse al computer di destinazione, quindi la console mostra solo lo schermo.'
+    },
     screen: {
       scale: 'Scala',
       title: 'Schermo',
@@ -696,7 +701,29 @@ const it = {
           passwordUpdated: 'Password aggiornata',
           loadFailed: 'Impossibile caricare gli utenti',
           saveFailed: "Impossibile salvare l'utente",
-          deleteFailed: "Impossibile eliminare l'utente"
+          deleteFailed: "Impossibile eliminare l'utente",
+          editPermissions: 'Autorizzazioni'
+        },
+        permissions: {
+          title: 'Autorizzazioni',
+          consoleGroup: 'Console',
+          manageGroup: 'Amministrazione',
+          consoleView: 'Visualizza console',
+          consoleControl: 'Tastiera e mouse',
+          power: 'Controllo alimentazione',
+          mediaMount: 'Monta e leggi immagini',
+          mediaManage: 'Gestisci la libreria delle immagini',
+          terminal: 'Terminale e script',
+          device: 'Impostazioni dispositivo',
+          network: 'Impostazioni di rete',
+          update: 'Aggiornamento di sistema',
+          mcp: 'Servizio MCP',
+          mcpNote:
+            "Il servizio MCP rilascia una chiave API valida per l'intero dispositivo che controlla tastiera, mouse e screenshot fuori dalla sessione web, e continua a funzionare dopo la revoca di questa autorizzazione finché la chiave non viene rigenerata.",
+          tailscale: 'Tailscale',
+          ai: 'Assistente IA',
+          aiNote:
+            "L'assistente IA raggiunge il dispositivo tramite un'interfaccia interna locale che non è limitata dalle altre autorizzazioni, quindi questa autorizzazione equivale di fatto al controllo completo del dispositivo."
         }
       }
     },

@@ -1,21 +1,155 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Button, Form, Input, message, Modal, Popconfirm, Select, Switch } from 'antd';
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Switch,
+  Tooltip
+} from 'antd';
+import { CircleAlertIcon, KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/auth.ts';
-import { User, UserRole } from '@/api/auth.ts';
+import { Permission, User, UserRole } from '@/api/auth.ts';
 import { encrypt } from '@/lib/encrypt.ts';
 
 type CreateValues = {
   username: string;
   password: string;
   role: UserRole;
+  permissions?: Permission[];
 };
 
 type PasswordValues = {
   password: string;
 };
+
+type PermissionValues = {
+  permissions: Permission[];
+};
+
+// i18next treats dots as key separators, so permission keys are mapped to
+// dot-free label keys.
+const PERMISSION_LABEL_KEYS: Record<Permission, string> = {
+  'console.view': 'consoleView',
+  'console.control': 'consoleControl',
+  power: 'power',
+  'media.mount': 'mediaMount',
+  'media.manage': 'mediaManage',
+  terminal: 'terminal',
+  device: 'device',
+  network: 'network',
+  update: 'update',
+  mcp: 'mcp',
+  tailscale: 'tailscale',
+  ai: 'ai'
+};
+
+const DEFAULT_USER_PERMISSIONS: Permission[] = ['console.view', 'console.control', 'power'];
+
+// console.view is not a choice: nothing in the app renders without it, so the
+// server rejects grant sets that omit it and the checkbox stays pinned.
+const REQUIRED_PERMISSION: Permission = 'console.view';
+
+// PERMISSION_NOTES warns about grants whose reach is wider than their name
+// suggests. Shown as a hint next to the checkbox.
+const PERMISSION_NOTES: Partial<Record<Permission, string>> = {
+  mcp: 'settings.account.permissions.mcpNote',
+  ai: 'settings.account.permissions.aiNote'
+};
+
+const CONSOLE_PERMISSIONS: Permission[] = [
+  'console.view',
+  'console.control',
+  'power',
+  'media.mount'
+];
+
+type PermissionCheckboxesProps = {
+  value?: Permission[];
+  onChange?: (permissions: Permission[]) => void;
+  catalog: Permission[];
+  labelOf: (permission: Permission) => string;
+};
+
+// PermissionCheckboxes renders the catalog in two labeled sections and plays
+// the value/onChange protocol so antd Form.Item can drive it directly.
+const PermissionCheckboxes = ({
+  value = [],
+  onChange,
+  catalog,
+  labelOf
+}: PermissionCheckboxesProps) => {
+  const { t } = useTranslation();
+
+  function toggle(permission: Permission, checked: boolean) {
+    if (!onChange || permission === REQUIRED_PERMISSION) return;
+    onChange(checked ? [...value, permission] : value.filter((item) => item !== permission));
+  }
+
+  // The catalog is fetched separately, so hide a group with nothing to show.
+  // The form still keeps grants it cannot render.
+  const sections = [
+    { title: t('settings.account.permissions.consoleGroup'), items: CONSOLE_PERMISSIONS },
+    {
+      title: t('settings.account.permissions.manageGroup'),
+      items: catalog.filter((item) => !CONSOLE_PERMISSIONS.includes(item))
+    }
+  ].filter((section) => section.items.length > 0);
+
+  return (
+    <div className="flex flex-col gap-3">
+      {sections.map((section) => (
+        <div key={section.title}>
+          <div className="mb-1 text-xs text-neutral-500">{section.title}</div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+            {section.items.map((permission) => {
+              const required = permission === REQUIRED_PERMISSION;
+              const note = PERMISSION_NOTES[permission];
+
+              return (
+                <Checkbox
+                  key={permission}
+                  checked={required || value.includes(permission)}
+                  disabled={required}
+                  onChange={(e) => toggle(permission, e.target.checked)}
+                >
+                  <span className="inline-flex items-center gap-1">
+                    {labelOf(permission)}
+                    {note && (
+                      <Tooltip title={t(note)}>
+                        <span
+                          className="inline-flex items-center text-amber-500"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <CircleAlertIcon size={12} />
+                        </span>
+                      </Tooltip>
+                    )}
+                  </span>
+                </Checkbox>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// withRequiredPermission keeps the pinned grant in the payload so an account
+// stored without it is repaired by the next save.
+function withRequiredPermission(permissions: Permission[]): Permission[] {
+  return permissions.includes(REQUIRED_PERMISSION)
+    ? permissions
+    : [REQUIRED_PERMISSION, ...permissions];
+}
 
 export const Users = () => {
   const { t } = useTranslation();
@@ -23,11 +157,15 @@ export const Users = () => {
   const [messageApi, contextHolder] = message.useMessage();
   const [createForm] = Form.useForm<CreateValues>();
   const [passwordForm] = Form.useForm<PasswordValues>();
+  const [permissionForm] = Form.useForm<PermissionValues>();
+  const createRole = Form.useWatch('role', createForm);
 
   const [users, setUsers] = useState<User[]>([]);
+  const [catalog, setCatalog] = useState<Permission[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [passwordUser, setPasswordUser] = useState<string | null>(null);
+  const [permissionUser, setPermissionUser] = useState<User | null>(null);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -43,6 +181,7 @@ export const Users = () => {
           username: user.username,
           role: user.role === 'admin' ? 'admin' : 'user',
           enabled: user.enabled !== false,
+          permissions: Array.isArray(user.permissions) ? user.permissions : [],
           systemAccount: user.systemAccount === true
         }))
       );
@@ -57,10 +196,34 @@ export const Users = () => {
     loadUsers();
   }, [loadUsers]);
 
+  useEffect(() => {
+    api
+      .getPermissions()
+      .then((rsp) => {
+        if (rsp.code === 0 && Array.isArray(rsp.data?.permissions)) {
+          setCatalog(rsp.data.permissions);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  function permissionLabel(permission: Permission) {
+    return t(`settings.account.permissions.${PERMISSION_LABEL_KEYS[permission]}`);
+  }
+
   async function createUser(values: CreateValues) {
     setIsLoading(true);
     try {
-      const rsp = await api.createUser(values.username, encrypt(values.password), values.role);
+      const permissions =
+        values.role === 'user'
+          ? withRequiredPermission(values.permissions ?? DEFAULT_USER_PERMISSIONS)
+          : undefined;
+      const rsp = await api.createUser(
+        values.username,
+        encrypt(values.password),
+        values.role,
+        permissions
+      );
       if (rsp.code !== 0) throw new Error(rsp.msg);
 
       setIsCreateOpen(false);
@@ -73,7 +236,10 @@ export const Users = () => {
     }
   }
 
-  async function updateUser(user: User, changes: Partial<Pick<User, 'role' | 'enabled'>>) {
+  async function updateUser(
+    user: User,
+    changes: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>
+  ) {
     setIsLoading(true);
     try {
       const rsp = await api.updateUser(user.username, changes);
@@ -83,6 +249,14 @@ export const Users = () => {
       messageApi.error(t('settings.account.users.saveFailed'));
       setIsLoading(false);
     }
+  }
+
+  async function savePermissions(values: PermissionValues) {
+    if (!permissionUser) return;
+    await updateUser(permissionUser, {
+      permissions: withRequiredPermission(values.permissions ?? [])
+    });
+    setPermissionUser(null);
   }
 
   async function deleteUser(username: string) {
@@ -131,51 +305,72 @@ export const Users = () => {
           return (
             <div
               key={user.username}
-              className="flex flex-wrap items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
+              className="flex items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
             >
-              <span className="min-w-0 flex-1 truncate">
-                {user.username}
+              <span className="flex min-w-0 flex-1 items-baseline">
+                <span className="truncate">{user.username}</span>
                 {user.systemAccount && (
-                  <span className="ml-2 text-xs text-neutral-500">
+                  <span className="ml-2 shrink-0 text-xs text-neutral-500">
                     {t('settings.account.users.deviceOwner')}
                   </span>
                 )}
               </span>
-              <Select<UserRole>
-                className="w-28"
-                value={user.role}
-                disabled={isLoading || isProtected}
-                options={[
-                  { value: 'admin', label: t('settings.account.roles.admin') },
-                  { value: 'user', label: t('settings.account.roles.user') }
-                ]}
-                onChange={(role) => updateUser(user, { role })}
-              />
-              <Switch
-                checked={user.enabled}
-                disabled={isLoading || isProtected}
-                checkedChildren={t('settings.account.users.enabled')}
-                unCheckedChildren={t('settings.account.users.disabled')}
-                onChange={(enabled) => updateUser(user, { enabled })}
-              />
-              <Button
-                size="small"
-                disabled={isLoading || isProtected}
-                onClick={() => setPasswordUser(user.username)}
-              >
-                {t('settings.account.users.resetPassword')}
-              </Button>
-              <Popconfirm
-                title={t('settings.account.users.deleteConfirm')}
-                okText={t('settings.account.okBtn')}
-                cancelText={t('settings.account.cancelBtn')}
-                disabled={isProtected}
-                onConfirm={() => deleteUser(user.username)}
-              >
-                <Button danger size="small" disabled={isLoading || isProtected}>
-                  {t('settings.account.users.delete')}
-                </Button>
-              </Popconfirm>
+              <div className="flex shrink-0 items-center gap-2">
+                <Select<UserRole>
+                  className="w-32"
+                  value={user.role}
+                  disabled={isLoading || isProtected}
+                  options={[
+                    { value: 'admin', label: t('settings.account.roles.admin') },
+                    { value: 'user', label: t('settings.account.roles.user') }
+                  ]}
+                  onChange={(role) => updateUser(user, { role })}
+                />
+                {/* Keep the slot occupied on admin rows so the trailing controls stay aligned */}
+                <span className="inline-flex w-[32px] justify-center">
+                  {user.role === 'user' && (
+                    <Tooltip title={t('settings.account.users.editPermissions')}>
+                      <Button
+                        size="small"
+                        icon={<ShieldCheckIcon size={14} />}
+                        disabled={isLoading}
+                        onClick={() => setPermissionUser(user)}
+                      />
+                    </Tooltip>
+                  )}
+                </span>
+                <Switch
+                  checked={user.enabled}
+                  disabled={isLoading || isProtected}
+                  checkedChildren={t('settings.account.users.enabled')}
+                  unCheckedChildren={t('settings.account.users.disabled')}
+                  onChange={(enabled) => updateUser(user, { enabled })}
+                />
+                <Tooltip title={t('settings.account.users.resetPassword')}>
+                  <Button
+                    size="small"
+                    icon={<KeyRoundIcon size={14} />}
+                    disabled={isLoading || isProtected}
+                    onClick={() => setPasswordUser(user.username)}
+                  />
+                </Tooltip>
+                <Popconfirm
+                  title={t('settings.account.users.deleteConfirm')}
+                  okText={t('settings.account.okBtn')}
+                  cancelText={t('settings.account.cancelBtn')}
+                  disabled={isProtected}
+                  onConfirm={() => deleteUser(user.username)}
+                >
+                  <Tooltip title={t('settings.account.users.delete')}>
+                    <Button
+                      danger
+                      size="small"
+                      icon={<Trash2Icon size={14} />}
+                      disabled={isLoading || isProtected}
+                    />
+                  </Tooltip>
+                </Popconfirm>
+              </div>
             </div>
           );
         })}
@@ -191,7 +386,7 @@ export const Users = () => {
         <Form<CreateValues>
           form={createForm}
           layout="vertical"
-          initialValues={{ role: 'user' }}
+          initialValues={{ role: 'user', permissions: DEFAULT_USER_PERMISSIONS }}
           onFinish={createUser}
         >
           <Form.Item
@@ -222,6 +417,11 @@ export const Users = () => {
               ]}
             />
           </Form.Item>
+          {createRole === 'user' && (
+            <Form.Item name="permissions" label={t('settings.account.permissions.title')}>
+              <PermissionCheckboxes catalog={catalog} labelOf={permissionLabel} />
+            </Form.Item>
+          )}
           <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
             {t('settings.account.users.create')}
           </Button>
@@ -245,6 +445,29 @@ export const Users = () => {
             ]}
           >
             <Input.Password autoComplete="new-password" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
+            {t('auth.ok')}
+          </Button>
+        </Form>
+      </Modal>
+
+      <Modal
+        title={t('settings.account.permissions.title')}
+        open={!!permissionUser}
+        footer={null}
+        destroyOnHidden
+        onCancel={() => setPermissionUser(null)}
+      >
+        <Form<PermissionValues>
+          key={permissionUser?.username ?? 'permissions'}
+          form={permissionForm}
+          layout="vertical"
+          initialValues={{ permissions: permissionUser?.permissions ?? [] }}
+          onFinish={savePermissions}
+        >
+          <Form.Item name="permissions">
+            <PermissionCheckboxes catalog={catalog} labelOf={permissionLabel} />
           </Form.Item>
           <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
             {t('auth.ok')}

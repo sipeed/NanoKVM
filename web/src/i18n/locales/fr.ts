@@ -65,6 +65,11 @@ const fr = {
         verifyBtn: 'Vérifier'
       }
     },
+    desktop: {
+      readOnly: 'Lecture seule',
+      readOnlyTip:
+        "Ce compte ne peut pas envoyer de saisie clavier ou souris vers la machine cible ; la console affiche donc uniquement l'écran."
+    },
     screen: {
       scale: 'Échelle',
       title: 'Écran',
@@ -699,7 +704,29 @@ const fr = {
           passwordUpdated: 'Mot de passe mis à jour',
           loadFailed: 'Échec du chargement des utilisateurs',
           saveFailed: "Échec de l'enregistrement de l'utilisateur",
-          deleteFailed: "Échec de la suppression de l'utilisateur"
+          deleteFailed: "Échec de la suppression de l'utilisateur",
+          editPermissions: 'Autorisations'
+        },
+        permissions: {
+          title: 'Autorisations',
+          consoleGroup: 'Console',
+          manageGroup: 'Administration',
+          consoleView: 'Voir la console',
+          consoleControl: 'Clavier et souris',
+          power: "Contrôle de l'alimentation",
+          mediaMount: 'Monter et lire les images',
+          mediaManage: "Gérer la bibliothèque d'images",
+          terminal: 'Terminal et scripts',
+          device: "Paramètres de l'appareil",
+          network: 'Paramètres réseau',
+          update: 'Mise à jour du système',
+          mcp: 'Service MCP',
+          mcpNote:
+            "Le service MCP délivre une clé API valable pour tout l'appareil qui contrôle le clavier, la souris et les captures hors de la session web ; elle continue de fonctionner après le retrait de cette autorisation jusqu'à ce que la clé soit régénérée.",
+          tailscale: 'Tailscale',
+          ai: 'Assistant IA',
+          aiNote:
+            "L'assistant IA accède à l'appareil via une interface interne locale que les autres autorisations ne limitent pas ; cette autorisation équivaut donc à un contrôle total de l'appareil."
         }
       }
     },

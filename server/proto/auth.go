@@ -6,8 +6,9 @@ type LoginReq struct {
 }
 
 type GetAccountRsp struct {
-	Username string `json:"username"`
-	Role     string `json:"role"`
+	Username    string   `json:"username"`
+	Role        string   `json:"role"`
+	Permissions []string `json:"permissions"`
 }
 
 type ChangePasswordReq struct {
@@ -20,10 +21,15 @@ type IsPasswordUpdatedRsp struct {
 }
 
 type UserInfo struct {
-	Username      string `json:"username"`
-	Role          string `json:"role"`
-	Enabled       bool   `json:"enabled"`
-	SystemAccount bool   `json:"systemAccount,omitempty"`
+	Username      string   `json:"username"`
+	Role          string   `json:"role"`
+	Enabled       bool     `json:"enabled"`
+	Permissions   []string `json:"permissions"`
+	SystemAccount bool     `json:"systemAccount,omitempty"`
+}
+
+type ListPermissionsRsp struct {
+	Permissions []string `json:"permissions"`
 }
 
 type ListUsersRsp struct {
@@ -31,12 +37,14 @@ type ListUsersRsp struct {
 }
 
 type CreateUserReq struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
-	Role     string `json:"role" validate:"required"`
+	Username    string   `json:"username" validate:"required"`
+	Password    string   `json:"password" validate:"required"`
+	Role        string   `json:"role" validate:"required"`
+	Permissions []string `json:"permissions"`
 }
 
 type UpdateUserReq struct {
-	Role    *string `json:"role"`
-	Enabled *bool   `json:"enabled"`
+	Role        *string   `json:"role"`
+	Enabled     *bool     `json:"enabled"`
+	Permissions *[]string `json:"permissions"`
 }

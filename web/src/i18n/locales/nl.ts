@@ -64,6 +64,11 @@ const nl = {
         verifyBtn: 'Verifieer'
       }
     },
+    desktop: {
+      readOnly: 'Alleen bekijken',
+      readOnlyTip:
+        'Dit account kan geen toetsenbord- of muisinvoer naar de doelmachine sturen, daarom toont de console alleen het scherm.'
+    },
     screen: {
       scale: 'Schaal',
       title: 'Scherm',
@@ -275,7 +280,8 @@ const nl = {
       enableDisk: {
         title: 'De virtuele schijf inschakelen?',
         desc: 'Voor het koppelen van een medium is de virtuele schijf nodig, die nu uitgeschakeld is. Nu inschakelen? Het toetsenbord en de muis van de doelcomputer worden even losgekoppeld.',
-        menuHint: 'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.'
+        menuHint:
+          'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.'
       },
       add: {
         title: 'Medium toevoegen',
@@ -697,7 +703,29 @@ const nl = {
           passwordUpdated: 'Wachtwoord bijgewerkt',
           loadFailed: 'Gebruikers konden niet worden geladen',
           saveFailed: 'Gebruiker kon niet worden opgeslagen',
-          deleteFailed: 'Gebruiker kon niet worden verwijderd'
+          deleteFailed: 'Gebruiker kon niet worden verwijderd',
+          editPermissions: 'Rechten'
+        },
+        permissions: {
+          title: 'Rechten',
+          consoleGroup: 'Console',
+          manageGroup: 'Beheer',
+          consoleView: 'Console bekijken',
+          consoleControl: 'Toetsenbord en muis',
+          power: 'Energiebeheer',
+          mediaMount: 'Afbeeldingen koppelen en lezen',
+          mediaManage: 'Afbeeldingenbibliotheek beheren',
+          terminal: 'Terminal en scripts',
+          device: 'Apparaatinstellingen',
+          network: 'Netwerkinstellingen',
+          update: 'Systeemupdate',
+          mcp: 'MCP-service',
+          mcpNote:
+            'De MCP-service geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; die blijft werken nadat dit recht is ingetrokken tot de sleutel opnieuw wordt gegenereerd.',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          aiNote:
+            'De AI-assistent benadert het apparaat via een lokale interne interface die niet door de andere rechten wordt beperkt; deze toestemming staat daardoor in de praktijk gelijk aan volledige controle over het apparaat.'
         }
       }
     },

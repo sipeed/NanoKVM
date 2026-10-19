@@ -42,25 +42,28 @@ var (
 )
 
 type User struct {
-	Username           string `json:"username"`
-	PasswordHash       string `json:"password"`
-	Role               Role   `json:"role"`
-	Enabled            bool   `json:"enabled"`
-	TokenVersion       uint64 `json:"tokenVersion"`
-	MustChangePassword bool   `json:"mustChangePassword,omitempty"`
-	SystemAccount      bool   `json:"systemAccount,omitempty"`
+	Username           string       `json:"username"`
+	PasswordHash       string       `json:"password"`
+	Role               Role         `json:"role"`
+	Enabled            bool         `json:"enabled"`
+	TokenVersion       uint64       `json:"tokenVersion"`
+	Permissions        []Permission `json:"permissions"`
+	MustChangePassword bool         `json:"mustChangePassword,omitempty"`
+	SystemAccount      bool         `json:"systemAccount,omitempty"`
 }
 
 type UserInfo struct {
-	Username      string `json:"username"`
-	Role          Role   `json:"role"`
-	Enabled       bool   `json:"enabled"`
-	SystemAccount bool   `json:"systemAccount,omitempty"`
+	Username      string       `json:"username"`
+	Role          Role         `json:"role"`
+	Enabled       bool         `json:"enabled"`
+	Permissions   []Permission `json:"permissions"`
+	SystemAccount bool         `json:"systemAccount,omitempty"`
 }
 
 type UserPatch struct {
-	Role    *Role
-	Enabled *bool
+	Role        *Role
+	Enabled     *bool
+	Permissions *[]Permission
 }
 
 type database struct {
@@ -115,11 +118,13 @@ func (s *Store) List() ([]UserInfo, error) {
 	}
 
 	users := make([]UserInfo, 0, len(db.Users))
-	for _, user := range db.Users {
+	for index := range db.Users {
+		user := &db.Users[index]
 		users = append(users, UserInfo{
 			Username:      user.Username,
 			Role:          user.Role,
 			Enabled:       user.Enabled,
+			Permissions:   EffectivePermissions(user),
 			SystemAccount: user.SystemAccount,
 		})
 	}
@@ -192,7 +197,7 @@ func (s *Store) ValidateToken(username string, tokenVersion uint64) (*User, erro
 	return user, nil
 }
 
-func (s *Store) Create(username, password string, role Role) error {
+func (s *Store) Create(username, password string, role Role, permissions ...Permission) error {
 	if err := ValidateUsername(username); err != nil {
 		return err
 	}
@@ -201,6 +206,12 @@ func (s *Store) Create(username, password string, role Role) error {
 	}
 	if !IsValidRole(role) {
 		return errors.New("invalid role")
+	}
+	if err := ValidatePermissions(permissions); err != nil {
+		return err
+	}
+	if err := ValidateUserPermissions(role, permissions); err != nil {
+		return err
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -227,6 +238,7 @@ func (s *Store) Create(username, password string, role Role) error {
 		Role:         role,
 		Enabled:      true,
 		TokenVersion: tokenVersion,
+		Permissions:  normalizePermissions(permissions),
 	})
 	return s.saveLocked(db)
 }
@@ -248,6 +260,26 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	if patch.Role != nil && !IsValidRole(*patch.Role) {
 		return nil, errors.New("invalid role")
 	}
+	if patch.Permissions != nil {
+		if err := ValidatePermissions(*patch.Permissions); err != nil {
+			return nil, err
+		}
+	}
+	// Validate the state the account ends up in rather than the patched fields
+	// alone: an administrator may hold a grant set without console.view (it is
+	// meaningless for the admin role), so demoting such an account would leave a
+	// regular user unable to reach the console at all.
+	resultingRole := user.Role
+	if patch.Role != nil {
+		resultingRole = *patch.Role
+	}
+	resultingPermissions := user.Permissions
+	if patch.Permissions != nil {
+		resultingPermissions = *patch.Permissions
+	}
+	if err := ValidateUserPermissions(resultingRole, resultingPermissions); err != nil {
+		return nil, err
+	}
 	if actor == username && user.Role == RoleAdmin &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
 		return nil, ErrSelfModification
@@ -258,12 +290,19 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	}
 
 	changed := false
+	credentialsChanged := false
 	if patch.Role != nil && user.Role != *patch.Role {
 		user.Role = *patch.Role
 		changed = true
+		credentialsChanged = true
 	}
 	if patch.Enabled != nil && user.Enabled != *patch.Enabled {
 		user.Enabled = *patch.Enabled
+		changed = true
+		credentialsChanged = true
+	}
+	if patch.Permissions != nil && !permissionsEqual(user.Permissions, *patch.Permissions) {
+		user.Permissions = normalizePermissions(*patch.Permissions)
 		changed = true
 	}
 	if !changed {
@@ -274,7 +313,12 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	if enabledAdminCount(db.Users) == 0 {
 		return nil, ErrLastAdmin
 	}
-	db.Users[index].TokenVersion++
+	// Permission-only updates keep the login valid: the principal is rebuilt
+	// from the store on every request, so new grants apply immediately and
+	// revoked ones are enforced by dropping connections from the handler.
+	if credentialsChanged {
+		db.Users[index].TokenVersion++
+	}
 	if err = s.saveLocked(db); err != nil {
 		return nil, err
 	}
@@ -528,6 +572,9 @@ func validateDatabase(db *database) error {
 		if user.PasswordHash == "" || !IsValidRole(user.Role) {
 			return errors.New("account file contains an invalid user")
 		}
+		if err := ValidatePermissions(user.Permissions); err != nil {
+			return fmt.Errorf("account file contains invalid permissions for %q: %w", user.Username, err)
+		}
 		if _, exists := seen[user.Username]; exists {
 			return errors.New("account file contains duplicate usernames")
 		}
@@ -563,6 +610,37 @@ func userIndex(users []User, username string) int {
 		}
 	}
 	return -1
+}
+
+// normalizePermissions keeps nil and empty slices distinct: nil means the
+// legacy default set applies, while an explicit empty set revokes every
+// grant. The copy is always fresh so callers cannot alias stored state.
+func normalizePermissions(permissions []Permission) []Permission {
+	if permissions == nil {
+		return nil
+	}
+	return append([]Permission{}, permissions...)
+}
+
+func permissionsEqual(a, b []Permission) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	// The stored order carries no meaning, so a reordering must not look like
+	// a change worth writing back.
+	seen := make(map[Permission]struct{}, len(a))
+	for _, permission := range a {
+		seen[permission] = struct{}{}
+	}
+	for _, permission := range b {
+		if _, exists := seen[permission]; !exists {
+			return false
+		}
+	}
+	return true
 }
 
 func enabledAdminCount(users []User) int {

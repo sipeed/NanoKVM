@@ -63,6 +63,11 @@ const hu = {
         verifyBtn: 'Ellenőrizze'
       }
     },
+    desktop: {
+      readOnly: 'Csak megtekintés',
+      readOnlyTip:
+        'Ez a fiók nem tud billentyűzet- vagy egérbemenetet küldeni a célgépnek, ezért a konzol csak a képernyőt jeleníti meg.'
+    },
     screen: {
       scale: 'Skála',
       title: 'Képernyő',
@@ -274,7 +279,8 @@ const hu = {
       enableDisk: {
         title: 'Bekapcsolja a virtuális lemezt?',
         desc: 'Az adathordozó csatlakoztatásához a virtuális lemez kell, amely jelenleg ki van kapcsolva. Bekapcsolja? A célgép billentyűzete és egere egy pillanatra leválik.',
-        menuHint: 'A virtuális lemez ki van kapcsolva. Kapcsolja be a Beállítások - Eszköz menüben.'
+        menuHint:
+          'A virtuális lemez ki van kapcsolva. Kapcsolja be a Beállítások - Eszköz menüben.'
       },
       add: {
         title: 'Adathordozó hozzáadása',
@@ -693,7 +699,29 @@ const hu = {
           passwordUpdated: 'Jelszó frissítve',
           loadFailed: 'A felhasználókat nem sikerült betölteni',
           saveFailed: 'A felhasználót nem sikerült menteni',
-          deleteFailed: 'A felhasználót nem sikerült törölni'
+          deleteFailed: 'A felhasználót nem sikerült törölni',
+          editPermissions: 'Engedélyek'
+        },
+        permissions: {
+          title: 'Engedélyek',
+          consoleGroup: 'Konzol',
+          manageGroup: 'Adminisztráció',
+          consoleView: 'Konzol megtekintése',
+          consoleControl: 'Billentyűzet és egér',
+          power: 'Tápellátás vezérlése',
+          mediaMount: 'Képek csatlakoztatása és olvasása',
+          mediaManage: 'Képkönyvtár kezelése',
+          terminal: 'Terminál és szkriptek',
+          device: 'Eszközbeállítások',
+          network: 'Hálózati beállítások',
+          update: 'Rendszerfrissítés',
+          mcp: 'MCP-szolgáltatás',
+          mcpNote:
+            'Az MCP-szolgáltatás egy eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket, és e jogosultság visszavonása után is működik, amíg a kulcsot újra nem generálják.',
+          tailscale: 'Tailscale',
+          ai: 'AI-asszisztens',
+          aiNote:
+            'Az AI-asszisztens egy helyi belső felületen keresztül éri el az eszközt, amelyet a többi engedély nem korlátoz, így ez az engedély gyakorlatilag teljes eszközfelügyeletet jelent.'
         }
       }
     },

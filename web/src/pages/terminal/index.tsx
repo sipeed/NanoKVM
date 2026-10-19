@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import '@xterm/xterm/css/xterm.css';
 
-import { notifyAuthExpired } from '@/lib/auth-events.ts';
+import { notifyAuthExpired, notifyAuthRefresh } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { Head } from '@/components/head.tsx';
 
@@ -35,6 +35,14 @@ export const Terminal = () => {
     ws.addEventListener('close', (event) => {
       if (event.code === 4401) {
         notifyAuthExpired();
+        return;
+      }
+
+      if (event.code === 4403) {
+        // Permissions changed but the login is still valid: refreshing the
+        // account lets the route guard move away from a shell the account may
+        // no longer use.
+        notifyAuthRefresh();
       }
     });
 

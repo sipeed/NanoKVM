@@ -59,6 +59,11 @@ const zh_tw = {
         verifyBtn: '驗證'
       }
     },
+    desktop: {
+      readOnly: '唯讀',
+      readOnlyTip:
+        '此帳號沒有鍵盤與滑鼠操作權限，無法向目標機發送鍵盤與滑鼠事件，主控台僅顯示畫面。'
+    },
     screen: {
       scale: '缩放',
       title: '螢幕',
@@ -668,7 +673,29 @@ const zh_tw = {
           passwordUpdated: '密碼已更新',
           loadFailed: '載入使用者失敗',
           saveFailed: '儲存使用者失敗',
-          deleteFailed: '刪除使用者失敗'
+          deleteFailed: '刪除使用者失敗',
+          editPermissions: '權限'
+        },
+        permissions: {
+          title: '功能權限',
+          consoleGroup: '主控台操作',
+          manageGroup: '設備管理',
+          consoleView: '檢視畫面',
+          consoleControl: '鍵盤與滑鼠',
+          power: '電源控制',
+          mediaMount: '裝載與讀取映像檔',
+          mediaManage: '映像檔與檔案管理',
+          terminal: '終端機與腳本',
+          device: '設備設定',
+          network: '網路設定',
+          update: '系統更新',
+          mcp: 'MCP 服務',
+          mcpNote:
+            'MCP 服務會核發設備級 API Key，可在 Web 工作階段之外控制鍵盤滑鼠並取得螢幕截圖；即使撤銷此權限，該 Key 仍然有效，直到重新產生。',
+          tailscale: 'Tailscale',
+          ai: 'AI 助理',
+          aiNote:
+            'AI 助理透過本機內部介面操作設備，不受其他權限限制，因此授予此項等同於授予完整的設備控制權。'
         }
       }
     },

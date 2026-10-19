@@ -1,6 +1,6 @@
 import { ICloseEvent, IMessageEvent, w3cwebsocket as W3cWebSocket } from 'websocket';
 
-import { notifyAuthExpired } from '@/lib/auth-events.ts';
+import { notifyAuthExpired, notifyAuthRefresh } from '@/lib/auth-events.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 
 type MessageHandler = (message: IMessageEvent) => void;
@@ -10,6 +10,19 @@ export enum MessageEvent {
   Heartbeat = 0,
   Keyboard = 1,
   Mouse = 2
+}
+
+// HID reports start with their event type, so only the two input types are
+// affected by the view-only gate below; heartbeats and unknown payloads go out
+// unchanged.
+const INPUT_EVENTS: ReadonlySet<number> = new Set<number>([
+  MessageEvent.Keyboard,
+  MessageEvent.Mouse
+]);
+
+function isInputReport(data: SendData): boolean {
+  const first = data instanceof ArrayBuffer ? new Uint8Array(data)[0] : data[0];
+  return first !== undefined && INPUT_EVENTS.has(first);
 }
 
 interface WsClientOptions {
@@ -33,6 +46,7 @@ export class WsClient {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private reconnectAttempts = 0;
   private shouldReconnect = true;
+  private viewOnly = false;
 
   private readonly eventHandlers = new Map<string, Set<MessageHandler>>();
 
@@ -44,6 +58,15 @@ export class WsClient {
     this.shouldReconnect = true;
     this.reconnectAttempts = 0;
     this.createConnection();
+  }
+
+  // The server drops keyboard and mouse reports from a session without
+  // console.control. The console does not mount its pointer and keyboard
+  // capture for a view-only account, so a report cannot be produced in the
+  // first place; this gate keeps a report that is already in flight from
+  // reaching the target when the grant is revoked mid-session.
+  public setViewOnly(viewOnly: boolean): void {
+    this.viewOnly = viewOnly;
   }
 
   public close(): void {
@@ -94,6 +117,10 @@ export class WsClient {
       return false;
     }
 
+    if (this.viewOnly && isInputReport(data)) {
+      return false;
+    }
+
     if (data instanceof ArrayBuffer || (data as unknown) instanceof Uint8Array) {
       this.instance.send(data);
     } else {
@@ -134,6 +161,12 @@ export class WsClient {
       return;
     }
 
+    if (event.code === 4403) {
+      // Permissions changed but the login is still valid: refresh the account
+      // and reconnect under the updated grants.
+      notifyAuthRefresh();
+    }
+
     this.scheduleReconnect();
   }
 
@@ -144,6 +177,16 @@ export class WsClient {
   private handleMessage(message: IMessageEvent): void {
     try {
       const data = JSON.parse(message.data as string);
+
+      // The server pushes this to every connection owned by a user whose
+      // grants changed. It is handled here rather than by each page so that
+      // any page holding a console socket (the desktop, the storage page)
+      // refreshes its account state without opting in.
+      if (data.type === 'auth') {
+        notifyAuthRefresh();
+        return;
+      }
+
       const handlers = this.eventHandlers.get(data.type);
 
       if (handlers) {

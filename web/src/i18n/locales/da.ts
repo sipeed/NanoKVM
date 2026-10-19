@@ -62,6 +62,11 @@ const da = {
         verifyBtn: 'Bekræft'
       }
     },
+    desktop: {
+      readOnly: 'Kun visning',
+      readOnlyTip:
+        'Denne konto kan ikke sende tastatur- eller musinput til målmaskinen, så konsollen viser kun skærmen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skærm',
@@ -688,7 +693,29 @@ const da = {
           passwordUpdated: 'Adgangskode opdateret',
           loadFailed: 'Kunne ikke indlæse brugere',
           saveFailed: 'Kunne ikke gemme brugeren',
-          deleteFailed: 'Kunne ikke slette brugeren'
+          deleteFailed: 'Kunne ikke slette brugeren',
+          editPermissions: 'Tilladelser'
+        },
+        permissions: {
+          title: 'Tilladelser',
+          consoleGroup: 'Konsol',
+          manageGroup: 'Administration',
+          consoleView: 'Se konsol',
+          consoleControl: 'Tastatur og mus',
+          power: 'Strømstyring',
+          mediaMount: 'Montér og læs diskbilleder',
+          mediaManage: 'Administrér billedbibliotek',
+          terminal: 'Terminal og scripts',
+          device: 'Enhedsindstillinger',
+          network: 'Netværksindstillinger',
+          update: 'Systemopdatering',
+          mcp: 'MCP-tjeneste',
+          mcpNote:
+            'MCP-tjenesten udsteder en enhedsdækkende API-nøgle, der styrer tastatur, mus og skærmbilleder uden for websessionen, og den virker stadig efter denne tilladelse er tilbagekaldt, indtil nøglen gendannes.',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          aiNote:
+            'AI-assistenten tilgår enheden via en lokal intern grænseflade, som ikke begrænses af de øvrige tilladelser, så denne tilladelse svarer i praksis til fuld kontrol over enheden.'
         }
       }
     },
