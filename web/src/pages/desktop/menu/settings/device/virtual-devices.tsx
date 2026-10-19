@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { cancelDownloadImage, statusImage } from '@/api/download.ts';
 import { getHidMode } from '@/api/hid.ts';
-import { getMountedImage } from '@/api/storage.ts';
+import { getMediaState } from '@/api/media.ts';
 import * as api from '@/api/virtual-device.ts';
 
 const imageUpdatedEvent = 'nanokvm:image-updated';
@@ -55,13 +55,13 @@ export const VirtualDevices = () => {
 
   async function getImageState() {
     try {
-      const rsp = await getMountedImage();
+      const rsp = await getMediaState();
       if (rsp.code !== 0) {
         console.log(rsp.msg);
         return;
       }
 
-      setIsImageMounted(!!rsp.data?.file);
+      setIsImageMounted(rsp.data?.state === 'image');
     } catch (err) {
       console.log(err);
     }
@@ -140,7 +140,7 @@ export const VirtualDevices = () => {
       </div>
 
       <Modal
-        title={t('image.attention')}
+        title={t('settings.device.attention')}
         open={isConfirmOpen}
         width={520}
         footer={null}

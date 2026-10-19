@@ -5,7 +5,8 @@ const se = {
       login: 'Logga in',
       changePassword: 'Byt lösenord',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Avbildningar och fildelning'
     },
     auth: {
       login: 'Logga in',
@@ -37,7 +38,10 @@ const se = {
         change2: 'Webbinloggningslösenord',
         change3: 'Systemets root-lösenord (SSH-lösenord)',
         change4: 'För att återställa lösenordet, håll in BOOT-knappen på NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Nuvarande lösenord',
+      passwordLength: 'Lösenordet måste vara mellan 8 och 72 tecken',
+      invalidCurrentPassword: 'Nuvarande lösenord är fel'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -210,33 +214,44 @@ const se = {
         disable: 'Inaktivera Endast-HID-läge'
       }
     },
-    image: {
-      title: 'Avbildningar',
-      loading: 'Laddar...',
-      empty: 'Inget hittades',
+    storage: {
+      title: 'Avbildningar och fildelning',
+      empty:
+        'Inga avbildningar än. Ladda upp en ISO eller IMG, eller kopiera en till disken från måldatorn.',
+      notAttached: 'Inget monterat',
+      attached: 'Monterat: {{name}}',
+      eject: 'Mata ut',
+      mount: 'Montera',
       mountMode: 'Monteringsläge',
-      mountFailed: 'Montering misslyckades',
-      mountDesc:
-        'I vissa system måste den virtuella disken avmonteras på fjärrvärden innan avbildningen monteras.',
-      diskOnWarn:
-        'Montering av avbildningen stänger av den virtuella disken, så datorn kommer inte åt /data. Fortsätta?',
-      diskOffWarn:
-        'Den virtuella disken är avstängd och måste aktiveras för att montera avbildningen. Datorns USB-enheter ansluts på nytt. Fortsätta?',
-      diskShared:
-        'Den virtuella disken är aktiverad, så /data är skrivskyddad här. Stäng av den för att ta bort eller ladda upp avbildningar.',
-      unmountFailed: 'Avmontering misslyckades',
-      unmountDesc:
-        'I vissa system måste du manuellt mata ut från fjärrvärden innan du avmonterar avbildningen.',
-      refresh: 'Uppdatera avbildningslistan',
-      attention: 'Observera',
-      deleteConfirm: 'Är du säker på att du vill ta bort denna avbildning?',
-      okBtn: 'Ja',
-      cancelBtn: 'Nej',
+      mountModeDisk: 'Massminne',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Öppna filhanteraren',
+      refresh: 'Uppdatera',
+      delete: 'Ta bort',
+      deleteTitle: 'Ta bort medium',
+      deleteConfirm: 'Ta bort {{name}}? Filerna i den går förlorade.',
+      downloadImage: 'Hämta avbildningen',
+      typePartition: 'Delade filer',
+      volumeLabel: 'Flyttbar disk',
+      groups: {
+        share: 'Fildelning',
+        images: 'Avbildningar'
+      },
+      failed: 'Åtgärden misslyckades',
+      hidOnly: 'Endast HID-läge: den virtuella disken är inte tillgänglig',
+      disabled: 'Den virtuella disken är avstängd (Inställningar - Enhet)',
+      force: {
+        title: 'Ta tillbaka mediet med tvång?',
+        desc: 'Måldatorn använder fortfarande mediet. Att ta tillbaka det räknar upp USB-enheten på nytt och kan förlora allt den ännu inte har skrivit till disken.',
+        menuHint:
+          'Måldatorn använder mediet. Öppna filhanteraren för att ta tillbaka det med tvång.'
+      },
       tips: {
         title: 'Hur man laddar upp',
         usb1: 'Anslut NanoKVM till din dator via USB.',
-        usb2: 'Säkerställ att den virtuella disken är monterad (Inställningar - Virtuell Disk).',
+        usb2: 'Montera de delade filerna i masslagringsläge på den här sidan.',
         usb3: 'Öppna den virtuella disken på din dator och kopiera avbildningsfilen till rotkatalogen.',
+        usb4: 'Mata ut disken när kopieringen är klar: avbilden visas då i listan.',
         scp1: 'Säkerställ att NanoKVM och din dator är på samma lokala nätverk.',
         scp2: 'Öppna en terminal på din dator och använd SCP-kommandot för att ladda upp avbildningen till /data på NanoKVM.',
         scp3: 'Exempel: scp din-avbildningssökväg root@din-nanokvm-ip:/data',
@@ -246,7 +261,66 @@ const se = {
         tf3: 'Sätt in TF-kortet i en kortläsare och anslut till din dator.',
         tf4: 'Kopiera avbildningsfilen till /data på TF-kortet.',
         tf5: 'Sätt in TF-kortet i NanoKVM.'
-      }
+      },
+      job: {
+        running: 'Arbetar med {{name}}'
+      },
+      enableDisk: {
+        title: 'Aktivera den virtuella disken?',
+        desc: 'För att montera ett medium krävs den virtuella disken, som är avstängd just nu. Aktivera den? Måldatorns tangentbord och mus kopplas från ett ögonblick.',
+        menuHint: 'Den virtuella disken är avstängd. Aktivera den under Inställningar - Enhet.'
+      },
+      add: {
+        title: 'Lägg till medium',
+        upload: 'Ladda upp en ISO eller IMG',
+        fromUrl: 'Hämta från en URL',
+        url: 'URL till avbildningen',
+        urlRequired: 'Ange en URL',
+        onlyImages: 'Bara .iso- och .img-filer kan monteras',
+        dropHint: 'Dra en ISO eller IMG hit, eller klicka för att välja en fil',
+        cdromOnlyIso: 'En CD-ROM kan bara innehålla en ISO 9660-avbildning',
+        uploadFailed: 'Uppladdningen misslyckades',
+        downloadFailed: 'Nedladdningen misslyckades',
+        uploading: 'Laddar upp {{name}}',
+        downloading: 'Laddar ner {{name}}',
+        done: '{{name}} är klar',
+        checksumFailed: 'Avbilden matchar inte SHA-256-kontrollsumman.',
+        blocked: 'Måldatorn använder disken',
+        copyHint:
+          'Du kan också kopiera en avbildning till datapartitionen via SCP, eller från måldatorn.'
+      },
+      files: {
+        selectMedium: 'Välj ett medium för att visa filerna på det.',
+        reasonAttached: 'Mediet är kopplat till måldatorn.',
+        reasonAttachedHint:
+          'Mata ut det först: måldatorn måste släppa disken innan filerna kan läsas.',
+        reasonNotBrowsable: 'Mediet innehåller ett filsystem som filhanteraren inte kan öppna.',
+        reasonNoLoop: 'Enheten kan inte montera diskavbildningar (inget loop-stöd).',
+        reasonISOImage:
+          'En ISO 9660-avbildning kan inte bläddras här. Den kan fortfarande monteras på måldatorn.',
+        empty: 'Mappen är tom',
+        noMatch: 'Inga filer matchar sökningen.',
+        free: '{{size}} ledigt',
+        search: 'Sök i mappen',
+        sort: {
+          name: 'Namn',
+          size: 'Storlek',
+          type: 'Typ',
+          asc: 'Stigande',
+          desc: 'Fallande'
+        },
+        upload: 'Ladda upp en fil till mediet',
+        deleteFolderTitle: 'Ta bort mapp',
+        deleteFolderConfirm: 'Ta bort mappen {{name}} och allt innehåll? Detta kan inte ångras.',
+        uploading: 'Laddar upp…',
+        uploadFailed: 'Uppladdningen misslyckades',
+        download: 'Hämta',
+        delete: 'Ta bort',
+        deleteTitle: 'Ta bort fil',
+        deleteConfirm: 'Ta bort {{name}} från mediet?'
+      },
+      yes: 'Ja',
+      no: 'Nej'
     },
     script: {
       title: 'Skript',
@@ -288,21 +362,11 @@ const se = {
       ok: 'Ok'
     },
     download: {
-      title: 'Avbildningshämtare',
-      input: 'Ange en fjärravbildnings-URL',
-      ok: 'Ok',
-      disabled: '/data partitionen är skrivskyddad, kan inte hämta avbildning',
-      diskShared: 'Stäng av den virtuella disken först och använd sedan nedladdningen.',
-      diskOff: 'Stäng av den virtuella disken',
-      uploadbox: 'Släpp filen här eller klicka för att välja',
-      inputfile: 'Vänligen ange bildfilen',
-      NoISO: 'Ingen ISO',
+      disabled:
+        'Datapartitionen är skrivskyddad medan måldatorn använder den: nya avbildningar kan inte skrivas, men befintliga filer går fortfarande att hämta.',
       sha256: 'SHA-256 (valfrie)',
       sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
       invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',
-      failed: 'Nedlasting mislyktes',
-      success: 'Nedlasting fullført',
-      checksumFailed: 'Nedlasting mislyktes: SHA-256-verifisering mislyktes',
       cancel: 'Avbryt',
       cancelFailed: 'Kunne ikke avbryte nedlastingen'
     },
@@ -452,17 +516,18 @@ const se = {
         hidOnlyDesc: 'Sluta emulera virtuella enheter, behåll bara grundläggande HID kontroll',
         disk: 'Virtuell disk',
         diskDesc: 'Montera virtuell U-disk på fjärrvärden',
-        diskLocked: 'Avstängd medan en avbildning är monterad (aktivering avbryter monteringen)',
-        diskCancelMount:
-          'Att aktivera den virtuella disken avbryter den monterade avbildningen och avbryter en pågående nedladdning eller uppladdning. Fortsätta?',
-        diskBreakDownload:
-          'Att aktivera den virtuella disken avbryter nedladdningen av avbildningar. Fortsätta?',
         network: 'Virtuellt nätverk',
         networkDesc: 'Montera virtuell nätverkskort på fjärrvärden',
         reboot: 'Starta om',
         rebootDesc: 'Är du säker på att du vill starta om NanoKVM?',
         okBtn: 'Ja',
-        cancelBtn: 'Nej'
+        cancelBtn: 'Nej',
+        diskLocked: 'Avstängd medan en avbildning är monterad (aktivering avbryter monteringen)',
+        diskCancelMount:
+          'Att aktivera den virtuella disken avbryter den monterade avbildningen och avbryter en pågående nedladdning eller uppladdning. Fortsätta?',
+        diskBreakDownload:
+          'Att aktivera den virtuella disken avbryter nedladdningen av avbildningar. Fortsätta?',
+        attention: 'Observera'
       },
       network: {
         title: 'Nätverk',
@@ -600,7 +665,28 @@ const se = {
         logoutBtn: 'Logga ut',
         logoutDesc: 'Är du säker på att du vill logga ut?',
         okBtn: 'Ja',
-        cancelBtn: 'Nej'
+        cancelBtn: 'Nej',
+        role: 'Roll',
+        roles: {
+          admin: 'Administratör',
+          user: 'Användare'
+        },
+        users: {
+          title: 'Användare',
+          create: 'Skapa användare',
+          enabled: 'Aktiverad',
+          disabled: 'Inaktiverad',
+          deviceOwner: 'Enhetens ägare',
+          resetPassword: 'Återställ lösenord',
+          delete: 'Ta bort',
+          deleteConfirm: 'Ta bort användaren och återkalla alla dess sessioner?',
+          created: 'Användare skapad',
+          deleted: 'Användare borttagen',
+          passwordUpdated: 'Lösenordet uppdaterat',
+          loadFailed: 'Kunde inte läsa in användare',
+          saveFailed: 'Kunde inte spara användaren',
+          deleteFailed: 'Kunde inte ta bort användaren'
+        }
       }
     },
     picoclaw: {

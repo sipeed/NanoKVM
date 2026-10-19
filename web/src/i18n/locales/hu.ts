@@ -5,7 +5,8 @@ const hu = {
       login: 'Bejelentkezés',
       changePassword: 'Jelszó megváltoztatása',
       terminal: 'Terminál',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Képek és fájlmegosztás'
     },
     auth: {
       login: 'Bejelentkezés',
@@ -40,7 +41,10 @@ const hu = {
         change2: 'Webes bejelentkezési jelszó',
         change3: 'Rendszer root jelszava (SSH bejelentkezési jelszó)',
         change4: 'A jelszavak visszaállításához tartsa lenyomva a BOOT gombot a NanoKVM-en.'
-      }
+      },
+      placeholderCurrentPassword: 'Jelenlegi jelszó',
+      passwordLength: 'A jelszónak 8 és 72 karakter között kell lennie',
+      invalidCurrentPassword: 'A jelenlegi jelszó helytelen'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -216,33 +220,44 @@ const hu = {
         disable: 'A HID-Csak mód letiltása'
       }
     },
-    image: {
-      title: 'Képek',
-      loading: 'Betöltés...',
-      empty: 'Nem található semmi',
+    storage: {
+      title: 'Képek és fájlmegosztás',
+      empty:
+        'Még nincsenek képek. Töltsön fel egy ISO vagy IMG fájlt, vagy másoljon egyet a lemezre a célgépről.',
+      notAttached: 'Nincs csatlakoztatva semmi',
+      attached: 'Csatlakoztatva: {{name}}',
+      eject: 'Kiadás',
+      mount: 'Csatlakoztatás',
       mountMode: 'Felszerelési mód',
-      mountFailed: 'Csatlakoztatás sikertelen',
-      mountDesc:
-        'Egyes rendszerekben szükséges lehet a virtuális lemez eltávolítása a távoli gépen, mielőtt a képet csatlakoztatja.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'A leválasztás nem sikerült',
-      unmountDesc:
-        'Egyes rendszereken manuálisan kell kiadnia a távoli gazdagépről a kép leválasztása előtt.',
-      refresh: 'Frissítse a képlistát',
-      attention: 'Figyelem',
-      deleteConfirm: 'Biztosan törli ezt a képet?',
-      okBtn: 'Igen',
-      cancelBtn: 'Nem',
+      mountModeDisk: 'Háttértár',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Fájlkezelő megnyitása',
+      refresh: 'Frissítés',
+      delete: 'Törlés',
+      deleteTitle: 'Adathordozó törlése',
+      deleteConfirm: 'Törli a következőt: {{name}}? A benne lévő fájlok elvesznek.',
+      downloadImage: 'A kép letöltése',
+      typePartition: 'Megosztott fájlok',
+      volumeLabel: 'Cserélhető lemez',
+      groups: {
+        share: 'Fájlmegosztás',
+        images: 'Képek'
+      },
+      failed: 'A művelet nem sikerült',
+      hidOnly: 'Csak HID mód: a virtuális lemez nem érhető el',
+      disabled: 'A virtuális lemez ki van kapcsolva (Beállítások - Eszköz)',
+      force: {
+        title: 'Visszaveszi az adathordozót erővel?',
+        desc: 'A célgép még használja ezt az adathordozót. A visszavétel újra felsorolja az USB-eszközt, és elveszhet minden, amit még nem írt a lemezre.',
+        menuHint:
+          'A célgép használja ezt az adathordozót. Nyissa meg a fájlkezelőt az erővel történő visszavételhez.'
+      },
       tips: {
         title: 'Hogyan tölts fel képeket',
         usb1: 'Csatlakoztassa a NanoKVM-t a számítógépéhez USB-n keresztül.',
-        usb2: 'Győződjön meg róla, hogy a virtuális lemez csatlakoztatva van (Beállítások - Virtuális lemez).',
+        usb2: 'Ezen az oldalon csatolja a megosztott fájlokat háttértár módban.',
         usb3: 'Nyissa meg a virtuális lemezt a számítógépén, és másolja a kép fájlt a virtuális lemez gyökérkönyvtárába.',
+        usb4: 'A másolás végeztével adja ki a lemezt: a lemezkép ezután megjelenik a listában.',
         scp1: 'Győződjön meg róla, hogy a NanoKVM és a számítógépe ugyanazon a helyi hálózaton van.',
         scp2: 'Nyisson meg egy terminált a számítógépén, és használja az SCP parancsot a kép fájl feltöltésére a /data könyvtárba a NanoKVM-en.',
         scp3: 'Példa: scp your-image-path root@your-nanokvm-ip:/data',
@@ -252,7 +267,68 @@ const hu = {
         tf3: 'Helyezze a TF kártyát egy kártyaolvasóba, és csatlakoztassa a számítógépéhez.',
         tf4: 'Másolja a képfájlt a TF kártya /data könyvtárába.',
         tf5: 'Helyezze vissza a TF kártyát a NanoKVM-be.'
-      }
+      },
+      job: {
+        running: '{{name}} feldolgozása'
+      },
+      enableDisk: {
+        title: 'Bekapcsolja a virtuális lemezt?',
+        desc: 'Az adathordozó csatlakoztatásához a virtuális lemez kell, amely jelenleg ki van kapcsolva. Bekapcsolja? A célgép billentyűzete és egere egy pillanatra leválik.',
+        menuHint: 'A virtuális lemez ki van kapcsolva. Kapcsolja be a Beállítások - Eszköz menüben.'
+      },
+      add: {
+        title: 'Adathordozó hozzáadása',
+        upload: 'ISO vagy IMG feltöltése',
+        fromUrl: 'Letöltés URL-ről',
+        url: 'A kép URL-címe',
+        urlRequired: 'Adjon meg egy URL-t',
+        onlyImages: 'Csak .iso és .img fájlok csatlakoztathatók',
+        dropHint: 'Húzzon ide egy ISO vagy IMG fájlt, vagy kattintson a kiválasztáshoz',
+        cdromOnlyIso: 'CD-ROM csak ISO 9660 képet tartalmazhat',
+        uploadFailed: 'A feltöltés nem sikerült',
+        downloadFailed: 'A letöltés nem sikerült',
+        uploading: '{{name}} feltöltése',
+        downloading: '{{name}} letöltése',
+        done: '{{name}} elkészült',
+        checksumFailed: 'A lemezkép nem egyezik a SHA-256 ellenőrzőösszeggel.',
+        blocked: 'A célgép használja a lemezt',
+        copyHint:
+          'A képet SCP-vel is a data partícióra másolhatja, vagy a célgépről is átmásolhatja.'
+      },
+      files: {
+        selectMedium: 'Válasszon adathordozót a rajta lévő fájlok megtekintéséhez.',
+        reasonAttached: 'Ez az adathordozó a célgéphez van csatlakoztatva.',
+        reasonAttachedHint:
+          'Először adja ki: a célgépnek fel kell szabadítania a lemezt, mielőtt a fájlok olvashatók lennének.',
+        reasonNotBrowsable:
+          'Ez az adathordozó olyan fájlrendszert tartalmaz, amelyet a fájlkezelő nem tud megnyitni.',
+        reasonNoLoop: 'Ez az eszköz nem tud lemezképeket csatlakoztatni (nincs loop támogatás).',
+        reasonISOImage:
+          'Az ISO 9660 képek itt nem böngészhetők. A célgépre továbbra is csatlakoztathatók.',
+        empty: 'Ez a mappa üres',
+        noMatch: 'Nincs a keresésnek megfelelő fájl.',
+        free: '{{size}} szabad',
+        search: 'Keresés ebben a mappában',
+        sort: {
+          name: 'Név',
+          size: 'Méret',
+          type: 'Típus',
+          asc: 'Növekvő',
+          desc: 'Csökkenő'
+        },
+        upload: 'Fájl feltöltése az adathordozóra',
+        deleteFolderTitle: 'Mappa törlése',
+        deleteFolderConfirm:
+          'Törli a(z) {{name}} mappát és a teljes tartalmát? Ez nem vonható vissza.',
+        uploading: 'Feltöltés…',
+        uploadFailed: 'A feltöltés nem sikerült',
+        download: 'Letöltés',
+        delete: 'Törlés',
+        deleteTitle: 'Fájl törlése',
+        deleteConfirm: 'Törli a következőt: {{name}} az adathordozóról?'
+      },
+      yes: 'Igen',
+      no: 'Nem'
     },
     script: {
       title: 'Szkriptek',
@@ -294,21 +370,11 @@ const hu = {
       ok: 'Ok'
     },
     download: {
-      title: 'Képletöltő',
-      input: 'Adjon meg egy távoli képet URL',
-      ok: 'Ok',
-      disabled: '/data partíció RO, ezért nem tudjuk letölteni a képet',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Dobja ide a fájlt, vagy kattintson a kiválasztáshoz',
-      inputfile: 'Kérjük, írja be a képfájlt',
-      NoISO: 'Nincs ISO',
+      disabled:
+        'A data partíció írásvédett, amíg a célgép használja: új kép nem írható rá, a meglévő fájlok viszont letölthetők.',
       sha256: 'SHA-256 (opcionális)',
       sha256Placeholder: 'Adjon meg egy 64 karakteres SHA-256 ellenőrzőösszeget',
       invalidSHA256: 'A SHA-256 értékének 64 karakteres hexadecimális karakterláncnak kell lennie',
-      failed: 'Sikertelen letöltés',
-      success: 'Sikeres letöltés',
-      checksumFailed: 'Sikertelen letöltés: a SHA-256 ellenőrzése sikertelen',
       cancel: 'Mégse',
       cancelFailed: 'A letöltés megszakítása sikertelen'
     },
@@ -458,16 +524,17 @@ const hu = {
           'A virtuális eszközök emulálásának leállítása, csak az alapvető HID vezérlés megtartásával',
         disk: 'Virtuális lemez',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuális hálózat',
         networkDesc: 'Virtuális hálózati kártya csatlakoztatása a távoli gazdagépen',
         reboot: 'Újraindítás',
         rebootDesc: 'Biztos, hogy újra akarja indítani a NanoKVM-t?',
         okBtn: 'Igen',
-        cancelBtn: 'Nem'
+        cancelBtn: 'Nem',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Figyelem'
       },
       network: {
         title: 'Hálózat',
@@ -606,7 +673,28 @@ const hu = {
         logoutBtn: 'Kijelentkezés',
         logoutDesc: 'Biztos, hogy ki szeretne jelentkezni?',
         okBtn: 'Igen',
-        cancelBtn: 'Nem'
+        cancelBtn: 'Nem',
+        role: 'Szerepkör',
+        roles: {
+          admin: 'Adminisztrátor',
+          user: 'Felhasználó'
+        },
+        users: {
+          title: 'Felhasználók',
+          create: 'Felhasználó létrehozása',
+          enabled: 'Engedélyezve',
+          disabled: 'Letiltva',
+          deviceOwner: 'Eszköz tulajdonosa',
+          resetPassword: 'Jelszó visszaállítása',
+          delete: 'Törlés',
+          deleteConfirm: 'Törli ezt a felhasználót és visszavonja az összes munkamenetét?',
+          created: 'Felhasználó létrehozva',
+          deleted: 'Felhasználó törölve',
+          passwordUpdated: 'Jelszó frissítve',
+          loadFailed: 'A felhasználókat nem sikerült betölteni',
+          saveFailed: 'A felhasználót nem sikerült menteni',
+          deleteFailed: 'A felhasználót nem sikerült törölni'
+        }
       }
     },
     picoclaw: {

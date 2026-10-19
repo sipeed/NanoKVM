@@ -4,6 +4,7 @@ const zh = {
       desktop: '远程桌面',
       login: '登录',
       changePassword: '修改密码',
+      storage: '镜像挂载/文件共享',
       terminal: '终端',
       wifi: 'Wi-Fi'
     },
@@ -208,29 +209,42 @@ const zh = {
         disable: '关闭 HID-Only 模式'
       }
     },
-    image: {
-      title: '镜像',
-      loading: '加载中',
-      empty: '无镜像文件',
-      mountMode: '挂载模式',
-      mountFailed: '挂载失败',
-      mountDesc: '在某些系统中，需要在远程主机中弹出虚拟硬盘后再挂载镜像。',
-      diskOnWarn: '挂载镜像会关闭虚拟U盘，电脑将无法再访问 /data 目录。是否继续？',
-      diskOffWarn:
-        '虚拟U盘当前已关闭，需要先开启才能挂载镜像，电脑上的 USB 设备会短暂断开重连。是否继续？',
-      diskShared: '虚拟U盘已开启，本机 /data 为只读；关闭虚拟U盘后才能删除或上传镜像。',
-      unmountFailed: '卸载失败',
-      unmountDesc: '在某些系统中，需要在远程主机中手动弹出后再卸载镜像。',
-      refresh: '刷新镜像列表',
-      attention: '注意',
-      deleteConfirm: '确定要删除该镜像吗？',
-      okBtn: '确定',
-      cancelBtn: '取消',
+    storage: {
+      title: '镜像挂载/文件共享',
+      empty: '还没有镜像。可以上传 ISO/IMG,也可以让被控机拷到这张盘上。',
+      notAttached: '未装载任何介质',
+      attached: '已装载:{{name}}',
+      eject: '弹出',
+      mount: '装载',
+      mountMode: '装载模式',
+      mountModeDisk: '磁盘模式',
+      mountModeCdrom: '光盘模式',
+      openManager: '打开文件管理器',
+      refresh: '刷新',
+      delete: '删除',
+      deleteTitle: '删除介质',
+      deleteConfirm: '确定删除 {{name}}?里面的文件会一起丢失。',
+      downloadImage: '下载镜像',
+      typePartition: '共享文件',
+      volumeLabel: '可移动磁盘',
+      groups: {
+        share: '文件共享',
+        images: '镜像'
+      },
+      failed: '操作失败',
+      hidOnly: 'HID-Only 模式:虚拟磁盘不可用',
+      disabled: '虚拟磁盘未启用(设置 - 设备)',
+      force: {
+        title: '强制收回介质?',
+        desc: '被控机还挂着这个介质。强制收回会让 USB 设备重新枚举,它还没写盘的数据可能丢失。',
+        menuHint: '被控机正在使用该介质,请到文件管理器页面强制收回。'
+      },
       tips: {
         title: '如何上传',
         usb1: '将 NanoKVM 通过 USB 连接到你的电脑；',
-        usb2: '确保已经挂载了虚拟硬盘（设置 - 虚拟硬盘）；',
+        usb2: '在本页面以大容量存储模式挂载共享文件；',
         usb3: '在电脑上打开虚拟硬盘，将镜像文件拷贝到虚拟硬盘的根目录下。',
+        usb4: '拷贝完成后弹出磁盘，镜像随后会出现在列表中。',
         scp1: '确保 NanoKVM 和你的电脑在同一个局域网内；',
         scp2: '在电脑上打开终端软件，使用 SCP 命令将镜像文件上传到 NanoKVM 的 /data 目录。',
         scp3: '示例：scp your-image-path root@your-nanokvm-ip:/data',
@@ -240,7 +254,63 @@ const zh = {
         tf3: '将 TF 卡插入读卡器并连接到你的电脑；',
         tf4: '从电脑上拷贝镜像文件到 TF 卡的 /data 目录下；',
         tf5: '将 TF 卡重新插入 NanoKVM。'
-      }
+      },
+      job: {
+        running: '正在处理 {{name}}'
+      },
+      enableDisk: {
+        title: '启用虚拟磁盘?',
+        desc: '装载介质需要虚拟磁盘,当前它是关闭的。现在启用?被控机的键鼠会短暂断开。',
+        menuHint: '虚拟磁盘未启用,请到 设置 - 设备 打开。'
+      },
+      add: {
+        title: '添加介质',
+        upload: '上传 ISO / IMG',
+        fromUrl: '从 URL 下载',
+        url: '镜像地址',
+        urlRequired: '请输入镜像地址',
+        onlyImages: '只能挂载 .iso 和 .img 文件',
+        dropHint: '把 ISO / IMG 拖到这里，或点击选择文件',
+        cdromOnlyIso: '光盘模式只能挂载 ISO 光盘镜像',
+        uploadFailed: '上传失败',
+        downloadFailed: '下载失败',
+        uploading: '正在上传 {{name}}',
+        downloading: '正在下载 {{name}}',
+        done: '{{name}} 已就绪',
+        checksumFailed: '镜像与 SHA-256 校验值不符。',
+        blocked: '被控机正在使用这张盘',
+        copyHint: '也可以通过 SCP 把镜像放进数据分区，或在被控机上直接拷贝。'
+      },
+      files: {
+        selectMedium: '选择一个介质,查看里面的文件。',
+        reasonAttached: '该介质正装载给被控机使用。',
+        reasonAttachedHint: '请先弹出:被控机必须释放这块盘,里面的文件才能读取。',
+        reasonNotBrowsable: '这个介质里的文件系统无法在网页端打开。',
+        reasonNoLoop: '本机不支持挂载磁盘镜像(内核未启用 loop)。',
+        reasonISOImage: 'ISO 光盘镜像不支持在网页端浏览目录，镜像本身仍可正常挂载给被控机',
+        empty: '这个目录是空的',
+        noMatch: '没有匹配的文件',
+        free: '剩余 {{size}}',
+        search: '搜索当前目录',
+        sort: {
+          name: '名称',
+          size: '大小',
+          type: '类型',
+          asc: '升序',
+          desc: '降序'
+        },
+        upload: '上传文件到介质',
+        deleteFolderTitle: '删除文件夹',
+        deleteFolderConfirm: '删除文件夹 {{name}} 及其中的全部内容？此操作无法撤销。',
+        uploading: '正在上传…',
+        uploadFailed: '上传失败',
+        download: '下载',
+        delete: '删除',
+        deleteTitle: '删除文件',
+        deleteConfirm: '确定从介质中删除 {{name}}?'
+      },
+      yes: '确定',
+      no: '取消'
     },
     script: {
       title: '脚本',
@@ -282,21 +352,10 @@ const zh = {
       ok: '确定'
     },
     download: {
-      title: '下载镜像',
-      input: '请输入远程镜像 URL',
-      ok: '确定',
-      disabled: '/data 是只读分区，无法下载镜像',
-      diskShared: '请先关闭虚拟U盘功能，再使用镜像下载功能',
-      diskOff: '关闭虚拟U盘功能',
-      uploadbox: '将文件拖放到此处或单击选择',
-      inputfile: '请输入镜像文件',
-      NoISO: '无 ISO',
+      disabled: '共享文件夹正被被控机使用，/data 当前只读：不能写入新镜像，已有文件仍可正常下载。',
       sha256: 'SHA-256（可选）',
       sha256Placeholder: '请输入 64 位 SHA-256 校验和',
       invalidSHA256: 'SHA-256 必须是 64 位十六进制字符串',
-      failed: '下载失败',
-      success: '下载成功',
-      checksumFailed: '下载失败：SHA-256 校验失败',
       cancel: '取消',
       cancelFailed: '取消下载失败'
     },
@@ -442,16 +501,17 @@ const zh = {
         hidOnlyDesc: '该模式下不再挂载虚拟设备，仅保留基础的 HID 控制功能。',
         disk: '虚拟U盘',
         diskDesc: '在远程主机中挂载虚拟U盘',
-        diskLocked: '挂载镜像期间已关闭（开启会取消镜像挂载）',
-        diskCancelMount:
-          '开启虚拟U盘会取消当前挂载的镜像，并中断正在进行的镜像下载或上传，是否继续？',
-        diskBreakDownload: '开启虚拟U盘会中断镜像下载功能，是否继续？',
         network: '虚拟网卡',
         networkDesc: '在远程主机中挂载虚拟网卡',
         reboot: '重新启动',
         rebootDesc: '您确定要重新启动 NanoKVM 吗？',
         okBtn: '是',
-        cancelBtn: '否'
+        cancelBtn: '否',
+        diskLocked: '挂载镜像期间已关闭（开启会取消镜像挂载）',
+        diskCancelMount:
+          '开启虚拟U盘会取消当前挂载的镜像，并中断正在进行的镜像下载或上传，是否继续？',
+        diskBreakDownload: '开启虚拟U盘会中断镜像下载功能，是否继续？',
+        attention: '注意'
       },
       network: {
         title: '网络',

@@ -5,7 +5,8 @@ const id = {
       login: 'Masuk',
       changePassword: 'Ubah Sandi',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Gambar dan berbagi file'
     },
     auth: {
       login: 'Masuk',
@@ -39,7 +40,10 @@ const id = {
         change2: 'Kata sandi login web',
         change3: 'Kata sandi root sistem (kata sandi login SSH)',
         change4: 'Untuk mengatur ulang kata sandi, tekan dan tahan tombol BOOT pada NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Kata sandi saat ini',
+      passwordLength: 'Kata sandi harus antara 8 dan 72 karakter',
+      invalidCurrentPassword: 'Kata sandi saat ini salah'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -214,33 +218,43 @@ const id = {
         disable: 'Nonaktifkan mode HID-Hanya'
       }
     },
-    image: {
-      title: 'Gambar',
-      loading: 'Memuat...',
-      empty: 'Tidak ada yang ditemukan',
+    storage: {
+      title: 'Gambar dan berbagi file',
+      empty: 'Belum ada gambar. Unggah ISO atau IMG, atau salin satu ke disk dari komputer target.',
+      notAttached: 'Tidak ada yang terpasang',
+      attached: 'Terpasang: {{name}}',
+      eject: 'Keluarkan',
+      mount: 'Pasang',
       mountMode: 'Mode pemasangan',
-      mountFailed: 'Pemasangan Gagal',
-      mountDesc:
-        'Di beberapa sistem, perlu mengeluarkan disk virtual pada host jarak jauh sebelum memasang gambar.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Pelepasan gagal',
-      unmountDesc:
-        'Pada beberapa sistem, Anda perlu mengeluarkan secara manual dari host jarak jauh sebelum melepas gambar.',
-      refresh: 'Segarkan daftar gambar',
-      attention: 'Perhatian',
-      deleteConfirm: 'Apakah Anda yakin ingin menghapus gambar ini?',
-      okBtn: 'Ya',
-      cancelBtn: 'Tidak',
+      mountModeDisk: 'Penyimpanan massal',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Buka pengelola file',
+      refresh: 'Segarkan',
+      delete: 'Hapus',
+      deleteTitle: 'Hapus media',
+      deleteConfirm: 'Hapus {{name}}? File di dalamnya akan hilang.',
+      downloadImage: 'Unduh gambar',
+      typePartition: 'File bersama',
+      volumeLabel: 'Disk yang dapat dilepas',
+      groups: {
+        share: 'Berbagi file',
+        images: 'Gambar'
+      },
+      failed: 'Operasi gagal',
+      hidOnly: 'Mode hanya HID: disk virtual tidak tersedia',
+      disabled: 'Disk virtual dinonaktifkan (Pengaturan - Perangkat)',
+      force: {
+        title: 'Ambil kembali media dengan paksa?',
+        desc: 'Komputer target masih menggunakan media ini. Mengambilnya kembali akan menghitung ulang perangkat USB dan dapat kehilangan apa pun yang belum ditulisnya ke disk.',
+        menuHint:
+          'Komputer target sedang menggunakan media ini. Buka pengelola file untuk mengambilnya kembali dengan paksa.'
+      },
       tips: {
         title: 'Cara mengunggah',
         usb1: 'Hubungkan NanoKVM ke komputer Anda melalui USB.',
-        usb2: 'Pastikan disk virtual telah terpasang (Pengaturan - Disk Virtual).',
+        usb2: 'Di halaman ini, pasang berkas bersama dalam mode penyimpanan massal.',
         usb3: 'Buka disk virtual di komputer Anda dan salin file gambar ke direktori root disk virtual.',
+        usb4: 'Keluarkan disk setelah penyalinan selesai: image kemudian muncul di daftar.',
         scp1: 'Pastikan NanoKVM dan komputer Anda berada di jaringan lokal yang sama.',
         scp2: 'Buka terminal di komputer Anda dan gunakan perintah SCP untuk mengunggah file gambar ke direktori /data di NanoKVM.',
         scp3: 'Contoh: scp jalur-gambar-anda root@ip-nanokvm-anda:/data',
@@ -250,7 +264,68 @@ const id = {
         tf3: 'Masukkan Kartu TF ke pembaca kartu dan hubungkan ke komputer Anda.',
         tf4: 'Salin berkas gambar ke direktori /data pada Kartu TF.',
         tf5: 'Masukkan Kartu TF ke dalam NanoKVM.'
-      }
+      },
+      job: {
+        running: 'Memproses {{name}}'
+      },
+      enableDisk: {
+        title: 'Aktifkan disk virtual?',
+        desc: 'Untuk memasang media diperlukan disk virtual, yang saat ini dimatikan. Aktifkan sekarang? Papan ketik dan tetikus komputer target akan terputus sebentar.',
+        menuHint: 'Disk virtual dinonaktifkan. Aktifkan di Pengaturan - Perangkat.'
+      },
+      add: {
+        title: 'Tambah media',
+        upload: 'Unggah ISO atau IMG',
+        fromUrl: 'Unduh dari URL',
+        url: 'URL gambar',
+        urlRequired: 'Masukkan URL',
+        onlyImages: 'Hanya file .iso dan .img yang dapat dipasang',
+        dropHint: 'Seret ISO atau IMG ke sini, atau klik untuk memilih file',
+        cdromOnlyIso: 'CD-ROM hanya dapat berisi citra ISO 9660',
+        uploadFailed: 'Unggahan gagal',
+        downloadFailed: 'Unduhan gagal',
+        uploading: 'Mengunggah {{name}}',
+        downloading: 'Mengunduh {{name}}',
+        done: '{{name}} siap',
+        checksumFailed: 'Image tidak cocok dengan checksum SHA-256.',
+        blocked: 'Komputer target sedang menggunakan disk',
+        copyHint:
+          'Anda juga dapat menyalin citra ke partisi data lewat SCP, atau dari komputer target.'
+      },
+      files: {
+        selectMedium: 'Pilih media untuk melihat file di dalamnya.',
+        reasonAttached: 'Media ini terpasang ke komputer target.',
+        reasonAttachedHint:
+          'Keluarkan dulu: komputer target harus melepaskan disk sebelum filenya dapat dibaca.',
+        reasonNotBrowsable:
+          'Media ini berisi sistem berkas yang tidak dapat dibuka pengelola file.',
+        reasonNoLoop: 'Perangkat ini tidak dapat memasang image disk (tanpa dukungan loop).',
+        reasonISOImage:
+          'Citra ISO 9660 tidak dapat dijelajahi di sini. Citra tetap dapat dipasang ke komputer target.',
+        empty: 'Folder ini kosong',
+        noMatch: 'Tidak ada file yang cocok dengan pencarian.',
+        free: '{{size}} kosong',
+        search: 'Cari di folder ini',
+        sort: {
+          name: 'Nama',
+          size: 'Ukuran',
+          type: 'Jenis',
+          asc: 'Naik',
+          desc: 'Turun'
+        },
+        upload: 'Unggah file ke media',
+        deleteFolderTitle: 'Hapus folder',
+        deleteFolderConfirm:
+          'Hapus folder {{name}} beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.',
+        uploading: 'Mengunggah…',
+        uploadFailed: 'Unggahan gagal',
+        download: 'Unduh',
+        delete: 'Hapus',
+        deleteTitle: 'Hapus file',
+        deleteConfirm: 'Hapus {{name}} dari media?'
+      },
+      yes: 'Ya',
+      no: 'Tidak'
     },
     script: {
       title: 'Script',
@@ -292,21 +367,11 @@ const id = {
       ok: 'Ok'
     },
     download: {
-      title: 'Pengunduh Gambar',
-      input: 'Silakan masukkan gambar jarak jauh URL',
-      ok: 'Ok',
-      disabled: 'Partisi /data adalah RO, jadi kami tidak dapat mengunduh gambarnya',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Letakkan file di sini atau klik untuk memilih',
-      inputfile: 'Silakan masukkan File gambar',
-      NoISO: 'Tidak ada ISO',
+      disabled:
+        'Partisi data bersifat hanya-baca selama komputer target memakainya: citra baru tidak dapat ditulis, file yang ada tetap dapat diunduh.',
       sha256: 'SHA-256 (opsional)',
       sha256Placeholder: 'Masukkan checksum SHA-256 64 karakter',
       invalidSHA256: 'SHA-256 harus berupa string heksadesimal 64 karakter',
-      failed: 'Unduhan gagal',
-      success: 'Unduhan berhasil',
-      checksumFailed: 'Unduhan gagal: verifikasi SHA-256 gagal',
       cancel: 'Batal',
       cancelFailed: 'Gagal membatalkan unduhan'
     },
@@ -455,16 +520,17 @@ const id = {
         hidOnlyDesc: 'Berhenti meniru perangkat virtual, hanya mempertahankan kontrol dasar HID',
         disk: 'Disk virtual',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Jaringan virtual',
         networkDesc: 'Pasang kartu jaringan virtual pada host jarak jauh',
         reboot: 'Mulai ulang',
         rebootDesc: 'Apakah Anda yakin ingin me-reboot NanoKVM?',
         okBtn: 'Ya',
-        cancelBtn: 'Tidak'
+        cancelBtn: 'Tidak',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Perhatian'
       },
       network: {
         title: 'Jaringan',
@@ -603,7 +669,28 @@ const id = {
         logoutBtn: 'Keluar',
         logoutDesc: 'Apakah Anda yakin ingin logout?',
         okBtn: 'Ya',
-        cancelBtn: 'Tidak'
+        cancelBtn: 'Tidak',
+        role: 'Peran',
+        roles: {
+          admin: 'Administrator',
+          user: 'Pengguna'
+        },
+        users: {
+          title: 'Pengguna',
+          create: 'Buat pengguna',
+          enabled: 'Diaktifkan',
+          disabled: 'Dinonaktifkan',
+          deviceOwner: 'Pemilik perangkat',
+          resetPassword: 'Setel ulang kata sandi',
+          delete: 'Hapus',
+          deleteConfirm: 'Hapus pengguna ini dan cabut semua sesinya?',
+          created: 'Pengguna dibuat',
+          deleted: 'Pengguna dihapus',
+          passwordUpdated: 'Kata sandi diperbarui',
+          loadFailed: 'Gagal memuat pengguna',
+          saveFailed: 'Gagal menyimpan pengguna',
+          deleteFailed: 'Gagal menghapus pengguna'
+        }
       }
     },
     picoclaw: {

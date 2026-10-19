@@ -5,7 +5,8 @@ const nb = {
       login: 'Logg inn',
       changePassword: 'Endre passord',
       terminal: 'Terminal',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Diskbilder og fildeling'
     },
     auth: {
       login: 'Logg inn',
@@ -40,7 +41,10 @@ const nb = {
         change2: 'Passord for webinnlogging',
         change3: 'Systemets root-passord (SSH-innloggingspassord)',
         change4: 'For å tilbakestille passordene holder du BOOT-knappen på NanoKVM inne.'
-      }
+      },
+      placeholderCurrentPassword: 'Nåværende passord',
+      passwordLength: 'Passordet må være mellom 8 og 72 tegn',
+      invalidCurrentPassword: 'Det nåværende passordet er feil'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -214,33 +218,44 @@ const nb = {
         disable: 'Deaktiver HID-bare-modus'
       }
     },
-    image: {
-      title: 'Bilder',
-      loading: 'Laster...',
-      empty: 'Ingen funnet',
+    storage: {
+      title: 'Diskbilder og fildeling',
+      empty:
+        'Ingen bilder ennå. Last opp en ISO eller IMG, eller kopier en over til disken fra målmaskinen.',
+      notAttached: 'Ingenting montert',
+      attached: 'Montert: {{name}}',
+      eject: 'Løs ut',
+      mount: 'Monter',
       mountMode: 'Monteringsmodus',
-      mountFailed: 'Montering feilet',
-      mountDesc:
-        'På noen systemer er det nødvendig å koble fra den virtuelle disken på den eksterne verten før man kan montere arkivfilen.',
-      diskOnWarn:
-        'Mounting the image turns the virtual disk off, so the computer can no longer access /data. Continue?',
-      diskOffWarn:
-        'The virtual disk is off and has to be enabled to mount the image. The USB devices on the computer are enumerated again. Continue?',
-      diskShared:
-        'Virtual disk is enabled, so /data is read-only here. Disable it to delete or upload images.',
-      unmountFailed: 'Avmontering mislyktes',
-      unmountDesc:
-        'På noen systemer må du manuelt løse ut fra den eksterne verten før du demonterer bildet.',
-      refresh: 'Oppdater bildelisten',
-      attention: 'Merknad',
-      deleteConfirm: 'Er du sikker på at du vil slette dette bildet?',
-      okBtn: 'Ja',
-      cancelBtn: 'Nei',
+      mountModeDisk: 'Masselagring',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Åpne filbehandler',
+      refresh: 'Oppdater',
+      delete: 'Slett',
+      deleteTitle: 'Slett medium',
+      deleteConfirm: 'Vil du slette {{name}}? Filene i den går tapt.',
+      downloadImage: 'Last ned bildet',
+      typePartition: 'Delte filer',
+      volumeLabel: 'Flyttbar disk',
+      groups: {
+        share: 'Fildeling',
+        images: 'Diskbilder'
+      },
+      failed: 'Handlingen mislyktes',
+      hidOnly: 'Kun HID-modus: den virtuelle disken er utilgjengelig',
+      disabled: 'Den virtuelle disken er slått av (Innstillinger - Enhet)',
+      force: {
+        title: 'Ta mediet tilbake med makt?',
+        desc: 'Målmaskinen bruker fortsatt dette mediet. Å ta det tilbake registrerer USB-enheten på nytt og kan miste alt den ennå ikke har skrevet til disken.',
+        menuHint:
+          'Målmaskinen bruker dette mediet. Åpne filbehandleren for å ta det tilbake med makt.'
+      },
       tips: {
         title: 'Hvordan laste opp',
         usb1: 'Koble til NanoKVM-enheten til din datamaskin med USB.',
-        usb2: 'Sikre at den virtuelle disken er montert (Innstillinger - Virtuell disk).',
+        usb2: 'Monter de delte filene i masselagringsmodus på denne siden.',
         usb3: 'Åpne den virtuelle disken på datamaskinen din og kopier arkivfilen til rot-mappen på den virtuelle disken.',
+        usb4: 'Løs ut disken når kopieringen er ferdig: bildet vises da i listen.',
         scp1: 'Sikre at NanoKVM-enheten og datamaskinen din er tilkoblet det samme lokale nettverket.',
         scp2: 'Åpne en terminal på datamaskinen din og bruk SCP-kommandoen til å laste opp arkivfilen til mappen /data på NanoKVM-enheten.',
         scp3: 'Eksempel: scp sti-til-din-arkivfil root@din-nanokvm-ip:/data',
@@ -250,7 +265,66 @@ const nb = {
         tf3: 'Sett inn TF-kortet i en kortleser og koble den til datamaskinen din.',
         tf4: 'Kopiér arkivfilen til mappen /data på TF-kortet.',
         tf5: 'Sett inn TF-kortet i NanoKVM-enheten.'
-      }
+      },
+      job: {
+        running: 'Arbeider med {{name}}'
+      },
+      enableDisk: {
+        title: 'Slå på den virtuelle disken?',
+        desc: 'For å montere et medium trengs den virtuelle disken, som er slått av nå. Slå den på? Tastaturet og musen til målmaskinen kobles fra et øyeblikk.',
+        menuHint: 'Den virtuelle disken er slått av. Slå den på under Innstillinger - Enhet.'
+      },
+      add: {
+        title: 'Legg til medium',
+        upload: 'Last opp en ISO eller IMG',
+        fromUrl: 'Last ned fra en URL',
+        url: 'URL til bildet',
+        urlRequired: 'Skriv inn en URL',
+        onlyImages: 'Bare .iso- og .img-filer kan monteres',
+        dropHint: 'Dra en ISO eller IMG hit, eller klikk for å velge en fil',
+        cdromOnlyIso: 'En CD-ROM kan bare inneholde et ISO 9660-bilde',
+        uploadFailed: 'Opplasting mislyktes',
+        downloadFailed: 'Nedlasting mislyktes',
+        uploading: 'Laster opp {{name}}',
+        downloading: 'Laster ned {{name}}',
+        done: '{{name}} er klar',
+        checksumFailed: 'Bildet samsvarer ikke med SHA-256-kontrollsummen.',
+        blocked: 'Målmaskinen bruker disken',
+        copyHint: 'Du kan også kopiere et bilde til datapartisjonen via SCP, eller fra målmaskinen.'
+      },
+      files: {
+        selectMedium: 'Velg et medium for å se filene på det.',
+        reasonAttached: 'Dette mediet er koblet til målmaskinen.',
+        reasonAttachedHint:
+          'Løs det ut først: målmaskinen må frigjøre disken før filene kan leses.',
+        reasonNotBrowsable:
+          'Dette mediet inneholder et filsystem som filbehandleren ikke kan åpne.',
+        reasonNoLoop: 'Denne enheten kan ikke montere diskbilder (ingen loop-støtte).',
+        reasonISOImage:
+          'Et ISO 9660-bilde kan ikke utforskes her. Det kan fortsatt monteres på målmaskinen.',
+        empty: 'Denne mappen er tom',
+        noMatch: 'Ingen filer samsvarer med søket.',
+        free: '{{size}} ledige',
+        search: 'Søk i denne mappen',
+        sort: {
+          name: 'Navn',
+          size: 'Størrelse',
+          type: 'Type',
+          asc: 'Stigende',
+          desc: 'Synkende'
+        },
+        upload: 'Last opp en fil til mediet',
+        deleteFolderTitle: 'Slett mappe',
+        deleteFolderConfirm: 'Slette mappen {{name}} og alt innholdet? Dette kan ikke angres.',
+        uploading: 'Laster opp…',
+        uploadFailed: 'Opplasting mislyktes',
+        download: 'Last ned',
+        delete: 'Slett',
+        deleteTitle: 'Slett fil',
+        deleteConfirm: 'Vil du slette {{name}} fra mediet?'
+      },
+      yes: 'Ja',
+      no: 'Nei'
     },
     script: {
       title: 'Skript',
@@ -292,21 +366,11 @@ const nb = {
       ok: 'Ok'
     },
     download: {
-      title: 'Bildedaster',
-      input: 'Vennligst skriv inn et eksternt bilde URL',
-      ok: 'Ok',
-      disabled: '/data partisjonen er RO, så vi kan ikke laste ned bildet',
-      diskShared: 'Turn the virtual disk off first, then use the image download.',
-      diskOff: 'Turn off the virtual disk',
-      uploadbox: 'Slipp filen her eller klikk for å velge',
-      inputfile: 'Vennligst skriv inn bildefilen',
-      NoISO: 'Ingen ISO',
+      disabled:
+        'Datapartisjonen er skrivebeskyttet mens målmaskinen bruker den: nye bilder kan ikke skrives, men eksisterende filer kan fortsatt lastes ned.',
       sha256: 'SHA-256 (valgfritt)',
       sha256Placeholder: 'Skriv inn en SHA-256-kontrollsum på 64 tegn',
       invalidSHA256: 'SHA-256 må være en heksadesimal streng på 64 tegn',
-      failed: 'Nedlasting mislyktes',
-      success: 'Nedlasting fullført',
-      checksumFailed: 'Nedlasting mislyktes: SHA-256-verifisering mislyktes',
       cancel: 'Avbryt',
       cancelFailed: 'Kunne ikke avbryte nedlastingen'
     },
@@ -454,16 +518,17 @@ const nb = {
         hidOnlyDesc: 'Slutt å emulere virtuelle enheter, behold bare grunnleggende HID-kontroll',
         disk: 'Virtuell disk',
         diskDesc: 'Mount virtual U-disk on the remote host',
-        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
-        diskCancelMount:
-          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
-        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
         network: 'Virtuelt nettverk',
         networkDesc: 'Monter virtuelt nettverkskort på den eksterne verten',
         reboot: 'Start på nytt',
         rebootDesc: 'Er du sikker på at du vil starte NanoKVM på nytt?',
         okBtn: 'Ja',
-        cancelBtn: 'Nei'
+        cancelBtn: 'Nei',
+        diskLocked: 'Off while an image is mounted (turning it on cancels the mount)',
+        diskCancelMount:
+          'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
+        diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
+        attention: 'Merknad'
       },
       network: {
         title: 'Nettverk',
@@ -602,7 +667,28 @@ const nb = {
         logoutBtn: 'Logg ut',
         logoutDesc: 'Er du sikker på at du vil logge ut?',
         okBtn: 'Ja',
-        cancelBtn: 'Nei'
+        cancelBtn: 'Nei',
+        role: 'Rolle',
+        roles: {
+          admin: 'Administrator',
+          user: 'Bruker'
+        },
+        users: {
+          title: 'Brukere',
+          create: 'Opprett bruker',
+          enabled: 'Aktivert',
+          disabled: 'Deaktivert',
+          deviceOwner: 'Enhetens eier',
+          resetPassword: 'Tilbakestill passord',
+          delete: 'Slett',
+          deleteConfirm: 'Vil du slette denne brukeren og tilbakekalle alle øktene dens?',
+          created: 'Bruker opprettet',
+          deleted: 'Bruker slettet',
+          passwordUpdated: 'Passord oppdatert',
+          loadFailed: 'Kunne ikke laste brukere',
+          saveFailed: 'Kunne ikke lagre brukeren',
+          deleteFailed: 'Kunne ikke slette brukeren'
+        }
       }
     },
     picoclaw: {

@@ -5,7 +5,8 @@ const ko = {
       login: '로그인',
       changePassword: '비밀번호 변경',
       terminal: '터미널',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: '이미지 및 파일 공유'
     },
     auth: {
       login: '로그인',
@@ -38,7 +39,10 @@ const ko = {
         change2: '웹 로그인 비밀번호',
         change3: '시스템 루트 비밀번호 (SSH 로그인 비밀번호)',
         change4: '비밀번호를 재설정하려면 NanoKVM의 BOOT 버튼을 길게 누르세요.'
-      }
+      },
+      placeholderCurrentPassword: '현재 비밀번호',
+      passwordLength: '비밀번호는 8~72자여야 합니다',
+      invalidCurrentPassword: '현재 비밀번호가 올바르지 않습니다'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -209,33 +213,44 @@ const ko = {
         disable: 'HID 전용 모드 비활성화'
       }
     },
-    image: {
-      title: '이미지',
-      loading: '불러오는 중...',
-      empty: '아무것도 없습니다.',
+    storage: {
+      title: '이미지 및 파일 공유',
+      empty:
+        '아직 이미지가 없습니다. ISO 또는 IMG를 업로드하거나 대상 컴퓨터에서 디스크로 복사하세요.',
+      notAttached: '마운트된 항목 없음',
+      attached: '마운트됨: {{name}}',
+      eject: '꺼내기',
+      mount: '마운트',
       mountMode: '마운트 모드',
-      mountFailed: '마운트 실패',
-      mountDesc:
-        '일부 시스템에서는 이미지를 마운트하기 전에 원격 호스트에서 가상 디스크를 제거해야 합니다.',
-      diskOnWarn:
-        '이미지를 마운트하면 가상 디스크가 꺼지고 컴퓨터에서 /data에 접근할 수 없게 됩니다. 계속하시겠습니까?',
-      diskOffWarn:
-        '가상 디스크가 꺼져 있어 이미지를 마운트하려면 먼저 켜야 합니다. 컴퓨터의 USB 장치가 다시 연결됩니다. 계속하시겠습니까?',
-      diskShared:
-        '가상 디스크가 켜져 있어 이 기기에서 /data는 읽기 전용입니다. 이미지를 삭제하거나 업로드하려면 가상 디스크를 끄세요.',
-      unmountFailed: '언마운트 실패',
-      unmountDesc:
-        '일부 시스템에서는 이미지를 언마운트하기 전에 원격 호스트에서 수동으로 제거하여야 합니다.',
-      refresh: '이미지 목록 새로고침',
-      attention: '주의',
-      deleteConfirm: '이 이미지를 제거하시겠습니까?',
-      okBtn: '네',
-      cancelBtn: '아니오',
+      mountModeDisk: '대용량 저장소',
+      mountModeCdrom: 'CD-ROM',
+      openManager: '파일 관리자 열기',
+      refresh: '새로 고침',
+      delete: '삭제',
+      deleteTitle: '미디어 삭제',
+      deleteConfirm: '{{name}}을(를) 삭제할까요? 안에 있는 파일이 사라집니다.',
+      downloadImage: '이미지 다운로드',
+      typePartition: '공유 파일',
+      volumeLabel: '이동식 디스크',
+      groups: {
+        share: '파일 공유',
+        images: '이미지'
+      },
+      failed: '작업 실패',
+      hidOnly: 'HID 전용 모드: 가상 디스크를 사용할 수 없습니다',
+      disabled: '가상 디스크가 꺼져 있습니다 (설정 - 장치)',
+      force: {
+        title: '미디어를 강제로 되찾을까요?',
+        desc: '대상 컴퓨터가 아직 이 미디어를 사용하고 있습니다. 되찾으면 USB 장치가 다시 열거되고 아직 디스크에 기록하지 않은 내용이 사라질 수 있습니다.',
+        menuHint:
+          '대상 컴퓨터가 이 미디어를 사용하고 있습니다. 파일 관리자를 열어 강제로 되찾으세요.'
+      },
       tips: {
         title: '업로드 방법',
         usb1: 'USB를 통해 NanoKVM을 컴퓨터에 연결하세요.',
-        usb2: '가상 디스크가 마운트되었는지 확인하세요. (설정 - 가상 디스크).',
+        usb2: '이 페이지에서 공유 파일을 대용량 저장 장치 모드로 마운트합니다.',
         usb3: '컴퓨터에서 가상 디스크를 열고 이미지 파일을 가상 디스크의 루트 디렉토리로 복사하세요.',
+        usb4: '복사가 끝나면 디스크를 꺼냅니다. 그러면 이미지가 목록에 나타납니다.',
         scp1: 'NanoKVM과 컴퓨터가 동일한 로컬 네트워크에 있는지 확인하세요.',
         scp2: '컴퓨터에서 터미널을 열고 SCP 명령을 사용하여 이미지 파일을 NanoKVM의 /data 디렉터리에 업로드하세요.',
         scp3: '예시: scp [이미지 파일 경로] root@[NanoKVM IP 주소]:/data',
@@ -245,7 +260,66 @@ const ko = {
         tf3: 'TF 카드를 카드 리더기에 삽입하고 컴퓨터에 연결하세요.',
         tf4: '이미지 파일을 TF 카드의 /data 디렉터리에 복사하세요.',
         tf5: 'TF 카드를 NanoKVM에 삽입하세요.'
-      }
+      },
+      job: {
+        running: '{{name}} 처리 중'
+      },
+      enableDisk: {
+        title: '가상 디스크를 켤까요?',
+        desc: '미디어를 마운트하려면 현재 꺼져 있는 가상 디스크가 필요합니다. 지금 켤까요? 대상 컴퓨터의 키보드와 마우스가 잠시 연결 해제됩니다.',
+        menuHint: '가상 디스크가 꺼져 있습니다. 설정 - 장치에서 켜세요.'
+      },
+      add: {
+        title: '미디어 추가',
+        upload: 'ISO 또는 IMG 업로드',
+        fromUrl: 'URL에서 다운로드',
+        url: '이미지 URL',
+        urlRequired: 'URL을 입력하세요',
+        onlyImages: '.iso 및 .img 파일만 마운트할 수 있습니다',
+        dropHint: 'ISO 또는 IMG를 여기로 끌어오거나 클릭하여 파일을 선택하세요',
+        cdromOnlyIso: 'CD-ROM에는 ISO 9660 이미지만 넣을 수 있습니다',
+        uploadFailed: '업로드 실패',
+        downloadFailed: '다운로드 실패',
+        uploading: '{{name}} 업로드 중',
+        downloading: '{{name}} 다운로드 중',
+        done: '{{name}} 준비 완료',
+        checksumFailed: '이미지가 SHA-256 체크섬과 일치하지 않습니다.',
+        blocked: '대상 컴퓨터가 디스크를 사용 중입니다',
+        copyHint:
+          'SCP로 데이터 파티션에 이미지를 복사하거나 대상 컴퓨터에서 직접 복사할 수도 있습니다.'
+      },
+      files: {
+        selectMedium: '미디어를 선택하면 안에 있는 파일을 볼 수 있습니다.',
+        reasonAttached: '이 미디어는 대상 컴퓨터에 연결되어 있습니다.',
+        reasonAttachedHint: '먼저 꺼내세요. 대상 컴퓨터가 디스크를 놓아야 파일을 읽을 수 있습니다.',
+        reasonNotBrowsable: '이 미디어에는 파일 관리자가 열 수 없는 파일 시스템이 있습니다.',
+        reasonNoLoop: '이 장치는 디스크 이미지를 마운트할 수 없습니다(loop 미지원).',
+        reasonISOImage:
+          'ISO 9660 이미지의 내용은 여기에서 볼 수 없습니다. 대상 컴퓨터에는 그대로 마운트할 수 있습니다.',
+        empty: '이 폴더는 비어 있습니다',
+        noMatch: '검색과 일치하는 파일이 없습니다.',
+        free: '{{size}} 남음',
+        search: '이 폴더에서 검색',
+        sort: {
+          name: '이름',
+          size: '크기',
+          type: '종류',
+          asc: '오름차순',
+          desc: '내림차순'
+        },
+        upload: '미디어에 파일 업로드',
+        deleteFolderTitle: '폴더 삭제',
+        deleteFolderConfirm:
+          '폴더 {{name}}와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.',
+        uploading: '업로드 중…',
+        uploadFailed: '업로드 실패',
+        download: '다운로드',
+        delete: '삭제',
+        deleteTitle: '파일 삭제',
+        deleteConfirm: '미디어에서 {{name}}을(를) 삭제할까요?'
+      },
+      yes: '예',
+      no: '아니요'
     },
     script: {
       title: '스크립트',
@@ -287,21 +361,11 @@ const ko = {
       ok: '확인'
     },
     download: {
-      title: '이미지 다운로드',
-      input: '원격 이미지 URL을 입력하세요.',
-      ok: '확인',
-      disabled: '/data 파티션이 읽기 전용(RO) 상태이므로 이미지를 다운로드할 수 없습니다.',
-      diskShared: '먼저 가상 디스크를 끈 다음 이미지 다운로드를 사용하세요.',
-      diskOff: '가상 디스크 끄기',
-      uploadbox: '여기에 파일을 놓거나 클릭하여 선택하세요.',
-      inputfile: '이미지 파일을 입력해주세요',
-      NoISO: 'ISO 없음',
+      disabled:
+        '대상 컴퓨터가 사용하는 동안 데이터 파티션은 읽기 전용입니다. 새 이미지는 쓸 수 없지만 기존 파일은 내려받을 수 있습니다.',
       sha256: 'SHA-256 (선택 사항)',
       sha256Placeholder: '64자 SHA-256 체크섬을 입력하세요',
       invalidSHA256: 'SHA-256은 64자의 16진수 문자열이어야 합니다',
-      failed: '다운로드 실패',
-      success: '다운로드 성공',
-      checksumFailed: '다운로드 실패: SHA-256 검증 실패',
       cancel: '취소',
       cancelFailed: '다운로드 취소 실패'
     },
@@ -450,16 +514,17 @@ const ko = {
         hidOnlyDesc: '가상 장치 에뮬레이션을 중지하고 기본 HID 제어만 유지합니다.',
         disk: '가상 디스크',
         diskDesc: '원격 호스트에서 가상 USB를 마운트합니다.',
-        diskLocked: '이미지가 마운트된 동안 꺼짐 (켜면 마운트가 해제됩니다)',
-        diskCancelMount:
-          '가상 디스크를 켜면 마운트된 이미지가 해제되고 진행 중인 이미지 다운로드/업로드도 중단됩니다. 계속하시겠습니까?',
-        diskBreakDownload: '가상 디스크를 켜면 이미지 다운로드가 중단됩니다. 계속하시겠습니까?',
         network: '가상 네트워크',
         networkDesc: '원격 호스트에서 가상 네트워크 카드를 마운트합니다.',
         reboot: '재부팅',
         rebootDesc: 'NanoKVM을 재부팅하시겠습니까?',
         okBtn: '네',
-        cancelBtn: '아니오'
+        cancelBtn: '아니오',
+        diskLocked: '이미지가 마운트된 동안 꺼짐 (켜면 마운트가 해제됩니다)',
+        diskCancelMount:
+          '가상 디스크를 켜면 마운트된 이미지가 해제되고 진행 중인 이미지 다운로드/업로드도 중단됩니다. 계속하시겠습니까?',
+        diskBreakDownload: '가상 디스크를 켜면 이미지 다운로드가 중단됩니다. 계속하시겠습니까?',
+        attention: '주의'
       },
       network: {
         title: '네트워크',
@@ -596,7 +661,28 @@ const ko = {
         logoutBtn: '로그아웃',
         logoutDesc: '정말로 로그아웃 하시겠습니까?',
         okBtn: '네',
-        cancelBtn: '아니오'
+        cancelBtn: '아니오',
+        role: '역할',
+        roles: {
+          admin: '관리자',
+          user: '사용자'
+        },
+        users: {
+          title: '사용자',
+          create: '사용자 만들기',
+          enabled: '사용',
+          disabled: '사용 안 함',
+          deviceOwner: '장치 소유자',
+          resetPassword: '비밀번호 재설정',
+          delete: '삭제',
+          deleteConfirm: '이 사용자를 삭제하고 모든 세션을 취소할까요?',
+          created: '사용자 생성됨',
+          deleted: '사용자 삭제됨',
+          passwordUpdated: '비밀번호 업데이트됨',
+          loadFailed: '사용자를 불러오지 못했습니다',
+          saveFailed: '사용자를 저장하지 못했습니다',
+          deleteFailed: '사용자를 삭제하지 못했습니다'
+        }
       }
     },
     picoclaw: {

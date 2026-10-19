@@ -5,7 +5,8 @@ const tr = {
       login: 'Giriş',
       changePassword: 'Şifreyi değiştir',
       terminal: 'Uçbirim',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Disk imajları ve dosya paylaşımı'
     },
     auth: {
       login: 'Giriş',
@@ -40,7 +41,10 @@ const tr = {
         change3: 'Sistem yöneticisi şifresi (Güvenli Kabuk Bağlantısı (SSH) giriş şifresi)',
         change4:
           'Şifreleri sıfırlamak için NanoKVM üzerinde bulunan BOOT tuşuna 10 saniye boyunca basılı tutun.'
-      }
+      },
+      placeholderCurrentPassword: 'Geçerli şifre',
+      passwordLength: 'Şifre 8 ile 72 karakter arasında olmalıdır',
+      invalidCurrentPassword: 'Geçerli şifre yanlış'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -213,33 +217,44 @@ const tr = {
         disable: 'Yalnızca HID modunu devre dışı bırak'
       }
     },
-    image: {
-      title: 'Disk İmajları',
-      loading: 'Yükleniyor...',
-      empty: 'Hiçbir şey bulunamadı',
+    storage: {
+      title: 'Disk imajları ve dosya paylaşımı',
+      empty:
+        'Henüz imaj yok. Bir ISO veya IMG yükleyin ya da hedef makineden diske bir tane kopyalayın.',
+      notAttached: 'Hiçbir şey bağlı değil',
+      attached: 'Bağlı: {{name}}',
+      eject: 'Çıkar',
+      mount: 'Bağla',
       mountMode: 'Montaj modu',
-      mountFailed: 'Bağlantı başarısız oldu',
-      mountDesc:
-        'Bazı sistemlerde, disk imajını bağlamadan önce uzak ana bilgisayardaki sanal diski çıkarmak gerekir.',
-      diskOnWarn:
-        'İmajı bağlamak sanal diski kapatır, böylece bilgisayar /data dizinine erişemez. Devam edilsin mi?',
-      diskOffWarn:
-        'Sanal disk kapalı ve imajı bağlamak için açılması gerekiyor. Bilgisayardaki USB aygıtları yeniden tanımlanır. Devam edilsin mi?',
-      diskShared:
-        'Sanal disk açık, bu nedenle /data burada salt okunur. İmaj silmek veya yüklemek için sanal diski kapatın.',
-      unmountFailed: 'Bağlantıyı kesme işlemi başarısız oldu',
-      unmountDesc:
-        'Bazı sistemlerde, görüntünün bağlantısını kesmeden önce uzak ana bilgisayardan manuel olarak çıkarmanız gerekir.',
-      refresh: 'Disk imajı listesini yenile',
-      attention: 'Dikkat',
-      deleteConfirm: 'Bu resmi silmek istediğinizden emin misiniz?',
-      okBtn: 'Evet',
-      cancelBtn: 'Hayır',
+      mountModeDisk: 'Yığın depolama',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Dosya yöneticisini aç',
+      refresh: 'Yenile',
+      delete: 'Sil',
+      deleteTitle: 'Ortamı sil',
+      deleteConfirm: '{{name}} silinsin mi? İçindeki dosyalar kaybolur.',
+      downloadImage: 'İmajı indir',
+      typePartition: 'Paylaşılan dosyalar',
+      volumeLabel: 'Çıkarılabilir disk',
+      groups: {
+        share: 'Dosya paylaşımı',
+        images: 'İmajlar'
+      },
+      failed: 'İşlem başarısız oldu',
+      hidOnly: 'Yalnızca HID modu: sanal disk kullanılamıyor',
+      disabled: 'Sanal disk devre dışı (Ayarlar - Aygıt)',
+      force: {
+        title: 'Ortam zorla geri alınsın mı?',
+        desc: 'Hedef makine bu ortamı hâlâ kullanıyor. Geri almak USB aygıtını yeniden numaralandırır ve diske henüz yazmadığı her şeyi kaybedebilir.',
+        menuHint:
+          'Hedef makine bu ortamı kullanıyor. Zorla geri almak için dosya yöneticisini açın.'
+      },
       tips: {
         title: 'Nasıl yüklenir',
         usb1: "NanoKVM'i bilgisayarınıza USB ile bağlayın.",
-        usb2: 'Sanal diskin bağlı olduğundan emin olun (Ayarlar - Sanal Disk).',
+        usb2: 'Bu sayfada paylaşılan dosyaları yığın depolama modunda bağlayın.',
         usb3: 'Sanal diski bilgisayarınızda açın ve disk imajı dosyanızı sanal diskin kök dizinine kopyalayın.',
+        usb4: 'Kopyalama bitince diski çıkarın: imaj ardından listede görünür.',
         scp1: 'NanoKVM ve bilgisayarınızın aynı yerel ağda bulunduğundan emin olun.',
         scp2: "Bilgisayarınızda uçbirimi açın ve disk imajı dosyanını SCP komudunu kullanarak NanoKVM'in /data dizinine yükleyin.",
         scp3: 'Örnek: scp senin-disk-imajı-dizinin root@senin-nanokvm-ip:/data',
@@ -249,7 +264,66 @@ const tr = {
         tf3: 'micro SD kartı kart okuyucusuna takın ve bilgisayarınıza bağlayın.',
         tf4: 'Disk imajı dosyanını micro SD kartın /data dizinine kopyalayın.',
         tf5: "micro SD kartı NanoKVM'e geri yerleştirin."
-      }
+      },
+      job: {
+        running: '{{name}} işleniyor'
+      },
+      enableDisk: {
+        title: 'Sanal disk etkinleştirilsin mi?',
+        desc: 'Bir ortamı bağlamak için şu anda kapalı olan sanal disk gerekir. Şimdi etkinleştirilsin mi? Hedef makinenin klavyesi ve faresinin bağlantısı bir an kesilir.',
+        menuHint: 'Sanal disk devre dışı. Ayarlar - Aygıt bölümünden etkinleştirin.'
+      },
+      add: {
+        title: 'Ortam ekle',
+        upload: 'ISO veya IMG yükle',
+        fromUrl: "URL'den indir",
+        url: "İmaj URL'si",
+        urlRequired: 'Lütfen bir URL girin',
+        onlyImages: 'Yalnızca .iso ve .img dosyaları bağlanabilir',
+        dropHint: 'ISO veya IMG dosyasını buraya sürükleyin ya da seçmek için tıklayın',
+        cdromOnlyIso: 'Bir CD-ROM yalnızca ISO 9660 imajı taşıyabilir',
+        uploadFailed: 'Yükleme başarısız oldu',
+        downloadFailed: 'İndirme başarısız oldu',
+        uploading: '{{name}} yükleniyor',
+        downloading: '{{name}} indiriliyor',
+        done: '{{name}} hazır',
+        checksumFailed: 'İmaj, SHA-256 sağlama toplamıyla eşleşmiyor.',
+        blocked: 'Hedef makine diski kullanıyor',
+        copyHint: 'İmajı SCP ile veri bölümüne ya da hedef makineden doğrudan kopyalayabilirsiniz.'
+      },
+      files: {
+        selectMedium: 'Dosyalarını görmek için bir ortam seçin.',
+        reasonAttached: 'Bu ortam hedef makineye bağlı.',
+        reasonAttachedHint:
+          'Önce çıkarın: dosyalarının okunabilmesi için hedef makinenin diski bırakması gerekir.',
+        reasonNotBrowsable: 'Bu ortam, dosya yöneticisinin açamadığı bir dosya sistemi içeriyor.',
+        reasonNoLoop: 'Bu aygıt disk imajlarını bağlayamıyor (loop desteği yok).',
+        reasonISOImage:
+          'ISO 9660 imajının içeriği burada görüntülenemez. İmaj hedef makineye yine bağlanabilir.',
+        empty: 'Bu klasör boş',
+        noMatch: 'Aramanızla eşleşen dosya yok.',
+        free: '{{size}} boş',
+        search: 'Bu klasörde ara',
+        sort: {
+          name: 'Ad',
+          size: 'Boyut',
+          type: 'Tür',
+          asc: 'Artan',
+          desc: 'Azalan'
+        },
+        upload: 'Ortama dosya yükle',
+        deleteFolderTitle: 'Klasörü sil',
+        deleteFolderConfirm:
+          '{{name}} klasörü ve içindeki her şey silinsin mi? Bu işlem geri alınamaz.',
+        uploading: 'Yükleniyor…',
+        uploadFailed: 'Yükleme başarısız oldu',
+        download: 'İndir',
+        delete: 'Sil',
+        deleteTitle: 'Dosyayı sil',
+        deleteConfirm: '{{name}} ortamdan silinsin mi?'
+      },
+      yes: 'Evet',
+      no: 'Hayır'
     },
     script: {
       title: 'Betikler',
@@ -291,21 +365,11 @@ const tr = {
       ok: 'Tamam'
     },
     download: {
-      title: 'Disk İmajı İndirici',
-      input: 'Uzak imaj URL’sini girin',
-      ok: 'Tamam',
-      disabled: '/data bölüntüsü salt okunur modda, disk imajı indirilemiyor.',
-      diskShared: 'Önce sanal diski kapatın, sonra imaj indirmeyi kullanın.',
-      diskOff: 'Sanal diski kapat',
-      uploadbox: 'Dosyayı buraya bırakın veya seçmek için tıklayın',
-      inputfile: 'Lütfen resim dosyasını giriniz',
-      NoISO: 'ISO yok',
+      disabled:
+        'Veri bölümü, hedef makine kullandığı sürece salt okunurdur: yeni imaj yazılamaz, mevcut dosyalar indirilebilir.',
       sha256: 'SHA-256 (isteğe bağlı)',
       sha256Placeholder: '64 karakterlik SHA-256 sağlama toplamını girin',
       invalidSHA256: 'SHA-256, 64 karakterlik bir onaltılık dize olmalıdır',
-      failed: 'İndirme başarısız',
-      success: 'İndirme başarılı',
-      checksumFailed: 'İndirme başarısız: SHA-256 doğrulaması başarısız',
       cancel: 'İptal',
       cancelFailed: 'İndirme iptal edilemedi'
     },
@@ -457,16 +521,17 @@ const tr = {
           'Yalnızca temel HID kontrolünü koruyarak sanal aygıtları taklit etmeyi bırakın',
         disk: 'Sanal Disk',
         diskDesc: "Sanal U-disk'i uzak ana bilgisayara bağla",
-        diskLocked: 'Bir imaj bağlıyken kapalı (açmak bağlamayı iptal eder)',
-        diskCancelMount:
-          'Sanal diski açmak, bağlı imajı iptal eder ve sürmekte olan imaj indirme veya yüklemeyi keser. Devam edilsin mi?',
-        diskBreakDownload: 'Sanal diski açmak imaj indirmeyi keser. Devam edilsin mi?',
         network: 'Sanal Ağ',
         networkDesc: 'Sanal ağ kartını uzak ana bilgisayara bağla',
         reboot: 'Yeniden Başlat',
         rebootDesc: "NanoKVM'i yeniden başlatmak istediğinizden emin misiniz?",
         okBtn: 'Evet',
-        cancelBtn: 'Hayır'
+        cancelBtn: 'Hayır',
+        diskLocked: 'Bir imaj bağlıyken kapalı (açmak bağlamayı iptal eder)',
+        diskCancelMount:
+          'Sanal diski açmak, bağlı imajı iptal eder ve sürmekte olan imaj indirme veya yüklemeyi keser. Devam edilsin mi?',
+        diskBreakDownload: 'Sanal diski açmak imaj indirmeyi keser. Devam edilsin mi?',
+        attention: 'Dikkat'
       },
       network: {
         title: 'Ağ',
@@ -604,7 +669,28 @@ const tr = {
         logoutBtn: 'Çıkış  yap',
         logoutDesc: 'Çıkış yapmak istediğinizden emin misiniz?',
         okBtn: 'Evet',
-        cancelBtn: 'Hayır'
+        cancelBtn: 'Hayır',
+        role: 'Rol',
+        roles: {
+          admin: 'Yönetici',
+          user: 'Kullanıcı'
+        },
+        users: {
+          title: 'Kullanıcılar',
+          create: 'Kullanıcı oluştur',
+          enabled: 'Etkin',
+          disabled: 'Devre dışı',
+          deviceOwner: 'Aygıt sahibi',
+          resetPassword: 'Şifreyi sıfırla',
+          delete: 'Sil',
+          deleteConfirm: 'Bu kullanıcı silinsin ve tüm oturumları iptal edilsin mi?',
+          created: 'Kullanıcı oluşturuldu',
+          deleted: 'Kullanıcı silindi',
+          passwordUpdated: 'Şifre güncellendi',
+          loadFailed: 'Kullanıcılar yüklenemedi',
+          saveFailed: 'Kullanıcı kaydedilemedi',
+          deleteFailed: 'Kullanıcı silinemedi'
+        }
       }
     },
     picoclaw: {

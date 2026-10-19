@@ -5,7 +5,8 @@ const es = {
       login: 'Inicio de sesión',
       changePassword: 'Cambiar contraseña',
       terminal: 'Consola',
-      wifi: 'Wi-Fi'
+      wifi: 'Wi-Fi',
+      storage: 'Imágenes y uso compartido de archivos'
     },
     auth: {
       login: 'Iniciar sesión',
@@ -40,7 +41,10 @@ const es = {
         change2: 'Contraseña de acceso web',
         change3: 'Contraseña root del sistema (contraseña de acceso por SSH)',
         change4: 'Para restablecer las contraseñas, mantén pulsado el botón BOOT del NanoKVM.'
-      }
+      },
+      placeholderCurrentPassword: 'Contraseña actual',
+      passwordLength: 'La contraseña debe tener entre 8 y 72 caracteres',
+      invalidCurrentPassword: 'La contraseña actual no es correcta'
     },
     wifi: {
       title: 'Wi-Fi',
@@ -215,33 +219,44 @@ const es = {
         disable: 'Desactivar modo sólo HID'
       }
     },
-    image: {
-      title: 'Imágenes',
-      loading: 'Cargando...',
-      empty: 'No se ha encontrado nada',
+    storage: {
+      title: 'Imágenes y uso compartido de archivos',
+      empty:
+        'Aún no hay imágenes. Sube una ISO o IMG, o copia una en el disco desde el equipo remoto.',
+      notAttached: 'Nada montado',
+      attached: 'Montado: {{name}}',
+      eject: 'Expulsar',
+      mount: 'Montar',
       mountMode: 'Modo de montaje',
-      mountFailed: 'Fallo al montar',
-      mountDesc:
-        'En algunos sistemas, es necesario expulsar el disco virtual del host remoto antes de montar una imagen.',
-      diskOnWarn:
-        'Montar la imagen desactiva el disco virtual, por lo que el equipo ya no puede acceder a /data. ¿Continuar?',
-      diskOffWarn:
-        'El disco virtual está desactivado y hay que activarlo para montar la imagen. Los dispositivos USB del equipo se enumeran de nuevo. ¿Continuar?',
-      diskShared:
-        'El disco virtual está activado, así que /data es de solo lectura aquí. Desactívalo para eliminar o subir imágenes.',
-      unmountFailed: 'Fallo al desmontar',
-      unmountDesc:
-        'En algunos sistemas, es necesario expulsar manualmente el disco virtual desde el host remoto antes de desmontar la imagen.',
-      refresh: 'Actualizar la lista de imágenes',
-      attention: 'Atención',
-      deleteConfirm: '¿Estás seguro de que deseas eliminar esta imagen?',
-      okBtn: 'Sí',
-      cancelBtn: 'No',
+      mountModeDisk: 'Almacenamiento masivo',
+      mountModeCdrom: 'CD-ROM',
+      openManager: 'Abrir el gestor de archivos',
+      refresh: 'Actualizar',
+      delete: 'Eliminar',
+      deleteTitle: 'Eliminar el medio',
+      deleteConfirm: '¿Eliminar {{name}}? Los archivos que contiene se perderán.',
+      downloadImage: 'Descargar la imagen',
+      typePartition: 'Archivos compartidos',
+      volumeLabel: 'Disco extraíble',
+      groups: {
+        share: 'Uso compartido de archivos',
+        images: 'Imágenes'
+      },
+      failed: 'La operación ha fallado',
+      hidOnly: 'Modo solo HID: el disco virtual no está disponible',
+      disabled: 'El disco virtual está desactivado (Ajustes - Dispositivo)',
+      force: {
+        title: '¿Recuperar el medio por la fuerza?',
+        desc: 'El equipo remoto todavía está usando este medio. Recuperarlo vuelve a enumerar el dispositivo USB y puede perder todo lo que aún no ha escrito en el disco.',
+        menuHint:
+          'El equipo remoto está usando este medio. Abre el gestor de archivos para recuperarlo por la fuerza.'
+      },
       tips: {
         title: 'Cómo subir imágenes',
         usb1: 'Conecta el NanoKVM a tu computadora mediante USB.',
-        usb2: 'Asegúrate de que el disco virtual esté montado (Ajustes - Disco Virtual).',
+        usb2: 'En esta página, monta los archivos compartidos en modo de almacenamiento masivo.',
         usb3: 'Abre el disco virtual en tu computadora y copia el archivo de imagen en el directorio raíz del disco virtual.',
+        usb4: 'Expulsa el disco cuando termine la copia: la imagen aparecerá entonces en la lista.',
         scp1: 'Asegúrate de que el NanoKVM y tu computadora estén en la misma red local.',
         scp2: 'Abre una terminal en tu computadora y usa el comando SCP para subir el archivo de imagen al directorio /data en el NanoKVM.',
         scp3: 'Ejemplo: scp tu-ruta-de-imagen root@tu-ip-del-nanokvm:/data',
@@ -251,7 +266,68 @@ const es = {
         tf3: 'Inserta la tarjeta SD en un lector de tarjetas y conéctalo a tu computadora.',
         tf4: 'Copia el archivo de imagen en el directorio /data de la tarjeta SD.',
         tf5: 'Inserta la tarjeta SD en el NanoKVM.'
-      }
+      },
+      job: {
+        running: 'Procesando {{name}}'
+      },
+      enableDisk: {
+        title: '¿Activar el disco virtual?',
+        desc: 'Para montar un medio se necesita el disco virtual, que ahora está desactivado. ¿Activarlo ahora? El teclado y el ratón del equipo remoto se desconectarán un momento.',
+        menuHint: 'El disco virtual está desactivado. Actívalo en Ajustes - Dispositivo.'
+      },
+      add: {
+        title: 'Añadir medio',
+        upload: 'Subir una ISO o IMG',
+        fromUrl: 'Descargar desde una URL',
+        url: 'URL de la imagen',
+        urlRequired: 'Introduce una URL',
+        onlyImages: 'Solo se pueden montar archivos .iso y .img',
+        dropHint: 'Arrastra una ISO o IMG aquí, o haz clic para elegir un archivo',
+        cdromOnlyIso: 'Un CD-ROM solo puede contener una imagen ISO 9660',
+        uploadFailed: 'La subida ha fallado',
+        downloadFailed: 'La descarga ha fallado',
+        uploading: 'Subiendo {{name}}',
+        downloading: 'Descargando {{name}}',
+        done: '{{name}} está listo',
+        checksumFailed: 'La imagen no coincide con la suma de comprobación SHA-256.',
+        blocked: 'El equipo remoto está usando el disco',
+        copyHint:
+          'También puedes copiar una imagen a la partición de datos por SCP, o desde el equipo remoto.'
+      },
+      files: {
+        selectMedium: 'Selecciona un medio para ver los archivos que contiene.',
+        reasonAttached: 'Este medio está conectado al equipo remoto.',
+        reasonAttachedHint:
+          'Expúlsalo primero: el equipo remoto debe liberar el disco antes de que se puedan leer sus archivos.',
+        reasonNotBrowsable:
+          'Este medio contiene un sistema de archivos que el gestor no puede abrir.',
+        reasonNoLoop: 'Este dispositivo no puede montar imágenes de disco (sin soporte de loop).',
+        reasonISOImage:
+          'Una imagen ISO 9660 no se puede explorar aquí. Se puede montar igualmente en el equipo remoto.',
+        empty: 'Esta carpeta está vacía',
+        noMatch: 'Ningún archivo coincide con la búsqueda.',
+        free: '{{size}} libres',
+        search: 'Buscar en esta carpeta',
+        sort: {
+          name: 'Nombre',
+          size: 'Tamaño',
+          type: 'Tipo',
+          asc: 'Ascendente',
+          desc: 'Descendente'
+        },
+        upload: 'Subir un archivo al medio',
+        deleteFolderTitle: 'Eliminar carpeta',
+        deleteFolderConfirm:
+          '¿Eliminar la carpeta {{name}} y todo su contenido? Esta acción no se puede deshacer.',
+        uploading: 'Subiendo…',
+        uploadFailed: 'La subida ha fallado',
+        download: 'Descargar',
+        delete: 'Eliminar',
+        deleteTitle: 'Eliminar el archivo',
+        deleteConfirm: '¿Eliminar {{name}} del medio?'
+      },
+      yes: 'Sí',
+      no: 'No'
     },
     script: {
       title: 'Script',
@@ -293,21 +369,11 @@ const es = {
       ok: 'Aceptar'
     },
     download: {
-      title: 'Descargador de imágenes',
-      input: 'Por favor, introduce la URL de una imagen remota',
-      ok: 'Aceptar',
-      disabled: 'La partición /data es de sólo lectura, no se puede descargar la imagen',
-      diskShared: 'Desactiva primero el disco virtual y luego usa la descarga de imágenes.',
-      diskOff: 'Desactivar el disco virtual',
-      uploadbox: 'Suelte el archivo aquí o haga clic para seleccionar',
-      inputfile: 'Por favor ingrese el archivo de imagen',
-      NoISO: 'Sin ISO',
+      disabled:
+        'La partición de datos es de solo lectura mientras la usa el equipo remoto: no se pueden escribir imágenes nuevas, pero los archivos existentes se siguen pudiendo descargar.',
       sha256: 'SHA-256 (opcional)',
       sha256Placeholder: 'Introduzca una suma de comprobación SHA-256 de 64 caracteres',
       invalidSHA256: 'SHA-256 debe ser una cadena hexadecimal de 64 caracteres',
-      failed: 'Descarga fallida',
-      success: 'Descarga correcta',
-      checksumFailed: 'Descarga fallida: error en la verificación SHA-256',
       cancel: 'Cancelar',
       cancelFailed: 'No se pudo cancelar la descarga'
     },
@@ -458,17 +524,18 @@ const es = {
           'Dejar de emular dispositivos virtuales y conservar solo el control básico HID',
         disk: 'Disco Virtual',
         diskDesc: 'Montar disco virtual en el host remoto',
-        diskLocked: 'Desactivado mientras hay una imagen montada (activarlo cancela el montaje)',
-        diskCancelMount:
-          'Activar el disco virtual cancela la imagen montada e interrumpe una descarga o subida de imagen en curso. ¿Continuar?',
-        diskBreakDownload:
-          'Activar el disco virtual interrumpe la descarga de imágenes. ¿Continuar?',
         network: 'Red Virtual',
         networkDesc: 'Montar tarjeta de red virtual en el host remoto',
         reboot: 'Reiniciar',
         rebootDesc: '¿Estás seguro de que deseas reiniciar el NanoKVM?',
         okBtn: 'Sí',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        diskLocked: 'Desactivado mientras hay una imagen montada (activarlo cancela el montaje)',
+        diskCancelMount:
+          'Activar el disco virtual cancela la imagen montada e interrumpe una descarga o subida de imagen en curso. ¿Continuar?',
+        diskBreakDownload:
+          'Activar el disco virtual interrumpe la descarga de imágenes. ¿Continuar?',
+        attention: 'Atención'
       },
       network: {
         title: 'Red',
@@ -611,7 +678,28 @@ const es = {
         logoutBtn: 'Cerrar sesión',
         logoutDesc: '¿Estás seguro de que deseas cerrar sesión?',
         okBtn: 'Sí',
-        cancelBtn: 'No'
+        cancelBtn: 'No',
+        role: 'Rol',
+        roles: {
+          admin: 'Administrador',
+          user: 'Usuario'
+        },
+        users: {
+          title: 'Usuarios',
+          create: 'Crear usuario',
+          enabled: 'Activado',
+          disabled: 'Desactivado',
+          deviceOwner: 'Propietario del dispositivo',
+          resetPassword: 'Restablecer contraseña',
+          delete: 'Eliminar',
+          deleteConfirm: '¿Eliminar este usuario y revocar todas sus sesiones?',
+          created: 'Usuario creado',
+          deleted: 'Usuario eliminado',
+          passwordUpdated: 'Contraseña actualizada',
+          loadFailed: 'No se pudieron cargar los usuarios',
+          saveFailed: 'No se pudo guardar el usuario',
+          deleteFailed: 'No se pudo eliminar el usuario'
+        }
       }
     },
     picoclaw: {

@@ -13,6 +13,7 @@ import (
 	"NanoKVM-Server/logger"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/router"
+	"NanoKVM-Server/service/storage/diskfs"
 	"NanoKVM-Server/service/vm"
 	"NanoKVM-Server/service/vm/jiggler"
 	"NanoKVM-Server/utils"
@@ -48,6 +49,11 @@ func initialize() {
 
 	// run mouse jiggler
 	jiggler.GetJiggler().Run()
+
+	// A medium left mounted by a crash or a restart keeps its loop device
+	// busy; nothing can be mounted by this process yet, so whatever is there
+	// is stale.
+	diskfs.CleanupStale()
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
@@ -123,5 +129,6 @@ func run() {
 }
 
 func dispose() {
+	diskfs.CleanupStale()
 	common.GetKvmVision().Close()
 }
