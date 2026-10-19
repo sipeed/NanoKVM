@@ -75,13 +75,17 @@ NanoKVM uses two device-wide roles:
 it; it is therefore always granted and pinned in the account editor. Media access splits along the
 trust boundary: `media.mount` attaches a medium to the target machine and reads it, while
 `media.manage` changes the library contents (uploads, deletes, and exchanging files with the
-target machine).
+target machine). The emulated USB devices are neither: the virtual disk and the RNDIS adapter
+hand the target machine the raw data partition and a network interface, so both follow `device`.
+A medium can only be attached while a `device` holder has the virtual disk switched on, and the
+storage page says so when it is off.
 
 Five grants reach further than their names suggest and are effectively full device control, so
 grant them only to accounts you trust with the whole device:
 
 - `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
-- `device` can enable SSH, which also means root, and can reboot the device.
+- `device` can enable SSH, which also means root, can reboot the device, and can hand the raw
+  data partition or a network interface to the target machine through the emulated USB devices.
 - `update` installs firmware and application packages.
 - `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
   outside the web session, and the key keeps working after this grant is revoked until it is

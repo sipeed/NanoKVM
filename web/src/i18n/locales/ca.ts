@@ -276,7 +276,9 @@ const ca = {
       enableDisk: {
         title: 'Voleu activar el disc virtual?',
         desc: "Per muntar un suport cal el disc virtual, que ara està desactivat. Voleu activar-lo? El teclat i el ratolí de l'ordinador remot es desconnectaran un moment.",
-        menuHint: 'El disc virtual està desactivat. Activeu-lo a Configuració - Dispositiu.'
+        menuHint: 'El disc virtual està desactivat. Activeu-lo a Configuració - Dispositiu.',
+        askDevice:
+          "El disc virtual està desactivat. Cal que un compte amb el permís de dispositiu l'activi primer."
       },
       add: {
         title: 'Afegeix un suport',

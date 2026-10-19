@@ -277,7 +277,9 @@ const nb = {
       enableDisk: {
         title: 'Slå på den virtuelle disken?',
         desc: 'For å montere et medium trengs den virtuelle disken, som er slått av nå. Slå den på? Tastaturet og musen til målmaskinen kobles fra et øyeblikk.',
-        menuHint: 'Den virtuelle disken er slått av. Slå den på under Innstillinger - Enhet.'
+        menuHint: 'Den virtuelle disken er slått av. Slå den på under Innstillinger - Enhet.',
+        askDevice:
+          'Den virtuelle disken er slått av. En konto med enhetstillatelse må aktivere den først.'
       },
       add: {
         title: 'Legg til medium',

@@ -282,7 +282,9 @@ const de = {
         title: 'Virtuelles Laufwerk aktivieren?',
         desc: 'Zum Einbinden eines Mediums wird das virtuelle Laufwerk benötigt, das derzeit ausgeschaltet ist. Jetzt aktivieren? Tastatur und Maus des Zielrechners werden kurz getrennt.',
         menuHint:
-          'Das virtuelle Laufwerk ist deaktiviert. Aktivieren Sie es unter Einstellungen - Gerät.'
+          'Das virtuelle Laufwerk ist deaktiviert. Aktivieren Sie es unter Einstellungen - Gerät.',
+        askDevice:
+          'Das virtuelle Laufwerk ist ausgeschaltet. Ein Konto mit der Geräte-Berechtigung muss es zuerst einschalten.'
       },
       add: {
         title: 'Medium hinzufügen',

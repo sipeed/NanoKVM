@@ -276,7 +276,9 @@ const da = {
       enableDisk: {
         title: 'Slå den virtuelle disk til?',
         desc: 'For at montere et medie kræves den virtuelle disk, som er slået fra lige nu. Slå den til? Målcomputerens tastatur og mus afbrydes et øjeblik.',
-        menuHint: 'Den virtuelle disk er slået fra. Slå den til under Indstillinger - Enhed.'
+        menuHint: 'Den virtuelle disk er slået fra. Slå den til under Indstillinger - Enhed.',
+        askDevice:
+          'Den virtuelle disk er slået fra. En konto med enhedstilladelse skal aktivere den først.'
       },
       add: {
         title: 'Tilføj medie',

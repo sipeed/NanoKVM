@@ -277,7 +277,9 @@ const cz = {
       enableDisk: {
         title: 'Zapnout virtuální disk?',
         desc: 'K připojení média je potřeba virtuální disk, který je nyní vypnutý. Zapnout ho? Klávesnice a myš vzdáleného počítače se na okamžik odpojí.',
-        menuHint: 'Virtuální disk je vypnutý. Zapněte ho v Nastavení - Zařízení.'
+        menuHint: 'Virtuální disk je vypnutý. Zapněte ho v Nastavení - Zařízení.',
+        askDevice:
+          'Virtuální disk je vypnutý. Nejprve jej musí zapnout účet s oprávněním pro zařízení.'
       },
       add: {
         title: 'Přidat médium',

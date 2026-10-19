@@ -278,7 +278,9 @@ const es = {
       enableDisk: {
         title: '¿Activar el disco virtual?',
         desc: 'Para montar un medio se necesita el disco virtual, que ahora está desactivado. ¿Activarlo ahora? El teclado y el ratón del equipo remoto se desconectarán un momento.',
-        menuHint: 'El disco virtual está desactivado. Actívalo en Ajustes - Dispositivo.'
+        menuHint: 'El disco virtual está desactivado. Actívalo en Ajustes - Dispositivo.',
+        askDevice:
+          'El disco virtual está desactivado. Una cuenta con el permiso de dispositivo debe activarlo primero.'
       },
       add: {
         title: 'Añadir medio',

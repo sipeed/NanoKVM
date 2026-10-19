@@ -277,7 +277,9 @@ const pt_br = {
       enableDisk: {
         title: 'Ativar o disco virtual?',
         desc: 'Montar uma mídia exige o disco virtual, que está desativado no momento. Ativá-lo agora? O teclado e o mouse da máquina remota serão desconectados por um instante.',
-        menuHint: 'O disco virtual está desativado. Ative-o em Configurações - Dispositivo.'
+        menuHint: 'O disco virtual está desativado. Ative-o em Configurações - Dispositivo.',
+        askDevice:
+          'O disco virtual está desativado. Uma conta com a permissão de dispositivo precisa ativá-lo primeiro.'
       },
       add: {
         title: 'Adicionar mídia',

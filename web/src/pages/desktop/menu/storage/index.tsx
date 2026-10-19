@@ -24,6 +24,9 @@ export const Storage = () => {
   const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const canMount = hasPermission('media.mount');
+  // The virtual disk is a device setting, so whether the hint can point at an
+  // enabled switch depends on this grant.
+  const canDevice = hasPermission('device');
 
   const [media, setMedia] = useState<api.MediaItem[]>([]);
   const [error, setError] = useState('');
@@ -39,7 +42,8 @@ export const Storage = () => {
   const { mount, eject, busy } = useMediaMount({
     onError: (message, description) =>
       setError(description ? `${message} — ${description}` : message),
-    onNeedEnableDisk: () => setError(t('storage.enableDisk.menuHint')),
+    onNeedEnableDisk: () =>
+      setError(t(canDevice ? 'storage.enableDisk.menuHint' : 'storage.enableDisk.askDevice')),
     onNeedForce: () => setError(t('storage.force.menuHint')),
     onChanged: () => void refresh()
   });

@@ -276,7 +276,9 @@ const tr = {
       enableDisk: {
         title: 'Sanal disk etkinleştirilsin mi?',
         desc: 'Bir ortamı bağlamak için şu anda kapalı olan sanal disk gerekir. Şimdi etkinleştirilsin mi? Hedef makinenin klavyesi ve faresinin bağlantısı bir an kesilir.',
-        menuHint: 'Sanal disk devre dışı. Ayarlar - Aygıt bölümünden etkinleştirin.'
+        menuHint: 'Sanal disk devre dışı. Ayarlar - Aygıt bölümünden etkinleştirin.',
+        askDevice:
+          'Sanal disk kapalı. Önce cihaz iznine sahip bir hesabın etkinleştirmesi gerekiyor.'
       },
       add: {
         title: 'Ortam ekle',

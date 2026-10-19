@@ -75,6 +75,9 @@ export const Storage = () => {
   const canManage = hasPermission('media.manage');
   // Managing the library requires inspecting it: both roles may read.
   const canRead = canMount || canManage;
+  // Turning the virtual disk on is a device setting, so only an account that may
+  // change device settings can do it from here.
+  const canDevice = hasPermission('device');
   const [notificationApi, contextHolder] = notification.useNotification();
   const { modal } = App.useApp();
 
@@ -212,21 +215,23 @@ export const Storage = () => {
   // swallowed by a popover closing.
   const { mount, eject, busy } = useMediaMount({
     onError: notifyError,
-    onNeedEnableDisk: (retry) =>
-      setConfirm({
-        title: t('storage.enableDisk.title'),
-        description: t('storage.enableDisk.desc'),
-        ok: async () => {
-          // Ask for the state, do not toggle: the disk being off is why this
-          // dialog appeared, and a toggle would be wrong if that changed.
-          const rsp = await api.setVirtualDevice('disk', true);
-          if (rsp.code !== 0) {
-            notifyError(rsp.msg);
-            return;
-          }
-          retry();
-        }
-      }),
+    onNeedEnableDisk: canDevice
+      ? (retry) =>
+          setConfirm({
+            title: t('storage.enableDisk.title'),
+            description: t('storage.enableDisk.desc'),
+            ok: async () => {
+              // Ask for the state, do not toggle: the disk being off is why this
+              // dialog appeared, and a toggle would be wrong if that changed.
+              const rsp = await api.setVirtualDevice('disk', true);
+              if (rsp.code !== 0) {
+                notifyError(rsp.msg);
+                return;
+              }
+              retry();
+            }
+          })
+      : () => notifyError(t('storage.enableDisk.askDevice')),
     onNeedForce: (retry) =>
       setConfirm({
         title: t('storage.force.title'),

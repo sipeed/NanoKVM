@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Button, Modal, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
@@ -11,6 +12,11 @@ const imageUpdatedEvent = 'nanokvm:image-updated';
 
 export const VirtualDevices = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  // Both switches are device settings. The medium state behind the disk hint,
+  // and the transfer a disk change can interrupt, belong to the media library.
+  const canReadMedia = hasPermission('media.mount') || hasPermission('media.manage');
+  const canManageMedia = hasPermission('media.manage');
 
   const [isHidOnlyMode, setIsHidOnlyMode] = useState(false);
   const [isDiskEnabled, setIsDiskEnabled] = useState(false);
@@ -22,8 +28,12 @@ export const VirtualDevices = () => {
   useEffect(() => {
     getHidOnlyMode();
     getVirtualDevice();
-    getImageState();
-  }, []);
+    // The medium state only decides the disk hint, and reading it needs a media
+    // grant, so an account without one must not ask for it.
+    if (canReadMedia) {
+      getImageState();
+    }
+  }, [canReadMedia]);
 
   async function getHidOnlyMode() {
     try {
@@ -79,7 +89,9 @@ export const VirtualDevices = () => {
       }
 
       await getVirtualDevice();
-      await getImageState();
+      if (canReadMedia) {
+        await getImageState();
+      }
 
       // the desktop shows the mounted image and the CD-ROM flag too
       window.dispatchEvent(new Event(imageUpdatedEvent));
@@ -101,10 +113,12 @@ export const VirtualDevices = () => {
     setIsConfirmOpen(true);
   }
 
-  // A transfer writes to /data, which the host takes over. Reading the status
-  // is allowed to media.mount, but cancelling it needs media.manage: failing to
-  // stop one must not block the toggle, the server rejects it on its own.
+  // A transfer writes to /data, which the host takes over. Cancelling one needs
+  // media.manage, so an account without that grant cannot stop it and leaves the
+  // toggle to the server, which refuses the change while a transfer holds /data.
   async function stopTransfer() {
+    if (!canManageMedia) return;
+
     try {
       const rsp = await statusImage();
       if (rsp.code !== 0 || rsp.data?.status !== 'in_progress') return;
@@ -154,10 +168,12 @@ export const VirtualDevices = () => {
       >
         <div className="flex flex-col items-center space-y-1 pb-10">
           <p>
+            {/* Without the media grant the mount state cannot be read, so the
+                warning has to cover a mounted image as well as a transfer. */}
             {t(
-              isImageMounted
-                ? 'settings.device.diskCancelMount'
-                : 'settings.device.diskBreakDownload'
+              canReadMedia && !isImageMounted
+                ? 'settings.device.diskBreakDownload'
+                : 'settings.device.diskCancelMount'
             )}
           </p>
         </div>

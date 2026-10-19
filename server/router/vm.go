@@ -17,7 +17,6 @@ func vmRouter(r *gin.Engine) {
 	view := use(authn.PermConsoleView)
 	control := use(authn.PermConsoleControl)
 	power := use(authn.PermPower)
-	mediaMount := use(authn.PermMediaMount)
 	terminal := use(authn.PermTerminal)
 	device := use(authn.PermDevice)
 	network := use(authn.PermNetwork)
@@ -45,8 +44,12 @@ func vmRouter(r *gin.Engine) {
 	terminal.POST("/vm/script/run", service.RunScript)       // run script
 	terminal.DELETE("/vm/script", service.DeleteScript)      // delete script
 
-	mediaMount.GET("/vm/device/virtual", service.GetVirtualDevice)     // get virtual device
-	mediaMount.POST("/vm/device/virtual", service.UpdateVirtualDevice) // update virtual device
+	// The emulated USB devices are device settings, not media or network ones:
+	// the virtual disk hands the raw data partition to the target machine and the
+	// RNDIS adapter hands it a network interface, so neither belongs to the
+	// media library the disk serves or to the network settings of this side.
+	device.GET("/vm/device/virtual", service.GetVirtualDevice)     // get virtual device
+	device.POST("/vm/device/virtual", service.UpdateVirtualDevice) // update virtual device
 
 	device.GET("/vm/memory/limit", service.GetMemoryLimit)  // get memory limit
 	device.POST("/vm/memory/limit", service.SetMemoryLimit) // set memory limit

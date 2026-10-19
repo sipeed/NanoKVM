@@ -273,7 +273,9 @@ const se = {
       enableDisk: {
         title: 'Aktivera den virtuella disken?',
         desc: 'För att montera ett medium krävs den virtuella disken, som är avstängd just nu. Aktivera den? Måldatorns tangentbord och mus kopplas från ett ögonblick.',
-        menuHint: 'Den virtuella disken är avstängd. Aktivera den under Inställningar - Enhet.'
+        menuHint: 'Den virtuella disken är avstängd. Aktivera den under Inställningar - Enhet.',
+        askDevice:
+          'Den virtuella disken är avstängd. Ett konto med enhetsbehörighet måste aktivera den först.'
       },
       add: {
         title: 'Lägg till medium',

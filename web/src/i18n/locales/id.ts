@@ -276,7 +276,9 @@ const id = {
       enableDisk: {
         title: 'Aktifkan disk virtual?',
         desc: 'Untuk memasang media diperlukan disk virtual, yang saat ini dimatikan. Aktifkan sekarang? Papan ketik dan tetikus komputer target akan terputus sebentar.',
-        menuHint: 'Disk virtual dinonaktifkan. Aktifkan di Pengaturan - Perangkat.'
+        menuHint: 'Disk virtual dinonaktifkan. Aktifkan di Pengaturan - Perangkat.',
+        askDevice:
+          'Disk virtual nonaktif. Akun dengan izin perangkat harus mengaktifkannya terlebih dahulu.'
       },
       add: {
         title: 'Tambah media',

@@ -280,7 +280,9 @@ const hu = {
         title: 'Bekapcsolja a virtuális lemezt?',
         desc: 'Az adathordozó csatlakoztatásához a virtuális lemez kell, amely jelenleg ki van kapcsolva. Bekapcsolja? A célgép billentyűzete és egere egy pillanatra leválik.',
         menuHint:
-          'A virtuális lemez ki van kapcsolva. Kapcsolja be a Beállítások - Eszköz menüben.'
+          'A virtuális lemez ki van kapcsolva. Kapcsolja be a Beállítások - Eszköz menüben.',
+        askDevice:
+          'A virtuális lemez ki van kapcsolva. Előbb egy eszköz-engedéllyel rendelkező fióknak kell bekapcsolnia.'
       },
       add: {
         title: 'Adathordozó hozzáadása',

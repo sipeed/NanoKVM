@@ -280,7 +280,9 @@ const fr = {
       enableDisk: {
         title: 'Activer le disque virtuel ?',
         desc: "Monter un support nécessite le disque virtuel, actuellement désactivé. L'activer maintenant ? Le clavier et la souris de la machine distante seront brièvement déconnectés.",
-        menuHint: 'Le disque virtuel est désactivé. Activez-le dans Paramètres - Appareil.'
+        menuHint: 'Le disque virtuel est désactivé. Activez-le dans Paramètres - Appareil.',
+        askDevice:
+          "Le disque virtuel est désactivé. Un compte disposant de l'autorisation appareil doit d'abord l'activer."
       },
       add: {
         title: 'Ajouter un support',

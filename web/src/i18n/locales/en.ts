@@ -274,7 +274,9 @@ const en = {
       enableDisk: {
         title: 'Enable the virtual disk?',
         desc: 'Mounting a medium needs the virtual disk, which is currently switched off. Enable it now? The keyboard and mouse of the target machine will disconnect for a moment.',
-        menuHint: 'The virtual disk is disabled. Enable it in Settings - Device.'
+        menuHint: 'The virtual disk is disabled. Enable it in Settings - Device.',
+        askDevice:
+          'The virtual disk is disabled. An account with the device permission has to enable it first.'
       },
       add: {
         title: 'Add media',

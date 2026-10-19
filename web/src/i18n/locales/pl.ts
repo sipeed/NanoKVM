@@ -277,7 +277,9 @@ const pl = {
       enableDisk: {
         title: 'Włączyć dysk wirtualny?',
         desc: 'Do zamontowania nośnika potrzebny jest dysk wirtualny, który jest teraz wyłączony. Włączyć go? Klawiatura i mysz zdalnego komputera rozłączą się na chwilę.',
-        menuHint: 'Dysk wirtualny jest wyłączony. Włącz go w Ustawienia - Urządzenie.'
+        menuHint: 'Dysk wirtualny jest wyłączony. Włącz go w Ustawienia - Urządzenie.',
+        askDevice:
+          'Dysk wirtualny jest wyłączony. Najpierw musi go włączyć konto z uprawnieniem do urządzenia.'
       },
       add: {
         title: 'Dodaj nośnik',

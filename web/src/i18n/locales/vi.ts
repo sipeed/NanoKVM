@@ -275,7 +275,8 @@ const vi = {
       enableDisk: {
         title: 'Bật đĩa ảo?',
         desc: 'Việc gắn kết phương tiện cần đĩa ảo, hiện đang tắt. Bật ngay bây giờ? Bàn phím và chuột của máy đích sẽ ngắt kết nối trong giây lát.',
-        menuHint: 'Đĩa ảo đang tắt. Hãy bật trong Cài đặt - Thiết bị.'
+        menuHint: 'Đĩa ảo đang tắt. Hãy bật trong Cài đặt - Thiết bị.',
+        askDevice: 'Đĩa ảo đang tắt. Tài khoản có quyền thiết bị cần bật nó trước.'
       },
       add: {
         title: 'Thêm phương tiện',

@@ -281,7 +281,9 @@ const nl = {
         title: 'De virtuele schijf inschakelen?',
         desc: 'Voor het koppelen van een medium is de virtuele schijf nodig, die nu uitgeschakeld is. Nu inschakelen? Het toetsenbord en de muis van de doelcomputer worden even losgekoppeld.',
         menuHint:
-          'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.'
+          'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.',
+        askDevice:
+          'De virtuele schijf staat uit. Een account met de apparaatrechten moet deze eerst aanzetten.'
       },
       add: {
         title: 'Medium toevoegen',

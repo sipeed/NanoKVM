@@ -279,7 +279,9 @@ const it = {
       enableDisk: {
         title: 'Attivare il disco virtuale?',
         desc: 'Per montare un supporto occorre il disco virtuale, che al momento è disattivato. Attivarlo ora? La tastiera e il mouse della macchina remota si disconnetteranno per un istante.',
-        menuHint: 'Il disco virtuale è disattivato. Attivalo in Impostazioni - Dispositivo.'
+        menuHint: 'Il disco virtuale è disattivato. Attivalo in Impostazioni - Dispositivo.',
+        askDevice:
+          "Il disco virtuale è disattivato. Un account con l'autorizzazione dispositivo deve attivarlo prima."
       },
       add: {
         title: 'Aggiungi supporto',
