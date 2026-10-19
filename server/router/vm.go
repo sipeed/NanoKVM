@@ -38,6 +38,9 @@ func vmRouter(r *gin.Engine) {
 	admin.GET("/vm/device/virtual", service.GetVirtualDevice)     // get virtual device
 	admin.POST("/vm/device/virtual", service.UpdateVirtualDevice) // update virtual device
 
+	admin.GET("/vm/usb-identity", service.GetUsbIdentity)  // get USB gadget VID/PID and string descriptors
+	admin.POST("/vm/usb-identity", service.SetUsbIdentity) // set USB gadget VID/PID and string descriptors
+
 	admin.GET("/vm/memory/limit", service.GetMemoryLimit)  // get memory limit
 	admin.POST("/vm/memory/limit", service.SetMemoryLimit) // set memory limit
 
