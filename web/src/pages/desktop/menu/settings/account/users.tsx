@@ -202,6 +202,13 @@ export const Users = () => {
 
   const isPermissionEditorReadOnly = permissionUser?.role === 'admin';
 
+  // Administrators first: they are the accounts that can change everyone else.
+  // The sort is stable, so accounts keep the order the account file lists them
+  // in within each group.
+  const sortedUsers = [...users].sort(
+    (a, b) => Number(a.role !== 'admin') - Number(b.role !== 'admin')
+  );
+
   return (
     <>
       {contextHolder}
@@ -213,13 +220,16 @@ export const Users = () => {
       </div>
 
       <div className="flex flex-col space-y-2 opacity-100">
-        {users.map((user) => {
+        {sortedUsers.map((user) => {
           const isSelf = user.username === account.username;
           const isProtected = isSelf || user.systemAccount;
+          const isAdmin = user.role === 'admin';
           return (
             <div
               key={user.username}
-              className="flex flex-wrap items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
+              className={`flex flex-wrap items-center gap-2 rounded-md px-3 py-2 ${
+                isAdmin ? 'bg-neutral-700/60' : 'bg-neutral-800/60'
+              }`}
             >
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="flex items-baseline">
