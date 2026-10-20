@@ -281,7 +281,7 @@ export const Desktop = () => {
         </div>
       ) : null}
 
-      <VirtualKeyboard />
+      {canControl && <VirtualKeyboard />}
     </div>
   );
 };

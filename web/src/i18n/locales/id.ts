@@ -537,7 +537,8 @@ const id = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Perhatian'
+        attention: 'Perhatian',
+        updateFailed: 'Gagal memperbarui perangkat virtual'
       },
       network: {
         title: 'Jaringan',
@@ -701,7 +702,10 @@ const id = {
         },
         permissions: {
           title: 'Izin',
+          editTitle: 'Edit izin',
+          save: 'Simpan',
           consoleGroup: 'Konsol',
+          mediaGroup: 'Media',
           manageGroup: 'Administrasi',
           consoleView: 'Lihat konsol',
           consoleControl: 'Keyboard dan tikus',

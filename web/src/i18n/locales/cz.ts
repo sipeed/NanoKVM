@@ -537,7 +537,8 @@ const cz = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Pozor'
+        attention: 'Pozor',
+        updateFailed: 'Aktualizace virtuálního zařízení se nezdařila'
       },
       network: {
         title: 'Síť',
@@ -701,7 +702,10 @@ const cz = {
         },
         permissions: {
           title: 'Oprávnění',
+          editTitle: 'Upravit oprávnění',
+          save: 'Uložit',
           consoleGroup: 'Konzole',
+          mediaGroup: 'Média',
           manageGroup: 'Správa',
           consoleView: 'Zobrazit konzoli',
           consoleControl: 'Klávesnice a myš',

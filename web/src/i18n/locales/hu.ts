@@ -542,7 +542,8 @@ const hu = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Figyelem'
+        attention: 'Figyelem',
+        updateFailed: 'A virtuális eszköz frissítése nem sikerült'
       },
       network: {
         title: 'Hálózat',
@@ -706,7 +707,10 @@ const hu = {
         },
         permissions: {
           title: 'Engedélyek',
+          editTitle: 'Engedélyek szerkesztése',
+          save: 'Mentés',
           consoleGroup: 'Konzol',
+          mediaGroup: 'Média',
           manageGroup: 'Adminisztráció',
           consoleView: 'Konzol megtekintése',
           consoleControl: 'Billentyűzet és egér',

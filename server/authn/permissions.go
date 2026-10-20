@@ -68,6 +68,18 @@ func ValidatePermissions(permissions []Permission) error {
 	return nil
 }
 
+// Has reports whether the set contains the permission. Administrators are not
+// special-cased: callers that should honor the role's implicit grants resolve
+// EffectivePermissions first.
+func Has(permissions []Permission, permission Permission) bool {
+	for _, granted := range permissions {
+		if granted == permission {
+			return true
+		}
+	}
+	return false
+}
+
 // ValidateUserPermissions rejects grant sets that would leave a regular user
 // unable to reach the console at all. A nil set is the legacy default, which
 // already includes console.view, so it is always acceptable.
@@ -75,10 +87,8 @@ func ValidateUserPermissions(role Role, permissions []Permission) error {
 	if role == RoleAdmin || permissions == nil {
 		return nil
 	}
-	for _, permission := range permissions {
-		if permission == PermConsoleView {
-			return nil
-		}
+	if Has(permissions, PermConsoleView) {
+		return nil
 	}
 	return fmt.Errorf("%q is required for regular users", PermConsoleView)
 }

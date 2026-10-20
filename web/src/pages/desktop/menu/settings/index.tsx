@@ -89,6 +89,18 @@ export const Settings = () => {
     }
   }, [canUpdate]);
 
+  // A permission change can take away the tab that is open. Fall back to the
+  // first tab instead of leaving an empty panel, and release a lock the vanished
+  // tab can no longer release itself (an update in progress keeps the modal
+  // open, so it would otherwise stay stuck with nothing to show).
+  const activeTab = tabs.find((tab) => tab.id === currentTab) ?? tabs[0];
+  useEffect(() => {
+    if (!activeTab || activeTab.id === currentTab) return;
+
+    setCurrentTab(activeTab.id);
+    setIsLocked(false);
+  }, [activeTab, currentTab]);
+
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });
   }, [currentTab]);
@@ -199,7 +211,7 @@ export const Settings = () => {
           >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
-                <>{tabs.find((tab) => tab.id === currentTab)?.component}</>
+                <>{activeTab?.component}</>
               </div>
             </div>
           </ScrollArea>

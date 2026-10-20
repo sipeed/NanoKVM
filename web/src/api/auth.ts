@@ -16,6 +16,12 @@ export type Permission =
   | 'tailscale'
   | 'ai';
 
+// Media access splits along the trust boundary: media.mount attaches a medium to
+// the target machine and reads it, media.manage changes the library contents.
+// Every screen that shows the library needs either of them, so the pair is
+// checked together instead of being spelled out at each call site.
+export const MEDIA_PERMISSIONS: Permission[] = ['media.mount', 'media.manage'];
+
 export type Account = {
   username: string;
   role: UserRole;

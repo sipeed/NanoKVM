@@ -542,7 +542,8 @@ const es = {
           'Activar el disco virtual cancela la imagen montada e interrumpe una descarga o subida de imagen en curso. ¿Continuar?',
         diskBreakDownload:
           'Activar el disco virtual interrumpe la descarga de imágenes. ¿Continuar?',
-        attention: 'Atención'
+        attention: 'Atención',
+        updateFailed: 'No se pudo actualizar el dispositivo virtual'
       },
       network: {
         title: 'Red',
@@ -710,7 +711,10 @@ const es = {
         },
         permissions: {
           title: 'Permisos',
+          editTitle: 'Editar permisos',
+          save: 'Guardar',
           consoleGroup: 'Consola',
+          mediaGroup: 'Soportes',
           manageGroup: 'Administración',
           consoleView: 'Ver la consola',
           consoleControl: 'Teclado y ratón',

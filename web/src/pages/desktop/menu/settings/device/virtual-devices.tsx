@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Button, Modal, Switch } from 'antd';
+import { App, Button, Modal, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import { cancelDownloadImage, statusImage } from '@/api/download.ts';
 import { getHidMode } from '@/api/hid.ts';
 import { getMediaState } from '@/api/media.ts';
@@ -12,10 +13,11 @@ const imageUpdatedEvent = 'nanokvm:image-updated';
 
 export const VirtualDevices = () => {
   const { t } = useTranslation();
-  const { hasPermission } = useAuth();
+  const { message } = App.useApp();
+  const { hasPermission, hasAnyPermission } = useAuth();
   // Both switches are device settings. The medium state behind the disk hint,
   // and the transfer a disk change can interrupt, belong to the media library.
-  const canReadMedia = hasPermission('media.mount') || hasPermission('media.manage');
+  const canReadMedia = hasAnyPermission(MEDIA_PERMISSIONS);
   const canManageMedia = hasPermission('media.manage');
 
   const [isHidOnlyMode, setIsHidOnlyMode] = useState(false);
@@ -84,7 +86,10 @@ export const VirtualDevices = () => {
     try {
       const rsp = await api.updateVirtualDevice(device);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        // Changing the disk is refused while a transfer or a mounted image holds
+        // /data. An account without media.manage cannot cancel the transfer and
+        // has to see why the switch did not move.
+        message.error(rsp.msg || t('settings.device.updateFailed'));
         return;
       }
 
@@ -97,6 +102,7 @@ export const VirtualDevices = () => {
       window.dispatchEvent(new Event(imageUpdatedEvent));
     } catch (err) {
       console.log(err);
+      message.error(t('settings.device.updateFailed'));
     } finally {
       setLoading('');
     }

@@ -16,7 +16,7 @@ import { CircleAlertIcon, KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'luci
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/auth.ts';
-import { Permission, User, UserRole } from '@/api/auth.ts';
+import { MEDIA_PERMISSIONS, Permission, User, UserRole } from '@/api/auth.ts';
 import { encrypt } from '@/lib/encrypt.ts';
 
 type CreateValues = {
@@ -28,10 +28,6 @@ type CreateValues = {
 
 type PasswordValues = {
   password: string;
-};
-
-type PermissionValues = {
-  permissions: Permission[];
 };
 
 // i18next treats dots as key separators, so permission keys are mapped to
@@ -64,12 +60,11 @@ const PERMISSION_NOTES: Partial<Record<Permission, string>> = {
   ai: 'settings.account.permissions.aiNote'
 };
 
-const CONSOLE_PERMISSIONS: Permission[] = [
-  'console.view',
-  'console.control',
-  'power',
-  'media.mount'
-];
+// The editor groups the catalog by what the grants give access to. A feature
+// that spans two grants (media.mount and media.manage) stays in one group, and
+// anything the server adds later lands in the last group instead of vanishing.
+const CONSOLE_PERMISSIONS: Permission[] = ['console.view', 'console.control', 'power'];
+const GROUPED_PERMISSIONS: Permission[] = [...CONSOLE_PERMISSIONS, ...MEDIA_PERMISSIONS];
 
 type PermissionCheckboxesProps = {
   value?: Permission[];
@@ -78,8 +73,8 @@ type PermissionCheckboxesProps = {
   labelOf: (permission: Permission) => string;
 };
 
-// PermissionCheckboxes renders the catalog in two labeled sections and plays
-// the value/onChange protocol so antd Form.Item can drive it directly.
+// PermissionCheckboxes renders the catalog in labeled sections and plays the
+// value/onChange protocol so antd Form.Item can drive it directly.
 const PermissionCheckboxes = ({
   value = [],
   onChange,
@@ -94,20 +89,29 @@ const PermissionCheckboxes = ({
   }
 
   // The catalog is fetched separately, so hide a group with nothing to show.
-  // The form still keeps grants it cannot render.
+  // The editor still keeps grants it cannot render.
   const sections = [
-    { title: t('settings.account.permissions.consoleGroup'), items: CONSOLE_PERMISSIONS },
     {
-      title: t('settings.account.permissions.manageGroup'),
-      items: catalog.filter((item) => !CONSOLE_PERMISSIONS.includes(item))
+      titleKey: 'consoleGroup',
+      items: CONSOLE_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
+    },
+    {
+      titleKey: 'mediaGroup',
+      items: MEDIA_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
+    },
+    {
+      titleKey: 'manageGroup',
+      items: catalog.filter((item) => !GROUPED_PERMISSIONS.includes(item))
     }
   ].filter((section) => section.items.length > 0);
 
   return (
     <div className="flex flex-col gap-3">
       {sections.map((section) => (
-        <div key={section.title}>
-          <div className="mb-1 text-xs text-neutral-500">{section.title}</div>
+        <div key={section.titleKey}>
+          <div className="mb-1 text-xs text-neutral-500">
+            {t(`settings.account.permissions.${section.titleKey}`)}
+          </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
             {section.items.map((permission) => {
               const required = permission === REQUIRED_PERMISSION;
@@ -151,13 +155,16 @@ function withRequiredPermission(permissions: Permission[]): Permission[] {
     : [REQUIRED_PERMISSION, ...permissions];
 }
 
+// AccountRefused marks a change the server turned down, which carries a reason
+// the administrator can act on (a missing grant, an invalid role, ...).
+class AccountRefused extends Error {}
+
 export const Users = () => {
   const { t } = useTranslation();
   const { account } = useAuth();
   const [messageApi, contextHolder] = message.useMessage();
   const [createForm] = Form.useForm<CreateValues>();
   const [passwordForm] = Form.useForm<PasswordValues>();
-  const [permissionForm] = Form.useForm<PermissionValues>();
   const createRole = Form.useWatch('role', createForm);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -166,6 +173,17 @@ export const Users = () => {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [passwordUser, setPasswordUser] = useState<string | null>(null);
   const [permissionUser, setPermissionUser] = useState<User | null>(null);
+  // The editor's selection lives in component state rather than in a Form: the
+  // modal is destroyed when it closes, but an antd Form keeps the values of its
+  // fields, so reopening it for the next account would show the previous
+  // selection and save it onto the wrong user. The draft is seeded when the
+  // editor opens, so a cancelled edit is not carried over either.
+  const [permissionDraft, setPermissionDraft] = useState<Permission[]>([]);
+
+  function openPermissionEditor(user: User) {
+    setPermissionDraft(user.permissions);
+    setPermissionUser(user);
+  }
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -211,6 +229,13 @@ export const Users = () => {
     return t(`settings.account.permissions.${PERMISSION_LABEL_KEYS[permission]}`);
   }
 
+  // Only the server's own refusals carry a message worth repeating: a transport
+  // failure would just add "Request failed with status code 500" to the toast.
+  function saveFailedMessage(err: unknown, fallback: string) {
+    const detail = err instanceof AccountRefused ? err.message : '';
+    return detail ? `${fallback} — ${detail}` : fallback;
+  }
+
   async function createUser(values: CreateValues) {
     setIsLoading(true);
     try {
@@ -224,18 +249,20 @@ export const Users = () => {
         values.role,
         permissions
       );
-      if (rsp.code !== 0) throw new Error(rsp.msg);
+      if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
 
       setIsCreateOpen(false);
       createForm.resetFields();
       messageApi.success(t('settings.account.users.created'));
       await loadUsers();
-    } catch {
-      messageApi.error(t('settings.account.users.saveFailed'));
+    } catch (err) {
+      messageApi.error(saveFailedMessage(err, t('settings.account.users.saveFailed')));
       setIsLoading(false);
     }
   }
 
+  // updateUser reports whether the change was stored, so a caller that owns a
+  // dialog only closes it on success.
   async function updateUser(
     user: User,
     changes: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>
@@ -243,31 +270,35 @@ export const Users = () => {
     setIsLoading(true);
     try {
       const rsp = await api.updateUser(user.username, changes);
-      if (rsp.code !== 0) throw new Error(rsp.msg);
+      if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
       await loadUsers();
-    } catch {
-      messageApi.error(t('settings.account.users.saveFailed'));
+      return true;
+    } catch (err) {
+      messageApi.error(saveFailedMessage(err, t('settings.account.users.saveFailed')));
       setIsLoading(false);
+      return false;
     }
   }
 
-  async function savePermissions(values: PermissionValues) {
+  async function savePermissions() {
     if (!permissionUser) return;
-    await updateUser(permissionUser, {
-      permissions: withRequiredPermission(values.permissions ?? [])
+    const saved = await updateUser(permissionUser, {
+      permissions: withRequiredPermission(permissionDraft)
     });
-    setPermissionUser(null);
+    if (saved) {
+      setPermissionUser(null);
+    }
   }
 
   async function deleteUser(username: string) {
     setIsLoading(true);
     try {
       const rsp = await api.deleteUser(username);
-      if (rsp.code !== 0) throw new Error(rsp.msg);
+      if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
       messageApi.success(t('settings.account.users.deleted'));
       await loadUsers();
-    } catch {
-      messageApi.error(t('settings.account.users.deleteFailed'));
+    } catch (err) {
+      messageApi.error(saveFailedMessage(err, t('settings.account.users.deleteFailed')));
       setIsLoading(false);
     }
   }
@@ -277,12 +308,12 @@ export const Users = () => {
     setIsLoading(true);
     try {
       const rsp = await api.resetUserPassword(passwordUser, encrypt(values.password));
-      if (rsp.code !== 0) throw new Error(rsp.msg);
+      if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
       setPasswordUser(null);
       passwordForm.resetFields();
       messageApi.success(t('settings.account.users.passwordUpdated'));
-    } catch {
-      messageApi.error(t('settings.account.users.saveFailed'));
+    } catch (err) {
+      messageApi.error(saveFailedMessage(err, t('settings.account.users.saveFailed')));
     } finally {
       setIsLoading(false);
     }
@@ -305,7 +336,7 @@ export const Users = () => {
           return (
             <div
               key={user.username}
-              className="flex items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
+              className="flex flex-wrap items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
             >
               <span className="flex min-w-0 flex-1 items-baseline">
                 <span className="truncate">{user.username}</span>
@@ -333,8 +364,9 @@ export const Users = () => {
                       <Button
                         size="small"
                         icon={<ShieldCheckIcon size={14} />}
+                        aria-label={t('settings.account.users.editPermissions')}
                         disabled={isLoading}
-                        onClick={() => setPermissionUser(user)}
+                        onClick={() => openPermissionEditor(user)}
                       />
                     </Tooltip>
                   )}
@@ -350,6 +382,7 @@ export const Users = () => {
                   <Button
                     size="small"
                     icon={<KeyRoundIcon size={14} />}
+                    aria-label={t('settings.account.users.resetPassword')}
                     disabled={isLoading || isProtected}
                     onClick={() => setPasswordUser(user.username)}
                   />
@@ -366,6 +399,7 @@ export const Users = () => {
                       danger
                       size="small"
                       icon={<Trash2Icon size={14} />}
+                      aria-label={t('settings.account.users.delete')}
                       disabled={isLoading || isProtected}
                     />
                   </Tooltip>
@@ -453,26 +487,28 @@ export const Users = () => {
       </Modal>
 
       <Modal
-        title={t('settings.account.permissions.title')}
+        title={t('settings.account.permissions.editTitle')}
         open={!!permissionUser}
         footer={null}
         destroyOnHidden
         onCancel={() => setPermissionUser(null)}
       >
-        <Form<PermissionValues>
-          key={permissionUser?.username ?? 'permissions'}
-          form={permissionForm}
-          layout="vertical"
-          initialValues={{ permissions: permissionUser?.permissions ?? [] }}
-          onFinish={savePermissions}
-        >
-          <Form.Item name="permissions">
-            <PermissionCheckboxes catalog={catalog} labelOf={permissionLabel} />
-          </Form.Item>
-          <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
-            {t('auth.ok')}
-          </Button>
-        </Form>
+        <div className="flex flex-col gap-4">
+          <PermissionCheckboxes
+            value={permissionDraft}
+            onChange={setPermissionDraft}
+            catalog={catalog}
+            labelOf={permissionLabel}
+          />
+          <div className="flex justify-end gap-2">
+            <Button disabled={isLoading} onClick={() => setPermissionUser(null)}>
+              {t('auth.cancel')}
+            </Button>
+            <Button type="primary" loading={isLoading} onClick={() => void savePermissions()}>
+              {t('settings.account.permissions.save')}
+            </Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

@@ -33,12 +33,7 @@ func (p Principal) Has(permission authn.Permission) bool {
 	if p.Role == authn.RoleAdmin {
 		return true
 	}
-	for _, granted := range p.Permissions {
-		if granted == permission {
-			return true
-		}
-	}
-	return false
+	return authn.Has(p.Permissions, permission)
 }
 
 type Token struct {

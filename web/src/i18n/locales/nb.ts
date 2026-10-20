@@ -535,7 +535,8 @@ const nb = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Merknad'
+        attention: 'Merknad',
+        updateFailed: 'Kunne ikke oppdatere den virtuelle enheten'
       },
       network: {
         title: 'Nettverk',
@@ -699,7 +700,10 @@ const nb = {
         },
         permissions: {
           title: 'Tillatelser',
+          editTitle: 'Rediger tillatelser',
+          save: 'Lagre',
           consoleGroup: 'Konsoll',
+          mediaGroup: 'Medier',
           manageGroup: 'Administrasjon',
           consoleView: 'Se konsoll',
           consoleControl: 'Tastatur og mus',

@@ -12,14 +12,14 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { Permission } from '@/api/auth.ts';
+import { MEDIA_PERMISSIONS, Permission } from '@/api/auth.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { Robot } from '@/components/icons/robot.tsx';
 
 export const MenuIcons = () => {
   const { t } = useTranslation();
-  const { hasPermission } = useAuth();
+  const { hasAnyPermission } = useAuth();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
@@ -34,7 +34,7 @@ export const MenuIcons = () => {
     {
       key: 'storage',
       icon: <HardDriveIcon size={16} />,
-      permission: ['media.mount', 'media.manage']
+      permission: MEDIA_PERMISSIONS
     },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} />, permission: 'terminal' },
     { key: 'script', icon: <FileJsonIcon size={16} />, permission: 'terminal' },
@@ -48,7 +48,7 @@ export const MenuIcons = () => {
   const items = allItems.filter((item) => {
     if (!item.permission) return true;
     const permissions = Array.isArray(item.permission) ? item.permission : [item.permission];
-    return permissions.some(hasPermission);
+    return hasAnyPermission(permissions);
   });
 
   function updateItems(key: string) {

@@ -530,7 +530,8 @@ const ko = {
         diskCancelMount:
           '가상 디스크를 켜면 마운트된 이미지가 해제되고 진행 중인 이미지 다운로드/업로드도 중단됩니다. 계속하시겠습니까?',
         diskBreakDownload: '가상 디스크를 켜면 이미지 다운로드가 중단됩니다. 계속하시겠습니까?',
-        attention: '주의'
+        attention: '주의',
+        updateFailed: '가상 장치를 업데이트하지 못했습니다'
       },
       network: {
         title: '네트워크',
@@ -692,7 +693,10 @@ const ko = {
         },
         permissions: {
           title: '권한',
+          editTitle: '권한 편집',
+          save: '저장',
           consoleGroup: '콘솔',
+          mediaGroup: '미디어',
           manageGroup: '관리',
           consoleView: '콘솔 보기',
           consoleControl: '키보드 및 마우스',

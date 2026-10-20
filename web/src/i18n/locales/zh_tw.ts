@@ -518,7 +518,8 @@ const zh_tw = {
         diskCancelMount:
           '開啟虛擬隨身碟會取消目前掛載的映像檔，並中斷正在進行的映像檔下載或上傳，是否繼續？',
         diskBreakDownload: '開啟虛擬隨身碟會中斷映像檔下載功能，是否繼續？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '虛擬裝置更新失敗'
       },
       network: {
         title: '網路',
@@ -679,7 +680,10 @@ const zh_tw = {
         },
         permissions: {
           title: '功能權限',
+          editTitle: '編輯權限',
+          save: '儲存',
           consoleGroup: '主控台操作',
+          mediaGroup: '媒體',
           manageGroup: '設備管理',
           consoleView: '檢視畫面',
           consoleControl: '鍵盤與滑鼠',

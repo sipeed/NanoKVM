@@ -541,7 +541,8 @@ const ja = {
           '仮想ディスクを有効にすると、マウント中のイメージは解除され、進行中のイメージのダウンロード/アップロードも中断されます。続行しますか？',
         diskBreakDownload:
           '仮想ディスクを有効にすると、イメージのダウンロードが中断されます。続行しますか？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '仮想デバイスの更新に失敗しました'
       },
       network: {
         title: 'ネットワーク',
@@ -707,7 +708,10 @@ const ja = {
         },
         permissions: {
           title: '権限',
+          editTitle: '権限を編集',
+          save: '保存',
           consoleGroup: 'コンソール',
+          mediaGroup: 'メディア',
           manageGroup: '管理',
           consoleView: 'コンソールを表示',
           consoleControl: 'キーボードとマウス',

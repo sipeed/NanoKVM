@@ -534,7 +534,8 @@ const se = {
           'Att aktivera den virtuella disken avbryter den monterade avbildningen och avbryter en pågående nedladdning eller uppladdning. Fortsätta?',
         diskBreakDownload:
           'Att aktivera den virtuella disken avbryter nedladdningen av avbildningar. Fortsätta?',
-        attention: 'Observera'
+        attention: 'Observera',
+        updateFailed: 'Det gick inte att uppdatera den virtuella enheten'
       },
       network: {
         title: 'Nätverk',
@@ -697,7 +698,10 @@ const se = {
         },
         permissions: {
           title: 'Behörigheter',
+          editTitle: 'Redigera behörigheter',
+          save: 'Spara',
           consoleGroup: 'Konsol',
+          mediaGroup: 'Medier',
           manageGroup: 'Administration',
           consoleView: 'Visa konsol',
           consoleControl: 'Tangentbord och mus',

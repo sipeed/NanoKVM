@@ -58,6 +58,13 @@ func vmRouter(r *gin.Engine) {
 	device.POST("/vm/oled", service.SetOLED) // set OLED configuration
 
 	// Only supported by PCIe version
+	//
+	// Toggling the HDMI capture engine is a device setting, but resetting it is
+	// capture recovery: a watcher whose screen went black needs it to see
+	// anything at all, the same way it needs to pick a video mode and a quality.
+	// Enabling, disabling and the idle timeout stay with the device grant, since
+	// they change how the device behaves for everyone rather than recover a
+	// broken picture.
 	view.GET("/vm/hdmi", service.GetHdmiState)           // get HDMI state
 	view.POST("/vm/hdmi/reset", service.ResetHdmi)       // reset hdmi
 	device.POST("/vm/hdmi/enable", service.EnableHdmi)   // enable hdmi

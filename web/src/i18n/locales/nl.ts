@@ -546,7 +546,8 @@ const nl = {
           'Het inschakelen van de virtuele schijf breekt de gekoppelde image af en onderbreekt een lopende image-download of -upload. Doorgaan?',
         diskBreakDownload:
           'Het inschakelen van de virtuele schijf onderbreekt de image-download. Doorgaan?',
-        attention: 'Let op'
+        attention: 'Let op',
+        updateFailed: 'Bijwerken van het virtuele apparaat mislukt'
       },
       network: {
         title: 'Netwerk',
@@ -710,7 +711,10 @@ const nl = {
         },
         permissions: {
           title: 'Rechten',
+          editTitle: 'Rechten bewerken',
+          save: 'Opslaan',
           consoleGroup: 'Console',
+          mediaGroup: 'Media',
           manageGroup: 'Beheer',
           consoleView: 'Console bekijken',
           consoleControl: 'Toetsenbord en muis',

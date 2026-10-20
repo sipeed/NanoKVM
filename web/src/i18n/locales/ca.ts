@@ -538,7 +538,8 @@ const ca = {
           "Activar el disc virtual cancel·la la imatge muntada i interromp una descàrrega o pujada d'imatge en curs. Voleu continuar?",
         diskBreakDownload:
           "Activar el disc virtual interromp la descàrrega d'imatges. Voleu continuar?",
-        attention: 'Atenció'
+        attention: 'Atenció',
+        updateFailed: "No s'ha pogut actualitzar el dispositiu virtual"
       },
       network: {
         title: 'Xarxa',
@@ -702,7 +703,10 @@ const ca = {
         },
         permissions: {
           title: 'Permisos',
+          editTitle: 'Edita els permisos',
+          save: 'Desa',
           consoleGroup: 'Consola',
+          mediaGroup: 'Suports',
           manageGroup: 'Administració',
           consoleView: 'Veure la consola',
           consoleControl: 'Teclat i ratolí',

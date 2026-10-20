@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import * as api from '@/api/media.ts';
 import { formatSize } from '@/lib/format.ts';
 import { MediaIcon } from '@/lib/media-icons.tsx';
@@ -70,11 +71,11 @@ const MediaGroup = ({
 
 export const Storage = () => {
   const { t } = useTranslation();
-  const { hasPermission } = useAuth();
+  const { hasPermission, hasAnyPermission } = useAuth();
   const canMount = hasPermission('media.mount');
   const canManage = hasPermission('media.manage');
   // Managing the library requires inspecting it: both roles may read.
-  const canRead = canMount || canManage;
+  const canRead = hasAnyPermission(MEDIA_PERMISSIONS);
   // Turning the virtual disk on is a device setting, so only an account that may
   // change device settings can do it from here.
   const canDevice = hasPermission('device');

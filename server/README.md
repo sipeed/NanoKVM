@@ -103,18 +103,21 @@ password, because that password is also synchronized to the Linux root account.
 
 All authenticated sessions are backed by the current account state: every request is authorized
 against the account file, so a revoked grant stops working immediately without re-issuing a login.
-Disabling, deleting, changing the role or changing the password of a user invalidates that user's
-HTTP and real-time connections without affecting other users. A permission change keeps the login
-valid and only drops the long-lived connections whose cached state depends on what changed
-(console, video stream, terminal, AI), so those clients reconnect with the new grants. Multiple
+Disabling, deleting, or resetting the password of a user invalidates that user's HTTP and real-time
+connections without affecting other users. Changing the role or the grants of an account keeps its
+login valid: the account is told to refresh, and only the long-lived connections whose cached
+state depends on what changed are dropped (console, terminal, AI), so those clients reconnect
+under the new grants. `console.view` cannot be taken from a regular user, so a permission change
+never interrupts the video stream itself. Multiple
 users may watch and control the KVM concurrently; input uses the existing cooperative HID
 coordinator, so simultaneous input can interleave. A user without `console.control` keeps the
 video and the menu for its other grants, but the console rejects keyboard and mouse reports and
 the web UI marks the session as view only.
-Video mode, quality, resolution, and MJPEG frame-detection controls require only `console.view`
-and stay shared KVM operations; when several users adjust them concurrently, the latest change
-applies device-wide. `console.control` is input only: keyboard, mouse, paste, and the input region
-that maps pointer motion onto the target screen.
+Video mode, quality, resolution, MJPEG frame-detection controls, and resetting the HDMI capture
+require only `console.view` and stay shared KVM operations; when several users adjust them
+concurrently, the latest change applies device-wide. Enabling or disabling the HDMI capture and
+its idle timeout are device settings. `console.control` is input only: keyboard, mouse, paste, and
+the input region that maps pointer motion onto the target screen.
 
 ## Compile & Deploy
 

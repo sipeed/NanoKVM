@@ -93,36 +93,39 @@ func (s *Service) UpdateUser(c *gin.Context) {
 		patch.Permissions = &permissions
 	}
 	username := c.Param("username")
-	permissionsOnly := req.Permissions != nil && req.Role == nil && req.Enabled == nil
-	var oldPermissions []authn.Permission
-	if permissionsOnly {
-		oldUser, err := authn.DefaultStore.Get(username)
-		if err != nil {
-			rsp.ErrRsp(c, -2, err.Error())
-			return
-		}
-		oldPermissions = authn.EffectivePermissions(oldUser)
+	// Compare the grants the account ends up with against the ones it had, so a
+	// role change is handled exactly like editing the permission set: the role
+	// resolves to its implicit grants and the difference drives the refresh.
+	previous, err := authn.DefaultStore.Get(username)
+	if err != nil {
+		rsp.ErrRsp(c, -2, err.Error())
+		return
 	}
+	previousPermissions := authn.EffectivePermissions(previous)
+
 	updated, err := authn.DefaultStore.Update(principal.Username, username, patch)
 	if err != nil {
 		rsp.ErrRsp(c, -2, err.Error())
 		return
 	}
-	if !permissionsOnly {
-		// Role and enabled changes invalidate the login itself.
+	if updated.TokenVersion != previous.TokenVersion {
+		// Disabling the account is the only change that invalidates the login.
 		middleware.RevokeUserSessions(username)
 	} else {
-		// Permission changes keep the login valid: drop only the long-lived
+		// Every other change keeps the login valid: drop only the long-lived
 		// connections whose in-memory state depends on what changed, and let the
 		// frontend refresh its account state in place. Revoked grants have to
 		// reconnect to stop using the feature, and granted ones have to reconnect
 		// to pick up capabilities cached at connect time (the console socket
 		// remembers whether it is read-only). Unrelated connections stay
-		// untouched.
-		if SessionNotifier != nil {
+		// untouched. A save that changes nothing stays silent.
+		changed := permissionsChanged(previousPermissions, authn.EffectivePermissions(updated))
+		roleChanged := updated.Role != previous.Role
+		if (roleChanged || len(changed) > 0) && SessionNotifier != nil {
+			// The role itself is rendered too (user management, the role label),
+			// so the frontend refreshes even when the grants happen to match.
 			SessionNotifier(username, "auth", "refresh")
 		}
-		changed := permissionsChanged(oldPermissions, authn.EffectivePermissions(updated))
 		if channels := channelsForPermissions(changed); len(channels) > 0 {
 			middleware.RefreshUserSessions(username, channels...)
 		}
@@ -176,25 +179,16 @@ func (s *Service) ChangeUserPassword(c *gin.Context) {
 func permissionsChanged(oldPermissions, newPermissions []authn.Permission) []authn.Permission {
 	changed := make([]authn.Permission, 0, len(oldPermissions))
 	for _, old := range oldPermissions {
-		if !hasPermission(newPermissions, old) {
+		if !authn.Has(newPermissions, old) {
 			changed = append(changed, old)
 		}
 	}
 	for _, current := range newPermissions {
-		if !hasPermission(oldPermissions, current) {
+		if !authn.Has(oldPermissions, current) {
 			changed = append(changed, current)
 		}
 	}
 	return changed
-}
-
-func hasPermission(permissions []authn.Permission, permission authn.Permission) bool {
-	for _, candidate := range permissions {
-		if candidate == permission {
-			return true
-		}
-	}
-	return false
 }
 
 // channelsForPermissions maps permissions that changed to the long-lived
@@ -206,6 +200,9 @@ func channelsForPermissions(permissions []authn.Permission) []string {
 	for _, permission := range permissions {
 		switch permission {
 		case authn.PermConsoleView:
+			// console.view is pinned for every regular user, so this pair only
+			// matters if that ever changes: it keeps a session that loses the
+			// grant from streaming frames until it notices.
 			channels = append(channels, middleware.SessionChannelConsole, middleware.SessionChannelStream)
 		case authn.PermConsoleControl:
 			channels = append(channels, middleware.SessionChannelConsole)

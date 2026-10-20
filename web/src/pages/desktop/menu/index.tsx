@@ -6,6 +6,7 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
+import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import {
   keyboardLedStatusVisibleAtom,
   menuCloseSignalAtom,
@@ -30,8 +31,8 @@ import { Wol } from './wol';
 
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
-  const { hasPermission } = useAuth();
-  const canMedia = hasPermission('media.mount') || hasPermission('media.manage');
+  const { hasPermission, hasAnyPermission } = useAuth();
+  const canMedia = hasAnyPermission(MEDIA_PERMISSIONS);
   const canControl = hasPermission('console.control');
   const canTerminal = hasPermission('terminal');
   const canAi = hasPermission('ai');

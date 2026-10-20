@@ -107,6 +107,16 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     };
   }, [refreshAccount]);
 
+  const hasPermission = useCallback(
+    (permission: Permission) =>
+      account?.role === 'admin' || !!account?.permissions.includes(permission),
+    [account]
+  );
+  const hasAnyPermission = useCallback(
+    (permissions: Permission[]) => permissions.some(hasPermission),
+    [hasPermission]
+  );
+
   if (isLoading) {
     return (
       <div className="flex h-screen w-screen items-center justify-center">
@@ -119,10 +129,11 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <Navigate to={'/auth/login'} replace />;
   }
 
-  const hasPermission = (permission: Permission) =>
-    account.role === 'admin' || account.permissions.includes(permission);
-
-  return <AuthContext.Provider value={{ account, hasPermission }}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ account, hasPermission, hasAnyPermission }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const PermissionRoute = ({
@@ -132,7 +143,7 @@ export const PermissionRoute = ({
   permission: Permission | Permission[];
   children: ReactNode;
 }) => {
-  const { hasPermission } = useAuth();
+  const { hasAnyPermission } = useAuth();
   const permissions = Array.isArray(permission) ? permission : [permission];
-  return permissions.some(hasPermission) ? children : <Navigate to="/" replace />;
+  return hasAnyPermission(permissions) ? children : <Navigate to="/" replace />;
 };

@@ -533,7 +533,8 @@ const vi = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Chú ý'
+        attention: 'Chú ý',
+        updateFailed: 'Không cập nhật được thiết bị ảo'
       },
       network: {
         title: 'Mạng',
@@ -698,7 +699,10 @@ const vi = {
         },
         permissions: {
           title: 'Quyền',
+          editTitle: 'Sửa quyền',
+          save: 'Lưu',
           consoleGroup: 'Console',
+          mediaGroup: 'Phương tiện',
           manageGroup: 'Quản trị',
           consoleView: 'Xem console',
           consoleControl: 'Bàn phím và chuột',

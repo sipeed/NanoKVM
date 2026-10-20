@@ -532,7 +532,8 @@ const en = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Attention'
+        attention: 'Attention',
+        updateFailed: 'Failed to update the virtual device'
       },
       network: {
         title: 'Network',
@@ -695,7 +696,10 @@ const en = {
         },
         permissions: {
           title: 'Permissions',
+          editTitle: 'Edit Permissions',
+          save: 'Save',
           consoleGroup: 'Console',
+          mediaGroup: 'Media',
           manageGroup: 'Administration',
           consoleView: 'View Console',
           consoleControl: 'Keyboard & Mouse',

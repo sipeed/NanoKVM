@@ -545,7 +545,8 @@ const fr = {
           "Activer le disque virtuel annule l'image montée et interrompt un téléchargement ou un envoi d'image en cours. Continuer ?",
         diskBreakDownload:
           "Activer le disque virtuel interrompt le téléchargement d'images. Continuer ?",
-        attention: 'Attention'
+        attention: 'Attention',
+        updateFailed: 'Échec de la mise à jour du périphérique virtuel'
       },
       network: {
         title: 'Réseau',
@@ -711,7 +712,10 @@ const fr = {
         },
         permissions: {
           title: 'Autorisations',
+          editTitle: 'Modifier les autorisations',
+          save: 'Enregistrer',
           consoleGroup: 'Console',
+          mediaGroup: 'Médias',
           manageGroup: 'Administration',
           consoleView: 'Voir la console',
           consoleControl: 'Clavier et souris',

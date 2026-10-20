@@ -539,7 +539,8 @@ const pt_br = {
         diskCancelMount:
           'Ativar o disco virtual cancela a imagem montada e interrompe um download ou upload de imagem em andamento. Continuar?',
         diskBreakDownload: 'Ativar o disco virtual interrompe o download de imagens. Continuar?',
-        attention: 'Atenção'
+        attention: 'Atenção',
+        updateFailed: 'Falha ao atualizar o dispositivo virtual'
       },
       network: {
         title: 'Rede',
@@ -703,7 +704,10 @@ const pt_br = {
         },
         permissions: {
           title: 'Permissões',
+          editTitle: 'Editar permissões',
+          save: 'Salvar',
           consoleGroup: 'Console',
+          mediaGroup: 'Mídia',
           manageGroup: 'Administração',
           consoleView: 'Ver console',
           consoleControl: 'Teclado e mouse',

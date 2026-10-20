@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import * as api from '@/api/media.ts';
 import { extension } from '@/lib/file-names.ts';
 import { formatSize } from '@/lib/format.ts';
@@ -115,11 +116,10 @@ export function useFileBrowser({
 }: Props) {
   const { t } = useTranslation();
   const { modal } = App.useApp();
-  const { hasPermission } = useAuth();
-  const canMount = hasPermission('media.mount');
+  const { hasPermission, hasAnyPermission } = useAuth();
   const canManage = hasPermission('media.manage');
   // Managing the library requires inspecting it: both roles may read.
-  const canRead = canMount || canManage;
+  const canRead = hasAnyPermission(MEDIA_PERMISSIONS);
 
   // A listing remembers the medium and folder it was read from: right after
   // the user moves elsewhere it still holds the old entries, and acting on

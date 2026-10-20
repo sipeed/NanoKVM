@@ -516,7 +516,8 @@ const zh = {
         diskCancelMount:
           '开启虚拟U盘会取消当前挂载的镜像，并中断正在进行的镜像下载或上传，是否继续？',
         diskBreakDownload: '开启虚拟U盘会中断镜像下载功能，是否继续？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '虚拟设备更新失败'
       },
       network: {
         title: '网络',
@@ -677,7 +678,10 @@ const zh = {
         },
         permissions: {
           title: '功能权限',
+          editTitle: '编辑权限',
+          save: '保存',
           consoleGroup: '控制台操作',
+          mediaGroup: '介质',
           manageGroup: '设备管理',
           consoleView: '查看画面',
           consoleControl: '键鼠操作',

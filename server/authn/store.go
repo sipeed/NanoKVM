@@ -290,16 +290,20 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	}
 
 	changed := false
-	credentialsChanged := false
+	// Only disabling the account invalidates its login. A role change does not:
+	// the principal is rebuilt from the account file on every request, and the
+	// caller refreshes the user's long-lived connections so they reconnect under
+	// the role's new grants. Bumping the token version for a role change would
+	// log the account out mid-session just because it was promoted or demoted.
+	loginInvalidated := false
 	if patch.Role != nil && user.Role != *patch.Role {
 		user.Role = *patch.Role
 		changed = true
-		credentialsChanged = true
 	}
 	if patch.Enabled != nil && user.Enabled != *patch.Enabled {
 		user.Enabled = *patch.Enabled
 		changed = true
-		credentialsChanged = true
+		loginInvalidated = true
 	}
 	if patch.Permissions != nil && !permissionsEqual(user.Permissions, *patch.Permissions) {
 		user.Permissions = normalizePermissions(*patch.Permissions)
@@ -313,10 +317,10 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	if enabledAdminCount(db.Users) == 0 {
 		return nil, ErrLastAdmin
 	}
-	// Permission-only updates keep the login valid: the principal is rebuilt
+	// Permission and role updates keep the login valid: the principal is rebuilt
 	// from the store on every request, so new grants apply immediately and
 	// revoked ones are enforced by dropping connections from the handler.
-	if credentialsChanged {
+	if loginInvalidated {
 		db.Users[index].TokenVersion++
 	}
 	if err = s.saveLocked(db); err != nil {

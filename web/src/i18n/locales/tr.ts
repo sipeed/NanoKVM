@@ -538,7 +538,8 @@ const tr = {
         diskCancelMount:
           'Sanal diski açmak, bağlı imajı iptal eder ve sürmekte olan imaj indirme veya yüklemeyi keser. Devam edilsin mi?',
         diskBreakDownload: 'Sanal diski açmak imaj indirmeyi keser. Devam edilsin mi?',
-        attention: 'Dikkat'
+        attention: 'Dikkat',
+        updateFailed: 'Sanal cihaz güncellenemedi'
       },
       network: {
         title: 'Ağ',
@@ -701,7 +702,10 @@ const tr = {
         },
         permissions: {
           title: 'İzinler',
+          editTitle: 'İzinleri düzenle',
+          save: 'Kaydet',
           consoleGroup: 'Konsol',
+          mediaGroup: 'Ortam',
           manageGroup: 'Yönetim',
           consoleView: 'Konsolu görüntüle',
           consoleControl: 'Klavye ve fare',

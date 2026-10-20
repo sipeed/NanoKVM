@@ -547,7 +547,8 @@ const de = {
           'Das Aktivieren des virtuellen Laufwerks bricht das eingebundene Image ab und unterbricht einen laufenden Image-Download oder -Upload. Fortfahren?',
         diskBreakDownload:
           'Das Aktivieren des virtuellen Laufwerks unterbricht den Image-Download. Fortfahren?',
-        attention: 'Achtung'
+        attention: 'Achtung',
+        updateFailed: 'Aktualisieren des virtuellen Geräts fehlgeschlagen'
       },
       network: {
         title: 'Netzwerk',
@@ -713,7 +714,10 @@ const de = {
         },
         permissions: {
           title: 'Berechtigungen',
+          editTitle: 'Berechtigungen bearbeiten',
+          save: 'Speichern',
           consoleGroup: 'Konsole',
+          mediaGroup: 'Medien',
           manageGroup: 'Verwaltung',
           consoleView: 'Konsole anzeigen',
           consoleControl: 'Tastatur und Maus',
