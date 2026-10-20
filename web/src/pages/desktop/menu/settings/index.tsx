@@ -64,7 +64,7 @@ export const Settings = () => {
       ? [
           {
             id: 'tailscale',
-            icon: <TailscaleIcon />,
+            icon: <TailscaleIcon size={16} />,
             component: <Tailscale setIsLocked={setIsLocked} />
           }
         ]
@@ -78,7 +78,7 @@ export const Settings = () => {
           }
         ]
       : []),
-    { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
+    { id: 'account', icon: <UserRoundIcon size={16} />, component: <Account /> }
   ];
 
   useEffect(() => {
@@ -158,7 +158,9 @@ export const Settings = () => {
           onClick={openModal}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
-            <div className="pt-[3px] text-neutral-300 hover:text-white">
+            {/* A flex wrapper centers the svg without the baseline gap an inline one
+                leaves inside the badge, which is what the old 3px padding hacked around */}
+            <div className="flex text-neutral-300 hover:text-white">
               <SettingsIcon size={18} />
             </div>
           </Badge>
@@ -188,7 +190,7 @@ export const Settings = () => {
                 )}
                 onClick={() => changeTab(tab.id)}
               >
-                <div className="h-[16px] w-[16px]">{tab.icon}</div>
+                <div className="flex h-[16px] w-[16px] items-center justify-center">{tab.icon}</div>
 
                 {isUpdateAvailable && tab.id === 'update' ? (
                   <Badge dot color="blue" offset={[6, 3]}>
