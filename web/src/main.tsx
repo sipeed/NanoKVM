@@ -14,6 +14,12 @@ import './assets/styles/index.css';
 const renderApp = () => {
   const themeConfig = {
     algorithm: theme.darkAlgorithm,
+    token: {
+      // Share the app's font stack (and the CJK punctuation override it starts
+      // with) instead of antd's default, so a tooltip and the page around it
+      // draw 、 and 。 with the same face.
+      fontFamily: 'var(--app-font)'
+    },
     components: {
       Collapse: {
         headerPadding: 0,

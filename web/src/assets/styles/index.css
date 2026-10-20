@@ -2,11 +2,35 @@
 @tailwind components;
 @tailwind utilities;
 
+/* CJK punctuation (、。) exists in some Latin fonts that draw it above the
+   baseline, so whichever font stack happens to claim those two characters
+   decides whether a Chinese or Japanese sentence looks aligned. Pin them to a
+   real CJK face: with unicode-range nothing else is affected, and when none of
+   the local fonts exist the browser keeps using the rest of the stack. */
+@font-face {
+  font-family: 'NanoKVM CJK punctuation';
+  src:
+    local('Noto Sans CJK SC'), local('Noto Sans SC'), local('Source Han Sans SC'),
+    local('PingFang SC'), local('Hiragino Sans GB'), local('Microsoft YaHei');
+  unicode-range: U+3001, U+3002;
+}
+
+/* One stack for the whole app: the Tailwind-styled text and the antd components
+   (tooltips, dialogs, selects) used to resolve CJK punctuation to different
+   fonts. antd reads this variable through its font-family token. */
+:root {
+  --app-font:
+    'NanoKVM CJK punctuation', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
   background: #000;
+  font-family: var(--app-font);
 }
 
 ::-webkit-scrollbar {
