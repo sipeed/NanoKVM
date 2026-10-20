@@ -68,6 +68,12 @@ const it = {
       readOnlyTip:
         'Questo account non può inviare input da tastiera o mouse al computer di destinazione, quindi la console mostra solo lo schermo.'
     },
+    noConsole: {
+      title: 'Questo account non ha accesso alla console',
+      description:
+        'Gli sono state concesse altre capacità. Apri una delle pagine che può usare o chiedi a un amministratore l’accesso alla console.',
+      nothing: 'Questo account non ha ancora permessi. Chiedi a un amministratore di concederne.'
+    },
     screen: {
       scale: 'Scala',
       title: 'Schermo',
@@ -708,29 +714,57 @@ const it = {
           editPermissions: 'Autorizzazioni'
         },
         permissions: {
-          title: 'Autorizzazioni',
-          editTitle: 'Modifica autorizzazioni',
+          title: 'Permessi',
+          editTitle: 'Modifica i permessi',
           save: 'Salva',
-          consoleGroup: 'Console',
-          mediaGroup: 'Supporti',
-          serviceGroup: 'Servizi',
-          manageGroup: 'Amministrazione',
-          consoleView: 'Visualizza console',
+          close: 'Chiudi',
+          groupConsole: 'Console',
+          groupTarget: 'Macchina di destinazione',
+          groupLibrary: 'Libreria dei supporti',
+          groupHost: 'Questo dispositivo',
+          groupServices: 'Servizi',
+          consoleView: 'Vedi lo schermo',
           consoleControl: 'Tastiera e mouse',
-          power: 'Controllo alimentazione',
-          mediaMount: 'Monta e leggi immagini',
-          mediaManage: 'Gestisci la libreria delle immagini',
+          power: 'Alimentazione e risveglio',
+          mediumAttach: 'Collega un supporto',
+          libraryRead: 'Sfoglia la libreria',
+          libraryWrite: 'Gestisci la libreria',
           terminal: 'Terminale e script',
           device: 'Impostazioni dispositivo',
           network: 'Impostazioni di rete',
           update: 'Aggiornamento di sistema',
           mcp: 'Servizio MCP',
-          mcpNote:
-            "Il servizio MCP rilascia una chiave API valida per l'intero dispositivo che controlla tastiera, mouse e screenshot fuori dalla sessione web, e continua a funzionare dopo la revoca di questa autorizzazione finché la chiave non viene rigenerata.",
           tailscale: 'Tailscale',
           ai: 'Assistente IA',
-          aiNote:
-            "L'assistente IA raggiunge il dispositivo tramite un'interfaccia interna locale che non è limitata dalle altre autorizzazioni, quindi questa autorizzazione equivale di fatto al controllo completo del dispositivo."
+          effectConsoleView:
+            'Mostra lo schermo di destinazione e imposta modalità video, risoluzione, frame rate e qualità condivisi da tutti gli spettatori.',
+          effectConsoleControl: 'Invia input di tastiera e mouse alla macchina di destinazione.',
+          effectPower:
+            'Accende, spegne e riavvia la macchina di destinazione e gestisce l’elenco dei dispositivi Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta ed espelle supporti sulla macchina di destinazione e scambia file con essa tramite la partizione condivisa.',
+          effectLibraryRead: 'Elenca e scarica le immagini e i file che contengono.',
+          effectLibraryWrite: 'Carica, crea ed elimina immagini e modifica i file che contengono.',
+          effectTerminal:
+            'Fornisce una shell root su questo dispositivo, senza passare dalla sessione web.',
+          effectDevice:
+            'Consente di attivare SSH (anch’esso root), riavviare il dispositivo, consegnare la partizione dati grezza alla macchina di destinazione e modificare OLED, HDMI, mDNS, memoria e swap.',
+          effectNetwork:
+            'Modifica Wi-Fi, DNS e TLS, il che può isolare questo dispositivo dalla rete.',
+          effectUpdate: 'Installa firmware e pacchetti applicativi.',
+          effectMcp:
+            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; la chiave continua a funzionare dopo la revoca del permesso finché non viene rigenerata.',
+          effectTailscale: 'Unisce questo dispositivo a una rete mesh VPN.',
+          effectAi:
+            'Pilota il dispositivo tramite un’interfaccia locale che gli altri permessi non limitano, quindi equivale al controllo totale del dispositivo.',
+          dangerWarning: 'Questi permessi equivalgono al controllo totale del dispositivo:',
+          emptyWarning: 'Questo account non avrà alcuna funzione e potrà solo accedere.',
+          impliedBy: 'Incluso da {{name}}',
+          grantCount: '{{count}} permessi',
+          adminAll: 'Gli amministratori hanno tutti i permessi',
+          adminDemote: 'Questo insieme torna valido se l’account torna utente normale.',
+          catalogFailed:
+            'Impossibile caricare l’elenco dei permessi. Chiudi questa finestra e riprova.'
         }
       }
     },

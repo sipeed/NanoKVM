@@ -68,6 +68,12 @@ const tr = {
       readOnlyTip:
         'Bu hesap hedef makineye klavye veya fare girişi gönderemez; bu nedenle konsol yalnızca ekranı gösterir.'
     },
+    noConsole: {
+      title: 'Bu hesabın konsol erişimi yok',
+      description:
+        'Hesaba başka yetkiler verilmiş. Kullanabileceği sayfalardan birini açın veya bir yöneticiden konsol erişimi isteyin.',
+      nothing: 'Bu hesabın henüz hiçbir izni yok. Bir yöneticiden izin vermesini isteyin.'
+    },
     screen: {
       scale: 'Ölçek',
       title: 'Ekran',
@@ -704,26 +710,52 @@ const tr = {
           title: 'İzinler',
           editTitle: 'İzinleri düzenle',
           save: 'Kaydet',
-          consoleGroup: 'Konsol',
-          mediaGroup: 'Ortam',
-          serviceGroup: 'Servisler',
-          manageGroup: 'Yönetim',
-          consoleView: 'Konsolu görüntüle',
+          close: 'Kapat',
+          groupConsole: 'Konsol',
+          groupTarget: 'Hedef makine',
+          groupLibrary: 'Medya kitaplığı',
+          groupHost: 'Bu cihaz',
+          groupServices: 'Hizmetler',
+          consoleView: 'Ekranı izle',
           consoleControl: 'Klavye ve fare',
-          power: 'Güç denetimi',
-          mediaMount: 'İmajları bağla ve oku',
-          mediaManage: 'İmaj kütüphanesini yönet',
-          terminal: 'Uçbirim ve betikler',
+          power: 'Güç ve uyandırma',
+          mediumAttach: 'Medya bağla',
+          libraryRead: 'Kitaplığa göz at',
+          libraryWrite: 'Kitaplığı yönet',
+          terminal: 'Terminal ve betikler',
           device: 'Cihaz ayarları',
           network: 'Ağ ayarları',
           update: 'Sistem güncellemesi',
-          mcp: 'MCP Hizmeti',
-          mcpNote:
-            'MCP hizmeti, web oturumu dışında klavye, fare ve ekran görüntülerini denetleyen cihaz genelinde geçerli bir API anahtarı verir; bu anahtar, izin kaldırıldıktan sonra da yeniden oluşturulana kadar çalışmaya devam eder.',
+          mcp: 'MCP hizmeti',
           tailscale: 'Tailscale',
-          ai: 'AI asistanı',
-          aiNote:
-            'AI asistanı cihaza, diğer izinlerle sınırlandırılmayan yerel bir dahili arayüz üzerinden erişir; bu nedenle bu izin fiilen cihaz üzerinde tam denetim anlamına gelir.'
+          ai: 'Yapay zekâ asistanı',
+          effectConsoleView:
+            'Hedef ekranı gösterir ve tüm izleyicilerin paylaştığı video modunu, çözünürlüğü, kare hızını ve kaliteyi ayarlar.',
+          effectConsoleControl: 'Klavye ve fare girdisini hedef makineye gönderir.',
+          effectPower:
+            'Hedef makineyi açar, kapatır ve yeniden başlatır; Wake-on-LAN cihaz listesini yönetir.',
+          effectMediumAttach:
+            'Hedef makinede medya bağlar ve çıkarır, paylaşılan bölüm üzerinden dosya alışverişi yapar.',
+          effectLibraryRead: 'İmajları ve içlerindeki dosyaları listeler ve indirir.',
+          effectLibraryWrite:
+            'İmaj yükler, oluşturur ve siler; imajların içindeki dosyaları değiştirir.',
+          effectTerminal: 'Web oturumuna girmeden bu cihazda root kabuğu verir.',
+          effectDevice:
+            'SSH’yi etkinleştirir (o da root), cihazı yeniden başlatır, ham veri bölümünü hedef makineye verir; OLED, HDMI, mDNS, bellek ve takas ayarlarını değiştirir.',
+          effectNetwork: 'Wi-Fi, DNS ve TLS ayarlarını değiştirir; bu cihaz ağdan düşebilir.',
+          effectUpdate: 'Ürün yazılımı ve uygulama paketleri kurar.',
+          effectMcp:
+            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir ve izin geri alınsa bile anahtar yeniden üretilene kadar çalışmaya devam eder.',
+          effectTailscale: 'Bu cihazı bir VPN ağına bağlar.',
+          effectAi:
+            'Cihazı, diğer izinlerin sınırlamadığı yerel bir arayüz üzerinden yönetir; bu nedenle cihaz üzerinde tam denetim anlamına gelir.',
+          dangerWarning: 'Bu izinler cihaz üzerinde tam denetim anlamına gelir:',
+          emptyWarning: 'Bu hesabın hiçbir özelliği olmayacak ve yalnızca oturum açabilecek.',
+          impliedBy: '{{name}} tarafından içerilir',
+          grantCount: '{{count}} izin',
+          adminAll: 'Yöneticiler tüm izinlere sahiptir',
+          adminDemote: 'Hesap normal kullanıcıya düşürülürse bu küme yeniden geçerli olur.',
+          catalogFailed: 'İzin listesi yüklenemedi. Bu pencereyi kapatıp yeniden deneyin.'
         }
       }
     },

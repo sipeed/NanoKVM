@@ -23,7 +23,7 @@ import { MenuItem } from '@/components/menu-item.tsx';
 export const Storage = () => {
   const { t } = useTranslation();
   const { hasPermission } = useAuth();
-  const canMount = hasPermission('media.mount');
+  const canAttach = hasPermission('medium.attach');
   // The virtual disk is a device setting, so whether the hint can point at an
   // enabled switch depends on this grant.
   const canDevice = hasPermission('device');
@@ -142,7 +142,7 @@ export const Storage = () => {
                 : t('storage.attached', { name: attachedName ?? '' })}
             </span>
 
-            {canMount && state.state !== 'none' && state.state !== 'unsupported' && (
+            {canAttach && state.state !== 'none' && state.state !== 'unsupported' && (
               <Tooltip title={t('storage.eject')}>
                 <div
                   className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
@@ -164,7 +164,7 @@ export const Storage = () => {
             </span>
           )}
 
-          {canMount && (
+          {canAttach && (
             <div className="flex items-center justify-between">
               <span className="text-sm">{t('storage.mountMode')}</span>
               <Segmented
@@ -191,7 +191,7 @@ export const Storage = () => {
                     'group flex h-[28px] items-center justify-between rounded px-2 hover:bg-neutral-700/70',
                     item.attached && 'text-blue-500'
                   )}
-                  onClick={() => canMount && !item.attached && void mount(item, mode === 'cd-rom')}
+                  onClick={() => canAttach && !item.attached && void mount(item, mode === 'cd-rom')}
                 >
                   <div className="flex min-w-0 flex-1 items-center space-x-2">
                     <MediaIcon item={item} />
@@ -200,7 +200,7 @@ export const Storage = () => {
                     </span>
                   </div>
 
-                  {canMount && (
+                  {canAttach && (
                     <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
                       {isBusy ? (
                         <LoaderCircleIcon size={14} className="animate-spin" />

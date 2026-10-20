@@ -67,6 +67,12 @@ const ja = {
       readOnlyTip:
         'このアカウントは対象マシンへキーボードやマウスの入力を行えないため、コンソールは画面の表示のみになります。'
     },
+    noConsole: {
+      title: 'このアカウントにはコンソール権限がありません',
+      description:
+        '他の機能が付与されています。利用できるページを開くか、管理者にコンソール権限を依頼してください。',
+      nothing: 'このアカウントにはまだ権限がありません。管理者に付与を依頼してください。'
+    },
     screen: {
       scale: '倍率',
       title: '画面',
@@ -710,26 +716,53 @@ const ja = {
           title: '権限',
           editTitle: '権限を編集',
           save: '保存',
-          consoleGroup: 'コンソール',
-          mediaGroup: 'メディア',
-          serviceGroup: 'サービス',
-          manageGroup: '管理',
-          consoleView: 'コンソールを表示',
+          close: '閉じる',
+          groupConsole: 'コンソール',
+          groupTarget: 'ターゲットマシン',
+          groupLibrary: 'メディアライブラリ',
+          groupHost: 'このデバイス',
+          groupServices: 'サービス',
+          consoleView: '画面を表示',
           consoleControl: 'キーボードとマウス',
-          power: '電源操作',
-          mediaMount: 'イメージをマウントして読み取り',
-          mediaManage: 'イメージライブラリを管理',
+          power: '電源とウェイク',
+          mediumAttach: 'メディアを接続',
+          libraryRead: 'ライブラリを閲覧',
+          libraryWrite: 'ライブラリを管理',
           terminal: 'ターミナルとスクリプト',
           device: 'デバイス設定',
           network: 'ネットワーク設定',
           update: 'システムアップデート',
           mcp: 'MCP サービス',
-          mcpNote:
-            'MCP サービスはデバイス全体で有効な API キーを発行し、Web セッション外からキーボード・マウス操作とスクリーンショット取得を行えます。この権限を取り消しても、キーを再生成するまで有効なままです。',
           tailscale: 'Tailscale',
           ai: 'AI アシスタント',
-          aiNote:
-            'AI アシスタントはローカルの内部インターフェース経由でデバイスを操作し、他の権限による制限を受けません。そのため、この権限を付与することは実質的にデバイスの完全な制御を意味します。'
+          effectConsoleView:
+            'ターゲットの画面を表示し、すべての視聴者が共有するビデオモード、解像度、フレームレート、画質を設定します。',
+          effectConsoleControl: 'キーボードとマウスの入力をターゲットマシンに送信します。',
+          effectPower:
+            'ターゲットマシンの電源投入、電源切断、リセットを行い、Wake-on-LAN のデバイス一覧を管理します。',
+          effectMediumAttach:
+            'メディアをターゲットマシンにマウント・取り出し、共有パーティション経由でファイルを交換します。',
+          effectLibraryRead: 'イメージとその中のファイルを一覧表示・ダウンロードします。',
+          effectLibraryWrite:
+            'イメージのアップロード・作成・削除と、イメージ内のファイルの変更を行います。',
+          effectTerminal: 'Web セッションを介さずに、このデバイスで root シェルを提供します。',
+          effectDevice:
+            'SSH の有効化（これも root 相当）、デバイスの再起動、生のデータパーティションをターゲットマシンへ公開、OLED・HDMI・mDNS・メモリ・スワップの設定変更ができます。',
+          effectNetwork:
+            'Wi-Fi、DNS、TLS を変更します。このデバイスがネットワークから切断される可能性があります。',
+          effectUpdate: 'ファームウェアとアプリケーションパッケージをインストールします。',
+          effectMcp:
+            'デバイス全体で有効な API キーを発行し、Web セッション外からキーボード・マウス・スクリーンショットを操作できます。この権限を取り消しても、キーを再生成するまで有効なままです。',
+          effectTailscale: 'このデバイスを VPN メッシュに参加させます。',
+          effectAi:
+            '他の権限に制限されないローカルインターフェース経由でデバイスを操作するため、実質的にデバイスの完全な制御権になります。',
+          dangerWarning: 'これらの権限はデバイスの完全な制御権に相当します:',
+          emptyWarning: 'このアカウントは機能を一切持たず、ログインのみ可能になります。',
+          impliedBy: '{{name}} に含まれます',
+          grantCount: '{{count}} 件の権限',
+          adminAll: '管理者はすべての権限を持ちます',
+          adminDemote: '一般ユーザーに降格すると、この設定が再び適用されます。',
+          catalogFailed: '権限一覧を読み込めませんでした。ダイアログを閉じて再試行してください。'
         }
       }
     },

@@ -68,6 +68,12 @@ const es = {
       readOnlyTip:
         'Esta cuenta no puede enviar entrada de teclado ni de ratón al equipo de destino, por lo que la consola solo muestra la pantalla.'
     },
+    noConsole: {
+      title: 'Esta cuenta no tiene acceso a la consola',
+      description:
+        'Se le concedieron otras capacidades. Abra una de las páginas que puede usar o pida a un administrador acceso a la consola.',
+      nothing: 'Esta cuenta aún no tiene permisos. Pida a un administrador que le conceda alguno.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -713,26 +719,54 @@ const es = {
           title: 'Permisos',
           editTitle: 'Editar permisos',
           save: 'Guardar',
-          consoleGroup: 'Consola',
-          mediaGroup: 'Soportes',
-          serviceGroup: 'Servicios',
-          manageGroup: 'Administración',
-          consoleView: 'Ver la consola',
+          close: 'Cerrar',
+          groupConsole: 'Consola',
+          groupTarget: 'Máquina de destino',
+          groupLibrary: 'Biblioteca de medios',
+          groupHost: 'Este dispositivo',
+          groupServices: 'Servicios',
+          consoleView: 'Ver la pantalla',
           consoleControl: 'Teclado y ratón',
-          power: 'Control de energía',
-          mediaMount: 'Montar y leer imágenes',
-          mediaManage: 'Gestionar la biblioteca de imágenes',
-          terminal: 'Consola y scripts',
+          power: 'Encendido y activación',
+          mediumAttach: 'Conectar un medio',
+          libraryRead: 'Explorar la biblioteca',
+          libraryWrite: 'Gestionar la biblioteca',
+          terminal: 'Terminal y scripts',
           device: 'Ajustes del dispositivo',
           network: 'Ajustes de red',
           update: 'Actualización del sistema',
           mcp: 'Servicio MCP',
-          mcpNote:
-            'El servicio MCP emite una clave API de ámbito del dispositivo que controla el teclado, el ratón y las capturas fuera de la sesión web, y sigue funcionando tras revocar este permiso hasta que se regenere la clave.',
           tailscale: 'Tailscale',
           ai: 'Asistente de IA',
-          aiNote:
-            'El asistente de IA accede al dispositivo mediante una interfaz interna local que no está limitada por los demás permisos, por lo que este permiso equivale en la práctica al control total del dispositivo.'
+          effectConsoleView:
+            'Muestra la pantalla de destino y define el modo de vídeo, la resolución, los fps y la calidad que comparten todos los espectadores.',
+          effectConsoleControl: 'Envía entrada de teclado y ratón a la máquina de destino.',
+          effectPower:
+            'Enciende, apaga y reinicia la máquina de destino, y gestiona la lista de dispositivos de Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta y expulsa medios en la máquina de destino, e intercambia archivos con ella mediante la partición compartida.',
+          effectLibraryRead: 'Lista y descarga las imágenes y los archivos que contienen.',
+          effectLibraryWrite:
+            'Sube, crea y elimina imágenes, y modifica los archivos que contienen.',
+          effectTerminal:
+            'Ofrece un shell de root en este dispositivo, sin pasar por la sesión web.',
+          effectDevice:
+            'Permite activar SSH (también root), reiniciar el dispositivo, entregar la partición de datos sin formato a la máquina de destino y cambiar OLED, HDMI, mDNS, memoria y swap.',
+          effectNetwork: 'Cambia Wi-Fi, DNS y TLS, lo que puede dejar este dispositivo sin red.',
+          effectUpdate: 'Instala firmware y paquetes de aplicación.',
+          effectMcp:
+            'Emite una clave API de todo el dispositivo que controla teclado, ratón y capturas fuera de la sesión web; la clave sigue funcionando tras revocar el permiso hasta que se regenere.',
+          effectTailscale: 'Une este dispositivo a una malla VPN.',
+          effectAi:
+            'Controla el dispositivo mediante una interfaz local que los demás permisos no limitan, por lo que equivale al control total del dispositivo.',
+          dangerWarning: 'Estos permisos equivalen al control total del dispositivo:',
+          emptyWarning: 'Esta cuenta no tendrá ninguna función y solo podrá iniciar sesión.',
+          impliedBy: 'Incluido por {{name}}',
+          grantCount: '{{count}} permisos',
+          adminAll: 'Los administradores tienen todos los permisos',
+          adminDemote: 'Este conjunto se aplica de nuevo si la cuenta pasa a usuario normal.',
+          catalogFailed:
+            'No se pudo cargar la lista de permisos. Cierre este diálogo e inténtelo de nuevo.'
         }
       }
     },

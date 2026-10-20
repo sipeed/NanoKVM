@@ -12,6 +12,8 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"NanoKVM-Server/authn"
+	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/storage/diskfs"
 	"NanoKVM-Server/utils"
@@ -20,6 +22,31 @@ import (
 // File handlers work inside a medium that is not attached to the target
 // machine. A medium the target machine owns is refused by openMedium: the two
 // of us writing one filesystem is how it gets destroyed.
+
+// requireFileWrite picks the grant the medium in the request needs. One path
+// serves two media types: an image holds library content (library.write), while
+// the shared partition is what the emulated disk hands to the target machine, so
+// writing into it belongs to medium.attach. The route admits either grant and
+// this is the only place the pair is narrowed, because which one applies is not
+// visible to a path-based rule.
+func requireFileWrite(c *gin.Context, mediaType string) bool {
+	permission := authn.PermLibraryWrite
+	if mediaType == proto.MediaTypePartition {
+		permission = authn.PermMediumAttach
+	}
+
+	principal, ok := middleware.CurrentPrincipal(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		return false
+	}
+	if principal.Has(permission) {
+		return true
+	}
+
+	c.JSON(http.StatusForbidden, "forbidden")
+	return false
+}
 
 // uploadMaxBytes is a hard ceiling for a single upload, so a runaway request
 // cannot fill the medium before the free space check has had its say.
@@ -141,6 +168,10 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 	// bound on the file: good enough to refuse an upload that cannot fit.
 	size := c.Request.ContentLength
 
+	if !requireFileWrite(c, mediaType) {
+		return
+	}
+
 	image, err := openMedium(mediaType, rel, true)
 	if err != nil {
 		respondError(c, err)
@@ -233,6 +264,9 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 
 	if err := proto.ParseFormRequest(c, &req); err != nil {
 		rsp.ErrRsp(c, codeInvalidArgument, "invalid arguments")
+		return
+	}
+	if !requireFileWrite(c, req.Type) {
 		return
 	}
 

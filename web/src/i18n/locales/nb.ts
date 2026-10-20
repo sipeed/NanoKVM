@@ -68,6 +68,12 @@ const nb = {
       readOnlyTip:
         'Denne kontoen kan ikke sende tastatur- eller musinndata til målmaskinen, så konsollen viser bare skjermen.'
     },
+    noConsole: {
+      title: 'Denne kontoen har ikke konsoltilgang',
+      description:
+        'Den har fått andre tillatelser. Åpne en av sidene den kan bruke, eller be en administrator om konsoltilgang.',
+      nothing: 'Denne kontoen har ingen tillatelser ennå. Be en administrator om å gi noen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skjerm',
@@ -702,26 +708,53 @@ const nb = {
           title: 'Tillatelser',
           editTitle: 'Rediger tillatelser',
           save: 'Lagre',
-          consoleGroup: 'Konsoll',
-          mediaGroup: 'Medier',
-          serviceGroup: 'Tjenester',
-          manageGroup: 'Administrasjon',
-          consoleView: 'Se konsoll',
+          close: 'Lukk',
+          groupConsole: 'Konsoll',
+          groupTarget: 'Målmaskin',
+          groupLibrary: 'Mediebibliotek',
+          groupHost: 'Denne enheten',
+          groupServices: 'Tjenester',
+          consoleView: 'Se skjermen',
           consoleControl: 'Tastatur og mus',
-          power: 'Strømstyring',
-          mediaMount: 'Monter og les diskbilder',
-          mediaManage: 'Administrer diskbildbibliotek',
+          power: 'Strøm og vekking',
+          mediumAttach: 'Koble til et medium',
+          libraryRead: 'Bla gjennom biblioteket',
+          libraryWrite: 'Administrer biblioteket',
           terminal: 'Terminal og skript',
           device: 'Enhetsinnstillinger',
           network: 'Nettverksinnstillinger',
           update: 'Systemoppdatering',
           mcp: 'MCP-tjeneste',
-          mcpNote:
-            'MCP-tjenesten utsteder en enhetsdekkende API-nøkkel som styrer tastatur, mus og skjermbilder utenfor nettsesjonen, og den virker fortsatt etter at denne tillatelsen er tilbakekalt, helt til nøkkelen genereres på nytt.',
           tailscale: 'Tailscale',
           ai: 'AI-assistent',
-          aiNote:
-            'AI-assistenten når enheten via et lokalt internt grensesnitt som ikke begrenses av de øvrige tillatelsene, så denne tillatelsen tilsvarer i praksis full kontroll over enheten.'
+          effectConsoleView:
+            'Viser målmaskinens skjerm og setter videomodus, oppløsning, bildefrekvens og kvalitet som alle seere deler.',
+          effectConsoleControl: 'Sender tastatur- og musinndata til målmaskinen.',
+          effectPower:
+            'Slår på, slår av og restarter målmaskinen, og administrerer listen over Wake-on-LAN-enheter.',
+          effectMediumAttach:
+            'Monterer og løser ut medier på målmaskinen, og utveksler filer med den via den delte partisjonen.',
+          effectLibraryRead: 'Lister ut og laster ned avbildningene og filene i dem.',
+          effectLibraryWrite:
+            'Laster opp, oppretter og sletter avbildninger, og endrer filene i dem.',
+          effectTerminal: 'Gir et root-skall på denne enheten, uten nettsesjonen imellom.',
+          effectDevice:
+            'Gjør det mulig å slå på SSH (også root), restarte enheten, gi den rå datapartisjonen til målmaskinen og endre OLED, HDMI, mDNS, minne og swap.',
+          effectNetwork:
+            'Endrer Wi-Fi, DNS og TLS, noe som kan koble denne enheten fra nettverket.',
+          effectUpdate: 'Installerer fastvare og programpakker.',
+          effectMcp:
+            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; nøkkelen virker fortsatt etter at denne tillatelsen er trukket tilbake, til den genereres på nytt.',
+          effectTailscale: 'Kobler denne enheten til et VPN-nett.',
+          effectAi:
+            'Styrer enheten via et lokalt grensesnitt som de andre tillatelsene ikke begrenser, så dette tilsvarer full kontroll over enheten.',
+          dangerWarning: 'Disse tillatelsene tilsvarer full kontroll over enheten:',
+          emptyWarning: 'Denne kontoen får ingen funksjoner og kan bare logge inn.',
+          impliedBy: 'Inkludert av {{name}}',
+          grantCount: '{{count}} tillatelser',
+          adminAll: 'Administratorer har alle tillatelser',
+          adminDemote: 'Dette settet gjelder igjen hvis kontoen nedgraderes til vanlig bruker.',
+          catalogFailed: 'Tillatelseslisten kunne ikke lastes. Lukk dialogen og prøv igjen.'
         }
       }
     },

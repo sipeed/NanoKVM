@@ -1,6 +1,5 @@
 import { createHashRouter, Outlet } from 'react-router-dom';
 
-import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import { PermissionRoute, ProtectedRoute } from '@/components/auth';
 import { Root } from '@/components/root';
 
@@ -45,7 +44,7 @@ export const router = createHashRouter([
       },
       {
         element: (
-          <PermissionRoute permission={MEDIA_PERMISSIONS}>
+          <PermissionRoute permission="library.read">
             <Outlet />
           </PermissionRoute>
         ),

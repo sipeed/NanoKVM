@@ -6,8 +6,9 @@ export type Permission =
   | 'console.view'
   | 'console.control'
   | 'power'
-  | 'media.mount'
-  | 'media.manage'
+  | 'medium.attach'
+  | 'library.read'
+  | 'library.write'
   | 'terminal'
   | 'device'
   | 'network'
@@ -16,15 +17,29 @@ export type Permission =
   | 'tailscale'
   | 'ai';
 
-// Media access splits along the trust boundary: media.mount attaches a medium to
-// the target machine and reads it, media.manage changes the library contents.
-// Every screen that shows the library needs either of them, so the pair is
-// checked together instead of being spelled out at each call site.
-export const MEDIA_PERMISSIONS: Permission[] = ['media.mount', 'media.manage'];
+// Group names the party a grant reaches: the console this account watches, the
+// machine behind it, the media library on this device, the device itself, or
+// the services that reach it on their own.
+export type PermissionGroup = 'console' | 'target' | 'library' | 'host' | 'services';
+
+// Risk states how far a grant reaches. The editor marks the danger ones, which
+// are the grants that amount to full device control.
+export type PermissionRisk = 'info' | 'warn' | 'danger';
+
+// PermissionDescriptor is one catalog entry as the server serves it. The editor
+// renders the catalog instead of keeping its own copy of the model, so labels,
+// groups and implied grants cannot drift from what the server enforces.
+export type PermissionDescriptor = {
+  id: Permission;
+  group: PermissionGroup;
+  risk: PermissionRisk;
+  implies?: Permission[];
+};
 
 export type Account = {
   username: string;
   role: UserRole;
+  // The effective grants: the stored set plus everything it implies.
   permissions: Permission[];
 };
 
@@ -32,7 +47,6 @@ export type User = Account & {
   enabled: boolean;
   systemAccount?: boolean;
 };
-
 export function login(username: string, password: string) {
   const data = {
     username,

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
 import {
+  Alert,
   Button,
-  Checkbox,
   Form,
   Input,
   message,
@@ -12,12 +12,14 @@ import {
   Switch,
   Tooltip
 } from 'antd';
-import { CircleAlertIcon, KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
+import { KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/auth.ts';
-import { MEDIA_PERMISSIONS, Permission, User, UserRole } from '@/api/auth.ts';
+import { Permission, PermissionDescriptor, User, UserRole } from '@/api/auth.ts';
 import { encrypt } from '@/lib/encrypt.ts';
+import { DEFAULT_PERMISSIONS } from '@/lib/permissions.ts';
+import { PermissionEditor } from '@/components/permission-editor.tsx';
 
 type CreateValues = {
   username: string;
@@ -30,145 +32,8 @@ type PasswordValues = {
   password: string;
 };
 
-// i18next treats dots as key separators, so permission keys are mapped to
-// dot-free label keys.
-const PERMISSION_LABEL_KEYS: Record<Permission, string> = {
-  'console.view': 'consoleView',
-  'console.control': 'consoleControl',
-  power: 'power',
-  'media.mount': 'mediaMount',
-  'media.manage': 'mediaManage',
-  terminal: 'terminal',
-  device: 'device',
-  network: 'network',
-  update: 'update',
-  mcp: 'mcp',
-  tailscale: 'tailscale',
-  ai: 'ai'
-};
-
-const DEFAULT_USER_PERMISSIONS: Permission[] = ['console.view', 'console.control', 'power'];
-
-// console.view is not a choice: nothing in the app renders without it, so the
-// server rejects grant sets that omit it and the checkbox stays pinned.
-const REQUIRED_PERMISSION: Permission = 'console.view';
-
-// PERMISSION_NOTES warns about grants whose reach is wider than their name
-// suggests. Shown as a hint next to the checkbox.
-const PERMISSION_NOTES: Partial<Record<Permission, string>> = {
-  mcp: 'settings.account.permissions.mcpNote',
-  ai: 'settings.account.permissions.aiNote'
-};
-
-// The editor groups the catalog by what the grants give access to. A feature
-// that spans two grants (media.mount and media.manage) stays in one group, and
-// anything the server adds later lands in the last group instead of vanishing.
-const CONSOLE_PERMISSIONS: Permission[] = ['console.view', 'console.control', 'power'];
-// Services are the add-ons that talk to the device on their own (an API key, a
-// VPN mesh, an agent), so they are kept apart from the device settings they can
-// reach past.
-const SERVICE_PERMISSIONS: Permission[] = ['mcp', 'tailscale', 'ai'];
-const GROUPED_PERMISSIONS: Permission[] = [
-  ...CONSOLE_PERMISSIONS,
-  ...MEDIA_PERMISSIONS,
-  ...SERVICE_PERMISSIONS
-];
-
-type PermissionCheckboxesProps = {
-  value?: Permission[];
-  onChange?: (permissions: Permission[]) => void;
-  catalog: Permission[];
-  labelOf: (permission: Permission) => string;
-};
-
-// PermissionCheckboxes renders the catalog in labeled sections and plays the
-// value/onChange protocol so antd Form.Item can drive it directly.
-const PermissionCheckboxes = ({
-  value = [],
-  onChange,
-  catalog,
-  labelOf
-}: PermissionCheckboxesProps) => {
-  const { t } = useTranslation();
-
-  function toggle(permission: Permission, checked: boolean) {
-    if (!onChange || permission === REQUIRED_PERMISSION) return;
-    onChange(checked ? [...value, permission] : value.filter((item) => item !== permission));
-  }
-
-  // The catalog is fetched separately, so hide a group with nothing to show.
-  // The editor still keeps grants it cannot render.
-  const sections = [
-    {
-      titleKey: 'consoleGroup',
-      items: CONSOLE_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
-    },
-    {
-      titleKey: 'mediaGroup',
-      items: MEDIA_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
-    },
-    {
-      titleKey: 'serviceGroup',
-      items: SERVICE_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
-    },
-    {
-      titleKey: 'manageGroup',
-      items: catalog.filter((item) => !GROUPED_PERMISSIONS.includes(item))
-    }
-  ].filter((section) => section.items.length > 0);
-
-  return (
-    <div className="flex flex-col gap-3">
-      {sections.map((section) => (
-        <div key={section.titleKey}>
-          <div className="mb-1 text-xs text-neutral-500">
-            {t(`settings.account.permissions.${section.titleKey}`)}
-          </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-            {section.items.map((permission) => {
-              const required = permission === REQUIRED_PERMISSION;
-              const note = PERMISSION_NOTES[permission];
-
-              return (
-                <Checkbox
-                  key={permission}
-                  checked={required || value.includes(permission)}
-                  disabled={required}
-                  onChange={(e) => toggle(permission, e.target.checked)}
-                >
-                  <span className="inline-flex items-center gap-1">
-                    {labelOf(permission)}
-                    {note && (
-                      <Tooltip title={t(note)}>
-                        <span
-                          className="inline-flex items-center text-amber-500"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          <CircleAlertIcon size={12} />
-                        </span>
-                      </Tooltip>
-                    )}
-                  </span>
-                </Checkbox>
-              );
-            })}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// withRequiredPermission keeps the pinned grant in the payload so an account
-// stored without it is repaired by the next save.
-function withRequiredPermission(permissions: Permission[]): Permission[] {
-  return permissions.includes(REQUIRED_PERMISSION)
-    ? permissions
-    : [REQUIRED_PERMISSION, ...permissions];
-}
-
 // AccountRefused marks a change the server turned down, which carries a reason
-// the administrator can act on (a missing grant, an invalid role, ...).
+// the administrator can act on (an invalid role, the last administrator, ...).
 class AccountRefused extends Error {}
 
 export const Users = () => {
@@ -180,7 +45,11 @@ export const Users = () => {
   const createRole = Form.useWatch('role', createForm);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [catalog, setCatalog] = useState<Permission[]>([]);
+  // The catalog drives the editor: its groups, its risk marks and the grants one
+  // permission implies all come from the server, so the editor cannot offer a
+  // grant the server does not enforce or hide one it does.
+  const [catalog, setCatalog] = useState<PermissionDescriptor[] | null>(null);
+  const [catalogFailed, setCatalogFailed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [passwordUser, setPasswordUser] = useState<string | null>(null);
@@ -230,16 +99,14 @@ export const Users = () => {
     api
       .getPermissions()
       .then((rsp) => {
-        if (rsp.code === 0 && Array.isArray(rsp.data?.permissions)) {
-          setCatalog(rsp.data.permissions);
+        if (rsp.code !== 0 || !Array.isArray(rsp.data?.permissions)) {
+          setCatalogFailed(true);
+          return;
         }
+        setCatalog(rsp.data.permissions);
       })
-      .catch(() => {});
+      .catch(() => setCatalogFailed(true));
   }, []);
-
-  function permissionLabel(permission: Permission) {
-    return t(`settings.account.permissions.${PERMISSION_LABEL_KEYS[permission]}`);
-  }
 
   // Only the server's own refusals carry a message worth repeating: a transport
   // failure would just add "Request failed with status code 500" to the toast.
@@ -252,9 +119,7 @@ export const Users = () => {
     setIsLoading(true);
     try {
       const permissions =
-        values.role === 'user'
-          ? withRequiredPermission(values.permissions ?? DEFAULT_USER_PERMISSIONS)
-          : undefined;
+        values.role === 'user' ? (values.permissions ?? DEFAULT_PERMISSIONS) : undefined;
       const rsp = await api.createUser(
         values.username,
         encrypt(values.password),
@@ -294,9 +159,7 @@ export const Users = () => {
 
   async function savePermissions() {
     if (!permissionUser) return;
-    const saved = await updateUser(permissionUser, {
-      permissions: withRequiredPermission(permissionDraft)
-    });
+    const saved = await updateUser(permissionUser, { permissions: permissionDraft });
     if (saved) {
       setPermissionUser(null);
     }
@@ -331,12 +194,20 @@ export const Users = () => {
     }
   }
 
+  // How much an account may do, without opening its editor.
+  function describePermissions(user: User) {
+    if (user.role === 'admin') return t('settings.account.permissions.adminAll');
+    return t('settings.account.permissions.grantCount', { count: user.permissions.length });
+  }
+
+  const isPermissionEditorReadOnly = permissionUser?.role === 'admin';
+
   return (
     <>
       {contextHolder}
       <div className="mb-4 flex items-center justify-between">
         <div className="text-base">{t('settings.account.users.title')}</div>
-        <Button type="primary" onClick={() => setIsCreateOpen(true)}>
+        <Button type="primary" disabled={catalogFailed} onClick={() => setIsCreateOpen(true)}>
           {t('settings.account.users.create')}
         </Button>
       </div>
@@ -350,13 +221,18 @@ export const Users = () => {
               key={user.username}
               className="flex flex-wrap items-center gap-2 rounded-md bg-neutral-800/60 px-3 py-2"
             >
-              <span className="flex min-w-0 flex-1 items-baseline">
-                <span className="truncate">{user.username}</span>
-                {user.systemAccount && (
-                  <span className="ml-2 shrink-0 text-xs text-neutral-500">
-                    {t('settings.account.users.deviceOwner')}
-                  </span>
-                )}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="flex items-baseline">
+                  <span className="truncate">{user.username}</span>
+                  {user.systemAccount && (
+                    <span className="ml-2 shrink-0 text-xs text-neutral-500">
+                      {t('settings.account.users.deviceOwner')}
+                    </span>
+                  )}
+                </span>
+                <span className="truncate text-xs text-neutral-500">
+                  {describePermissions(user)}
+                </span>
               </span>
               <div className="flex shrink-0 items-center gap-2">
                 <Select<UserRole>
@@ -369,20 +245,15 @@ export const Users = () => {
                   ]}
                   onChange={(role) => updateUser(user, { role })}
                 />
-                {/* Keep the slot occupied on admin rows so the trailing controls stay aligned */}
-                <span className="inline-flex w-[32px] justify-center">
-                  {user.role === 'user' && (
-                    <Tooltip title={t('settings.account.users.editPermissions')}>
-                      <Button
-                        size="small"
-                        icon={<ShieldCheckIcon size={14} />}
-                        aria-label={t('settings.account.users.editPermissions')}
-                        disabled={isLoading}
-                        onClick={() => openPermissionEditor(user)}
-                      />
-                    </Tooltip>
-                  )}
-                </span>
+                <Tooltip title={t('settings.account.users.editPermissions')}>
+                  <Button
+                    size="small"
+                    icon={<ShieldCheckIcon size={14} />}
+                    aria-label={t('settings.account.users.editPermissions')}
+                    disabled={isLoading || catalogFailed}
+                    onClick={() => openPermissionEditor(user)}
+                  />
+                </Tooltip>
                 <Switch
                   checked={user.enabled}
                   disabled={isLoading || isProtected}
@@ -432,7 +303,7 @@ export const Users = () => {
         <Form<CreateValues>
           form={createForm}
           layout="vertical"
-          initialValues={{ role: 'user', permissions: DEFAULT_USER_PERMISSIONS }}
+          initialValues={{ role: 'user', permissions: DEFAULT_PERMISSIONS }}
           onFinish={createUser}
         >
           <Form.Item
@@ -465,10 +336,16 @@ export const Users = () => {
           </Form.Item>
           {createRole === 'user' && (
             <Form.Item name="permissions" label={t('settings.account.permissions.title')}>
-              <PermissionCheckboxes catalog={catalog} labelOf={permissionLabel} />
+              <PermissionEditor catalog={catalog} catalogFailed={catalogFailed} />
             </Form.Item>
           )}
-          <Button type="primary" htmlType="submit" loading={isLoading} className="w-full">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isLoading}
+            disabled={catalogFailed}
+            className="w-full"
+          >
             {t('settings.account.users.create')}
           </Button>
         </Form>
@@ -501,25 +378,40 @@ export const Users = () => {
       <Modal
         title={t('settings.account.permissions.editTitle')}
         open={!!permissionUser}
-        footer={null}
         destroyOnHidden
         onCancel={() => setPermissionUser(null)}
+        onOk={() => void savePermissions()}
+        okText={t('settings.account.permissions.save')}
+        cancelText={t('auth.cancel')}
+        confirmLoading={isLoading}
+        okButtonProps={{ disabled: !catalog }}
+        // An administrator holds every grant, so its set is shown for reference
+        // and there is nothing to save.
+        footer={
+          isPermissionEditorReadOnly ? (
+            <Button onClick={() => setPermissionUser(null)}>
+              {t('settings.account.permissions.close')}
+            </Button>
+          ) : undefined
+        }
       >
         <div className="flex flex-col gap-4">
-          <PermissionCheckboxes
-            value={permissionDraft}
-            onChange={setPermissionDraft}
+          {isPermissionEditorReadOnly && (
+            <Alert
+              type="info"
+              showIcon
+              message={t('settings.account.permissions.adminAll')}
+              description={t('settings.account.permissions.adminDemote')}
+            />
+          )}
+          <PermissionEditor
+            value={
+              isPermissionEditorReadOnly ? (permissionUser?.permissions ?? []) : permissionDraft
+            }
+            onChange={isPermissionEditorReadOnly ? undefined : setPermissionDraft}
             catalog={catalog}
-            labelOf={permissionLabel}
+            catalogFailed={catalogFailed}
           />
-          <div className="flex justify-end gap-2">
-            <Button disabled={isLoading} onClick={() => setPermissionUser(null)}>
-              {t('auth.cancel')}
-            </Button>
-            <Button type="primary" loading={isLoading} onClick={() => void savePermissions()}>
-              {t('settings.account.permissions.save')}
-            </Button>
-          </div>
         </div>
       </Modal>
     </>

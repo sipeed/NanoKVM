@@ -6,7 +6,6 @@ import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
-import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import {
   keyboardLedStatusVisibleAtom,
   menuCloseSignalAtom,
@@ -31,8 +30,10 @@ import { Wol } from './wol';
 
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
-  const { hasPermission, hasAnyPermission } = useAuth();
-  const canMedia = hasAnyPermission(MEDIA_PERMISSIONS);
+  const { hasPermission } = useAuth();
+  // Every media grant implies reading the library, so this alone decides whether
+  // the storage menu has anything to show.
+  const canLibrary = hasPermission('library.read');
   const canControl = hasPermission('console.control');
   const canTerminal = hasPermission('terminal');
   const canAi = hasPermission('ai');
@@ -122,13 +123,13 @@ export const Menu = () => {
             <Mouse />
             <Divider type="vertical" />
 
-            {canMedia && isEnabled('storage') && <Storage />}
+            {canLibrary && isEnabled('storage') && <Storage />}
             {canTerminal && isEnabled('terminal') && <Terminal />}
             {canTerminal && isEnabled('script') && <Script />}
             {canPower && isEnabled('wol') && <Wol />}
 
             {((canPower && isEnabled('wol')) ||
-              (canMedia && isEnabled('storage')) ||
+              (canLibrary && isEnabled('storage')) ||
               (canTerminal && ['script', 'terminal'].some(isEnabled))) && (
               <Divider type="vertical" />
             )}

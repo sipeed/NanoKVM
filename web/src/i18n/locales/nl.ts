@@ -69,6 +69,12 @@ const nl = {
       readOnlyTip:
         'Dit account kan geen toetsenbord- of muisinvoer naar de doelmachine sturen, daarom toont de console alleen het scherm.'
     },
+    noConsole: {
+      title: 'Dit account heeft geen toegang tot de console',
+      description:
+        'Er zijn andere mogelijkheden toegekend. Open een van de pagina’s die het mag gebruiken, of vraag een beheerder om toegang tot de console.',
+      nothing: 'Dit account heeft nog geen rechten. Vraag een beheerder om er een toe te kennen.'
+    },
     screen: {
       scale: 'Schaal',
       title: 'Scherm',
@@ -713,26 +719,54 @@ const nl = {
           title: 'Rechten',
           editTitle: 'Rechten bewerken',
           save: 'Opslaan',
-          consoleGroup: 'Console',
-          mediaGroup: 'Media',
-          serviceGroup: 'Services',
-          manageGroup: 'Beheer',
-          consoleView: 'Console bekijken',
+          close: 'Sluiten',
+          groupConsole: 'Console',
+          groupTarget: 'Doelmachine',
+          groupLibrary: 'Mediabibliotheek',
+          groupHost: 'Dit apparaat',
+          groupServices: 'Diensten',
+          consoleView: 'Scherm bekijken',
           consoleControl: 'Toetsenbord en muis',
-          power: 'Energiebeheer',
-          mediaMount: 'Afbeeldingen koppelen en lezen',
-          mediaManage: 'Afbeeldingenbibliotheek beheren',
+          power: 'Voeding en wekken',
+          mediumAttach: 'Medium koppelen',
+          libraryRead: 'Mediabibliotheek doorbladeren',
+          libraryWrite: 'Mediabibliotheek beheren',
           terminal: 'Terminal en scripts',
           device: 'Apparaatinstellingen',
           network: 'Netwerkinstellingen',
           update: 'Systeemupdate',
-          mcp: 'MCP-service',
-          mcpNote:
-            'De MCP-service geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; die blijft werken nadat dit recht is ingetrokken tot de sleutel opnieuw wordt gegenereerd.',
+          mcp: 'MCP-dienst',
           tailscale: 'Tailscale',
           ai: 'AI-assistent',
-          aiNote:
-            'De AI-assistent benadert het apparaat via een lokale interne interface die niet door de andere rechten wordt beperkt; deze toestemming staat daardoor in de praktijk gelijk aan volledige controle over het apparaat.'
+          effectConsoleView:
+            'Toont het scherm van de doelmachine en stelt de videomodus, resolutie, framesnelheid en kwaliteit in die alle kijkers delen.',
+          effectConsoleControl: 'Stuurt toetsenbord- en muisinvoer naar de doelmachine.',
+          effectPower:
+            'Zet de doelmachine aan, uit en herstart hem, en beheert de lijst met Wake-on-LAN-apparaten.',
+          effectMediumAttach:
+            'Koppelt en ontkoppelt media op de doelmachine en wisselt bestanden met hem uit via de gedeelde partitie.',
+          effectLibraryRead: 'Toont en downloadt de images en de bestanden erin.',
+          effectLibraryWrite: 'Uploadt, maakt en verwijdert images, en wijzigt de bestanden erin.',
+          effectTerminal: 'Geeft een root-shell op dit apparaat, zonder de websessie ertussen.',
+          effectDevice:
+            'Maakt SSH mogelijk (ook root), herstart het apparaat, geeft de ruwe datapartitie aan de doelmachine en wijzigt OLED, HDMI, mDNS, geheugen en swap.',
+          effectNetwork:
+            'Wijzigt wifi, DNS en TLS, waardoor dit apparaat van het netwerk kan verdwijnen.',
+          effectUpdate: 'Installeert firmware en applicatiepakketten.',
+          effectMcp:
+            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; de sleutel blijft werken nadat deze toestemming is ingetrokken tot hij opnieuw wordt gegenereerd.',
+          effectTailscale: 'Voegt dit apparaat toe aan een VPN-mesh.',
+          effectAi:
+            'Bestuurt het apparaat via een lokale interface die de andere rechten niet beperken, dus dit staat gelijk aan volledige apparaatcontrole.',
+          dangerWarning: 'Deze rechten komen neer op volledige apparaatcontrole:',
+          emptyWarning: 'Dit account heeft dan geen enkele functie en kan alleen inloggen.',
+          impliedBy: 'Inbegrepen via {{name}}',
+          grantCount: '{{count}} rechten',
+          adminAll: 'Beheerders hebben alle rechten',
+          adminDemote:
+            'Deze set geldt weer als het account wordt teruggezet naar een gewone gebruiker.',
+          catalogFailed:
+            'De rechtenlijst kon niet worden geladen. Sluit dit venster en probeer het opnieuw.'
         }
       }
     },

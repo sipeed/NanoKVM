@@ -64,6 +64,11 @@ const zh_tw = {
       readOnlyTip:
         '此帳號沒有鍵盤與滑鼠操作權限，無法向目標機發送鍵盤與滑鼠事件，主控台僅顯示畫面。'
     },
+    noConsole: {
+      title: '此帳戶沒有控制台權限',
+      description: '此帳戶被授予了其他功能。可以開啟下方可用頁面，或聯絡管理員授予控制台權限。',
+      nothing: '此帳戶還沒有任何功能權限，請聯絡管理員授予。'
+    },
     screen: {
       scale: '缩放',
       title: '螢幕',
@@ -682,26 +687,48 @@ const zh_tw = {
           title: '功能權限',
           editTitle: '編輯權限',
           save: '儲存',
-          consoleGroup: '主控台操作',
-          mediaGroup: '媒體',
-          serviceGroup: '服務',
-          manageGroup: '設備管理',
-          consoleView: '檢視畫面',
-          consoleControl: '鍵盤與滑鼠',
-          power: '電源控制',
-          mediaMount: '裝載與讀取映像檔',
-          mediaManage: '映像檔與檔案管理',
+          close: '關閉',
+          groupConsole: '控制台',
+          groupTarget: '被控機',
+          groupLibrary: '媒體庫',
+          groupHost: '本裝置',
+          groupServices: '服務',
+          consoleView: '觀看畫面',
+          consoleControl: '鍵鼠操作',
+          power: '電源與喚醒',
+          mediumAttach: '掛載與交換媒體',
+          libraryRead: '瀏覽媒體庫',
+          libraryWrite: '管理媒體庫',
           terminal: '終端機與腳本',
-          device: '設備設定',
+          device: '裝置設定',
           network: '網路設定',
           update: '系統更新',
           mcp: 'MCP 服務',
-          mcpNote:
-            'MCP 服務會核發設備級 API Key，可在 Web 工作階段之外控制鍵盤滑鼠並取得螢幕截圖；即使撤銷此權限，該 Key 仍然有效，直到重新產生。',
           tailscale: 'Tailscale',
-          ai: 'AI 助理',
-          aiNote:
-            'AI 助理透過本機內部介面操作設備，不受其他權限限制，因此授予此項等同於授予完整的設備控制權。'
+          ai: 'AI 助手',
+          effectConsoleView:
+            '顯示被控機畫面，並設定所有觀看者共用的視訊模式、解析度、影格率與畫質。',
+          effectConsoleControl: '向被控機發送鍵盤與滑鼠事件。',
+          effectPower: '對被控機開機、關機、重新啟動，並管理網路喚醒裝置清單。',
+          effectMediumAttach: '把媒體掛載到被控機或退出，並透過共享分割區與被控機交換檔案。',
+          effectLibraryRead: '列出並下載映像檔及映像檔內的檔案。',
+          effectLibraryWrite: '上傳、建立、刪除映像檔，並修改映像檔內的檔案。',
+          effectTerminal: '在本裝置上取得 root shell，無需經過 Web 工作階段。',
+          effectDevice:
+            '可啟用 SSH（同樣是 root）、重新啟動裝置、把原始資料分割區交給被控機，並修改 OLED、HDMI、mDNS、記憶體與置換空間設定。',
+          effectNetwork: '修改 Wi-Fi、DNS 與 TLS，可能使本裝置離線。',
+          effectUpdate: '安裝韌體與應用程式更新包。',
+          effectMcp:
+            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；即使撤銷此權限，該 Key 仍有效，直到重新產生。',
+          effectTailscale: '把本裝置加入 VPN 網路。',
+          effectAi: '透過不受其他權限限制的本機介面操作裝置，因此相當於完整的裝置控制權。',
+          dangerWarning: '下列權限等同於完整的裝置控制權：',
+          emptyWarning: '此帳戶將不具備任何功能，只能登入。',
+          impliedBy: '由「{{name}}」自動包含',
+          grantCount: '{{count}} 項權限',
+          adminAll: '管理員擁有全部權限',
+          adminDemote: '若降級為一般使用者，將恢復以下權限。',
+          catalogFailed: '權限清單載入失敗，請關閉後重試。'
         }
       }
     },

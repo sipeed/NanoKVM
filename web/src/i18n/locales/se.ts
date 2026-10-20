@@ -65,6 +65,12 @@ const se = {
       readOnlyTip:
         'Det här kontot kan inte skicka tangentbords- eller musindata till målmaskinen, så konsolen visar bara skärmen.'
     },
+    noConsole: {
+      title: 'Det här kontot har ingen konsolåtkomst',
+      description:
+        'Det har fått andra behörigheter. Öppna någon av sidorna det kan använda, eller be en administratör om konsolåtkomst.',
+      nothing: 'Det här kontot har ännu inga behörigheter. Be en administratör att ge några.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skärm',
@@ -700,26 +706,54 @@ const se = {
           title: 'Behörigheter',
           editTitle: 'Redigera behörigheter',
           save: 'Spara',
-          consoleGroup: 'Konsol',
-          mediaGroup: 'Medier',
-          serviceGroup: 'Tjänster',
-          manageGroup: 'Administration',
-          consoleView: 'Visa konsol',
+          close: 'Stäng',
+          groupConsole: 'Konsol',
+          groupTarget: 'Målmaskin',
+          groupLibrary: 'Mediabibliotek',
+          groupHost: 'Den här enheten',
+          groupServices: 'Tjänster',
+          consoleView: 'Se skärmen',
           consoleControl: 'Tangentbord och mus',
-          power: 'Strömstyrning',
-          mediaMount: 'Montera och läs avbildningar',
-          mediaManage: 'Hantera avbildningsbibliotek',
+          power: 'Ström och väckning',
+          mediumAttach: 'Anslut en media',
+          libraryRead: 'Bläddra i biblioteket',
+          libraryWrite: 'Hantera biblioteket',
           terminal: 'Terminal och skript',
           device: 'Enhetsinställningar',
           network: 'Nätverksinställningar',
           update: 'Systemuppdatering',
           mcp: 'MCP-tjänst',
-          mcpNote:
-            'MCP-tjänsten utfärdar en enhetsomfattande API-nyckel som styr tangentbord, mus och skärmbilder utanför webbsessionen, och den fortsätter att fungera efter att den här behörigheten återkallats tills nyckeln genereras om.',
           tailscale: 'Tailscale',
           ai: 'AI-assistent',
-          aiNote:
-            'AI-assistenten når enheten via ett lokalt internt gränssnitt som inte begränsas av de övriga behörigheterna, så denna behörighet motsvarar i praktiken full kontroll över enheten.'
+          effectConsoleView:
+            'Visar målmaskinens skärm och anger videoläge, upplösning, bildfrekvens och kvalitet som alla tittare delar.',
+          effectConsoleControl: 'Skickar tangentbords- och musinmatning till målmaskinen.',
+          effectPower:
+            'Slår på, stänger av och startar om målmaskinen samt hanterar listan med Wake-on-LAN-enheter.',
+          effectMediumAttach:
+            'Monterar och matar ut media på målmaskinen och utbyter filer med den via den delade partitionen.',
+          effectLibraryRead: 'Listar och hämtar avbildningarna och filerna i dem.',
+          effectLibraryWrite:
+            'Laddar upp, skapar och tar bort avbildningar och ändrar filerna i dem.',
+          effectTerminal: 'Ger ett root-skal på den här enheten, utan webbsessionen emellan.',
+          effectDevice:
+            'Gör det möjligt att slå på SSH (också root), starta om enheten, lämna den råa datapartitionen till målmaskinen och ändra OLED, HDMI, mDNS, minne och swap.',
+          effectNetwork:
+            'Ändrar Wi-Fi, DNS och TLS, vilket kan koppla bort den här enheten från nätet.',
+          effectUpdate: 'Installerar firmware och programpaket.',
+          effectMcp:
+            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; nyckeln fungerar även efter att behörigheten tagits bort, tills den skapas på nytt.',
+          effectTailscale: 'Ansluter den här enheten till ett VPN-nät.',
+          effectAi:
+            'Styr enheten via ett lokalt gränssnitt som de övriga behörigheterna inte begränsar, så det motsvarar full kontroll över enheten.',
+          dangerWarning: 'Dessa behörigheter motsvarar full kontroll över enheten:',
+          emptyWarning: 'Det här kontot får inga funktioner alls och kan bara logga in.',
+          impliedBy: 'Ingår via {{name}}',
+          grantCount: '{{count}} behörigheter',
+          adminAll: 'Administratörer har alla behörigheter',
+          adminDemote:
+            'Den här uppsättningen gäller igen om kontot nedgraderas till vanlig användare.',
+          catalogFailed: 'Behörighetslistan kunde inte läsas in. Stäng dialogen och försök igen.'
         }
       }
     },

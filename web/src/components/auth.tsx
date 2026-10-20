@@ -112,10 +112,6 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
       account?.role === 'admin' || !!account?.permissions.includes(permission),
     [account]
   );
-  const hasAnyPermission = useCallback(
-    (permissions: Permission[]) => permissions.some(hasPermission),
-    [hasPermission]
-  );
 
   if (isLoading) {
     return (
@@ -129,21 +125,19 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     return <Navigate to={'/auth/login'} replace />;
   }
 
-  return (
-    <AuthContext.Provider value={{ account, hasPermission, hasAnyPermission }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ account, hasPermission }}>{children}</AuthContext.Provider>;
 };
 
+// PermissionRoute keeps a page behind a grant. Losing the grant while the page
+// is open sends the account back to the console, which then decides where it
+// can go; the alternative is a page whose every request is refused.
 export const PermissionRoute = ({
   permission,
   children
 }: {
-  permission: Permission | Permission[];
+  permission: Permission;
   children: ReactNode;
 }) => {
-  const { hasAnyPermission } = useAuth();
-  const permissions = Array.isArray(permission) ? permission : [permission];
-  return hasAnyPermission(permissions) ? children : <Navigate to="/" replace />;
+  const { hasPermission } = useAuth();
+  return hasPermission(permission) ? children : <Navigate to="/" replace />;
 };

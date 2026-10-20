@@ -57,18 +57,34 @@ export const handlers = [
       code: 0,
       data: {
         permissions: [
-          'console.view',
-          'console.control',
-          'power',
-          'media.mount',
-          'media.manage',
-          'terminal',
-          'device',
-          'network',
-          'update',
-          'mcp',
-          'tailscale',
-          'ai'
+          { id: 'console.view', group: 'console', risk: 'info' },
+          {
+            id: 'console.control',
+            group: 'console',
+            risk: 'warn',
+            implies: ['console.view']
+          },
+          { id: 'power', group: 'target', risk: 'warn' },
+          {
+            id: 'medium.attach',
+            group: 'target',
+            risk: 'warn',
+            implies: ['library.read']
+          },
+          { id: 'library.read', group: 'library', risk: 'info' },
+          {
+            id: 'library.write',
+            group: 'library',
+            risk: 'warn',
+            implies: ['library.read']
+          },
+          { id: 'terminal', group: 'host', risk: 'danger' },
+          { id: 'device', group: 'host', risk: 'danger' },
+          { id: 'network', group: 'host', risk: 'warn' },
+          { id: 'update', group: 'host', risk: 'danger' },
+          { id: 'mcp', group: 'services', risk: 'danger' },
+          { id: 'tailscale', group: 'services', risk: 'warn' },
+          { id: 'ai', group: 'services', risk: 'danger' }
         ]
       }
     });

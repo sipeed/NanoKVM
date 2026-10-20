@@ -12,14 +12,14 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { MEDIA_PERMISSIONS, Permission } from '@/api/auth.ts';
+import { Permission } from '@/api/auth.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { Robot } from '@/components/icons/robot.tsx';
 
 export const MenuIcons = () => {
   const { t } = useTranslation();
-  const { hasAnyPermission } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
@@ -27,14 +27,14 @@ export const MenuIcons = () => {
     key: string;
     icon: React.ReactNode;
     label?: string;
-    permission?: Permission | Permission[];
+    permission?: Permission;
   };
 
   const allItems: Item[] = [
     {
       key: 'storage',
       icon: <HardDriveIcon size={16} />,
-      permission: MEDIA_PERMISSIONS
+      permission: 'library.read'
     },
     { key: 'terminal', icon: <TerminalSquareIcon size={16} />, permission: 'terminal' },
     { key: 'script', icon: <FileJsonIcon size={16} />, permission: 'terminal' },
@@ -45,11 +45,7 @@ export const MenuIcons = () => {
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
   ];
 
-  const items = allItems.filter((item) => {
-    if (!item.permission) return true;
-    const permissions = Array.isArray(item.permission) ? item.permission : [item.permission];
-    return hasAnyPermission(permissions);
-  });
+  const items = allItems.filter((item) => !item.permission || hasPermission(item.permission));
 
   function updateItems(key: string) {
     const exist = menuDisabledItems.includes(key);

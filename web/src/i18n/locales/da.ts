@@ -67,6 +67,12 @@ const da = {
       readOnlyTip:
         'Denne konto kan ikke sende tastatur- eller musinput til målmaskinen, så konsollen viser kun skærmen.'
     },
+    noConsole: {
+      title: 'Denne konto har ingen konsoladgang',
+      description:
+        'Den har fået andre rettigheder. Åbn en af de sider, den kan bruge, eller bed en administrator om konsoladgang.',
+      nothing: 'Denne konto har endnu ingen rettigheder. Bed en administrator om at give nogle.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skærm',
@@ -700,29 +706,54 @@ const da = {
           editPermissions: 'Tilladelser'
         },
         permissions: {
-          title: 'Tilladelser',
-          editTitle: 'Rediger tilladelser',
+          title: 'Rettigheder',
+          editTitle: 'Rediger rettigheder',
           save: 'Gem',
-          consoleGroup: 'Konsol',
-          mediaGroup: 'Medier',
-          serviceGroup: 'Tjenester',
-          manageGroup: 'Administration',
-          consoleView: 'Se konsol',
+          close: 'Luk',
+          groupConsole: 'Konsol',
+          groupTarget: 'Målmaskine',
+          groupLibrary: 'Mediebibliotek',
+          groupHost: 'Denne enhed',
+          groupServices: 'Tjenester',
+          consoleView: 'Se skærmen',
           consoleControl: 'Tastatur og mus',
-          power: 'Strømstyring',
-          mediaMount: 'Montér og læs diskbilleder',
-          mediaManage: 'Administrér billedbibliotek',
+          power: 'Strøm og vækning',
+          mediumAttach: 'Tilslut et medie',
+          libraryRead: 'Gennemse biblioteket',
+          libraryWrite: 'Administrer biblioteket',
           terminal: 'Terminal og scripts',
           device: 'Enhedsindstillinger',
           network: 'Netværksindstillinger',
           update: 'Systemopdatering',
           mcp: 'MCP-tjeneste',
-          mcpNote:
-            'MCP-tjenesten udsteder en enhedsdækkende API-nøgle, der styrer tastatur, mus og skærmbilleder uden for websessionen, og den virker stadig efter denne tilladelse er tilbagekaldt, indtil nøglen gendannes.',
           tailscale: 'Tailscale',
           ai: 'AI-assistent',
-          aiNote:
-            'AI-assistenten tilgår enheden via en lokal intern grænseflade, som ikke begrænses af de øvrige tilladelser, så denne tilladelse svarer i praksis til fuld kontrol over enheden.'
+          effectConsoleView:
+            'Viser målmaskinens skærm og angiver videotilstand, opløsning, billedhastighed og kvalitet, som alle seere deler.',
+          effectConsoleControl: 'Sender tastatur- og musinput til målmaskinen.',
+          effectPower:
+            'Tænder, slukker og genstarter målmaskinen og administrerer listen over Wake-on-LAN-enheder.',
+          effectMediumAttach:
+            'Monterer og afmonterer medier på målmaskinen og udveksler filer med den via den delte partition.',
+          effectLibraryRead: 'Viser og henter images og filerne i dem.',
+          effectLibraryWrite: 'Uploader, opretter og sletter images og ændrer filerne i dem.',
+          effectTerminal: 'Giver et root-shell på denne enhed uden om websessionen.',
+          effectDevice:
+            'Gør det muligt at slå SSH til (også root), genstarte enheden, give den rå datapartition til målmaskinen og ændre OLED, HDMI, mDNS, hukommelse og swap.',
+          effectNetwork: 'Ændrer Wi-Fi, DNS og TLS, hvilket kan tage denne enhed af netværket.',
+          effectUpdate: 'Installerer firmware og programpakker.',
+          effectMcp:
+            'Udsteder en API-nøgle for hele enheden, der styrer tastatur, mus og skærmbilleder uden for websessionen; nøglen virker stadig, efter denne rettighed er fjernet, indtil den gendannes.',
+          effectTailscale: 'Forbinder denne enhed til et VPN-mesh.',
+          effectAi:
+            'Styrer enheden via en lokal grænseflade, som de øvrige rettigheder ikke begrænser, så det svarer til fuld kontrol over enheden.',
+          dangerWarning: 'Disse rettigheder svarer til fuld kontrol over enheden:',
+          emptyWarning: 'Denne konto har ingen funktioner og kan kun logge ind.',
+          impliedBy: 'Inkluderet af {{name}}',
+          grantCount: '{{count}} rettigheder',
+          adminAll: 'Administratorer har alle rettigheder',
+          adminDemote: 'Dette sæt gælder igen, hvis kontoen nedgraderes til almindelig bruger.',
+          catalogFailed: 'Rettighedslisten kunne ikke indlæses. Luk dialogen, og prøv igen.'
         }
       }
     },

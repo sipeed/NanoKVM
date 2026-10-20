@@ -29,7 +29,17 @@ type UserInfo struct {
 }
 
 type ListPermissionsRsp struct {
-	Permissions []string `json:"permissions"`
+	Permissions []PermissionInfo `json:"permissions"`
+}
+
+// PermissionInfo describes one grantable permission: the group it belongs to,
+// how far it reaches, and the grants it implies. The client renders the editor
+// from this catalog instead of keeping its own copy of the model.
+type PermissionInfo struct {
+	ID      string   `json:"id"`
+	Group   string   `json:"group"`
+	Risk    string   `json:"risk"`
+	Implies []string `json:"implies,omitempty"`
 }
 
 type ListUsersRsp struct {

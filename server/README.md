@@ -67,21 +67,38 @@ turn:
 NanoKVM uses two device-wide roles:
 
 - `admin`: everything below, plus user management.
-- `user`: only what the account is granted. Grants are grouped per feature: `console.view`,
-  `console.control`, `power`, `media.mount`, `media.manage`, `terminal`, `device`, `network`,
-  `update`, `mcp`, `tailscale`, and `ai`.
+- `user`: only what the account is granted.
 
-`console.view` is required for every regular user, because nothing in the web UI renders without
-it; it is therefore always granted and pinned in the account editor. Media access splits along the
-trust boundary: `media.mount` attaches a medium to the target machine and reads it, while
-`media.manage` changes the library contents (uploads, deletes, and exchanging files with the
-target machine). The emulated USB devices are neither: the virtual disk and the RNDIS adapter
-hand the target machine the raw data partition and a network interface, so both follow `device`.
-A medium can only be attached while a `device` holder has the virtual disk switched on, and the
-storage page says so when it is off.
+A grant names an action on one party, and the catalog the server serves to the account editor
+carries its group, its risk, and the grants it implies:
 
-Five grants reach further than their names suggest and are effectively full device control, so
-grant them only to accounts you trust with the whole device:
+| Group | Grants |
+| --- | --- |
+| console (this session) | `console.view`, `console.control` |
+| target machine | `power`, `medium.attach` |
+| media library (this device) | `library.read`, `library.write` |
+| this device | `terminal`, `device`, `network`, `update` |
+| services | `mcp`, `tailscale`, `ai` |
+
+Implied grants are declared once, in the catalog, and the server resolves them before answering any
+request: `console.control` implies `console.view`, and both `medium.attach` and `library.write`
+imply `library.read`. Consequences worth knowing:
+
+- An account can hold no console access at all. The web app then lands on a page that offers the
+  sections the account may use (the media library, the terminal) instead of a console it cannot
+  open. `library.read` is all that media access needs, because the other two media grants imply it.
+- The media grants split along the trust boundary. `medium.attach` mounts or ejects a medium on the
+  target machine and writes into the shared partition the target reads; `library.write` changes what
+  the library keeps (uploads, deletes, the files inside an image); `library.read` lists and downloads.
+  The file endpoints serve an image and the shared partition through one path, so the route admits
+  either grant and each request is checked against the medium type it names.
+- The emulated USB devices are neither media nor network: the virtual disk and the RNDIS adapter
+  hand the target machine the raw data partition and a network interface, so both follow `device`.
+  A medium can only be attached while a `device` holder has the virtual disk switched on, and the
+  storage page says so when it is off.
+
+Five grants reach further than their names suggest and amount to full device control. The account
+editor marks them as `danger` and names them before the grants are saved:
 
 - `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
 - `device` can enable SSH, which also means root, can reboot the device, and can hand the raw
@@ -89,9 +106,13 @@ grant them only to accounts you trust with the whole device:
 - `update` installs firmware and application packages.
 - `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
   outside the web session, and the key keeps working after this grant is revoked until it is
-  regenerated; the account editor warns about this one.
+  regenerated.
 - `ai` drives the device through the local loopback interface, which the other grants do not
-  restrict; the account editor warns about this one too.
+  restrict.
+
+Two grants also change settings that affect everyone watching: `console.view` sets the video mode,
+resolution, frame rate and quality, and resets the HDMI capture; `power` manages the Wake-on-LAN
+device list. Both are described that way in the editor.
 
 Administrators manage accounts from **Settings > Account**. Account data remains in
 `/etc/kvm/pwd`; the server migrates the legacy single-account JSON format in place and writes
@@ -106,9 +127,9 @@ against the account file, so a revoked grant stops working immediately without r
 Disabling, deleting, or resetting the password of a user invalidates that user's HTTP and real-time
 connections without affecting other users. Changing the role or the grants of an account keeps its
 login valid: the account is told to refresh, and only the long-lived connections whose cached
-state depends on what changed are dropped (console, terminal, AI), so those clients reconnect
-under the new grants. `console.view` cannot be taken from a regular user, so a permission change
-never interrupts the video stream itself. Multiple
+state depends on what changed are dropped (console, video stream, terminal, AI), so those clients
+reconnect under the new grants. An account that loses `console.view` is sent to the landing page
+instead of a console it can no longer open. Multiple
 users may watch and control the KVM concurrently; input uses the existing cooperative HID
 coordinator, so simultaneous input can interleave. A user without `console.control` keeps the
 video and the menu for its other grants, but the console rejects keyboard and mouse reports and
@@ -118,6 +139,11 @@ require only `console.view` and stay shared KVM operations; when several users a
 concurrently, the latest change applies device-wide. Enabling or disabling the HDMI capture and
 its idle timeout are device settings. `console.control` is input only: keyboard, mouse, paste, and
 the input region that maps pointer motion onto the target screen.
+
+The account file stores an explicit grant set: a record written before fine-grained permissions
+keeps exactly what the user role used to grant, and the split media grants are translated on load,
+so the store never holds a missing set that would fall back to different behavior later. Grants
+this build does not know are preserved and ignored, so a downgrade cannot lock the device out.
 
 ## Compile & Deploy
 

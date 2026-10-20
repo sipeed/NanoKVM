@@ -41,9 +41,17 @@ func (s *Service) ListUsers(c *gin.Context) {
 
 func (s *Service) ListPermissions(c *gin.Context) {
 	var rsp proto.Response
-	rsp.OkRspWithData(c, &proto.ListPermissionsRsp{
-		Permissions: permissionStrings(authn.PermissionCatalog()),
-	})
+	catalog := authn.Catalog()
+	permissions := make([]proto.PermissionInfo, 0, len(catalog))
+	for _, descriptor := range catalog {
+		permissions = append(permissions, proto.PermissionInfo{
+			ID:      string(descriptor.Permission),
+			Group:   string(descriptor.Group),
+			Risk:    string(descriptor.Risk),
+			Implies: permissionStrings(descriptor.Implies),
+		})
+	}
+	rsp.OkRspWithData(c, &proto.ListPermissionsRsp{Permissions: permissions})
 }
 
 func (s *Service) CreateUser(c *gin.Context) {
@@ -193,16 +201,16 @@ func permissionsChanged(oldPermissions, newPermissions []authn.Permission) []aut
 
 // channelsForPermissions maps permissions that changed to the long-lived
 // connection channels that must reconnect to take effect. Permissions without
-// connection state (media, network, ...) are enforced per-request and need no
+// connection state (library, network, ...) are enforced per-request and need no
 // teardown.
 func channelsForPermissions(permissions []authn.Permission) []string {
 	channels := make([]string, 0, 2)
 	for _, permission := range permissions {
 		switch permission {
 		case authn.PermConsoleView:
-			// console.view is pinned for every regular user, so this pair only
-			// matters if that ever changes: it keeps a session that loses the
-			// grant from streaming frames until it notices.
+			// Losing the console grant closes the video stream, and gaining it (an
+			// account promoted to administrator) keeps every console connection
+			// from running under the grants it cached at connect time.
 			channels = append(channels, middleware.SessionChannelConsole, middleware.SessionChannelStream)
 		case authn.PermConsoleControl:
 			channels = append(channels, middleware.SessionChannelConsole)

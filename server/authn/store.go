@@ -120,11 +120,14 @@ func (s *Store) List() ([]UserInfo, error) {
 	users := make([]UserInfo, 0, len(db.Users))
 	for index := range db.Users {
 		user := &db.Users[index]
+		// The stored grants, not the effective ones: the editor shows what an
+		// administrator set, and what an account implies is derived from the
+		// catalog instead of being written back on every save.
 		users = append(users, UserInfo{
 			Username:      user.Username,
 			Role:          user.Role,
 			Enabled:       user.Enabled,
-			Permissions:   EffectivePermissions(user),
+			Permissions:   clonePermissions(user.Permissions),
 			SystemAccount: user.SystemAccount,
 		})
 	}
@@ -210,9 +213,6 @@ func (s *Store) Create(username, password string, role Role, permissions ...Perm
 	if err := ValidatePermissions(permissions); err != nil {
 		return err
 	}
-	if err := ValidateUserPermissions(role, permissions); err != nil {
-		return err
-	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -238,7 +238,7 @@ func (s *Store) Create(username, password string, role Role, permissions ...Perm
 		Role:         role,
 		Enabled:      true,
 		TokenVersion: tokenVersion,
-		Permissions:  normalizePermissions(permissions),
+		Permissions:  NormalizeStoredPermissions(permissions),
 	})
 	return s.saveLocked(db)
 }
@@ -260,25 +260,15 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	if patch.Role != nil && !IsValidRole(*patch.Role) {
 		return nil, errors.New("invalid role")
 	}
+	// The patch is normalized before it is compared and stored, so a caller that
+	// still sends the split media grants does not look like a change once they
+	// resolve to the grants they now mean.
+	granted := user.Permissions
 	if patch.Permissions != nil {
 		if err := ValidatePermissions(*patch.Permissions); err != nil {
 			return nil, err
 		}
-	}
-	// Validate the state the account ends up in rather than the patched fields
-	// alone: an administrator may hold a grant set without console.view (it is
-	// meaningless for the admin role), so demoting such an account would leave a
-	// regular user unable to reach the console at all.
-	resultingRole := user.Role
-	if patch.Role != nil {
-		resultingRole = *patch.Role
-	}
-	resultingPermissions := user.Permissions
-	if patch.Permissions != nil {
-		resultingPermissions = *patch.Permissions
-	}
-	if err := ValidateUserPermissions(resultingRole, resultingPermissions); err != nil {
-		return nil, err
+		granted = NormalizeStoredPermissions(*patch.Permissions)
 	}
 	if actor == username && user.Role == RoleAdmin &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
@@ -305,8 +295,8 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 		changed = true
 		loginInvalidated = true
 	}
-	if patch.Permissions != nil && !permissionsEqual(user.Permissions, *patch.Permissions) {
-		user.Permissions = normalizePermissions(*patch.Permissions)
+	if patch.Permissions != nil && !permissionsEqual(user.Permissions, granted) {
+		user.Permissions = granted
 		changed = true
 	}
 	if !changed {
@@ -426,6 +416,7 @@ func (s *Store) loadLocked(migrate bool) (*database, error) {
 		if defaultErr != nil {
 			return nil, defaultErr
 		}
+		materializePermissions(db)
 		if migrate {
 			if saveErr := s.saveLocked(db); saveErr != nil {
 				return nil, saveErr
@@ -439,6 +430,7 @@ func (s *Store) loadLocked(migrate bool) (*database, error) {
 
 	var db database
 	if err = json.Unmarshal(data, &db); err == nil && db.Version != 0 {
+		materializePermissions(&db)
 		if err = validateDatabase(&db); err != nil {
 			return nil, err
 		}
@@ -468,6 +460,7 @@ func (s *Store) loadLocked(migrate bool) (*database, error) {
 			SystemAccount:      true,
 		}},
 	}
+	materializePermissions(&db)
 	if migrate {
 		if err = s.saveLocked(&db); err != nil {
 			return nil, err
@@ -576,7 +569,7 @@ func validateDatabase(db *database) error {
 		if user.PasswordHash == "" || !IsValidRole(user.Role) {
 			return errors.New("account file contains an invalid user")
 		}
-		if err := ValidatePermissions(user.Permissions); err != nil {
+		if err := ValidateStoredPermissions(user.Permissions); err != nil {
 			return fmt.Errorf("account file contains invalid permissions for %q: %w", user.Username, err)
 		}
 		if _, exists := seen[user.Username]; exists {
@@ -616,13 +609,22 @@ func userIndex(users []User, username string) int {
 	return -1
 }
 
-// normalizePermissions keeps nil and empty slices distinct: nil means the
-// legacy default set applies, while an explicit empty set revokes every
-// grant. The copy is always fresh so callers cannot alias stored state.
-func normalizePermissions(permissions []Permission) []Permission {
-	if permissions == nil {
-		return nil
+// materializePermissions replaces the grant shapes of earlier releases with an
+// explicit set: an account that predates fine-grained permissions keeps exactly
+// what the user role used to grant, and the split media grants are translated.
+// After this the store never holds a nil set, so "no grants" and "never
+// configured" can no longer be confused, and no caller has to special-case nil.
+func materializePermissions(db *database) {
+	for index := range db.Users {
+		if db.Users[index].Permissions == nil {
+			db.Users[index].Permissions = legacyUserPermissions()
+			continue
+		}
+		db.Users[index].Permissions = NormalizeStoredPermissions(db.Users[index].Permissions)
 	}
+}
+
+func clonePermissions(permissions []Permission) []Permission {
 	return append([]Permission{}, permissions...)
 }
 

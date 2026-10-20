@@ -69,6 +69,13 @@ const de = {
       readOnlyTip:
         'Dieses Konto kann keine Tastatur- oder Mauseingaben an den Zielrechner senden, daher zeigt die Konsole nur das Bild.'
     },
+    noConsole: {
+      title: 'Dieses Konto hat keinen Konsolenzugriff',
+      description:
+        'Ihm wurden andere Fähigkeiten erteilt. Öffnen Sie eine der Seiten, die es nutzen darf, oder bitten Sie einen Administrator um Konsolenzugriff.',
+      nothing:
+        'Dieses Konto hat noch keine Berechtigungen. Bitten Sie einen Administrator, welche zu erteilen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Bildschirm',
@@ -716,26 +723,55 @@ const de = {
           title: 'Berechtigungen',
           editTitle: 'Berechtigungen bearbeiten',
           save: 'Speichern',
-          consoleGroup: 'Konsole',
-          mediaGroup: 'Medien',
-          serviceGroup: 'Dienste',
-          manageGroup: 'Verwaltung',
-          consoleView: 'Konsole anzeigen',
+          close: 'Schließen',
+          groupConsole: 'Konsole',
+          groupTarget: 'Zielrechner',
+          groupLibrary: 'Medienbibliothek',
+          groupHost: 'Dieses Gerät',
+          groupServices: 'Dienste',
+          consoleView: 'Bildschirm ansehen',
           consoleControl: 'Tastatur und Maus',
-          power: 'Energiesteuerung',
-          mediaMount: 'Abbilder einbinden und lesen',
-          mediaManage: 'Abbild-Bibliothek verwalten',
+          power: 'Energie und Aufwecken',
+          mediumAttach: 'Medium einbinden',
+          libraryRead: 'Medienbibliothek durchsuchen',
+          libraryWrite: 'Medienbibliothek verwalten',
           terminal: 'Terminal und Skripte',
           device: 'Geräteeinstellungen',
           network: 'Netzwerkeinstellungen',
           update: 'Systemaktualisierung',
           mcp: 'MCP-Dienst',
-          mcpNote:
-            'Der MCP-Dienst stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; er funktioniert auch nach dem Entzug dieser Berechtigung weiter, bis der Schlüssel neu erzeugt wird.',
           tailscale: 'Tailscale',
           ai: 'KI-Assistent',
-          aiNote:
-            'Der KI-Assistent erreicht das Gerät über eine lokale interne Schnittstelle, die nicht durch die übrigen Berechtigungen eingeschränkt wird; diese Berechtigung entspricht daher praktisch der vollständigen Gerätekontrolle.'
+          effectConsoleView:
+            'Zeigt den Zielbildschirm und legt Videomodus, Auflösung, Bildrate und Qualität fest, die alle Betrachter gemeinsam nutzen.',
+          effectConsoleControl: 'Sendet Tastatur- und Mauseingaben an den Zielrechner.',
+          effectPower:
+            'Schaltet den Zielrechner ein, aus und startet ihn neu und verwaltet die Wake-on-LAN-Geräteliste.',
+          effectMediumAttach:
+            'Bindet Medien am Zielrechner ein und aus und tauscht Dateien über die geteilte Partition mit ihm aus.',
+          effectLibraryRead: 'Listet und lädt Abbilder und die darin enthaltenen Dateien herunter.',
+          effectLibraryWrite:
+            'Lädt Abbilder hoch, erstellt und löscht sie und ändert die darin enthaltenen Dateien.',
+          effectTerminal:
+            'Gewährt eine Root-Shell auf diesem Gerät, ohne den Umweg über die Websitzung.',
+          effectDevice:
+            'Ermöglicht SSH (ebenfalls root), startet das Gerät neu, übergibt die rohe Datenpartition an den Zielrechner und ändert OLED, HDMI, mDNS, Arbeitsspeicher und Swap.',
+          effectNetwork: 'Ändert WLAN, DNS und TLS, was dieses Gerät vom Netz trennen kann.',
+          effectUpdate: 'Installiert Firmware und Anwendungspakete.',
+          effectMcp:
+            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; der Schlüssel bleibt nach dem Entzug dieser Berechtigung gültig, bis er neu erzeugt wird.',
+          effectTailscale: 'Bildet dieses Gerät in ein VPN-Mesh ein.',
+          effectAi:
+            'Steuert das Gerät über eine lokale Schnittstelle, die die übrigen Berechtigungen nicht einschränken; das entspricht praktisch der vollständigen Gerätekontrolle.',
+          dangerWarning: 'Diese Berechtigungen laufen auf die vollständige Gerätekontrolle hinaus:',
+          emptyWarning: 'Dieses Konto hat keinerlei Funktionen und kann sich nur anmelden.',
+          impliedBy: 'Enthalten durch {{name}}',
+          grantCount: '{{count}} Berechtigungen',
+          adminAll: 'Administratoren besitzen alle Berechtigungen',
+          adminDemote:
+            'Dieser Satz greift wieder, wenn das Konto zu einem normalen Benutzer herabgestuft wird.',
+          catalogFailed:
+            'Die Berechtigungsliste konnte nicht geladen werden. Schließen Sie diesen Dialog und versuchen Sie es erneut.'
         }
       }
     },

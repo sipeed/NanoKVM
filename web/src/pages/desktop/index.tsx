@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Splitter, Tooltip } from 'antd';
+import { Splitter, Tag, Tooltip } from 'antd';
 import { useAtom, useSetAtom } from 'jotai';
 import { LockIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +22,7 @@ import {
   videoModeAtom
 } from '@/jotai/screen.ts';
 import { Head } from '@/components/head.tsx';
+import { NoConsoleAccess } from '@/pages/no-console-access.tsx';
 
 import { CaptureStatusOverlay, useCaptureStatus } from './capture-status';
 import { Keyboard } from './keyboard';
@@ -53,7 +54,7 @@ function getVideoMode() {
   return ['direct', 'h264', 'mjpeg'].includes(cookieVideoMode) ? cookieVideoMode : defaultVideoMode;
 }
 
-export const Desktop = () => {
+const Console = () => {
   const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const canControl = hasPermission('console.control');
@@ -248,10 +249,20 @@ export const Desktop = () => {
                   <CaptureStatusOverlay status={captureStatus} />
                   {!canControl && (
                     <Tooltip title={t('desktop.readOnlyTip')}>
-                      <div className="absolute left-2 top-2 z-10 flex items-center space-x-1 rounded bg-black/70 px-2 py-1 text-xs text-neutral-200 backdrop-blur">
-                        <LockIcon size={12} />
-                        <span>{t('desktop.readOnly')}</span>
-                      </div>
+                      {/* A label over the video: the tag keeps the app's chip shape, the
+                          inline style survives being drawn on top of the stream */}
+                      <Tag
+                        className="absolute left-2 top-2 z-10"
+                        style={{
+                          margin: 0,
+                          border: 'none',
+                          background: 'rgba(0, 0, 0, 0.7)',
+                          backdropFilter: 'blur(4px)'
+                        }}
+                        icon={<LockIcon size={12} />}
+                      >
+                        {t('desktop.readOnly')}
+                      </Tag>
                     </Tooltip>
                   )}
                 </div>
@@ -284,4 +295,12 @@ export const Desktop = () => {
       {canControl && <VirtualKeyboard />}
     </div>
   );
+};
+
+// The console is the landing page, not a requirement: an account granted only
+// the media library or only the terminal gets sent to what it can actually use
+// instead of opening a screen whose every request would be refused.
+export const Desktop = () => {
+  const { hasPermission } = useAuth();
+  return hasPermission('console.view') ? <Console /> : <NoConsoleAccess />;
 };

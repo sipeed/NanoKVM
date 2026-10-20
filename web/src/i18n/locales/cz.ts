@@ -68,6 +68,12 @@ const cz = {
       readOnlyTip:
         'Tento účet nemůže odesílat vstup z klávesnice a myši do cílového počítače, proto konzole pouze zobrazuje obrazovku.'
     },
+    noConsole: {
+      title: 'Tento účet nemá přístup ke konzoli',
+      description:
+        'Byla mu udělena jiná oprávnění. Otevřete některou ze stránek, které může používat, nebo požádejte administrátora o přístup ke konzoli.',
+      nothing: 'Tento účet zatím nemá žádná oprávnění. Požádejte administrátora o jejich udělení.'
+    },
     screen: {
       scale: 'Měřítko',
       title: 'Obrazovka',
@@ -704,26 +710,51 @@ const cz = {
           title: 'Oprávnění',
           editTitle: 'Upravit oprávnění',
           save: 'Uložit',
-          consoleGroup: 'Konzole',
-          mediaGroup: 'Média',
-          serviceGroup: 'Služby',
-          manageGroup: 'Správa',
-          consoleView: 'Zobrazit konzoli',
+          close: 'Zavřít',
+          groupConsole: 'Konzole',
+          groupTarget: 'Cílový počítač',
+          groupLibrary: 'Knihovna médií',
+          groupHost: 'Toto zařízení',
+          groupServices: 'Služby',
+          consoleView: 'Sledovat obrazovku',
           consoleControl: 'Klávesnice a myš',
-          power: 'Ovládání napájení',
-          mediaMount: 'Připojit a číst obrazy',
-          mediaManage: 'Spravovat knihovnu obrazů',
+          power: 'Napájení a probuzení',
+          mediumAttach: 'Připojit médium',
+          libraryRead: 'Procházet knihovnu',
+          libraryWrite: 'Spravovat knihovnu',
           terminal: 'Terminál a skripty',
           device: 'Nastavení zařízení',
           network: 'Nastavení sítě',
           update: 'Aktualizace systému',
           mcp: 'Služba MCP',
-          mcpNote:
-            'Služba MCP vystaví API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení, a po zrušení tohoto oprávnění funguje dál, dokud se klíč nevygeneruje znovu.',
           tailscale: 'Tailscale',
           ai: 'AI asistent',
-          aiNote:
-            'AI asistent přistupuje k zařízení přes lokální interní rozhraní, které není omezeno ostatními oprávněními, takže toto oprávnění ve skutečnosti znamená plnou kontrolu nad zařízením.'
+          effectConsoleView:
+            'Zobrazuje obrazovku cílového počítače a nastavuje režim videa, rozlišení, snímkovou frekvenci a kvalitu, které sdílí všichni diváci.',
+          effectConsoleControl: 'Posílá vstup z klávesnice a myši cílovému počítači.',
+          effectPower:
+            'Zapíná, vypíná a restartuje cílový počítač a spravuje seznam zařízení Wake-on-LAN.',
+          effectMediumAttach:
+            'Připojuje a odpojuje média na cílovém počítači a vyměňuje s ním soubory přes sdílený oddíl.',
+          effectLibraryRead: 'Vypisuje a stahuje obrazy a soubory v nich uložené.',
+          effectLibraryWrite: 'Nahrává, vytváří a maže obrazy a mění soubory v nich uložené.',
+          effectTerminal: 'Poskytuje root shell na tomto zařízení, bez webového sezení mezi tím.',
+          effectDevice:
+            'Umožňuje zapnout SSH (také root), restartovat zařízení, předat surový datový oddíl cílovému počítači a měnit nastavení OLED, HDMI, mDNS, paměti a swapu.',
+          effectNetwork: 'Mění Wi-Fi, DNS a TLS, což může toto zařízení odpojit od sítě.',
+          effectUpdate: 'Instaluje firmware a balíčky aplikací.',
+          effectMcp:
+            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; klíč funguje i po odebrání tohoto oprávnění, dokud není znovu vygenerován.',
+          effectTailscale: 'Připojuje toto zařízení do VPN sítě.',
+          effectAi:
+            'Ovládá zařízení přes lokální rozhraní, které ostatní oprávnění neomezují, takže jde prakticky o plnou kontrolu nad zařízením.',
+          dangerWarning: 'Tato oprávnění představují plnou kontrolu nad zařízením:',
+          emptyWarning: 'Tento účet nebude mít žádné funkce a bude se moci jen přihlásit.',
+          impliedBy: 'Zahrnuto díky {{name}}',
+          grantCount: '{{count}} oprávnění',
+          adminAll: 'Administrátoři mají všechna oprávnění',
+          adminDemote: 'Tato sada opět platí, pokud bude účet snížen na běžného uživatele.',
+          catalogFailed: 'Seznam oprávnění se nepodařilo načíst. Zavřete dialog a zkuste to znovu.'
         }
       }
     },

@@ -67,6 +67,12 @@ const pt_br = {
       readOnlyTip:
         'Esta conta não pode enviar entrada de teclado ou mouse para a máquina de destino, portanto o console apenas exibe a tela.'
     },
+    noConsole: {
+      title: 'Esta conta não tem acesso ao console',
+      description:
+        'Foram concedidas outras capacidades. Abra uma das páginas que ela pode usar ou peça a um administrador acesso ao console.',
+      nothing: 'Esta conta ainda não tem permissões. Peça a um administrador para conceder.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Tela',
@@ -706,26 +712,52 @@ const pt_br = {
           title: 'Permissões',
           editTitle: 'Editar permissões',
           save: 'Salvar',
-          consoleGroup: 'Console',
-          mediaGroup: 'Mídia',
-          serviceGroup: 'Serviços',
-          manageGroup: 'Administração',
-          consoleView: 'Ver console',
+          close: 'Fechar',
+          groupConsole: 'Console',
+          groupTarget: 'Máquina de destino',
+          groupLibrary: 'Biblioteca de mídia',
+          groupHost: 'Este dispositivo',
+          groupServices: 'Serviços',
+          consoleView: 'Ver a tela',
           consoleControl: 'Teclado e mouse',
-          power: 'Controle de energia',
-          mediaMount: 'Montar e ler imagens',
-          mediaManage: 'Gerenciar a biblioteca de imagens',
+          power: 'Energia e despertar',
+          mediumAttach: 'Conectar uma mídia',
+          libraryRead: 'Navegar na biblioteca',
+          libraryWrite: 'Gerenciar a biblioteca',
           terminal: 'Terminal e scripts',
           device: 'Configurações do dispositivo',
           network: 'Configurações de rede',
           update: 'Atualização do sistema',
           mcp: 'Serviço MCP',
-          mcpNote:
-            'O serviço MCP emite uma chave de API válida para todo o dispositivo que controla teclado, mouse e capturas fora da sessão web, e ela continua funcionando após a revogação desta permissão até que a chave seja regenerada.',
           tailscale: 'Tailscale',
           ai: 'Assistente de IA',
-          aiNote:
-            'O assistente de IA acessa o dispositivo por uma interface interna local que não é limitada pelas demais permissões, portanto esta permissão equivale, na prática, ao controle total do dispositivo.'
+          effectConsoleView:
+            'Mostra a tela de destino e define o modo de vídeo, a resolução, a taxa de quadros e a qualidade compartilhados por todos os espectadores.',
+          effectConsoleControl: 'Envia entrada de teclado e mouse para a máquina de destino.',
+          effectPower:
+            'Liga, desliga e reinicia a máquina de destino, e gerencia a lista de dispositivos Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta e ejeta mídias na máquina de destino, e troca arquivos com ela pela partição compartilhada.',
+          effectLibraryRead: 'Lista e baixa as imagens e os arquivos dentro delas.',
+          effectLibraryWrite: 'Envia, cria e exclui imagens, e altera os arquivos dentro delas.',
+          effectTerminal: 'Fornece um shell root neste dispositivo, sem passar pela sessão web.',
+          effectDevice:
+            'Permite ativar SSH (também root), reiniciar o dispositivo, entregar a partição de dados bruta à máquina de destino e alterar OLED, HDMI, mDNS, memória e swap.',
+          effectNetwork: 'Altera Wi-Fi, DNS e TLS, o que pode tirar este dispositivo da rede.',
+          effectUpdate: 'Instala firmware e pacotes de aplicativo.',
+          effectMcp:
+            'Emite uma chave de API de todo o dispositivo que controla teclado, mouse e capturas fora da sessão web; a chave continua válida após revogar esta permissão até ser regenerada.',
+          effectTailscale: 'Conecta este dispositivo a uma malha VPN.',
+          effectAi:
+            'Controla o dispositivo por uma interface local que as outras permissões não limitam, então equivale ao controle total do dispositivo.',
+          dangerWarning: 'Estas permissões equivalem ao controle total do dispositivo:',
+          emptyWarning: 'Esta conta não terá nenhuma função e só poderá entrar.',
+          impliedBy: 'Incluído por {{name}}',
+          grantCount: '{{count}} permissões',
+          adminAll: 'Administradores têm todas as permissões',
+          adminDemote: 'Este conjunto volta a valer se a conta for rebaixada para usuário comum.',
+          catalogFailed:
+            'Não foi possível carregar a lista de permissões. Feche esta janela e tente novamente.'
         }
       }
     },

@@ -67,6 +67,12 @@ const vi = {
       readOnlyTip:
         'Tài khoản này không thể gửi dữ liệu bàn phím hoặc chuột tới máy đích, vì vậy console chỉ hiển thị màn hình.'
     },
+    noConsole: {
+      title: 'Tài khoản này không có quyền console',
+      description:
+        'Tài khoản đã được cấp các khả năng khác. Hãy mở một trong các trang có thể dùng, hoặc đề nghị quản trị viên cấp quyền console.',
+      nothing: 'Tài khoản này chưa có quyền nào. Hãy đề nghị quản trị viên cấp quyền.'
+    },
     screen: {
       scale: 'Quy mô',
       title: 'Màn hình',
@@ -701,26 +707,51 @@ const vi = {
           title: 'Quyền',
           editTitle: 'Sửa quyền',
           save: 'Lưu',
-          consoleGroup: 'Console',
-          mediaGroup: 'Phương tiện',
-          serviceGroup: 'Dịch vụ',
-          manageGroup: 'Quản trị',
-          consoleView: 'Xem console',
+          close: 'Đóng',
+          groupConsole: 'Console',
+          groupTarget: 'Máy đích',
+          groupLibrary: 'Thư viện phương tiện',
+          groupHost: 'Thiết bị này',
+          groupServices: 'Dịch vụ',
+          consoleView: 'Xem màn hình',
           consoleControl: 'Bàn phím và chuột',
-          power: 'Điều khiển nguồn',
-          mediaMount: 'Gắn kết và đọc hình ảnh',
-          mediaManage: 'Quản lý thư viện hình ảnh',
+          power: 'Nguồn và đánh thức',
+          mediumAttach: 'Gắn phương tiện',
+          libraryRead: 'Duyệt thư viện',
+          libraryWrite: 'Quản lý thư viện',
           terminal: 'Terminal và tập lệnh',
           device: 'Cài đặt thiết bị',
           network: 'Cài đặt mạng',
           update: 'Cập nhật hệ thống',
           mcp: 'Dịch vụ MCP',
-          mcpNote:
-            'Dịch vụ MCP cấp một khóa API áp dụng cho toàn thiết bị, cho phép điều khiển bàn phím, chuột và chụp màn hình ngoài phiên web; khóa này vẫn hoạt động sau khi thu hồi quyền cho đến khi khóa được tạo lại.',
           tailscale: 'Tailscale',
           ai: 'Trợ lý AI',
-          aiNote:
-            'Trợ lý AI truy cập thiết bị qua một giao diện nội bộ cục bộ không bị giới hạn bởi các quyền khác, vì vậy quyền này trên thực tế tương đương với toàn quyền điều khiển thiết bị.'
+          effectConsoleView:
+            'Hiển thị màn hình của máy đích và đặt chế độ video, độ phân giải, tốc độ khung hình và chất lượng mà mọi người xem dùng chung.',
+          effectConsoleControl: 'Gửi dữ liệu bàn phím và chuột tới máy đích.',
+          effectPower:
+            'Bật, tắt và khởi động lại máy đích, đồng thời quản lý danh sách thiết bị Wake-on-LAN.',
+          effectMediumAttach:
+            'Gắn và tháo phương tiện trên máy đích, và trao đổi tệp với máy đó qua phân vùng chia sẻ.',
+          effectLibraryRead: 'Liệt kê và tải xuống các ảnh và tệp bên trong.',
+          effectLibraryWrite: 'Tải lên, tạo và xóa ảnh, và thay đổi các tệp bên trong.',
+          effectTerminal: 'Cung cấp shell root trên thiết bị này mà không qua phiên web.',
+          effectDevice:
+            'Cho phép bật SSH (cũng là root), khởi động lại thiết bị, đưa phân vùng dữ liệu thô cho máy đích và thay đổi cài đặt OLED, HDMI, mDNS, bộ nhớ và swap.',
+          effectNetwork: 'Thay đổi Wi-Fi, DNS và TLS, có thể khiến thiết bị này mất kết nối mạng.',
+          effectUpdate: 'Cài đặt firmware và gói ứng dụng.',
+          effectMcp:
+            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; khóa vẫn hoạt động sau khi thu hồi quyền này cho đến khi được tạo lại.',
+          effectTailscale: 'Kết nối thiết bị này vào một mạng VPN.',
+          effectAi:
+            'Điều khiển thiết bị qua giao diện cục bộ mà các quyền khác không giới hạn, nên tương đương toàn quyền điều khiển thiết bị.',
+          dangerWarning: 'Các quyền này tương đương toàn quyền điều khiển thiết bị:',
+          emptyWarning: 'Tài khoản này sẽ không có chức năng nào và chỉ có thể đăng nhập.',
+          impliedBy: 'Được {{name}} bao gồm',
+          grantCount: '{{count}} quyền',
+          adminAll: 'Quản trị viên có mọi quyền',
+          adminDemote: 'Bộ quyền này áp dụng lại nếu tài khoản bị hạ xuống người dùng thường.',
+          catalogFailed: 'Không tải được danh sách quyền. Hãy đóng hộp thoại và thử lại.'
         }
       }
     },

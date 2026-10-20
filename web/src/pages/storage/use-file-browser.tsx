@@ -18,7 +18,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import * as api from '@/api/media.ts';
 import { extension } from '@/lib/file-names.ts';
 import { formatSize } from '@/lib/format.ts';
@@ -116,10 +115,12 @@ export function useFileBrowser({
 }: Props) {
   const { t } = useTranslation();
   const { modal } = App.useApp();
-  const { hasPermission, hasAnyPermission } = useAuth();
-  const canManage = hasPermission('media.manage');
-  // Managing the library requires inspecting it: both roles may read.
-  const canRead = hasAnyPermission(MEDIA_PERMISSIONS);
+  const { hasPermission } = useAuth();
+  // Writing into the shared partition is a target-machine operation
+  // (medium.attach); writing into an image changes what the library keeps
+  // (library.write). The server picks the same grant from the medium type.
+  const mayWrite = (type: api.MediaType) =>
+    hasPermission(type === 'partition' ? 'medium.attach' : 'library.write');
 
   // A listing remembers the medium and folder it was read from: right after
   // the user moves elsewhere it still holds the old entries, and acting on
@@ -361,7 +362,7 @@ export function useFileBrowser({
 
     return (
       <div className="flex shrink-0 items-center space-x-1">
-        {canManage && (
+        {mayWrite(target.type) && (
           <Tooltip title={canWrite ? t('storage.files.upload') : t('storage.add.blocked')}>
             <Button
               size="small"
@@ -473,7 +474,7 @@ export function useFileBrowser({
                 )}
               </span>
               <div className="flex items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100">
-                {!entry.isDir && canRead && (
+                {!entry.isDir && (
                   <Button
                     type="text"
                     size="small"
@@ -483,7 +484,7 @@ export function useFileBrowser({
                     title={t('storage.files.download')}
                   />
                 )}
-                {canManage && (
+                {mayWrite(media!.type) && (
                   <Button
                     type="text"
                     size="small"

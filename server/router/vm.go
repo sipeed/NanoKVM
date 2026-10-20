@@ -14,6 +14,9 @@ func vmRouter(r *gin.Engine) {
 	use := func(permission authn.Permission) gin.IRoutes {
 		return r.Group("/api").Use(middleware.CheckToken(), middleware.RequirePermission(permission))
 	}
+	// The app shell reads the site title on every page, including the pages an
+	// account without console access can open, so it asks for no feature grant.
+	base := r.Group("/api").Use(middleware.CheckToken())
 	view := use(authn.PermConsoleView)
 	control := use(authn.PermConsoleControl)
 	power := use(authn.PermPower)
@@ -84,7 +87,7 @@ func vmRouter(r *gin.Engine) {
 	view.GET("/vm/hostname", service.GetHostname)    // Get Hostname
 	device.POST("/vm/hostname", service.SetHostname) // Set Hostname
 
-	view.GET("/vm/web-title", service.GetWebTitle)    // Get web title
+	base.GET("/vm/web-title", service.GetWebTitle)    // Get web title
 	device.POST("/vm/web-title", service.SetWebTitle) // Set web title
 
 	device.GET("/vm/mdns", service.GetMdnsState)         // get mDNS state

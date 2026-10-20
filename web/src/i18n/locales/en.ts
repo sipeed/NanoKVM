@@ -66,6 +66,13 @@ const en = {
       readOnlyTip:
         'This account cannot send keyboard or mouse input to the target machine, so the console only shows the screen.'
     },
+    noConsole: {
+      title: 'This account has no console access',
+      description:
+        'It was granted other capabilities. Open one of the pages it can use, or ask an administrator for console access.',
+      nothing: 'This account has no feature permissions yet. Ask an administrator to grant some.'
+    },
+
     screen: {
       scale: 'Scale',
       title: 'Screen',
@@ -698,26 +705,53 @@ const en = {
           title: 'Permissions',
           editTitle: 'Edit Permissions',
           save: 'Save',
-          consoleGroup: 'Console',
-          mediaGroup: 'Media',
-          serviceGroup: 'Services',
-          manageGroup: 'Administration',
-          consoleView: 'View Console',
-          consoleControl: 'Keyboard & Mouse',
-          power: 'Power Control',
-          mediaMount: 'Mount & Read Media',
-          mediaManage: 'Manage Media Library',
-          terminal: 'Terminal & Scripts',
-          device: 'Device Settings',
-          network: 'Network Settings',
-          update: 'System Update',
-          mcp: 'MCP Service',
-          mcpNote:
-            'The MCP service issues a device-wide API key that controls the keyboard, mouse and screenshots outside the web session, and it keeps working after this grant is revoked until the key is regenerated.',
+          close: 'Close',
+          groupConsole: 'Console',
+          groupTarget: 'Target machine',
+          groupLibrary: 'Media library',
+          groupHost: 'This device',
+          groupServices: 'Services',
+          consoleView: 'Watch the screen',
+          consoleControl: 'Keyboard & mouse',
+          power: 'Power & wake',
+          mediumAttach: 'Attach a medium',
+          libraryRead: 'Browse the media library',
+          libraryWrite: 'Manage the media library',
+          terminal: 'Terminal & scripts',
+          device: 'Device settings',
+          network: 'Network settings',
+          update: 'System update',
+          mcp: 'MCP service',
           tailscale: 'Tailscale',
-          ai: 'AI Assistant',
-          aiNote:
-            'The AI assistant reaches the device through a local internal interface that is not limited by the other permissions, so this grant is effectively full device control.'
+          ai: 'AI assistant',
+          effectConsoleView:
+            'Shows the target screen, and sets the video mode, resolution, frame rate and quality that every viewer shares.',
+          effectConsoleControl: 'Sends keyboard and mouse input to the target machine.',
+          effectPower:
+            'Powers on, powers off and resets the target machine, and manages the Wake-on-LAN device list.',
+          effectMediumAttach:
+            'Mounts and ejects media on the target machine, and exchanges files with it through the shared partition.',
+          effectLibraryRead: 'Lists and downloads the images and the files inside them.',
+          effectLibraryWrite:
+            'Uploads, creates and deletes images, and changes the files inside them.',
+          effectTerminal: 'Gives a root shell on this device, without the web session in between.',
+          effectDevice:
+            'Enables SSH (also root), reboots the device, hands the raw data partition to the target machine, and changes the OLED, HDMI, mDNS, memory and swap settings.',
+          effectNetwork: 'Changes Wi-Fi, DNS and TLS, which can take this device off the network.',
+          effectUpdate: 'Installs firmware and application packages.',
+          effectMcp:
+            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; the key keeps working after this grant is revoked until it is regenerated.',
+          effectTailscale: 'Joins this device to a VPN mesh.',
+          effectAi:
+            'Drives the device through a local interface that the other grants do not restrict, so this is effectively full device control.',
+          dangerWarning: 'These grants amount to full device control:',
+          emptyWarning: 'This account will have no features at all and can only sign in.',
+          impliedBy: 'Included by {{name}}',
+          grantCount: '{{count}} grants',
+          adminAll: 'Administrators hold every permission',
+          adminDemote: 'This set applies again if the account is demoted to a regular user.',
+          catalogFailed:
+            'The permission catalog could not be loaded. Close this dialog and try again.'
         }
       }
     },

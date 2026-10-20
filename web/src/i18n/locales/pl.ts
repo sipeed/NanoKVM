@@ -68,6 +68,12 @@ const pl = {
       readOnlyTip:
         'To konto nie może wysyłać danych z klawiatury ani myszy do maszyny docelowej, dlatego konsola tylko wyświetla ekran.'
     },
+    noConsole: {
+      title: 'To konto nie ma dostępu do konsoli',
+      description:
+        'Przyznano mu inne możliwości. Otwórz jedną ze stron, z których może korzystać, albo poproś administratora o dostęp do konsoli.',
+      nothing: 'To konto nie ma jeszcze żadnych uprawnień. Poproś administratora o ich przyznanie.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Ekran',
@@ -706,26 +712,54 @@ const pl = {
           title: 'Uprawnienia',
           editTitle: 'Edytuj uprawnienia',
           save: 'Zapisz',
-          consoleGroup: 'Konsola',
-          mediaGroup: 'Nośniki',
-          serviceGroup: 'Usługi',
-          manageGroup: 'Administracja',
-          consoleView: 'Wyświetl konsolę',
+          close: 'Zamknij',
+          groupConsole: 'Konsola',
+          groupTarget: 'Maszyna docelowa',
+          groupLibrary: 'Biblioteka nośników',
+          groupHost: 'To urządzenie',
+          groupServices: 'Usługi',
+          consoleView: 'Podgląd ekranu',
           consoleControl: 'Klawiatura i mysz',
-          power: 'Sterowanie zasilaniem',
-          mediaMount: 'Zamontuj i odczytaj obrazy',
-          mediaManage: 'Zarządzaj biblioteką obrazów',
+          power: 'Zasilanie i wybudzanie',
+          mediumAttach: 'Podłącz nośnik',
+          libraryRead: 'Przeglądaj bibliotekę',
+          libraryWrite: 'Zarządzaj biblioteką',
           terminal: 'Terminal i skrypty',
           device: 'Ustawienia urządzenia',
           network: 'Ustawienia sieci',
           update: 'Aktualizacja systemu',
           mcp: 'Usługa MCP',
-          mcpNote:
-            'Usługa MCP wydaje klucz API obowiązujący dla całego urządzenia, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją WWW; działa on nadal po odebraniu tego uprawnienia, dopóki klucz nie zostanie wygenerowany ponownie.',
           tailscale: 'Tailscale',
           ai: 'Asystent AI',
-          aiNote:
-            'Asystent AI uzyskuje dostęp do urządzenia przez lokalny interfejs wewnętrzny, którego nie ograniczają pozostałe uprawnienia, więc to uprawnienie w praktyce oznacza pełną kontrolę nad urządzeniem.'
+          effectConsoleView:
+            'Pokazuje ekran maszyny docelowej i ustawia tryb wideo, rozdzielczość, liczbę klatek i jakość wspólne dla wszystkich widzów.',
+          effectConsoleControl: 'Wysyła wejście z klawiatury i myszy do maszyny docelowej.',
+          effectPower:
+            'Włącza, wyłącza i resetuje maszynę docelową oraz zarządza listą urządzeń Wake-on-LAN.',
+          effectMediumAttach:
+            'Montuje i odłącza nośniki na maszynie docelowej oraz wymienia z nią pliki przez współdzieloną partycję.',
+          effectLibraryRead: 'Wyświetla i pobiera obrazy oraz pliki w nich zawarte.',
+          effectLibraryWrite: 'Wysyła, tworzy i usuwa obrazy oraz zmienia pliki w nich zawarte.',
+          effectTerminal: 'Daje powłokę root na tym urządzeniu, z pominięciem sesji webowej.',
+          effectDevice:
+            'Umożliwia włączenie SSH (również root), restart urządzenia, udostępnienie surowej partycji danych maszynie docelowej oraz zmianę ustawień OLED, HDMI, mDNS, pamięci i swap.',
+          effectNetwork: 'Zmienia Wi-Fi, DNS i TLS, co może odciąć to urządzenie od sieci.',
+          effectUpdate: 'Instaluje firmware i pakiety aplikacji.',
+          effectMcp:
+            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; klucz działa nadal po odebraniu tego uprawnienia, dopóki nie zostanie wygenerowany ponownie.',
+          effectTailscale: 'Dołącza to urządzenie do sieci VPN typu mesh.',
+          effectAi:
+            'Steruje urządzeniem przez lokalny interfejs, którego pozostałe uprawnienia nie ograniczają, więc oznacza to pełną kontrolę nad urządzeniem.',
+          dangerWarning: 'Te uprawnienia oznaczają pełną kontrolę nad urządzeniem:',
+          emptyWarning:
+            'To konto nie będzie miało żadnych funkcji i będzie mogło się tylko zalogować.',
+          impliedBy: 'Zawarte przez {{name}}',
+          grantCount: '{{count}} uprawnień',
+          adminAll: 'Administratorzy mają wszystkie uprawnienia',
+          adminDemote:
+            'Ten zestaw znów zadziała, jeśli konto zostanie zdegradowane do zwykłego użytkownika.',
+          catalogFailed:
+            'Nie udało się wczytać listy uprawnień. Zamknij to okno i spróbuj ponownie.'
         }
       }
     },

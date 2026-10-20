@@ -16,7 +16,6 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-import { MEDIA_PERMISSIONS } from '@/api/auth.ts';
 import * as api from '@/api/media.ts';
 import { formatSize } from '@/lib/format.ts';
 import { MediaIcon } from '@/lib/media-icons.tsx';
@@ -71,11 +70,12 @@ const MediaGroup = ({
 
 export const Storage = () => {
   const { t } = useTranslation();
-  const { hasPermission, hasAnyPermission } = useAuth();
-  const canMount = hasPermission('media.mount');
-  const canManage = hasPermission('media.manage');
-  // Managing the library requires inspecting it: both roles may read.
-  const canRead = hasAnyPermission(MEDIA_PERMISSIONS);
+  const { hasPermission } = useAuth();
+  // Attaching a medium hands it to the target machine; writing changes what the
+  // library keeps. Reading is implied by both, so the page itself is already
+  // behind library.read.
+  const canAttach = hasPermission('medium.attach');
+  const canWrite = hasPermission('library.write');
   // Turning the virtual disk on is a device setting, so only an account that may
   // change device settings can do it from here.
   const canDevice = hasPermission('device');
@@ -164,7 +164,13 @@ export const Storage = () => {
   // file listing stays current. The medium list keeps its own poll above: a
   // refresh only means the files changed, and re-walking the medium directory
   // on every one of those events would cost more than it shows.
+  //
+  // The socket is the console one, so an account granted only the library has
+  // none to open. The medium list keeps its own poll either way; without the
+  // push the file listing waits for the refresh button.
   useEffect(() => {
+    if (!hasPermission('console.view')) return;
+
     const ws = new WsClient();
     ws.connect();
     const unsubscribe = ws.on('storage', () => setStorageSignal((signal) => signal + 1));
@@ -172,7 +178,7 @@ export const Storage = () => {
       unsubscribe();
       ws.close();
     };
-  }, []);
+  }, [hasPermission]);
 
   // Poll the media job while one is running: creating a medium writes
   // gigabytes to the card, so the page reports it like any other transfer.
@@ -546,7 +552,7 @@ export const Storage = () => {
                 <span className="text-blue-500">
                   {t('storage.attached', { name: attachedName })}
                 </span>
-                {canMount && (
+                {canAttach && (
                   <Button
                     size="small"
                     icon={<UnplugIcon size={14} />}
@@ -692,7 +698,7 @@ export const Storage = () => {
                             onClick={() => setIsTipsOpen(true)}
                           />
                         </Tooltip>
-                        {canManage && addMedia.actions}
+                        {canWrite && addMedia.actions}
                       </div>
                     }
                   >
@@ -756,7 +762,7 @@ export const Storage = () => {
                 className="flex shrink-0 items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(event) => event.stopPropagation()}
               >
-                {canMount &&
+                {canAttach &&
                   (item.attached ? (
                     <Tooltip title={t('storage.eject')}>
                       <Button
@@ -787,22 +793,18 @@ export const Storage = () => {
 
                 {item.type === 'image' && (
                   <>
-                    {canRead && (
-                      <Tooltip
-                        title={
-                          item.attached ? t('storage.add.blocked') : t('storage.downloadImage')
-                        }
-                      >
-                        <Button
-                          type="text"
-                          size="small"
-                          disabled={item.attached}
-                          icon={<DownloadIcon size={14} />}
-                          onClick={() => void downloadImage(item)}
-                        />
-                      </Tooltip>
-                    )}
-                    {canManage && (
+                    <Tooltip
+                      title={item.attached ? t('storage.add.blocked') : t('storage.downloadImage')}
+                    >
+                      <Button
+                        type="text"
+                        size="small"
+                        disabled={item.attached}
+                        icon={<DownloadIcon size={14} />}
+                        onClick={() => void downloadImage(item)}
+                      />
+                    </Tooltip>
+                    {canWrite && (
                       <Tooltip
                         title={
                           dataOwned || item.attached

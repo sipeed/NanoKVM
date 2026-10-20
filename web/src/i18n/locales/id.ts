@@ -67,6 +67,12 @@ const id = {
       readOnlyTip:
         'Akun ini tidak dapat mengirim input keyboard atau tikus ke mesin target, sehingga konsol hanya menampilkan layar.'
     },
+    noConsole: {
+      title: 'Akun ini tidak memiliki akses konsol',
+      description:
+        'Akun ini diberi kemampuan lain. Buka salah satu halaman yang dapat dipakai, atau minta administrator memberikan akses konsol.',
+      nothing: 'Akun ini belum memiliki izin apa pun. Minta administrator memberikannya.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Layar',
@@ -704,26 +710,53 @@ const id = {
           title: 'Izin',
           editTitle: 'Edit izin',
           save: 'Simpan',
-          consoleGroup: 'Konsol',
-          mediaGroup: 'Media',
-          serviceGroup: 'Layanan',
-          manageGroup: 'Administrasi',
-          consoleView: 'Lihat konsol',
-          consoleControl: 'Keyboard dan tikus',
-          power: 'Kontrol daya',
-          mediaMount: 'Pasang dan baca gambar',
-          mediaManage: 'Kelola pustaka gambar',
+          close: 'Tutup',
+          groupConsole: 'Konsol',
+          groupTarget: 'Mesin target',
+          groupLibrary: 'Pustaka media',
+          groupHost: 'Perangkat ini',
+          groupServices: 'Layanan',
+          consoleView: 'Lihat layar',
+          consoleControl: 'Keyboard dan mouse',
+          power: 'Daya dan bangunkan',
+          mediumAttach: 'Pasang media',
+          libraryRead: 'Jelajahi pustaka',
+          libraryWrite: 'Kelola pustaka',
           terminal: 'Terminal dan skrip',
           device: 'Pengaturan perangkat',
           network: 'Pengaturan jaringan',
           update: 'Pembaruan sistem',
           mcp: 'Layanan MCP',
-          mcpNote:
-            'Layanan MCP menerbitkan kunci API tingkat perangkat yang mengendalikan keyboard, tikus, dan tangkapan layar di luar sesi web, dan tetap berfungsi setelah izin ini dicabut sampai kuncinya dibuat ulang.',
           tailscale: 'Tailscale',
           ai: 'Asisten AI',
-          aiNote:
-            'Asisten AI mengakses perangkat melalui antarmuka internal lokal yang tidak dibatasi oleh izin lain, sehingga izin ini pada praktiknya setara dengan kendali penuh atas perangkat.'
+          effectConsoleView:
+            'Menampilkan layar target dan mengatur mode video, resolusi, laju bingkai, serta kualitas yang dipakai bersama semua penonton.',
+          effectConsoleControl: 'Mengirim masukan keyboard dan mouse ke mesin target.',
+          effectPower:
+            'Menyalakan, mematikan, dan memulai ulang mesin target, serta mengelola daftar perangkat Wake-on-LAN.',
+          effectMediumAttach:
+            'Memasang dan melepas media pada mesin target, serta bertukar berkas dengannya melalui partisi bersama.',
+          effectLibraryRead: 'Menampilkan dan mengunduh image beserta berkas di dalamnya.',
+          effectLibraryWrite:
+            'Mengunggah, membuat, dan menghapus image, serta mengubah berkas di dalamnya.',
+          effectTerminal: 'Memberi shell root di perangkat ini tanpa melalui sesi web.',
+          effectDevice:
+            'Memungkinkan mengaktifkan SSH (juga root), memulai ulang perangkat, menyerahkan partisi data mentah ke mesin target, dan mengubah pengaturan OLED, HDMI, mDNS, memori, serta swap.',
+          effectNetwork:
+            'Mengubah Wi-Fi, DNS, dan TLS, yang dapat memutus perangkat ini dari jaringan.',
+          effectUpdate: 'Memasang firmware dan paket aplikasi.',
+          effectMcp:
+            'Menerbitkan kunci API untuk seluruh perangkat yang mengendalikan keyboard, mouse, dan tangkapan layar di luar sesi web; kunci tetap berlaku setelah izin ini dicabut sampai dibuat ulang.',
+          effectTailscale: 'Menghubungkan perangkat ini ke jaringan VPN.',
+          effectAi:
+            'Mengendalikan perangkat melalui antarmuka lokal yang tidak dibatasi izin lain, sehingga setara dengan kendali penuh atas perangkat.',
+          dangerWarning: 'Izin ini setara dengan kendali penuh atas perangkat:',
+          emptyWarning: 'Akun ini tidak akan memiliki fitur apa pun dan hanya bisa masuk.',
+          impliedBy: 'Termasuk oleh {{name}}',
+          grantCount: '{{count}} izin',
+          adminAll: 'Administrator memiliki semua izin',
+          adminDemote: 'Kumpulan ini berlaku lagi jika akun diturunkan menjadi pengguna biasa.',
+          catalogFailed: 'Daftar izin gagal dimuat. Tutup dialog ini dan coba lagi.'
         }
       }
     },

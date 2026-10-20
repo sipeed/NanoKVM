@@ -70,6 +70,13 @@ const fr = {
       readOnlyTip:
         "Ce compte ne peut pas envoyer de saisie clavier ou souris vers la machine cible ; la console affiche donc uniquement l'écran."
     },
+    noConsole: {
+      title: 'Ce compte n’a pas accès à la console',
+      description:
+        'D’autres capacités lui ont été accordées. Ouvrez l’une des pages qu’il peut utiliser ou demandez à un administrateur l’accès à la console.',
+      nothing:
+        'Ce compte n’a encore aucune autorisation. Demandez à un administrateur de lui en accorder.'
+    },
     screen: {
       scale: 'Échelle',
       title: 'Écran',
@@ -714,26 +721,55 @@ const fr = {
           title: 'Autorisations',
           editTitle: 'Modifier les autorisations',
           save: 'Enregistrer',
-          consoleGroup: 'Console',
-          mediaGroup: 'Médias',
-          serviceGroup: 'Services',
-          manageGroup: 'Administration',
-          consoleView: 'Voir la console',
+          close: 'Fermer',
+          groupConsole: 'Console',
+          groupTarget: 'Machine cible',
+          groupLibrary: 'Bibliothèque de médias',
+          groupHost: 'Cet appareil',
+          groupServices: 'Services',
+          consoleView: 'Voir l’écran',
           consoleControl: 'Clavier et souris',
-          power: "Contrôle de l'alimentation",
-          mediaMount: 'Monter et lire les images',
-          mediaManage: "Gérer la bibliothèque d'images",
+          power: 'Alimentation et réveil',
+          mediumAttach: 'Attacher un média',
+          libraryRead: 'Parcourir la bibliothèque',
+          libraryWrite: 'Gérer la bibliothèque',
           terminal: 'Terminal et scripts',
-          device: "Paramètres de l'appareil",
-          network: 'Paramètres réseau',
-          update: 'Mise à jour du système',
+          device: 'Réglages de l’appareil',
+          network: 'Réglages réseau',
+          update: 'Mise à jour système',
           mcp: 'Service MCP',
-          mcpNote:
-            "Le service MCP délivre une clé API valable pour tout l'appareil qui contrôle le clavier, la souris et les captures hors de la session web ; elle continue de fonctionner après le retrait de cette autorisation jusqu'à ce que la clé soit régénérée.",
           tailscale: 'Tailscale',
           ai: 'Assistant IA',
-          aiNote:
-            "L'assistant IA accède à l'appareil via une interface interne locale que les autres autorisations ne limitent pas ; cette autorisation équivaut donc à un contrôle total de l'appareil."
+          effectConsoleView:
+            'Affiche l’écran cible et définit le mode vidéo, la résolution, la cadence et la qualité partagés par tous les spectateurs.',
+          effectConsoleControl: 'Envoie les saisies clavier et souris à la machine cible.',
+          effectPower:
+            'Allume, éteint et redémarre la machine cible, et gère la liste des appareils Wake-on-LAN.',
+          effectMediumAttach:
+            'Monte et éjecte des médias sur la machine cible, et échange des fichiers avec elle via la partition partagée.',
+          effectLibraryRead: 'Liste et télécharge les images et les fichiers qu’elles contiennent.',
+          effectLibraryWrite:
+            'Envoie, crée et supprime des images, et modifie les fichiers qu’elles contiennent.',
+          effectTerminal: 'Donne un shell root sur cet appareil, sans passer par la session web.',
+          effectDevice:
+            'Permet d’activer SSH (root également), de redémarrer l’appareil, de livrer la partition de données brute à la machine cible et de modifier OLED, HDMI, mDNS, mémoire et swap.',
+          effectNetwork:
+            'Modifie le Wi-Fi, le DNS et TLS, ce qui peut couper cet appareil du réseau.',
+          effectUpdate: 'Installe des micrologiciels et des paquets d’application.',
+          effectMcp:
+            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; la clé reste valide après révocation de cette autorisation jusqu’à sa régénération.',
+          effectTailscale: 'Rejoint cet appareil à un maillage VPN.',
+          effectAi:
+            'Pilote l’appareil via une interface locale que les autres autorisations ne limitent pas : cela équivaut au contrôle total de l’appareil.',
+          dangerWarning: 'Ces autorisations équivalent au contrôle total de l’appareil :',
+          emptyWarning: 'Ce compte n’aura aucune fonction et pourra seulement se connecter.',
+          impliedBy: 'Inclus par {{name}}',
+          grantCount: '{{count}} autorisations',
+          adminAll: 'Les administrateurs détiennent toutes les autorisations',
+          adminDemote:
+            'Cet ensemble s’applique de nouveau si le compte repasse en utilisateur simple.',
+          catalogFailed:
+            'Impossible de charger la liste des autorisations. Fermez ce dialogue et réessayez.'
         }
       }
     },

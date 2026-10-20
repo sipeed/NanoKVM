@@ -67,6 +67,12 @@ const ca = {
       readOnlyTip:
         'Aquest compte no pot enviar entrada de teclat ni de ratolí a la màquina objectiu, de manera que la consola només mostra la pantalla.'
     },
+    noConsole: {
+      title: 'Aquest compte no té accés a la consola',
+      description:
+        'Se li han concedit altres capacitats. Obriu una de les pàgines que pot usar o demaneu a un administrador accés a la consola.',
+      nothing: 'Aquest compte encara no té permisos. Demaneu a un administrador que n’atorgui.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -705,26 +711,54 @@ const ca = {
           title: 'Permisos',
           editTitle: 'Edita els permisos',
           save: 'Desa',
-          consoleGroup: 'Consola',
-          mediaGroup: 'Suports',
-          serviceGroup: 'Serveis',
-          manageGroup: 'Administració',
-          consoleView: 'Veure la consola',
+          close: 'Tanca',
+          groupConsole: 'Consola',
+          groupTarget: 'Màquina de destí',
+          groupLibrary: 'Biblioteca de mitjans',
+          groupHost: 'Aquest dispositiu',
+          groupServices: 'Serveis',
+          consoleView: 'Veure la pantalla',
           consoleControl: 'Teclat i ratolí',
-          power: "Control d'energia",
-          mediaMount: 'Muntar i llegir imatges',
-          mediaManage: "Gestionar la biblioteca d'imatges",
+          power: 'Engegada i despertar',
+          mediumAttach: 'Connecta un mitjà',
+          libraryRead: 'Navega per la biblioteca',
+          libraryWrite: 'Gestiona la biblioteca',
           terminal: 'Terminal i scripts',
           device: 'Configuració del dispositiu',
-          network: 'Configuració de la xarxa',
+          network: 'Configuració de xarxa',
           update: 'Actualització del sistema',
           mcp: 'Servei MCP',
-          mcpNote:
-            "El servei MCP emet una clau API d'abast del dispositiu que controla el teclat, el ratolí i les captures fora de la sessió web, i continua funcionant després de revocar aquest permís fins que es regeneri la clau.",
           tailscale: 'Tailscale',
-          ai: "Assistent d'IA",
-          aiNote:
-            "L'assistent d'IA accedeix al dispositiu mitjançant una interfície interna local que no està limitada per la resta de permisos, de manera que aquest permís equival a un control complet del dispositiu."
+          ai: 'Assistent d’IA',
+          effectConsoleView:
+            'Mostra la pantalla de destí i defineix el mode de vídeo, la resolució, els fps i la qualitat que comparteixen tots els espectadors.',
+          effectConsoleControl: 'Envia entrada de teclat i ratolí a la màquina de destí.',
+          effectPower:
+            'Engega, apaga i reinicia la màquina de destí, i gestiona la llista de dispositius de Wake-on-LAN.',
+          effectMediumAttach:
+            'Munta i expulsa mitjans a la màquina de destí, i hi intercanvia fitxers mitjançant la partició compartida.',
+          effectLibraryRead: 'Llista i baixa les imatges i els fitxers que contenen.',
+          effectLibraryWrite: 'Puja, crea i elimina imatges, i modifica els fitxers que contenen.',
+          effectTerminal:
+            'Dona un shell de root en aquest dispositiu, sense passar per la sessió web.',
+          effectDevice:
+            'Permet activar SSH (també root), reiniciar el dispositiu, lliurar la partició de dades en brut a la màquina de destí i canviar OLED, HDMI, mDNS, memòria i swap.',
+          effectNetwork:
+            'Canvia Wi-Fi, DNS i TLS, cosa que pot deixar aquest dispositiu sense xarxa.',
+          effectUpdate: 'Instal·la firmware i paquets d’aplicació.',
+          effectMcp:
+            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; la clau continua funcionant després de revocar el permís fins que es regeneri.',
+          effectTailscale: 'Uneix aquest dispositiu a una malla VPN.',
+          effectAi:
+            'Controla el dispositiu mitjançant una interfície local que els altres permisos no limiten, així que equival al control total del dispositiu.',
+          dangerWarning: 'Aquests permisos equivalen al control total del dispositiu:',
+          emptyWarning: 'Aquest compte no tindrà cap funció i només podrà iniciar sessió.',
+          impliedBy: 'Inclòs per {{name}}',
+          grantCount: '{{count}} permisos',
+          adminAll: 'Els administradors tenen tots els permisos',
+          adminDemote: 'Aquest conjunt torna a aplicar-se si el compte passa a usuari normal.',
+          catalogFailed:
+            'No s’ha pogut carregar la llista de permisos. Tanqueu aquest diàleg i torneu-ho a provar.'
         }
       }
     },

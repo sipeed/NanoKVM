@@ -178,7 +178,7 @@ func CheckTokenOrLoopbackInternalToken() gin.HandlerFunc {
 func authenticate(c *gin.Context) (Principal, *Token, bool) {
 	conf := config.GetInstance()
 	if conf.Authentication == "disable" {
-		return Principal{Username: "admin", Role: authn.RoleAdmin, Permissions: authn.PermissionCatalog()}, nil, true
+		return Principal{Username: "admin", Role: authn.RoleAdmin, Permissions: authn.PermissionIDs()}, nil, true
 	}
 
 	cookie, err := c.Cookie(CookieName)

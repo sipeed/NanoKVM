@@ -68,6 +68,12 @@ const hu = {
       readOnlyTip:
         'Ez a fiók nem tud billentyűzet- vagy egérbemenetet küldeni a célgépnek, ezért a konzol csak a képernyőt jeleníti meg.'
     },
+    noConsole: {
+      title: 'Ennek a fióknak nincs konzolhozzáférése',
+      description:
+        'Más képességeket kapott. Nyissa meg az egyik használható oldalt, vagy kérjen konzolhozzáférést egy adminisztrátortól.',
+      nothing: 'Ennek a fióknak még nincs engedélye. Kérjen engedélyeket egy adminisztrátortól.'
+    },
     screen: {
       scale: 'Skála',
       title: 'Képernyő',
@@ -709,26 +715,54 @@ const hu = {
           title: 'Engedélyek',
           editTitle: 'Engedélyek szerkesztése',
           save: 'Mentés',
-          consoleGroup: 'Konzol',
-          mediaGroup: 'Média',
-          serviceGroup: 'Szolgáltatások',
-          manageGroup: 'Adminisztráció',
-          consoleView: 'Konzol megtekintése',
+          close: 'Bezárás',
+          groupConsole: 'Konzol',
+          groupTarget: 'Célgép',
+          groupLibrary: 'Médiatár',
+          groupHost: 'Ez az eszköz',
+          groupServices: 'Szolgáltatások',
+          consoleView: 'Képernyő megtekintése',
           consoleControl: 'Billentyűzet és egér',
-          power: 'Tápellátás vezérlése',
-          mediaMount: 'Képek csatlakoztatása és olvasása',
-          mediaManage: 'Képkönyvtár kezelése',
+          power: 'Tápellátás és ébresztés',
+          mediumAttach: 'Médium csatolása',
+          libraryRead: 'Médiatár böngészése',
+          libraryWrite: 'Médiatár kezelése',
           terminal: 'Terminál és szkriptek',
           device: 'Eszközbeállítások',
           network: 'Hálózati beállítások',
           update: 'Rendszerfrissítés',
-          mcp: 'MCP-szolgáltatás',
-          mcpNote:
-            'Az MCP-szolgáltatás egy eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket, és e jogosultság visszavonása után is működik, amíg a kulcsot újra nem generálják.',
+          mcp: 'MCP szolgáltatás',
           tailscale: 'Tailscale',
           ai: 'AI-asszisztens',
-          aiNote:
-            'Az AI-asszisztens egy helyi belső felületen keresztül éri el az eszközt, amelyet a többi engedély nem korlátoz, így ez az engedély gyakorlatilag teljes eszközfelügyeletet jelent.'
+          effectConsoleView:
+            'Megjeleníti a célgép képernyőjét, és beállítja a minden néző által közösen használt videómódot, felbontást, képsebességet és minőséget.',
+          effectConsoleControl: 'Billentyűzet- és egérbevitelt küld a célgépnek.',
+          effectPower:
+            'Be- és kikapcsolja, valamint újraindítja a célgépet, és kezeli a Wake-on-LAN eszközlistát.',
+          effectMediumAttach:
+            'Csatolja és kiadja a médiumokat a célgépen, és a megosztott partíción keresztül fájlokat cserél vele.',
+          effectLibraryRead: 'Listázza és letölti a lemezképeket és a bennük lévő fájlokat.',
+          effectLibraryWrite:
+            'Feltölt, létrehoz és töröl lemezképeket, valamint módosítja a bennük lévő fájlokat.',
+          effectTerminal: 'Root shellt ad ezen az eszközön, a webes munkamenet megkerülésével.',
+          effectDevice:
+            'Lehetővé teszi az SSH bekapcsolását (ez is root), az eszköz újraindítását, a nyers adatpartíció átadását a célgépnek, valamint az OLED, HDMI, mDNS, memória és swap beállításainak módosítását.',
+          effectNetwork:
+            'Módosítja a Wi-Fi, DNS és TLS beállításokat, ami leválaszthatja ezt az eszközt a hálózatról.',
+          effectUpdate: 'Firmware-t és alkalmazáscsomagokat telepít.',
+          effectMcp:
+            'Eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket; a kulcs az engedély visszavonása után is működik, amíg újra nem generálják.',
+          effectTailscale: 'Csatlakoztatja ezt az eszközt egy VPN-hálózathoz.',
+          effectAi:
+            'Olyan helyi felületen keresztül vezérli az eszközt, amelyet a többi engedély nem korlátoz, így gyakorlatilag teljes eszközvezérlést jelent.',
+          dangerWarning: 'Ezek az engedélyek teljes eszközvezérlést jelentenek:',
+          emptyWarning: 'Ennek a fióknak nem lesz semmilyen funkciója, csak bejelentkezni tud.',
+          impliedBy: 'A(z) {{name}} tartalmazza',
+          grantCount: '{{count}} engedély',
+          adminAll: 'Az adminisztrátorok minden engedéllyel rendelkeznek',
+          adminDemote:
+            'Ez a készlet ismét érvénybe lép, ha a fiókot sima felhasználóvá minősítik vissza.',
+          catalogFailed: 'Az engedélylista nem tölthető be. Zárja be az ablakot, és próbálja újra.'
         }
       }
     },
