@@ -13,7 +13,8 @@ type Streamer struct {
 	mutex          sync.Mutex
 	clients        map[*client]struct{}
 	clientSnapshot atomic.Pointer[[]*client]
-	running        bool
+	config         stream.EncoderConfig
+	subscription   *stream.VideoSubscription
 	viewerVersion  uint64
 }
 
@@ -26,25 +27,39 @@ func newStreamer() *Streamer {
 	return s
 }
 
-func (s *Streamer) addClient(client *client) {
-	client.start()
-
+func (s *Streamer) addClient(client *client, config stream.EncoderConfig) error {
 	s.mutex.Lock()
+	if len(s.clients) > 0 && s.config != config {
+		active := s.config
+		s.mutex.Unlock()
+		return &stream.EncoderConfigConflictError{Active: active, Requested: config}
+	}
+
+	var subscription *stream.VideoSubscription
+	if len(s.clients) == 0 {
+		var err error
+		subscription, err = stream.SubscribeVideo(config)
+		if err != nil {
+			s.mutex.Unlock()
+			return err
+		}
+		s.config = config
+		s.subscription = subscription
+	}
+
 	s.clients[client] = struct{}{}
 	count := s.updateClientSnapshotLocked()
 	s.viewerVersion++
 	version := s.viewerVersion
-	start := !s.running
-	if start {
-		s.running = true
-	}
 	s.mutex.Unlock()
+	client.start()
 	vm.UpdateHdmiViewerSnapshot("direct", count, version)
 
-	if start {
-		go s.run()
-		log.Debug("h264 stream started")
+	if subscription != nil {
+		go s.run(subscription)
+		log.Debugf("direct video stream started with %+v", config)
 	}
+	return nil
 }
 
 func (s *Streamer) removeClient(client *client) {
@@ -58,8 +73,17 @@ func (s *Streamer) removeClient(client *client) {
 	count := s.updateClientSnapshotLocked()
 	s.viewerVersion++
 	version := s.viewerVersion
+	var subscription *stream.VideoSubscription
+	if count == 0 {
+		subscription = s.subscription
+		s.subscription = nil
+		s.config = stream.EncoderConfig{}
+	}
 	s.mutex.Unlock()
 	client.close()
+	if subscription != nil {
+		subscription.Close()
+	}
 	vm.UpdateHdmiViewerSnapshot("direct", count, version)
 
 	log.Debugf("h264 websocket disconnected, remaining clients: %d", count)
@@ -75,34 +99,40 @@ func (s *Streamer) updateClientSnapshotLocked() int {
 	return len(clients)
 }
 
-func (s *Streamer) getClients() []*client {
+func (s *Streamer) getClientsFor(subscription *stream.VideoSubscription) []*client {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.subscription != subscription {
+		return nil
+	}
+
 	clients := s.clientSnapshot.Load()
 	if clients == nil {
 		return nil
 	}
-
 	return *clients
 }
 
-func (s *Streamer) run() {
-	subscription := stream.SubscribeH264()
-	defer subscription.Close()
-
+func (s *Streamer) run(subscription *stream.VideoSubscription) {
 	for {
 		frame, ok := subscription.Next()
 		if !ok {
 			return
 		}
-		clients := s.getClients()
+		clients := s.getClientsFor(subscription)
 		if len(clients) == 0 {
-			if s.stopIfIdle() {
-				log.Debug("h264 stream stopped due to no clients")
-				return
-			}
-			continue
+			return
 		}
 
 		if !hasCaptureDemand(clients) {
+			// The shared source has already advanced.  A client whose entire
+			// flow-control window is in flight cannot safely resume on the next
+			// delta frame because that frame may reference the one skipped here.
+			// Preserve its acknowledgements, discard queued deltas, and resume
+			// only at the next independently decodable keyframe.
+			for _, client := range clients {
+				client.markDiscontinuity()
+			}
 			continue
 		}
 
@@ -111,21 +141,9 @@ func (s *Streamer) run() {
 			continue
 		}
 
-		outbound := newOutboundFrame(frame.Result == 3, frame.Timestamp, frame.Data)
+		outbound := newOutboundFrame(frame.Result == 3, frame.Timestamp, frame.Storage, frame.Data)
 		for _, client := range clients {
 			client.offer(outbound)
 		}
 	}
-}
-
-func (s *Streamer) stopIfIdle() bool {
-	s.mutex.Lock()
-	defer s.mutex.Unlock()
-
-	if len(s.clients) > 0 {
-		return false
-	}
-
-	s.running = false
-	return true
 }

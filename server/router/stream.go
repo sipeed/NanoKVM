@@ -16,6 +16,8 @@ func streamRouter(r *gin.Engine) {
 	api.POST("/stream/mjpeg/detect", mjpeg.UpdateFrameDetect)    // update frame detect
 	api.POST("/stream/mjpeg/detect/stop", mjpeg.StopFrameDetect) // temporary stop frame detect
 
-	api.GET("/stream/h264", webrtc.Connect)        // h264 stream (webrtc)
-	api.GET("/stream/h264/direct", direct.Connect) // h264 stream (http)
+	api.GET("/stream/video", webrtc.Connect)             // configurable video stream (webrtc)
+	api.GET("/stream/video/direct", direct.Connect)      // configurable video stream (direct)
+	api.GET("/stream/h264", webrtc.ConnectLegacy)        // legacy h264 stream (webrtc)
+	api.GET("/stream/h264/direct", direct.ConnectLegacy) // legacy h264 stream (direct)
 }
