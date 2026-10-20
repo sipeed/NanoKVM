@@ -712,6 +712,7 @@ const ja = {
           save: '保存',
           consoleGroup: 'コンソール',
           mediaGroup: 'メディア',
+          serviceGroup: 'サービス',
           manageGroup: '管理',
           consoleView: 'コンソールを表示',
           consoleControl: 'キーボードとマウス',

@@ -684,6 +684,7 @@ const zh_tw = {
           save: '儲存',
           consoleGroup: '主控台操作',
           mediaGroup: '媒體',
+          serviceGroup: '服務',
           manageGroup: '設備管理',
           consoleView: '檢視畫面',
           consoleControl: '鍵盤與滑鼠',

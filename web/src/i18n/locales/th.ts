@@ -693,6 +693,7 @@ const th = {
           save: 'บันทึก',
           consoleGroup: 'คอนโซล',
           mediaGroup: 'สื่อ',
+          serviceGroup: 'บริการ',
           manageGroup: 'การจัดการ',
           consoleView: 'ดูคอนโซล',
           consoleControl: 'คีย์บอร์ดและเมาส์',

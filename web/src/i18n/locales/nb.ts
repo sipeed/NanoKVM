@@ -704,6 +704,7 @@ const nb = {
           save: 'Lagre',
           consoleGroup: 'Konsoll',
           mediaGroup: 'Medier',
+          serviceGroup: 'Tjenester',
           manageGroup: 'Administrasjon',
           consoleView: 'Se konsoll',
           consoleControl: 'Tastatur og mus',

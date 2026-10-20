@@ -708,6 +708,7 @@ const ru = {
           save: 'Сохранить',
           consoleGroup: 'Консоль',
           mediaGroup: 'Носители',
+          serviceGroup: 'Сервисы',
           manageGroup: 'Администрирование',
           consoleView: 'Просмотр консоли',
           consoleControl: 'Клавиатура и мышь',

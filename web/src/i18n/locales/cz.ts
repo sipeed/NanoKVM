@@ -706,6 +706,7 @@ const cz = {
           save: 'Uložit',
           consoleGroup: 'Konzole',
           mediaGroup: 'Média',
+          serviceGroup: 'Služby',
           manageGroup: 'Správa',
           consoleView: 'Zobrazit konzoli',
           consoleControl: 'Klávesnice a myš',

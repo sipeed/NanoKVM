@@ -706,6 +706,7 @@ const tr = {
           save: 'Kaydet',
           consoleGroup: 'Konsol',
           mediaGroup: 'Ortam',
+          serviceGroup: 'Servisler',
           manageGroup: 'Yönetim',
           consoleView: 'Konsolu görüntüle',
           consoleControl: 'Klavye ve fare',

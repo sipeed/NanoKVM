@@ -716,6 +716,7 @@ const fr = {
           save: 'Enregistrer',
           consoleGroup: 'Console',
           mediaGroup: 'Médias',
+          serviceGroup: 'Services',
           manageGroup: 'Administration',
           consoleView: 'Voir la console',
           consoleControl: 'Clavier et souris',

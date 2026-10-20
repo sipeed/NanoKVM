@@ -715,6 +715,7 @@ const es = {
           save: 'Guardar',
           consoleGroup: 'Consola',
           mediaGroup: 'Soportes',
+          serviceGroup: 'Servicios',
           manageGroup: 'Administración',
           consoleView: 'Ver la consola',
           consoleControl: 'Teclado y ratón',

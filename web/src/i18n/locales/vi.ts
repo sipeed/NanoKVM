@@ -703,6 +703,7 @@ const vi = {
           save: 'Lưu',
           consoleGroup: 'Console',
           mediaGroup: 'Phương tiện',
+          serviceGroup: 'Dịch vụ',
           manageGroup: 'Quản trị',
           consoleView: 'Xem console',
           consoleControl: 'Bàn phím và chuột',

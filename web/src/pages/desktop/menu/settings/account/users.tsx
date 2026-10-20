@@ -64,7 +64,15 @@ const PERMISSION_NOTES: Partial<Record<Permission, string>> = {
 // that spans two grants (media.mount and media.manage) stays in one group, and
 // anything the server adds later lands in the last group instead of vanishing.
 const CONSOLE_PERMISSIONS: Permission[] = ['console.view', 'console.control', 'power'];
-const GROUPED_PERMISSIONS: Permission[] = [...CONSOLE_PERMISSIONS, ...MEDIA_PERMISSIONS];
+// Services are the add-ons that talk to the device on their own (an API key, a
+// VPN mesh, an agent), so they are kept apart from the device settings they can
+// reach past.
+const SERVICE_PERMISSIONS: Permission[] = ['mcp', 'tailscale', 'ai'];
+const GROUPED_PERMISSIONS: Permission[] = [
+  ...CONSOLE_PERMISSIONS,
+  ...MEDIA_PERMISSIONS,
+  ...SERVICE_PERMISSIONS
+];
 
 type PermissionCheckboxesProps = {
   value?: Permission[];
@@ -98,6 +106,10 @@ const PermissionCheckboxes = ({
     {
       titleKey: 'mediaGroup',
       items: MEDIA_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
+    },
+    {
+      titleKey: 'serviceGroup',
+      items: SERVICE_PERMISSIONS.filter((item) => catalog.length === 0 || catalog.includes(item))
     },
     {
       titleKey: 'manageGroup',

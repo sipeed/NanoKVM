@@ -713,6 +713,7 @@ const it = {
           save: 'Salva',
           consoleGroup: 'Console',
           mediaGroup: 'Supporti',
+          serviceGroup: 'Servizi',
           manageGroup: 'Amministrazione',
           consoleView: 'Visualizza console',
           consoleControl: 'Tastiera e mouse',

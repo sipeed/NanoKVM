@@ -711,6 +711,7 @@ const hu = {
           save: 'Mentés',
           consoleGroup: 'Konzol',
           mediaGroup: 'Média',
+          serviceGroup: 'Szolgáltatások',
           manageGroup: 'Adminisztráció',
           consoleView: 'Konzol megtekintése',
           consoleControl: 'Billentyűzet és egér',

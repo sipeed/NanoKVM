@@ -706,6 +706,7 @@ const id = {
           save: 'Simpan',
           consoleGroup: 'Konsol',
           mediaGroup: 'Media',
+          serviceGroup: 'Layanan',
           manageGroup: 'Administrasi',
           consoleView: 'Lihat konsol',
           consoleControl: 'Keyboard dan tikus',

@@ -702,6 +702,7 @@ const se = {
           save: 'Spara',
           consoleGroup: 'Konsol',
           mediaGroup: 'Medier',
+          serviceGroup: 'Tjänster',
           manageGroup: 'Administration',
           consoleView: 'Visa konsol',
           consoleControl: 'Tangentbord och mus',

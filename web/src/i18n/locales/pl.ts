@@ -708,6 +708,7 @@ const pl = {
           save: 'Zapisz',
           consoleGroup: 'Konsola',
           mediaGroup: 'Nośniki',
+          serviceGroup: 'Usługi',
           manageGroup: 'Administracja',
           consoleView: 'Wyświetl konsolę',
           consoleControl: 'Klawiatura i mysz',

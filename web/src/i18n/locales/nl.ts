@@ -715,6 +715,7 @@ const nl = {
           save: 'Opslaan',
           consoleGroup: 'Console',
           mediaGroup: 'Media',
+          serviceGroup: 'Services',
           manageGroup: 'Beheer',
           consoleView: 'Console bekijken',
           consoleControl: 'Toetsenbord en muis',

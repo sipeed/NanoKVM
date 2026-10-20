@@ -697,6 +697,7 @@ const ko = {
           save: '저장',
           consoleGroup: '콘솔',
           mediaGroup: '미디어',
+          serviceGroup: '서비스',
           manageGroup: '관리',
           consoleView: '콘솔 보기',
           consoleControl: '키보드 및 마우스',

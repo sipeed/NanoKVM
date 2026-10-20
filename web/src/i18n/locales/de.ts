@@ -718,6 +718,7 @@ const de = {
           save: 'Speichern',
           consoleGroup: 'Konsole',
           mediaGroup: 'Medien',
+          serviceGroup: 'Dienste',
           manageGroup: 'Verwaltung',
           consoleView: 'Konsole anzeigen',
           consoleControl: 'Tastatur und Maus',

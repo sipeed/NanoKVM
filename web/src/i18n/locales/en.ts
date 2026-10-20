@@ -700,6 +700,7 @@ const en = {
           save: 'Save',
           consoleGroup: 'Console',
           mediaGroup: 'Media',
+          serviceGroup: 'Services',
           manageGroup: 'Administration',
           consoleView: 'View Console',
           consoleControl: 'Keyboard & Mouse',

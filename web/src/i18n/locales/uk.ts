@@ -706,6 +706,7 @@ const uk = {
           save: 'Зберегти',
           consoleGroup: 'Консоль',
           mediaGroup: 'Носії',
+          serviceGroup: 'Сервіси',
           manageGroup: 'Адміністрування',
           consoleView: 'Перегляд консолі',
           consoleControl: 'Клавіатура й миша',

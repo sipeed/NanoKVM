@@ -707,6 +707,7 @@ const ca = {
           save: 'Desa',
           consoleGroup: 'Consola',
           mediaGroup: 'Suports',
+          serviceGroup: 'Serveis',
           manageGroup: 'Administració',
           consoleView: 'Veure la consola',
           consoleControl: 'Teclat i ratolí',

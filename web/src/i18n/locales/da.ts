@@ -705,6 +705,7 @@ const da = {
           save: 'Gem',
           consoleGroup: 'Konsol',
           mediaGroup: 'Medier',
+          serviceGroup: 'Tjenester',
           manageGroup: 'Administration',
           consoleView: 'Se konsol',
           consoleControl: 'Tastatur og mus',

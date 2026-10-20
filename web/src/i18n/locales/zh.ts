@@ -682,6 +682,7 @@ const zh = {
           save: '保存',
           consoleGroup: '控制台操作',
           mediaGroup: '介质',
+          serviceGroup: '服务',
           manageGroup: '设备管理',
           consoleView: '查看画面',
           consoleControl: '键鼠操作',

@@ -708,6 +708,7 @@ const pt_br = {
           save: 'Salvar',
           consoleGroup: 'Console',
           mediaGroup: 'Mídia',
+          serviceGroup: 'Serviços',
           manageGroup: 'Administração',
           consoleView: 'Ver console',
           consoleControl: 'Teclado e mouse',
