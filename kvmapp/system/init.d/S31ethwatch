@@ -9,13 +9,18 @@
 # FAIL_LIMIT missed checks, makes udhcpc release the lease and start a
 # fresh discover.
 #
+# The lease is only released once a DHCP server is known to answer.
+# When the gateway is down because the router itself is (rebooting,
+# broken), releasing would leave eth0 with no address at all and the
+# KVM unreachable even from the local network.
+#
 
 PIDFILE="/var/run/ethwatch.pid"
 UDHCPC_PIDFILE="/run/udhcpc.eth0.pid"
 
 INTERVAL=10     # seconds between checks
 FAIL_LIMIT=12   # missed checks before restarting DHCP (12 x 10s = 2 min)
-HOLDOFF=60      # seconds to wait after a restart before checking again
+HOLDOFF=60      # seconds to wait after a restart or a failed probe
 
 log() {
     logger -t ethwatch "$1"
@@ -34,6 +39,12 @@ gateway_alive() {
     arping -q -c 2 -w 3 -I eth0 "$1" >/dev/null 2>&1
 }
 
+dhcp_server_alive() {
+    # One-shot discover that configures nothing (-s /bin/true) and exits
+    # as soon as a server hands out a lease (-q) or none does (-n).
+    udhcpc -i eth0 -f -n -q -t 3 -T 2 -s /bin/true >/dev/null 2>&1
+}
+
 udhcpc_pid() {
     pid=$(cat "$UDHCPC_PIDFILE" 2>/dev/null)
     [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && echo "$pid"
@@ -41,6 +52,7 @@ udhcpc_pid() {
 
 run() {
     fails=0
+    stuck=
     while true; do
         sleep "$INTERVAL"
 
@@ -53,13 +65,23 @@ run() {
 
         if gateway_alive "$gw"; then
             fails=0
+            stuck=
             continue
         fi
 
         fails=$((fails + 1))
         [ "$fails" -lt "$FAIL_LIMIT" ] && continue
 
-        log "gateway $gw unreachable for $((fails * INTERVAL))s, restarting DHCP"
+        if ! dhcp_server_alive; then
+            [ -n "$stuck" ] || log "gateway $gw unreachable and no DHCP server answers, keeping the current lease"
+            stuck=1
+            fails=0
+            sleep "$HOLDOFF"
+            continue
+        fi
+
+        stuck=
+        log "gateway $gw unreachable and a DHCP server answers, restarting DHCP"
         kill -USR2 "$pid"   # release the lease
         sleep 1
         kill -USR1 "$pid"   # discover again
