@@ -63,8 +63,8 @@ export const Mouse = () => {
     <div className="flex flex-col space-y-1">
       <Cursor />
       {/* Mode, direction and speed only shape the input this account sends, so a
-          view-only account gets none of them. The cursor style below is local to
-          the screen and stays available. */}
+          view-only account gets none of them; the cursor style is local to the
+          screen and stays available. */}
       {canControl && <MouseMode />}
       {canControl && <Direction />}
       {canControl && <Speed />}
@@ -75,12 +75,6 @@ export const Mouse = () => {
       {canDevice && <ResetHid />}
     </div>
   );
-
-  // A view-only account without the device grant has nothing left to configure:
-  // hide the entry instead of opening a menu whose items do nothing.
-  if (!canControl && !canDevice) {
-    return null;
-  }
 
   return <MenuItem title={t('mouse.title')} icon={<MouseIcon size={18} />} content={content} />;
 };

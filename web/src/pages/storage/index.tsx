@@ -643,37 +643,41 @@ export const Storage = () => {
 
         <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] gap-6">
           <div className="flex min-h-0 flex-col space-y-3">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-xs uppercase tracking-wide text-neutral-500">
-                {t('storage.mountMode')}
-              </span>
-              <Segmented
-                size="small"
-                value={mountAsCdrom ? 'cdrom' : 'disk'}
-                disabled={busy !== '' || state.state === 'unsupported'}
-                onChange={(value) => setMountAsCdrom(value === 'cdrom')}
-                options={[
-                  {
-                    value: 'disk',
-                    label: (
-                      <div className="flex items-center space-x-1">
-                        <HardDriveIcon size={14} />
-                        <span>{t('storage.mountModeDisk')}</span>
-                      </div>
-                    )
-                  },
-                  {
-                    value: 'cdrom',
-                    label: (
-                      <div className="flex items-center space-x-1">
-                        <DiscIcon size={14} />
-                        <span>{t('storage.mountModeCdrom')}</span>
-                      </div>
-                    )
-                  }
-                ]}
-              />
-            </div>
+            {/* The mount mode only shapes an attach, so an account that cannot
+                attach has nothing to pick here. */}
+            {canAttach && (
+              <div className="flex items-center justify-between px-2">
+                <span className="text-xs uppercase tracking-wide text-neutral-500">
+                  {t('storage.mountMode')}
+                </span>
+                <Segmented
+                  size="small"
+                  value={mountAsCdrom ? 'cdrom' : 'disk'}
+                  disabled={busy !== '' || state.state === 'unsupported'}
+                  onChange={(value) => setMountAsCdrom(value === 'cdrom')}
+                  options={[
+                    {
+                      value: 'disk',
+                      label: (
+                        <div className="flex items-center space-x-1">
+                          <HardDriveIcon size={14} />
+                          <span>{t('storage.mountModeDisk')}</span>
+                        </div>
+                      )
+                    },
+                    {
+                      value: 'cdrom',
+                      label: (
+                        <div className="flex items-center space-x-1">
+                          <DiscIcon size={14} />
+                          <span>{t('storage.mountModeCdrom')}</span>
+                        </div>
+                      )
+                    }
+                  ]}
+                />
+              </div>
+            )}
 
             <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-auto">
               {isLoading ? (
