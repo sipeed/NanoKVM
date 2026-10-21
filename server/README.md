@@ -81,12 +81,15 @@ carries its group, its risk, and the grants it implies:
 | services | `mcp`, `tailscale`, `ai` |
 
 Implied grants are declared once, in the catalog, and the server resolves them before answering any
-request: `console.control` implies `console.view`, and both `medium.attach` and `library.write`
-imply `library.read`. Consequences worth knowing:
+request: `console.control` implies `console.view`, both `medium.attach` and `library.write` imply
+`library.read`, and every grant whose controls live in the console menu — `power`, `device`,
+`network`, `update`, `mcp`, `tailscale` and `ai` — implies `console.view` too, because no page
+outside the console renders them. Consequences worth knowing:
 
 - An account can hold no console access at all. The web app then lands on a page that offers the
   sections the account may use (the media library, the terminal) instead of a console it cannot
-  open. `library.read` is all that media access needs, because the other two media grants imply it.
+  open. `library.read` is all that media access needs, because the other two media grants imply it,
+  and only `terminal` and the media grants can stand on their own pages in the first place.
 - The media grants split along the trust boundary. `medium.attach` mounts or ejects a medium on the
   target machine and writes into the shared partition the target reads; `library.write` changes what
   the library keeps (uploads, deletes, the files inside an image); `library.read` lists and downloads.
@@ -97,18 +100,23 @@ imply `library.read`. Consequences worth knowing:
   A medium can only be attached while a `device` holder has the virtual disk switched on, and the
   storage page says so when it is off.
 
-Five grants reach further than their names suggest and amount to full device control. The account
-editor marks them as `danger` and names them before the grants are saved:
+Three grants reach further than their names suggest and amount to full device control. The catalog
+has two risk levels, and `warn` is reserved for them: the account editor marks those three and
+names them before the grants are saved:
 
 - `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
-- `device` can enable SSH, which also means root, can reboot the device, and can hand the raw
-  data partition or a network interface to the target machine through the emulated USB devices.
-- `update` installs firmware and application packages.
 - `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
   outside the web session, and the key keeps working after this grant is revoked until it is
   regenerated.
 - `ai` drives the device through the local loopback interface, which the other grants do not
   restrict.
+
+`device` and `update` carry no such mark, although both change what the device does for everyone
+and neither can be narrowed per account. `device` turns SSH on or off (root login, with the device
+owner's password), reboots the device, hands the raw data partition or a network interface to the
+target machine through the emulated USB devices, and edits the OLED, HDMI, mDNS, memory, swap and
+HID settings; `update` installs firmware and application packages. Both are described that way in
+the editor.
 
 Two grants also change settings that affect everyone watching: `console.view` sets the video mode,
 resolution, frame rate and quality, and resets the HDMI capture; `power` manages the Wake-on-LAN
@@ -144,6 +152,9 @@ The account file stores an explicit grant set: a record written before fine-grai
 keeps exactly what the user role used to grant, and the split media grants are translated on load,
 so the store never holds a missing set that would fall back to different behavior later. Grants
 this build does not know are preserved and ignored, so a downgrade cannot lock the device out.
+Creating a regular account without naming a grant set keeps that same meaning, so a script that only
+knows about roles gets the account the user role used to create; the account editor seeds a new
+regular account with `console.view` only, and an explicitly empty set really is empty.
 
 ## Compile & Deploy
 

@@ -55,14 +55,17 @@ const (
 	GroupServices Group = "services"
 )
 
-// Risk states how far a grant reaches, so the editor can mark the grants that
-// are effectively full device control instead of explaining each one by hand.
+// Risk states how far a grant reaches, and the catalog carries two levels: a
+// plain grant, and the grants that amount to full device control, which the
+// account editor marks and names before the grants are saved.
 type Risk string
 
 const (
-	RiskInfo   Risk = "info"
-	RiskWarn   Risk = "warn"
-	RiskDanger Risk = "danger"
+	// RiskInfo is a grant that stays within the feature it names.
+	RiskInfo Risk = "info"
+	// RiskWarn is a grant that reaches past the device: a root shell, the AI
+	// loopback, an API key that outlives its grant.
+	RiskWarn Risk = "warn"
 )
 
 // Descriptor is one catalog entry: the grant, the group it belongs to, the risk
@@ -75,37 +78,75 @@ type Descriptor struct {
 }
 
 // Implied grants are declared once here instead of as unions at every call
-// site: control without the picture is meaningless, and nothing can be attached
-// or changed in the library without being allowed to see it first.
+// site: control without the picture is meaningless, nothing can be attached or
+// changed in the library without being allowed to see it first, and the grants
+// whose controls live in the console menu imply the console, because no page
+// outside it renders them and a grant nothing can use is a promise the app
+// cannot keep. Terminal and the media grants stand on their own pages.
 var permissionCatalog = []Descriptor{
 	{Permission: PermConsoleView, Group: GroupConsole, Risk: RiskInfo},
 	{
 		Permission: PermConsoleControl,
 		Group:      GroupConsole,
-		Risk:       RiskWarn,
+		Risk:       RiskInfo,
 		Implies:    []Permission{PermConsoleView},
 	},
-	{Permission: PermPower, Group: GroupTarget, Risk: RiskWarn},
+	{
+		Permission: PermPower,
+		Group:      GroupTarget,
+		Risk:       RiskInfo,
+		Implies:    []Permission{PermConsoleView},
+	},
 	{
 		Permission: PermMediumAttach,
 		Group:      GroupTarget,
-		Risk:       RiskWarn,
+		Risk:       RiskInfo,
 		Implies:    []Permission{PermLibraryRead},
 	},
 	{Permission: PermLibraryRead, Group: GroupLibrary, Risk: RiskInfo},
 	{
 		Permission: PermLibraryWrite,
 		Group:      GroupLibrary,
-		Risk:       RiskWarn,
+		Risk:       RiskInfo,
 		Implies:    []Permission{PermLibraryRead},
 	},
-	{Permission: PermTerminal, Group: GroupHost, Risk: RiskDanger},
-	{Permission: PermDevice, Group: GroupHost, Risk: RiskDanger},
-	{Permission: PermNetwork, Group: GroupHost, Risk: RiskWarn},
-	{Permission: PermUpdate, Group: GroupHost, Risk: RiskDanger},
-	{Permission: PermMcp, Group: GroupServices, Risk: RiskDanger},
-	{Permission: PermTailscale, Group: GroupServices, Risk: RiskWarn},
-	{Permission: PermAi, Group: GroupServices, Risk: RiskDanger},
+	{Permission: PermTerminal, Group: GroupHost, Risk: RiskWarn},
+	{
+		Permission: PermDevice,
+		Group:      GroupHost,
+		Risk:       RiskInfo,
+		Implies:    []Permission{PermConsoleView},
+	},
+	{
+		Permission: PermNetwork,
+		Group:      GroupHost,
+		Risk:       RiskInfo,
+		Implies:    []Permission{PermConsoleView},
+	},
+	{
+		Permission: PermUpdate,
+		Group:      GroupHost,
+		Risk:       RiskInfo,
+		Implies:    []Permission{PermConsoleView},
+	},
+	{
+		Permission: PermMcp,
+		Group:      GroupServices,
+		Risk:       RiskWarn,
+		Implies:    []Permission{PermConsoleView},
+	},
+	{
+		Permission: PermTailscale,
+		Group:      GroupServices,
+		Risk:       RiskInfo,
+		Implies:    []Permission{PermConsoleView},
+	},
+	{
+		Permission: PermAi,
+		Group:      GroupServices,
+		Risk:       RiskWarn,
+		Implies:    []Permission{PermConsoleView},
+	},
 }
 
 // Grants of earlier releases, kept so an account file written by one of them

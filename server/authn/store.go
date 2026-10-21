@@ -210,6 +210,13 @@ func (s *Store) Create(username, password string, role Role, permissions ...Perm
 	if !IsValidRole(role) {
 		return errors.New("invalid role")
 	}
+	// A nil set means the caller named none at all, which keeps the meaning it
+	// had before grants existed: an account created by a script that only knows
+	// about roles gets what the user role granted then. An explicit empty set is
+	// a decision and stays empty, so the account really holds nothing.
+	if permissions == nil && role == RoleUser {
+		permissions = legacyUserPermissions()
+	}
 	if err := ValidatePermissions(permissions); err != nil {
 		return err
 	}
