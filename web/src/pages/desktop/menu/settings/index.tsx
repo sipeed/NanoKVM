@@ -21,7 +21,6 @@ import * as ls from '@/lib/localstorage.ts';
 import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { About } from './about';
 import { Account } from './account';
@@ -207,16 +206,16 @@ export const Settings = () => {
             ))}
           </div>
 
-          <ScrollArea
-            viewportRef={scrollViewportRef}
-            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-scrollbar]]:p-0 [&_[data-slot=scroll-area-thumb]]:bg-neutral-500/30"
+          <div
+            ref={scrollViewportRef}
+            className="h-full w-full overflow-y-auto rounded-r-lg bg-neutral-900/50 px-3"
           >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
                 <>{activeTab?.component}</>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </Modal>
     </>
