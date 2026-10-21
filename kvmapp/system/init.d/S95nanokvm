@@ -63,12 +63,27 @@ start_services() {
         done
         rm -f /tmp/.nanokvm_migrating
     else
-        /tmp/kvm_system/kvm_system &
+        # On a normal boot, let NanoKVM-Server claim the CPU first; the helper
+        # (OLED, buttons, network status) is not on the path to first frame.
+        # Image/app migration and restarts start it immediately as before.
+        if [ "${1:-}" != boot ] || [ -e /kvmapp/kvm_new_img ] || [ -e /kvmapp/kvm_new_app ]; then
+            /tmp/kvm_system/kvm_system &
+        else
+            (sleep 3; exec /tmp/kvm_system/kvm_system) &
+        fi
     fi
 
     if ! pidof NanoKVM-Server >/dev/null 2>&1; then
         rm -rf /tmp/server
         cp -r /kvmapp/server /tmp/
+        # Keep the source mtimes of content-hashed web assets so browsers get
+        # 304 Not Modified after a reboot instead of re-downloading the bundle.
+        # index.html stays freshly copied.
+        for asset in /kvmapp/server/web/assets/*; do
+            if [ -f "$asset" ] && [ ! -L "$asset" ]; then
+                touch -cmr "$asset" "/tmp/server/web/assets/${asset##*/}"
+            fi
+        done
         /tmp/server/NanoKVM-Server &
     fi
 }
@@ -118,7 +133,7 @@ case "$1" in
     fi
 
     # Start services
-    start_services
+    start_services boot
    ;;
 
   stop)
