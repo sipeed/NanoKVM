@@ -710,6 +710,7 @@ const tr = {
           title: 'İzinler',
           editTitle: 'İzinleri düzenle',
           save: 'Kaydet',
+          saved: 'Kaydedildi',
           close: 'Kapat',
           groupConsole: 'Konsol',
           groupTarget: 'Hedef makine',
@@ -749,12 +750,11 @@ const tr = {
           effectTailscale: 'Bu cihazı bir VPN ağına bağlar.',
           effectAi:
             'Cihazı, diğer izinlerin sınırlamadığı yerel bir arayüz üzerinden yönetir; bu nedenle cihaz üzerinde tam denetim anlamına gelir.',
-          dangerWarning: 'Bu izinler cihaz üzerinde tam denetim anlamına gelir:',
+          fullControlWarning: 'Bu izinler cihaz üzerinde tam denetim anlamına gelir:',
           emptyWarning: 'Bu hesabın hiçbir özelliği olmayacak ve yalnızca oturum açabilecek.',
           impliedBy: '{{name}} tarafından içerilir',
           grantCount: '{{count}} izin',
           adminAll: 'Yöneticiler tüm izinlere sahiptir',
-          adminDemote: 'Hesap normal kullanıcıya düşürülürse bu küme yeniden geçerli olur.',
           catalogFailed: 'İzin listesi yüklenemedi. Bu pencereyi kapatıp yeniden deneyin.'
         }
       }

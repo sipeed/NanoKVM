@@ -708,6 +708,7 @@ const nb = {
           title: 'Tillatelser',
           editTitle: 'Rediger tillatelser',
           save: 'Lagre',
+          saved: 'Lagret',
           close: 'Lukk',
           groupConsole: 'Konsoll',
           groupTarget: 'Målmaskin',
@@ -748,12 +749,11 @@ const nb = {
           effectTailscale: 'Kobler denne enheten til et VPN-nett.',
           effectAi:
             'Styrer enheten via et lokalt grensesnitt som de andre tillatelsene ikke begrenser, så dette tilsvarer full kontroll over enheten.',
-          dangerWarning: 'Disse tillatelsene tilsvarer full kontroll over enheten:',
+          fullControlWarning: 'Disse tillatelsene tilsvarer full kontroll over enheten:',
           emptyWarning: 'Denne kontoen får ingen funksjoner og kan bare logge inn.',
           impliedBy: 'Inkludert av {{name}}',
           grantCount: '{{count}} tillatelser',
           adminAll: 'Administratorer har alle tillatelser',
-          adminDemote: 'Dette settet gjelder igjen hvis kontoen nedgraderes til vanlig bruker.',
           catalogFailed: 'Tillatelseslisten kunne ikke lastes. Lukk dialogen og prøv igjen.'
         }
       }

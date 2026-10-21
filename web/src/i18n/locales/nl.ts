@@ -719,6 +719,7 @@ const nl = {
           title: 'Rechten',
           editTitle: 'Rechten bewerken',
           save: 'Opslaan',
+          saved: 'Opgeslagen',
           close: 'Sluiten',
           groupConsole: 'Console',
           groupTarget: 'Doelmachine',
@@ -758,13 +759,11 @@ const nl = {
           effectTailscale: 'Voegt dit apparaat toe aan een VPN-mesh.',
           effectAi:
             'Bestuurt het apparaat via een lokale interface die de andere rechten niet beperken, dus dit staat gelijk aan volledige apparaatcontrole.',
-          dangerWarning: 'Deze rechten komen neer op volledige apparaatcontrole:',
+          fullControlWarning: 'Deze rechten komen neer op volledige apparaatcontrole:',
           emptyWarning: 'Dit account heeft dan geen enkele functie en kan alleen inloggen.',
           impliedBy: 'Inbegrepen via {{name}}',
           grantCount: '{{count}} rechten',
           adminAll: 'Beheerders hebben alle rechten',
-          adminDemote:
-            'Deze set geldt weer als het account wordt teruggezet naar een gewone gebruiker.',
           catalogFailed:
             'De rechtenlijst kon niet worden geladen. Sluit dit venster en probeer het opnieuw.'
         }

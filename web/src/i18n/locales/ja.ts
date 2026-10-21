@@ -716,6 +716,7 @@ const ja = {
           title: '権限',
           editTitle: '権限を編集',
           save: '保存',
+          saved: '保存しました',
           close: '閉じる',
           groupConsole: 'コンソール',
           groupTarget: 'ターゲットマシン',
@@ -756,12 +757,11 @@ const ja = {
           effectTailscale: 'このデバイスを VPN メッシュに参加させます。',
           effectAi:
             '他の権限に制限されないローカルインターフェース経由でデバイスを操作するため、実質的にデバイスの完全な制御権になります。',
-          dangerWarning: 'これらの権限はデバイスの完全な制御権に相当します:',
+          fullControlWarning: 'これらの権限はデバイスの完全な制御権に相当します:',
           emptyWarning: 'このアカウントは機能を一切持たず、ログインのみ可能になります。',
           impliedBy: '{{name}} に含まれます',
           grantCount: '{{count}} 件の権限',
           adminAll: '管理者はすべての権限を持ちます',
-          adminDemote: '一般ユーザーに降格すると、この設定が再び適用されます。',
           catalogFailed: '権限一覧を読み込めませんでした。ダイアログを閉じて再試行してください。'
         }
       }

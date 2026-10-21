@@ -61,30 +61,30 @@ export const handlers = [
           {
             id: 'console.control',
             group: 'console',
-            risk: 'warn',
+            risk: 'info',
             implies: ['console.view']
           },
-          { id: 'power', group: 'target', risk: 'warn' },
+          { id: 'power', group: 'target', risk: 'info', implies: ['console.view'] },
           {
             id: 'medium.attach',
             group: 'target',
-            risk: 'warn',
+            risk: 'info',
             implies: ['library.read']
           },
           { id: 'library.read', group: 'library', risk: 'info' },
           {
             id: 'library.write',
             group: 'library',
-            risk: 'warn',
+            risk: 'info',
             implies: ['library.read']
           },
-          { id: 'terminal', group: 'host', risk: 'danger' },
-          { id: 'device', group: 'host', risk: 'danger' },
-          { id: 'network', group: 'host', risk: 'warn' },
-          { id: 'update', group: 'host', risk: 'danger' },
-          { id: 'mcp', group: 'services', risk: 'danger' },
-          { id: 'tailscale', group: 'services', risk: 'warn' },
-          { id: 'ai', group: 'services', risk: 'danger' }
+          { id: 'terminal', group: 'host', risk: 'warn' },
+          { id: 'device', group: 'host', risk: 'info', implies: ['console.view'] },
+          { id: 'network', group: 'host', risk: 'info', implies: ['console.view'] },
+          { id: 'update', group: 'host', risk: 'info', implies: ['console.view'] },
+          { id: 'mcp', group: 'services', risk: 'warn', implies: ['console.view'] },
+          { id: 'tailscale', group: 'services', risk: 'info', implies: ['console.view'] },
+          { id: 'ai', group: 'services', risk: 'warn', implies: ['console.view'] }
         ]
       }
     });

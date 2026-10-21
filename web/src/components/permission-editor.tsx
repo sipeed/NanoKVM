@@ -16,7 +16,7 @@ import {
 // full device control. Everything else stays in the tooltip, so thirteen grants
 // still fit on one screen.
 function markerOf(risk: PermissionDescriptor['risk']) {
-  return risk === 'danger'
+  return risk === 'warn'
     ? { Icon: ShieldAlertIcon, className: 'text-amber-500' }
     : { Icon: CircleHelpIcon, className: 'text-neutral-500' };
 }
@@ -80,8 +80,8 @@ export const PermissionEditor = ({
     items: catalog.filter((descriptor) => descriptor.group === group)
   })).filter((section) => section.items.length > 0);
 
-  const danger = catalog
-    .filter((descriptor) => descriptor.risk === 'danger' && resolved.has(descriptor.id))
+  const fullControl = catalog
+    .filter((descriptor) => descriptor.risk === 'warn' && resolved.has(descriptor.id))
     .map((descriptor) => labelOf(descriptor.id));
 
   return (
@@ -94,15 +94,23 @@ export const PermissionEditor = ({
               {section.items.map((descriptor) => {
                 const granted = value.includes(descriptor.id);
                 const source = impliedSource.get(descriptor.id);
-                const implied = !granted && source !== undefined;
+                // A grant another selection already brings in is locked even when
+                // the account also stores it explicitly: unchecking it would only
+                // remove the stored copy and leave the closure to add it back, so
+                // the box must not offer an edit that cannot take effect.
+                const locked = source !== undefined;
+                // The note explains a box that is checked on someone else's
+                // account only. A grant the account stores itself is checked in
+                // its own right, so naming a source would describe it backwards.
+                const includedBy = !granted && source;
                 const { Icon, className: markerClass } = markerOf(descriptor.risk);
                 const effect = permissionEffectKey(descriptor.id);
 
                 return (
                   <Checkbox
                     key={descriptor.id}
-                    checked={granted || implied}
-                    disabled={readOnly || implied}
+                    checked={granted || locked}
+                    disabled={readOnly || locked}
                     onChange={(event) => toggle(descriptor.id, event.target.checked)}
                   >
                     <span className="inline-flex items-center gap-1">
@@ -111,7 +119,7 @@ export const PermissionEditor = ({
                         title={
                           <span>
                             {effect ? t(effect) : labelOf(descriptor.id)}
-                            {implied && source && (
+                            {includedBy && source && (
                               <span className="mt-1 block text-amber-300">
                                 {t('settings.account.permissions.impliedBy', {
                                   name: labelOf(source)
@@ -144,11 +152,11 @@ export const PermissionEditor = ({
       </div>
 
       {/* One line, below the grants: the marks above already say where it comes from */}
-      {danger.length > 0 && (
+      {fullControl.length > 0 && (
         <div className="flex items-start gap-1 text-xs text-amber-500">
           <ShieldAlertIcon size={12} className="mt-0.5 shrink-0" />
           <span>
-            {t('settings.account.permissions.dangerWarning')} {danger.join(', ')}
+            {t('settings.account.permissions.fullControlWarning')} {fullControl.join(', ')}
           </span>
         </div>
       )}

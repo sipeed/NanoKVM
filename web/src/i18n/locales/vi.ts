@@ -707,6 +707,7 @@ const vi = {
           title: 'Quyền',
           editTitle: 'Sửa quyền',
           save: 'Lưu',
+          saved: 'Đã lưu',
           close: 'Đóng',
           groupConsole: 'Console',
           groupTarget: 'Máy đích',
@@ -745,12 +746,11 @@ const vi = {
           effectTailscale: 'Kết nối thiết bị này vào một mạng VPN.',
           effectAi:
             'Điều khiển thiết bị qua giao diện cục bộ mà các quyền khác không giới hạn, nên tương đương toàn quyền điều khiển thiết bị.',
-          dangerWarning: 'Các quyền này tương đương toàn quyền điều khiển thiết bị:',
+          fullControlWarning: 'Các quyền này tương đương toàn quyền điều khiển thiết bị:',
           emptyWarning: 'Tài khoản này sẽ không có chức năng nào và chỉ có thể đăng nhập.',
           impliedBy: 'Được {{name}} bao gồm',
           grantCount: '{{count}} quyền',
           adminAll: 'Quản trị viên có mọi quyền',
-          adminDemote: 'Bộ quyền này áp dụng lại nếu tài khoản bị hạ xuống người dùng thường.',
           catalogFailed: 'Không tải được danh sách quyền. Hãy đóng hộp thoại và thử lại.'
         }
       }

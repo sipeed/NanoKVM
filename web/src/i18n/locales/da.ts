@@ -709,6 +709,7 @@ const da = {
           title: 'Rettigheder',
           editTitle: 'Rediger rettigheder',
           save: 'Gem',
+          saved: 'Gemt',
           close: 'Luk',
           groupConsole: 'Konsol',
           groupTarget: 'Målmaskine',
@@ -747,12 +748,11 @@ const da = {
           effectTailscale: 'Forbinder denne enhed til et VPN-mesh.',
           effectAi:
             'Styrer enheden via en lokal grænseflade, som de øvrige rettigheder ikke begrænser, så det svarer til fuld kontrol over enheden.',
-          dangerWarning: 'Disse rettigheder svarer til fuld kontrol over enheden:',
+          fullControlWarning: 'Disse rettigheder svarer til fuld kontrol over enheden:',
           emptyWarning: 'Denne konto har ingen funktioner og kan kun logge ind.',
           impliedBy: 'Inkluderet af {{name}}',
           grantCount: '{{count}} rettigheder',
           adminAll: 'Administratorer har alle rettigheder',
-          adminDemote: 'Dette sæt gælder igen, hvis kontoen nedgraderes til almindelig bruger.',
           catalogFailed: 'Rettighedslisten kunne ikke indlæses. Luk dialogen, og prøv igen.'
         }
       }

@@ -710,6 +710,7 @@ const cz = {
           title: 'Oprávnění',
           editTitle: 'Upravit oprávnění',
           save: 'Uložit',
+          saved: 'Uloženo',
           close: 'Zavřít',
           groupConsole: 'Konzole',
           groupTarget: 'Cílový počítač',
@@ -748,12 +749,11 @@ const cz = {
           effectTailscale: 'Připojuje toto zařízení do VPN sítě.',
           effectAi:
             'Ovládá zařízení přes lokální rozhraní, které ostatní oprávnění neomezují, takže jde prakticky o plnou kontrolu nad zařízením.',
-          dangerWarning: 'Tato oprávnění představují plnou kontrolu nad zařízením:',
+          fullControlWarning: 'Tato oprávnění představují plnou kontrolu nad zařízením:',
           emptyWarning: 'Tento účet nebude mít žádné funkce a bude se moci jen přihlásit.',
           impliedBy: 'Zahrnuto díky {{name}}',
           grantCount: '{{count}} oprávnění',
           adminAll: 'Administrátoři mají všechna oprávnění',
-          adminDemote: 'Tato sada opět platí, pokud bude účet snížen na běžného uživatele.',
           catalogFailed: 'Seznam oprávnění se nepodařilo načíst. Zavřete dialog a zkuste to znovu.'
         }
       }

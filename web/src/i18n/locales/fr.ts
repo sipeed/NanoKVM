@@ -721,6 +721,7 @@ const fr = {
           title: 'Autorisations',
           editTitle: 'Modifier les autorisations',
           save: 'Enregistrer',
+          saved: 'Enregistré',
           close: 'Fermer',
           groupConsole: 'Console',
           groupTarget: 'Machine cible',
@@ -761,13 +762,11 @@ const fr = {
           effectTailscale: 'Rejoint cet appareil à un maillage VPN.',
           effectAi:
             'Pilote l’appareil via une interface locale que les autres autorisations ne limitent pas : cela équivaut au contrôle total de l’appareil.',
-          dangerWarning: 'Ces autorisations équivalent au contrôle total de l’appareil :',
+          fullControlWarning: 'Ces autorisations équivalent au contrôle total de l’appareil :',
           emptyWarning: 'Ce compte n’aura aucune fonction et pourra seulement se connecter.',
           impliedBy: 'Inclus par {{name}}',
           grantCount: '{{count}} autorisations',
           adminAll: 'Les administrateurs détiennent toutes les autorisations',
-          adminDemote:
-            'Cet ensemble s’applique de nouveau si le compte repasse en utilisateur simple.',
           catalogFailed:
             'Impossible de charger la liste des autorisations. Fermez ce dialogue et réessayez.'
         }

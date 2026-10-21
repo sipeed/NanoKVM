@@ -706,6 +706,7 @@ const se = {
           title: 'Behörigheter',
           editTitle: 'Redigera behörigheter',
           save: 'Spara',
+          saved: 'Sparat',
           close: 'Stäng',
           groupConsole: 'Konsol',
           groupTarget: 'Målmaskin',
@@ -746,13 +747,11 @@ const se = {
           effectTailscale: 'Ansluter den här enheten till ett VPN-nät.',
           effectAi:
             'Styr enheten via ett lokalt gränssnitt som de övriga behörigheterna inte begränsar, så det motsvarar full kontroll över enheten.',
-          dangerWarning: 'Dessa behörigheter motsvarar full kontroll över enheten:',
+          fullControlWarning: 'Dessa behörigheter motsvarar full kontroll över enheten:',
           emptyWarning: 'Det här kontot får inga funktioner alls och kan bara logga in.',
           impliedBy: 'Ingår via {{name}}',
           grantCount: '{{count}} behörigheter',
           adminAll: 'Administratörer har alla behörigheter',
-          adminDemote:
-            'Den här uppsättningen gäller igen om kontot nedgraderas till vanlig användare.',
           catalogFailed: 'Behörighetslistan kunde inte läsas in. Stäng dialogen och försök igen.'
         }
       }

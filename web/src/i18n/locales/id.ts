@@ -710,6 +710,7 @@ const id = {
           title: 'Izin',
           editTitle: 'Edit izin',
           save: 'Simpan',
+          saved: 'Tersimpan',
           close: 'Tutup',
           groupConsole: 'Konsol',
           groupTarget: 'Mesin target',
@@ -750,12 +751,11 @@ const id = {
           effectTailscale: 'Menghubungkan perangkat ini ke jaringan VPN.',
           effectAi:
             'Mengendalikan perangkat melalui antarmuka lokal yang tidak dibatasi izin lain, sehingga setara dengan kendali penuh atas perangkat.',
-          dangerWarning: 'Izin ini setara dengan kendali penuh atas perangkat:',
+          fullControlWarning: 'Izin ini setara dengan kendali penuh atas perangkat:',
           emptyWarning: 'Akun ini tidak akan memiliki fitur apa pun dan hanya bisa masuk.',
           impliedBy: 'Termasuk oleh {{name}}',
           grantCount: '{{count}} izin',
           adminAll: 'Administrator memiliki semua izin',
-          adminDemote: 'Kumpulan ini berlaku lagi jika akun diturunkan menjadi pengguna biasa.',
           catalogFailed: 'Daftar izin gagal dimuat. Tutup dialog ini dan coba lagi.'
         }
       }

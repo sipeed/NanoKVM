@@ -705,6 +705,7 @@ const en = {
           title: 'Permissions',
           editTitle: 'Edit Permissions',
           save: 'Save',
+          saved: 'Saved',
           close: 'Close',
           groupConsole: 'Console',
           groupTarget: 'Target machine',
@@ -744,12 +745,11 @@ const en = {
           effectTailscale: 'Joins this device to a VPN mesh.',
           effectAi:
             'Drives the device through a local interface that the other grants do not restrict, so this is effectively full device control.',
-          dangerWarning: 'These grants amount to full device control:',
+          fullControlWarning: 'These grants amount to full device control:',
           emptyWarning: 'This account will have no features at all and can only sign in.',
           impliedBy: 'Included by {{name}}',
           grantCount: '{{count}} grants',
           adminAll: 'Administrators hold every permission',
-          adminDemote: 'This set applies again if the account is demoted to a regular user.',
           catalogFailed:
             'The permission catalog could not be loaded. Close this dialog and try again.'
         }

@@ -687,6 +687,7 @@ const zh_tw = {
           title: '功能權限',
           editTitle: '編輯權限',
           save: '儲存',
+          saved: '已儲存',
           close: '關閉',
           groupConsole: '控制台',
           groupTarget: '被控機',
@@ -722,12 +723,11 @@ const zh_tw = {
             '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；即使撤銷此權限，該 Key 仍有效，直到重新產生。',
           effectTailscale: '把本裝置加入 VPN 網路。',
           effectAi: '透過不受其他權限限制的本機介面操作裝置，因此相當於完整的裝置控制權。',
-          dangerWarning: '下列權限等同於完整的裝置控制權：',
+          fullControlWarning: '下列權限等同於完整的裝置控制權：',
           emptyWarning: '此帳戶將不具備任何功能，只能登入。',
           impliedBy: '由「{{name}}」自動包含',
           grantCount: '{{count}} 項權限',
           adminAll: '管理員擁有全部權限',
-          adminDemote: '若降級為一般使用者，將恢復以下權限。',
           catalogFailed: '權限清單載入失敗，請關閉後重試。'
         }
       }

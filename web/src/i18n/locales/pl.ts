@@ -712,6 +712,7 @@ const pl = {
           title: 'Uprawnienia',
           editTitle: 'Edytuj uprawnienia',
           save: 'Zapisz',
+          saved: 'Zapisano',
           close: 'Zamknij',
           groupConsole: 'Konsola',
           groupTarget: 'Maszyna docelowa',
@@ -750,14 +751,12 @@ const pl = {
           effectTailscale: 'Dołącza to urządzenie do sieci VPN typu mesh.',
           effectAi:
             'Steruje urządzeniem przez lokalny interfejs, którego pozostałe uprawnienia nie ograniczają, więc oznacza to pełną kontrolę nad urządzeniem.',
-          dangerWarning: 'Te uprawnienia oznaczają pełną kontrolę nad urządzeniem:',
+          fullControlWarning: 'Te uprawnienia oznaczają pełną kontrolę nad urządzeniem:',
           emptyWarning:
             'To konto nie będzie miało żadnych funkcji i będzie mogło się tylko zalogować.',
           impliedBy: 'Zawarte przez {{name}}',
           grantCount: '{{count}} uprawnień',
           adminAll: 'Administratorzy mają wszystkie uprawnienia',
-          adminDemote:
-            'Ten zestaw znów zadziała, jeśli konto zostanie zdegradowane do zwykłego użytkownika.',
           catalogFailed:
             'Nie udało się wczytać listy uprawnień. Zamknij to okno i spróbuj ponownie.'
         }

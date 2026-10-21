@@ -22,9 +22,10 @@ export type Permission =
 // the services that reach it on their own.
 export type PermissionGroup = 'console' | 'target' | 'library' | 'host' | 'services';
 
-// Risk states how far a grant reaches. The editor marks the danger ones, which
-// are the grants that amount to full device control.
-export type PermissionRisk = 'info' | 'warn' | 'danger';
+// Risk states how far a grant reaches. There are two levels: a plain grant, and
+// the grants that amount to full device control, which the editor marks and
+// names before the grants are saved.
+export type PermissionRisk = 'info' | 'warn';
 
 // PermissionDescriptor is one catalog entry as the server serves it. The editor
 // renders the catalog instead of keeping its own copy of the model, so labels,

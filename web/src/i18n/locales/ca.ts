@@ -711,6 +711,7 @@ const ca = {
           title: 'Permisos',
           editTitle: 'Edita els permisos',
           save: 'Desa',
+          saved: 'Desat',
           close: 'Tanca',
           groupConsole: 'Consola',
           groupTarget: 'Màquina de destí',
@@ -751,12 +752,11 @@ const ca = {
           effectTailscale: 'Uneix aquest dispositiu a una malla VPN.',
           effectAi:
             'Controla el dispositiu mitjançant una interfície local que els altres permisos no limiten, així que equival al control total del dispositiu.',
-          dangerWarning: 'Aquests permisos equivalen al control total del dispositiu:',
+          fullControlWarning: 'Aquests permisos equivalen al control total del dispositiu:',
           emptyWarning: 'Aquest compte no tindrà cap funció i només podrà iniciar sessió.',
           impliedBy: 'Inclòs per {{name}}',
           grantCount: '{{count}} permisos',
           adminAll: 'Els administradors tenen tots els permisos',
-          adminDemote: 'Aquest conjunt torna a aplicar-se si el compte passa a usuari normal.',
           catalogFailed:
             'No s’ha pogut carregar la llista de permisos. Tanqueu aquest diàleg i torneu-ho a provar.'
         }

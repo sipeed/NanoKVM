@@ -1,17 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import {
-  Alert,
-  Button,
-  Form,
-  Input,
-  message,
-  Modal,
-  Popconfirm,
-  Select,
-  Switch,
-  Tooltip
-} from 'antd';
+import { Button, Form, Input, message, Modal, Popconfirm, Select, Switch, Tooltip } from 'antd';
 import { KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -60,11 +49,47 @@ export const Users = () => {
   // selection and save it onto the wrong user. The draft is seeded when the
   // editor opens, so a cancelled edit is not carried over either.
   const [permissionDraft, setPermissionDraft] = useState<Permission[]>([]);
+  // A saved grant set is confirmed in place instead of a toast, and the dialog
+  // stays open: saving is often one of several edits, and closing it would lose
+  // the place the administrator was working in.
+  const [isSaved, setIsSaved] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function stopSavedTimer() {
+    if (savedTimer.current !== null) {
+      clearTimeout(savedTimer.current);
+      savedTimer.current = null;
+    }
+  }
 
   function openPermissionEditor(user: User) {
+    stopSavedTimer();
+    setIsSaved(false);
     setPermissionDraft(user.permissions);
     setPermissionUser(user);
   }
+
+  function closePermissionEditor() {
+    stopSavedTimer();
+    setIsSaved(false);
+    setPermissionUser(null);
+  }
+
+  // Editing again makes the last save stale, so the confirmation goes away and
+  // the footer reads Save before anything else is submitted.
+  function updatePermissionDraft(permissions: Permission[]) {
+    stopSavedTimer();
+    setIsSaved(false);
+    setPermissionDraft(permissions);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (savedTimer.current !== null) {
+        clearTimeout(savedTimer.current);
+      }
+    };
+  }, []);
 
   const loadUsers = useCallback(async () => {
     setIsLoading(true);
@@ -160,9 +185,16 @@ export const Users = () => {
   async function savePermissions() {
     if (!permissionUser) return;
     const saved = await updateUser(permissionUser, { permissions: permissionDraft });
-    if (saved) {
-      setPermissionUser(null);
-    }
+    if (!saved) return;
+
+    // The footer button carries the confirmation for a moment, then goes back to
+    // Save. No toast: a grant edit is a small, reversible change.
+    stopSavedTimer();
+    setIsSaved(true);
+    savedTimer.current = setTimeout(() => {
+      savedTimer.current = null;
+      setIsSaved(false);
+    }, 2000);
   }
 
   async function deleteUser(username: string) {
@@ -201,6 +233,11 @@ export const Users = () => {
   }
 
   const isPermissionEditorReadOnly = permissionUser?.role === 'admin';
+  // An administrator holds every grant, so the read-only reference shows the
+  // whole catalog. Its stored set is only what it held as a regular account and
+  // says nothing about this role, so reading it back would describe the account
+  // wrong and trip the empty-set warning on a freshly created administrator.
+  const catalogPermissions = catalog?.map((descriptor) => descriptor.id) ?? [];
 
   // Administrators first: they are the accounts that can change everyone else.
   // The sort is stable, so accounts keep the order the account file lists them
@@ -389,9 +426,11 @@ export const Users = () => {
         title={t('settings.account.permissions.editTitle')}
         open={!!permissionUser}
         destroyOnHidden
-        onCancel={() => setPermissionUser(null)}
+        onCancel={closePermissionEditor}
         onOk={() => void savePermissions()}
-        okText={t('settings.account.permissions.save')}
+        okText={
+          isSaved ? t('settings.account.permissions.saved') : t('settings.account.permissions.save')
+        }
         cancelText={t('auth.cancel')}
         confirmLoading={isLoading}
         okButtonProps={{ disabled: !catalog }}
@@ -399,30 +438,18 @@ export const Users = () => {
         // and there is nothing to save.
         footer={
           isPermissionEditorReadOnly ? (
-            <Button onClick={() => setPermissionUser(null)}>
+            <Button onClick={closePermissionEditor}>
               {t('settings.account.permissions.close')}
             </Button>
           ) : undefined
         }
       >
-        <div className="flex flex-col gap-4">
-          {isPermissionEditorReadOnly && (
-            <Alert
-              type="info"
-              showIcon
-              message={t('settings.account.permissions.adminAll')}
-              description={t('settings.account.permissions.adminDemote')}
-            />
-          )}
-          <PermissionEditor
-            value={
-              isPermissionEditorReadOnly ? (permissionUser?.permissions ?? []) : permissionDraft
-            }
-            onChange={isPermissionEditorReadOnly ? undefined : setPermissionDraft}
-            catalog={catalog}
-            catalogFailed={catalogFailed}
-          />
-        </div>
+        <PermissionEditor
+          value={isPermissionEditorReadOnly ? catalogPermissions : permissionDraft}
+          onChange={isPermissionEditorReadOnly ? undefined : updatePermissionDraft}
+          catalog={catalog}
+          catalogFailed={catalogFailed}
+        />
       </Modal>
     </>
   );

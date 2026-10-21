@@ -723,6 +723,7 @@ const de = {
           title: 'Berechtigungen',
           editTitle: 'Berechtigungen bearbeiten',
           save: 'Speichern',
+          saved: 'Gespeichert',
           close: 'Schließen',
           groupConsole: 'Konsole',
           groupTarget: 'Zielrechner',
@@ -763,13 +764,12 @@ const de = {
           effectTailscale: 'Bildet dieses Gerät in ein VPN-Mesh ein.',
           effectAi:
             'Steuert das Gerät über eine lokale Schnittstelle, die die übrigen Berechtigungen nicht einschränken; das entspricht praktisch der vollständigen Gerätekontrolle.',
-          dangerWarning: 'Diese Berechtigungen laufen auf die vollständige Gerätekontrolle hinaus:',
+          fullControlWarning:
+            'Diese Berechtigungen laufen auf die vollständige Gerätekontrolle hinaus:',
           emptyWarning: 'Dieses Konto hat keinerlei Funktionen und kann sich nur anmelden.',
           impliedBy: 'Enthalten durch {{name}}',
           grantCount: '{{count}} Berechtigungen',
           adminAll: 'Administratoren besitzen alle Berechtigungen',
-          adminDemote:
-            'Dieser Satz greift wieder, wenn das Konto zu einem normalen Benutzer herabgestuft wird.',
           catalogFailed:
             'Die Berechtigungsliste konnte nicht geladen werden. Schließen Sie diesen Dialog und versuchen Sie es erneut.'
         }

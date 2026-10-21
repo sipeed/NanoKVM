@@ -719,6 +719,7 @@ const es = {
           title: 'Permisos',
           editTitle: 'Editar permisos',
           save: 'Guardar',
+          saved: 'Guardado',
           close: 'Cerrar',
           groupConsole: 'Consola',
           groupTarget: 'Máquina de destino',
@@ -759,12 +760,11 @@ const es = {
           effectTailscale: 'Une este dispositivo a una malla VPN.',
           effectAi:
             'Controla el dispositivo mediante una interfaz local que los demás permisos no limitan, por lo que equivale al control total del dispositivo.',
-          dangerWarning: 'Estos permisos equivalen al control total del dispositivo:',
+          fullControlWarning: 'Estos permisos equivalen al control total del dispositivo:',
           emptyWarning: 'Esta cuenta no tendrá ninguna función y solo podrá iniciar sesión.',
           impliedBy: 'Incluido por {{name}}',
           grantCount: '{{count}} permisos',
           adminAll: 'Los administradores tienen todos los permisos',
-          adminDemote: 'Este conjunto se aplica de nuevo si la cuenta pasa a usuario normal.',
           catalogFailed:
             'No se pudo cargar la lista de permisos. Cierre este diálogo e inténtelo de nuevo.'
         }

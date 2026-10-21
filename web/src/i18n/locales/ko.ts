@@ -701,6 +701,7 @@ const ko = {
           title: '권한',
           editTitle: '권한 편집',
           save: '저장',
+          saved: '저장됨',
           close: '닫기',
           groupConsole: '콘솔',
           groupTarget: '대상 머신',
@@ -739,12 +740,11 @@ const ko = {
           effectTailscale: '이 장치를 VPN 메시에 연결합니다.',
           effectAi:
             '다른 권한의 제한을 받지 않는 로컬 인터페이스로 장치를 제어하므로 사실상 완전한 장치 제어 권한입니다.',
-          dangerWarning: '이 권한들은 장치에 대한 완전한 제어 권한에 해당합니다:',
+          fullControlWarning: '이 권한들은 장치에 대한 완전한 제어 권한에 해당합니다:',
           emptyWarning: '이 계정은 어떤 기능도 없이 로그인만 할 수 있습니다.',
           impliedBy: '{{name}}에 포함됨',
           grantCount: '권한 {{count}}개',
           adminAll: '관리자는 모든 권한을 가집니다',
-          adminDemote: '일반 사용자로 강등되면 이 설정이 다시 적용됩니다.',
           catalogFailed: '권한 목록을 불러오지 못했습니다. 창을 닫고 다시 시도하세요.'
         }
       }

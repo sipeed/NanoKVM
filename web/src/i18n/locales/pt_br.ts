@@ -712,6 +712,7 @@ const pt_br = {
           title: 'Permissões',
           editTitle: 'Editar permissões',
           save: 'Salvar',
+          saved: 'Salvo',
           close: 'Fechar',
           groupConsole: 'Console',
           groupTarget: 'Máquina de destino',
@@ -750,12 +751,11 @@ const pt_br = {
           effectTailscale: 'Conecta este dispositivo a uma malha VPN.',
           effectAi:
             'Controla o dispositivo por uma interface local que as outras permissões não limitam, então equivale ao controle total do dispositivo.',
-          dangerWarning: 'Estas permissões equivalem ao controle total do dispositivo:',
+          fullControlWarning: 'Estas permissões equivalem ao controle total do dispositivo:',
           emptyWarning: 'Esta conta não terá nenhuma função e só poderá entrar.',
           impliedBy: 'Incluído por {{name}}',
           grantCount: '{{count}} permissões',
           adminAll: 'Administradores têm todas as permissões',
-          adminDemote: 'Este conjunto volta a valer se a conta for rebaixada para usuário comum.',
           catalogFailed:
             'Não foi possível carregar a lista de permissões. Feche esta janela e tente novamente.'
         }

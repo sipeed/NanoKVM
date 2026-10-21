@@ -715,6 +715,7 @@ const hu = {
           title: 'Engedélyek',
           editTitle: 'Engedélyek szerkesztése',
           save: 'Mentés',
+          saved: 'Mentve',
           close: 'Bezárás',
           groupConsole: 'Konzol',
           groupTarget: 'Célgép',
@@ -755,13 +756,11 @@ const hu = {
           effectTailscale: 'Csatlakoztatja ezt az eszközt egy VPN-hálózathoz.',
           effectAi:
             'Olyan helyi felületen keresztül vezérli az eszközt, amelyet a többi engedély nem korlátoz, így gyakorlatilag teljes eszközvezérlést jelent.',
-          dangerWarning: 'Ezek az engedélyek teljes eszközvezérlést jelentenek:',
+          fullControlWarning: 'Ezek az engedélyek teljes eszközvezérlést jelentenek:',
           emptyWarning: 'Ennek a fióknak nem lesz semmilyen funkciója, csak bejelentkezni tud.',
           impliedBy: 'A(z) {{name}} tartalmazza',
           grantCount: '{{count}} engedély',
           adminAll: 'Az adminisztrátorok minden engedéllyel rendelkeznek',
-          adminDemote:
-            'Ez a készlet ismét érvénybe lép, ha a fiókot sima felhasználóvá minősítik vissza.',
           catalogFailed: 'Az engedélylista nem tölthető be. Zárja be az ablakot, és próbálja újra.'
         }
       }

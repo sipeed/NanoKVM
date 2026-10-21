@@ -717,6 +717,7 @@ const it = {
           title: 'Permessi',
           editTitle: 'Modifica i permessi',
           save: 'Salva',
+          saved: 'Salvato',
           close: 'Chiudi',
           groupConsole: 'Console',
           groupTarget: 'Macchina di destinazione',
@@ -757,12 +758,11 @@ const it = {
           effectTailscale: 'Unisce questo dispositivo a una rete mesh VPN.',
           effectAi:
             'Pilota il dispositivo tramite un’interfaccia locale che gli altri permessi non limitano, quindi equivale al controllo totale del dispositivo.',
-          dangerWarning: 'Questi permessi equivalgono al controllo totale del dispositivo:',
+          fullControlWarning: 'Questi permessi equivalgono al controllo totale del dispositivo:',
           emptyWarning: 'Questo account non avrà alcuna funzione e potrà solo accedere.',
           impliedBy: 'Incluso da {{name}}',
           grantCount: '{{count}} permessi',
           adminAll: 'Gli amministratori hanno tutti i permessi',
-          adminDemote: 'Questo insieme torna valido se l’account torna utente normale.',
           catalogFailed:
             'Impossibile caricare l’elenco dei permessi. Chiudi questa finestra e riprova.'
         }
