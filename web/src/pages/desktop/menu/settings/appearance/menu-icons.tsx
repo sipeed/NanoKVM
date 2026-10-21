@@ -12,29 +12,40 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
+import { Permission } from '@/api/auth.ts';
 import * as ls from '@/lib/localstorage.ts';
 import { menuDisabledItemsAtom } from '@/jotai/settings.ts';
 import { Robot } from '@/components/icons/robot.tsx';
 
 export const MenuIcons = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [menuDisabledItems, setMenuDisabledItems] = useAtom(menuDisabledItemsAtom);
 
-  const items = [
-    { key: 'storage', icon: <HardDriveIcon size={16} /> },
-    { key: 'terminal', icon: <TerminalSquareIcon size={16} /> },
-    { key: 'script', icon: <FileJsonIcon size={16} /> },
-    { key: 'wol', icon: <NetworkIcon size={16} /> },
-    { key: 'picoclaw', icon: <Robot size={16} /> },
-    { key: 'power', icon: <PowerIcon size={16} /> },
+  type Item = {
+    key: string;
+    icon: React.ReactNode;
+    label?: string;
+    permission?: Permission;
+  };
+
+  const allItems: Item[] = [
+    {
+      key: 'storage',
+      icon: <HardDriveIcon size={16} />,
+      permission: 'library.read'
+    },
+    { key: 'terminal', icon: <TerminalSquareIcon size={16} />, permission: 'terminal' },
+    { key: 'script', icon: <FileJsonIcon size={16} />, permission: 'terminal' },
+    { key: 'wol', icon: <NetworkIcon size={16} />, permission: 'power' },
+    { key: 'picoclaw', icon: <Robot size={16} />, permission: 'ai' },
+    { key: 'power', icon: <PowerIcon size={16} />, permission: 'power' },
     { key: 'fullscreen', icon: <MaximizeIcon size={16} />, label: 'fullscreen.toggle' },
     { key: 'collapse', icon: <XIcon size={16} />, label: 'menu.collapse' }
-  ].filter(
-    (item) =>
-      account.role === 'admin' || !['storage', 'terminal', 'script', 'picoclaw'].includes(item.key)
-  );
+  ];
+
+  const items = allItems.filter((item) => !item.permission || hasPermission(item.permission));
 
   function updateItems(key: string) {
     const exist = menuDisabledItems.includes(key);

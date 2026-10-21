@@ -135,6 +135,14 @@ func ensureAPIKey(cfg Config) (Config, error) {
 	return cfg, nil
 }
 
+// RotateAPIKey replaces the device-wide API key. The key is shared by every
+// account that may read it, so once one of them loses the mcp grant the key it
+// may have copied has to stop working.
+func RotateAPIKey() error {
+	_, err := updateConfig(regenerateAPIKey)
+	return err
+}
+
 func regenerateAPIKey(cfg Config) (Config, error) {
 	key, err := generateAPIKey()
 	if err != nil {

@@ -62,6 +62,17 @@ const pt_br = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Somente leitura',
+      readOnlyTip:
+        'Esta conta não pode enviar entrada de teclado ou mouse para a máquina de destino, portanto o console apenas exibe a tela.'
+    },
+    noConsole: {
+      title: 'Esta conta não tem acesso ao console',
+      description:
+        'Foram concedidas outras capacidades. Abra uma das páginas que ela pode usar ou peça a um administrador acesso ao console.',
+      nothing: 'Esta conta ainda não tem permissões. Peça a um administrador para conceder.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Tela',
@@ -272,7 +283,9 @@ const pt_br = {
       enableDisk: {
         title: 'Ativar o disco virtual?',
         desc: 'Montar uma mídia exige o disco virtual, que está desativado no momento. Ativá-lo agora? O teclado e o mouse da máquina remota serão desconectados por um instante.',
-        menuHint: 'O disco virtual está desativado. Ative-o em Configurações - Dispositivo.'
+        menuHint: 'O disco virtual está desativado. Ative-o em Configurações - Dispositivo.',
+        askDevice:
+          'O disco virtual está desativado. Uma conta com a permissão de dispositivo precisa ativá-lo primeiro.'
       },
       add: {
         title: 'Adicionar mídia',
@@ -532,7 +545,8 @@ const pt_br = {
         diskCancelMount:
           'Ativar o disco virtual cancela a imagem montada e interrompe um download ou upload de imagem em andamento. Continuar?',
         diskBreakDownload: 'Ativar o disco virtual interrompe o download de imagens. Continuar?',
-        attention: 'Atenção'
+        attention: 'Atenção',
+        updateFailed: 'Falha ao atualizar o dispositivo virtual'
       },
       network: {
         title: 'Rede',
@@ -691,7 +705,67 @@ const pt_br = {
           passwordUpdated: 'Senha atualizada',
           loadFailed: 'Falha ao carregar os usuários',
           saveFailed: 'Falha ao salvar o usuário',
-          deleteFailed: 'Falha ao excluir o usuário'
+          deleteFailed: 'Falha ao excluir o usuário',
+          editPermissions: 'Permissões',
+          mcpLossTitle: 'Revogar acesso MCP',
+          mcpLossDesc:
+            '{{name}} perderá o acesso MCP. A chave de API do MCP é compartilhada por todo o dispositivo, então uma cópia continua funcionando até a chave ser regenerada. Regenerá-la desconecta todos os clientes MCP até que recebam a nova chave.',
+          mcpLossRotate: 'Regenerar a chave de API do MCP',
+          mcpLossKeep:
+            'A chave atual continua válida, e quem tiver uma cópia ainda pode controlar o teclado e o mouse. Você pode regenerá-la depois nas configurações do MCP.',
+          mcpKeyRotated: 'Chave de API do MCP regenerada. Os clientes MCP precisam da nova chave.'
+        },
+        permissions: {
+          title: 'Permissões',
+          editTitle: 'Editar permissões',
+          save: 'Salvar',
+          saved: 'Salvo',
+          close: 'Fechar',
+          groupConsole: 'Console',
+          groupTarget: 'Máquina de destino',
+          groupLibrary: 'Biblioteca de mídia',
+          groupHost: 'Este dispositivo',
+          groupServices: 'Serviços',
+          consoleView: 'Ver a tela',
+          consoleControl: 'Teclado e mouse',
+          power: 'Energia e despertar',
+          mediumAttach: 'Conectar uma mídia',
+          libraryRead: 'Navegar na biblioteca',
+          libraryWrite: 'Gerenciar a biblioteca',
+          terminal: 'Terminal e scripts',
+          device: 'Configurações do dispositivo',
+          network: 'Configurações de rede',
+          update: 'Atualização do sistema',
+          mcp: 'Serviço MCP',
+          tailscale: 'Tailscale',
+          ai: 'Assistente de IA',
+          effectConsoleView:
+            'Mostra a tela de destino e define o modo de vídeo, a resolução, a taxa de quadros e a qualidade compartilhados por todos os espectadores.',
+          effectConsoleControl: 'Envia entrada de teclado e mouse para a máquina de destino.',
+          effectPower:
+            'Liga, desliga e reinicia a máquina de destino, e gerencia a lista de dispositivos Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta e ejeta mídias na máquina de destino, e troca arquivos com ela pela partição compartilhada.',
+          effectLibraryRead: 'Lista e baixa as imagens e os arquivos dentro delas.',
+          effectLibraryWrite: 'Envia, cria e exclui imagens, e altera os arquivos dentro delas.',
+          effectTerminal: 'Fornece um shell root neste dispositivo, sem passar pela sessão web.',
+          effectDevice:
+            'Permite ativar SSH (também root), reiniciar o dispositivo, entregar a partição de dados bruta à máquina de destino e alterar OLED, HDMI, mDNS, memória e swap.',
+          effectNetwork: 'Altera Wi-Fi, DNS e TLS, o que pode tirar este dispositivo da rede.',
+          effectUpdate: 'Instala firmware e pacotes de aplicativo.',
+          effectMcp:
+            'Emite uma chave de API de todo o dispositivo que controla teclado, mouse e capturas fora da sessão web; uma cópia continua válida após revogar a permissão, a menos que a chave seja regenerada, o que é oferecido ao remover a permissão.',
+          effectTailscale: 'Conecta este dispositivo a uma malha VPN.',
+          effectAi:
+            'Controla o dispositivo por uma interface local que as outras permissões não limitam, então equivale ao controle total do dispositivo.',
+          fullControlWarning: 'Estas permissões equivalem ao controle total do dispositivo:',
+          emptyWarning: 'Esta conta não terá nenhuma função e só poderá entrar.',
+          impliedBy: 'Incluído por {{name}}',
+          grantCount_one: '{{count}} permissão',
+          grantCount: '{{count}} permissões',
+          adminAll: 'Administradores têm todas as permissões',
+          catalogFailed:
+            'Não foi possível carregar a lista de permissões. Feche esta janela e tente novamente.'
         }
       }
     },

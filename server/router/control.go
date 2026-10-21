@@ -22,7 +22,7 @@ type setAIControlModeRequest struct {
 func controlRouter(r *gin.Engine, control *controlmode.Manager, picoclawService *picoclaw.Service) {
 	group := r.Group("/api/ai/control").Use(
 		middleware.CheckToken(),
-		middleware.RequireRole(authn.RoleAdmin),
+		middleware.RequirePermission(authn.PermAi),
 	)
 	group.GET("/status", func(c *gin.Context) {
 		status, err := control.Status()

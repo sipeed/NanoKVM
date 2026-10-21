@@ -61,6 +61,17 @@ const ko = {
         verifyBtn: '확인'
       }
     },
+    desktop: {
+      readOnly: '보기 전용',
+      readOnlyTip:
+        '이 계정은 대상 컴퓨터로 키보드나 마우스 입력을 보낼 수 없으므로 콘솔은 화면만 표시합니다.'
+    },
+    noConsole: {
+      title: '이 계정에는 콘솔 권한이 없습니다',
+      description:
+        '다른 기능이 부여되어 있습니다. 사용할 수 있는 페이지를 열거나 관리자에게 콘솔 권한을 요청하세요.',
+      nothing: '이 계정에는 아직 권한이 없습니다. 관리자에게 부여를 요청하세요.'
+    },
     screen: {
       scale: '규모',
       title: '화면',
@@ -267,7 +278,8 @@ const ko = {
       enableDisk: {
         title: '가상 디스크를 켤까요?',
         desc: '미디어를 마운트하려면 현재 꺼져 있는 가상 디스크가 필요합니다. 지금 켤까요? 대상 컴퓨터의 키보드와 마우스가 잠시 연결 해제됩니다.',
-        menuHint: '가상 디스크가 꺼져 있습니다. 설정 - 장치에서 켜세요.'
+        menuHint: '가상 디스크가 꺼져 있습니다. 설정 - 장치에서 켜세요.',
+        askDevice: '가상 디스크가 꺼져 있습니다. 장치 권한이 있는 계정에서 먼저 켜야 합니다.'
       },
       add: {
         title: '미디어 추가',
@@ -524,7 +536,8 @@ const ko = {
         diskCancelMount:
           '가상 디스크를 켜면 마운트된 이미지가 해제되고 진행 중인 이미지 다운로드/업로드도 중단됩니다. 계속하시겠습니까?',
         diskBreakDownload: '가상 디스크를 켜면 이미지 다운로드가 중단됩니다. 계속하시겠습니까?',
-        attention: '주의'
+        attention: '주의',
+        updateFailed: '가상 장치를 업데이트하지 못했습니다'
       },
       network: {
         title: '네트워크',
@@ -681,7 +694,66 @@ const ko = {
           passwordUpdated: '비밀번호 업데이트됨',
           loadFailed: '사용자를 불러오지 못했습니다',
           saveFailed: '사용자를 저장하지 못했습니다',
-          deleteFailed: '사용자를 삭제하지 못했습니다'
+          deleteFailed: '사용자를 삭제하지 못했습니다',
+          editPermissions: '권한',
+          mcpLossTitle: 'MCP 접근 취소',
+          mcpLossDesc:
+            '{{name}} 계정이 MCP 접근 권한을 잃습니다. MCP API 키는 장치 전체가 공유하므로 복사된 키는 재생성할 때까지 계속 유효합니다. 재생성하면 새 키를 받을 때까지 모든 MCP 클라이언트의 연결이 끊어집니다.',
+          mcpLossRotate: 'MCP API 키 재생성',
+          mcpLossKeep:
+            '현재 키는 계속 유효하며, 사본을 가진 사람은 여전히 키보드와 마우스를 제어할 수 있습니다. 나중에 MCP 설정에서 재생성할 수 있습니다.',
+          mcpKeyRotated: 'MCP API 키를 재생성했습니다. MCP 클라이언트에 새 키가 필요합니다.'
+        },
+        permissions: {
+          title: '권한',
+          editTitle: '권한 편집',
+          save: '저장',
+          saved: '저장됨',
+          close: '닫기',
+          groupConsole: '콘솔',
+          groupTarget: '대상 머신',
+          groupLibrary: '미디어 라이브러리',
+          groupHost: '이 장치',
+          groupServices: '서비스',
+          consoleView: '화면 보기',
+          consoleControl: '키보드 및 마우스',
+          power: '전원 및 깨우기',
+          mediumAttach: '미디어 연결',
+          libraryRead: '라이브러리 탐색',
+          libraryWrite: '라이브러리 관리',
+          terminal: '터미널 및 스크립트',
+          device: '장치 설정',
+          network: '네트워크 설정',
+          update: '시스템 업데이트',
+          mcp: 'MCP 서비스',
+          tailscale: 'Tailscale',
+          ai: 'AI 어시스턴트',
+          effectConsoleView:
+            '대상 화면을 표시하고 모든 시청자가 공유하는 비디오 모드, 해상도, 프레임 속도, 화질을 설정합니다.',
+          effectConsoleControl: '키보드와 마우스 입력을 대상 머신으로 보냅니다.',
+          effectPower:
+            '대상 머신의 전원을 켜고 끄고 재설정하며, Wake-on-LAN 장치 목록을 관리합니다.',
+          effectMediumAttach:
+            '미디어를 대상 머신에 마운트하거나 분리하고, 공유 파티션을 통해 파일을 주고받습니다.',
+          effectLibraryRead: '이미지와 그 안의 파일을 나열하고 내려받습니다.',
+          effectLibraryWrite: '이미지를 업로드, 생성, 삭제하고 이미지 안의 파일을 변경합니다.',
+          effectTerminal: '웹 세션을 거치지 않고 이 장치에서 root 셸을 제공합니다.',
+          effectDevice:
+            'SSH 활성화(역시 root), 장치 재부팅, 원시 데이터 파티션을 대상 머신에 제공, OLED·HDMI·mDNS·메모리·스왑 설정 변경이 가능합니다.',
+          effectNetwork: 'Wi-Fi, DNS, TLS를 변경하며, 이 장치가 네트워크에서 끊길 수 있습니다.',
+          effectUpdate: '펌웨어와 응용 프로그램 패키지를 설치합니다.',
+          effectMcp:
+            '장치 전체에 유효한 API 키를 발급하여 웹 세션 밖에서 키보드, 마우스, 스크린샷을 제어합니다. 이 권한을 취소해도 복사된 키는 재생성하지 않는 한 유효합니다(권한을 제거할 때 재생성 여부를 묻습니다).',
+          effectTailscale: '이 장치를 VPN 메시에 연결합니다.',
+          effectAi:
+            '다른 권한의 제한을 받지 않는 로컬 인터페이스로 장치를 제어하므로 사실상 완전한 장치 제어 권한입니다.',
+          fullControlWarning: '이 권한들은 장치에 대한 완전한 제어 권한에 해당합니다:',
+          emptyWarning: '이 계정은 어떤 기능도 없이 로그인만 할 수 있습니다.',
+          impliedBy: '{{name}}에 포함됨',
+          grantCount_one: '권한 {{count}}개',
+          grantCount: '권한 {{count}}개',
+          adminAll: '관리자는 모든 권한을 가집니다',
+          catalogFailed: '권한 목록을 불러오지 못했습니다. 창을 닫고 다시 시도하세요.'
         }
       }
     },

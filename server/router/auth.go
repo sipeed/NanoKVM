@@ -24,6 +24,7 @@ func authRouter(r *gin.Engine) {
 		middleware.CheckToken(),
 		middleware.RequireRole(authn.RoleAdmin),
 	)
+	admin.GET("/auth/permissions", service.ListPermissions)
 	admin.GET("/auth/users", service.ListUsers)
 	admin.POST("/auth/users", service.CreateUser)
 	admin.PUT("/auth/users/:username", service.UpdateUser)

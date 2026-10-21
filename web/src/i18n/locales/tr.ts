@@ -63,6 +63,17 @@ const tr = {
         verifyBtn: 'Doğrula'
       }
     },
+    desktop: {
+      readOnly: 'Yalnızca izleme',
+      readOnlyTip:
+        'Bu hesap hedef makineye klavye veya fare girişi gönderemez; bu nedenle konsol yalnızca ekranı gösterir.'
+    },
+    noConsole: {
+      title: 'Bu hesabın konsol erişimi yok',
+      description:
+        'Hesaba başka yetkiler verilmiş. Kullanabileceği sayfalardan birini açın veya bir yöneticiden konsol erişimi isteyin.',
+      nothing: 'Bu hesabın henüz hiçbir izni yok. Bir yöneticiden izin vermesini isteyin.'
+    },
     screen: {
       scale: 'Ölçek',
       title: 'Ekran',
@@ -271,7 +282,9 @@ const tr = {
       enableDisk: {
         title: 'Sanal disk etkinleştirilsin mi?',
         desc: 'Bir ortamı bağlamak için şu anda kapalı olan sanal disk gerekir. Şimdi etkinleştirilsin mi? Hedef makinenin klavyesi ve faresinin bağlantısı bir an kesilir.',
-        menuHint: 'Sanal disk devre dışı. Ayarlar - Aygıt bölümünden etkinleştirin.'
+        menuHint: 'Sanal disk devre dışı. Ayarlar - Aygıt bölümünden etkinleştirin.',
+        askDevice:
+          'Sanal disk kapalı. Önce cihaz iznine sahip bir hesabın etkinleştirmesi gerekiyor.'
       },
       add: {
         title: 'Ortam ekle',
@@ -531,7 +544,8 @@ const tr = {
         diskCancelMount:
           'Sanal diski açmak, bağlı imajı iptal eder ve sürmekte olan imaj indirme veya yüklemeyi keser. Devam edilsin mi?',
         diskBreakDownload: 'Sanal diski açmak imaj indirmeyi keser. Devam edilsin mi?',
-        attention: 'Dikkat'
+        attention: 'Dikkat',
+        updateFailed: 'Sanal cihaz güncellenemedi'
       },
       network: {
         title: 'Ağ',
@@ -689,7 +703,68 @@ const tr = {
           passwordUpdated: 'Şifre güncellendi',
           loadFailed: 'Kullanıcılar yüklenemedi',
           saveFailed: 'Kullanıcı kaydedilemedi',
-          deleteFailed: 'Kullanıcı silinemedi'
+          deleteFailed: 'Kullanıcı silinemedi',
+          editPermissions: 'İzinler',
+          mcpLossTitle: 'MCP erişimini kaldır',
+          mcpLossDesc:
+            '{{name}} MCP erişimini kaybedecek. MCP API anahtarı tüm cihazda ortaktır; bu yüzden bir kopyası anahtar yeniden üretilene kadar çalışır. Yeniden üretmek, yeni anahtarı alana kadar tüm MCP istemcilerinin bağlantısını keser.',
+          mcpLossRotate: 'MCP API anahtarını yeniden üret',
+          mcpLossKeep:
+            'Mevcut anahtar geçerli kalır ve kopyası olan herkes klavye ve fareyi kontrol etmeye devam edebilir. Daha sonra MCP ayarlarından yeniden üretebilirsiniz.',
+          mcpKeyRotated:
+            'MCP API anahtarı yeniden üretildi. MCP istemcilerinin yeni anahtara ihtiyacı var.'
+        },
+        permissions: {
+          title: 'İzinler',
+          editTitle: 'İzinleri düzenle',
+          save: 'Kaydet',
+          saved: 'Kaydedildi',
+          close: 'Kapat',
+          groupConsole: 'Konsol',
+          groupTarget: 'Hedef makine',
+          groupLibrary: 'Medya kitaplığı',
+          groupHost: 'Bu cihaz',
+          groupServices: 'Hizmetler',
+          consoleView: 'Ekranı izle',
+          consoleControl: 'Klavye ve fare',
+          power: 'Güç ve uyandırma',
+          mediumAttach: 'Medya bağla',
+          libraryRead: 'Kitaplığa göz at',
+          libraryWrite: 'Kitaplığı yönet',
+          terminal: 'Terminal ve betikler',
+          device: 'Cihaz ayarları',
+          network: 'Ağ ayarları',
+          update: 'Sistem güncellemesi',
+          mcp: 'MCP hizmeti',
+          tailscale: 'Tailscale',
+          ai: 'Yapay zekâ asistanı',
+          effectConsoleView:
+            'Hedef ekranı gösterir ve tüm izleyicilerin paylaştığı video modunu, çözünürlüğü, kare hızını ve kaliteyi ayarlar.',
+          effectConsoleControl: 'Klavye ve fare girdisini hedef makineye gönderir.',
+          effectPower:
+            'Hedef makineyi açar, kapatır ve yeniden başlatır; Wake-on-LAN cihaz listesini yönetir.',
+          effectMediumAttach:
+            'Hedef makinede medya bağlar ve çıkarır, paylaşılan bölüm üzerinden dosya alışverişi yapar.',
+          effectLibraryRead: 'İmajları ve içlerindeki dosyaları listeler ve indirir.',
+          effectLibraryWrite:
+            'İmaj yükler, oluşturur ve siler; imajların içindeki dosyaları değiştirir.',
+          effectTerminal: 'Web oturumuna girmeden bu cihazda root kabuğu verir.',
+          effectDevice:
+            'SSH’yi etkinleştirir (o da root), cihazı yeniden başlatır, ham veri bölümünü hedef makineye verir; OLED, HDMI, mDNS, bellek ve takas ayarlarını değiştirir.',
+          effectNetwork: 'Wi-Fi, DNS ve TLS ayarlarını değiştirir; bu cihaz ağdan düşebilir.',
+          effectUpdate: 'Ürün yazılımı ve uygulama paketleri kurar.',
+          effectMcp:
+            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir. İzin kaldırıldıktan sonra kopyalanmış anahtar, yeniden üretilmedikçe çalışır; izin kaldırılırken yeniden üretme önerilir.',
+          effectTailscale: 'Bu cihazı bir VPN ağına bağlar.',
+          effectAi:
+            'Cihazı, diğer izinlerin sınırlamadığı yerel bir arayüz üzerinden yönetir; bu nedenle cihaz üzerinde tam denetim anlamına gelir.',
+          fullControlWarning: 'Bu izinler cihaz üzerinde tam denetim anlamına gelir:',
+          emptyWarning: 'Bu hesabın hiçbir özelliği olmayacak ve yalnızca oturum açabilecek.',
+          impliedBy: '{{name}} tarafından içerilir',
+          grantCount_one: '{{count}} izin',
+          grantCount: '{{count}} izin',
+          adminAll: 'Yöneticiler tüm izinlere sahiptir',
+          catalogFailed: 'İzin listesi yüklenemedi. Bu pencereyi kapatıp yeniden deneyin.'
         }
       }
     },

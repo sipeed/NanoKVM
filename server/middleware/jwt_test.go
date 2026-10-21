@@ -114,7 +114,7 @@ func TestParseJWTRejectsExpiredToken(t *testing.T) {
 func TestRevokeUserSessionsCancelsActiveRequests(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	unregister := activeSessions.register("alice", cancel)
+	unregister := activeSessions.register("alice", cancel, newSessionHandle(), "")
 	defer unregister()
 
 	RevokeUserSessions("alice")

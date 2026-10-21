@@ -63,6 +63,17 @@ const it = {
         verifyBtn: 'Verifica'
       }
     },
+    desktop: {
+      readOnly: 'Solo visualizzazione',
+      readOnlyTip:
+        'Questo account non può inviare input da tastiera o mouse al computer di destinazione, quindi la console mostra solo lo schermo.'
+    },
+    noConsole: {
+      title: 'Questo account non ha accesso alla console',
+      description:
+        'Gli sono state concesse altre capacità. Apri una delle pagine che può usare o chiedi a un amministratore l’accesso alla console.',
+      nothing: 'Questo account non ha ancora permessi. Chiedi a un amministratore di concederne.'
+    },
     screen: {
       scale: 'Scala',
       title: 'Schermo',
@@ -274,7 +285,9 @@ const it = {
       enableDisk: {
         title: 'Attivare il disco virtuale?',
         desc: 'Per montare un supporto occorre il disco virtuale, che al momento è disattivato. Attivarlo ora? La tastiera e il mouse della macchina remota si disconnetteranno per un istante.',
-        menuHint: 'Il disco virtuale è disattivato. Attivalo in Impostazioni - Dispositivo.'
+        menuHint: 'Il disco virtuale è disattivato. Attivalo in Impostazioni - Dispositivo.',
+        askDevice:
+          "Il disco virtuale è disattivato. Un account con l'autorizzazione dispositivo deve attivarlo prima."
       },
       add: {
         title: 'Aggiungi supporto',
@@ -536,7 +549,8 @@ const it = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Attenzione'
+        attention: 'Attenzione',
+        updateFailed: 'Aggiornamento del dispositivo virtuale non riuscito'
       },
       network: {
         title: 'Rete',
@@ -696,7 +710,69 @@ const it = {
           passwordUpdated: 'Password aggiornata',
           loadFailed: 'Impossibile caricare gli utenti',
           saveFailed: "Impossibile salvare l'utente",
-          deleteFailed: "Impossibile eliminare l'utente"
+          deleteFailed: "Impossibile eliminare l'utente",
+          editPermissions: 'Autorizzazioni',
+          mcpLossTitle: 'Revoca accesso MCP',
+          mcpLossDesc:
+            '{{name}} perderà l’accesso MCP. La chiave API MCP è condivisa da tutto il dispositivo, quindi una copia continua a funzionare finché la chiave non viene rigenerata. Rigenerarla disconnette tutti i client MCP finché non ricevono la nuova chiave.',
+          mcpLossRotate: 'Rigenera la chiave API MCP',
+          mcpLossKeep:
+            'La chiave attuale resta valida e chi ne ha una copia può ancora controllare tastiera e mouse. Potrai rigenerarla in seguito nelle impostazioni MCP.',
+          mcpKeyRotated: 'Chiave API MCP rigenerata. I client MCP hanno bisogno della nuova chiave.'
+        },
+        permissions: {
+          title: 'Permessi',
+          editTitle: 'Modifica i permessi',
+          save: 'Salva',
+          saved: 'Salvato',
+          close: 'Chiudi',
+          groupConsole: 'Console',
+          groupTarget: 'Macchina di destinazione',
+          groupLibrary: 'Libreria dei supporti',
+          groupHost: 'Questo dispositivo',
+          groupServices: 'Servizi',
+          consoleView: 'Vedi lo schermo',
+          consoleControl: 'Tastiera e mouse',
+          power: 'Alimentazione e risveglio',
+          mediumAttach: 'Collega un supporto',
+          libraryRead: 'Sfoglia la libreria',
+          libraryWrite: 'Gestisci la libreria',
+          terminal: 'Terminale e script',
+          device: 'Impostazioni dispositivo',
+          network: 'Impostazioni di rete',
+          update: 'Aggiornamento di sistema',
+          mcp: 'Servizio MCP',
+          tailscale: 'Tailscale',
+          ai: 'Assistente IA',
+          effectConsoleView:
+            'Mostra lo schermo di destinazione e imposta modalità video, risoluzione, frame rate e qualità condivisi da tutti gli spettatori.',
+          effectConsoleControl: 'Invia input di tastiera e mouse alla macchina di destinazione.',
+          effectPower:
+            'Accende, spegne e riavvia la macchina di destinazione e gestisce l’elenco dei dispositivi Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta ed espelle supporti sulla macchina di destinazione e scambia file con essa tramite la partizione condivisa.',
+          effectLibraryRead: 'Elenca e scarica le immagini e i file che contengono.',
+          effectLibraryWrite: 'Carica, crea ed elimina immagini e modifica i file che contengono.',
+          effectTerminal:
+            'Fornisce una shell root su questo dispositivo, senza passare dalla sessione web.',
+          effectDevice:
+            'Consente di attivare SSH (anch’esso root), riavviare il dispositivo, consegnare la partizione dati grezza alla macchina di destinazione e modificare OLED, HDMI, mDNS, memoria e swap.',
+          effectNetwork:
+            'Modifica Wi-Fi, DNS e TLS, il che può isolare questo dispositivo dalla rete.',
+          effectUpdate: 'Installa firmware e pacchetti applicativi.',
+          effectMcp:
+            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; una copia continua a funzionare dopo la revoca se la chiave non viene rigenerata, cosa proposta quando si rimuove il permesso.',
+          effectTailscale: 'Unisce questo dispositivo a una rete mesh VPN.',
+          effectAi:
+            'Pilota il dispositivo tramite un’interfaccia locale che gli altri permessi non limitano, quindi equivale al controllo totale del dispositivo.',
+          fullControlWarning: 'Questi permessi equivalgono al controllo totale del dispositivo:',
+          emptyWarning: 'Questo account non avrà alcuna funzione e potrà solo accedere.',
+          impliedBy: 'Incluso da {{name}}',
+          grantCount_one: '{{count}} permesso',
+          grantCount: '{{count}} permessi',
+          adminAll: 'Gli amministratori hanno tutti i permessi',
+          catalogFailed:
+            'Impossibile caricare l’elenco dei permessi. Chiudi questa finestra e riprova.'
         }
       }
     },

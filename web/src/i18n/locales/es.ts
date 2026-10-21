@@ -63,6 +63,17 @@ const es = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Solo lectura',
+      readOnlyTip:
+        'Esta cuenta no puede enviar entrada de teclado ni de ratón al equipo de destino, por lo que la consola solo muestra la pantalla.'
+    },
+    noConsole: {
+      title: 'Esta cuenta no tiene acceso a la consola',
+      description:
+        'Se le concedieron otras capacidades. Abra una de las páginas que puede usar o pida a un administrador acceso a la consola.',
+      nothing: 'Esta cuenta aún no tiene permisos. Pida a un administrador que le conceda alguno.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -273,7 +284,9 @@ const es = {
       enableDisk: {
         title: '¿Activar el disco virtual?',
         desc: 'Para montar un medio se necesita el disco virtual, que ahora está desactivado. ¿Activarlo ahora? El teclado y el ratón del equipo remoto se desconectarán un momento.',
-        menuHint: 'El disco virtual está desactivado. Actívalo en Ajustes - Dispositivo.'
+        menuHint: 'El disco virtual está desactivado. Actívalo en Ajustes - Dispositivo.',
+        askDevice:
+          'El disco virtual está desactivado. Una cuenta con el permiso de dispositivo debe activarlo primero.'
       },
       add: {
         title: 'Añadir medio',
@@ -535,7 +548,8 @@ const es = {
           'Activar el disco virtual cancela la imagen montada e interrumpe una descarga o subida de imagen en curso. ¿Continuar?',
         diskBreakDownload:
           'Activar el disco virtual interrumpe la descarga de imágenes. ¿Continuar?',
-        attention: 'Atención'
+        attention: 'Atención',
+        updateFailed: 'No se pudo actualizar el dispositivo virtual'
       },
       network: {
         title: 'Red',
@@ -698,7 +712,69 @@ const es = {
           passwordUpdated: 'Contraseña actualizada',
           loadFailed: 'No se pudieron cargar los usuarios',
           saveFailed: 'No se pudo guardar el usuario',
-          deleteFailed: 'No se pudo eliminar el usuario'
+          deleteFailed: 'No se pudo eliminar el usuario',
+          editPermissions: 'Permisos',
+          mcpLossTitle: 'Retirar el acceso MCP',
+          mcpLossDesc:
+            '{{name}} perderá el acceso MCP. La clave API de MCP la comparte todo el dispositivo, así que una copia sigue funcionando hasta que se regenere. Regenerarla desconecta a todos los clientes MCP hasta que reciban la nueva clave.',
+          mcpLossRotate: 'Regenerar la clave API de MCP',
+          mcpLossKeep:
+            'La clave actual sigue siendo válida y quien tenga una copia aún puede controlar el teclado y el ratón. Puede regenerarla más tarde en los ajustes de MCP.',
+          mcpKeyRotated: 'Clave API de MCP regenerada. Los clientes MCP necesitan la nueva clave.'
+        },
+        permissions: {
+          title: 'Permisos',
+          editTitle: 'Editar permisos',
+          save: 'Guardar',
+          saved: 'Guardado',
+          close: 'Cerrar',
+          groupConsole: 'Consola',
+          groupTarget: 'Máquina de destino',
+          groupLibrary: 'Biblioteca de medios',
+          groupHost: 'Este dispositivo',
+          groupServices: 'Servicios',
+          consoleView: 'Ver la pantalla',
+          consoleControl: 'Teclado y ratón',
+          power: 'Encendido y activación',
+          mediumAttach: 'Conectar un medio',
+          libraryRead: 'Explorar la biblioteca',
+          libraryWrite: 'Gestionar la biblioteca',
+          terminal: 'Terminal y scripts',
+          device: 'Ajustes del dispositivo',
+          network: 'Ajustes de red',
+          update: 'Actualización del sistema',
+          mcp: 'Servicio MCP',
+          tailscale: 'Tailscale',
+          ai: 'Asistente de IA',
+          effectConsoleView:
+            'Muestra la pantalla de destino y define el modo de vídeo, la resolución, los fps y la calidad que comparten todos los espectadores.',
+          effectConsoleControl: 'Envía entrada de teclado y ratón a la máquina de destino.',
+          effectPower:
+            'Enciende, apaga y reinicia la máquina de destino, y gestiona la lista de dispositivos de Wake-on-LAN.',
+          effectMediumAttach:
+            'Monta y expulsa medios en la máquina de destino, e intercambia archivos con ella mediante la partición compartida.',
+          effectLibraryRead: 'Lista y descarga las imágenes y los archivos que contienen.',
+          effectLibraryWrite:
+            'Sube, crea y elimina imágenes, y modifica los archivos que contienen.',
+          effectTerminal:
+            'Ofrece un shell de root en este dispositivo, sin pasar por la sesión web.',
+          effectDevice:
+            'Permite activar SSH (también root), reiniciar el dispositivo, entregar la partición de datos sin formato a la máquina de destino y cambiar OLED, HDMI, mDNS, memoria y swap.',
+          effectNetwork: 'Cambia Wi-Fi, DNS y TLS, lo que puede dejar este dispositivo sin red.',
+          effectUpdate: 'Instala firmware y paquetes de aplicación.',
+          effectMcp:
+            'Emite una clave API de todo el dispositivo que controla teclado, ratón y capturas fuera de la sesión web; una copia sigue funcionando tras revocar el permiso salvo que se regenere la clave, algo que se ofrece al retirar el permiso.',
+          effectTailscale: 'Une este dispositivo a una malla VPN.',
+          effectAi:
+            'Controla el dispositivo mediante una interfaz local que los demás permisos no limitan, por lo que equivale al control total del dispositivo.',
+          fullControlWarning: 'Estos permisos equivalen al control total del dispositivo:',
+          emptyWarning: 'Esta cuenta no tendrá ninguna función y solo podrá iniciar sesión.',
+          impliedBy: 'Incluido por {{name}}',
+          grantCount_one: '{{count}} permiso',
+          grantCount: '{{count}} permisos',
+          adminAll: 'Los administradores tienen todos los permisos',
+          catalogFailed:
+            'No se pudo cargar la lista de permisos. Cierre este diálogo e inténtelo de nuevo.'
         }
       }
     },

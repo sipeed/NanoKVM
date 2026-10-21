@@ -5,6 +5,7 @@ import (
 
 	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/service/auth"
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/hid"
 	mcpservice "NanoKVM-Server/service/mcp"
@@ -24,9 +25,11 @@ func mcpRouter(r *gin.Engine, control *controlmode.Manager, picoclawService *pic
 			picoclawService.PublishControlModeChangedFrom(status, "mcp_config")
 		},
 	)
+	auth.APIKeyRotator = mcpservice.RotateAPIKey
+
 	management := r.Group("/api/mcp").Use(
 		middleware.CheckToken(),
-		middleware.RequireRole(authn.RoleAdmin),
+		middleware.RequirePermission(authn.PermMcp),
 	)
 	management.GET("/config", service.GetConfig)
 	management.POST("/config", service.SetConfig)

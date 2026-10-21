@@ -11,7 +11,7 @@ import (
 func extensionsRouter(r *gin.Engine) {
 	api := r.Group("/api/extensions").Use(
 		middleware.CheckToken(),
-		middleware.RequireRole(authn.RoleAdmin),
+		middleware.RequirePermission(authn.PermTailscale),
 	)
 
 	ts := tailscale.NewService()

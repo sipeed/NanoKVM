@@ -60,6 +60,17 @@ const se = {
         verifyBtn: 'Verifiera'
       }
     },
+    desktop: {
+      readOnly: 'Endast visning',
+      readOnlyTip:
+        'Det här kontot kan inte skicka tangentbords- eller musindata till målmaskinen, så konsolen visar bara skärmen.'
+    },
+    noConsole: {
+      title: 'Det här kontot har ingen konsolåtkomst',
+      description:
+        'Det har fått andra behörigheter. Öppna någon av sidorna det kan använda, eller be en administratör om konsolåtkomst.',
+      nothing: 'Det här kontot har ännu inga behörigheter. Be en administratör att ge några.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skärm',
@@ -268,7 +279,9 @@ const se = {
       enableDisk: {
         title: 'Aktivera den virtuella disken?',
         desc: 'För att montera ett medium krävs den virtuella disken, som är avstängd just nu. Aktivera den? Måldatorns tangentbord och mus kopplas från ett ögonblick.',
-        menuHint: 'Den virtuella disken är avstängd. Aktivera den under Inställningar - Enhet.'
+        menuHint: 'Den virtuella disken är avstängd. Aktivera den under Inställningar - Enhet.',
+        askDevice:
+          'Den virtuella disken är avstängd. Ett konto med enhetsbehörighet måste aktivera den först.'
       },
       add: {
         title: 'Lägg till medium',
@@ -527,7 +540,8 @@ const se = {
           'Att aktivera den virtuella disken avbryter den monterade avbildningen och avbryter en pågående nedladdning eller uppladdning. Fortsätta?',
         diskBreakDownload:
           'Att aktivera den virtuella disken avbryter nedladdningen av avbildningar. Fortsätta?',
-        attention: 'Observera'
+        attention: 'Observera',
+        updateFailed: 'Det gick inte att uppdatera den virtuella enheten'
       },
       network: {
         title: 'Nätverk',
@@ -685,7 +699,68 @@ const se = {
           passwordUpdated: 'Lösenordet uppdaterat',
           loadFailed: 'Kunde inte läsa in användare',
           saveFailed: 'Kunde inte spara användaren',
-          deleteFailed: 'Kunde inte ta bort användaren'
+          deleteFailed: 'Kunde inte ta bort användaren',
+          editPermissions: 'Behörigheter',
+          mcpLossTitle: 'Ta bort MCP-åtkomst',
+          mcpLossDesc:
+            '{{name}} förlorar MCP-åtkomst. MCP-API-nyckeln delas av hela enheten, så en kopia fungerar tills nyckeln skapas på nytt. Att skapa den på nytt kopplar från alla MCP-klienter tills de får den nya nyckeln.',
+          mcpLossRotate: 'Skapa ny MCP-API-nyckel',
+          mcpLossKeep:
+            'Den nuvarande nyckeln förblir giltig, och den som har en kopia kan fortfarande styra tangentbord och mus. Du kan skapa en ny senare i MCP-inställningarna.',
+          mcpKeyRotated: 'Ny MCP-API-nyckel skapad. MCP-klienter behöver den nya nyckeln.'
+        },
+        permissions: {
+          title: 'Behörigheter',
+          editTitle: 'Redigera behörigheter',
+          save: 'Spara',
+          saved: 'Sparat',
+          close: 'Stäng',
+          groupConsole: 'Konsol',
+          groupTarget: 'Målmaskin',
+          groupLibrary: 'Mediabibliotek',
+          groupHost: 'Den här enheten',
+          groupServices: 'Tjänster',
+          consoleView: 'Se skärmen',
+          consoleControl: 'Tangentbord och mus',
+          power: 'Ström och väckning',
+          mediumAttach: 'Anslut en media',
+          libraryRead: 'Bläddra i biblioteket',
+          libraryWrite: 'Hantera biblioteket',
+          terminal: 'Terminal och skript',
+          device: 'Enhetsinställningar',
+          network: 'Nätverksinställningar',
+          update: 'Systemuppdatering',
+          mcp: 'MCP-tjänst',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          effectConsoleView:
+            'Visar målmaskinens skärm och anger videoläge, upplösning, bildfrekvens och kvalitet som alla tittare delar.',
+          effectConsoleControl: 'Skickar tangentbords- och musinmatning till målmaskinen.',
+          effectPower:
+            'Slår på, stänger av och startar om målmaskinen samt hanterar listan med Wake-on-LAN-enheter.',
+          effectMediumAttach:
+            'Monterar och matar ut media på målmaskinen och utbyter filer med den via den delade partitionen.',
+          effectLibraryRead: 'Listar och hämtar avbildningarna och filerna i dem.',
+          effectLibraryWrite:
+            'Laddar upp, skapar och tar bort avbildningar och ändrar filerna i dem.',
+          effectTerminal: 'Ger ett root-skal på den här enheten, utan webbsessionen emellan.',
+          effectDevice:
+            'Gör det möjligt att slå på SSH (också root), starta om enheten, lämna den råa datapartitionen till målmaskinen och ändra OLED, HDMI, mDNS, minne och swap.',
+          effectNetwork:
+            'Ändrar Wi-Fi, DNS och TLS, vilket kan koppla bort den här enheten från nätet.',
+          effectUpdate: 'Installerar firmware och programpaket.',
+          effectMcp:
+            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; en kopia fungerar även efter att behörigheten tagits bort om inte nyckeln skapas på nytt, vilket erbjuds när behörigheten tas bort.',
+          effectTailscale: 'Ansluter den här enheten till ett VPN-nät.',
+          effectAi:
+            'Styr enheten via ett lokalt gränssnitt som de övriga behörigheterna inte begränsar, så det motsvarar full kontroll över enheten.',
+          fullControlWarning: 'Dessa behörigheter motsvarar full kontroll över enheten:',
+          emptyWarning: 'Det här kontot får inga funktioner alls och kan bara logga in.',
+          impliedBy: 'Ingår via {{name}}',
+          grantCount_one: '{{count}} behörighet',
+          grantCount: '{{count}} behörigheter',
+          adminAll: 'Administratörer har alla behörigheter',
+          catalogFailed: 'Behörighetslistan kunde inte läsas in. Stäng dialogen och försök igen.'
         }
       }
     },

@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next';
 import { isModifier } from '@/lib/keymap.ts';
 import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { Kbd, KbdGroup } from '@/components/ui/kbd.tsx';
-import { ScrollArea } from '@/components/ui/scroll-area.tsx';
 
 import { KeyInfo, Shortcut } from './types.ts';
 
@@ -232,7 +231,7 @@ export const Recorder = ({
           <>
             <Divider />
 
-            <ScrollArea className="[&>[data-radix-scroll-area-viewport]]:max-h-[300px]">
+            <div className="max-h-[300px] overflow-y-auto">
               {shortcuts.map((shortcut) => (
                 <div
                   key={shortcut.id}
@@ -254,7 +253,7 @@ export const Recorder = ({
                   </div>
                 </div>
               ))}
-            </ScrollArea>
+            </div>
           </>
         )}
       </Modal>

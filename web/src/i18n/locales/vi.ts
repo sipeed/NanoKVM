@@ -62,6 +62,17 @@ const vi = {
         verifyBtn: 'Xác minh'
       }
     },
+    desktop: {
+      readOnly: 'Chỉ xem',
+      readOnlyTip:
+        'Tài khoản này không thể gửi dữ liệu bàn phím hoặc chuột tới máy đích, vì vậy console chỉ hiển thị màn hình.'
+    },
+    noConsole: {
+      title: 'Tài khoản này không có quyền console',
+      description:
+        'Tài khoản đã được cấp các khả năng khác. Hãy mở một trong các trang có thể dùng, hoặc đề nghị quản trị viên cấp quyền console.',
+      nothing: 'Tài khoản này chưa có quyền nào. Hãy đề nghị quản trị viên cấp quyền.'
+    },
     screen: {
       scale: 'Quy mô',
       title: 'Màn hình',
@@ -270,7 +281,8 @@ const vi = {
       enableDisk: {
         title: 'Bật đĩa ảo?',
         desc: 'Việc gắn kết phương tiện cần đĩa ảo, hiện đang tắt. Bật ngay bây giờ? Bàn phím và chuột của máy đích sẽ ngắt kết nối trong giây lát.',
-        menuHint: 'Đĩa ảo đang tắt. Hãy bật trong Cài đặt - Thiết bị.'
+        menuHint: 'Đĩa ảo đang tắt. Hãy bật trong Cài đặt - Thiết bị.',
+        askDevice: 'Đĩa ảo đang tắt. Tài khoản có quyền thiết bị cần bật nó trước.'
       },
       add: {
         title: 'Thêm phương tiện',
@@ -527,7 +539,8 @@ const vi = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Chú ý'
+        attention: 'Chú ý',
+        updateFailed: 'Không cập nhật được thiết bị ảo'
       },
       network: {
         title: 'Mạng',
@@ -687,7 +700,66 @@ const vi = {
           passwordUpdated: 'Đã cập nhật mật khẩu',
           loadFailed: 'Không tải được người dùng',
           saveFailed: 'Không lưu được người dùng',
-          deleteFailed: 'Không xóa được người dùng'
+          deleteFailed: 'Không xóa được người dùng',
+          editPermissions: 'Quyền',
+          mcpLossTitle: 'Thu hồi quyền truy cập MCP',
+          mcpLossDesc:
+            '{{name}} sẽ mất quyền truy cập MCP. Khóa API MCP được dùng chung cho toàn thiết bị, nên bản sao vẫn hoạt động cho đến khi khóa được tạo lại. Tạo lại sẽ ngắt kết nối mọi máy khách MCP cho đến khi chúng nhận khóa mới.',
+          mcpLossRotate: 'Tạo lại khóa API MCP',
+          mcpLossKeep:
+            'Khóa hiện tại vẫn hợp lệ, và ai có bản sao vẫn có thể điều khiển bàn phím và chuột. Bạn có thể tạo lại sau trong cài đặt MCP.',
+          mcpKeyRotated: 'Đã tạo lại khóa API MCP. Máy khách MCP cần khóa mới.'
+        },
+        permissions: {
+          title: 'Quyền',
+          editTitle: 'Sửa quyền',
+          save: 'Lưu',
+          saved: 'Đã lưu',
+          close: 'Đóng',
+          groupConsole: 'Console',
+          groupTarget: 'Máy đích',
+          groupLibrary: 'Thư viện phương tiện',
+          groupHost: 'Thiết bị này',
+          groupServices: 'Dịch vụ',
+          consoleView: 'Xem màn hình',
+          consoleControl: 'Bàn phím và chuột',
+          power: 'Nguồn và đánh thức',
+          mediumAttach: 'Gắn phương tiện',
+          libraryRead: 'Duyệt thư viện',
+          libraryWrite: 'Quản lý thư viện',
+          terminal: 'Terminal và tập lệnh',
+          device: 'Cài đặt thiết bị',
+          network: 'Cài đặt mạng',
+          update: 'Cập nhật hệ thống',
+          mcp: 'Dịch vụ MCP',
+          tailscale: 'Tailscale',
+          ai: 'Trợ lý AI',
+          effectConsoleView:
+            'Hiển thị màn hình của máy đích và đặt chế độ video, độ phân giải, tốc độ khung hình và chất lượng mà mọi người xem dùng chung.',
+          effectConsoleControl: 'Gửi dữ liệu bàn phím và chuột tới máy đích.',
+          effectPower:
+            'Bật, tắt và khởi động lại máy đích, đồng thời quản lý danh sách thiết bị Wake-on-LAN.',
+          effectMediumAttach:
+            'Gắn và tháo phương tiện trên máy đích, và trao đổi tệp với máy đó qua phân vùng chia sẻ.',
+          effectLibraryRead: 'Liệt kê và tải xuống các ảnh và tệp bên trong.',
+          effectLibraryWrite: 'Tải lên, tạo và xóa ảnh, và thay đổi các tệp bên trong.',
+          effectTerminal: 'Cung cấp shell root trên thiết bị này mà không qua phiên web.',
+          effectDevice:
+            'Cho phép bật SSH (cũng là root), khởi động lại thiết bị, đưa phân vùng dữ liệu thô cho máy đích và thay đổi cài đặt OLED, HDMI, mDNS, bộ nhớ và swap.',
+          effectNetwork: 'Thay đổi Wi-Fi, DNS và TLS, có thể khiến thiết bị này mất kết nối mạng.',
+          effectUpdate: 'Cài đặt firmware và gói ứng dụng.',
+          effectMcp:
+            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; bản sao khóa vẫn hoạt động sau khi thu hồi quyền trừ khi khóa được tạo lại, việc này sẽ được đề xuất khi gỡ quyền.',
+          effectTailscale: 'Kết nối thiết bị này vào một mạng VPN.',
+          effectAi:
+            'Điều khiển thiết bị qua giao diện cục bộ mà các quyền khác không giới hạn, nên tương đương toàn quyền điều khiển thiết bị.',
+          fullControlWarning: 'Các quyền này tương đương toàn quyền điều khiển thiết bị:',
+          emptyWarning: 'Tài khoản này sẽ không có chức năng nào và chỉ có thể đăng nhập.',
+          impliedBy: 'Được {{name}} bao gồm',
+          grantCount_one: '{{count}} quyền',
+          grantCount: '{{count}} quyền',
+          adminAll: 'Quản trị viên có mọi quyền',
+          catalogFailed: 'Không tải được danh sách quyền. Hãy đóng hộp thoại và thử lại.'
         }
       }
     },

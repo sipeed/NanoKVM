@@ -65,6 +65,18 @@ const fr = {
         verifyBtn: 'Vérifier'
       }
     },
+    desktop: {
+      readOnly: 'Lecture seule',
+      readOnlyTip:
+        "Ce compte ne peut pas envoyer de saisie clavier ou souris vers la machine cible ; la console affiche donc uniquement l'écran."
+    },
+    noConsole: {
+      title: 'Ce compte n’a pas accès à la console',
+      description:
+        'D’autres capacités lui ont été accordées. Ouvrez l’une des pages qu’il peut utiliser ou demandez à un administrateur l’accès à la console.',
+      nothing:
+        'Ce compte n’a encore aucune autorisation. Demandez à un administrateur de lui en accorder.'
+    },
     screen: {
       scale: 'Échelle',
       title: 'Écran',
@@ -275,7 +287,9 @@ const fr = {
       enableDisk: {
         title: 'Activer le disque virtuel ?',
         desc: "Monter un support nécessite le disque virtuel, actuellement désactivé. L'activer maintenant ? Le clavier et la souris de la machine distante seront brièvement déconnectés.",
-        menuHint: 'Le disque virtuel est désactivé. Activez-le dans Paramètres - Appareil.'
+        menuHint: 'Le disque virtuel est désactivé. Activez-le dans Paramètres - Appareil.',
+        askDevice:
+          "Le disque virtuel est désactivé. Un compte disposant de l'autorisation appareil doit d'abord l'activer."
       },
       add: {
         title: 'Ajouter un support',
@@ -538,7 +552,8 @@ const fr = {
           "Activer le disque virtuel annule l'image montée et interrompt un téléchargement ou un envoi d'image en cours. Continuer ?",
         diskBreakDownload:
           "Activer le disque virtuel interrompt le téléchargement d'images. Continuer ?",
-        attention: 'Attention'
+        attention: 'Attention',
+        updateFailed: 'Échec de la mise à jour du périphérique virtuel'
       },
       network: {
         title: 'Réseau',
@@ -699,7 +714,69 @@ const fr = {
           passwordUpdated: 'Mot de passe mis à jour',
           loadFailed: 'Échec du chargement des utilisateurs',
           saveFailed: "Échec de l'enregistrement de l'utilisateur",
-          deleteFailed: "Échec de la suppression de l'utilisateur"
+          deleteFailed: "Échec de la suppression de l'utilisateur",
+          editPermissions: 'Autorisations',
+          mcpLossTitle: 'Retirer l’accès MCP',
+          mcpLossDesc:
+            '{{name}} perdra l’accès MCP. La clé API MCP est partagée par tout l’appareil : une copie reste valide jusqu’à sa régénération. La régénérer déconnecte tous les clients MCP jusqu’à ce qu’ils reçoivent la nouvelle clé.',
+          mcpLossRotate: 'Régénérer la clé API MCP',
+          mcpLossKeep:
+            'La clé actuelle reste valide et toute personne qui en a une copie peut encore contrôler le clavier et la souris. Vous pourrez la régénérer plus tard dans les réglages MCP.',
+          mcpKeyRotated: 'Clé API MCP régénérée. Les clients MCP ont besoin de la nouvelle clé.'
+        },
+        permissions: {
+          title: 'Autorisations',
+          editTitle: 'Modifier les autorisations',
+          save: 'Enregistrer',
+          saved: 'Enregistré',
+          close: 'Fermer',
+          groupConsole: 'Console',
+          groupTarget: 'Machine cible',
+          groupLibrary: 'Bibliothèque de médias',
+          groupHost: 'Cet appareil',
+          groupServices: 'Services',
+          consoleView: 'Voir l’écran',
+          consoleControl: 'Clavier et souris',
+          power: 'Alimentation et réveil',
+          mediumAttach: 'Attacher un média',
+          libraryRead: 'Parcourir la bibliothèque',
+          libraryWrite: 'Gérer la bibliothèque',
+          terminal: 'Terminal et scripts',
+          device: 'Réglages de l’appareil',
+          network: 'Réglages réseau',
+          update: 'Mise à jour système',
+          mcp: 'Service MCP',
+          tailscale: 'Tailscale',
+          ai: 'Assistant IA',
+          effectConsoleView:
+            'Affiche l’écran cible et définit le mode vidéo, la résolution, la cadence et la qualité partagés par tous les spectateurs.',
+          effectConsoleControl: 'Envoie les saisies clavier et souris à la machine cible.',
+          effectPower:
+            'Allume, éteint et redémarre la machine cible, et gère la liste des appareils Wake-on-LAN.',
+          effectMediumAttach:
+            'Monte et éjecte des médias sur la machine cible, et échange des fichiers avec elle via la partition partagée.',
+          effectLibraryRead: 'Liste et télécharge les images et les fichiers qu’elles contiennent.',
+          effectLibraryWrite:
+            'Envoie, crée et supprime des images, et modifie les fichiers qu’elles contiennent.',
+          effectTerminal: 'Donne un shell root sur cet appareil, sans passer par la session web.',
+          effectDevice:
+            'Permet d’activer SSH (root également), de redémarrer l’appareil, de livrer la partition de données brute à la machine cible et de modifier OLED, HDMI, mDNS, mémoire et swap.',
+          effectNetwork:
+            'Modifie le Wi-Fi, le DNS et TLS, ce qui peut couper cet appareil du réseau.',
+          effectUpdate: 'Installe des micrologiciels et des paquets d’application.',
+          effectMcp:
+            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; une copie reste valide après révocation tant que la clé n’est pas régénérée, ce qui est proposé lors du retrait de l’autorisation.',
+          effectTailscale: 'Rejoint cet appareil à un maillage VPN.',
+          effectAi:
+            'Pilote l’appareil via une interface locale que les autres autorisations ne limitent pas : cela équivaut au contrôle total de l’appareil.',
+          fullControlWarning: 'Ces autorisations équivalent au contrôle total de l’appareil :',
+          emptyWarning: 'Ce compte n’aura aucune fonction et pourra seulement se connecter.',
+          impliedBy: 'Inclus par {{name}}',
+          grantCount_one: '{{count}} autorisation',
+          grantCount: '{{count}} autorisations',
+          adminAll: 'Les administrateurs détiennent toutes les autorisations',
+          catalogFailed:
+            'Impossible de charger la liste des autorisations. Fermez ce dialogue et réessayez.'
         }
       }
     },

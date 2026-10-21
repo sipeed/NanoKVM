@@ -30,8 +30,14 @@ import { Wol } from './wol';
 
 export const Menu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
-  const { account } = useAuth();
-  const isAdmin = account.role === 'admin';
+  const { hasPermission } = useAuth();
+  // Every media grant implies reading the library, so this alone decides whether
+  // the storage menu has anything to show.
+  const canLibrary = hasPermission('library.read');
+  const canControl = hasPermission('console.control');
+  const canTerminal = hasPermission('terminal');
+  const canAi = hasPermission('ai');
+  const canPower = hasPermission('power');
 
   const menuDisabledItems = useAtomValue(menuDisabledItemsAtom);
   const menuCloseSignal = useAtomValue(menuCloseSignalAtom);
@@ -113,28 +119,29 @@ export const Menu = () => {
             <Divider type="vertical" />
 
             <Screen />
-            <Keyboard />
+            {canControl && <Keyboard />}
             <Mouse />
             <Divider type="vertical" />
 
-            {isAdmin && isEnabled('storage') && <Storage />}
-            {isAdmin && isEnabled('terminal') && <Terminal />}
-            {isAdmin && isEnabled('script') && <Script />}
-            {isEnabled('wol') && <Wol />}
+            {canLibrary && isEnabled('storage') && <Storage />}
+            {canTerminal && isEnabled('terminal') && <Terminal />}
+            {canTerminal && isEnabled('script') && <Script />}
+            {canPower && isEnabled('wol') && <Wol />}
 
-            {(isEnabled('wol') ||
-              (isAdmin && ['storage', 'script', 'terminal'].some(isEnabled))) && (
+            {((canPower && isEnabled('wol')) ||
+              (canLibrary && isEnabled('storage')) ||
+              (canTerminal && ['script', 'terminal'].some(isEnabled))) && (
               <Divider type="vertical" />
             )}
 
-            {isAdmin && isEnabled('picoclaw') && (
+            {canAi && isEnabled('picoclaw') && (
               <>
                 <Picoclaw />
                 <Divider type="vertical" />
               </>
             )}
 
-            {isEnabled('power') && (
+            {canPower && isEnabled('power') && (
               <>
                 <Power />
                 <Divider type="vertical" />

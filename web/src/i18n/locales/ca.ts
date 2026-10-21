@@ -62,6 +62,17 @@ const ca = {
         verifyBtn: 'Verificar'
       }
     },
+    desktop: {
+      readOnly: 'Només lectura',
+      readOnlyTip:
+        'Aquest compte no pot enviar entrada de teclat ni de ratolí a la màquina objectiu, de manera que la consola només mostra la pantalla.'
+    },
+    noConsole: {
+      title: 'Aquest compte no té accés a la consola',
+      description:
+        'Se li han concedit altres capacitats. Obriu una de les pàgines que pot usar o demaneu a un administrador accés a la consola.',
+      nothing: 'Aquest compte encara no té permisos. Demaneu a un administrador que n’atorgui.'
+    },
     screen: {
       scale: 'Escala',
       title: 'Pantalla',
@@ -271,7 +282,9 @@ const ca = {
       enableDisk: {
         title: 'Voleu activar el disc virtual?',
         desc: "Per muntar un suport cal el disc virtual, que ara està desactivat. Voleu activar-lo? El teclat i el ratolí de l'ordinador remot es desconnectaran un moment.",
-        menuHint: 'El disc virtual està desactivat. Activeu-lo a Configuració - Dispositiu.'
+        menuHint: 'El disc virtual està desactivat. Activeu-lo a Configuració - Dispositiu.',
+        askDevice:
+          "El disc virtual està desactivat. Cal que un compte amb el permís de dispositiu l'activi primer."
       },
       add: {
         title: 'Afegeix un suport',
@@ -531,7 +544,8 @@ const ca = {
           "Activar el disc virtual cancel·la la imatge muntada i interromp una descàrrega o pujada d'imatge en curs. Voleu continuar?",
         diskBreakDownload:
           "Activar el disc virtual interromp la descàrrega d'imatges. Voleu continuar?",
-        attention: 'Atenció'
+        attention: 'Atenció',
+        updateFailed: "No s'ha pogut actualitzar el dispositiu virtual"
       },
       network: {
         title: 'Xarxa',
@@ -690,7 +704,69 @@ const ca = {
           passwordUpdated: 'Contrasenya actualitzada',
           loadFailed: "No s'han pogut carregar els usuaris",
           saveFailed: "No s'ha pogut desar l'usuari",
-          deleteFailed: "No s'ha pogut eliminar l'usuari"
+          deleteFailed: "No s'ha pogut eliminar l'usuari",
+          editPermissions: 'Permisos',
+          mcpLossTitle: 'Retirar l’accés MCP',
+          mcpLossDesc:
+            '{{name}} perdrà l’accés MCP. La clau API de MCP la comparteix tot el dispositiu, així que una còpia continua funcionant fins que es regeneri. Regenerar-la desconnecta tots els clients MCP fins que rebin la clau nova.',
+          mcpLossRotate: 'Regenera la clau API de MCP',
+          mcpLossKeep:
+            'La clau actual continua sent vàlida i qui en tingui una còpia encara pot controlar el teclat i el ratolí. La podeu regenerar més tard a la configuració de MCP.',
+          mcpKeyRotated: 'Clau API de MCP regenerada. Els clients MCP necessiten la clau nova.'
+        },
+        permissions: {
+          title: 'Permisos',
+          editTitle: 'Edita els permisos',
+          save: 'Desa',
+          saved: 'Desat',
+          close: 'Tanca',
+          groupConsole: 'Consola',
+          groupTarget: 'Màquina de destí',
+          groupLibrary: 'Biblioteca de mitjans',
+          groupHost: 'Aquest dispositiu',
+          groupServices: 'Serveis',
+          consoleView: 'Veure la pantalla',
+          consoleControl: 'Teclat i ratolí',
+          power: 'Engegada i despertar',
+          mediumAttach: 'Connecta un mitjà',
+          libraryRead: 'Navega per la biblioteca',
+          libraryWrite: 'Gestiona la biblioteca',
+          terminal: 'Terminal i scripts',
+          device: 'Configuració del dispositiu',
+          network: 'Configuració de xarxa',
+          update: 'Actualització del sistema',
+          mcp: 'Servei MCP',
+          tailscale: 'Tailscale',
+          ai: 'Assistent d’IA',
+          effectConsoleView:
+            'Mostra la pantalla de destí i defineix el mode de vídeo, la resolució, els fps i la qualitat que comparteixen tots els espectadors.',
+          effectConsoleControl: 'Envia entrada de teclat i ratolí a la màquina de destí.',
+          effectPower:
+            'Engega, apaga i reinicia la màquina de destí, i gestiona la llista de dispositius de Wake-on-LAN.',
+          effectMediumAttach:
+            'Munta i expulsa mitjans a la màquina de destí, i hi intercanvia fitxers mitjançant la partició compartida.',
+          effectLibraryRead: 'Llista i baixa les imatges i els fitxers que contenen.',
+          effectLibraryWrite: 'Puja, crea i elimina imatges, i modifica els fitxers que contenen.',
+          effectTerminal:
+            'Dona un shell de root en aquest dispositiu, sense passar per la sessió web.',
+          effectDevice:
+            'Permet activar SSH (també root), reiniciar el dispositiu, lliurar la partició de dades en brut a la màquina de destí i canviar OLED, HDMI, mDNS, memòria i swap.',
+          effectNetwork:
+            'Canvia Wi-Fi, DNS i TLS, cosa que pot deixar aquest dispositiu sense xarxa.',
+          effectUpdate: 'Instal·la firmware i paquets d’aplicació.',
+          effectMcp:
+            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; una còpia continua funcionant després de revocar el permís si no es regenera la clau, cosa que s’ofereix en retirar el permís.',
+          effectTailscale: 'Uneix aquest dispositiu a una malla VPN.',
+          effectAi:
+            'Controla el dispositiu mitjançant una interfície local que els altres permisos no limiten, així que equival al control total del dispositiu.',
+          fullControlWarning: 'Aquests permisos equivalen al control total del dispositiu:',
+          emptyWarning: 'Aquest compte no tindrà cap funció i només podrà iniciar sessió.',
+          impliedBy: 'Inclòs per {{name}}',
+          grantCount_one: '{{count}} permís',
+          grantCount: '{{count}} permisos',
+          adminAll: 'Els administradors tenen tots els permisos',
+          catalogFailed:
+            'No s’ha pogut carregar la llista de permisos. Tanqueu aquest diàleg i torneu-ho a provar.'
         }
       }
     },

@@ -21,7 +21,6 @@ import * as ls from '@/lib/localstorage.ts';
 import { keyboardLockAtom } from '@/jotai/keyboard.ts';
 import { submenuOpenCountAtom } from '@/jotai/settings.ts';
 import { Tailscale as TailscaleIcon } from '@/components/icons/tailscale';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { About } from './about';
 import { Account } from './account';
@@ -34,8 +33,12 @@ import { Update } from './update';
 
 export const Settings = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
-  const isAdmin = account.role === 'admin';
+  const { hasPermission } = useAuth();
+  const canDevice = hasPermission('device');
+  const canNetwork = hasPermission('network');
+  const canUpdate = hasPermission('update');
+  const canMcp = hasPermission('mcp');
+  const canTailscale = hasPermission('tailscale');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -49,16 +52,24 @@ export const Settings = () => {
   const tabs = [
     { id: 'about', icon: <BadgeInfoIcon size={16} />, component: <About /> },
     { id: 'appearance', icon: <PaletteIcon size={16} />, component: <Appearance /> },
-    ...(isAdmin
+    ...(canDevice
+      ? [{ id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> }]
+      : []),
+    ...(canNetwork
+      ? [{ id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> }]
+      : []),
+    ...(canMcp ? [{ id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> }] : []),
+    ...(canTailscale
       ? [
-          { id: 'device', icon: <SmartphoneIcon size={16} />, component: <Device /> },
-          { id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> },
-          { id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> },
           {
             id: 'tailscale',
-            icon: <TailscaleIcon />,
+            icon: <TailscaleIcon size={16} />,
             component: <Tailscale setIsLocked={setIsLocked} />
-          },
+          }
+        ]
+      : []),
+    ...(canUpdate
+      ? [
           {
             id: 'update',
             icon: <CircleArrowUpIcon size={16} />,
@@ -66,16 +77,28 @@ export const Settings = () => {
           }
         ]
       : []),
-    { id: 'account', icon: <UserRoundIcon size={18} />, component: <Account /> }
+    { id: 'account', icon: <UserRoundIcon size={16} />, component: <Account /> }
   ];
 
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!canUpdate) return;
     const skip = ls.getSkipUpdate();
     if (!skip) {
       checkForUpdates();
     }
-  }, [isAdmin]);
+  }, [canUpdate]);
+
+  // A permission change can take away the tab that is open. Fall back to the
+  // first tab instead of leaving an empty panel, and release a lock the vanished
+  // tab can no longer release itself (an update in progress keeps the modal
+  // open, so it would otherwise stay stuck with nothing to show).
+  const activeTab = tabs.find((tab) => tab.id === currentTab) ?? tabs[0];
+  useEffect(() => {
+    if (!activeTab || activeTab.id === currentTab) return;
+
+    setCurrentTab(activeTab.id);
+    setIsLocked(false);
+  }, [activeTab, currentTab]);
 
   useEffect(() => {
     scrollViewportRef.current?.scrollTo({ top: 0, left: 0 });
@@ -134,7 +157,9 @@ export const Settings = () => {
           onClick={openModal}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
-            <div className="pt-[3px] text-neutral-300 hover:text-white">
+            {/* A flex wrapper centers the svg without the baseline gap an inline one
+                leaves inside the badge, which is what the old 3px padding hacked around */}
+            <div className="flex text-neutral-300 hover:text-white">
               <SettingsIcon size={18} />
             </div>
           </Badge>
@@ -164,7 +189,7 @@ export const Settings = () => {
                 )}
                 onClick={() => changeTab(tab.id)}
               >
-                <div className="h-[16px] w-[16px]">{tab.icon}</div>
+                <div className="flex h-[16px] w-[16px] items-center justify-center">{tab.icon}</div>
 
                 {isUpdateAvailable && tab.id === 'update' ? (
                   <Badge dot color="blue" offset={[6, 3]}>
@@ -181,16 +206,16 @@ export const Settings = () => {
             ))}
           </div>
 
-          <ScrollArea
-            viewportRef={scrollViewportRef}
-            className="h-full w-full rounded-r-lg bg-neutral-900/50 px-3 [&_[data-slot=scroll-area-scrollbar]]:w-1.5 [&_[data-slot=scroll-area-scrollbar]]:p-0 [&_[data-slot=scroll-area-thumb]]:bg-neutral-500/30"
+          <div
+            ref={scrollViewportRef}
+            className="h-full w-full overflow-y-auto rounded-r-lg bg-neutral-900/50 px-3"
           >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">
-                <>{tabs.find((tab) => tab.id === currentTab)?.component}</>
+                <>{activeTab?.component}</>
               </div>
             </div>
-          </ScrollArea>
+          </div>
         </div>
       </Modal>
     </>

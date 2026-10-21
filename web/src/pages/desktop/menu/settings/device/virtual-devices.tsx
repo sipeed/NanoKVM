@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal, Switch } from 'antd';
+import { useAuth } from '@/contexts/auth.ts';
+import { App, Button, Modal, Switch } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { cancelDownloadImage, statusImage } from '@/api/download.ts';
@@ -11,6 +12,12 @@ const imageUpdatedEvent = 'nanokvm:image-updated';
 
 export const VirtualDevices = () => {
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const { hasPermission } = useAuth();
+  // Both switches are device settings. The medium state behind the disk hint,
+  // and the transfer a disk change can interrupt, belong to the media library.
+  const canReadMedia = hasPermission('library.read');
+  const canManageMedia = hasPermission('library.write');
 
   const [isHidOnlyMode, setIsHidOnlyMode] = useState(false);
   const [isDiskEnabled, setIsDiskEnabled] = useState(false);
@@ -22,8 +29,12 @@ export const VirtualDevices = () => {
   useEffect(() => {
     getHidOnlyMode();
     getVirtualDevice();
-    getImageState();
-  }, []);
+    // The medium state only decides the disk hint, and reading it needs a media
+    // grant, so an account without one must not ask for it.
+    if (canReadMedia) {
+      getImageState();
+    }
+  }, [canReadMedia]);
 
   async function getHidOnlyMode() {
     try {
@@ -74,17 +85,23 @@ export const VirtualDevices = () => {
     try {
       const rsp = await api.updateVirtualDevice(device);
       if (rsp.code !== 0) {
-        console.log(rsp.msg);
+        // Changing the disk is refused while a transfer or a mounted image holds
+        // /data. An account without library.write cannot cancel the transfer and
+        // has to see why the switch did not move.
+        message.error(rsp.msg || t('settings.device.updateFailed'));
         return;
       }
 
       await getVirtualDevice();
-      await getImageState();
+      if (canReadMedia) {
+        await getImageState();
+      }
 
       // the desktop shows the mounted image and the CD-ROM flag too
       window.dispatchEvent(new Event(imageUpdatedEvent));
     } catch (err) {
       console.log(err);
+      message.error(t('settings.device.updateFailed'));
     } finally {
       setLoading('');
     }
@@ -101,14 +118,22 @@ export const VirtualDevices = () => {
     setIsConfirmOpen(true);
   }
 
-  // a transfer writes to /data, which the host takes over
+  // A transfer writes to /data, which the host takes over. Cancelling one needs
+  // library.write, so an account without that grant cannot stop it and leaves the
+  // toggle to the server, which refuses the change while a transfer holds /data.
   async function stopTransfer() {
-    const rsp = await statusImage();
-    if (rsp.code !== 0 || rsp.data?.status !== 'in_progress') return;
+    if (!canManageMedia) return;
 
-    const cancel = await cancelDownloadImage();
-    if (cancel.code !== 0) {
-      console.log(cancel.msg);
+    try {
+      const rsp = await statusImage();
+      if (rsp.code !== 0 || rsp.data?.status !== 'in_progress') return;
+
+      const cancel = await cancelDownloadImage();
+      if (cancel.code !== 0) {
+        console.log(cancel.msg);
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 
@@ -148,10 +173,12 @@ export const VirtualDevices = () => {
       >
         <div className="flex flex-col items-center space-y-1 pb-10">
           <p>
+            {/* Without the media grant the mount state cannot be read, so the
+                warning has to cover a mounted image as well as a transfer. */}
             {t(
-              isImageMounted
-                ? 'settings.device.diskCancelMount'
-                : 'settings.device.diskBreakDownload'
+              canReadMedia && !isImageMounted
+                ? 'settings.device.diskBreakDownload'
+                : 'settings.device.diskCancelMount'
             )}
           </p>
         </div>

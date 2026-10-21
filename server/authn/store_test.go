@@ -96,14 +96,14 @@ func TestUserLifecycleAndTokenRevocation(t *testing.T) {
 	}
 
 	disabled := false
-	if _, err = store.Update("admin", "alice", UserPatch{Enabled: &disabled}); err != nil {
+	if _, _, err = store.Update("admin", "alice", UserPatch{Enabled: &disabled}); err != nil {
 		t.Fatal(err)
 	}
 	if _, ok, err := store.Authenticate("alice", "new-password"); err != nil || ok {
 		t.Fatalf("disabled login: ok=%v err=%v", ok, err)
 	}
 	enabled := true
-	if _, err = store.Update("admin", "alice", UserPatch{Enabled: &enabled}); err != nil {
+	if _, _, err = store.Update("admin", "alice", UserPatch{Enabled: &enabled}); err != nil {
 		t.Fatal(err)
 	}
 	if err = store.Delete("admin", "alice"); err != nil {
@@ -120,7 +120,7 @@ func TestLastAdminAndSelfProtection(t *testing.T) {
 		t.Fatalf("default login: ok=%v err=%v", ok, err)
 	}
 	userRole := RoleUser
-	if _, err := store.Update("admin", "admin", UserPatch{Role: &userRole}); !errors.Is(err, ErrSelfModification) {
+	if _, _, err := store.Update("admin", "admin", UserPatch{Role: &userRole}); !errors.Is(err, ErrSelfModification) {
 		t.Fatalf("self demotion error = %v", err)
 	}
 	if err := store.Delete("admin", "admin"); !errors.Is(err, ErrSelfDelete) {
@@ -130,10 +130,10 @@ func TestLastAdminAndSelfProtection(t *testing.T) {
 		t.Fatal(err)
 	}
 	disabled := false
-	if _, err := store.Update("second", "admin", UserPatch{Enabled: &disabled}); !errors.Is(err, ErrSystemAccount) {
+	if _, _, err := store.Update("second", "admin", UserPatch{Enabled: &disabled}); !errors.Is(err, ErrSystemAccount) {
 		t.Fatalf("disable device owner error = %v", err)
 	}
-	if _, err := store.Update("second", "admin", UserPatch{Role: &userRole}); !errors.Is(err, ErrSystemAccount) {
+	if _, _, err := store.Update("second", "admin", UserPatch{Role: &userRole}); !errors.Is(err, ErrSystemAccount) {
 		t.Fatalf("demote device owner error = %v", err)
 	}
 	if err := store.Delete("second", "admin"); !errors.Is(err, ErrSystemAccount) {

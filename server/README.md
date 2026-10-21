@@ -66,8 +66,68 @@ turn:
 
 NanoKVM uses two device-wide roles:
 
-- `admin`: KVM access plus user, system, network, update, storage, terminal, script, MCP, and PicoClaw administration.
-- `user`: KVM video, keyboard, mouse, paste, power/reset, and Wake-on-LAN access.
+- `admin`: everything below, plus user management.
+- `user`: only what the account is granted.
+
+A grant names an action on one party, and the catalog the server serves to the account editor
+carries its group, its risk, and the grants it implies:
+
+| Group | Grants |
+| --- | --- |
+| console (this session) | `console.view`, `console.control` |
+| target machine | `power`, `medium.attach` |
+| media library (this device) | `library.read`, `library.write` |
+| this device | `terminal`, `device`, `network`, `update` |
+| services | `mcp`, `tailscale`, `ai` |
+
+Implied grants are declared once, in the catalog, and the server resolves them before answering any
+request: `console.control` implies `console.view`, both `medium.attach` and `library.write` imply
+`library.read`, and every grant whose controls live in the console menu — `power`, `device`,
+`network`, `update`, `mcp`, `tailscale` and `ai` — implies `console.view` too, because no page
+outside the console renders them. Consequences worth knowing:
+
+- An account can hold no console access at all. The web app then lands on a page that offers the
+  sections the account may use (the media library, the terminal) instead of a console it cannot
+  open. `library.read` is all that media access needs, because the other two media grants imply it,
+  and only `terminal` and the media grants can stand on their own pages in the first place.
+- The media grants split along the trust boundary. `medium.attach` mounts or ejects a medium on the
+  target machine and writes into the shared partition the target reads; `library.write` changes what
+  the library keeps (uploads, deletes, the files inside an image); `library.read` lists and downloads.
+  The file endpoints serve an image and the shared partition through one path, so the route admits
+  either grant and each request is checked against the medium type it names. Every `.iso` and
+  `.img` on the partition is a library entry, so uploading one through the shared partition, or
+  deleting a file or folder that holds one, also needs `library.write`.
+- The emulated USB devices are neither media nor network: the virtual disk and the RNDIS adapter
+  hand the target machine the raw data partition and a network interface, so both follow `device`.
+  A medium can only be attached while a `device` holder has the virtual disk switched on, and the
+  storage page says so when it is off.
+
+Four grants reach further than their names suggest and amount to full device control. The catalog
+has two risk levels, and `warn` is reserved for them: the account editor marks those four and
+names them before the grants are saved:
+
+- `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
+- `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
+  outside the web session. The key is shared, so a copy keeps working after an account loses this
+  grant. Whenever a change takes the grant away (revoked, demoted, disabled or deleted), the account
+  editor warns and offers to regenerate the key, checked by default; regenerating disconnects every
+  MCP client until it is given the new key, and an administrator who keeps the key accepts that a
+  copy stays valid. The API takes the choice as `rotateMcpKey` (a body field on update, a query
+  parameter on delete) and never rotates without it.
+- `ai` drives the device through the local loopback interface, which the other grants do not
+  restrict.
+- `update` installs firmware and application packages. An offline package is checked only against
+  the checksum its uploader supplies, so installing one is running code as root.
+
+`device` carries no such mark, although it changes what the device does for everyone and cannot be
+narrowed per account. `device` turns SSH on or off (root login, with the device
+owner's password), reboots the device, hands the raw data partition or a network interface to the
+target machine through the emulated USB devices, and edits the OLED, HDMI, mDNS, memory, swap and
+HID settings. The editor describes it that way.
+
+Two grants also change settings that affect everyone watching: `console.view` sets the video mode,
+resolution, frame rate and quality, and resets the HDMI capture; `power` manages the Wake-on-LAN
+device list. Both are described that way in the editor.
 
 Administrators manage accounts from **Settings > Account**. Account data remains in
 `/etc/kvm/pwd`; the server migrates the legacy single-account JSON format in place and writes
@@ -77,12 +137,31 @@ Users must confirm their current password when changing it themselves; administr
 non-owner users from the account manager. Only the device owner can change the device owner's
 password, because that password is also synchronized to the Linux root account.
 
-All authenticated sessions are backed by the current account state. Disabling, deleting,
-changing the role or password of a user invalidates that user's HTTP and real-time connections
-without affecting other users. Multiple users may watch and control the KVM concurrently; input
-uses the existing cooperative HID coordinator, so simultaneous input can interleave.
-Video mode, quality, resolution, and MJPEG frame-detection controls remain shared KVM
-operations; when several users adjust them concurrently, the latest change applies device-wide.
+All authenticated sessions are backed by the current account state: every request is authorized
+against the account file, so a revoked grant stops working immediately without re-issuing a login.
+Disabling, deleting, or resetting the password of a user invalidates that user's HTTP and real-time
+connections without affecting other users. Changing the role or the grants of an account keeps its
+login valid: the account is told to refresh, and only the long-lived connections whose cached
+state depends on what changed are dropped (console, video stream, terminal, AI), so those clients
+reconnect under the new grants. An account that loses `console.view` is sent to the landing page
+instead of a console it can no longer open. Multiple
+users may watch and control the KVM concurrently; input uses the existing cooperative HID
+coordinator, so simultaneous input can interleave. A user without `console.control` keeps the
+video and the menu for its other grants, but the console rejects keyboard and mouse reports and
+the web UI marks the session as view only.
+Video mode, quality, resolution, MJPEG frame-detection controls, and resetting the HDMI capture
+require only `console.view` and stay shared KVM operations; when several users adjust them
+concurrently, the latest change applies device-wide. Enabling or disabling the HDMI capture and
+its idle timeout are device settings. `console.control` is input only: keyboard, mouse, paste, and
+the input region that maps pointer motion onto the target screen.
+
+The account file stores an explicit grant set: a record written before fine-grained permissions
+keeps exactly what the user role used to grant, and the split media grants are translated on load,
+so the store never holds a missing set that would fall back to different behavior later. Grants
+this build does not know are preserved and ignored, so a downgrade cannot lock the device out.
+Creating a regular account without naming a grant set keeps that same meaning, so a script that only
+knows about roles gets the account the user role used to create; the account editor seeds a new
+regular account with `console.view` only, and an explicitly empty set really is empty.
 
 ## Compile & Deploy
 

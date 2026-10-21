@@ -63,6 +63,17 @@ const cz = {
         verifyBtn: 'Ověřte'
       }
     },
+    desktop: {
+      readOnly: 'Pouze prohlížení',
+      readOnlyTip:
+        'Tento účet nemůže odesílat vstup z klávesnice a myši do cílového počítače, proto konzole pouze zobrazuje obrazovku.'
+    },
+    noConsole: {
+      title: 'Tento účet nemá přístup ke konzoli',
+      description:
+        'Byla mu udělena jiná oprávnění. Otevřete některou ze stránek, které může používat, nebo požádejte administrátora o přístup ke konzoli.',
+      nothing: 'Tento účet zatím nemá žádná oprávnění. Požádejte administrátora o jejich udělení.'
+    },
     screen: {
       scale: 'Měřítko',
       title: 'Obrazovka',
@@ -272,7 +283,9 @@ const cz = {
       enableDisk: {
         title: 'Zapnout virtuální disk?',
         desc: 'K připojení média je potřeba virtuální disk, který je nyní vypnutý. Zapnout ho? Klávesnice a myš vzdáleného počítače se na okamžik odpojí.',
-        menuHint: 'Virtuální disk je vypnutý. Zapněte ho v Nastavení - Zařízení.'
+        menuHint: 'Virtuální disk je vypnutý. Zapněte ho v Nastavení - Zařízení.',
+        askDevice:
+          'Virtuální disk je vypnutý. Nejprve jej musí zapnout účet s oprávněním pro zařízení.'
       },
       add: {
         title: 'Přidat médium',
@@ -530,7 +543,8 @@ const cz = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Pozor'
+        attention: 'Pozor',
+        updateFailed: 'Aktualizace virtuálního zařízení se nezdařila'
       },
       network: {
         title: 'Síť',
@@ -689,7 +703,66 @@ const cz = {
           passwordUpdated: 'Heslo aktualizováno',
           loadFailed: 'Uživatele se nepodařilo načíst',
           saveFailed: 'Uživatele se nepodařilo uložit',
-          deleteFailed: 'Uživatele se nepodařilo smazat'
+          deleteFailed: 'Uživatele se nepodařilo smazat',
+          editPermissions: 'Oprávnění',
+          mcpLossTitle: 'Odebrat přístup MCP',
+          mcpLossDesc:
+            '{{name}} ztratí přístup MCP. API klíč MCP sdílí celé zařízení, takže jeho kopie funguje, dokud klíč znovu nevygenerujete. Nové vygenerování odpojí všechny MCP klienty, dokud nedostanou nový klíč.',
+          mcpLossRotate: 'Znovu vygenerovat API klíč MCP',
+          mcpLossKeep:
+            'Současný klíč zůstane platný a kdo má jeho kopii, může dál ovládat klávesnici a myš. Později jej můžete znovu vygenerovat v nastavení MCP.',
+          mcpKeyRotated: 'API klíč MCP byl znovu vygenerován. MCP klienti potřebují nový klíč.'
+        },
+        permissions: {
+          title: 'Oprávnění',
+          editTitle: 'Upravit oprávnění',
+          save: 'Uložit',
+          saved: 'Uloženo',
+          close: 'Zavřít',
+          groupConsole: 'Konzole',
+          groupTarget: 'Cílový počítač',
+          groupLibrary: 'Knihovna médií',
+          groupHost: 'Toto zařízení',
+          groupServices: 'Služby',
+          consoleView: 'Sledovat obrazovku',
+          consoleControl: 'Klávesnice a myš',
+          power: 'Napájení a probuzení',
+          mediumAttach: 'Připojit médium',
+          libraryRead: 'Procházet knihovnu',
+          libraryWrite: 'Spravovat knihovnu',
+          terminal: 'Terminál a skripty',
+          device: 'Nastavení zařízení',
+          network: 'Nastavení sítě',
+          update: 'Aktualizace systému',
+          mcp: 'Služba MCP',
+          tailscale: 'Tailscale',
+          ai: 'AI asistent',
+          effectConsoleView:
+            'Zobrazuje obrazovku cílového počítače a nastavuje režim videa, rozlišení, snímkovou frekvenci a kvalitu, které sdílí všichni diváci.',
+          effectConsoleControl: 'Posílá vstup z klávesnice a myši cílovému počítači.',
+          effectPower:
+            'Zapíná, vypíná a restartuje cílový počítač a spravuje seznam zařízení Wake-on-LAN.',
+          effectMediumAttach:
+            'Připojuje a odpojuje média na cílovém počítači a vyměňuje s ním soubory přes sdílený oddíl.',
+          effectLibraryRead: 'Vypisuje a stahuje obrazy a soubory v nich uložené.',
+          effectLibraryWrite: 'Nahrává, vytváří a maže obrazy a mění soubory v nich uložené.',
+          effectTerminal: 'Poskytuje root shell na tomto zařízení, bez webového sezení mezi tím.',
+          effectDevice:
+            'Umožňuje zapnout SSH (také root), restartovat zařízení, předat surový datový oddíl cílovému počítači a měnit nastavení OLED, HDMI, mDNS, paměti a swapu.',
+          effectNetwork: 'Mění Wi-Fi, DNS a TLS, což může toto zařízení odpojit od sítě.',
+          effectUpdate: 'Instaluje firmware a balíčky aplikací.',
+          effectMcp:
+            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; kopie funguje i po odebrání oprávnění, pokud klíč znovu nevygenerujete, což se nabízí při odebrání oprávnění.',
+          effectTailscale: 'Připojuje toto zařízení do VPN sítě.',
+          effectAi:
+            'Ovládá zařízení přes lokální rozhraní, které ostatní oprávnění neomezují, takže jde prakticky o plnou kontrolu nad zařízením.',
+          fullControlWarning: 'Tato oprávnění představují plnou kontrolu nad zařízením:',
+          emptyWarning: 'Tento účet nebude mít žádné funkce a bude se moci jen přihlásit.',
+          impliedBy: 'Zahrnuto díky {{name}}',
+          grantCount_one: '{{count}} oprávnění',
+          grantCount: '{{count}} oprávnění',
+          adminAll: 'Administrátoři mají všechna oprávnění',
+          catalogFailed: 'Seznam oprávnění se nepodařilo načíst. Zavřete dialog a zkuste to znovu.'
         }
       }
     },

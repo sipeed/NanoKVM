@@ -22,8 +22,18 @@ const (
 )
 
 type Principal struct {
-	Username string
-	Role     authn.Role
+	Username    string
+	Role        authn.Role
+	Permissions []authn.Permission
+}
+
+// Has reports whether the principal effectively holds the permission.
+// Administrators always do.
+func (p Principal) Has(permission authn.Permission) bool {
+	if p.Role == authn.RoleAdmin {
+		return true
+	}
+	return authn.Has(p.Permissions, permission)
 }
 
 type Token struct {
@@ -48,8 +58,34 @@ func CheckToken() gin.HandlerFunc {
 		}
 
 		requestContext, cancel := context.WithCancel(c.Request.Context())
+		sessionHandle := newSessionHandle()
+		requestContext = WithSessionHandle(requestContext, sessionHandle)
 		c.Request = c.Request.WithContext(requestContext)
-		unregister := activeSessions.register(principal.Username, cancel)
+		channel := SessionChannelForPath(c.Request.URL.Path)
+		unregister := activeSessions.register(
+			principal.Username,
+			cancel,
+			sessionHandle,
+			channel,
+		)
+		// The principal was resolved before this session could be found by a
+		// revocation, so a grant edit landing in between would miss it. Now that
+		// it is registered, any later edit drops it; re-reading the account picks
+		// up any earlier one. Only the long-lived channels are dropped by a grant
+		// edit, so a short request keeps the principal it was authorized with.
+		if channel != "" {
+			user, err := authn.DefaultStore.ValidateToken(principal.Username, token.TokenVersion)
+			if err != nil {
+				unregister()
+				cancel()
+				abortUnauthorized(c)
+				return
+			}
+			principal.Role = user.Role
+			principal.Permissions = authn.EffectivePermissions(user)
+			c.Set(principalContextKey, principal)
+		}
+
 		timer := time.AfterFunc(time.Until(token.ExpiresAt.Time), cancel)
 		go watchSessionState(requestContext, cancel, principal.Username, token.TokenVersion, sessionRecheckDelay)
 		defer func() {
@@ -90,8 +126,31 @@ func RequireRole(roles ...authn.Role) gin.HandlerFunc {
 			return
 		}
 		if _, ok = allowed[principal.Role]; !ok {
-			c.JSON(http.StatusForbidden, "forbidden")
-			c.Abort()
+			abortForbidden(c)
+			return
+		}
+		c.Next()
+	}
+}
+
+// RequirePermission allows the request when the principal holds at least one
+// of the listed permissions. Administrators implicitly hold every permission.
+func RequirePermission(permissions ...authn.Permission) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		principal, ok := CurrentPrincipal(c)
+		if !ok {
+			abortUnauthorized(c)
+			return
+		}
+		allowed := false
+		for _, permission := range permissions {
+			if principal.Has(permission) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			abortForbidden(c)
 			return
 		}
 		c.Next()
@@ -138,7 +197,7 @@ func CheckTokenOrLoopbackInternalToken() gin.HandlerFunc {
 func authenticate(c *gin.Context) (Principal, *Token, bool) {
 	conf := config.GetInstance()
 	if conf.Authentication == "disable" {
-		return Principal{Username: "admin", Role: authn.RoleAdmin}, nil, true
+		return Principal{Username: "admin", Role: authn.RoleAdmin, Permissions: authn.PermissionIDs()}, nil, true
 	}
 
 	cookie, err := c.Cookie(CookieName)
@@ -154,11 +213,20 @@ func authenticate(c *gin.Context) (Principal, *Token, bool) {
 		log.Debugf("validate session for %q: %s", token.Username, err)
 		return Principal{}, nil, false
 	}
-	return Principal{Username: user.Username, Role: user.Role}, token, true
+	return Principal{
+		Username:    user.Username,
+		Role:        user.Role,
+		Permissions: authn.EffectivePermissions(user),
+	}, token, true
 }
 
 func abortUnauthorized(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, "unauthorized")
+	c.Abort()
+}
+
+func abortForbidden(c *gin.Context) {
+	c.JSON(http.StatusForbidden, "forbidden")
 	c.Abort()
 }
 

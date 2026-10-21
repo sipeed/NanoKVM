@@ -59,6 +59,16 @@ const zh = {
         verifyBtn: '验证'
       }
     },
+    desktop: {
+      readOnly: '只读',
+      readOnlyTip: '当前账户没有键鼠操作权限，无法向目标机发送键盘和鼠标事件，控制台仅显示画面。'
+    },
+    noConsole: {
+      title: '该账户没有控制台权限',
+      description: '该账户被授予了其他功能。可以打开下方可用页面，或联系管理员授予控制台权限。',
+      nothing: '该账户还没有任何功能权限，请联系管理员授予。'
+    },
+
     screen: {
       scale: '缩放',
       title: '屏幕',
@@ -261,7 +271,8 @@ const zh = {
       enableDisk: {
         title: '启用虚拟磁盘?',
         desc: '装载介质需要虚拟磁盘,当前它是关闭的。现在启用?被控机的键鼠会短暂断开。',
-        menuHint: '虚拟磁盘未启用,请到 设置 - 设备 打开。'
+        menuHint: '虚拟磁盘未启用,请到 设置 - 设备 打开。',
+        askDevice: '虚拟磁盘当前已关闭，需要拥有“设备设置”权限的账户先将其开启。'
       },
       add: {
         title: '添加介质',
@@ -511,7 +522,8 @@ const zh = {
         diskCancelMount:
           '开启虚拟U盘会取消当前挂载的镜像，并中断正在进行的镜像下载或上传，是否继续？',
         diskBreakDownload: '开启虚拟U盘会中断镜像下载功能，是否继续？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '虚拟设备更新失败'
       },
       network: {
         title: '网络',
@@ -667,7 +679,62 @@ const zh = {
           passwordUpdated: '密码已更新',
           loadFailed: '加载用户失败',
           saveFailed: '保存用户失败',
-          deleteFailed: '删除用户失败'
+          deleteFailed: '删除用户失败',
+          editPermissions: '权限',
+          mcpLossTitle: '撤销 MCP 访问',
+          mcpLossDesc:
+            '{{name}} 将失去 MCP 访问权限。MCP API Key 由整台设备共用，已复制出去的 Key 在重新生成前仍然有效。重新生成会断开所有 MCP 客户端，直到它们换用新 Key。',
+          mcpLossRotate: '重新生成 MCP API Key',
+          mcpLossKeep:
+            '当前 Key 将继续有效，持有副本的人仍可控制键盘和鼠标。之后可在 MCP 设置中重新生成。',
+          mcpKeyRotated: 'MCP API Key 已重新生成，MCP 客户端需换用新 Key。'
+        },
+        permissions: {
+          title: '功能权限',
+          editTitle: '编辑权限',
+          save: '保存',
+          saved: '已保存',
+          close: '关闭',
+          groupConsole: '控制台',
+          groupTarget: '被控机',
+          groupLibrary: '介质库',
+          groupHost: '本设备',
+          groupServices: '服务',
+          consoleView: '观看画面',
+          consoleControl: '键鼠操作',
+          power: '电源与唤醒',
+          mediumAttach: '挂载与交换介质',
+          libraryRead: '浏览介质库',
+          libraryWrite: '管理介质库',
+          terminal: '终端与脚本',
+          device: '设备设置',
+          network: '网络设置',
+          update: '系统更新',
+          mcp: 'MCP 服务',
+          tailscale: 'Tailscale',
+          ai: 'AI 助手',
+          effectConsoleView: '显示被控机画面，并设置所有观看者共用的视频模式、分辨率、帧率和画质。',
+          effectConsoleControl: '向被控机发送键盘和鼠标事件。',
+          effectPower: '对被控机开机、关机、复位，并管理网络唤醒设备列表。',
+          effectMediumAttach: '把介质挂载到被控机或弹出，并通过共享分区与被控机交换文件。',
+          effectLibraryRead: '列出并下载镜像及镜像内的文件。',
+          effectLibraryWrite: '上传、新建、删除镜像，并修改镜像内的文件。',
+          effectTerminal: '在本设备上获得 root shell，无需经过 Web 会话。',
+          effectDevice:
+            '可启用 SSH（同样是 root）、重启设备、把原始数据分区交给被控机，并修改 OLED、HDMI、mDNS、内存与交换设置。',
+          effectNetwork: '修改 Wi-Fi、DNS 与 TLS，可能使本设备失联。',
+          effectUpdate: '安装固件与应用更新包。',
+          effectMcp:
+            '下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；撤销此权限后，已复制的 Key 仍有效，除非重新生成（移除权限时会询问是否重新生成）。',
+          effectTailscale: '把本设备加入 VPN 组网。',
+          effectAi: '通过不受其他权限限制的本地接口操作设备，因此相当于完整的设备控制权。',
+          fullControlWarning: '下列权限等同于完整的设备控制权：',
+          emptyWarning: '该账户将不具备任何功能，只能登录。',
+          impliedBy: '由「{{name}}」自动包含',
+          grantCount_one: '{{count}} 项权限',
+          grantCount: '{{count}} 项权限',
+          adminAll: '管理员拥有全部权限',
+          catalogFailed: '权限列表加载失败，请关闭后重试。'
         }
       }
     },

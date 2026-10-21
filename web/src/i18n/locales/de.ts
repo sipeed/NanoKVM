@@ -64,6 +64,18 @@ const de = {
         verifyBtn: 'Überprüfen'
       }
     },
+    desktop: {
+      readOnly: 'Nur Ansehen',
+      readOnlyTip:
+        'Dieses Konto kann keine Tastatur- oder Mauseingaben an den Zielrechner senden, daher zeigt die Konsole nur das Bild.'
+    },
+    noConsole: {
+      title: 'Dieses Konto hat keinen Konsolenzugriff',
+      description:
+        'Ihm wurden andere Fähigkeiten erteilt. Öffnen Sie eine der Seiten, die es nutzen darf, oder bitten Sie einen Administrator um Konsolenzugriff.',
+      nothing:
+        'Dieses Konto hat noch keine Berechtigungen. Bitten Sie einen Administrator, welche zu erteilen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Bildschirm',
@@ -277,7 +289,9 @@ const de = {
         title: 'Virtuelles Laufwerk aktivieren?',
         desc: 'Zum Einbinden eines Mediums wird das virtuelle Laufwerk benötigt, das derzeit ausgeschaltet ist. Jetzt aktivieren? Tastatur und Maus des Zielrechners werden kurz getrennt.',
         menuHint:
-          'Das virtuelle Laufwerk ist deaktiviert. Aktivieren Sie es unter Einstellungen - Gerät.'
+          'Das virtuelle Laufwerk ist deaktiviert. Aktivieren Sie es unter Einstellungen - Gerät.',
+        askDevice:
+          'Das virtuelle Laufwerk ist ausgeschaltet. Ein Konto mit der Geräte-Berechtigung muss es zuerst einschalten.'
       },
       add: {
         title: 'Medium hinzufügen',
@@ -540,7 +554,8 @@ const de = {
           'Das Aktivieren des virtuellen Laufwerks bricht das eingebundene Image ab und unterbricht einen laufenden Image-Download oder -Upload. Fortfahren?',
         diskBreakDownload:
           'Das Aktivieren des virtuellen Laufwerks unterbricht den Image-Download. Fortfahren?',
-        attention: 'Achtung'
+        attention: 'Achtung',
+        updateFailed: 'Aktualisieren des virtuellen Geräts fehlgeschlagen'
       },
       network: {
         title: 'Netzwerk',
@@ -701,7 +716,70 @@ const de = {
           passwordUpdated: 'Passwort aktualisiert',
           loadFailed: 'Benutzer konnten nicht geladen werden',
           saveFailed: 'Benutzer konnte nicht gespeichert werden',
-          deleteFailed: 'Benutzer konnte nicht gelöscht werden'
+          deleteFailed: 'Benutzer konnte nicht gelöscht werden',
+          editPermissions: 'Berechtigungen',
+          mcpLossTitle: 'MCP-Zugriff entziehen',
+          mcpLossDesc:
+            '{{name}} verliert den MCP-Zugriff. Der MCP-API-Schlüssel gilt für das ganze Gerät, eine Kopie bleibt daher gültig, bis der Schlüssel neu erzeugt wird. Das Neuerzeugen trennt alle MCP-Clients, bis sie den neuen Schlüssel erhalten.',
+          mcpLossRotate: 'MCP-API-Schlüssel neu erzeugen',
+          mcpLossKeep:
+            'Der aktuelle Schlüssel bleibt gültig, und wer eine Kopie hat, kann weiterhin Tastatur und Maus steuern. Sie können ihn später in den MCP-Einstellungen neu erzeugen.',
+          mcpKeyRotated: 'MCP-API-Schlüssel neu erzeugt. MCP-Clients benötigen den neuen Schlüssel.'
+        },
+        permissions: {
+          title: 'Berechtigungen',
+          editTitle: 'Berechtigungen bearbeiten',
+          save: 'Speichern',
+          saved: 'Gespeichert',
+          close: 'Schließen',
+          groupConsole: 'Konsole',
+          groupTarget: 'Zielrechner',
+          groupLibrary: 'Medienbibliothek',
+          groupHost: 'Dieses Gerät',
+          groupServices: 'Dienste',
+          consoleView: 'Bildschirm ansehen',
+          consoleControl: 'Tastatur und Maus',
+          power: 'Energie und Aufwecken',
+          mediumAttach: 'Medium einbinden',
+          libraryRead: 'Medienbibliothek durchsuchen',
+          libraryWrite: 'Medienbibliothek verwalten',
+          terminal: 'Terminal und Skripte',
+          device: 'Geräteeinstellungen',
+          network: 'Netzwerkeinstellungen',
+          update: 'Systemaktualisierung',
+          mcp: 'MCP-Dienst',
+          tailscale: 'Tailscale',
+          ai: 'KI-Assistent',
+          effectConsoleView:
+            'Zeigt den Zielbildschirm und legt Videomodus, Auflösung, Bildrate und Qualität fest, die alle Betrachter gemeinsam nutzen.',
+          effectConsoleControl: 'Sendet Tastatur- und Mauseingaben an den Zielrechner.',
+          effectPower:
+            'Schaltet den Zielrechner ein, aus und startet ihn neu und verwaltet die Wake-on-LAN-Geräteliste.',
+          effectMediumAttach:
+            'Bindet Medien am Zielrechner ein und aus und tauscht Dateien über die geteilte Partition mit ihm aus.',
+          effectLibraryRead: 'Listet und lädt Abbilder und die darin enthaltenen Dateien herunter.',
+          effectLibraryWrite:
+            'Lädt Abbilder hoch, erstellt und löscht sie und ändert die darin enthaltenen Dateien.',
+          effectTerminal:
+            'Gewährt eine Root-Shell auf diesem Gerät, ohne den Umweg über die Websitzung.',
+          effectDevice:
+            'Ermöglicht SSH (ebenfalls root), startet das Gerät neu, übergibt die rohe Datenpartition an den Zielrechner und ändert OLED, HDMI, mDNS, Arbeitsspeicher und Swap.',
+          effectNetwork: 'Ändert WLAN, DNS und TLS, was dieses Gerät vom Netz trennen kann.',
+          effectUpdate: 'Installiert Firmware und Anwendungspakete.',
+          effectMcp:
+            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; eine Kopie bleibt nach dem Entzug gültig, sofern der Schlüssel nicht neu erzeugt wird – dies wird beim Entfernen der Berechtigung angeboten.',
+          effectTailscale: 'Bildet dieses Gerät in ein VPN-Mesh ein.',
+          effectAi:
+            'Steuert das Gerät über eine lokale Schnittstelle, die die übrigen Berechtigungen nicht einschränken; das entspricht praktisch der vollständigen Gerätekontrolle.',
+          fullControlWarning:
+            'Diese Berechtigungen laufen auf die vollständige Gerätekontrolle hinaus:',
+          emptyWarning: 'Dieses Konto hat keinerlei Funktionen und kann sich nur anmelden.',
+          impliedBy: 'Enthalten durch {{name}}',
+          grantCount_one: '{{count}} Berechtigung',
+          grantCount: '{{count}} Berechtigungen',
+          adminAll: 'Administratoren besitzen alle Berechtigungen',
+          catalogFailed:
+            'Die Berechtigungsliste konnte nicht geladen werden. Schließen Sie diesen Dialog und versuchen Sie es erneut.'
         }
       }
     },

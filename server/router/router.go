@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"NanoKVM-Server/service/auth"
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/picoclaw"
+	"NanoKVM-Server/service/ws"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
@@ -34,6 +36,8 @@ func web(r *gin.Engine) {
 func server(r *gin.Engine) {
 	control := controlmode.GetManager()
 	picoclawService := picoclaw.NewService(control)
+
+	auth.SessionNotifier = ws.GetManager().NotifyUser
 
 	authRouter(r)
 	applicationRouter(r)

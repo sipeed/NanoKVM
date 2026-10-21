@@ -61,6 +61,18 @@ const en = {
         verifyBtn: 'Verify'
       }
     },
+    desktop: {
+      readOnly: 'View Only',
+      readOnlyTip:
+        'This account cannot send keyboard or mouse input to the target machine, so the console only shows the screen.'
+    },
+    noConsole: {
+      title: 'This account has no console access',
+      description:
+        'It was granted other capabilities. Open one of the pages it can use, or ask an administrator for console access.',
+      nothing: 'This account has no feature permissions yet. Ask an administrator to grant some.'
+    },
+
     screen: {
       scale: 'Scale',
       title: 'Screen',
@@ -269,7 +281,9 @@ const en = {
       enableDisk: {
         title: 'Enable the virtual disk?',
         desc: 'Mounting a medium needs the virtual disk, which is currently switched off. Enable it now? The keyboard and mouse of the target machine will disconnect for a moment.',
-        menuHint: 'The virtual disk is disabled. Enable it in Settings - Device.'
+        menuHint: 'The virtual disk is disabled. Enable it in Settings - Device.',
+        askDevice:
+          'The virtual disk is disabled. An account with the device permission has to enable it first.'
       },
       add: {
         title: 'Add media',
@@ -525,7 +539,8 @@ const en = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Attention'
+        attention: 'Attention',
+        updateFailed: 'Failed to update the virtual device'
       },
       network: {
         title: 'Network',
@@ -683,7 +698,68 @@ const en = {
           passwordUpdated: 'Password updated',
           loadFailed: 'Failed to load users',
           saveFailed: 'Failed to save user',
-          deleteFailed: 'Failed to delete user'
+          deleteFailed: 'Failed to delete user',
+          editPermissions: 'Permissions',
+          mcpLossTitle: 'Revoke MCP access',
+          mcpLossDesc:
+            '{{name}} will lose MCP access. The MCP API key is shared by the whole device, so a copy of it keeps working until the key is regenerated. Regenerating it disconnects every MCP client until it is given the new key.',
+          mcpLossRotate: 'Regenerate the MCP API key',
+          mcpLossKeep:
+            'The current key stays valid, and whoever has a copy can still control the keyboard and mouse. You can regenerate it later in the MCP settings.',
+          mcpKeyRotated: 'MCP API key regenerated. MCP clients need the new key.'
+        },
+        permissions: {
+          title: 'Permissions',
+          editTitle: 'Edit Permissions',
+          save: 'Save',
+          saved: 'Saved',
+          close: 'Close',
+          groupConsole: 'Console',
+          groupTarget: 'Target machine',
+          groupLibrary: 'Media library',
+          groupHost: 'This device',
+          groupServices: 'Services',
+          consoleView: 'Watch the screen',
+          consoleControl: 'Keyboard & mouse',
+          power: 'Power & wake',
+          mediumAttach: 'Attach a medium',
+          libraryRead: 'Browse the media library',
+          libraryWrite: 'Manage the media library',
+          terminal: 'Terminal & scripts',
+          device: 'Device settings',
+          network: 'Network settings',
+          update: 'System update',
+          mcp: 'MCP service',
+          tailscale: 'Tailscale',
+          ai: 'AI assistant',
+          effectConsoleView:
+            'Shows the target screen, and sets the video mode, resolution, frame rate and quality that every viewer shares.',
+          effectConsoleControl: 'Sends keyboard and mouse input to the target machine.',
+          effectPower:
+            'Powers on, powers off and resets the target machine, and manages the Wake-on-LAN device list.',
+          effectMediumAttach:
+            'Mounts and ejects media on the target machine, and exchanges files with it through the shared partition.',
+          effectLibraryRead: 'Lists and downloads the images and the files inside them.',
+          effectLibraryWrite:
+            'Uploads, creates and deletes images, and changes the files inside them.',
+          effectTerminal: 'Gives a root shell on this device, without the web session in between.',
+          effectDevice:
+            'Enables SSH (also root), reboots the device, hands the raw data partition to the target machine, and changes the OLED, HDMI, mDNS, memory and swap settings.',
+          effectNetwork: 'Changes Wi-Fi, DNS and TLS, which can take this device off the network.',
+          effectUpdate: 'Installs firmware and application packages.',
+          effectMcp:
+            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; a copied key keeps working after this grant is revoked unless the key is regenerated, which is offered when the grant is removed.',
+          effectTailscale: 'Joins this device to a VPN mesh.',
+          effectAi:
+            'Drives the device through a local interface that the other grants do not restrict, so this is effectively full device control.',
+          fullControlWarning: 'These grants amount to full device control:',
+          emptyWarning: 'This account will have no features at all and can only sign in.',
+          impliedBy: 'Included by {{name}}',
+          grantCount_one: '{{count}} grant',
+          grantCount: '{{count}} grants',
+          adminAll: 'Administrators hold every permission',
+          catalogFailed:
+            'The permission catalog could not be loaded. Close this dialog and try again.'
         }
       }
     },

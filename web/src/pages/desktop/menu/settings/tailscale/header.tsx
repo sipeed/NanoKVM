@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Popconfirm, Popover } from 'antd';
 import { CircleStopIcon, EllipsisIcon, LoaderIcon, RotateCwIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ type Loading = '' | 'restarting' | 'stopping';
 
 export const Header = ({ state, onSuccess }: HeaderProps) => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
 
   const [loading, setLoading] = useState<Loading>('');
 
@@ -93,8 +95,13 @@ export const Header = ({ state, onSuccess }: HeaderProps) => {
           <Popover
             content={
               <div className="flex min-w-[250px] flex-col">
-                <Memory />
-                <Swap />
+                {/* Memory and swap are device settings, which tailscale alone does not reach. */}
+                {hasPermission('device') && (
+                  <>
+                    <Memory />
+                    <Swap />
+                  </>
+                )}
                 <Uninstall onSuccess={onSuccess} />
               </div>
             }

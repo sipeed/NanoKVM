@@ -17,6 +17,8 @@ type Manager struct {
 
 type Client struct {
 	ws                 *websocket.Conn
+	readOnly           bool
+	username           string
 	hid                *hid.Hid
 	manual             *inputcontrol.ManualSession
 	keyboard           chan hid.QueuedReport

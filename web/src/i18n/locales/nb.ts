@@ -63,6 +63,17 @@ const nb = {
         verifyBtn: 'Bekreft'
       }
     },
+    desktop: {
+      readOnly: 'Kun visning',
+      readOnlyTip:
+        'Denne kontoen kan ikke sende tastatur- eller musinndata til målmaskinen, så konsollen viser bare skjermen.'
+    },
+    noConsole: {
+      title: 'Denne kontoen har ikke konsoltilgang',
+      description:
+        'Den har fått andre tillatelser. Åpne en av sidene den kan bruke, eller be en administrator om konsoltilgang.',
+      nothing: 'Denne kontoen har ingen tillatelser ennå. Be en administrator om å gi noen.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Skjerm',
@@ -272,7 +283,9 @@ const nb = {
       enableDisk: {
         title: 'Slå på den virtuelle disken?',
         desc: 'For å montere et medium trengs den virtuelle disken, som er slått av nå. Slå den på? Tastaturet og musen til målmaskinen kobles fra et øyeblikk.',
-        menuHint: 'Den virtuelle disken er slått av. Slå den på under Innstillinger - Enhet.'
+        menuHint: 'Den virtuelle disken er slått av. Slå den på under Innstillinger - Enhet.',
+        askDevice:
+          'Den virtuelle disken er slått av. En konto med enhetstillatelse må aktivere den først.'
       },
       add: {
         title: 'Legg til medium',
@@ -528,7 +541,8 @@ const nb = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Merknad'
+        attention: 'Merknad',
+        updateFailed: 'Kunne ikke oppdatere den virtuelle enheten'
       },
       network: {
         title: 'Nettverk',
@@ -687,7 +701,69 @@ const nb = {
           passwordUpdated: 'Passord oppdatert',
           loadFailed: 'Kunne ikke laste brukere',
           saveFailed: 'Kunne ikke lagre brukeren',
-          deleteFailed: 'Kunne ikke slette brukeren'
+          deleteFailed: 'Kunne ikke slette brukeren',
+          editPermissions: 'Tillatelser',
+          mcpLossTitle: 'Fjern MCP-tilgang',
+          mcpLossDesc:
+            '{{name}} mister MCP-tilgang. MCP-API-nøkkelen deles av hele enheten, så en kopi virker til nøkkelen genereres på nytt. Å generere den på nytt kobler fra alle MCP-klienter til de får den nye nøkkelen.',
+          mcpLossRotate: 'Generer MCP-API-nøkkelen på nytt',
+          mcpLossKeep:
+            'Den nåværende nøkkelen forblir gyldig, og den som har en kopi kan fortsatt styre tastatur og mus. Du kan generere den på nytt senere i MCP-innstillingene.',
+          mcpKeyRotated:
+            'MCP-API-nøkkelen er generert på nytt. MCP-klienter trenger den nye nøkkelen.'
+        },
+        permissions: {
+          title: 'Tillatelser',
+          editTitle: 'Rediger tillatelser',
+          save: 'Lagre',
+          saved: 'Lagret',
+          close: 'Lukk',
+          groupConsole: 'Konsoll',
+          groupTarget: 'Målmaskin',
+          groupLibrary: 'Mediebibliotek',
+          groupHost: 'Denne enheten',
+          groupServices: 'Tjenester',
+          consoleView: 'Se skjermen',
+          consoleControl: 'Tastatur og mus',
+          power: 'Strøm og vekking',
+          mediumAttach: 'Koble til et medium',
+          libraryRead: 'Bla gjennom biblioteket',
+          libraryWrite: 'Administrer biblioteket',
+          terminal: 'Terminal og skript',
+          device: 'Enhetsinnstillinger',
+          network: 'Nettverksinnstillinger',
+          update: 'Systemoppdatering',
+          mcp: 'MCP-tjeneste',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          effectConsoleView:
+            'Viser målmaskinens skjerm og setter videomodus, oppløsning, bildefrekvens og kvalitet som alle seere deler.',
+          effectConsoleControl: 'Sender tastatur- og musinndata til målmaskinen.',
+          effectPower:
+            'Slår på, slår av og restarter målmaskinen, og administrerer listen over Wake-on-LAN-enheter.',
+          effectMediumAttach:
+            'Monterer og løser ut medier på målmaskinen, og utveksler filer med den via den delte partisjonen.',
+          effectLibraryRead: 'Lister ut og laster ned avbildningene og filene i dem.',
+          effectLibraryWrite:
+            'Laster opp, oppretter og sletter avbildninger, og endrer filene i dem.',
+          effectTerminal: 'Gir et root-skall på denne enheten, uten nettsesjonen imellom.',
+          effectDevice:
+            'Gjør det mulig å slå på SSH (også root), restarte enheten, gi den rå datapartisjonen til målmaskinen og endre OLED, HDMI, mDNS, minne og swap.',
+          effectNetwork:
+            'Endrer Wi-Fi, DNS og TLS, noe som kan koble denne enheten fra nettverket.',
+          effectUpdate: 'Installerer fastvare og programpakker.',
+          effectMcp:
+            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; en kopi virker fortsatt etter at tillatelsen er trukket tilbake med mindre nøkkelen genereres på nytt, noe som tilbys når tillatelsen fjernes.',
+          effectTailscale: 'Kobler denne enheten til et VPN-nett.',
+          effectAi:
+            'Styrer enheten via et lokalt grensesnitt som de andre tillatelsene ikke begrenser, så dette tilsvarer full kontroll over enheten.',
+          fullControlWarning: 'Disse tillatelsene tilsvarer full kontroll over enheten:',
+          emptyWarning: 'Denne kontoen får ingen funksjoner og kan bare logge inn.',
+          impliedBy: 'Inkludert av {{name}}',
+          grantCount_one: '{{count}} tillatelse',
+          grantCount: '{{count}} tillatelser',
+          adminAll: 'Administratorer har alle tillatelser',
+          catalogFailed: 'Tillatelseslisten kunne ikke lastes. Lukk dialogen og prøv igjen.'
         }
       }
     },

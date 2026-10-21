@@ -63,6 +63,17 @@ const pl = {
         verifyBtn: 'Sprawdź'
       }
     },
+    desktop: {
+      readOnly: 'Tylko podgląd',
+      readOnlyTip:
+        'To konto nie może wysyłać danych z klawiatury ani myszy do maszyny docelowej, dlatego konsola tylko wyświetla ekran.'
+    },
+    noConsole: {
+      title: 'To konto nie ma dostępu do konsoli',
+      description:
+        'Przyznano mu inne możliwości. Otwórz jedną ze stron, z których może korzystać, albo poproś administratora o dostęp do konsoli.',
+      nothing: 'To konto nie ma jeszcze żadnych uprawnień. Poproś administratora o ich przyznanie.'
+    },
     screen: {
       scale: 'Skala',
       title: 'Ekran',
@@ -272,7 +283,9 @@ const pl = {
       enableDisk: {
         title: 'Włączyć dysk wirtualny?',
         desc: 'Do zamontowania nośnika potrzebny jest dysk wirtualny, który jest teraz wyłączony. Włączyć go? Klawiatura i mysz zdalnego komputera rozłączą się na chwilę.',
-        menuHint: 'Dysk wirtualny jest wyłączony. Włącz go w Ustawienia - Urządzenie.'
+        menuHint: 'Dysk wirtualny jest wyłączony. Włącz go w Ustawienia - Urządzenie.',
+        askDevice:
+          'Dysk wirtualny jest wyłączony. Najpierw musi go włączyć konto z uprawnieniem do urządzenia.'
       },
       add: {
         title: 'Dodaj nośnik',
@@ -532,7 +545,8 @@ const pl = {
         diskCancelMount:
           'Enabling the virtual disk cancels the mounted image and interrupts a running image download or upload. Continue?',
         diskBreakDownload: 'Enabling the virtual disk interrupts the image download. Continue?',
-        attention: 'Uwaga'
+        attention: 'Uwaga',
+        updateFailed: 'Nie udało się zaktualizować urządzenia wirtualnego'
       },
       network: {
         title: 'Sieć',
@@ -691,7 +705,69 @@ const pl = {
           passwordUpdated: 'Zaktualizowano hasło',
           loadFailed: 'Nie udało się wczytać użytkowników',
           saveFailed: 'Nie udało się zapisać użytkownika',
-          deleteFailed: 'Nie udało się usunąć użytkownika'
+          deleteFailed: 'Nie udało się usunąć użytkownika',
+          editPermissions: 'Uprawnienia',
+          mcpLossTitle: 'Odbierz dostęp MCP',
+          mcpLossDesc:
+            '{{name}} utraci dostęp MCP. Klucz API MCP jest wspólny dla całego urządzenia, więc jego kopia działa, dopóki klucz nie zostanie wygenerowany ponownie. Ponowne wygenerowanie rozłącza wszystkich klientów MCP, dopóki nie otrzymają nowego klucza.',
+          mcpLossRotate: 'Wygeneruj ponownie klucz API MCP',
+          mcpLossKeep:
+            'Obecny klucz pozostaje ważny, a każdy, kto ma kopię, nadal może sterować klawiaturą i myszą. Możesz go wygenerować ponownie później w ustawieniach MCP.',
+          mcpKeyRotated:
+            'Klucz API MCP wygenerowany ponownie. Klienci MCP potrzebują nowego klucza.'
+        },
+        permissions: {
+          title: 'Uprawnienia',
+          editTitle: 'Edytuj uprawnienia',
+          save: 'Zapisz',
+          saved: 'Zapisano',
+          close: 'Zamknij',
+          groupConsole: 'Konsola',
+          groupTarget: 'Maszyna docelowa',
+          groupLibrary: 'Biblioteka nośników',
+          groupHost: 'To urządzenie',
+          groupServices: 'Usługi',
+          consoleView: 'Podgląd ekranu',
+          consoleControl: 'Klawiatura i mysz',
+          power: 'Zasilanie i wybudzanie',
+          mediumAttach: 'Podłącz nośnik',
+          libraryRead: 'Przeglądaj bibliotekę',
+          libraryWrite: 'Zarządzaj biblioteką',
+          terminal: 'Terminal i skrypty',
+          device: 'Ustawienia urządzenia',
+          network: 'Ustawienia sieci',
+          update: 'Aktualizacja systemu',
+          mcp: 'Usługa MCP',
+          tailscale: 'Tailscale',
+          ai: 'Asystent AI',
+          effectConsoleView:
+            'Pokazuje ekran maszyny docelowej i ustawia tryb wideo, rozdzielczość, liczbę klatek i jakość wspólne dla wszystkich widzów.',
+          effectConsoleControl: 'Wysyła wejście z klawiatury i myszy do maszyny docelowej.',
+          effectPower:
+            'Włącza, wyłącza i resetuje maszynę docelową oraz zarządza listą urządzeń Wake-on-LAN.',
+          effectMediumAttach:
+            'Montuje i odłącza nośniki na maszynie docelowej oraz wymienia z nią pliki przez współdzieloną partycję.',
+          effectLibraryRead: 'Wyświetla i pobiera obrazy oraz pliki w nich zawarte.',
+          effectLibraryWrite: 'Wysyła, tworzy i usuwa obrazy oraz zmienia pliki w nich zawarte.',
+          effectTerminal: 'Daje powłokę root na tym urządzeniu, z pominięciem sesji webowej.',
+          effectDevice:
+            'Umożliwia włączenie SSH (również root), restart urządzenia, udostępnienie surowej partycji danych maszynie docelowej oraz zmianę ustawień OLED, HDMI, mDNS, pamięci i swap.',
+          effectNetwork: 'Zmienia Wi-Fi, DNS i TLS, co może odciąć to urządzenie od sieci.',
+          effectUpdate: 'Instaluje firmware i pakiety aplikacji.',
+          effectMcp:
+            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; kopia działa po odebraniu uprawnienia, chyba że klucz zostanie wygenerowany ponownie, co jest proponowane przy usuwaniu uprawnienia.',
+          effectTailscale: 'Dołącza to urządzenie do sieci VPN typu mesh.',
+          effectAi:
+            'Steruje urządzeniem przez lokalny interfejs, którego pozostałe uprawnienia nie ograniczają, więc oznacza to pełną kontrolę nad urządzeniem.',
+          fullControlWarning: 'Te uprawnienia oznaczają pełną kontrolę nad urządzeniem:',
+          emptyWarning:
+            'To konto nie będzie miało żadnych funkcji i będzie mogło się tylko zalogować.',
+          impliedBy: 'Zawarte przez {{name}}',
+          grantCount_one: '{{count}} uprawnienie',
+          grantCount: '{{count}} uprawnień',
+          adminAll: 'Administratorzy mają wszystkie uprawnienia',
+          catalogFailed:
+            'Nie udało się wczytać listy uprawnień. Zamknij to okno i spróbuj ponownie.'
         }
       }
     },

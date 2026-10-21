@@ -10,7 +10,7 @@ import { WebTitle } from './web-title.tsx';
 
 export const Appearance = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   return (
     <>
@@ -19,7 +19,7 @@ export const Appearance = () => {
 
       <div className="text-neutral-400">{t('settings.appearance.display')}</div>
       <Language />
-      {account.role === 'admin' && <WebTitle />}
+      {hasPermission('device') && <WebTitle />}
 
       <Divider className="opacity-50" style={{ margin: '32px 0' }} />
 

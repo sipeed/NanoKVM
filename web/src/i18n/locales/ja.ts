@@ -62,6 +62,17 @@ const ja = {
         verifyBtn: '確認する'
       }
     },
+    desktop: {
+      readOnly: '閲覧のみ',
+      readOnlyTip:
+        'このアカウントは対象マシンへキーボードやマウスの入力を行えないため、コンソールは画面の表示のみになります。'
+    },
+    noConsole: {
+      title: 'このアカウントにはコンソール権限がありません',
+      description:
+        '他の機能が付与されています。利用できるページを開くか、管理者にコンソール権限を依頼してください。',
+      nothing: 'このアカウントにはまだ権限がありません。管理者に付与を依頼してください。'
+    },
     screen: {
       scale: '倍率',
       title: '画面',
@@ -272,7 +283,9 @@ const ja = {
       enableDisk: {
         title: '仮想ディスクを有効にしますか？',
         desc: 'メディアをマウントするには仮想ディスクが必要ですが、現在は無効です。今すぐ有効にしますか？ターゲットマシンのキーボードとマウスが一時的に切断されます。',
-        menuHint: '仮想ディスクは無効です。設定 - デバイスで有効にしてください。'
+        menuHint: '仮想ディスクは無効です。設定 - デバイスで有効にしてください。',
+        askDevice:
+          '仮想ディスクは無効になっています。デバイス権限を持つアカウントで先に有効にしてください。'
       },
       add: {
         title: 'メディアを追加',
@@ -534,7 +547,8 @@ const ja = {
           '仮想ディスクを有効にすると、マウント中のイメージは解除され、進行中のイメージのダウンロード/アップロードも中断されます。続行しますか？',
         diskBreakDownload:
           '仮想ディスクを有効にすると、イメージのダウンロードが中断されます。続行しますか？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '仮想デバイスの更新に失敗しました'
       },
       network: {
         title: 'ネットワーク',
@@ -695,7 +709,68 @@ const ja = {
           passwordUpdated: 'パスワードを更新しました',
           loadFailed: 'ユーザーを読み込めませんでした',
           saveFailed: 'ユーザーを保存できませんでした',
-          deleteFailed: 'ユーザーを削除できませんでした'
+          deleteFailed: 'ユーザーを削除できませんでした',
+          editPermissions: '権限',
+          mcpLossTitle: 'MCP アクセスを取り消す',
+          mcpLossDesc:
+            '{{name}} は MCP へのアクセス権を失います。MCP API キーはデバイス全体で共有されるため、コピーされたキーは再生成するまで有効です。再生成すると、新しいキーを設定するまですべての MCP クライアントが切断されます。',
+          mcpLossRotate: 'MCP API キーを再生成する',
+          mcpLossKeep:
+            '現在のキーは引き続き有効で、コピーを持つ人はキーボードとマウスを操作できます。後で MCP 設定から再生成できます。',
+          mcpKeyRotated: 'MCP API キーを再生成しました。MCP クライアントには新しいキーが必要です。'
+        },
+        permissions: {
+          title: '権限',
+          editTitle: '権限を編集',
+          save: '保存',
+          saved: '保存しました',
+          close: '閉じる',
+          groupConsole: 'コンソール',
+          groupTarget: 'ターゲットマシン',
+          groupLibrary: 'メディアライブラリ',
+          groupHost: 'このデバイス',
+          groupServices: 'サービス',
+          consoleView: '画面を表示',
+          consoleControl: 'キーボードとマウス',
+          power: '電源とウェイク',
+          mediumAttach: 'メディアを接続',
+          libraryRead: 'ライブラリを閲覧',
+          libraryWrite: 'ライブラリを管理',
+          terminal: 'ターミナルとスクリプト',
+          device: 'デバイス設定',
+          network: 'ネットワーク設定',
+          update: 'システムアップデート',
+          mcp: 'MCP サービス',
+          tailscale: 'Tailscale',
+          ai: 'AI アシスタント',
+          effectConsoleView:
+            'ターゲットの画面を表示し、すべての視聴者が共有するビデオモード、解像度、フレームレート、画質を設定します。',
+          effectConsoleControl: 'キーボードとマウスの入力をターゲットマシンに送信します。',
+          effectPower:
+            'ターゲットマシンの電源投入、電源切断、リセットを行い、Wake-on-LAN のデバイス一覧を管理します。',
+          effectMediumAttach:
+            'メディアをターゲットマシンにマウント・取り出し、共有パーティション経由でファイルを交換します。',
+          effectLibraryRead: 'イメージとその中のファイルを一覧表示・ダウンロードします。',
+          effectLibraryWrite:
+            'イメージのアップロード・作成・削除と、イメージ内のファイルの変更を行います。',
+          effectTerminal: 'Web セッションを介さずに、このデバイスで root シェルを提供します。',
+          effectDevice:
+            'SSH の有効化（これも root 相当）、デバイスの再起動、生のデータパーティションをターゲットマシンへ公開、OLED・HDMI・mDNS・メモリ・スワップの設定変更ができます。',
+          effectNetwork:
+            'Wi-Fi、DNS、TLS を変更します。このデバイスがネットワークから切断される可能性があります。',
+          effectUpdate: 'ファームウェアとアプリケーションパッケージをインストールします。',
+          effectMcp:
+            'デバイス全体で有効な API キーを発行し、Web セッション外からキーボード・マウス・スクリーンショットを操作できます。この権限を取り消しても、コピーされたキーは再生成しない限り有効です（権限の削除時に再生成するか確認します）。',
+          effectTailscale: 'このデバイスを VPN メッシュに参加させます。',
+          effectAi:
+            '他の権限に制限されないローカルインターフェース経由でデバイスを操作するため、実質的にデバイスの完全な制御権になります。',
+          fullControlWarning: 'これらの権限はデバイスの完全な制御権に相当します:',
+          emptyWarning: 'このアカウントは機能を一切持たず、ログインのみ可能になります。',
+          impliedBy: '{{name}} に含まれます',
+          grantCount_one: '{{count}} 件の権限',
+          grantCount: '{{count}} 件の権限',
+          adminAll: '管理者はすべての権限を持ちます',
+          catalogFailed: '権限一覧を読み込めませんでした。ダイアログを閉じて再試行してください。'
         }
       }
     },

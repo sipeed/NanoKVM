@@ -64,6 +64,17 @@ const nl = {
         verifyBtn: 'Verifieer'
       }
     },
+    desktop: {
+      readOnly: 'Alleen bekijken',
+      readOnlyTip:
+        'Dit account kan geen toetsenbord- of muisinvoer naar de doelmachine sturen, daarom toont de console alleen het scherm.'
+    },
+    noConsole: {
+      title: 'Dit account heeft geen toegang tot de console',
+      description:
+        'Er zijn andere mogelijkheden toegekend. Open een van de pagina’s die het mag gebruiken, of vraag een beheerder om toegang tot de console.',
+      nothing: 'Dit account heeft nog geen rechten. Vraag een beheerder om er een toe te kennen.'
+    },
     screen: {
       scale: 'Schaal',
       title: 'Scherm',
@@ -275,7 +286,10 @@ const nl = {
       enableDisk: {
         title: 'De virtuele schijf inschakelen?',
         desc: 'Voor het koppelen van een medium is de virtuele schijf nodig, die nu uitgeschakeld is. Nu inschakelen? Het toetsenbord en de muis van de doelcomputer worden even losgekoppeld.',
-        menuHint: 'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.'
+        menuHint:
+          'De virtuele schijf is uitgeschakeld. Schakel die in bij Instellingen - Apparaat.',
+        askDevice:
+          'De virtuele schijf staat uit. Een account met de apparaatrechten moet deze eerst aanzetten.'
       },
       add: {
         title: 'Medium toevoegen',
@@ -538,7 +552,8 @@ const nl = {
           'Het inschakelen van de virtuele schijf breekt de gekoppelde image af en onderbreekt een lopende image-download of -upload. Doorgaan?',
         diskBreakDownload:
           'Het inschakelen van de virtuele schijf onderbreekt de image-download. Doorgaan?',
-        attention: 'Let op'
+        attention: 'Let op',
+        updateFailed: 'Bijwerken van het virtuele apparaat mislukt'
       },
       network: {
         title: 'Netwerk',
@@ -697,7 +712,69 @@ const nl = {
           passwordUpdated: 'Wachtwoord bijgewerkt',
           loadFailed: 'Gebruikers konden niet worden geladen',
           saveFailed: 'Gebruiker kon niet worden opgeslagen',
-          deleteFailed: 'Gebruiker kon niet worden verwijderd'
+          deleteFailed: 'Gebruiker kon niet worden verwijderd',
+          editPermissions: 'Rechten',
+          mcpLossTitle: 'MCP-toegang intrekken',
+          mcpLossDesc:
+            '{{name}} verliest MCP-toegang. De MCP-API-sleutel wordt door het hele apparaat gedeeld, dus een kopie blijft werken tot de sleutel opnieuw wordt gegenereerd. Opnieuw genereren verbreekt alle MCP-clients tot ze de nieuwe sleutel krijgen.',
+          mcpLossRotate: 'MCP-API-sleutel opnieuw genereren',
+          mcpLossKeep:
+            'De huidige sleutel blijft geldig en wie een kopie heeft, kan nog steeds toetsenbord en muis bedienen. U kunt hem later opnieuw genereren in de MCP-instellingen.',
+          mcpKeyRotated:
+            'MCP-API-sleutel opnieuw gegenereerd. MCP-clients hebben de nieuwe sleutel nodig.'
+        },
+        permissions: {
+          title: 'Rechten',
+          editTitle: 'Rechten bewerken',
+          save: 'Opslaan',
+          saved: 'Opgeslagen',
+          close: 'Sluiten',
+          groupConsole: 'Console',
+          groupTarget: 'Doelmachine',
+          groupLibrary: 'Mediabibliotheek',
+          groupHost: 'Dit apparaat',
+          groupServices: 'Diensten',
+          consoleView: 'Scherm bekijken',
+          consoleControl: 'Toetsenbord en muis',
+          power: 'Voeding en wekken',
+          mediumAttach: 'Medium koppelen',
+          libraryRead: 'Mediabibliotheek doorbladeren',
+          libraryWrite: 'Mediabibliotheek beheren',
+          terminal: 'Terminal en scripts',
+          device: 'Apparaatinstellingen',
+          network: 'Netwerkinstellingen',
+          update: 'Systeemupdate',
+          mcp: 'MCP-dienst',
+          tailscale: 'Tailscale',
+          ai: 'AI-assistent',
+          effectConsoleView:
+            'Toont het scherm van de doelmachine en stelt de videomodus, resolutie, framesnelheid en kwaliteit in die alle kijkers delen.',
+          effectConsoleControl: 'Stuurt toetsenbord- en muisinvoer naar de doelmachine.',
+          effectPower:
+            'Zet de doelmachine aan, uit en herstart hem, en beheert de lijst met Wake-on-LAN-apparaten.',
+          effectMediumAttach:
+            'Koppelt en ontkoppelt media op de doelmachine en wisselt bestanden met hem uit via de gedeelde partitie.',
+          effectLibraryRead: 'Toont en downloadt de images en de bestanden erin.',
+          effectLibraryWrite: 'Uploadt, maakt en verwijdert images, en wijzigt de bestanden erin.',
+          effectTerminal: 'Geeft een root-shell op dit apparaat, zonder de websessie ertussen.',
+          effectDevice:
+            'Maakt SSH mogelijk (ook root), herstart het apparaat, geeft de ruwe datapartitie aan de doelmachine en wijzigt OLED, HDMI, mDNS, geheugen en swap.',
+          effectNetwork:
+            'Wijzigt wifi, DNS en TLS, waardoor dit apparaat van het netwerk kan verdwijnen.',
+          effectUpdate: 'Installeert firmware en applicatiepakketten.',
+          effectMcp:
+            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; een kopie blijft na intrekking werken tenzij de sleutel opnieuw wordt gegenereerd, wat wordt aangeboden bij het verwijderen van de toestemming.',
+          effectTailscale: 'Voegt dit apparaat toe aan een VPN-mesh.',
+          effectAi:
+            'Bestuurt het apparaat via een lokale interface die de andere rechten niet beperken, dus dit staat gelijk aan volledige apparaatcontrole.',
+          fullControlWarning: 'Deze rechten komen neer op volledige apparaatcontrole:',
+          emptyWarning: 'Dit account heeft dan geen enkele functie en kan alleen inloggen.',
+          impliedBy: 'Inbegrepen via {{name}}',
+          grantCount_one: '{{count}} recht',
+          grantCount: '{{count}} rechten',
+          adminAll: 'Beheerders hebben alle rechten',
+          catalogFailed:
+            'De rechtenlijst kon niet worden geladen. Sluit dit venster en probeer het opnieuw.'
         }
       }
     },

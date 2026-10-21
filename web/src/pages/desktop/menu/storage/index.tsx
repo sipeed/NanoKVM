@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Divider, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
@@ -21,6 +22,11 @@ import { MenuItem } from '@/components/menu-item.tsx';
 // its own tab.
 export const Storage = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  const canAttach = hasPermission('medium.attach');
+  // The virtual disk is a device setting, so whether the hint can point at an
+  // enabled switch depends on this grant.
+  const canDevice = hasPermission('device');
 
   const [media, setMedia] = useState<api.MediaItem[]>([]);
   const [error, setError] = useState('');
@@ -36,7 +42,8 @@ export const Storage = () => {
   const { mount, eject, busy } = useMediaMount({
     onError: (message, description) =>
       setError(description ? `${message} — ${description}` : message),
-    onNeedEnableDisk: () => setError(t('storage.enableDisk.menuHint')),
+    onNeedEnableDisk: () =>
+      setError(t(canDevice ? 'storage.enableDisk.menuHint' : 'storage.enableDisk.askDevice')),
     onNeedForce: () => setError(t('storage.force.menuHint')),
     onChanged: () => void refresh()
   });
@@ -135,7 +142,7 @@ export const Storage = () => {
                 : t('storage.attached', { name: attachedName ?? '' })}
             </span>
 
-            {state.state !== 'none' && state.state !== 'unsupported' && (
+            {canAttach && state.state !== 'none' && state.state !== 'unsupported' && (
               <Tooltip title={t('storage.eject')}>
                 <div
                   className="flex h-6 w-6 cursor-pointer items-center justify-center rounded text-neutral-400 hover:bg-neutral-700 hover:text-white"
@@ -157,16 +164,18 @@ export const Storage = () => {
             </span>
           )}
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm">{t('storage.mountMode')}</span>
-            <Segmented
-              size="small"
-              value={mode}
-              options={modes}
-              onChange={(value) => setMode(value as 'mass-storage' | 'cd-rom')}
-              disabled={state.state === 'unsupported' || busy !== ''}
-            />
-          </div>
+          {canAttach && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm">{t('storage.mountMode')}</span>
+              <Segmented
+                size="small"
+                value={mode}
+                options={modes}
+                onChange={(value) => setMode(value as 'mass-storage' | 'cd-rom')}
+                disabled={state.state === 'unsupported' || busy !== ''}
+              />
+            </div>
+          )}
 
           <Divider style={{ margin: '4px 0' }} />
 
@@ -182,7 +191,7 @@ export const Storage = () => {
                     'group flex h-[28px] items-center justify-between rounded px-2 hover:bg-neutral-700/70',
                     item.attached && 'text-blue-500'
                   )}
-                  onClick={() => !item.attached && void mount(item, mode === 'cd-rom')}
+                  onClick={() => canAttach && !item.attached && void mount(item, mode === 'cd-rom')}
                 >
                   <div className="flex min-w-0 flex-1 items-center space-x-2">
                     <MediaIcon item={item} />
@@ -191,13 +200,15 @@ export const Storage = () => {
                     </span>
                   </div>
 
-                  <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
-                    {isBusy ? (
-                      <LoaderCircleIcon size={14} className="animate-spin" />
-                    ) : (
-                      !item.attached && <PlugIcon size={14} className="text-neutral-400" />
-                    )}
-                  </div>
+                  {canAttach && (
+                    <div className="shrink-0 opacity-0 transition-opacity group-hover:opacity-100">
+                      {isBusy ? (
+                        <LoaderCircleIcon size={14} className="animate-spin" />
+                      ) : (
+                        !item.attached && <PlugIcon size={14} className="text-neutral-400" />
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}

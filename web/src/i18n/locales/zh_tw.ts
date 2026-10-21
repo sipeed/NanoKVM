@@ -59,6 +59,16 @@ const zh_tw = {
         verifyBtn: '驗證'
       }
     },
+    desktop: {
+      readOnly: '唯讀',
+      readOnlyTip:
+        '此帳號沒有鍵盤與滑鼠操作權限，無法向目標機發送鍵盤與滑鼠事件，主控台僅顯示畫面。'
+    },
+    noConsole: {
+      title: '此帳戶沒有控制台權限',
+      description: '此帳戶被授予了其他功能。可以開啟下方可用頁面，或聯絡管理員授予控制台權限。',
+      nothing: '此帳戶還沒有任何功能權限，請聯絡管理員授予。'
+    },
     screen: {
       scale: '缩放',
       title: '螢幕',
@@ -261,7 +271,8 @@ const zh_tw = {
       enableDisk: {
         title: '啟用虛擬隨身碟？',
         desc: '裝載媒體需要虛擬隨身碟，目前它是關閉的。現在啟用？受控裝置的鍵盤與滑鼠會短暫中斷。',
-        menuHint: '虛擬隨身碟未啟用，請到 設定 - 設備 開啟。'
+        menuHint: '虛擬隨身碟未啟用，請到 設定 - 設備 開啟。',
+        askDevice: '虛擬磁碟目前已關閉，需要擁有「設備設定」權限的帳號先將其開啟。'
       },
       add: {
         title: '新增媒體',
@@ -512,7 +523,8 @@ const zh_tw = {
         diskCancelMount:
           '開啟虛擬隨身碟會取消目前掛載的映像檔，並中斷正在進行的映像檔下載或上傳，是否繼續？',
         diskBreakDownload: '開啟虛擬隨身碟會中斷映像檔下載功能，是否繼續？',
-        attention: '注意'
+        attention: '注意',
+        updateFailed: '虛擬裝置更新失敗'
       },
       network: {
         title: '網路',
@@ -668,7 +680,63 @@ const zh_tw = {
           passwordUpdated: '密碼已更新',
           loadFailed: '載入使用者失敗',
           saveFailed: '儲存使用者失敗',
-          deleteFailed: '刪除使用者失敗'
+          deleteFailed: '刪除使用者失敗',
+          editPermissions: '權限',
+          mcpLossTitle: '撤銷 MCP 存取',
+          mcpLossDesc:
+            '{{name}} 將失去 MCP 存取權限。MCP API Key 由整台裝置共用，已複製出去的 Key 在重新產生前仍然有效。重新產生會中斷所有 MCP 用戶端，直到它們改用新 Key。',
+          mcpLossRotate: '重新產生 MCP API Key',
+          mcpLossKeep:
+            '目前的 Key 將繼續有效，持有副本的人仍可控制鍵盤和滑鼠。之後可在 MCP 設定中重新產生。',
+          mcpKeyRotated: 'MCP API Key 已重新產生，MCP 用戶端需改用新 Key。'
+        },
+        permissions: {
+          title: '功能權限',
+          editTitle: '編輯權限',
+          save: '儲存',
+          saved: '已儲存',
+          close: '關閉',
+          groupConsole: '控制台',
+          groupTarget: '被控機',
+          groupLibrary: '媒體庫',
+          groupHost: '本裝置',
+          groupServices: '服務',
+          consoleView: '觀看畫面',
+          consoleControl: '鍵鼠操作',
+          power: '電源與喚醒',
+          mediumAttach: '掛載與交換媒體',
+          libraryRead: '瀏覽媒體庫',
+          libraryWrite: '管理媒體庫',
+          terminal: '終端機與腳本',
+          device: '裝置設定',
+          network: '網路設定',
+          update: '系統更新',
+          mcp: 'MCP 服務',
+          tailscale: 'Tailscale',
+          ai: 'AI 助手',
+          effectConsoleView:
+            '顯示被控機畫面，並設定所有觀看者共用的視訊模式、解析度、影格率與畫質。',
+          effectConsoleControl: '向被控機發送鍵盤與滑鼠事件。',
+          effectPower: '對被控機開機、關機、重新啟動，並管理網路喚醒裝置清單。',
+          effectMediumAttach: '把媒體掛載到被控機或退出，並透過共享分割區與被控機交換檔案。',
+          effectLibraryRead: '列出並下載映像檔及映像檔內的檔案。',
+          effectLibraryWrite: '上傳、建立、刪除映像檔，並修改映像檔內的檔案。',
+          effectTerminal: '在本裝置上取得 root shell，無需經過 Web 工作階段。',
+          effectDevice:
+            '可啟用 SSH（同樣是 root）、重新啟動裝置、把原始資料分割區交給被控機，並修改 OLED、HDMI、mDNS、記憶體與置換空間設定。',
+          effectNetwork: '修改 Wi-Fi、DNS 與 TLS，可能使本裝置離線。',
+          effectUpdate: '安裝韌體與應用程式更新包。',
+          effectMcp:
+            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；撤銷此權限後，已複製的 Key 仍有效，除非重新產生（移除權限時會詢問是否重新產生）。',
+          effectTailscale: '把本裝置加入 VPN 網路。',
+          effectAi: '透過不受其他權限限制的本機介面操作裝置，因此相當於完整的裝置控制權。',
+          fullControlWarning: '下列權限等同於完整的裝置控制權：',
+          emptyWarning: '此帳戶將不具備任何功能，只能登入。',
+          impliedBy: '由「{{name}}」自動包含',
+          grantCount_one: '{{count}} 項權限',
+          grantCount: '{{count}} 項權限',
+          adminAll: '管理員擁有全部權限',
+          catalogFailed: '權限清單載入失敗，請關閉後重試。'
         }
       }
     },

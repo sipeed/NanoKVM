@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useAuth } from '@/contexts/auth.ts';
 import { Alert, App, Button, Collapse, Modal, notification, Segmented, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
@@ -69,6 +70,15 @@ const MediaGroup = ({
 
 export const Storage = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
+  // Attaching a medium hands it to the target machine; writing changes what the
+  // library keeps. Reading is implied by both, so the page itself is already
+  // behind library.read.
+  const canAttach = hasPermission('medium.attach');
+  const canWrite = hasPermission('library.write');
+  // Turning the virtual disk on is a device setting, so only an account that may
+  // change device settings can do it from here.
+  const canDevice = hasPermission('device');
   const [notificationApi, contextHolder] = notification.useNotification();
   const { modal } = App.useApp();
 
@@ -154,7 +164,16 @@ export const Storage = () => {
   // file listing stays current. The medium list keeps its own poll above: a
   // refresh only means the files changed, and re-walking the medium directory
   // on every one of those events would cost more than it shows.
+  //
+  // The socket is the console one, so an account granted only the library has
+  // none to open. The medium list keeps its own poll either way; without the
+  // push the file listing waits for the refresh button.
+  // Depend on the grant, not on hasPermission: that changes identity with every
+  // account refresh, which would tear the socket down on each auth push.
+  const canWatchConsole = hasPermission('console.view');
   useEffect(() => {
+    if (!canWatchConsole) return;
+
     const ws = new WsClient();
     ws.connect();
     const unsubscribe = ws.on('storage', () => setStorageSignal((signal) => signal + 1));
@@ -162,7 +181,7 @@ export const Storage = () => {
       unsubscribe();
       ws.close();
     };
-  }, []);
+  }, [canWatchConsole]);
 
   // Poll the media job while one is running: creating a medium writes
   // gigabytes to the card, so the page reports it like any other transfer.
@@ -206,21 +225,23 @@ export const Storage = () => {
   // swallowed by a popover closing.
   const { mount, eject, busy } = useMediaMount({
     onError: notifyError,
-    onNeedEnableDisk: (retry) =>
-      setConfirm({
-        title: t('storage.enableDisk.title'),
-        description: t('storage.enableDisk.desc'),
-        ok: async () => {
-          // Ask for the state, do not toggle: the disk being off is why this
-          // dialog appeared, and a toggle would be wrong if that changed.
-          const rsp = await api.setVirtualDevice('disk', true);
-          if (rsp.code !== 0) {
-            notifyError(rsp.msg);
-            return;
-          }
-          retry();
-        }
-      }),
+    onNeedEnableDisk: canDevice
+      ? (retry) =>
+          setConfirm({
+            title: t('storage.enableDisk.title'),
+            description: t('storage.enableDisk.desc'),
+            ok: async () => {
+              // Ask for the state, do not toggle: the disk being off is why this
+              // dialog appeared, and a toggle would be wrong if that changed.
+              const rsp = await api.setVirtualDevice('disk', true);
+              if (rsp.code !== 0) {
+                notifyError(rsp.msg);
+                return;
+              }
+              retry();
+            }
+          })
+      : () => notifyError(t('storage.enableDisk.askDevice')),
     onNeedForce: (retry) =>
       setConfirm({
         title: t('storage.force.title'),
@@ -534,14 +555,16 @@ export const Storage = () => {
                 <span className="text-blue-500">
                   {t('storage.attached', { name: attachedName })}
                 </span>
-                <Button
-                  size="small"
-                  icon={<UnplugIcon size={14} />}
-                  loading={busy === 'eject'}
-                  onClick={() => void eject()}
-                >
-                  {t('storage.eject')}
-                </Button>
+                {canAttach && (
+                  <Button
+                    size="small"
+                    icon={<UnplugIcon size={14} />}
+                    loading={busy === 'eject'}
+                    onClick={() => void eject()}
+                  >
+                    {t('storage.eject')}
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -623,37 +646,41 @@ export const Storage = () => {
 
         <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] gap-6">
           <div className="flex min-h-0 flex-col space-y-3">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-xs uppercase tracking-wide text-neutral-500">
-                {t('storage.mountMode')}
-              </span>
-              <Segmented
-                size="small"
-                value={mountAsCdrom ? 'cdrom' : 'disk'}
-                disabled={busy !== '' || state.state === 'unsupported'}
-                onChange={(value) => setMountAsCdrom(value === 'cdrom')}
-                options={[
-                  {
-                    value: 'disk',
-                    label: (
-                      <div className="flex items-center space-x-1">
-                        <HardDriveIcon size={14} />
-                        <span>{t('storage.mountModeDisk')}</span>
-                      </div>
-                    )
-                  },
-                  {
-                    value: 'cdrom',
-                    label: (
-                      <div className="flex items-center space-x-1">
-                        <DiscIcon size={14} />
-                        <span>{t('storage.mountModeCdrom')}</span>
-                      </div>
-                    )
-                  }
-                ]}
-              />
-            </div>
+            {/* The mount mode only shapes an attach, so an account that cannot
+                attach has nothing to pick here. */}
+            {canAttach && (
+              <div className="flex items-center justify-between px-2">
+                <span className="text-xs uppercase tracking-wide text-neutral-500">
+                  {t('storage.mountMode')}
+                </span>
+                <Segmented
+                  size="small"
+                  value={mountAsCdrom ? 'cdrom' : 'disk'}
+                  disabled={busy !== '' || state.state === 'unsupported'}
+                  onChange={(value) => setMountAsCdrom(value === 'cdrom')}
+                  options={[
+                    {
+                      value: 'disk',
+                      label: (
+                        <div className="flex items-center space-x-1">
+                          <HardDriveIcon size={14} />
+                          <span>{t('storage.mountModeDisk')}</span>
+                        </div>
+                      )
+                    },
+                    {
+                      value: 'cdrom',
+                      label: (
+                        <div className="flex items-center space-x-1">
+                          <DiscIcon size={14} />
+                          <span>{t('storage.mountModeCdrom')}</span>
+                        </div>
+                      )
+                    }
+                  ]}
+                />
+              </div>
+            )}
 
             <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-auto">
               {isLoading ? (
@@ -678,7 +705,7 @@ export const Storage = () => {
                             onClick={() => setIsTipsOpen(true)}
                           />
                         </Tooltip>
-                        {addMedia.actions}
+                        {canWrite && addMedia.actions}
                       </div>
                     }
                   >
@@ -742,33 +769,34 @@ export const Storage = () => {
                 className="flex shrink-0 items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(event) => event.stopPropagation()}
               >
-                {item.attached ? (
-                  <Tooltip title={t('storage.eject')}>
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<UnplugIcon size={14} />}
-                      onClick={() => void eject()}
-                    />
-                  </Tooltip>
-                ) : (
-                  <Tooltip
-                    title={
-                      mountAsCdrom && !api.isOpticalImage(item)
-                        ? t('storage.add.cdromOnlyIso')
-                        : t('storage.mount')
-                    }
-                  >
-                    <Button
-                      type="text"
-                      size="small"
-                      loading={isBusy}
-                      disabled={mountAsCdrom && !api.isOpticalImage(item)}
-                      icon={<PlugIcon size={14} />}
-                      onClick={() => void mount(item, mountAsCdrom)}
-                    />
-                  </Tooltip>
-                )}
+                {canAttach &&
+                  (item.attached ? (
+                    <Tooltip title={t('storage.eject')}>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<UnplugIcon size={14} />}
+                        onClick={() => void eject()}
+                      />
+                    </Tooltip>
+                  ) : (
+                    <Tooltip
+                      title={
+                        mountAsCdrom && !api.isOpticalImage(item)
+                          ? t('storage.add.cdromOnlyIso')
+                          : t('storage.mount')
+                      }
+                    >
+                      <Button
+                        type="text"
+                        size="small"
+                        loading={isBusy}
+                        disabled={mountAsCdrom && !api.isOpticalImage(item)}
+                        icon={<PlugIcon size={14} />}
+                        onClick={() => void mount(item, mountAsCdrom)}
+                      />
+                    </Tooltip>
+                  ))}
 
                 {item.type === 'image' && (
                   <>
@@ -783,20 +811,24 @@ export const Storage = () => {
                         onClick={() => void downloadImage(item)}
                       />
                     </Tooltip>
-                    <Tooltip
-                      title={
-                        dataOwned || item.attached ? t('storage.add.blocked') : t('storage.delete')
-                      }
-                    >
-                      <Button
-                        type="text"
-                        size="small"
-                        danger
-                        disabled={dataOwned || item.attached}
-                        icon={<Trash2Icon size={14} />}
-                        onClick={() => confirmDelete(item)}
-                      />
-                    </Tooltip>
+                    {canWrite && (
+                      <Tooltip
+                        title={
+                          dataOwned || item.attached
+                            ? t('storage.add.blocked')
+                            : t('storage.delete')
+                        }
+                      >
+                        <Button
+                          type="text"
+                          size="small"
+                          danger
+                          disabled={dataOwned || item.attached}
+                          icon={<Trash2Icon size={14} />}
+                          onClick={() => confirmDelete(item)}
+                        />
+                      </Tooltip>
+                    )}
                   </>
                 )}
               </div>

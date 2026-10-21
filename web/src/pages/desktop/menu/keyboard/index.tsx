@@ -11,14 +11,14 @@ import { VirtualKeyboard } from './virtual-keyboard.tsx';
 
 export const Keyboard = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   const content = (
     <div className="flex flex-col space-y-1">
       <Paste />
       <VirtualKeyboard />
       <Shortcuts />
-      {account.role === 'admin' && <LeaderKey />}
+      {hasPermission('device') && <LeaderKey />}
     </div>
   );
 

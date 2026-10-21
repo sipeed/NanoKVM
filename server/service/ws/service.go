@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +32,16 @@ func (s *Service) Connect(c *gin.Context) {
 
 	log.Debug("websocket connected")
 
-	client := NewClient(ws)
+	// View-only sessions keep receiving frames but their keyboard and mouse
+	// reports are dropped.
+	readOnly := true
+	username := ""
+	if principal, ok := middleware.CurrentPrincipal(c); ok {
+		readOnly = !principal.Has(authn.PermConsoleControl)
+		username = principal.Username
+	}
+
+	client := NewClient(ws, readOnly, username)
 
 	manager := GetManager()
 	manager.AddClient(ws, client)

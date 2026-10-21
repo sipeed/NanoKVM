@@ -36,3 +36,5 @@ kvmapp/kvm_system/kvm_system
 
 # Release packages assembled by scripts/package.sh
 /build/
+kvmapp/server
+kvmapp/version

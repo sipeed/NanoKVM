@@ -24,6 +24,7 @@ export const Device = () => {
         <Hdmi />
         <Divider className="opacity-50" />
 
+        {/* The emulated USB devices are device settings, like the rest of the tab */}
         <VirtualDevices />
         <Divider className="opacity-50" />
 

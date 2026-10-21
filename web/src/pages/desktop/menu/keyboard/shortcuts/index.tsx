@@ -5,7 +5,6 @@ import { CommandIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/hid.ts';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 import { Recorder } from './recorder.tsx';
 import { Shortcut } from './shortcut.tsx';
@@ -13,7 +12,7 @@ import type { Shortcut as ShortcutInterface } from './types.ts';
 
 export const Shortcuts = () => {
   const { t } = useTranslation();
-  const { account } = useAuth();
+  const { hasPermission } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -95,7 +94,7 @@ export const Shortcuts = () => {
   }
 
   const content = (
-    <ScrollArea className="max-w-[400px] [&>[data-radix-scroll-area-viewport]]:max-h-[350px]">
+    <div className="max-h-[350px] max-w-[400px] overflow-y-auto">
       {/* custom shortcuts */}
       {customShortcuts.length > 0 && (
         <>
@@ -114,7 +113,7 @@ export const Shortcuts = () => {
 
       <Divider style={{ margin: '5px 0 5px 0' }} />
 
-      {account.role === 'admin' && (
+      {hasPermission('device') && (
         <Recorder
           shortcuts={customShortcuts}
           addShortcut={addShortcut}
@@ -122,7 +121,7 @@ export const Shortcuts = () => {
           setIsRecording={setIsRecording}
         />
       )}
-    </ScrollArea>
+    </div>
   );
 
   return (
