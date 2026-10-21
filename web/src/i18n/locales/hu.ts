@@ -709,7 +709,14 @@ const hu = {
           loadFailed: 'A felhasználókat nem sikerült betölteni',
           saveFailed: 'A felhasználót nem sikerült menteni',
           deleteFailed: 'A felhasználót nem sikerült törölni',
-          editPermissions: 'Engedélyek'
+          editPermissions: 'Engedélyek',
+          mcpLossTitle: 'MCP-hozzáférés visszavonása',
+          mcpLossDesc:
+            '{{name}} elveszíti az MCP-hozzáférést. Az MCP API-kulcsot az egész eszköz közösen használja, így egy másolata az újragenerálásig működik. Az újragenerálás minden MCP-klienst lecsatlakoztat, amíg meg nem kapják az új kulcsot.',
+          mcpLossRotate: 'MCP API-kulcs újragenerálása',
+          mcpLossKeep:
+            'A jelenlegi kulcs érvényes marad, és akinél másolat van, továbbra is vezérelheti a billentyűzetet és az egeret. Később az MCP-beállításokban újragenerálhatja.',
+          mcpKeyRotated: 'MCP API-kulcs újragenerálva. Az MCP-klienseknek az új kulcs kell.'
         },
         permissions: {
           title: 'Engedélyek',
@@ -752,7 +759,7 @@ const hu = {
             'Módosítja a Wi-Fi, DNS és TLS beállításokat, ami leválaszthatja ezt az eszközt a hálózatról.',
           effectUpdate: 'Firmware-t és alkalmazáscsomagokat telepít.',
           effectMcp:
-            'Eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket; ha bármely fiók elveszíti ezt az engedélyt, a kulcs minden kliens számára újragenerálódik.',
+            'Eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket; egy másolat az engedély visszavonása után is működik, hacsak nem generálják újra a kulcsot, amit az engedély eltávolításakor felajánlunk.',
           effectTailscale: 'Csatlakoztatja ezt az eszközt egy VPN-hálózathoz.',
           effectAi:
             'Olyan helyi felületen keresztül vezérli az eszközt, amelyet a többi engedély nem korlátoz, így gyakorlatilag teljes eszközvezérlést jelent.',

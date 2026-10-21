@@ -700,7 +700,14 @@ const se = {
           loadFailed: 'Kunde inte läsa in användare',
           saveFailed: 'Kunde inte spara användaren',
           deleteFailed: 'Kunde inte ta bort användaren',
-          editPermissions: 'Behörigheter'
+          editPermissions: 'Behörigheter',
+          mcpLossTitle: 'Ta bort MCP-åtkomst',
+          mcpLossDesc:
+            '{{name}} förlorar MCP-åtkomst. MCP-API-nyckeln delas av hela enheten, så en kopia fungerar tills nyckeln skapas på nytt. Att skapa den på nytt kopplar från alla MCP-klienter tills de får den nya nyckeln.',
+          mcpLossRotate: 'Skapa ny MCP-API-nyckel',
+          mcpLossKeep:
+            'Den nuvarande nyckeln förblir giltig, och den som har en kopia kan fortfarande styra tangentbord och mus. Du kan skapa en ny senare i MCP-inställningarna.',
+          mcpKeyRotated: 'Ny MCP-API-nyckel skapad. MCP-klienter behöver den nya nyckeln.'
         },
         permissions: {
           title: 'Behörigheter',
@@ -743,7 +750,7 @@ const se = {
             'Ändrar Wi-Fi, DNS och TLS, vilket kan koppla bort den här enheten från nätet.',
           effectUpdate: 'Installerar firmware och programpaket.',
           effectMcp:
-            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; när ett konto förlorar behörigheten skapas nyckeln på nytt för alla klienter.',
+            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; en kopia fungerar även efter att behörigheten tagits bort om inte nyckeln skapas på nytt, vilket erbjuds när behörigheten tas bort.',
           effectTailscale: 'Ansluter den här enheten till ett VPN-nät.',
           effectAi:
             'Styr enheten via ett lokalt gränssnitt som de övriga behörigheterna inte begränsar, så det motsvarar full kontroll över enheten.',

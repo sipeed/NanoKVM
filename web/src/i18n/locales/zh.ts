@@ -680,7 +680,14 @@ const zh = {
           loadFailed: '加载用户失败',
           saveFailed: '保存用户失败',
           deleteFailed: '删除用户失败',
-          editPermissions: '权限'
+          editPermissions: '权限',
+          mcpLossTitle: '撤销 MCP 访问',
+          mcpLossDesc:
+            '{{name}} 将失去 MCP 访问权限。MCP API Key 由整台设备共用，已复制出去的 Key 在重新生成前仍然有效。重新生成会断开所有 MCP 客户端，直到它们换用新 Key。',
+          mcpLossRotate: '重新生成 MCP API Key',
+          mcpLossKeep:
+            '当前 Key 将继续有效，持有副本的人仍可控制键盘和鼠标。之后可在 MCP 设置中重新生成。',
+          mcpKeyRotated: 'MCP API Key 已重新生成，MCP 客户端需换用新 Key。'
         },
         permissions: {
           title: '功能权限',
@@ -718,7 +725,7 @@ const zh = {
           effectNetwork: '修改 Wi-Fi、DNS 与 TLS，可能使本设备失联。',
           effectUpdate: '安装固件与应用更新包。',
           effectMcp:
-            '下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；任一账户失去此权限时，Key 都会重新生成，所有客户端需换用新 Key。',
+            '下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；撤销此权限后，已复制的 Key 仍有效，除非重新生成（移除权限时会询问是否重新生成）。',
           effectTailscale: '把本设备加入 VPN 组网。',
           effectAi: '通过不受其他权限限制的本地接口操作设备，因此相当于完整的设备控制权。',
           fullControlWarning: '下列权限等同于完整的设备控制权：',

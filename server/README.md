@@ -108,8 +108,12 @@ names them before the grants are saved:
 
 - `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
 - `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
-  outside the web session. The key is shared, so when any account loses this grant (revoked,
-  demoted, disabled or deleted) the server regenerates it, and every MCP client needs the new key.
+  outside the web session. The key is shared, so a copy keeps working after an account loses this
+  grant. Whenever a change takes the grant away (revoked, demoted, disabled or deleted), the account
+  editor warns and offers to regenerate the key, checked by default; regenerating disconnects every
+  MCP client until it is given the new key, and an administrator who keeps the key accepts that a
+  copy stays valid. The API takes the choice as `rotateMcpKey` (a body field on update, a query
+  parameter on delete) and never rotates without it.
 - `ai` drives the device through the local loopback interface, which the other grants do not
   restrict.
 - `update` installs firmware and application packages. An offline package is checked only against

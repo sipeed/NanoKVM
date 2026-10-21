@@ -702,7 +702,15 @@ const nb = {
           loadFailed: 'Kunne ikke laste brukere',
           saveFailed: 'Kunne ikke lagre brukeren',
           deleteFailed: 'Kunne ikke slette brukeren',
-          editPermissions: 'Tillatelser'
+          editPermissions: 'Tillatelser',
+          mcpLossTitle: 'Fjern MCP-tilgang',
+          mcpLossDesc:
+            '{{name}} mister MCP-tilgang. MCP-API-nøkkelen deles av hele enheten, så en kopi virker til nøkkelen genereres på nytt. Å generere den på nytt kobler fra alle MCP-klienter til de får den nye nøkkelen.',
+          mcpLossRotate: 'Generer MCP-API-nøkkelen på nytt',
+          mcpLossKeep:
+            'Den nåværende nøkkelen forblir gyldig, og den som har en kopi kan fortsatt styre tastatur og mus. Du kan generere den på nytt senere i MCP-innstillingene.',
+          mcpKeyRotated:
+            'MCP-API-nøkkelen er generert på nytt. MCP-klienter trenger den nye nøkkelen.'
         },
         permissions: {
           title: 'Tillatelser',
@@ -745,7 +753,7 @@ const nb = {
             'Endrer Wi-Fi, DNS og TLS, noe som kan koble denne enheten fra nettverket.',
           effectUpdate: 'Installerer fastvare og programpakker.',
           effectMcp:
-            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; når en konto mister denne tillatelsen, genereres nøkkelen på nytt for alle klienter.',
+            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; en kopi virker fortsatt etter at tillatelsen er trukket tilbake med mindre nøkkelen genereres på nytt, noe som tilbys når tillatelsen fjernes.',
           effectTailscale: 'Kobler denne enheten til et VPN-nett.',
           effectAi:
             'Styrer enheten via et lokalt grensesnitt som de andre tillatelsene ikke begrenser, så dette tilsvarer full kontroll over enheten.',

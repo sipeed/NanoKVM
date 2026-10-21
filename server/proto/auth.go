@@ -57,4 +57,13 @@ type UpdateUserReq struct {
 	Role        *string   `json:"role"`
 	Enabled     *bool     `json:"enabled"`
 	Permissions *[]string `json:"permissions"`
+	// RotateMcpKey asks to regenerate the device-wide MCP API key when this
+	// change takes the mcp grant away. The administrator decides: rotating
+	// disconnects every MCP client, keeping it leaves a copied key working.
+	RotateMcpKey bool `json:"rotateMcpKey"`
+}
+
+// UpdateUserRsp says whether the change regenerated the MCP API key.
+type UpdateUserRsp struct {
+	McpKeyRotated bool `json:"mcpKeyRotated"`
 }

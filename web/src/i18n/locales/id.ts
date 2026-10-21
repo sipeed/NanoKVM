@@ -704,7 +704,14 @@ const id = {
           loadFailed: 'Gagal memuat pengguna',
           saveFailed: 'Gagal menyimpan pengguna',
           deleteFailed: 'Gagal menghapus pengguna',
-          editPermissions: 'Izin'
+          editPermissions: 'Izin',
+          mcpLossTitle: 'Cabut akses MCP',
+          mcpLossDesc:
+            '{{name}} akan kehilangan akses MCP. Kunci API MCP dipakai bersama oleh seluruh perangkat, jadi salinannya tetap berlaku sampai kunci dibuat ulang. Membuat ulang akan memutus semua klien MCP sampai mereka menerima kunci baru.',
+          mcpLossRotate: 'Buat ulang kunci API MCP',
+          mcpLossKeep:
+            'Kunci saat ini tetap berlaku, dan siapa pun yang memiliki salinannya masih dapat mengendalikan keyboard dan mouse. Anda dapat membuatnya ulang nanti di pengaturan MCP.',
+          mcpKeyRotated: 'Kunci API MCP dibuat ulang. Klien MCP memerlukan kunci baru.'
         },
         permissions: {
           title: 'Izin',
@@ -747,7 +754,7 @@ const id = {
             'Mengubah Wi-Fi, DNS, dan TLS, yang dapat memutus perangkat ini dari jaringan.',
           effectUpdate: 'Memasang firmware dan paket aplikasi.',
           effectMcp:
-            'Menerbitkan kunci API untuk seluruh perangkat yang mengendalikan keyboard, mouse, dan tangkapan layar di luar sesi web; saat akun mana pun kehilangan izin ini, kunci dibuat ulang untuk semua klien.',
+            'Menerbitkan kunci API untuk seluruh perangkat yang mengendalikan keyboard, mouse, dan tangkapan layar di luar sesi web; salinan kunci tetap berlaku setelah izin dicabut kecuali kunci dibuat ulang, yang ditawarkan saat izin dihapus.',
           effectTailscale: 'Menghubungkan perangkat ini ke jaringan VPN.',
           effectAi:
             'Mengendalikan perangkat melalui antarmuka lokal yang tidak dibatasi izin lain, sehingga setara dengan kendali penuh atas perangkat.',

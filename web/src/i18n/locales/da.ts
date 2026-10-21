@@ -703,7 +703,14 @@ const da = {
           loadFailed: 'Kunne ikke indlæse brugere',
           saveFailed: 'Kunne ikke gemme brugeren',
           deleteFailed: 'Kunne ikke slette brugeren',
-          editPermissions: 'Tilladelser'
+          editPermissions: 'Tilladelser',
+          mcpLossTitle: 'Fjern MCP-adgang',
+          mcpLossDesc:
+            '{{name}} mister MCP-adgang. MCP-API-nøglen deles af hele enheden, så en kopi virker, indtil nøglen gendannes. Gendannelse afbryder alle MCP-klienter, indtil de får den nye nøgle.',
+          mcpLossRotate: 'Gendan MCP-API-nøglen',
+          mcpLossKeep:
+            'Den nuværende nøgle forbliver gyldig, og den, der har en kopi, kan stadig styre tastatur og mus. Du kan gendanne den senere i MCP-indstillingerne.',
+          mcpKeyRotated: 'MCP-API-nøglen er gendannet. MCP-klienter skal bruge den nye nøgle.'
         },
         permissions: {
           title: 'Rettigheder',
@@ -744,7 +751,7 @@ const da = {
           effectNetwork: 'Ændrer Wi-Fi, DNS og TLS, hvilket kan tage denne enhed af netværket.',
           effectUpdate: 'Installerer firmware og programpakker.',
           effectMcp:
-            'Udsteder en API-nøgle for hele enheden, der styrer tastatur, mus og skærmbilleder uden for websessionen; når en konto mister denne rettighed, gendannes nøglen for alle klienter.',
+            'Udsteder en API-nøgle for hele enheden, der styrer tastatur, mus og skærmbilleder uden for websessionen; en kopi virker stadig, efter rettigheden er fjernet, medmindre nøglen gendannes, hvilket tilbydes, når rettigheden fjernes.',
           effectTailscale: 'Forbinder denne enhed til et VPN-mesh.',
           effectAi:
             'Styrer enheden via en lokal grænseflade, som de øvrige rettigheder ikke begrænser, så det svarer til fuld kontrol over enheden.',

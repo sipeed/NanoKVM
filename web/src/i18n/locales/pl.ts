@@ -706,7 +706,15 @@ const pl = {
           loadFailed: 'Nie udało się wczytać użytkowników',
           saveFailed: 'Nie udało się zapisać użytkownika',
           deleteFailed: 'Nie udało się usunąć użytkownika',
-          editPermissions: 'Uprawnienia'
+          editPermissions: 'Uprawnienia',
+          mcpLossTitle: 'Odbierz dostęp MCP',
+          mcpLossDesc:
+            '{{name}} utraci dostęp MCP. Klucz API MCP jest wspólny dla całego urządzenia, więc jego kopia działa, dopóki klucz nie zostanie wygenerowany ponownie. Ponowne wygenerowanie rozłącza wszystkich klientów MCP, dopóki nie otrzymają nowego klucza.',
+          mcpLossRotate: 'Wygeneruj ponownie klucz API MCP',
+          mcpLossKeep:
+            'Obecny klucz pozostaje ważny, a każdy, kto ma kopię, nadal może sterować klawiaturą i myszą. Możesz go wygenerować ponownie później w ustawieniach MCP.',
+          mcpKeyRotated:
+            'Klucz API MCP wygenerowany ponownie. Klienci MCP potrzebują nowego klucza.'
         },
         permissions: {
           title: 'Uprawnienia',
@@ -747,7 +755,7 @@ const pl = {
           effectNetwork: 'Zmienia Wi-Fi, DNS i TLS, co może odciąć to urządzenie od sieci.',
           effectUpdate: 'Instaluje firmware i pakiety aplikacji.',
           effectMcp:
-            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; gdy dowolne konto utraci to uprawnienie, klucz jest generowany ponownie dla wszystkich klientów.',
+            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; kopia działa po odebraniu uprawnienia, chyba że klucz zostanie wygenerowany ponownie, co jest proponowane przy usuwaniu uprawnienia.',
           effectTailscale: 'Dołącza to urządzenie do sieci VPN typu mesh.',
           effectAi:
             'Steruje urządzeniem przez lokalny interfejs, którego pozostałe uprawnienia nie ograniczają, więc oznacza to pełną kontrolę nad urządzeniem.',

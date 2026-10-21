@@ -711,7 +711,14 @@ const it = {
           loadFailed: 'Impossibile caricare gli utenti',
           saveFailed: "Impossibile salvare l'utente",
           deleteFailed: "Impossibile eliminare l'utente",
-          editPermissions: 'Autorizzazioni'
+          editPermissions: 'Autorizzazioni',
+          mcpLossTitle: 'Revoca accesso MCP',
+          mcpLossDesc:
+            '{{name}} perderà l’accesso MCP. La chiave API MCP è condivisa da tutto il dispositivo, quindi una copia continua a funzionare finché la chiave non viene rigenerata. Rigenerarla disconnette tutti i client MCP finché non ricevono la nuova chiave.',
+          mcpLossRotate: 'Rigenera la chiave API MCP',
+          mcpLossKeep:
+            'La chiave attuale resta valida e chi ne ha una copia può ancora controllare tastiera e mouse. Potrai rigenerarla in seguito nelle impostazioni MCP.',
+          mcpKeyRotated: 'Chiave API MCP rigenerata. I client MCP hanno bisogno della nuova chiave.'
         },
         permissions: {
           title: 'Permessi',
@@ -754,7 +761,7 @@ const it = {
             'Modifica Wi-Fi, DNS e TLS, il che può isolare questo dispositivo dalla rete.',
           effectUpdate: 'Installa firmware e pacchetti applicativi.',
           effectMcp:
-            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; quando un account perde questo permesso, la chiave viene rigenerata per tutti i client.',
+            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; una copia continua a funzionare dopo la revoca se la chiave non viene rigenerata, cosa proposta quando si rimuove il permesso.',
           effectTailscale: 'Unisce questo dispositivo a una rete mesh VPN.',
           effectAi:
             'Pilota il dispositivo tramite un’interfaccia locale che gli altri permessi non limitano, quindi equivale al controllo totale del dispositivo.',

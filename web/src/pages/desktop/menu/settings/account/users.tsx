@@ -1,6 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Button, Form, Input, message, Modal, Popconfirm, Select, Switch, Tooltip } from 'antd';
+import {
+  Alert,
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Select,
+  Switch,
+  Tooltip
+} from 'antd';
 import { KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -20,6 +32,19 @@ type CreateValues = {
 type PasswordValues = {
   password: string;
 };
+
+// A change that takes the MCP API key out of an account's reach, held until the
+// administrator decides whether the shared key is regenerated.
+type PendingMcpLoss = {
+  user: User;
+  apply: (rotateMcpKey: boolean) => Promise<unknown>;
+};
+
+// An enabled account reaches the MCP API key when it is an administrator or
+// holds the mcp grant; no other grant implies it.
+function reachesMcp(user: Pick<User, 'role' | 'enabled' | 'permissions'> | null) {
+  return !!user && user.enabled && (user.role === 'admin' || user.permissions.includes('mcp'));
+}
 
 // AccountRefused marks a change the server turned down, which carries a reason
 // the administrator can act on (an invalid role, the last administrator, ...).
@@ -54,6 +79,43 @@ export const Users = () => {
   // the place the administrator was working in.
   const [isSaved, setIsSaved] = useState(false);
   const savedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The MCP API key is shared by the whole device, so a key the account copied
+  // keeps working after it loses the grant. Regenerating it disconnects every
+  // MCP client, so the administrator is warned and chooses; regenerating is the
+  // default.
+  const [mcpLoss, setMcpLoss] = useState<PendingMcpLoss | null>(null);
+  const [rotateMcpKey, setRotateMcpKey] = useState(true);
+  // Kept apart from the pending change so the dialog still names the account
+  // while it animates closed.
+  const [mcpLossName, setMcpLossName] = useState('');
+
+  // guardMcpLoss applies the change at once unless it takes the MCP API key out
+  // of the account's reach; then it asks first.
+  function guardMcpLoss(
+    user: User,
+    next: User | null,
+    apply: (rotateMcpKey: boolean) => Promise<unknown>
+  ) {
+    if (!reachesMcp(user) || reachesMcp(next)) {
+      void apply(false);
+      return;
+    }
+    setRotateMcpKey(true);
+    setMcpLossName(user.username);
+    setMcpLoss({ user, apply });
+  }
+
+  function confirmMcpLoss() {
+    const pending = mcpLoss;
+    setMcpLoss(null);
+    if (pending) void pending.apply(rotateMcpKey);
+  }
+
+  function reportMcpKeyRotated(rsp: { data?: { mcpKeyRotated?: boolean } }) {
+    if (rsp.data?.mcpKeyRotated) {
+      messageApi.success(t('settings.account.users.mcpKeyRotated'));
+    }
+  }
 
   function stopSavedTimer() {
     if (savedTimer.current !== null) {
@@ -167,29 +229,46 @@ export const Users = () => {
   // dialog only closes it on success.
   async function updateUser(
     user: User,
-    changes: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>
+    changes: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>,
+    rotateMcpKey = false
   ) {
     setIsLoading(true);
     try {
-      const rsp = await api.updateUser(user.username, changes);
+      const rsp = await api.updateUser(
+        user.username,
+        rotateMcpKey ? { ...changes, rotateMcpKey } : changes
+      );
       if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
+      reportMcpKeyRotated(rsp);
       await loadUsers();
       return true;
     } catch (err) {
       messageApi.error(saveFailedMessage(err, t('settings.account.users.saveFailed')));
-      setIsLoading(false);
+      // A refusal can follow a stored change (the MCP key failed to rotate), so
+      // the list is re-read rather than left showing the old state.
+      if (err instanceof AccountRefused) {
+        void loadUsers();
+      } else {
+        setIsLoading(false);
+      }
       return false;
     }
   }
 
-  async function savePermissions() {
+  function savePermissions() {
     if (!permissionUser) return;
     // Only grants this build knows can be sent; the server keeps the stored ones
     // it does not know (written by a newer release) on its own.
     const known = new Set(catalog?.map((descriptor) => descriptor.id) ?? []);
-    const saved = await updateUser(permissionUser, {
-      permissions: permissionDraft.filter((permission) => known.has(permission))
-    });
+    const permissions = permissionDraft.filter((permission) => known.has(permission));
+    const user = permissionUser;
+    guardMcpLoss(user, { ...user, permissions }, (rotate) =>
+      commitPermissions(user, permissions, rotate)
+    );
+  }
+
+  async function commitPermissions(user: User, permissions: Permission[], rotate: boolean) {
+    const saved = await updateUser(user, { permissions }, rotate);
     if (!saved) return;
 
     // The footer button carries the confirmation for a moment, then goes back to
@@ -202,16 +281,21 @@ export const Users = () => {
     }, 2000);
   }
 
-  async function deleteUser(username: string) {
+  async function deleteUser(username: string, rotateMcpKey = false) {
     setIsLoading(true);
     try {
-      const rsp = await api.deleteUser(username);
+      const rsp = await api.deleteUser(username, rotateMcpKey);
       if (rsp.code !== 0) throw new AccountRefused(rsp.msg);
       messageApi.success(t('settings.account.users.deleted'));
+      reportMcpKeyRotated(rsp);
       await loadUsers();
     } catch (err) {
       messageApi.error(saveFailedMessage(err, t('settings.account.users.deleteFailed')));
-      setIsLoading(false);
+      if (err instanceof AccountRefused) {
+        void loadUsers();
+      } else {
+        setIsLoading(false);
+      }
     }
   }
 
@@ -295,7 +379,11 @@ export const Users = () => {
                     { value: 'admin', label: t('settings.account.roles.admin') },
                     { value: 'user', label: t('settings.account.roles.user') }
                   ]}
-                  onChange={(role) => updateUser(user, { role })}
+                  onChange={(role) =>
+                    guardMcpLoss(user, { ...user, role }, (rotate) =>
+                      updateUser(user, { role }, rotate)
+                    )
+                  }
                 />
                 <Tooltip title={t('settings.account.users.editPermissions')}>
                   <Button
@@ -311,7 +399,11 @@ export const Users = () => {
                   disabled={isLoading || isProtected}
                   checkedChildren={t('settings.account.users.enabled')}
                   unCheckedChildren={t('settings.account.users.disabled')}
-                  onChange={(enabled) => updateUser(user, { enabled })}
+                  onChange={(enabled) =>
+                    guardMcpLoss(user, { ...user, enabled }, (rotate) =>
+                      updateUser(user, { enabled }, rotate)
+                    )
+                  }
                 />
                 <Tooltip title={t('settings.account.users.resetPassword')}>
                   <Button
@@ -327,7 +419,9 @@ export const Users = () => {
                   okText={t('settings.account.okBtn')}
                   cancelText={t('settings.account.cancelBtn')}
                   disabled={isProtected}
-                  onConfirm={() => deleteUser(user.username)}
+                  onConfirm={() =>
+                    guardMcpLoss(user, null, (rotate) => deleteUser(user.username, rotate))
+                  }
                 >
                   <Tooltip title={t('settings.account.users.delete')}>
                     <Button
@@ -432,7 +526,7 @@ export const Users = () => {
         open={!!permissionUser}
         destroyOnHidden
         onCancel={closePermissionEditor}
-        onOk={() => void savePermissions()}
+        onOk={savePermissions}
         okText={
           isSaved ? t('settings.account.permissions.saved') : t('settings.account.permissions.save')
         }
@@ -455,6 +549,26 @@ export const Users = () => {
           catalog={catalog}
           catalogFailed={catalogFailed}
         />
+      </Modal>
+
+      <Modal
+        title={t('settings.account.users.mcpLossTitle')}
+        open={!!mcpLoss}
+        destroyOnHidden
+        onCancel={() => setMcpLoss(null)}
+        onOk={confirmMcpLoss}
+        okText={t('auth.ok')}
+        cancelText={t('auth.cancel')}
+      >
+        <div className="flex flex-col gap-3">
+          <div>{t('settings.account.users.mcpLossDesc', { name: mcpLossName })}</div>
+          <Checkbox checked={rotateMcpKey} onChange={(e) => setRotateMcpKey(e.target.checked)}>
+            {t('settings.account.users.mcpLossRotate')}
+          </Checkbox>
+          {!rotateMcpKey && (
+            <Alert type="warning" showIcon message={t('settings.account.users.mcpLossKeep')} />
+          )}
+        </div>
       </Modal>
     </>
   );

@@ -715,7 +715,14 @@ const fr = {
           loadFailed: 'Échec du chargement des utilisateurs',
           saveFailed: "Échec de l'enregistrement de l'utilisateur",
           deleteFailed: "Échec de la suppression de l'utilisateur",
-          editPermissions: 'Autorisations'
+          editPermissions: 'Autorisations',
+          mcpLossTitle: 'Retirer l’accès MCP',
+          mcpLossDesc:
+            '{{name}} perdra l’accès MCP. La clé API MCP est partagée par tout l’appareil : une copie reste valide jusqu’à sa régénération. La régénérer déconnecte tous les clients MCP jusqu’à ce qu’ils reçoivent la nouvelle clé.',
+          mcpLossRotate: 'Régénérer la clé API MCP',
+          mcpLossKeep:
+            'La clé actuelle reste valide et toute personne qui en a une copie peut encore contrôler le clavier et la souris. Vous pourrez la régénérer plus tard dans les réglages MCP.',
+          mcpKeyRotated: 'Clé API MCP régénérée. Les clients MCP ont besoin de la nouvelle clé.'
         },
         permissions: {
           title: 'Autorisations',
@@ -758,7 +765,7 @@ const fr = {
             'Modifie le Wi-Fi, le DNS et TLS, ce qui peut couper cet appareil du réseau.',
           effectUpdate: 'Installe des micrologiciels et des paquets d’application.',
           effectMcp:
-            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; dès qu’un compte perd cette autorisation, la clé est régénérée pour tous les clients.',
+            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; une copie reste valide après révocation tant que la clé n’est pas régénérée, ce qui est proposé lors du retrait de l’autorisation.',
           effectTailscale: 'Rejoint cet appareil à un maillage VPN.',
           effectAi:
             'Pilote l’appareil via une interface locale que les autres autorisations ne limitent pas : cela équivaut au contrôle total de l’appareil.',

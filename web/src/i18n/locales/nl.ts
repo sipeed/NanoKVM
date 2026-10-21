@@ -713,7 +713,15 @@ const nl = {
           loadFailed: 'Gebruikers konden niet worden geladen',
           saveFailed: 'Gebruiker kon niet worden opgeslagen',
           deleteFailed: 'Gebruiker kon niet worden verwijderd',
-          editPermissions: 'Rechten'
+          editPermissions: 'Rechten',
+          mcpLossTitle: 'MCP-toegang intrekken',
+          mcpLossDesc:
+            '{{name}} verliest MCP-toegang. De MCP-API-sleutel wordt door het hele apparaat gedeeld, dus een kopie blijft werken tot de sleutel opnieuw wordt gegenereerd. Opnieuw genereren verbreekt alle MCP-clients tot ze de nieuwe sleutel krijgen.',
+          mcpLossRotate: 'MCP-API-sleutel opnieuw genereren',
+          mcpLossKeep:
+            'De huidige sleutel blijft geldig en wie een kopie heeft, kan nog steeds toetsenbord en muis bedienen. U kunt hem later opnieuw genereren in de MCP-instellingen.',
+          mcpKeyRotated:
+            'MCP-API-sleutel opnieuw gegenereerd. MCP-clients hebben de nieuwe sleutel nodig.'
         },
         permissions: {
           title: 'Rechten',
@@ -755,7 +763,7 @@ const nl = {
             'Wijzigt wifi, DNS en TLS, waardoor dit apparaat van het netwerk kan verdwijnen.',
           effectUpdate: 'Installeert firmware en applicatiepakketten.',
           effectMcp:
-            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; zodra een account deze toestemming verliest, wordt de sleutel voor alle clients opnieuw gegenereerd.',
+            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; een kopie blijft na intrekking werken tenzij de sleutel opnieuw wordt gegenereerd, wat wordt aangeboden bij het verwijderen van de toestemming.',
           effectTailscale: 'Voegt dit apparaat toe aan een VPN-mesh.',
           effectAi:
             'Bestuurt het apparaat via een lokale interface die de andere rechten niet beperken, dus dit staat gelijk aan volledige apparaatcontrole.',

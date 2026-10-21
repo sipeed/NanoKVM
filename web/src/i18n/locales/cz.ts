@@ -704,7 +704,14 @@ const cz = {
           loadFailed: 'Uživatele se nepodařilo načíst',
           saveFailed: 'Uživatele se nepodařilo uložit',
           deleteFailed: 'Uživatele se nepodařilo smazat',
-          editPermissions: 'Oprávnění'
+          editPermissions: 'Oprávnění',
+          mcpLossTitle: 'Odebrat přístup MCP',
+          mcpLossDesc:
+            '{{name}} ztratí přístup MCP. API klíč MCP sdílí celé zařízení, takže jeho kopie funguje, dokud klíč znovu nevygenerujete. Nové vygenerování odpojí všechny MCP klienty, dokud nedostanou nový klíč.',
+          mcpLossRotate: 'Znovu vygenerovat API klíč MCP',
+          mcpLossKeep:
+            'Současný klíč zůstane platný a kdo má jeho kopii, může dál ovládat klávesnici a myš. Později jej můžete znovu vygenerovat v nastavení MCP.',
+          mcpKeyRotated: 'API klíč MCP byl znovu vygenerován. MCP klienti potřebují nový klíč.'
         },
         permissions: {
           title: 'Oprávnění',
@@ -745,7 +752,7 @@ const cz = {
           effectNetwork: 'Mění Wi-Fi, DNS a TLS, což může toto zařízení odpojit od sítě.',
           effectUpdate: 'Instaluje firmware a balíčky aplikací.',
           effectMcp:
-            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; jakmile kterýkoli účet toto oprávnění ztratí, klíč se pro všechny klienty znovu vygeneruje.',
+            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; kopie funguje i po odebrání oprávnění, pokud klíč znovu nevygenerujete, což se nabízí při odebrání oprávnění.',
           effectTailscale: 'Připojuje toto zařízení do VPN sítě.',
           effectAi:
             'Ovládá zařízení přes lokální rozhraní, které ostatní oprávnění neomezují, takže jde prakticky o plnou kontrolu nad zařízením.',

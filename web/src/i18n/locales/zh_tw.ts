@@ -681,7 +681,14 @@ const zh_tw = {
           loadFailed: '載入使用者失敗',
           saveFailed: '儲存使用者失敗',
           deleteFailed: '刪除使用者失敗',
-          editPermissions: '權限'
+          editPermissions: '權限',
+          mcpLossTitle: '撤銷 MCP 存取',
+          mcpLossDesc:
+            '{{name}} 將失去 MCP 存取權限。MCP API Key 由整台裝置共用，已複製出去的 Key 在重新產生前仍然有效。重新產生會中斷所有 MCP 用戶端，直到它們改用新 Key。',
+          mcpLossRotate: '重新產生 MCP API Key',
+          mcpLossKeep:
+            '目前的 Key 將繼續有效，持有副本的人仍可控制鍵盤和滑鼠。之後可在 MCP 設定中重新產生。',
+          mcpKeyRotated: 'MCP API Key 已重新產生，MCP 用戶端需改用新 Key。'
         },
         permissions: {
           title: '功能權限',
@@ -720,7 +727,7 @@ const zh_tw = {
           effectNetwork: '修改 Wi-Fi、DNS 與 TLS，可能使本裝置離線。',
           effectUpdate: '安裝韌體與應用程式更新包。',
           effectMcp:
-            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；任一帳戶失去此權限時，Key 都會重新產生，所有用戶端需改用新 Key。',
+            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；撤銷此權限後，已複製的 Key 仍有效，除非重新產生（移除權限時會詢問是否重新產生）。',
           effectTailscale: '把本裝置加入 VPN 網路。',
           effectAi: '透過不受其他權限限制的本機介面操作裝置，因此相當於完整的裝置控制權。',
           fullControlWarning: '下列權限等同於完整的裝置控制權：',

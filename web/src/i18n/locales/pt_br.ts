@@ -706,7 +706,14 @@ const pt_br = {
           loadFailed: 'Falha ao carregar os usuários',
           saveFailed: 'Falha ao salvar o usuário',
           deleteFailed: 'Falha ao excluir o usuário',
-          editPermissions: 'Permissões'
+          editPermissions: 'Permissões',
+          mcpLossTitle: 'Revogar acesso MCP',
+          mcpLossDesc:
+            '{{name}} perderá o acesso MCP. A chave de API do MCP é compartilhada por todo o dispositivo, então uma cópia continua funcionando até a chave ser regenerada. Regenerá-la desconecta todos os clientes MCP até que recebam a nova chave.',
+          mcpLossRotate: 'Regenerar a chave de API do MCP',
+          mcpLossKeep:
+            'A chave atual continua válida, e quem tiver uma cópia ainda pode controlar o teclado e o mouse. Você pode regenerá-la depois nas configurações do MCP.',
+          mcpKeyRotated: 'Chave de API do MCP regenerada. Os clientes MCP precisam da nova chave.'
         },
         permissions: {
           title: 'Permissões',
@@ -747,7 +754,7 @@ const pt_br = {
           effectNetwork: 'Altera Wi-Fi, DNS e TLS, o que pode tirar este dispositivo da rede.',
           effectUpdate: 'Instala firmware e pacotes de aplicativo.',
           effectMcp:
-            'Emite uma chave de API de todo o dispositivo que controla teclado, mouse e capturas fora da sessão web; quando qualquer conta perde esta permissão, a chave é regenerada para todos os clientes.',
+            'Emite uma chave de API de todo o dispositivo que controla teclado, mouse e capturas fora da sessão web; uma cópia continua válida após revogar a permissão, a menos que a chave seja regenerada, o que é oferecido ao remover a permissão.',
           effectTailscale: 'Conecta este dispositivo a uma malha VPN.',
           effectAi:
             'Controla o dispositivo por uma interface local que as outras permissões não limitam, então equivale ao controle total do dispositivo.',

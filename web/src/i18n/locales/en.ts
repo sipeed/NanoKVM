@@ -699,7 +699,14 @@ const en = {
           loadFailed: 'Failed to load users',
           saveFailed: 'Failed to save user',
           deleteFailed: 'Failed to delete user',
-          editPermissions: 'Permissions'
+          editPermissions: 'Permissions',
+          mcpLossTitle: 'Revoke MCP access',
+          mcpLossDesc:
+            '{{name}} will lose MCP access. The MCP API key is shared by the whole device, so a copy of it keeps working until the key is regenerated. Regenerating it disconnects every MCP client until it is given the new key.',
+          mcpLossRotate: 'Regenerate the MCP API key',
+          mcpLossKeep:
+            'The current key stays valid, and whoever has a copy can still control the keyboard and mouse. You can regenerate it later in the MCP settings.',
+          mcpKeyRotated: 'MCP API key regenerated. MCP clients need the new key.'
         },
         permissions: {
           title: 'Permissions',
@@ -741,7 +748,7 @@ const en = {
           effectNetwork: 'Changes Wi-Fi, DNS and TLS, which can take this device off the network.',
           effectUpdate: 'Installs firmware and application packages.',
           effectMcp:
-            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; when any account loses this grant the key is regenerated for every client.',
+            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; a copied key keeps working after this grant is revoked unless the key is regenerated, which is offered when the grant is removed.',
           effectTailscale: 'Joins this device to a VPN mesh.',
           effectAi:
             'Drives the device through a local interface that the other grants do not restrict, so this is effectively full device control.',

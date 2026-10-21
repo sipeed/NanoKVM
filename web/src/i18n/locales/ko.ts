@@ -695,7 +695,14 @@ const ko = {
           loadFailed: '사용자를 불러오지 못했습니다',
           saveFailed: '사용자를 저장하지 못했습니다',
           deleteFailed: '사용자를 삭제하지 못했습니다',
-          editPermissions: '권한'
+          editPermissions: '권한',
+          mcpLossTitle: 'MCP 접근 취소',
+          mcpLossDesc:
+            '{{name}} 계정이 MCP 접근 권한을 잃습니다. MCP API 키는 장치 전체가 공유하므로 복사된 키는 재생성할 때까지 계속 유효합니다. 재생성하면 새 키를 받을 때까지 모든 MCP 클라이언트의 연결이 끊어집니다.',
+          mcpLossRotate: 'MCP API 키 재생성',
+          mcpLossKeep:
+            '현재 키는 계속 유효하며, 사본을 가진 사람은 여전히 키보드와 마우스를 제어할 수 있습니다. 나중에 MCP 설정에서 재생성할 수 있습니다.',
+          mcpKeyRotated: 'MCP API 키를 재생성했습니다. MCP 클라이언트에 새 키가 필요합니다.'
         },
         permissions: {
           title: '권한',
@@ -736,7 +743,7 @@ const ko = {
           effectNetwork: 'Wi-Fi, DNS, TLS를 변경하며, 이 장치가 네트워크에서 끊길 수 있습니다.',
           effectUpdate: '펌웨어와 응용 프로그램 패키지를 설치합니다.',
           effectMcp:
-            '장치 전체에 유효한 API 키를 발급하여 웹 세션 밖에서 키보드, 마우스, 스크린샷을 제어합니다. 어느 계정이든 이 권한을 잃으면 모든 클라이언트의 키가 재생성됩니다.',
+            '장치 전체에 유효한 API 키를 발급하여 웹 세션 밖에서 키보드, 마우스, 스크린샷을 제어합니다. 이 권한을 취소해도 복사된 키는 재생성하지 않는 한 유효합니다(권한을 제거할 때 재생성 여부를 묻습니다).',
           effectTailscale: '이 장치를 VPN 메시에 연결합니다.',
           effectAi:
             '다른 권한의 제한을 받지 않는 로컬 인터페이스로 장치를 제어하므로 사실상 완전한 장치 제어 권한입니다.',

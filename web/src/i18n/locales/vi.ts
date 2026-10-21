@@ -701,7 +701,14 @@ const vi = {
           loadFailed: 'Không tải được người dùng',
           saveFailed: 'Không lưu được người dùng',
           deleteFailed: 'Không xóa được người dùng',
-          editPermissions: 'Quyền'
+          editPermissions: 'Quyền',
+          mcpLossTitle: 'Thu hồi quyền truy cập MCP',
+          mcpLossDesc:
+            '{{name}} sẽ mất quyền truy cập MCP. Khóa API MCP được dùng chung cho toàn thiết bị, nên bản sao vẫn hoạt động cho đến khi khóa được tạo lại. Tạo lại sẽ ngắt kết nối mọi máy khách MCP cho đến khi chúng nhận khóa mới.',
+          mcpLossRotate: 'Tạo lại khóa API MCP',
+          mcpLossKeep:
+            'Khóa hiện tại vẫn hợp lệ, và ai có bản sao vẫn có thể điều khiển bàn phím và chuột. Bạn có thể tạo lại sau trong cài đặt MCP.',
+          mcpKeyRotated: 'Đã tạo lại khóa API MCP. Máy khách MCP cần khóa mới.'
         },
         permissions: {
           title: 'Quyền',
@@ -742,7 +749,7 @@ const vi = {
           effectNetwork: 'Thay đổi Wi-Fi, DNS và TLS, có thể khiến thiết bị này mất kết nối mạng.',
           effectUpdate: 'Cài đặt firmware và gói ứng dụng.',
           effectMcp:
-            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; khi bất kỳ tài khoản nào mất quyền này, khóa sẽ được tạo lại cho mọi máy khách.',
+            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; bản sao khóa vẫn hoạt động sau khi thu hồi quyền trừ khi khóa được tạo lại, việc này sẽ được đề xuất khi gỡ quyền.',
           effectTailscale: 'Kết nối thiết bị này vào một mạng VPN.',
           effectAi:
             'Điều khiển thiết bị qua giao diện cục bộ mà các quyền khác không giới hạn, nên tương đương toàn quyền điều khiển thiết bị.',

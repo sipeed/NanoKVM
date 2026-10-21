@@ -89,9 +89,11 @@ export function createUser(
   return http.post('/api/auth/users', { username, password, role, permissions });
 }
 
+// rotateMcpKey asks the server to regenerate the device-wide MCP API key when
+// the change takes the mcp grant away; without it the key is kept.
 export function updateUser(
   username: string,
-  data: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>>
+  data: Partial<Pick<User, 'role' | 'enabled' | 'permissions'>> & { rotateMcpKey?: boolean }
 ) {
   return http.request({
     method: 'put',
@@ -100,8 +102,13 @@ export function updateUser(
   });
 }
 
-export function deleteUser(username: string) {
-  return http.delete(`/api/auth/users/${encodeURIComponent(username)}`);
+export function deleteUser(username: string, rotateMcpKey = false) {
+  // DELETE carries no body the server reads, so the choice goes in the query.
+  return http.request({
+    method: 'delete',
+    url: `/api/auth/users/${encodeURIComponent(username)}`,
+    params: rotateMcpKey ? { rotateMcpKey: true } : undefined
+  });
 }
 
 export function resetUserPassword(username: string, password: string) {

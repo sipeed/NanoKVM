@@ -717,7 +717,14 @@ const de = {
           loadFailed: 'Benutzer konnten nicht geladen werden',
           saveFailed: 'Benutzer konnte nicht gespeichert werden',
           deleteFailed: 'Benutzer konnte nicht gelöscht werden',
-          editPermissions: 'Berechtigungen'
+          editPermissions: 'Berechtigungen',
+          mcpLossTitle: 'MCP-Zugriff entziehen',
+          mcpLossDesc:
+            '{{name}} verliert den MCP-Zugriff. Der MCP-API-Schlüssel gilt für das ganze Gerät, eine Kopie bleibt daher gültig, bis der Schlüssel neu erzeugt wird. Das Neuerzeugen trennt alle MCP-Clients, bis sie den neuen Schlüssel erhalten.',
+          mcpLossRotate: 'MCP-API-Schlüssel neu erzeugen',
+          mcpLossKeep:
+            'Der aktuelle Schlüssel bleibt gültig, und wer eine Kopie hat, kann weiterhin Tastatur und Maus steuern. Sie können ihn später in den MCP-Einstellungen neu erzeugen.',
+          mcpKeyRotated: 'MCP-API-Schlüssel neu erzeugt. MCP-Clients benötigen den neuen Schlüssel.'
         },
         permissions: {
           title: 'Berechtigungen',
@@ -760,7 +767,7 @@ const de = {
           effectNetwork: 'Ändert WLAN, DNS und TLS, was dieses Gerät vom Netz trennen kann.',
           effectUpdate: 'Installiert Firmware und Anwendungspakete.',
           effectMcp:
-            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; verliert ein Konto diese Berechtigung, wird der Schlüssel für alle Clients neu erzeugt.',
+            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; eine Kopie bleibt nach dem Entzug gültig, sofern der Schlüssel nicht neu erzeugt wird – dies wird beim Entfernen der Berechtigung angeboten.',
           effectTailscale: 'Bildet dieses Gerät in ein VPN-Mesh ein.',
           effectAi:
             'Steuert das Gerät über eine lokale Schnittstelle, die die übrigen Berechtigungen nicht einschränken; das entspricht praktisch der vollständigen Gerätekontrolle.',

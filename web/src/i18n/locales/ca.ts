@@ -705,7 +705,14 @@ const ca = {
           loadFailed: "No s'han pogut carregar els usuaris",
           saveFailed: "No s'ha pogut desar l'usuari",
           deleteFailed: "No s'ha pogut eliminar l'usuari",
-          editPermissions: 'Permisos'
+          editPermissions: 'Permisos',
+          mcpLossTitle: 'Retirar l’accés MCP',
+          mcpLossDesc:
+            '{{name}} perdrà l’accés MCP. La clau API de MCP la comparteix tot el dispositiu, així que una còpia continua funcionant fins que es regeneri. Regenerar-la desconnecta tots els clients MCP fins que rebin la clau nova.',
+          mcpLossRotate: 'Regenera la clau API de MCP',
+          mcpLossKeep:
+            'La clau actual continua sent vàlida i qui en tingui una còpia encara pot controlar el teclat i el ratolí. La podeu regenerar més tard a la configuració de MCP.',
+          mcpKeyRotated: 'Clau API de MCP regenerada. Els clients MCP necessiten la clau nova.'
         },
         permissions: {
           title: 'Permisos',
@@ -748,7 +755,7 @@ const ca = {
             'Canvia Wi-Fi, DNS i TLS, cosa que pot deixar aquest dispositiu sense xarxa.',
           effectUpdate: 'Instal·la firmware i paquets d’aplicació.',
           effectMcp:
-            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; quan qualsevol compte perd aquest permís, la clau es regenera per a tots els clients.',
+            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; una còpia continua funcionant després de revocar el permís si no es regenera la clau, cosa que s’ofereix en retirar el permís.',
           effectTailscale: 'Uneix aquest dispositiu a una malla VPN.',
           effectAi:
             'Controla el dispositiu mitjançant una interfície local que els altres permisos no limiten, així que equival al control total del dispositiu.',

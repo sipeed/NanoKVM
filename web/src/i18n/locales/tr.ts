@@ -704,7 +704,15 @@ const tr = {
           loadFailed: 'Kullanıcılar yüklenemedi',
           saveFailed: 'Kullanıcı kaydedilemedi',
           deleteFailed: 'Kullanıcı silinemedi',
-          editPermissions: 'İzinler'
+          editPermissions: 'İzinler',
+          mcpLossTitle: 'MCP erişimini kaldır',
+          mcpLossDesc:
+            '{{name}} MCP erişimini kaybedecek. MCP API anahtarı tüm cihazda ortaktır; bu yüzden bir kopyası anahtar yeniden üretilene kadar çalışır. Yeniden üretmek, yeni anahtarı alana kadar tüm MCP istemcilerinin bağlantısını keser.',
+          mcpLossRotate: 'MCP API anahtarını yeniden üret',
+          mcpLossKeep:
+            'Mevcut anahtar geçerli kalır ve kopyası olan herkes klavye ve fareyi kontrol etmeye devam edebilir. Daha sonra MCP ayarlarından yeniden üretebilirsiniz.',
+          mcpKeyRotated:
+            'MCP API anahtarı yeniden üretildi. MCP istemcilerinin yeni anahtara ihtiyacı var.'
         },
         permissions: {
           title: 'İzinler',
@@ -746,7 +754,7 @@ const tr = {
           effectNetwork: 'Wi-Fi, DNS ve TLS ayarlarını değiştirir; bu cihaz ağdan düşebilir.',
           effectUpdate: 'Ürün yazılımı ve uygulama paketleri kurar.',
           effectMcp:
-            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir. Herhangi bir hesap bu izni kaybettiğinde anahtar tüm istemciler için yeniden üretilir.',
+            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir. İzin kaldırıldıktan sonra kopyalanmış anahtar, yeniden üretilmedikçe çalışır; izin kaldırılırken yeniden üretme önerilir.',
           effectTailscale: 'Bu cihazı bir VPN ağına bağlar.',
           effectAi:
             'Cihazı, diğer izinlerin sınırlamadığı yerel bir arayüz üzerinden yönetir; bu nedenle cihaz üzerinde tam denetim anlamına gelir.',
