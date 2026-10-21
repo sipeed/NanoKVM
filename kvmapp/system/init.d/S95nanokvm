@@ -76,14 +76,6 @@ start_services() {
     if ! pidof NanoKVM-Server >/dev/null 2>&1; then
         rm -rf /tmp/server
         cp -r /kvmapp/server /tmp/
-        # Keep the source mtimes of content-hashed web assets so browsers get
-        # 304 Not Modified after a reboot instead of re-downloading the bundle.
-        # index.html stays freshly copied.
-        for asset in /kvmapp/server/web/assets/*; do
-            if [ -f "$asset" ] && [ ! -L "$asset" ]; then
-                touch -cmr "$asset" "/tmp/server/web/assets/${asset##*/}"
-            fi
-        done
         /tmp/server/NanoKVM-Server &
     fi
 }
