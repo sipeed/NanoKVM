@@ -743,13 +743,14 @@ const se = {
             'Ändrar Wi-Fi, DNS och TLS, vilket kan koppla bort den här enheten från nätet.',
           effectUpdate: 'Installerar firmware och programpaket.',
           effectMcp:
-            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; nyckeln fungerar även efter att behörigheten tagits bort, tills den skapas på nytt.',
+            'Utfärdar en API-nyckel för hela enheten som styr tangentbord, mus och skärmbilder utanför webbsessionen; när ett konto förlorar behörigheten skapas nyckeln på nytt för alla klienter.',
           effectTailscale: 'Ansluter den här enheten till ett VPN-nät.',
           effectAi:
             'Styr enheten via ett lokalt gränssnitt som de övriga behörigheterna inte begränsar, så det motsvarar full kontroll över enheten.',
           fullControlWarning: 'Dessa behörigheter motsvarar full kontroll över enheten:',
           emptyWarning: 'Det här kontot får inga funktioner alls och kan bara logga in.',
           impliedBy: 'Ingår via {{name}}',
+          grantCount_one: '{{count}} behörighet',
           grantCount: '{{count}} behörigheter',
           adminAll: 'Administratörer har alla behörigheter',
           catalogFailed: 'Behörighetslistan kunde inte läsas in. Stäng dialogen och försök igen.'

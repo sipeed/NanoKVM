@@ -760,7 +760,7 @@ const de = {
           effectNetwork: 'Ändert WLAN, DNS und TLS, was dieses Gerät vom Netz trennen kann.',
           effectUpdate: 'Installiert Firmware und Anwendungspakete.',
           effectMcp:
-            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; der Schlüssel bleibt nach dem Entzug dieser Berechtigung gültig, bis er neu erzeugt wird.',
+            'Stellt einen geräteweiten API-Schlüssel aus, der Tastatur, Maus und Screenshots außerhalb der Websitzung steuert; verliert ein Konto diese Berechtigung, wird der Schlüssel für alle Clients neu erzeugt.',
           effectTailscale: 'Bildet dieses Gerät in ein VPN-Mesh ein.',
           effectAi:
             'Steuert das Gerät über eine lokale Schnittstelle, die die übrigen Berechtigungen nicht einschränken; das entspricht praktisch der vollständigen Gerätekontrolle.',
@@ -768,6 +768,7 @@ const de = {
             'Diese Berechtigungen laufen auf die vollständige Gerätekontrolle hinaus:',
           emptyWarning: 'Dieses Konto hat keinerlei Funktionen und kann sich nur anmelden.',
           impliedBy: 'Enthalten durch {{name}}',
+          grantCount_one: '{{count}} Berechtigung',
           grantCount: '{{count}} Berechtigungen',
           adminAll: 'Administratoren besitzen alle Berechtigungen',
           catalogFailed:

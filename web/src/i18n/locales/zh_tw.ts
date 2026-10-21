@@ -720,12 +720,13 @@ const zh_tw = {
           effectNetwork: '修改 Wi-Fi、DNS 與 TLS，可能使本裝置離線。',
           effectUpdate: '安裝韌體與應用程式更新包。',
           effectMcp:
-            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；即使撤銷此權限，該 Key 仍有效，直到重新產生。',
+            '下發裝置級 API Key，可在 Web 工作階段之外控制鍵鼠並取得截圖；任一帳戶失去此權限時，Key 都會重新產生，所有用戶端需改用新 Key。',
           effectTailscale: '把本裝置加入 VPN 網路。',
           effectAi: '透過不受其他權限限制的本機介面操作裝置，因此相當於完整的裝置控制權。',
           fullControlWarning: '下列權限等同於完整的裝置控制權：',
           emptyWarning: '此帳戶將不具備任何功能，只能登入。',
           impliedBy: '由「{{name}}」自動包含',
+          grantCount_one: '{{count}} 項權限',
           grantCount: '{{count}} 項權限',
           adminAll: '管理員擁有全部權限',
           catalogFailed: '權限清單載入失敗，請關閉後重試。'

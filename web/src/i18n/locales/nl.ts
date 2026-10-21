@@ -755,13 +755,14 @@ const nl = {
             'Wijzigt wifi, DNS en TLS, waardoor dit apparaat van het netwerk kan verdwijnen.',
           effectUpdate: 'Installeert firmware en applicatiepakketten.',
           effectMcp:
-            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; de sleutel blijft werken nadat deze toestemming is ingetrokken tot hij opnieuw wordt gegenereerd.',
+            'Geeft een apparaatbrede API-sleutel uit die toetsenbord, muis en schermafbeeldingen buiten de websessie bestuurt; zodra een account deze toestemming verliest, wordt de sleutel voor alle clients opnieuw gegenereerd.',
           effectTailscale: 'Voegt dit apparaat toe aan een VPN-mesh.',
           effectAi:
             'Bestuurt het apparaat via een lokale interface die de andere rechten niet beperken, dus dit staat gelijk aan volledige apparaatcontrole.',
           fullControlWarning: 'Deze rechten komen neer op volledige apparaatcontrole:',
           emptyWarning: 'Dit account heeft dan geen enkele functie en kan alleen inloggen.',
           impliedBy: 'Inbegrepen via {{name}}',
+          grantCount_one: '{{count}} recht',
           grantCount: '{{count}} rechten',
           adminAll: 'Beheerders hebben alle rechten',
           catalogFailed:

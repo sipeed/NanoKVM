@@ -747,7 +747,7 @@ const pl = {
           effectNetwork: 'Zmienia Wi-Fi, DNS i TLS, co może odciąć to urządzenie od sieci.',
           effectUpdate: 'Instaluje firmware i pakiety aplikacji.',
           effectMcp:
-            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; klucz działa nadal po odebraniu tego uprawnienia, dopóki nie zostanie wygenerowany ponownie.',
+            'Wydaje klucz API obejmujący całe urządzenie, który steruje klawiaturą, myszą i zrzutami ekranu poza sesją webową; gdy dowolne konto utraci to uprawnienie, klucz jest generowany ponownie dla wszystkich klientów.',
           effectTailscale: 'Dołącza to urządzenie do sieci VPN typu mesh.',
           effectAi:
             'Steruje urządzeniem przez lokalny interfejs, którego pozostałe uprawnienia nie ograniczają, więc oznacza to pełną kontrolę nad urządzeniem.',
@@ -755,6 +755,7 @@ const pl = {
           emptyWarning:
             'To konto nie będzie miało żadnych funkcji i będzie mogło się tylko zalogować.',
           impliedBy: 'Zawarte przez {{name}}',
+          grantCount_one: '{{count}} uprawnienie',
           grantCount: '{{count}} uprawnień',
           adminAll: 'Administratorzy mają wszystkie uprawnienia',
           catalogFailed:

@@ -752,13 +752,14 @@ const hu = {
             'Módosítja a Wi-Fi, DNS és TLS beállításokat, ami leválaszthatja ezt az eszközt a hálózatról.',
           effectUpdate: 'Firmware-t és alkalmazáscsomagokat telepít.',
           effectMcp:
-            'Eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket; a kulcs az engedély visszavonása után is működik, amíg újra nem generálják.',
+            'Eszközszintű API-kulcsot ad ki, amely a webes munkameneten kívül vezérli a billentyűzetet, az egeret és a képernyőképeket; ha bármely fiók elveszíti ezt az engedélyt, a kulcs minden kliens számára újragenerálódik.',
           effectTailscale: 'Csatlakoztatja ezt az eszközt egy VPN-hálózathoz.',
           effectAi:
             'Olyan helyi felületen keresztül vezérli az eszközt, amelyet a többi engedély nem korlátoz, így gyakorlatilag teljes eszközvezérlést jelent.',
           fullControlWarning: 'Ezek az engedélyek teljes eszközvezérlést jelentenek:',
           emptyWarning: 'Ennek a fióknak nem lesz semmilyen funkciója, csak bejelentkezni tud.',
           impliedBy: 'A(z) {{name}} tartalmazza',
+          grantCount_one: '{{count}} engedély',
           grantCount: '{{count}} engedély',
           adminAll: 'Az adminisztrátorok minden engedéllyel rendelkeznek',
           catalogFailed: 'Az engedélylista nem tölthető be. Zárja be az ablakot, és próbálja újra.'

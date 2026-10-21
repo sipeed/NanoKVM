@@ -756,13 +756,14 @@ const es = {
           effectNetwork: 'Cambia Wi-Fi, DNS y TLS, lo que puede dejar este dispositivo sin red.',
           effectUpdate: 'Instala firmware y paquetes de aplicación.',
           effectMcp:
-            'Emite una clave API de todo el dispositivo que controla teclado, ratón y capturas fuera de la sesión web; la clave sigue funcionando tras revocar el permiso hasta que se regenere.',
+            'Emite una clave API de todo el dispositivo que controla teclado, ratón y capturas fuera de la sesión web; cuando cualquier cuenta pierde este permiso, la clave se regenera para todos los clientes.',
           effectTailscale: 'Une este dispositivo a una malla VPN.',
           effectAi:
             'Controla el dispositivo mediante una interfaz local que los demás permisos no limitan, por lo que equivale al control total del dispositivo.',
           fullControlWarning: 'Estos permisos equivalen al control total del dispositivo:',
           emptyWarning: 'Esta cuenta no tendrá ninguna función y solo podrá iniciar sesión.',
           impliedBy: 'Incluido por {{name}}',
+          grantCount_one: '{{count}} permiso',
           grantCount: '{{count}} permisos',
           adminAll: 'Los administradores tienen todos los permisos',
           catalogFailed:

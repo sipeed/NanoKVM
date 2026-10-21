@@ -742,13 +742,14 @@ const vi = {
           effectNetwork: 'Thay đổi Wi-Fi, DNS và TLS, có thể khiến thiết bị này mất kết nối mạng.',
           effectUpdate: 'Cài đặt firmware và gói ứng dụng.',
           effectMcp:
-            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; khóa vẫn hoạt động sau khi thu hồi quyền này cho đến khi được tạo lại.',
+            'Cấp một khóa API áp dụng cho toàn thiết bị, điều khiển bàn phím, chuột và ảnh chụp màn hình ngoài phiên web; khi bất kỳ tài khoản nào mất quyền này, khóa sẽ được tạo lại cho mọi máy khách.',
           effectTailscale: 'Kết nối thiết bị này vào một mạng VPN.',
           effectAi:
             'Điều khiển thiết bị qua giao diện cục bộ mà các quyền khác không giới hạn, nên tương đương toàn quyền điều khiển thiết bị.',
           fullControlWarning: 'Các quyền này tương đương toàn quyền điều khiển thiết bị:',
           emptyWarning: 'Tài khoản này sẽ không có chức năng nào và chỉ có thể đăng nhập.',
           impliedBy: 'Được {{name}} bao gồm',
+          grantCount_one: '{{count}} quyền',
           grantCount: '{{count}} quyền',
           adminAll: 'Quản trị viên có mọi quyền',
           catalogFailed: 'Không tải được danh sách quyền. Hãy đóng hộp thoại và thử lại.'

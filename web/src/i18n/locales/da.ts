@@ -744,13 +744,14 @@ const da = {
           effectNetwork: 'Ændrer Wi-Fi, DNS og TLS, hvilket kan tage denne enhed af netværket.',
           effectUpdate: 'Installerer firmware og programpakker.',
           effectMcp:
-            'Udsteder en API-nøgle for hele enheden, der styrer tastatur, mus og skærmbilleder uden for websessionen; nøglen virker stadig, efter denne rettighed er fjernet, indtil den gendannes.',
+            'Udsteder en API-nøgle for hele enheden, der styrer tastatur, mus og skærmbilleder uden for websessionen; når en konto mister denne rettighed, gendannes nøglen for alle klienter.',
           effectTailscale: 'Forbinder denne enhed til et VPN-mesh.',
           effectAi:
             'Styrer enheden via en lokal grænseflade, som de øvrige rettigheder ikke begrænser, så det svarer til fuld kontrol over enheden.',
           fullControlWarning: 'Disse rettigheder svarer til fuld kontrol over enheden:',
           emptyWarning: 'Denne konto har ingen funktioner og kan kun logge ind.',
           impliedBy: 'Inkluderet af {{name}}',
+          grantCount_one: '{{count}} rettighed',
           grantCount: '{{count}} rettigheder',
           adminAll: 'Administratorer har alle rettigheder',
           catalogFailed: 'Rettighedslisten kunne ikke indlæses. Luk dialogen, og prøv igen.'

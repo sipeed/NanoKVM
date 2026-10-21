@@ -168,8 +168,11 @@ export const Storage = () => {
   // The socket is the console one, so an account granted only the library has
   // none to open. The medium list keeps its own poll either way; without the
   // push the file listing waits for the refresh button.
+  // Depend on the grant, not on hasPermission: that changes identity with every
+  // account refresh, which would tear the socket down on each auth push.
+  const canWatchConsole = hasPermission('console.view');
   useEffect(() => {
-    if (!hasPermission('console.view')) return;
+    if (!canWatchConsole) return;
 
     const ws = new WsClient();
     ws.connect();
@@ -178,7 +181,7 @@ export const Storage = () => {
       unsubscribe();
       ws.close();
     };
-  }, [hasPermission]);
+  }, [canWatchConsole]);
 
   // Poll the media job while one is running: creating a medium writes
   // gigabytes to the card, so the page reports it like any other transfer.

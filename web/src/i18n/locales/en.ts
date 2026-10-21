@@ -741,13 +741,14 @@ const en = {
           effectNetwork: 'Changes Wi-Fi, DNS and TLS, which can take this device off the network.',
           effectUpdate: 'Installs firmware and application packages.',
           effectMcp:
-            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; the key keeps working after this grant is revoked until it is regenerated.',
+            'Issues a device-wide API key that drives the keyboard, mouse and screenshots outside the web session; when any account loses this grant the key is regenerated for every client.',
           effectTailscale: 'Joins this device to a VPN mesh.',
           effectAi:
             'Drives the device through a local interface that the other grants do not restrict, so this is effectively full device control.',
           fullControlWarning: 'These grants amount to full device control:',
           emptyWarning: 'This account will have no features at all and can only sign in.',
           impliedBy: 'Included by {{name}}',
+          grantCount_one: '{{count}} grant',
           grantCount: '{{count}} grants',
           adminAll: 'Administrators hold every permission',
           catalogFailed:

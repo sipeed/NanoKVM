@@ -746,13 +746,14 @@ const tr = {
           effectNetwork: 'Wi-Fi, DNS ve TLS ayarlarını değiştirir; bu cihaz ağdan düşebilir.',
           effectUpdate: 'Ürün yazılımı ve uygulama paketleri kurar.',
           effectMcp:
-            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir ve izin geri alınsa bile anahtar yeniden üretilene kadar çalışmaya devam eder.',
+            'Cihaz genelinde geçerli bir API anahtarı verir; bu anahtar web oturumu dışında klavye, fare ve ekran görüntüsünü yönetir. Herhangi bir hesap bu izni kaybettiğinde anahtar tüm istemciler için yeniden üretilir.',
           effectTailscale: 'Bu cihazı bir VPN ağına bağlar.',
           effectAi:
             'Cihazı, diğer izinlerin sınırlamadığı yerel bir arayüz üzerinden yönetir; bu nedenle cihaz üzerinde tam denetim anlamına gelir.',
           fullControlWarning: 'Bu izinler cihaz üzerinde tam denetim anlamına gelir:',
           emptyWarning: 'Bu hesabın hiçbir özelliği olmayacak ve yalnızca oturum açabilecek.',
           impliedBy: '{{name}} tarafından içerilir',
+          grantCount_one: '{{count}} izin',
           grantCount: '{{count}} izin',
           adminAll: 'Yöneticiler tüm izinlere sahiptir',
           catalogFailed: 'İzin listesi yüklenemedi. Bu pencereyi kapatıp yeniden deneyin.'

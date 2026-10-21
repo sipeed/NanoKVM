@@ -754,13 +754,14 @@ const it = {
             'Modifica Wi-Fi, DNS e TLS, il che può isolare questo dispositivo dalla rete.',
           effectUpdate: 'Installa firmware e pacchetti applicativi.',
           effectMcp:
-            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; la chiave continua a funzionare dopo la revoca del permesso finché non viene rigenerata.',
+            'Emette una chiave API valida per tutto il dispositivo che pilota tastiera, mouse e screenshot fuori dalla sessione web; quando un account perde questo permesso, la chiave viene rigenerata per tutti i client.',
           effectTailscale: 'Unisce questo dispositivo a una rete mesh VPN.',
           effectAi:
             'Pilota il dispositivo tramite un’interfaccia locale che gli altri permessi non limitano, quindi equivale al controllo totale del dispositivo.',
           fullControlWarning: 'Questi permessi equivalgono al controllo totale del dispositivo:',
           emptyWarning: 'Questo account non avrà alcuna funzione e potrà solo accedere.',
           impliedBy: 'Incluso da {{name}}',
+          grantCount_one: '{{count}} permesso',
           grantCount: '{{count}} permessi',
           adminAll: 'Gli amministratori hanno tutti i permessi',
           catalogFailed:

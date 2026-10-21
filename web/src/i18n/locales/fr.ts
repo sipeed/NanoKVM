@@ -758,13 +758,14 @@ const fr = {
             'Modifie le Wi-Fi, le DNS et TLS, ce qui peut couper cet appareil du réseau.',
           effectUpdate: 'Installe des micrologiciels et des paquets d’application.',
           effectMcp:
-            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; la clé reste valide après révocation de cette autorisation jusqu’à sa régénération.',
+            'Émet une clé API valable pour tout l’appareil qui pilote clavier, souris et captures hors de la session web ; dès qu’un compte perd cette autorisation, la clé est régénérée pour tous les clients.',
           effectTailscale: 'Rejoint cet appareil à un maillage VPN.',
           effectAi:
             'Pilote l’appareil via une interface locale que les autres autorisations ne limitent pas : cela équivaut au contrôle total de l’appareil.',
           fullControlWarning: 'Ces autorisations équivalent au contrôle total de l’appareil :',
           emptyWarning: 'Ce compte n’aura aucune fonction et pourra seulement se connecter.',
           impliedBy: 'Inclus par {{name}}',
+          grantCount_one: '{{count}} autorisation',
           grantCount: '{{count}} autorisations',
           adminAll: 'Les administrateurs détiennent toutes les autorisations',
           catalogFailed:

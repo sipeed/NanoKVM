@@ -745,13 +745,14 @@ const cz = {
           effectNetwork: 'Mění Wi-Fi, DNS a TLS, což může toto zařízení odpojit od sítě.',
           effectUpdate: 'Instaluje firmware a balíčky aplikací.',
           effectMcp:
-            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; klíč funguje i po odebrání tohoto oprávnění, dokud není znovu vygenerován.',
+            'Vydává API klíč platný pro celé zařízení, který ovládá klávesnici, myš a snímky obrazovky mimo webové sezení; jakmile kterýkoli účet toto oprávnění ztratí, klíč se pro všechny klienty znovu vygeneruje.',
           effectTailscale: 'Připojuje toto zařízení do VPN sítě.',
           effectAi:
             'Ovládá zařízení přes lokální rozhraní, které ostatní oprávnění neomezují, takže jde prakticky o plnou kontrolu nad zařízením.',
           fullControlWarning: 'Tato oprávnění představují plnou kontrolu nad zařízením:',
           emptyWarning: 'Tento účet nebude mít žádné funkce a bude se moci jen přihlásit.',
           impliedBy: 'Zahrnuto díky {{name}}',
+          grantCount_one: '{{count}} oprávnění',
           grantCount: '{{count}} oprávnění',
           adminAll: 'Administrátoři mají všechna oprávnění',
           catalogFailed: 'Seznam oprávnění se nepodařilo načíst. Zavřete dialog a zkuste to znovu.'

@@ -23,9 +23,16 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   // refreshAccount keeps the account state in sync without disturbing the
   // page: a permission change must not look like a reload. It never clears the
   // account, so a transient failure leaves the last known state in place.
+  //
+  // Refreshes can overlap (a push, a rejected request and a focus change can
+  // all ask at once), so only the latest request may set the state: an older
+  // response arriving last would otherwise restore the grants it read.
+  const refreshSequence = useRef(0);
   const refreshAccount = useCallback(() => {
+    const sequence = ++refreshSequence.current;
     getAccount()
       .then((rsp) => {
+        if (sequence !== refreshSequence.current) return;
         if (rsp.code !== 0 || !rsp.data?.username) return;
         const next = toAccount(rsp.data);
         setAccount((previous) => {
@@ -91,11 +98,17 @@ export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
     refreshAccount();
   }, [location.pathname, refreshAccount]);
 
+  // Returning to the tab fires both focus and visibilitychange; one re-read
+  // covers both.
+  const lastVisibleRefresh = useRef(0);
   useEffect(() => {
     const handleVisible = () => {
-      if (document.visibilityState === 'visible') {
-        refreshAccount();
-      }
+      if (document.visibilityState !== 'visible') return;
+
+      const now = Date.now();
+      if (now - lastVisibleRefresh.current < 1000) return;
+      lastVisibleRefresh.current = now;
+      refreshAccount();
     };
 
     window.addEventListener('focus', handleVisible);

@@ -748,13 +748,14 @@ const ca = {
             'Canvia Wi-Fi, DNS i TLS, cosa que pot deixar aquest dispositiu sense xarxa.',
           effectUpdate: 'Instal·la firmware i paquets d’aplicació.',
           effectMcp:
-            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; la clau continua funcionant després de revocar el permís fins que es regeneri.',
+            'Emet una clau API de tot el dispositiu que controla teclat, ratolí i captures fora de la sessió web; quan qualsevol compte perd aquest permís, la clau es regenera per a tots els clients.',
           effectTailscale: 'Uneix aquest dispositiu a una malla VPN.',
           effectAi:
             'Controla el dispositiu mitjançant una interfície local que els altres permisos no limiten, així que equival al control total del dispositiu.',
           fullControlWarning: 'Aquests permisos equivalen al control total del dispositiu:',
           emptyWarning: 'Aquest compte no tindrà cap funció i només podrà iniciar sessió.',
           impliedBy: 'Inclòs per {{name}}',
+          grantCount_one: '{{count}} permís',
           grantCount: '{{count}} permisos',
           adminAll: 'Els administradors tenen tots els permisos',
           catalogFailed:

@@ -745,13 +745,14 @@ const nb = {
             'Endrer Wi-Fi, DNS og TLS, noe som kan koble denne enheten fra nettverket.',
           effectUpdate: 'Installerer fastvare og programpakker.',
           effectMcp:
-            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; nøkkelen virker fortsatt etter at denne tillatelsen er trukket tilbake, til den genereres på nytt.',
+            'Utsteder en API-nøkkel for hele enheten som styrer tastatur, mus og skjermbilder utenfor nettsesjonen; når en konto mister denne tillatelsen, genereres nøkkelen på nytt for alle klienter.',
           effectTailscale: 'Kobler denne enheten til et VPN-nett.',
           effectAi:
             'Styrer enheten via et lokalt grensesnitt som de andre tillatelsene ikke begrenser, så dette tilsvarer full kontroll over enheten.',
           fullControlWarning: 'Disse tillatelsene tilsvarer full kontroll over enheten:',
           emptyWarning: 'Denne kontoen får ingen funksjoner og kan bare logge inn.',
           impliedBy: 'Inkludert av {{name}}',
+          grantCount_one: '{{count}} tillatelse',
           grantCount: '{{count}} tillatelser',
           adminAll: 'Administratorer har alle tillatelser',
           catalogFailed: 'Tillatelseslisten kunne ikke lastes. Lukk dialogen og prøv igjen.'

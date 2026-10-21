@@ -718,12 +718,13 @@ const zh = {
           effectNetwork: '修改 Wi-Fi、DNS 与 TLS，可能使本设备失联。',
           effectUpdate: '安装固件与应用更新包。',
           effectMcp:
-            '下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；即使撤销此权限，该 Key 仍有效，直到重新生成。',
+            '下发设备级 API Key，可在 Web 会话之外控制键鼠并获取截图；任一账户失去此权限时，Key 都会重新生成，所有客户端需换用新 Key。',
           effectTailscale: '把本设备加入 VPN 组网。',
           effectAi: '通过不受其他权限限制的本地接口操作设备，因此相当于完整的设备控制权。',
           fullControlWarning: '下列权限等同于完整的设备控制权：',
           emptyWarning: '该账户将不具备任何功能，只能登录。',
           impliedBy: '由「{{name}}」自动包含',
+          grantCount_one: '{{count}} 项权限',
           grantCount: '{{count}} 项权限',
           adminAll: '管理员拥有全部权限',
           catalogFailed: '权限列表加载失败，请关闭后重试。'

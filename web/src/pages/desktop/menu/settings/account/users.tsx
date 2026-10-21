@@ -184,7 +184,12 @@ export const Users = () => {
 
   async function savePermissions() {
     if (!permissionUser) return;
-    const saved = await updateUser(permissionUser, { permissions: permissionDraft });
+    // Only grants this build knows can be sent; the server keeps the stored ones
+    // it does not know (written by a newer release) on its own.
+    const known = new Set(catalog?.map((descriptor) => descriptor.id) ?? []);
+    const saved = await updateUser(permissionUser, {
+      permissions: permissionDraft.filter((permission) => known.has(permission))
+    });
     if (!saved) return;
 
     // The footer button carries the confirmation for a moment, then goes back to

@@ -747,13 +747,14 @@ const id = {
             'Mengubah Wi-Fi, DNS, dan TLS, yang dapat memutus perangkat ini dari jaringan.',
           effectUpdate: 'Memasang firmware dan paket aplikasi.',
           effectMcp:
-            'Menerbitkan kunci API untuk seluruh perangkat yang mengendalikan keyboard, mouse, dan tangkapan layar di luar sesi web; kunci tetap berlaku setelah izin ini dicabut sampai dibuat ulang.',
+            'Menerbitkan kunci API untuk seluruh perangkat yang mengendalikan keyboard, mouse, dan tangkapan layar di luar sesi web; saat akun mana pun kehilangan izin ini, kunci dibuat ulang untuk semua klien.',
           effectTailscale: 'Menghubungkan perangkat ini ke jaringan VPN.',
           effectAi:
             'Mengendalikan perangkat melalui antarmuka lokal yang tidak dibatasi izin lain, sehingga setara dengan kendali penuh atas perangkat.',
           fullControlWarning: 'Izin ini setara dengan kendali penuh atas perangkat:',
           emptyWarning: 'Akun ini tidak akan memiliki fitur apa pun dan hanya bisa masuk.',
           impliedBy: 'Termasuk oleh {{name}}',
+          grantCount_one: '{{count}} izin',
           grantCount: '{{count}} izin',
           adminAll: 'Administrator memiliki semua izin',
           catalogFailed: 'Daftar izin gagal dimuat. Tutup dialog ini dan coba lagi.'
