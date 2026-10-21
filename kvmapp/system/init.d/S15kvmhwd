@@ -102,6 +102,9 @@ kvm_hw_detect(){
   if [ -e /etc/kvm/hw ]
   then
     echo "/etc/kvm/hw exist"
+    # Cached detection wrote nothing; skip the global sync below.
+    # Fresh detection keeps its syncs.
+    return 0
   else
     echo "/etc/kvm/hw not exist"
     if [ -d "/etc/kvm/" ]
@@ -202,6 +205,17 @@ kvm_hdmi_version_detect()
     fi
 }
 
+# Opt-in: when /etc/kvm/hdmi-version.fixed names the board's HDMI chip and
+# matches the last detected value, reuse it instead of probing I2C again.
+cached_hdmi_version(){
+    [ -r /etc/kvm/hdmi-version.fixed ] || return 1
+    [ -r /etc/kvm/hdmi_version ] || return 1
+    read expected < /etc/kvm/hdmi-version.fixed || return 1
+    read detected < /etc/kvm/hdmi_version || return 1
+    case "$expected" in c|d|ue|ux) ;; *) return 1 ;; esac
+    [ "$expected" = "$detected" ]
+}
+
 case "$1" in
   start)
     kvm_hw_detect
@@ -216,6 +230,6 @@ case "$1" in
     kvm_hw_init
   ;;
   get_hdmi_version)
-    kvm_hdmi_version_detect
+    cached_hdmi_version || kvm_hdmi_version_detect
   ;;
 esac
