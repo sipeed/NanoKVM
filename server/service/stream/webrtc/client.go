@@ -1,9 +1,11 @@
 package webrtc
 
 import (
+	"NanoKVM-Server/common"
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
+	"github.com/pion/rtcp"
 	"github.com/pion/webrtc/v4"
 	log "github.com/sirupsen/logrus"
 
@@ -89,7 +91,7 @@ func (c *Client) AddTrack() error {
 		log.Errorf("failed to add video track: %s", err)
 		return err
 	}
-	go startRTCPReader(videoSender)
+	go startRTCPReader(videoSender, c)
 
 	track := &Track{
 		video: videoTrack,
@@ -102,12 +104,50 @@ func (c *Client) AddTrack() error {
 	return nil
 }
 
-func startRTCPReader(sender *webrtc.RTPSender) {
+func startRTCPReader(sender *webrtc.RTPSender, client *Client) {
 	rtcpBuf := make([]byte, 1500)
 	for {
-		if _, _, err := sender.Read(rtcpBuf); err != nil {
+		n, _, err := sender.Read(rtcpBuf)
+		if err != nil {
 			log.Debugf("RTCP reader error: %v", err)
 			return
 		}
+		if n <= 0 || n > len(rtcpBuf) || !videoPLI(rtcpBuf[:n], sender.GetParameters()) {
+			continue
+		}
+		client.queueVideoIDR()
 	}
+}
+
+// Linearize the queue store with manager membership/removal. This never initializes
+// capture or calls the hardware SDK; common.RequestH264IDR only sets an atomic flag.
+func (c *Client) queueVideoIDR() {
+	manager := getManager()
+	manager.mutex.Lock()
+	defer manager.mutex.Unlock()
+	if manager.clients[c.ws] != c || c.video == nil ||
+		c.video.ConnectionState() != webrtc.PeerConnectionStateConnected {
+		return
+	}
+	common.RequestH264IDR()
+}
+
+// Only matching primary media SSRC PLI is handled; FIR/NACK/RR stay unchanged.
+func videoPLI(raw []byte, parameters webrtc.RTPSendParameters) bool {
+	packets, err := rtcp.Unmarshal(raw)
+	if err != nil {
+		return false
+	}
+	for _, packet := range packets {
+		pli, ok := packet.(*rtcp.PictureLossIndication)
+		if !ok || pli.MediaSSRC == 0 {
+			continue
+		}
+		for _, encoding := range parameters.Encodings {
+			if pli.MediaSSRC == uint32(encoding.SSRC) {
+				return true
+			}
+		}
+	}
+	return false
 }
