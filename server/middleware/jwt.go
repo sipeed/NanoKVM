@@ -67,6 +67,21 @@ func CheckToken() gin.HandlerFunc {
 			sessionHandle,
 			SessionChannelForPath(c.Request.URL.Path),
 		)
+		// The principal was resolved before this session could be found by a
+		// revocation, so a grant edit landing in between would miss it. Now that
+		// it is registered, any later edit drops it; re-reading the account picks
+		// up any earlier one.
+		user, err := authn.DefaultStore.ValidateToken(principal.Username, token.TokenVersion)
+		if err != nil {
+			unregister()
+			cancel()
+			abortUnauthorized(c)
+			return
+		}
+		principal.Role = user.Role
+		principal.Permissions = authn.EffectivePermissions(user)
+		c.Set(principalContextKey, principal)
+
 		timer := time.AfterFunc(time.Until(token.ExpiresAt.Time), cancel)
 		go watchSessionState(requestContext, cancel, principal.Username, token.TokenVersion, sessionRecheckDelay)
 		defer func() {

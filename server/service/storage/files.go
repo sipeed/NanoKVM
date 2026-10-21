@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"mime/multipart"
 	"net/http"
+	"os"
 	"path"
 	"path/filepath"
 
@@ -46,6 +48,53 @@ func requireFileWrite(c *gin.Context, mediaType string) bool {
 
 	c.JSON(http.StatusForbidden, "forbidden")
 	return false
+}
+
+// requireLibraryWrite guards a write through the shared partition that changes
+// the library. The library is every .iso and .img on the volume, wherever it
+// was put (findImages walks all of /data), so creating, replacing or removing
+// one through the partition changes it as much as the library endpoints do,
+// and medium.attach alone must not reach that far.
+func requireLibraryWrite(c *gin.Context) bool {
+	principal, ok := middleware.CurrentPrincipal(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, "unauthorized")
+		return false
+	}
+	if principal.Has(authn.PermLibraryWrite) {
+		return true
+	}
+
+	c.JSON(http.StatusForbidden, "forbidden")
+	return false
+}
+
+// holdsMedia reports whether full is a disk image or a directory with one
+// anywhere below it.
+func holdsMedia(full string) (bool, error) {
+	info, err := os.Stat(full)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return utils.IsMediaFile(full), nil
+		}
+		return false, err
+	}
+	if !info.IsDir() {
+		return utils.IsMediaFile(info.Name()), nil
+	}
+
+	found := false
+	err = filepath.WalkDir(full, func(_ string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !entry.IsDir() && utils.IsMediaFile(entry.Name()) {
+			found = true
+			return filepath.SkipAll
+		}
+		return nil
+	})
+	return found, err
 }
 
 // uploadMaxBytes is a hard ceiling for a single upload, so a runaway request
@@ -218,6 +267,10 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 		return
 	}
 
+	if mediaType == proto.MediaTypePartition && utils.IsMediaFile(name) && !requireLibraryWrite(c) {
+		return
+	}
+
 	target := name
 	if dir != "/" {
 		target = path.Join(dir, name)
@@ -323,6 +376,14 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 		}
 		if err := deleteGuard(full, status.Backing, diskfs.MountedImages()); err != nil {
 			respondError(c, err)
+			return
+		}
+		touchesLibrary, err := holdsMedia(full)
+		if err != nil {
+			respondError(c, fmt.Errorf("refusing to delete %s: %w", entryPath, err))
+			return
+		}
+		if touchesLibrary && !requireLibraryWrite(c) {
 			return
 		}
 	}

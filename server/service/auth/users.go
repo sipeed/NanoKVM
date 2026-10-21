@@ -19,6 +19,27 @@ var errInvalidPassword = errors.New("invalid password")
 // package does not depend on the cgo-based HID stack.
 var SessionNotifier func(username, event, data string)
 
+// APIKeyRotator replaces the device-wide MCP API key. It is wired by the MCP
+// router for the same reason as SessionNotifier.
+var APIKeyRotator func() error
+
+// rotateAPIKeyIfLost regenerates the MCP API key when the account no longer
+// reaches it. The key outlives the web session, so revoking the grant without
+// replacing the key would leave a copied key working.
+func rotateAPIKeyIfLost(previous, current []authn.Permission) {
+	if !authn.Has(previous, authn.PermMcp) || authn.Has(current, authn.PermMcp) {
+		return
+	}
+	if APIKeyRotator == nil {
+		return
+	}
+	if err := APIKeyRotator(); err != nil {
+		log.Errorf("rotate MCP API key after revoking the mcp grant: %s", err)
+		return
+	}
+	log.Infof("MCP API key rotated after the mcp grant was revoked")
+}
+
 func (s *Service) ListUsers(c *gin.Context) {
 	var rsp proto.Response
 	users, err := authn.DefaultStore.List()
@@ -101,21 +122,20 @@ func (s *Service) UpdateUser(c *gin.Context) {
 		patch.Permissions = &permissions
 	}
 	username := c.Param("username")
-	// Compare the grants the account ends up with against the ones it had, so a
-	// role change is handled exactly like editing the permission set: the role
-	// resolves to its implicit grants and the difference drives the refresh.
-	previous, err := authn.DefaultStore.Get(username)
+	// The store hands back the account as it was before and after this patch,
+	// read under one lock, so a role change is handled exactly like editing the
+	// permission set: the role resolves to its implicit grants and the
+	// difference drives the refresh.
+	previous, updated, err := authn.DefaultStore.Update(principal.Username, username, patch)
 	if err != nil {
 		rsp.ErrRsp(c, -2, err.Error())
 		return
 	}
-	previousPermissions := authn.EffectivePermissions(previous)
+	// A disabled account reaches nothing, whatever it stores.
+	previousPermissions := enabledPermissions(previous)
+	currentPermissions := enabledPermissions(updated)
+	rotateAPIKeyIfLost(previousPermissions, currentPermissions)
 
-	updated, err := authn.DefaultStore.Update(principal.Username, username, patch)
-	if err != nil {
-		rsp.ErrRsp(c, -2, err.Error())
-		return
-	}
 	if updated.TokenVersion != previous.TokenVersion {
 		// Disabling the account is the only change that invalidates the login.
 		middleware.RevokeUserSessions(username)
@@ -127,12 +147,14 @@ func (s *Service) UpdateUser(c *gin.Context) {
 		// to pick up capabilities cached at connect time (the console socket
 		// remembers whether it is read-only). Unrelated connections stay
 		// untouched. A save that changes nothing stays silent.
-		changed := permissionsChanged(previousPermissions, authn.EffectivePermissions(updated))
+		changed := permissionsChanged(previousPermissions, currentPermissions)
 		roleChanged := updated.Role != previous.Role
 		if (roleChanged || len(changed) > 0) && SessionNotifier != nil {
 			// The role itself is rendered too (user management, the role label),
 			// so the frontend refreshes even when the grants happen to match.
-			SessionNotifier(username, "auth", "refresh")
+			// The notifier writes to every socket of the user, each with its own
+			// write deadline; one stuck connection must not hold this request.
+			go SessionNotifier(username, "auth", "refresh")
 		}
 		if channels := channelsForPermissions(changed); len(channels) > 0 {
 			middleware.RefreshUserSessions(username, channels...)
@@ -146,11 +168,13 @@ func (s *Service) DeleteUser(c *gin.Context) {
 	var rsp proto.Response
 	principal, _ := middleware.CurrentPrincipal(c)
 	username := c.Param("username")
+	previous, _ := authn.DefaultStore.Get(username)
 	if err := authn.DefaultStore.Delete(principal.Username, username); err != nil {
 		rsp.ErrRsp(c, -1, err.Error())
 		return
 	}
 	middleware.RevokeUserSessions(username)
+	rotateAPIKeyIfLost(enabledPermissions(previous), nil)
 	rsp.OkRsp(c)
 	log.Infof("user deleted: %s", username)
 }
@@ -179,6 +203,13 @@ func (s *Service) ChangeUserPassword(c *gin.Context) {
 	middleware.RevokeUserSessions(username)
 	rsp.OkRsp(c)
 	log.Infof("password reset for user: %s", username)
+}
+
+func enabledPermissions(user *authn.User) []authn.Permission {
+	if user == nil || !user.Enabled {
+		return nil
+	}
+	return authn.EffectivePermissions(user)
 }
 
 // permissionsChanged returns the grants that were added or removed. Both

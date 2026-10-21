@@ -3,6 +3,8 @@ package storage
 import (
 	"context"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -144,5 +146,42 @@ func TestRFC5987Encode(t *testing.T) {
 	header := attachmentHeader(`中 "a".iso`)
 	if !strings.HasPrefix(header, `attachment; filename="_ _a_.iso"; filename*=UTF-8''`) {
 		t.Errorf("attachmentHeader = %q", header)
+	}
+}
+
+func TestHoldsMedia(t *testing.T) {
+	root := t.TempDir()
+	mustWrite := func(rel string) {
+		full := filepath.Join(root, rel)
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, nil, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mustWrite("images/win.ISO")
+	mustWrite("share/notes.txt")
+	mustWrite("share/deep/disk.img")
+	mustWrite("docs/readme.txt")
+
+	cases := map[string]bool{
+		"images":              true,
+		"images/win.ISO":      true,
+		"share":               true,
+		"share/notes.txt":     false,
+		"docs":                false,
+		"missing/new.iso":     true,
+		"missing/notes.txt":   false,
+		"share/deep/disk.img": true,
+	}
+	for rel, want := range cases {
+		got, err := holdsMedia(filepath.Join(root, rel))
+		if err != nil {
+			t.Fatalf("holdsMedia(%s): %v", rel, err)
+		}
+		if got != want {
+			t.Errorf("holdsMedia(%s) = %v, want %v", rel, got, want)
+		}
 	}
 }

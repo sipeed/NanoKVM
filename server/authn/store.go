@@ -250,22 +250,26 @@ func (s *Store) Create(username, password string, role Role, permissions ...Perm
 	return s.saveLocked(db)
 }
 
-func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
+// Update applies the patch and returns the account as it was before and after,
+// both read under the store lock, so a caller comparing the two sees exactly the
+// change it made even while another update runs.
+func (s *Store) Update(actor, username string, patch UserPatch) (previous, updated *User, err error) {
 	s.mutex.Lock()
 	defer s.mutex.Unlock()
 
 	db, err := s.loadLocked(true)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	index := userIndex(db.Users, username)
 	if index < 0 {
-		return nil, ErrUserNotFound
+		return nil, nil, ErrUserNotFound
 	}
+	previous = cloneUser(&db.Users[index])
 	user := db.Users[index]
 
 	if patch.Role != nil && !IsValidRole(*patch.Role) {
-		return nil, errors.New("invalid role")
+		return nil, nil, errors.New("invalid role")
 	}
 	// The patch is normalized before it is compared and stored, so a caller that
 	// still sends the split media grants does not look like a change once they
@@ -273,17 +277,25 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 	granted := user.Permissions
 	if patch.Permissions != nil {
 		if err := ValidatePermissions(*patch.Permissions); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		granted = NormalizeStoredPermissions(*patch.Permissions)
+		// A request can only name grants this build knows, so the ones it does
+		// not (written by a newer release) are carried over instead of being
+		// dropped by an editor that never showed them.
+		for _, permission := range user.Permissions {
+			if !IsValidPermission(permission) && !Has(granted, permission) {
+				granted = append(granted, permission)
+			}
+		}
 	}
 	if actor == username && user.Role == RoleAdmin &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
-		return nil, ErrSelfModification
+		return nil, nil, ErrSelfModification
 	}
 	if user.SystemAccount &&
 		((patch.Role != nil && *patch.Role != RoleAdmin) || (patch.Enabled != nil && !*patch.Enabled)) {
-		return nil, ErrSystemAccount
+		return nil, nil, ErrSystemAccount
 	}
 
 	changed := false
@@ -307,12 +319,12 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 		changed = true
 	}
 	if !changed {
-		return &user, nil
+		return previous, cloneUser(&user), nil
 	}
 
 	db.Users[index] = user
 	if enabledAdminCount(db.Users) == 0 {
-		return nil, ErrLastAdmin
+		return nil, nil, ErrLastAdmin
 	}
 	// Permission and role updates keep the login valid: the principal is rebuilt
 	// from the store on every request, so new grants apply immediately and
@@ -321,9 +333,9 @@ func (s *Store) Update(actor, username string, patch UserPatch) (*User, error) {
 		db.Users[index].TokenVersion++
 	}
 	if err = s.saveLocked(db); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return cloneUser(&db.Users[index]), nil
+	return previous, cloneUser(&db.Users[index]), nil
 }
 
 func (s *Store) Delete(actor, username string) error {

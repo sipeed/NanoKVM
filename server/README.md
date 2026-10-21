@@ -94,29 +94,32 @@ outside the console renders them. Consequences worth knowing:
   target machine and writes into the shared partition the target reads; `library.write` changes what
   the library keeps (uploads, deletes, the files inside an image); `library.read` lists and downloads.
   The file endpoints serve an image and the shared partition through one path, so the route admits
-  either grant and each request is checked against the medium type it names.
+  either grant and each request is checked against the medium type it names. Every `.iso` and
+  `.img` on the partition is a library entry, so uploading one through the shared partition, or
+  deleting a file or folder that holds one, also needs `library.write`.
 - The emulated USB devices are neither media nor network: the virtual disk and the RNDIS adapter
   hand the target machine the raw data partition and a network interface, so both follow `device`.
   A medium can only be attached while a `device` holder has the virtual disk switched on, and the
   storage page says so when it is off.
 
-Three grants reach further than their names suggest and amount to full device control. The catalog
-has two risk levels, and `warn` is reserved for them: the account editor marks those three and
+Four grants reach further than their names suggest and amount to full device control. The catalog
+has two risk levels, and `warn` is reserved for them: the account editor marks those four and
 names them before the grants are saved:
 
 - `terminal` is a root shell (the same one SSH gives) and can run saved and autostart scripts.
 - `mcp` hands out a device-wide API key that drives the keyboard, mouse and screenshots from
-  outside the web session, and the key keeps working after this grant is revoked until it is
-  regenerated.
+  outside the web session. The key is shared, so when any account loses this grant (revoked,
+  demoted, disabled or deleted) the server regenerates it, and every MCP client needs the new key.
 - `ai` drives the device through the local loopback interface, which the other grants do not
   restrict.
+- `update` installs firmware and application packages. An offline package is checked only against
+  the checksum its uploader supplies, so installing one is running code as root.
 
-`device` and `update` carry no such mark, although both change what the device does for everyone
-and neither can be narrowed per account. `device` turns SSH on or off (root login, with the device
+`device` carries no such mark, although it changes what the device does for everyone and cannot be
+narrowed per account. `device` turns SSH on or off (root login, with the device
 owner's password), reboots the device, hands the raw data partition or a network interface to the
 target machine through the emulated USB devices, and edits the OLED, HDMI, mDNS, memory, swap and
-HID settings; `update` installs firmware and application packages. Both are described that way in
-the editor.
+HID settings. The editor describes it that way.
 
 Two grants also change settings that affect everyone watching: `console.view` sets the video mode,
 resolution, frame rate and quality, and resets the HDMI capture; `power` manages the Wake-on-LAN
