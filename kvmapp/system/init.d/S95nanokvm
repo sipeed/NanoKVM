@@ -63,7 +63,14 @@ start_services() {
         done
         rm -f /tmp/.nanokvm_migrating
     else
-        /tmp/kvm_system/kvm_system &
+        # On a normal boot, let NanoKVM-Server claim the CPU first; the helper
+        # (OLED, buttons, network status) is not on the path to first frame.
+        # Image/app migration and restarts start it immediately as before.
+        if [ "${1:-}" != boot ] || [ -e /kvmapp/kvm_new_img ] || [ -e /kvmapp/kvm_new_app ]; then
+            /tmp/kvm_system/kvm_system &
+        else
+            (sleep 3; exec /tmp/kvm_system/kvm_system) &
+        fi
     fi
 
     if ! pidof NanoKVM-Server >/dev/null 2>&1; then
@@ -118,7 +125,7 @@ case "$1" in
     fi
 
     # Start services
-    start_services
+    start_services boot
    ;;
 
   stop)
