@@ -26,19 +26,24 @@ var APIKeyRotator func() error
 // rotateAPIKeyIfLost regenerates the MCP API key when the account no longer
 // reaches it. The key outlives the web session, so revoking the grant without
 // replacing the key would leave a copied key working.
-func rotateAPIKeyIfLost(previous, current []authn.Permission) {
+// It reports a failed rotation so the administrator learns that the old key
+// still works.
+func rotateAPIKeyIfLost(previous, current []authn.Permission) error {
 	if !authn.Has(previous, authn.PermMcp) || authn.Has(current, authn.PermMcp) {
-		return
+		return nil
 	}
 	if APIKeyRotator == nil {
-		return
+		return nil
 	}
 	if err := APIKeyRotator(); err != nil {
 		log.Errorf("rotate MCP API key after revoking the mcp grant: %s", err)
-		return
+		return errAPIKeyNotRotated
 	}
 	log.Infof("MCP API key rotated after the mcp grant was revoked")
+	return nil
 }
+
+var errAPIKeyNotRotated = errors.New("the change was saved, but the MCP API key could not be regenerated; regenerate it from the MCP settings")
 
 func (s *Service) ListUsers(c *gin.Context) {
 	var rsp proto.Response
@@ -134,7 +139,7 @@ func (s *Service) UpdateUser(c *gin.Context) {
 	// A disabled account reaches nothing, whatever it stores.
 	previousPermissions := enabledPermissions(previous)
 	currentPermissions := enabledPermissions(updated)
-	rotateAPIKeyIfLost(previousPermissions, currentPermissions)
+	rotateErr := rotateAPIKeyIfLost(previousPermissions, currentPermissions)
 
 	if updated.TokenVersion != previous.TokenVersion {
 		// Disabling the account is the only change that invalidates the login.
@@ -160,6 +165,10 @@ func (s *Service) UpdateUser(c *gin.Context) {
 			middleware.RefreshUserSessions(username, channels...)
 		}
 	}
+	if rotateErr != nil {
+		rsp.ErrRsp(c, -3, rotateErr.Error())
+		return
+	}
 	rsp.OkRsp(c)
 	log.Infof("user updated: %s", username)
 }
@@ -174,7 +183,10 @@ func (s *Service) DeleteUser(c *gin.Context) {
 		return
 	}
 	middleware.RevokeUserSessions(username)
-	rotateAPIKeyIfLost(enabledPermissions(previous), nil)
+	if err := rotateAPIKeyIfLost(enabledPermissions(previous), nil); err != nil {
+		rsp.ErrRsp(c, -2, err.Error())
+		return
+	}
 	rsp.OkRsp(c)
 	log.Infof("user deleted: %s", username)
 }

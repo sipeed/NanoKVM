@@ -61,26 +61,30 @@ func CheckToken() gin.HandlerFunc {
 		sessionHandle := newSessionHandle()
 		requestContext = WithSessionHandle(requestContext, sessionHandle)
 		c.Request = c.Request.WithContext(requestContext)
+		channel := SessionChannelForPath(c.Request.URL.Path)
 		unregister := activeSessions.register(
 			principal.Username,
 			cancel,
 			sessionHandle,
-			SessionChannelForPath(c.Request.URL.Path),
+			channel,
 		)
 		// The principal was resolved before this session could be found by a
 		// revocation, so a grant edit landing in between would miss it. Now that
 		// it is registered, any later edit drops it; re-reading the account picks
-		// up any earlier one.
-		user, err := authn.DefaultStore.ValidateToken(principal.Username, token.TokenVersion)
-		if err != nil {
-			unregister()
-			cancel()
-			abortUnauthorized(c)
-			return
+		// up any earlier one. Only the long-lived channels are dropped by a grant
+		// edit, so a short request keeps the principal it was authorized with.
+		if channel != "" {
+			user, err := authn.DefaultStore.ValidateToken(principal.Username, token.TokenVersion)
+			if err != nil {
+				unregister()
+				cancel()
+				abortUnauthorized(c)
+				return
+			}
+			principal.Role = user.Role
+			principal.Permissions = authn.EffectivePermissions(user)
+			c.Set(principalContextKey, principal)
 		}
-		principal.Role = user.Role
-		principal.Permissions = authn.EffectivePermissions(user)
-		c.Set(principalContextKey, principal)
 
 		timer := time.AfterFunc(time.Until(token.ExpiresAt.Time), cancel)
 		go watchSessionState(requestContext, cancel, principal.Username, token.TokenVersion, sessionRecheckDelay)

@@ -267,13 +267,26 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 		return
 	}
 
-	if mediaType == proto.MediaTypePartition && utils.IsMediaFile(name) && !requireLibraryWrite(c) {
-		return
-	}
-
 	target := name
 	if dir != "/" {
 		target = path.Join(dir, name)
+	}
+
+	// exFAT folds case with its own table, so the name in the request is not
+	// necessarily the file it replaces: check the on-disk spelling as well.
+	if mediaType == proto.MediaTypePartition {
+		touchesLibrary := utils.IsMediaFile(name)
+		if !touchesLibrary {
+			full, err := utils.CanonicalPathInside(mediaDirectory, target)
+			if err != nil {
+				respondError(c, err)
+				return
+			}
+			touchesLibrary = utils.IsMediaFile(full)
+		}
+		if touchesLibrary && !requireLibraryWrite(c) {
+			return
+		}
 	}
 
 	// An upload is a long transfer like any other: it takes the single job
