@@ -23,7 +23,7 @@ stop_process() {
         return
     fi
 
-    killall -INT "$process" 2>/dev/null || true
+    killall -TERM "$process" 2>/dev/null || true
     if wait_for_exit "$process" 20; then
         return
     fi
