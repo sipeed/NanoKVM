@@ -22,7 +22,7 @@ export const MenuItem = ({
   fresh,
   onOpenChange
 }: MenuItemProps) => {
-  const isBigScreen = useMediaQuery({ minWidth: 640 });
+  const isBigScreen = useMediaQuery({ minWidth: 850 });
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
   const menuCloseSignal = useAtomValue(menuCloseSignalAtom);
 
@@ -82,15 +82,18 @@ export const MenuItem = ({
         open={isTooltipOpen}
         onOpenChange={toggleTooltip}
       >
-        <div
+        <button
+          type="button"
+          aria-label={title}
+          aria-expanded={isPopoverOpen}
           className={
             className
               ? className
-              : 'flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700/80 hover:text-white'
+              : 'flex h-10 w-10 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 text-neutral-300 hover:bg-neutral-700/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 min-[850px]:h-[30px] min-[850px]:w-[30px]'
           }
         >
           {icon}
-        </div>
+        </button>
       </Tooltip>
     </Popover>
   );

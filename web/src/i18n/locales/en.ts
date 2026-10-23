@@ -935,6 +935,15 @@ const en = {
       toggle: 'Toggle Fullscreen'
     },
     menu: {
+      more: 'More',
+      less: 'Less',
+      files: 'Files',
+      ai: 'AI',
+      fullscreen: 'Full screen',
+      hide: 'Hide',
+      keyboardTools: 'Keys',
+      wol: 'WOL',
+      mobileControls: 'Console controls',
       collapse: 'Collapse Menu',
       expand: 'Expand Menu'
     }

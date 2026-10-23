@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
 import { Splitter, Tag, Tooltip } from 'antd';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { LockIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMediaQuery } from 'react-responsive';
@@ -21,6 +21,7 @@ import {
   selectedOriginalResolutionAtom,
   videoModeAtom
 } from '@/jotai/screen.ts';
+import { mobileMenuCollapsedAtom } from '@/jotai/settings.ts';
 import { Head } from '@/components/head.tsx';
 import { NoConsoleAccess } from '@/pages/no-console-access.tsx';
 
@@ -73,6 +74,7 @@ const Console = () => {
   const setSelectedManualRegion = useSetAtom(selectedManualRegionAtom);
   const setSelectedOriginalResolution = useSetAtom(selectedOriginalResolutionAtom);
   const [isPicoclawChatOpen, setPicoclawChatOpen] = useAtom(picoclawChatOpenAtom);
+  const isMobileMenuCollapsed = useAtomValue(mobileMenuCollapsedAtom);
 
   // Losing the ai grant closes the chat: its socket is dropped with the
   // grant, so leaving the sidebar open would only show send failures.
@@ -235,7 +237,15 @@ const Console = () => {
       <H264ModeNotification />
 
       {videoMode && resolution && (
-        <div className="relative flex h-full min-h-0 w-full min-w-0">
+        <div
+          className="relative flex h-full min-h-0 w-full min-w-0"
+          style={{
+            paddingTop:
+              isBigScreen || isMobileMenuCollapsed
+                ? undefined
+                : 'calc(3.5rem + env(safe-area-inset-top))'
+          }}
+        >
           <Menu />
           <div className="h-full min-h-0 w-full min-w-0">
             <Splitter
@@ -287,7 +297,10 @@ const Console = () => {
       )}
 
       {!isBigScreen && isPicoclawChatOpen ? (
-        <div className="fixed inset-x-0 bottom-0 top-14 z-[980] overflow-hidden bg-[#0d0d0f] shadow-2xl">
+        <div
+          className="fixed inset-x-0 bottom-0 z-[980] overflow-hidden bg-[#0d0d0f] shadow-2xl"
+          style={{ top: isMobileMenuCollapsed ? 0 : 'calc(3.5rem + env(safe-area-inset-top))' }}
+        >
           <PicoclawSidebar />
         </div>
       ) : null}
