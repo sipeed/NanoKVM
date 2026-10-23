@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useAtomValue } from 'jotai';
 import { GripVerticalIcon } from 'lucide-react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
+import { useMediaQuery } from 'react-responsive';
 
 import {
   keyboardLedStatusVisibleAtom,
@@ -17,6 +18,7 @@ import { useMenuVisibility } from '@/hooks/useMenuVisibility.ts';
 import { KeyboardLedStatus } from '../keyboard-led-status';
 import { Fullscreen } from './fullscreen';
 import { Keyboard } from './keyboard';
+import { MobileMenu } from './mobile-menu';
 import { Mouse } from './mouse';
 import { Collapse, Expand } from './operations';
 import { Picoclaw } from './picoclaw';
@@ -28,7 +30,7 @@ import { Storage } from './storage';
 import { Terminal } from './terminal';
 import { Wol } from './wol';
 
-export const Menu = () => {
+const DesktopMenu = () => {
   const nodeRef = useRef<HTMLDivElement | null>(null);
   const { hasPermission } = useAuth();
   // Every media grant implies reading the library, so this alone decides whether
@@ -159,4 +161,9 @@ export const Menu = () => {
       </div>
     </Draggable>
   );
+};
+
+export const Menu = () => {
+  const isMobile = useMediaQuery({ maxWidth: 849 });
+  return isMobile ? <MobileMenu /> : <DesktopMenu />;
 };

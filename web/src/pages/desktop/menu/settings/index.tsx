@@ -14,6 +14,7 @@ import {
   UserRoundIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useMediaQuery } from 'react-responsive';
 import semver from 'semver';
 
 import * as api from '@/api/application.ts';
@@ -33,6 +34,7 @@ import { Update } from './update';
 
 export const Settings = () => {
   const { t } = useTranslation();
+  const isMobile = useMediaQuery({ maxWidth: 849 });
   const { hasPermission } = useAuth();
   const canDevice = hasPermission('device');
   const canNetwork = hasPermission('network');
@@ -152,8 +154,10 @@ export const Settings = () => {
   return (
     <>
       <Tooltip title={t('settings.title')} placement="bottom" mouseEnterDelay={0.6}>
-        <div
-          className="flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded hover:bg-neutral-700/80"
+        <button
+          type="button"
+          aria-label={t('settings.title')}
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 hover:bg-neutral-700/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 min-[850px]:h-[30px] min-[850px]:w-[30px]"
           onClick={openModal}
         >
           <Badge dot={isUpdateAvailable} color="blue" offset={[0, 2]}>
@@ -163,29 +167,47 @@ export const Settings = () => {
               <SettingsIcon size={18} />
             </div>
           </Badge>
-        </div>
+        </button>
       </Tooltip>
 
       <Modal
         open={isModalOpen}
-        width={'80%'}
-        centered={true}
+        width={isMobile ? '100%' : '80%'}
+        centered={!isMobile}
         footer={null}
         destroyOnHidden={true}
         onCancel={closeModal}
-        style={{ maxWidth: '1080px' }}
+        style={isMobile ? { top: 0, margin: 0, paddingBottom: 0 } : { maxWidth: '1080px' }}
         styles={{ content: { padding: 0 } }}
       >
-        <div className="flex h-[80vh] max-h-[700px] rounded-lg outline outline-1 outline-neutral-700">
-          <div className="flex h-full max-w-[260px] flex-col space-y-0.5 rounded-l-lg bg-neutral-800/90 px-1 sm:w-1/5 md:w-1/4 md:px-2">
-            <div className="hidden px-3 pt-10 text-xl sm:block">{t('settings.title')}</div>
-            <div className="h-10 sm:h-5" />
+        <div
+          className={clsx(
+            'flex rounded-lg outline outline-1 outline-neutral-700',
+            isMobile ? 'h-[100dvh]' : 'h-[80vh] max-h-[700px]'
+          )}
+        >
+          <div
+            className={clsx(
+              'flex h-full flex-col space-y-1 overflow-y-auto rounded-l-lg bg-neutral-800/90',
+              isMobile ? 'w-14 shrink-0 px-1' : 'max-w-[260px] px-1 sm:w-1/5 md:w-1/4 md:px-2'
+            )}
+          >
+            {!isMobile && <div className="px-3 pt-10 text-xl">{t('settings.title')}</div>}
+            <div className={isMobile ? 'h-12 shrink-0' : 'h-5 shrink-0'} />
             {tabs.map((tab) => (
-              <div
+              <button
+                type="button"
                 key={tab.id}
+                aria-label={t(`settings.${tab.id}.title`)}
+                title={t(`settings.${tab.id}.title`)}
+                aria-current={currentTab === tab.id ? 'page' : undefined}
+                disabled={isLocked}
                 className={clsx(
-                  'flex cursor-pointer select-none items-center space-x-2 rounded-lg p-2 sm:px-3',
-                  currentTab === tab.id ? 'bg-neutral-700/50' : 'hover:bg-neutral-700/50'
+                  'flex min-h-11 w-full cursor-pointer select-none items-center rounded-lg border-0 text-neutral-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 disabled:cursor-not-allowed',
+                  isMobile ? 'justify-center' : 'space-x-2 p-2 sm:px-3',
+                  currentTab === tab.id
+                    ? 'bg-neutral-700/50'
+                    : 'bg-transparent hover:bg-neutral-700/50'
                 )}
                 onClick={() => changeTab(tab.id)}
               >
@@ -193,22 +215,22 @@ export const Settings = () => {
 
                 {isUpdateAvailable && tab.id === 'update' ? (
                   <Badge dot color="blue" offset={[6, 3]}>
-                    <span className="hidden truncate text-sm sm:block">
+                    <span className={clsx('truncate text-sm', isMobile ? 'hidden' : 'block')}>
                       {t(`settings.${tab.id}.title`)}
                     </span>
                   </Badge>
                 ) : (
-                  <span className="hidden truncate text-sm sm:block">
+                  <span className={clsx('truncate text-sm', isMobile ? 'hidden' : 'block')}>
                     {t(`settings.${tab.id}.title`)}
                   </span>
                 )}
-              </div>
+              </button>
             ))}
           </div>
 
           <div
             ref={scrollViewportRef}
-            className="h-full w-full overflow-y-auto rounded-r-lg bg-neutral-900/50 px-3"
+            className="h-full min-w-0 flex-1 overflow-y-auto rounded-r-lg bg-neutral-900/50 px-3"
           >
             <div className="flex h-full w-full justify-center">
               <div className="w-full max-w-[600px] pb-10 pt-14">

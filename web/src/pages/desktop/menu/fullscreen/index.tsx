@@ -38,12 +38,14 @@ export const Fullscreen = () => {
 
   return (
     <Tooltip title={t('fullscreen.toggle')} placement="bottom" mouseEnterDelay={0.6}>
-      <div
-        className="hidden h-[30px] w-[30px] cursor-pointer items-center justify-center rounded text-neutral-300 hover:bg-neutral-700/80 hover:text-white sm:flex"
+      <button
+        type="button"
+        aria-label={t('fullscreen.toggle')}
+        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded border-0 bg-transparent p-0 text-neutral-300 hover:bg-neutral-700/80 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 min-[850px]:h-[30px] min-[850px]:w-[30px]"
         onClick={handleFullscreen}
       >
         {isFullscreen ? <MinimizeIcon size={18} /> : <MaximizeIcon size={18} />}
-      </div>
+      </button>
     </Tooltip>
   );
 };

@@ -15,5 +15,8 @@ export const webTitleAtom = atom('');
 // menu display mode: 'off' | 'auto' | 'always'
 export const menuDisplayModeAtom = atom<string>('auto');
 
+// whether the mobile toolbar is collapsed, so the console can reclaim its space
+export const mobileMenuCollapsedAtom = atom(false);
+
 // show the remote keyboard lock-status indicator beside the menu bar
 export const keyboardLedStatusVisibleAtom = atom(true);
