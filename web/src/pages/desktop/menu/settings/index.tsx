@@ -172,7 +172,7 @@ export const Settings = () => {
 
       <Modal
         open={isModalOpen}
-        width={isMobile ? '100%' : '80%'}
+        width={isMobile ? '100vw' : '80%'}
         centered={!isMobile}
         footer={null}
         destroyOnHidden={true}
