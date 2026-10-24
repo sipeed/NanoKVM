@@ -36,12 +36,11 @@ echo -e "${GREEN}[OK] All dependencies found.${NC}"
 # ------------------------------------------------------------------------------
 # Step 2: Build the Binary
 # ------------------------------------------------------------------------------
-echo -e "${YELLOW}[INFO] Starting cross-compilation for RISC-V 64-bit (BoringCrypto enabled)...${NC}"
+echo -e "${YELLOW}[INFO] Starting cross-compilation for RISC-V 64-bit...${NC}"
 
 export CGO_ENABLED=1
 export GOOS=linux
 export GOARCH=riscv64
-export GOEXPERIMENT=boringcrypto
 export CC="$CC_COMPILER"
 export CGO_CFLAGS="$CGO_CFLAGS_OPTS"
 
