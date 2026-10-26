@@ -107,3 +107,65 @@
 .hg-candidate-box {
   display: none !important;
 }
+
+.keyboard-drawer-controls {
+  scrollbar-width: none;
+}
+
+.keyboard-drawer-controls::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 849px) {
+  .keyboardContainer {
+    overflow-x: hidden;
+  }
+
+  .simple-keyboard-main.simple-keyboard {
+    width: 100%;
+    min-width: 0;
+    padding: 3px;
+    font-size: clamp(7px, 2.3vw, 11px);
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-button {
+    min-width: 0;
+    height: 32px;
+    padding: 1px;
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-row:first-child,
+  .simple-keyboard-main.simple-keyboard .hg-row:not(:last-child) {
+    margin-bottom: 3px;
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-row .hg-button:not(:last-child) {
+    margin-right: 3px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .keyboard-drawer-header {
+    min-height: 28px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .simple-keyboard-main.simple-keyboard {
+    padding: 2px;
+    font-size: 8px;
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-button {
+    height: 25px;
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-row:first-child,
+  .simple-keyboard-main.simple-keyboard .hg-row:not(:last-child) {
+    margin-bottom: 2px;
+  }
+
+  .simple-keyboard-main.simple-keyboard .hg-row .hg-button:not(:last-child) {
+    margin-right: 2px;
+  }
+}
