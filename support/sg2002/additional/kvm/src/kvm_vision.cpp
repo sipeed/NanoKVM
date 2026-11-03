@@ -12,6 +12,8 @@
 #include "kvm_vision.h"
 #include "vi_state_shared.hpp"
 #include "internal/vi_state_writer.hpp"
+#include <atomic>
+#include "cvi_venc.h"
 
 #include <errno.h>
 #include <sys/stat.h>
@@ -1618,6 +1620,40 @@ void set_frame_detact(uint8_t _frame_detact)
     kvmv_cfg.stream_stop = 0;
 }
 
+
+// RTCP threads only queue; the existing serialized capture owner consumes.
+static std::atomic<uint32_t> nanokvm_idr_pending{0};
+static_assert(std::atomic<uint32_t>::is_always_lock_free, "IDR queue must be lock-free");
+
+extern "C" void kvmv_request_h264_idr(void)
+{
+    nanokvm_idr_pending.store(1, std::memory_order_relaxed);
+}
+
+// Caller holds the existing VI mutex; owner-only rate state survives reinit.
+static void nanokvm_consume_h264_idr(void)
+{
+    static bool attempted = false;
+    static uint64_t last_attempt_ns = 0;
+    if (!nanokvm_idr_pending.load(std::memory_order_relaxed) ||
+        kvm_venc.enc_h264_init != 1 || kvm_venc.kvm_venc_cfg.type != 2)
+        return;
+    struct timespec now;
+    if (clock_gettime(CLOCK_MONOTONIC, &now) != 0 || now.tv_sec < 0 ||
+        now.tv_nsec < 0 || now.tv_nsec >= 1000000000L)
+        return;
+    const uint64_t now_ns = (uint64_t)now.tv_sec * 1000000000ULL + now.tv_nsec;
+    // Coalesce all clients; failures also count. Never retry without new feedback.
+    if (attempted && (now_ns < last_attempt_ns ||
+        now_ns - last_attempt_ns < 500000000ULL))
+        return;
+    if (!nanokvm_idr_pending.exchange(0, std::memory_order_relaxed)) return;
+    attempted = true;
+    last_attempt_ns = now_ns;
+    const int result = CVI_VENC_RequestIDR(kvm_venc.mmf_venc_chn, true);
+    debug("[kvmv] feedback IDR request result = %d\n", result);
+}
+
 int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
 {
 	uint64_t __attribute__((unused)) start_time;
@@ -1645,6 +1681,7 @@ int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
 		// }
     }
 	// log::info("init(): %d \r\n", (int)(time::time_ms() - start_time));
+    nanokvm_consume_h264_idr();
     if (mmf_venc_push(kvm_venc.mmf_venc_chn, (uint8_t *)raw->data(), raw->width(), raw->height(), mmf_invert_format_to_mmf(raw->format()))) {
         mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
         kvm_venc.enc_h264_init = 0;
@@ -1695,7 +1732,7 @@ void kvmv_init(uint8_t _debug_info_en)
 
     cam->hmirror(1);
     cam->vflip(1);
-    cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+    // Startup camera already has this geometry; retain all recovery restarts.
     for(int i = 0; i < kvmv_data_buffer_size; i++){
         kvmv_data_buffer[i].p_img_data = NULL;
     }

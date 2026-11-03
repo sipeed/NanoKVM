@@ -70,6 +70,7 @@ void set_venc_auto_recyc(uint8_t _enable);
 int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size);
 int free_kvmv_data(uint8_t ** _pp_kvm_data);
 void free_all_kvmv_data();
+void kvmv_request_h264_idr(void);
 void set_h264_gop(uint8_t _gop);
 void set_frame_detact(uint8_t _frame_detact);
 void kvmv_deinit();

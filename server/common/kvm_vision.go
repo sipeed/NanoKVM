@@ -126,6 +126,11 @@ func (k *KvmVision) HasHDMISignal() bool {
 	return C.kvmv_hdmi_signal_active() != 0
 }
 
+// RequestH264IDR only queues feedback; capture initialization belongs to its owner.
+func RequestH264IDR() {
+	C.kvmv_request_h264_idr()
+}
+
 func (k *KvmVision) SetGop(gop uint8) {
 	k.mutex.RLock()
 	defer k.mutex.RUnlock()
