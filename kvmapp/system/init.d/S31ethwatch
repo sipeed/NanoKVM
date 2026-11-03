@@ -1,0 +1,124 @@
+#!/bin/sh
+#
+# ethwatch    Restarts DHCP on eth0 when the gateway stops answering.
+#
+# udhcpc only looks for a new server once its lease runs out. If the
+# router that handed out the lease disappears (a mesh satellite that
+# reboots, a second router that is switched off), eth0 keeps a dead
+# gateway until then. This watches the gateway over ARP and, after
+# FAIL_LIMIT missed checks, makes udhcpc release the lease and start a
+# fresh discover.
+#
+# The lease is only released once a DHCP server is known to answer.
+# When the gateway is down because the router itself is (rebooting,
+# broken), releasing would leave eth0 with no address at all and the
+# KVM unreachable even from the local network.
+#
+
+PIDFILE="/var/run/ethwatch.pid"
+UDHCPC_PIDFILE="/run/udhcpc.eth0.pid"
+
+INTERVAL=10     # seconds between checks
+FAIL_LIMIT=12   # missed checks before restarting DHCP (12 x 10s = 2 min)
+HOLDOFF=60      # seconds to wait after a restart or a failed probe
+
+log() {
+    logger -t ethwatch "$1"
+}
+
+gateway() {
+    ip route show default dev eth0 2>/dev/null | awk '/^default/ { print $3; exit }'
+}
+
+carrier() {
+    [ "$(cat /sys/class/net/eth0/carrier 2>/dev/null)" = "1" ]
+}
+
+gateway_alive() {
+    # ARP rather than ICMP: a router may drop ping, but not ARP.
+    arping -q -c 2 -w 3 -I eth0 "$1" >/dev/null 2>&1
+}
+
+dhcp_server_alive() {
+    # One-shot discover that configures nothing (-s /bin/true) and exits
+    # as soon as a server hands out a lease (-q) or none does (-n).
+    udhcpc -i eth0 -f -n -q -t 3 -T 2 -s /bin/true >/dev/null 2>&1
+}
+
+udhcpc_pid() {
+    pid=$(cat "$UDHCPC_PIDFILE" 2>/dev/null)
+    [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null && echo "$pid"
+}
+
+run() {
+    fails=0
+    stuck=
+    while true; do
+        sleep "$INTERVAL"
+
+        # Nothing to do on a static address, with the cable out, or
+        # while udhcpc has no lease yet (it is already discovering).
+        pid=$(udhcpc_pid) || { fails=0; continue; }
+        carrier || { fails=0; continue; }
+        gw=$(gateway)
+        [ -n "$gw" ] || { fails=0; continue; }
+
+        if gateway_alive "$gw"; then
+            fails=0
+            stuck=
+            continue
+        fi
+
+        fails=$((fails + 1))
+        [ "$fails" -lt "$FAIL_LIMIT" ] && continue
+
+        if ! dhcp_server_alive; then
+            [ -n "$stuck" ] || log "gateway $gw unreachable and no DHCP server answers, keeping the current lease"
+            stuck=1
+            fails=0
+            sleep "$HOLDOFF"
+            continue
+        fi
+
+        stuck=
+        log "gateway $gw unreachable and a DHCP server answers, restarting DHCP"
+        kill -USR2 "$pid"   # release the lease
+        sleep 1
+        kill -USR1 "$pid"   # discover again
+        fails=0
+        sleep "$HOLDOFF"
+    done
+}
+
+start() {
+    printf "Starting ethwatch: "
+    if [ -e /boot/eth.nodhcp ] && ! udhcpc_pid >/dev/null; then
+        echo "static address, skipped"
+        return 0
+    fi
+    "$0" run >/dev/null 2>&1 &
+    echo $! > "$PIDFILE"
+    echo "OK"
+}
+
+stop() {
+    printf "Stopping ethwatch: "
+    [ -e "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null
+    rm -f "$PIDFILE"
+    echo "OK"
+}
+
+case "$1" in
+    start) start ;;
+    stop) stop ;;
+    restart|reload)
+        stop
+        start
+        ;;
+    run) run ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit 0
