@@ -1,3 +1,71 @@
+## 2.5.3 (2026-11-03)
+
+### Features
+
+* Replaced the desktop image menu and the download page with a storage page that lists the media the emulated USB disk can carry, mounts and ejects them, and browses the files inside a medium over the same gadget, so the two machines exchange files without going through the terminal
+* Added uploads, downloads and deletes to the storage page, with search, sorting, folder deletion behind a confirmation, one transfer display for image and file transfers, cancellable uploads, a free space preflight and a checksum mismatch report
+* Browsed only media whose filesystem this device can read, so an ISO 9660 image is still served to the target machine but cannot be listed here, and limited CD-ROM mode to ISO 9660 and UDF images
+* Made the shared folder follow the target machine: while it owns the data partition the listing refreshes on a timer after dropping the dentry and inode caches, so a file the target machine wrote shows up within a second of its own writeback
+* Added a fine-grained permission system on top of the `admin` and `user` roles: administrators keep implicit full access, while every other account receives an explicit set of grants covering the console, power, media, terminal, device, network, updates, MCP, Tailscale and AI features, with the groups, risk marks and implied grants shown in a permission editor; mounting a medium needs the virtual disk, and the storage page names the account that has to enable it when the current account cannot
+* Added a view-only console session for an account that may watch but not send input: the pointer and keyboard capture, the mouse menu and the input region editor follow the grant, pages, menus, settings tabs and storage actions render only what the account is allowed to use, and an account without console access lands on a page offering the sections its grants open
+* Changed permission handling so an open session picks up the new grants without ending the login: a change that invalidates a cached capability drops the long-lived connection with a dedicated close code so the page reconnects, and only disabling an account ends the login
+* Added the choice of regenerating the device-wide MCP API key when an account loses the MCP grant, instead of rotating the key silently and disconnecting every MCP client
+* Kept the pre-2.6 image endpoints working as a compatibility layer over the new media API, so existing clients and scripts keep working
+* Treated UDF images, not only ISO 9660 ones, as optical media, and accepted uploads by extension (`.iso`/`.img`), leaving an unusable image to fail when it is mounted instead of while it is stored
+
+### Bug Fixes
+
+* Fixed HID input being lost after a medium was mounted or the gadget was otherwise reset, by reopening the HID devices with a retry instead of a single attempt that could fail while the new nodes were still coming up
+* Fixed `/data` staying read-only after a failed gadget script or a network switch
+* Fixed the settings menu icon sitting a few pixels below the other menu icons, and centered the dialog tab icons in their box
+* Fixed Chinese and Japanese punctuation being drawn by a Latin face in tooltips and dialogs, which pushed the ideographic comma and full stop above the baseline
+
+### UI Improvements
+
+* Gave the shared folder, ISO and IMG entries their own glyphs and picked file icons from the extension, so a listing can be read at a glance
+* Listed administrators above regular accounts and gave their rows a lighter card
+* Moved the PicoClaw chat composer to an antd text area and replaced the Radix scroll area with the native scroll container, so the settings dialog and the shortcut lists scroll like the rest of the app
+
+### Localization
+
+* Translated every string the storage page, the permission editor, the view-only console and the MCP key rotation add for all 24 supported locales
+* Removed the keys the retired image menu and download page left behind
+
+### Security
+
+* Mounted images are opened through loop devices that refuse symlinks, and files inside a medium are opened without following links
+
+### Chores
+
+* Removed the desktop image menu, the download page and their web client code
+* Dropped the `@radix-ui/react-scroll-area` dependency
+* Documented the permission catalog, the split between mounting media and writing the library, and the grants that reach the whole device in `server/README.md` and `server/README_ZH.md`
+
+## 2.5.2 (2026-09-29)
+
+### Features
+
+* Added a one-writer policy for the emulated USB disk and the `/data` partition: `/data` is mounted read-only from boot while the virtual disk serves the raw partition to the target machine, enabling the disk remounts it read-only and verifies the state before the target machine can write it, refusing to expose the disk when the remount fails, and releasing a medium hands the raw partition back to the target machine the same way
+* Added confirmation before a mounted medium and the virtual disk take the shared partition from each other, including a warning that a running image transfer is cancelled and that `/data` becomes read-only on this device
+* Added cancellation of a running image transfer before the partition handover, showed the transfer state in the image list and disabled the actions that cannot run while a medium is mounted, with a hint explaining why
+* Added names for the mounted medium and the emulated USB device taken from the image file, truncated to the SCSI inquiry product field and the USB product string and restored on unmount
+* Added streaming validation of uploaded images: ISO 9660 and UDF volume descriptors and raw disk images (GPT, APFS, HFS+, MBR) are accepted and anything else is rejected in seconds instead of after the whole transfer, with a free space check that keeps a 128 MiB reserve before any byte is received
+
+### Bug Fixes
+
+* Fixed mass storage mounts staying writable from the target machine: every mounted image is now served read-only, with the flag set before the LUN is attached, so the target machine can neither write to nor format it
+* Fixed the LUN flags surviving a gadget restart, which brought the shared partition back to the target machine read-only or as an optical drive after a medium had been mounted
+* Fixed the virtual disk switch staying on but unchangeable while a medium was mounted; the disk now reports itself on only while the LUN really carries the `/data` partition
+* Fixed the on-screen keyboard crashing the page with "Minified React error #130" as soon as it was opened, by importing the `react-simple-keyboard` component through its named export, which the CommonJS interop under Vite 8 no longer resolves from a default import
+
+### Localization
+
+* Translated the new virtual disk and image mounting strings for every locale
+
+### Chores
+
+* Added unit tests for the upload header check, the free space preflight and the image name truncation
+
 ## 2.5.1 (2026-09-09)
 
 ### Features
