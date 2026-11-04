@@ -5,12 +5,19 @@
 #include "sample_comm.h"
 
 #include <algorithm>
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <fcntl.h>
 #include <limits>
 #include <mutex>
+#include <sys/file.h>
+#include <sys/ioctl.h>
 #include <time.h>
+#include <unistd.h>
+
+#include <linux/cvi_vc_drv_ioctl.h>
 
 namespace kvm_mmf {
 namespace {
@@ -37,6 +44,8 @@ SAMPLE_VI_CONFIG_S vi_config = {};
 bool system_ready = false, group_created = false, group_started = false;
 bool vi_bound = false, vi_started = false;
 uint64_t next_token[2] = {}, last_pts[2] = {};
+int owner_fd = -1; // Held until process exit, including across HDMI restarts.
+bool stale_resources_cleared = false;
 
 int channel_id(Codec codec) { return codec == H264 ? 0 : 1; }
 bool valid_codec(Codec codec) { return codec == H264 || codec == MJPEG; }
@@ -46,6 +55,64 @@ bool check(int result, const char *operation)
     if (result == CVI_SUCCESS) return true;
     fprintf(stderr, "[kvm_mmf] %s failed: %#x\n", operation, result);
     return false;
+}
+
+bool unbind_source(MOD_ID_E module, int device, int channel)
+{
+    MMF_CHN_S source = {module, device, channel};
+    MMF_BIND_DEST_S destinations = {};
+    if (!check(CVI_SYS_GetBindbySrc(&source, &destinations), "GetBindbySrc")) return false;
+    for (unsigned i = 0; i < destinations.u32Num; ++i) {
+        if (!check(CVI_SYS_UnBind(&source, &destinations.astMmfChn[i]), "UnBind stale stream")) return false;
+    }
+    return true;
+}
+
+bool clear_stale_encoder(int channel)
+{
+    char device[32];
+    snprintf(device, sizeof(device), "/dev/%s%d", CVI_VC_DRV_ENCODER_DEV_NAME, channel);
+    int fd = open(device, O_RDWR | O_CLOEXEC);
+    if (fd < 0) return check(CVI_FAILURE, "open stale encoder");
+    VENC_CHN_ATTR_S attr = {};
+    int result = ioctl(fd, CVI_VC_VENC_GET_CHN_ATTR, &attr);
+    if (result == CVI_SUCCESS) {
+        fprintf(stderr, "[kvm_mmf] clearing stale VENC channel %d\n", channel);
+        // The SDK wrapper counts channels created in this process. Its
+        // DestroyChn cannot adopt an orphan without corrupting that count.
+        // Use the SDK's kernel ABI only for recovery of the previous owner.
+        result = ioctl(fd, CVI_VC_VENC_STOP_RECV_FRAME);
+        if (result == CVI_SUCCESS) result = ioctl(fd, CVI_VC_VENC_RESET_CHN);
+        if (result == CVI_SUCCESS) result = ioctl(fd, CVI_VC_VENC_DESTROY_CHN);
+    } else if (result == CVI_ERR_VENC_UNEXIST) {
+        result = CVI_SUCCESS;
+    }
+    close(fd);
+    return check(result, "clear stale VENC channel");
+}
+
+bool clear_stale_resources()
+{
+    if (!unbind_source(CVI_ID_VI, 0, 0)) return false;
+    for (int channel = 0; channel < VPSS_MAX_CHN_NUM; ++channel) {
+        if (!unbind_source(CVI_ID_VPSS, group, channel)) return false;
+    }
+    for (int channel = 0; channel < 2; ++channel) {
+        if (!clear_stale_encoder(channel)) return false;
+    }
+    VPSS_GRP_ATTR_S attr = {};
+    int result = CVI_VPSS_GetGrpAttr(group, &attr);
+    if (result == CVI_SUCCESS) {
+        fprintf(stderr, "[kvm_mmf] clearing stale VPSS group %d\n", group);
+        for (int channel = 0; channel < VPSS_MAX_CHN_NUM; ++channel) {
+            if (!check(CVI_VPSS_DisableChn(group, channel), "Disable stale VPSS channel")) return false;
+        }
+        if (!check(CVI_VPSS_StopGrp(group), "Stop stale VPSS group") ||
+            !check(CVI_VPSS_DestroyGrp(group), "Destroy stale VPSS group")) return false;
+    } else if (result != CVI_ERR_VPSS_UNEXIST) {
+        return check(result, "Get stale VPSS group");
+    }
+    return true;
 }
 
 bool release_locked(Codec codec)
@@ -121,26 +188,55 @@ bool configure_output(Codec codec, uint16_t width, uint16_t height, uint16_t fps
     return true;
 }
 
-void deinitialize_locked()
+bool deinitialize_locked()
 {
-    stop_locked(H264);
-    stop_locked(MJPEG);
-    if (vi_bound) check(SAMPLE_COMM_VI_UnBind_VPSS(0, 0, group), "VI_UnBind_VPSS");
-    if (vi_started) {
-        check(SAMPLE_COMM_VI_DestroyIsp(&vi_config), "DestroyIsp");
-        check(SAMPLE_COMM_VI_DestroyVi(&vi_config), "DestroyVi");
+    bool h264_stopped = stop_locked(H264);
+    bool mjpeg_stopped = stop_locked(MJPEG);
+    if (!h264_stopped || !mjpeg_stopped) return false;
+    if (vi_bound) {
+        if (!check(SAMPLE_COMM_VI_UnBind_VPSS(0, 0, group), "VI_UnBind_VPSS")) return false;
+        vi_bound = false;
     }
-    if (group_started) check(CVI_VPSS_StopGrp(group), "StopGrp");
-    if (group_created) check(CVI_VPSS_DestroyGrp(group), "DestroyGrp");
-    if (system_ready) SAMPLE_COMM_SYS_Exit();
-    system_ready = group_created = group_started = vi_bound = vi_started = false;
-    channels[H264] = Channel{};
-    channels[MJPEG] = Channel{};
+    if (vi_started) {
+        SAMPLE_COMM_VI_DestroyIsp(&vi_config);
+        SAMPLE_COMM_VI_DestroyVi(&vi_config);
+        vi_started = false;
+    }
+    if (group_started) {
+        if (!check(CVI_VPSS_StopGrp(group), "StopGrp")) return false;
+        group_started = false;
+    }
+    if (group_created) {
+        if (!check(CVI_VPSS_DestroyGrp(group), "DestroyGrp")) return false;
+        group_created = false;
+    }
+    if (system_ready) {
+        if (!check(CVI_SYS_Exit(), "SYS_Exit") || !check(CVI_VB_Exit(), "VB_Exit")) return false;
+        system_ready = false;
+    }
+    return true;
 }
 
 bool initialize_locked()
 {
     if (vi_started) return true;
+    if (owner_fd < 0) {
+        int fd = open("/run/nanokvm-video.lock", O_CREAT | O_RDWR | O_CLOEXEC, 0600);
+        if (fd < 0 || flock(fd, LOCK_EX | LOCK_NB) != 0) {
+            fprintf(stderr, "[kvm_mmf] cannot acquire video ownership: %s\n", strerror(errno));
+            if (fd >= 0) close(fd);
+            return false;
+        }
+        owner_fd = fd;
+    }
+    if (!stale_resources_cleared) {
+        if (!check(CVI_SYS_Init(), "SYS_Init for recovery")) return false;
+        const bool cleared = clear_stale_resources();
+        const bool exited = check(CVI_SYS_Exit(), "SYS_Exit after recovery");
+        if (!cleared || !exited) return false;
+        stale_resources_cleared = true;
+    }
+    if (system_ready && !deinitialize_locked()) return false;
     SAMPLE_INI_CFG_S ini = {};
     PIC_SIZE_E picture;
     SIZE_S size = {};
@@ -278,7 +374,7 @@ bool initialize()
 bool restart()
 {
     std::scoped_lock lock(channel_mutex[H264], channel_mutex[MJPEG]);
-    deinitialize_locked();
+    if (!deinitialize_locked()) return false;
     return initialize_locked();
 }
 

@@ -1,6 +1,9 @@
 #!/bin/sh
 # nanokvm Rev3.1
 
+exec 9>/run/nanokvm-service.lock || exit 1
+flock -n 9 || { echo "NanoKVM service operation already in progress" >&2; exit 1; }
+
 wait_for_exit() {
     process="$1"
     timeout="$2"
@@ -34,43 +37,42 @@ stop_process() {
     fi
 
     killall -KILL "$process" 2>/dev/null || true
-    wait_for_exit "$process" 2 || true
+    wait_for_exit "$process" 2 || {
+        echo "Failed to stop $process" >&2
+        return 1
+    }
 }
 
 stop_services() {
     # The server owns VI/VPSS. Let it release MMF before stopping kvm_system.
-    stop_process NanoKVM-Server
-    stop_process kvm_system
-    rm -rf /tmp/kvm_system /tmp/server
+    stop_process NanoKVM-Server || return 1
+    stop_process kvm_system || return 1
 }
 
 start_services() {
-    cp -r /kvmapp/kvm_system /tmp/
+    if pidof NanoKVM-Server >/dev/null 2>&1 && pidof kvm_system >/dev/null 2>&1; then
+        return 0
+    fi
+    if pidof NanoKVM-Server >/dev/null 2>&1 || pidof kvm_system >/dev/null 2>&1; then
+        echo "NanoKVM is partially running; use restart" >&2
+        return 1
+    fi
+
+    rm -rf /tmp/kvm_system /tmp/server || return 1
+    cp -r /kvmapp/kvm_system /tmp/ || return 1
     if [ -f /kvmapp/kvm_new_app ]; then
-        touch /tmp/.nanokvm_migrating
-        /tmp/kvm_system/kvm_system &
-
-        # The legacy migration invokes this init script recursively and starts
-        # the server itself. Wait for that single migration path to finish.
-        migration_wait=0
-        while [ "$migration_wait" -lt 30 ]; do
-            if [ ! -f /kvmapp/kvm_new_app ] && pidof NanoKVM-Server >/dev/null 2>&1; then
-                rm -f /tmp/.nanokvm_migrating
-                return
-            fi
-            sleep 1
-            migration_wait=$((migration_wait + 1))
-        done
-        rm -f /tmp/.nanokvm_migrating
-    else
-        /tmp/kvm_system/kvm_system &
+        /tmp/kvm_system/kvm_system --migrate 9>&-
+        case "$?" in
+            0) ;;
+            2) sync; reboot; return "$?" ;;
+            *) echo "NanoKVM migration failed" >&2; return 1 ;;
+        esac
     fi
 
-    if ! pidof NanoKVM-Server >/dev/null 2>&1; then
-        rm -rf /tmp/server
-        cp -r /kvmapp/server /tmp/
-        /tmp/server/NanoKVM-Server &
-    fi
+    cp -r /kvmapp/server /tmp/ || return 1
+    # Daemons must not inherit the service-operation lock.
+    /tmp/kvm_system/kvm_system 9>&- &
+    /tmp/server/NanoKVM-Server 9>&- &
 }
 
 case "$1" in
@@ -118,20 +120,17 @@ case "$1" in
     fi
 
     # Start services
-    start_services
+    start_services || exit 1
    ;;
 
   stop)
-    stop_services
+    stop_services || exit 1
     echo "OK"
    ;;
 
   restart)
-    if [ -f /tmp/.nanokvm_migrating ]; then
-        exit 0
-    fi
-    stop_services
-    start_services
+    stop_services || exit 1
+    start_services || exit 1
 
     sync
     echo "OK"

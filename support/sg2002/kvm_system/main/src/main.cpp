@@ -192,10 +192,15 @@ int main(int argc, char* argv[])
 		new_img_init();
 	}
 
-	// Execute only when it's a new app
+	const bool migrate_only = argc == 2 && strcmp(argv[1], "--migrate") == 0;
 	if(access("/kvmapp/kvm_new_app", F_OK) == 0){
-		new_app_init();
+		AppInitResult result = new_app_init();
+		if(migrate_only || result == APP_INIT_FAILED) return result;
+		// A legacy init script starts us without --migrate and can still be
+		// copying the server. Boot once into the newly installed init script.
+		return system("reboot") == 0 ? 0 : 1;
 	}
+	if(migrate_only) return APP_INIT_OK;
 
 	// only for production testing
 	if (access("/tmp/S49kvmtest", F_OK) == 0){

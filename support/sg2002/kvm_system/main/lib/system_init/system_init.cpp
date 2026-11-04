@@ -10,14 +10,14 @@ using namespace maix::sys;
 extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
 
-static void write_hdmi_state(uint8_t active)
+static bool write_hdmi_state(uint8_t active)
 {
     char temp_path[] = "/kvmapp/kvm/.state.init.XXXXXX";
     const char *state = active != 0 ? "1\n" : "0\n";
     int fd = mkstemp(temp_path);
     if(fd < 0){
         printf("failed to create HDMI state file: %d\n", errno);
-        return;
+        return false;
     }
 
     int failure = 0;
@@ -40,6 +40,7 @@ static void write_hdmi_state(uint8_t active)
         unlink(temp_path);
         printf("failed to publish HDMI state file: %d\n", failure);
     }
+    return failure == 0;
 }
 
 uint8_t get_hdmi_version()
@@ -88,38 +89,45 @@ void Production_testing_patch(void)
 	system("sync");
 }
 
-void new_app_init(void)
+static bool init_command(const char *command)
+{
+	if(system(command) == 0) return true;
+	fprintf(stderr, "[kvms] migration failed: %s\n", command);
+	return false;
+}
+
+AppInitResult new_app_init(void)
 {
 	// Update the necessary scripts
 	system("rm -f /boot/logo.jpeg");
-	system("cp -f /kvmapp/system/update-nanokvm.py /etc/kvm/");
+	if(!init_command("mkdir -p /etc/kvm /kvmapp/kvm")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/update-nanokvm.py /etc/kvm/")) return APP_INIT_FAILED;
 	system("rm -f /etc/init.d/S02udisk");
-	system("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/");
-	system("cp -f /kvmapp/system/init.d/S01fs /etc/init.d/");
-	system("cp -f /kvmapp/system/init.d/S03usbdev /etc/init.d/");
-	system("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/");
-	system("cp -f /kvmapp/system/init.d/S30eth /etc/init.d/");
-	system("cp -f /kvmapp/system/init.d/S50sshd /etc/init.d/");
+	if(!init_command("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S01fs /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S03usbdev /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S30eth /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S50sshd /etc/init.d/")) return APP_INIT_FAILED;
 	if(kvm_wifi_exist()) {
-		system("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/");
+		if(!init_command("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/")) return APP_INIT_FAILED;
 	} else {
 		system("rm -f /etc/init.d/S30wifi");
 	}
 	
 	// if exit /etc/init.d/S98tailscaled then cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/
 	if(access("/etc/init.d/S98tailscaled", F_OK) == 0){
-		system("cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/");
+		if(!init_command("cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/")) return APP_INIT_FAILED;
 	}
 
 	// rmmod soph_saradc
 	system("rmmod soph_saradc");
 	system("rm -f /mnt/system/ko/soph_saradc.ko");
 
-	// PCIe Patch
-	// system("cp /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
-	if(access("/kvmapp/jpg_stream/dl_lib/libmaixcam_lib.so", F_OK) != 0){
-		system("cp -f /kvmapp/system/init.d/S95nanokvm /etc/init.d/");
-	}
+	// Keep an already running legacy shell on its original script inode.
+	if(!init_command("cp /kvmapp/system/init.d/S95nanokvm /etc/init.d/.S95nanokvm.new && "
+	                 "chmod 755 /etc/init.d/.S95nanokvm.new && "
+	                 "mv -f /etc/init.d/.S95nanokvm.new /etc/init.d/S95nanokvm")) return APP_INIT_FAILED;
 
 	// Remove unnecessary components to speed up boot time
 	system("rm -f /etc/init.d/S04backlight");
@@ -129,90 +137,45 @@ void new_app_init(void)
 	system("rm -f /etc/init.d/S99*");
 	
 	// Add necessary configuration files for program execution
-	system("mkdir /kvmapp/kvm");
-	system("mkdir /etc/kvm");
-	system("echo 0 > /kvmapp/kvm/now_fps");
-	system("echo 30 > /kvmapp/kvm/fps");
-	system("echo 2000 > /kvmapp/kvm/qlty");
-	system("echo h264 > /kvmapp/kvm/type");
-	write_hdmi_state(0);
-	system("touch /etc/kvm/frame_detact");
+	if(!init_command("echo 0 > /kvmapp/kvm/now_fps && echo 30 > /kvmapp/kvm/fps && "
+	                 "echo 2000 > /kvmapp/kvm/qlty && echo h264 > /kvmapp/kvm/type && "
+	                 "touch /etc/kvm/frame_detact")) return APP_INIT_FAILED;
+	if(!write_hdmi_state(0)) return APP_INIT_FAILED;
 
 	// rm jpg_stream & kvm_stream
 	system("rm -rf /kvmapp/jpg_stream");
 	system("rm -f /kvmapp/kvm_system/kvm_stream");	// Cannot delete temporarily; the old production test script uses this file to determine if the download is complete
 
-	system("rm -f /kvmapp/kvm_new_app");
-	system("sync");
-	// system("/etc/init.d/S95nanokvm restart");
-
 	// update ko
-	FILE *fp;
-	uint8_t RW_Data_0[30];	
-	uint8_t RW_Data_1[30];	
-	fp = popen("md5sum /mnt/system/ko/soph_mipi_rx.ko | grep 086ed01749188975afaa40fb569374f8 | awk '{print $2}'", "r");
-	if ( NULL == fp )
-	{
-		pclose(fp);
-		// return;
-	}
-	fgets((char*)RW_Data_0, 10, fp);
-	pclose(fp);
-	fp = popen("md5sum /mnt/system/ko/soph_mipi_rx.ko | grep 69be7eeded3777f750480a5dd5a1aa26 | awk '{print $2}'", "r");
-	if ( NULL == fp )
-	{
-		pclose(fp);
-		// return;
-	}
-	fgets((char*)RW_Data_1, 10, fp);
-	pclose(fp);
+	FILE *fp = popen("md5sum /mnt/system/ko/soph_mipi_rx.ko", "r");
+	if(!fp) return APP_INIT_FAILED;
+	char digest[33] = {};
+	bool digest_read = fscanf(fp, "%32s", digest) == 1;
+	int digest_status = pclose(fp);
+	if(!digest_read || digest_status != 0) return APP_INIT_FAILED;
 
 	int8_t hdmi_ver = -1;
 
 	if(access("/etc/kvm/hdmi_version", F_OK) == 0){
-		uint8_t RW_Data[2];
 		FILE *fp = fopen("/etc/kvm/hdmi_version", "r");
-		fread(RW_Data, sizeof(char), 2, fp);
+		if(!fp) return APP_INIT_FAILED;
+		int version = fgetc(fp);
 		fclose(fp);
-		if(RW_Data[0] == 'c') hdmi_ver = 1;
-		else if(RW_Data[0] == 'u') hdmi_ver = 2;
-		else if(RW_Data[0] == 'd') hdmi_ver = 2;
+		if(version == EOF) return APP_INIT_FAILED;
+		if(version == 'c') hdmi_ver = 1;
+		else if(version == 'u' || version == 'd') hdmi_ver = 2;
 	}
 
-	// system("/etc/init.d/S03usbdev stop_start");
 	create_temp_watchdog();
-
-	if(hdmi_ver == 2){
-		if(RW_Data_1[0] != '/'){
-			system("cp /kvmapp/system/ko/soph_mipi_rx.ko /mnt/system/ko/soph_mipi_rx.ko");
-			system("sync");
-			system("reboot");
-		} else {
-			system("sync");
-			system("/etc/init.d/S15kvmhwd start");
-			system("/etc/init.d/S95nanokvm restart");
-		}
-	} else {
-		if((RW_Data_0[0] != '/') && (RW_Data_1[0] != '/')){
-			system("cp /kvmapp/system/ko/soph_mipi_rx.ko /mnt/system/ko/soph_mipi_rx.ko");
-			system("sync");
-			system("reboot");
-		} else {
-			system("sync");
-			system("/etc/init.d/S15kvmhwd start");
-			system("/etc/init.d/S95nanokvm restart");
-		}
+	bool current_driver = strcmp(digest, "69be7eeded3777f750480a5dd5a1aa26") == 0 ||
+	    (hdmi_ver != 2 && strcmp(digest, "086ed01749188975afaa40fb569374f8") == 0);
+	if(!current_driver){
+		if(!init_command("cp /kvmapp/system/ko/soph_mipi_rx.ko /mnt/system/ko/soph_mipi_rx.ko")) return APP_INIT_FAILED;
 	}
 
-	if(access("/root/old/kvm_new_img", F_OK) == 0){
-		system("rm -r /root/old");
-	}	
-	
-	system("sync");
-	system("killall NanoKVM-Server");
-	system("rm -r /tmp/server");
-	system("cp -r /kvmapp/server /tmp/");
-	system("/tmp/server/NanoKVM-Server &");
+	if(unlink("/kvmapp/kvm_new_app") != 0) return APP_INIT_FAILED;
+	sync();
+	return current_driver ? APP_INIT_OK : APP_INIT_REBOOT;
 }
 
 void build_complete_resolv(void)
