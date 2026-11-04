@@ -1,7 +1,9 @@
 #!/bin/bash
 
-export MAIXCDK_PATH=~/MaixCDK
-export NanoKVM_PATH=~/NanoKVM
+set -e
+
+export MAIXCDK_PATH="${MAIXCDK_PATH:-$HOME/MaixCDK}"
+export NanoKVM_PATH="${NanoKVM_PATH:-$HOME/NanoKVM}"
 
 Project_Name="None"
 Project_PATH="None"
@@ -16,9 +18,7 @@ maixcdk_build() {
   
   if [ "$input_value" = "from_zero" ]
   then
-    maixcdk build <<EOF
-2
-EOF
+    maixcdk build -p maixcam
   else
     maixcdk build
   fi
@@ -39,15 +39,31 @@ maixcdk_clean(){
   maixcdk clean
 }
 
+sync_component(){
+  local source="$1"
+  local target="$2"
+
+  case "$target" in
+    "$MAIXCDK_PATH"/components/*) ;;
+    *)
+      echo "Refusing to replace component outside MaixCDK: $target" >&2
+      exit 1
+    ;;
+  esac
+
+  rm -rf -- "$target"
+  cp -rf -- "$source" "$target"
+}
+
 case "$1" in
   update_lib)
     # This script does not run under "set -e", and a release build relies on
     # update_lib to guarantee the SDK components match the source tree. A copy
     # that fails silently here would produce stale libraries, so fail loudly.
     set -e
-    cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm $MAIXCDK_PATH/components
-    cp -rf $NanoKVM_PATH/support/sg2002/additional/kvm_mmf $MAIXCDK_PATH/components
-    cp -rf $NanoKVM_PATH/support/sg2002/additional/vision $MAIXCDK_PATH/components
+    sync_component "$NanoKVM_PATH/support/sg2002/additional/kvm" "$MAIXCDK_PATH/components/kvm"
+    sync_component "$NanoKVM_PATH/support/sg2002/additional/kvm_mmf" "$MAIXCDK_PATH/components/kvm_mmf"
+    sync_component "$NanoKVM_PATH/support/sg2002/additional/vision" "$MAIXCDK_PATH/components/vision"
     cp -f $NanoKVM_PATH/support/sg2002/additional/peripheral/port/maixcam/maix_i2c.cpp $MAIXCDK_PATH/components/peripheral/port/maixcam/maix_i2c.cpp
     cp -f $NanoKVM_PATH/support/sg2002/additional/sophgo-middleware/v2/sample/common/sample_common_sensor.c $MAIXCDK_PATH/components/3rd_party/sophgo-middleware/sophgo-middleware/v2/sample/common/
 
@@ -102,6 +118,7 @@ then
 
       JSON_PATH="$Project_PATH/build/config/project_vars.json"
       Platform_Char="\"PLATFORM\": \"maixcam\""
+      SDK_Char="\"SDK_PATH\": \"$MAIXCDK_PATH\""
 
       if [ ! -e "$MAIXCDK_PATH/components/kvm" ]
       then
@@ -125,7 +142,8 @@ then
       cd $Project_PATH
       if [ -f $JSON_PATH ]
       then
-        if grep -q $Platform_Char $JSON_PATH; then
+        if grep -Fq "$Platform_Char" "$JSON_PATH" &&
+           grep -Fq "$SDK_Char" "$JSON_PATH"; then
           maixcdk_build
         else
           maixcdk_clean
