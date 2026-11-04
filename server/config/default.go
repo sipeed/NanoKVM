@@ -1,5 +1,7 @@
 package config
 
+import "log"
+
 var defaultConfig = &Config{
 	Proto: "http",
 	Host:  "",
@@ -35,7 +37,12 @@ var defaultConfig = &Config{
 
 func checkDefaultValue() {
 	if instance.JWT.SecretKey == "" {
-		instance.JWT.SecretKey = generateRandomSecretKey()
+		secret, err := loadOrCreateJWTSecret(jwtSecretFile)
+		if err != nil {
+			log.Printf("failed to persist JWT secret: %s", err)
+			secret = generateRandomSecretKey()
+		}
+		instance.JWT.SecretKey = secret
 		instance.JWT.RevokeTokensOnLogout = true
 	}
 
