@@ -1,15 +1,106 @@
 #include "config.h"
 #include "system_state.h"
 #include "vi_state_shared.hpp"
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <time.h>
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 using namespace maix;
 using namespace maix::sys;
 
 extern kvm_sys_state_t kvm_sys_state;
 extern kvm_oled_state_t kvm_oled_state;
+
+namespace {
+
+constexpr uint64_t NETWORK_PROBE_INTERVAL_MS = 10000U;
+
+uint64_t monotonic_ms()
+{
+	struct timespec now = {};
+	if (clock_gettime(CLOCK_MONOTONIC, &now) != 0) {
+		return 0;
+	}
+	return static_cast<uint64_t>(now.tv_sec) * 1000U
+			+ static_cast<uint64_t>(now.tv_nsec) / 1000000U;
+}
+
+bool network_probe_due(uint64_t& last_probe_ms)
+{
+	const uint64_t now_ms = monotonic_ms();
+	if (now_ms == 0U) {
+		return true;
+	}
+	if (last_probe_ms != 0U && now_ms - last_probe_ms < NETWORK_PROBE_INTERVAL_MS) {
+		return false;
+	}
+	last_probe_ms = now_ms;
+	return true;
+}
+
+int read_default_gateway(const char* interface_name, uint8_t* output, size_t output_size)
+{
+	if (interface_name == NULL || output == NULL || output_size == 0U) {
+		return 0;
+	}
+	output[0] = 0;
+
+	FILE* fp = fopen("/proc/net/route", "r");
+	if (fp == NULL) {
+		return 0;
+	}
+
+	char line[256];
+	(void)fgets(line, sizeof(line), fp); // header
+	while (fgets(line, sizeof(line), fp) != NULL) {
+		char route_interface[IFNAMSIZ] = {0};
+		unsigned long destination = 0;
+		unsigned long gateway = 0;
+		unsigned long flags = 0;
+		if (sscanf(line, "%15s %lx %lx %lx", route_interface, &destination, &gateway, &flags) != 4) {
+			continue;
+		}
+		if (strcmp(route_interface, interface_name) != 0 || destination != 0 || (flags & 0x1U) == 0) {
+			continue;
+		}
+
+		struct in_addr address = {};
+		address.s_addr = static_cast<in_addr_t>(gateway);
+		const char* result = inet_ntop(AF_INET, &address,
+				reinterpret_cast<char*>(output), output_size);
+		fclose(fp);
+		return result == NULL ? 0 : 1;
+	}
+
+	fclose(fp);
+	return 0;
+}
+
+void publish_wifi_state(uint8_t state)
+{
+	static int last_state = -1;
+	if (last_state == state) {
+		return;
+	}
+
+	FILE* fp = fopen("/kvmapp/kvm/wifi_state", "w");
+	if (fp == NULL) {
+		return;
+	}
+	const bool write_ok = fputc(state == 0 ? '0' : '1', fp) != EOF;
+	const bool close_ok = fclose(fp) == 0;
+	if (write_ok && close_ok) {
+		last_state = state;
+	}
+}
+
+} // namespace
 
 int get_nic_state(const char* interface_name)
 {
@@ -109,90 +200,69 @@ int get_ip_addr(ip_addr_t ip_type)
 			return 1;
 		case ETH_ROUTE: // eth_route
 			if(access("/etc/kvm/gateway", F_OK) != 0){
-				// 不存在gateway文件
-				memset( kvm_sys_state.eth_route, 0, sizeof( kvm_sys_state.eth_route ) );
-				char Cmd[100]={0};
-				memset( Cmd, 0, sizeof( Cmd ) );
-				sprintf( Cmd,"ip route | grep -i '^default' | grep -i 'eth0' | awk '{print $3}'");
-				FILE* fp = popen( Cmd, "r" );
-				if ( NULL == fp )
-				{
-					pclose(fp);
-					return 0;
-				}
-				memset( kvm_sys_state.eth_route, 0, sizeof( kvm_sys_state.eth_route ) );
-				while ( NULL != fgets( (char*)kvm_sys_state.eth_route,sizeof( kvm_sys_state.eth_route ),fp ))
-				{
-					// printf("ip=%s\n",kvm_sys_state.eth_route);
-					break;
-				}
-				if(kvm_sys_state.eth_route[0] == 0){
-					// 开机时未插入ETH
-					pclose(fp);
-					return 0;
-				}
-				for(int i = 0; i < 40; i++){
-					if(kvm_sys_state.eth_route[i] == 10){
-						kvm_sys_state.eth_route[i] = ' ';
-						break;
-					}
-				}
-				pclose(fp);
-				return 1;
+				return read_default_gateway("eth0", kvm_sys_state.eth_route,
+						sizeof(kvm_sys_state.eth_route));
 			} else {
-				int file_size;
 				FILE *fp = fopen("/etc/kvm/gateway", "r");
-				fseek(fp, 0, SEEK_END);
-				file_size = ftell(fp); 
-				fseek(fp, 0, SEEK_SET);
-				fread(kvm_sys_state.eth_route, sizeof(char), file_size, fp);
+				if (fp == NULL) {
+					return 0;
+				}
+				memset(kvm_sys_state.eth_route, 0, sizeof(kvm_sys_state.eth_route));
+				if (fgets((char*)kvm_sys_state.eth_route, sizeof(kvm_sys_state.eth_route), fp) == NULL) {
+					fclose(fp);
+					return 0;
+				}
 				fclose(fp);
+				kvm_sys_state.eth_route[strcspn((char*)kvm_sys_state.eth_route, "\r\n")] = 0;
 				return 1;
 			}
 		case WiFi_ROUTE: // wifi_route
-			memset( kvm_sys_state.wifi_route, 0, sizeof( kvm_sys_state.wifi_route ) );
-			char Cmd[100]={0};
-			memset( Cmd, 0, sizeof( Cmd ) );
-			sprintf( Cmd,"ip route | grep -i '^default' | grep -i 'wlan0' | awk '{print $3}'");
-			FILE* fp = popen( Cmd, "r" );
-			if ( NULL == fp )
-			{
-				pclose(fp);
-				return 0;
-			}
-			memset( kvm_sys_state.wifi_route, 0, sizeof( kvm_sys_state.wifi_route ) );
-			while ( NULL != fgets( (char*)kvm_sys_state.wifi_route,sizeof( kvm_sys_state.wifi_route ),fp ))
-			{
-				// printf("ip=%s\n",kvm_sys_state.wifi_route);
-				break;
-			}
-			if(kvm_sys_state.wifi_route[0] == 0){
-				// 开机时未插入ETH
-				pclose(fp);
-				return 0;
-			}
-			for(int i = 0; i < 40; i++){
-				if(kvm_sys_state.wifi_route[i] == 10){
-					kvm_sys_state.wifi_route[i] = ' ';
-					break;
-				}
-			}
-			pclose(fp);
-			return 1;
+			return read_default_gateway("wlan0", kvm_sys_state.wifi_route,
+					sizeof(kvm_sys_state.wifi_route));
 	}
 	return 0;
 }
 
 int chack_net_state(ip_addr_t use_ip_type)
 {
-	char Cmd[100]={0};
-	if		(use_ip_type == ETH_ROUTE)  sprintf( Cmd,"ping -I eth0 -w 1 %s > /dev/null", kvm_sys_state.eth_route);
-	else if	(use_ip_type == WiFi_ROUTE) sprintf( Cmd,"ping -I wlan0 -w 1 %s > /dev/null", kvm_sys_state.wifi_route);
-	else return -1;	// 不支持的端口
-	if(system(Cmd) == 0){	// 256：不通； = 0：通
-		return 1;
+	const char* interface_name = NULL;
+	const char* gateway = NULL;
+	if (use_ip_type == ETH_ROUTE) {
+		interface_name = "eth0";
+		gateway = (char*)kvm_sys_state.eth_route;
+	} else if (use_ip_type == WiFi_ROUTE) {
+		interface_name = "wlan0";
+		gateway = (char*)kvm_sys_state.wifi_route;
+	} else {
+		return -1;
 	}
-	return 0;
+
+	const pid_t pid = fork();
+	if (pid < 0) {
+		return 0;
+	}
+	if (pid == 0) {
+		const int null_fd = open("/dev/null", O_WRONLY);
+		if (null_fd >= 0) {
+			(void)dup2(null_fd, STDOUT_FILENO);
+			(void)dup2(null_fd, STDERR_FILENO);
+			if (null_fd > STDERR_FILENO) {
+				(void)close(null_fd);
+			}
+		}
+		execl("/bin/ping", "ping", "-I", interface_name, "-c", "1", "-W", "1", gateway, (char*)NULL);
+		_exit(127);
+	}
+
+	int status = 0;
+	pid_t wait_result;
+	do {
+		wait_result = waitpid(pid, &status, 0);
+	} while (wait_result < 0 && errno == EINTR);
+	if (wait_result != pid) {
+		return 0;
+	}
+	return WIFEXITED(status) && WEXITSTATUS(status) == 0 ? 1 : 0;
 }
 
 void patch_eth_wifi(void)
@@ -395,6 +465,7 @@ void kvm_update_hdmi_res(void)
 void kvm_update_eth_state(void)
 {	
 	static uint8_t nic_state = 0;
+	static uint64_t last_probe_ms = 0;
 	nic_state = get_nic_state("eth0");
 
 	if(nic_state == NIC_STATE_RUNNING){
@@ -412,7 +483,9 @@ void kvm_update_eth_state(void)
 			if(kvm_sys_state.eth_route[0] == 0){
 				get_ip_addr(ETH_ROUTE);
 			} else {
-				if(chack_net_state(ETH_ROUTE)){
+				if(!network_probe_due(last_probe_ms)) {
+					return;
+				} else if(chack_net_state(ETH_ROUTE)){
 					// Ping successful
 					kvm_sys_state.eth_state = 3;
 				} else {
@@ -432,6 +505,7 @@ void kvm_update_eth_state(void)
 
 void kvm_update_wifi_state(void)
 {	
+	static uint64_t last_probe_ms = 0;
 	// No WiFi module (check for existence?) -> Module exists & not connected (check if connected) ->
 	if(kvm_sys_state.wifi_state == -2) return;
 	switch (kvm_sys_state.wifi_state){
@@ -449,11 +523,11 @@ void kvm_update_wifi_state(void)
 			// break;	// Start checking the connection directly.
 		case 0:
 		// WiFi is available but not connected.
-			system("echo 0 > /kvmapp/kvm/wifi_state");
+			publish_wifi_state(0);
 			if (get_ip_addr(WiFi_IP) && get_ip_addr(WiFi_ROUTE)){
 				// IP+Route has been acquired
 				if(kvm_sys_state.ping_allow){
-					if (chack_net_state(WiFi_ROUTE)){
+					if (network_probe_due(last_probe_ms) && chack_net_state(WiFi_ROUTE)){
 						// Ping successful
 						kvm_sys_state.wifi_state = 1;
 					}
@@ -465,10 +539,10 @@ void kvm_update_wifi_state(void)
 			break;
 		case 1:
 		// Connected to the network & continuously checking if it can ping successfully.
-			system("echo 1 > /kvmapp/kvm/wifi_state");
+			publish_wifi_state(1);
 			get_ip_addr(WiFi_IP);
 			if(kvm_sys_state.ping_allow){
-				if (kvm_sys_state.wifi_route[0] != 0){
+				if (kvm_sys_state.wifi_route[0] != 0 && network_probe_due(last_probe_ms)){
 					if (chack_net_state(WiFi_ROUTE) == 0){
 						// Ping successful
 						kvm_sys_state.wifi_state = 0;

@@ -42,6 +42,8 @@ help:
 	@echo "  app           - Build Go application server"
 	@echo "  support       - Build kvm_system daemon"
 	@echo "  vision        - Build video libraries (libkvm.so)"
+	@echo "  test-wifi-modules - Test Wi-Fi module selection"
+	@echo "  test-wifi-runtime - Test Wi-Fi runtime state and credential permissions"
 	@echo "  web           - Build the frontend into web/dist"
 	@echo "  all           - Build both app and support (default)"
 	@echo "  release-build - Build every riscv64 release artifact in one pass"
@@ -103,6 +105,14 @@ support: check-root builder-image
 vision: check-root builder-image
 	@echo "Building vision..."
 	@$(DOCKER_RUN_BASE) $(DOCKER_TTY) $(IMAGE_NAME) /bin/bash -c '$(VISION_BUILD_CMD)'
+
+.PHONY: test-wifi-modules test-wifi-runtime
+test-wifi-modules:
+	@sh tools/test-s25wifimod.sh
+
+test-wifi-runtime:
+	@sh tools/test-s30wifi-runtime.sh
+	@cd server && go test ./service/network
 
 # Build every riscv64 release artifact in one container pass
 release-build: check-root builder-image
