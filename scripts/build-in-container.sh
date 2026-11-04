@@ -55,13 +55,8 @@ fi
 # shellcheck disable=SC1091
 . "$MAIXCDK_PATH/bin/activate"
 
-echo "::group::support: sync MaixCDK components"
+# Each support build synchronizes the repository components before compiling.
 cd "$NANOKVM_PATH/support/sg2002"
-# The image bakes support/sg2002/additional/ into MaixCDK's components at image
-# build time, and ./build only re-copies them when components/kvm is missing.
-# Refresh unconditionally so a cached image never yields stale libraries.
-./build update_lib
-echo "::endgroup::"
 
 echo "::group::support: build kvm_system"
 ./build kvm_system
@@ -100,11 +95,8 @@ if [ "$missing" -ne 0 ]; then
     exit 1
 fi
 
-# NanoKVM-Server is cgo-linked against the tracked server/dl_lib/libkvm.so
-# (server/common/kvm_vision.go: -L../dl_lib -lkvm), but the package ships the
-# freshly built one from kvm_vision. Those are different files, so confirm the
-# shipped library still exports every symbol the binary actually imports from
-# it. Without this a dropped symbol only shows up as a crash on a real device.
+# Confirm the shipped video libraries provide every KVM symbol imported by
+# the server, including the frame ownership API.
 echo "[INFO] verifying shipped libkvm.so satisfies NanoKVM-Server"
 if ! command -v readelf >/dev/null 2>&1; then
     echo "[WARN] readelf unavailable, skipping ABI check"
@@ -120,13 +112,10 @@ else
             | sed 's/@.*//' | LC_ALL=C sort -u
     }
 
-    linked_lib="$NANOKVM_PATH/server/dl_lib/libkvm.so"
     shipped_lib="$NANOKVM_PATH/kvmapp/server/dl_lib/libkvm.so"
     server_bin="$NANOKVM_PATH/server/NanoKVM-Server"
 
-    # Symbols the binary imports that the link-time library provides, i.e. the
-    # ones libkvm.so is actually responsible for at runtime.
-    needed=$(comm -12 <(imported "$server_bin") <(exported "$linked_lib"))
+    needed=$(imported "$server_bin" | awk '/^(kvmv_|free_kvmv_data$|free_all_kvmv_data$|set_h264_gop$|set_frame_detact$|set_venc_auto_recyc$)/')
 
     if [ -z "$needed" ]; then
         echo "[WARN] no libkvm symbols resolved; skipping ABI check"

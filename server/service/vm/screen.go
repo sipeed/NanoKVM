@@ -13,10 +13,9 @@ import (
 )
 
 var screenFileMap = map[string]string{
-	"type":       "/kvmapp/kvm/type",
-	"fps":        "/kvmapp/kvm/fps",
-	"quality":    "/kvmapp/kvm/qlty",
-	"resolution": "/kvmapp/kvm/res",
+	"type":    "/kvmapp/kvm/type",
+	"fps":     "/kvmapp/kvm/fps",
+	"quality": "/kvmapp/kvm/qlty",
 }
 
 func (s *Service) SetScreen(c *gin.Context) {

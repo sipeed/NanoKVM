@@ -8,9 +8,5 @@ import (
 )
 
 func New() mcpservice.Snapshotter {
-	return mcpcapture.NewWithCaptureLease(common.GetKvmVision(), func() (uint16, uint16) {
-		screen := common.GetScreen()
-		common.CheckScreen()
-		return screen.Width, screen.Height
-	}, vm.AcquireHdmiCaptureLeaseForRead)
+	return mcpcapture.NewWithCaptureLease(common.GetKvmVision(), common.InputSize, vm.AcquireHdmiCaptureLeaseForRead)
 }

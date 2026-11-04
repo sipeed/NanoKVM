@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { MouseReportRelative } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { MouseRelativeEvent } from './types.ts';
 
@@ -14,7 +13,6 @@ export const Relative = () => {
   const { t } = useTranslation();
   const [messageApi, contextHolder] = message.useMessage();
 
-  const resolution = useAtomValue(resolutionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
 
@@ -328,7 +326,7 @@ export const Relative = () => {
       target.removeEventListener('touchcancel', handleTouchCancel, touchOptions.capture);
       clearTouchLongPressTimer();
     };
-  }, [resolution, scrollDirection, scrollInterval]);
+  }, [scrollDirection, scrollInterval]);
 
   // Mouse handler
   function handleMouseEvent(event: MouseRelativeEvent) {

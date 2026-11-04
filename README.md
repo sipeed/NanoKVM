@@ -97,7 +97,7 @@ The repository ships a [Dev Container](https://containers.dev) setup (`.devconta
 
 - Requirements: Docker plus an editor or CLI with dev container support (e.g. the VS Code "Dev Containers" extension, or `devcontainer up`).
 - On creation the container prepares itself automatically: `support/sg2002/build update_lib` (resyncs MaixCDK components with the checkout) and `pnpm install` for the frontend.
-- Backend: run `server/build.sh` for a release-equivalent binary (BoringCrypto + `dl_lib` RPATH). `make app` builds a plain development binary without those, so prefer `server/build.sh` whenever the result should match a release.
+- Backend: inside the container, run `./build.sh` from `server/`. On the host, `make app` runs the same script in Docker. Both use the prebuilt libraries in `server/dl_lib/`, enable the BoringCrypto build option, and set the `dl_lib` RPATH.
 - Support layer: `cd support/sg2002 && ./build kvm_system` (the MaixCDK virtualenv is part of the container environment).
 - Frontend: `cd web && pnpm dev` (VS Code forwards port 3001 automatically; other clients may need to map it themselves); see [web/README.md](web/README.md) for pointing it at a device.
 - The base image `ghcr.io/sipeed/nanokvm-builder:latest` is x86-64 only; on Apple Silicon it runs under emulation (works, but C builds are slow). You can also build the image locally first (`make builder-image`) and point the `BASE_IMAGE` build arg at it (e.g. via `build.args` in `devcontainer.json`). On Linux hosts the first container creation also takes a while: the container user is remapped to your uid, which re-chowns its home directory once.

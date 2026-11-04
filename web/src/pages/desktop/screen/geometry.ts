@@ -27,7 +27,7 @@ export const fullFrameContent = (mediaSize: MediaSize): FrameContent => ({
   height: mediaSize.height
 });
 
-export function getMediaSize(screen: Element, fallback?: MediaSize | null): MediaSize | null {
+export function getMediaSize(screen: Element): MediaSize | null {
   const dataWidth = Number(screen.getAttribute(mediaWidthAttribute));
   const dataHeight = Number(screen.getAttribute(mediaHeightAttribute));
   if (dataWidth > 0 && dataHeight > 0) {
@@ -42,7 +42,7 @@ export function getMediaSize(screen: Element, fallback?: MediaSize | null): Medi
     return { width: screen.naturalWidth, height: screen.naturalHeight };
   }
 
-  return fallback && fallback.width > 0 && fallback.height > 0 ? fallback : null;
+  return null;
 }
 
 export function isMediaReady(screen: Element) {

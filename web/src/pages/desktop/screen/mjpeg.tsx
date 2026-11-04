@@ -6,17 +6,14 @@ import { stopFrameDetect } from '@/api/stream.ts';
 import { getFrameDetect } from '@/lib/localstorage.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 import { mouseStyleAtom } from '@/jotai/mouse.ts';
-import { resolutionAtom } from '@/jotai/screen.ts';
 
 import { ScreenViewport } from './viewport.tsx';
 
 export const Mjpeg = () => {
-  const resolution = useAtomValue(resolutionAtom);
   const mouseStyle = useAtomValue(mouseStyleAtom);
   const [hasError, setHasError] = useState(false);
-  const [streamNonce, setStreamNonce] = useState(0);
   const streamURL = `${getBaseUrl('http')}/api/stream/mjpeg`;
-  const streamSrc = hasError ? undefined : `${streamURL}?v=${streamNonce}`;
+  const streamSrc = hasError ? undefined : streamURL;
 
   useEffect(() => {
     // stop frame detect for a while
@@ -24,9 +21,7 @@ export const Mjpeg = () => {
     if (enabled) {
       stopFrameDetect(10);
     }
-    setHasError(false);
-    setStreamNonce((current) => current + 1);
-  }, [resolution]);
+  }, []);
 
   return (
     <ScreenViewport>

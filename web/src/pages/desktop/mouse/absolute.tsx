@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai';
 import { MouseReportAbsolute } from '@/lib/mouse.ts';
 import { client, MessageEvent } from '@/lib/websocket.ts';
 import { scrollDirectionAtom, scrollIntervalAtom } from '@/jotai/mouse.ts';
-import { inputRegionAtom, resolutionAtom } from '@/jotai/screen.ts';
+import { inputRegionAtom } from '@/jotai/screen.ts';
 
 import {
   FrameContent,
@@ -25,7 +25,6 @@ enum MouseButton {
 }
 
 export const Absolute = () => {
-  const resolution = useAtomValue(resolutionAtom);
   const inputRegion = useAtomValue(inputRegionAtom);
   const scrollDirection = useAtomValue(scrollDirectionAtom);
   const scrollInterval = useAtomValue(scrollIntervalAtom);
@@ -426,9 +425,7 @@ export const Absolute = () => {
         return null;
       }
 
-      const mediaSize =
-        getMediaSize(target) ||
-        (resolution && resolution.width > 0 && resolution.height > 0 ? resolution : null);
+      const mediaSize = getMediaSize(target);
       if (!mediaSize) {
         const x = (clientX - rect.left) / rect.width;
         const y = (clientY - rect.top) / rect.height;
@@ -531,7 +528,7 @@ export const Absolute = () => {
         clearTimeout(longPressTimerRef.current);
       }
     };
-  }, [inputRegion, resolution, scrollDirection, scrollInterval]);
+  }, [inputRegion, scrollDirection, scrollInterval]);
 
   // disable default events
   function disableEvent(event: Event) {

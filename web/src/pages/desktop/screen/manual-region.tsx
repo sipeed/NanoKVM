@@ -5,7 +5,6 @@ import {
   controlRegionModeAtom,
   inputRegionAtom,
   manualRegionsAtom,
-  resolutionAtom,
   selectedManualRegionAtom,
   selectedOriginalResolutionAtom
 } from '@/jotai/screen.ts';
@@ -17,7 +16,6 @@ export const ManualRegion = () => {
   const selectedOriginal = useAtomValue(selectedOriginalResolutionAtom);
   const selectedManual = useAtomValue(selectedManualRegionAtom);
   const manualRegions = useAtomValue(manualRegionsAtom);
-  const resolution = useAtomValue(resolutionAtom);
   const setInputRegion = useSetAtom(inputRegionAtom);
 
   useEffect(() => {
@@ -44,7 +42,7 @@ export const ManualRegion = () => {
     const update = () => {
       const target = document.getElementById('screen');
       if (!target) return;
-      const mediaSize = getMediaSize(target, resolution);
+      const mediaSize = getMediaSize(target);
       setInputRegion(
         mediaSize ? getCenteredInputRegionByAspectRatio(width, height, mediaSize) : null
       );
@@ -54,7 +52,7 @@ export const ManualRegion = () => {
     return () => {
       window.clearInterval(timer);
     };
-  }, [manualRegions, mode, resolution, selectedManual, selectedOriginal, setInputRegion]);
+  }, [manualRegions, mode, selectedManual, selectedOriginal, setInputRegion]);
 
   return null;
 };

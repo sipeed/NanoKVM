@@ -1,4 +1,4 @@
-list(APPEND ADD_REQUIREMENTS vision basic peripheral)
+list(APPEND ADD_REQUIREMENTS kvm_mmf basic peripheral)
 list(APPEND ADD_INCLUDE "include")
 list(APPEND ADD_LINK_DEFINITIONS_PRIVATE -Wl,--as-needed)
 

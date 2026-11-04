@@ -5,24 +5,14 @@ import (
 	"NanoKVM-Server/service/vm"
 
 	"github.com/gorilla/websocket"
-	"github.com/pion/rtp"
-	"github.com/pion/rtp/codecs"
-	"github.com/pion/webrtc/v4/pkg/media"
 	log "github.com/sirupsen/logrus"
 )
 
 func NewWebRTCManager() *WebRTCManager {
 	m := &WebRTCManager{
-		clients: make(map[*websocket.Conn]*Client),
-		videoPacketizer: rtp.NewPacketizer(
-			1200,
-			100,
-			0x1234ABCD,
-			&codecs.H264Payloader{},
-			rtp.NewRandomSequencer(),
-			90000,
-		),
-		videoSending: false,
+		clients:         make(map[*websocket.Conn]*Client),
+		videoPacketizer: newH264Packetizer(),
+		videoSending:    false,
 	}
 	m.updateClientSnapshotLocked()
 
@@ -85,7 +75,7 @@ func (m *WebRTCManager) StartVideoStream() {
 	m.videoSending = true
 	m.mutex.Unlock()
 
-	go m.sendVideoStream()
+	go m.writeVideoStream()
 	log.Debugf("start sending h264 stream")
 }
 
@@ -101,28 +91,21 @@ func (m *WebRTCManager) stopVideoStreamIfIdle() bool {
 	return true
 }
 
-func (m *WebRTCManager) sendVideoStream() {
+func (m *WebRTCManager) writeVideoStream() {
 	subscription := stream.SubscribeH264()
 	defer subscription.Close()
-	samples, writerDone := m.startVideoWriter()
 
 	for {
 		frame, ok := subscription.Next()
 		if !ok {
-			close(samples)
-			<-writerDone
 			return
 		}
 		clients := m.getClients()
 		if len(clients) == 0 {
-			close(samples)
-			<-writerDone
 			if m.stopVideoStreamIfIdle() {
 				log.Debugf("stop sending h264 stream")
 				return
 			}
-			samples, writerDone = m.startVideoWriter()
-
 			continue
 		}
 
@@ -131,33 +114,13 @@ func (m *WebRTCManager) sendVideoStream() {
 			continue
 		}
 
-		sample := media.Sample{
-			Data:     frame.Data,
-			Duration: frame.Duration,
-		}
-
-		samples <- sample
-	}
-}
-
-func (m *WebRTCManager) startVideoWriter() (chan media.Sample, <-chan struct{}) {
-	samples := make(chan media.Sample, 1)
-	done := make(chan struct{})
-
-	go func() {
-		defer close(done)
-		for sample := range samples {
-			packets := m.videoPacketizer.Packetize(sample.Data, uint32(sample.Duration.Seconds()*90000))
-			for _, client := range m.getClients() {
-				err := client.track.writeVideoPackets(packets)
-				if err != nil {
-					log.Errorf("failed to write h264 video to client: %s", err)
-					m.RemoveClient(client.WsConn())
-					client.Close()
-				}
+		packets := m.videoPacketizer.Packetize(frame.Data, frame.Timestamp)
+		for _, client := range clients {
+			if err := client.track.writeVideoPackets(packets); err != nil {
+				log.Errorf("failed to write h264 video to client: %s", err)
+				m.RemoveClient(client.WsConn())
+				client.Close()
 			}
 		}
-	}()
-
-	return samples, done
+	}
 }

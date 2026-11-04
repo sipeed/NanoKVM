@@ -60,7 +60,7 @@ func (s *Service) Screenshot(c *gin.Context) {
 func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) ([]byte, ScreenshotMeta, *PicoclawError) {
 	width, height, quality := resolveScreenshotRequest(query)
 
-	screen := common.GetScreen()
+	sourceWidth, sourceHeight := common.InputSize()
 	common.CheckScreen()
 	releaseLease, claimFresh, leaseErr := s.acquireCaptureLease(ctx)
 	if leaseErr != nil {
@@ -94,8 +94,8 @@ func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) 
 				continue
 			}
 			return data, ScreenshotMeta{
-				SourceWidth:   screen.Width,
-				SourceHeight:  screen.Height,
+				SourceWidth:   sourceWidth,
+				SourceHeight:  sourceHeight,
 				CaptureWidth:  width,
 				CaptureHeight: height,
 				Format:        "jpeg",
@@ -108,8 +108,7 @@ func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) 
 
 func resolveScreenshotRequest(query ScreenshotQuery) (uint16, uint16, uint16) {
 	screen := common.GetScreen()
-	width := screen.Width
-	height := screen.Height
+	width, height := common.InputSize()
 	quality := screen.Quality
 
 	if query.Format == "base64" {

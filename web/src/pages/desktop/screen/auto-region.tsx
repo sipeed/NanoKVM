@@ -4,8 +4,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import {
   controlRegionModeAtom,
   inputRegionAtom,
-  inputRegionSelectingAtom,
-  resolutionAtom
+  inputRegionSelectingAtom
 } from '@/jotai/screen.ts';
 
 import { detectFrameContent, getMediaSize } from './geometry.ts';
@@ -13,7 +12,6 @@ import { detectFrameContent, getMediaSize } from './geometry.ts';
 export const AutoRegion = () => {
   const mode = useAtomValue(controlRegionModeAtom);
   const selecting = useAtomValue(inputRegionSelectingAtom);
-  const resolution = useAtomValue(resolutionAtom);
   const setInputRegion = useSetAtom(inputRegionAtom);
 
   useEffect(() => {
@@ -37,7 +35,7 @@ export const AutoRegion = () => {
         confirmations = 0;
       }
 
-      const mediaSize = getMediaSize(screen, resolution);
+      const mediaSize = getMediaSize(screen);
       if (!mediaSize) return;
       const content = detectFrameContent(screen, mediaSize);
       const key = [
@@ -74,7 +72,7 @@ export const AutoRegion = () => {
       stopped = true;
       window.clearInterval(timer);
     };
-  }, [mode, resolution, selecting, setInputRegion]);
+  }, [mode, selecting, setInputRegion]);
 
   useEffect(() => {
     if (mode !== 'auto') setInputRegion(null);

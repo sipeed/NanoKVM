@@ -16,7 +16,6 @@ import {
   inputRegionAtom,
   manualInputRegionAtom,
   manualRegionsAtom,
-  resolutionAtom,
   selectedManualRegionAtom,
   selectedOriginalResolutionAtom,
   videoModeAtom
@@ -65,7 +64,6 @@ const Console = () => {
   const captureStatus = useCaptureStatus(activeVideoMode);
 
   const [videoMode, setVideoMode] = useAtom(videoModeAtom);
-  const [resolution, setResolution] = useAtom(resolutionAtom);
   const [inputRegion, setInputRegion] = useAtom(inputRegionAtom);
   const [controlRegionMode, setControlRegionModeState] = useAtom(controlRegionModeAtom);
   const setManualInputRegion = useSetAtom(manualInputRegionAtom);
@@ -94,8 +92,6 @@ const Console = () => {
 
     setVideoMode(activeVideoMode);
 
-    const res = storage.getResolution() || { width: 0, height: 0 };
-    setResolution(res);
     setInputRegion(null);
     setManualInputRegion(null);
     setManualRegions([]);
@@ -141,7 +137,6 @@ const Console = () => {
     setInputRegion,
     setManualInputRegion,
     setManualRegions,
-    setResolution,
     setSelectedManualRegion,
     setSelectedOriginalResolution,
     setVideoMode
@@ -172,7 +167,7 @@ const Console = () => {
         clearTimeout(validationTimer);
       }
       validationTimer = setTimeout(() => {
-        const mediaSize = getMediaSize(target, resolution);
+        const mediaSize = getMediaSize(target);
         if (!mediaSize || !isMediaReady(target) || isInputRegionCompatible(region, mediaSize)) {
           return;
         }
@@ -214,7 +209,6 @@ const Console = () => {
     canControl,
     controlRegionMode,
     inputRegion,
-    resolution,
     setControlRegionModeState,
     setInputRegion,
     videoMode
@@ -234,7 +228,7 @@ const Console = () => {
       {isBigScreen && <Notification />}
       <H264ModeNotification />
 
-      {videoMode && resolution && (
+      {videoMode && (
         <div className="relative flex h-full min-h-0 w-full min-w-0">
           <Menu />
           <div className="h-full min-h-0 w-full min-w-0">

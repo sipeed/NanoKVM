@@ -30,8 +30,8 @@ type GetGpioRsp struct {
 }
 
 type SetScreenReq struct {
-	Type  string `validate:"required"` // resolution / fps / quality
-	Value int    `validate:"number"`   // value
+	Type  string `validate:"required,oneof=type fps quality gop"`
+	Value int    `validate:"number"` // value
 }
 
 type GetScriptsRsp struct {

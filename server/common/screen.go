@@ -1,10 +1,13 @@
 package common
 
-import "sync"
+import (
+	"os"
+	"strconv"
+	"strings"
+	"sync"
+)
 
 type Screen struct {
-	Width   uint16
-	Height  uint16
 	FPS     int
 	Quality uint16
 	BitRate uint16
@@ -15,15 +18,6 @@ var (
 	screen     *Screen
 	screenOnce sync.Once
 )
-
-// ResolutionMap height to width
-var ResolutionMap = map[uint16]uint16{
-	1080: 1920,
-	720:  1280,
-	600:  800,
-	480:  640,
-	0:    0,
-}
 
 var QualityMap = map[uint16]bool{
 	100: true,
@@ -42,8 +36,6 @@ var BitRateMap = map[uint16]bool{
 func GetScreen() *Screen {
 	screenOnce.Do(func() {
 		screen = &Screen{
-			Width:   0,
-			Height:  0,
 			Quality: 80,
 			FPS:     30,
 			BitRate: 3000,
@@ -56,13 +48,6 @@ func GetScreen() *Screen {
 
 func SetScreen(key string, value int) {
 	switch key {
-	case "resolution":
-		height := uint16(value)
-		if width, ok := ResolutionMap[height]; ok {
-			screen.Width = width
-			screen.Height = height
-		}
-
 	case "quality":
 		if value > 100 {
 			screen.BitRate = uint16(value)
@@ -79,11 +64,6 @@ func SetScreen(key string, value int) {
 }
 
 func CheckScreen() {
-	if _, ok := ResolutionMap[screen.Height]; !ok {
-		screen.Width = 1920
-		screen.Height = 1080
-	}
-
 	if _, ok := QualityMap[screen.Quality]; !ok {
 		screen.Quality = 80
 	}
@@ -91,6 +71,21 @@ func CheckScreen() {
 	if _, ok := BitRateMap[screen.BitRate]; !ok {
 		screen.BitRate = 3000
 	}
+}
+
+func InputSize() (uint16, uint16) {
+	read := func(path string) uint16 {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			return 0
+		}
+		value, err := strconv.ParseUint(strings.TrimSpace(string(data)), 10, 16)
+		if err != nil {
+			return 0
+		}
+		return uint16(value)
+	}
+	return read("/kvmapp/kvm/width"), read("/kvmapp/kvm/height")
 }
 
 func validateFPS(fps int) int {

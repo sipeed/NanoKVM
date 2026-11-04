@@ -5,14 +5,13 @@ import (
 	"sync/atomic"
 
 	"github.com/gorilla/websocket"
-	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
 )
 
 type WebRTCManager struct {
 	clients         map[*websocket.Conn]*Client
 	clientSnapshot  atomic.Pointer[[]*Client]
-	videoPacketizer rtp.Packetizer
+	videoPacketizer *h264Packetizer
 	videoSending    bool
 	mutex           sync.Mutex
 	viewerVersion   uint64

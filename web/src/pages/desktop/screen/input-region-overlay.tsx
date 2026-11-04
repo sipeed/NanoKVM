@@ -13,7 +13,6 @@ import {
   inputRegionSelectingAtom,
   manualInputRegionAtom,
   manualRegionsAtom,
-  resolutionAtom,
   selectedManualRegionAtom,
   selectedOriginalResolutionAtom,
   videoScaleAtom
@@ -87,7 +86,6 @@ export const InputRegionOverlay = () => {
   const [, setInputRegionState] = useAtom(inputRegionAtom);
   const setManualInputRegion = useSetAtom(manualInputRegionAtom);
   const [manualRegions, setManualRegions] = useAtom(manualRegionsAtom);
-  const resolution = useAtomValue(resolutionAtom);
   const setSelectedManualRegion = useSetAtom(selectedManualRegionAtom);
   const setSelectedOriginalResolution = useSetAtom(selectedOriginalResolutionAtom);
   const videoScale = useAtomValue(videoScaleAtom);
@@ -166,7 +164,7 @@ export const InputRegionOverlay = () => {
         frameRectRef.current = null;
         return;
       }
-      const nextMediaSize = getMediaSize(target, resolution);
+      const nextMediaSize = getMediaSize(target);
       const bounds = target.getBoundingClientRect();
       if (!nextMediaSize || bounds.width <= 0 || bounds.height <= 0) {
         setFrameRect(null);
@@ -206,7 +204,7 @@ export const InputRegionOverlay = () => {
       window.removeEventListener('scroll', updateFrame, true);
       window.clearInterval(timer);
     };
-  }, [resolution, selecting, videoScale]);
+  }, [selecting, videoScale]);
 
   useEffect(() => {
     if (!selecting) {

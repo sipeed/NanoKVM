@@ -1,45 +1,29 @@
-/**
- * 待解决的问题:
- * // 分辨率跟随输出
- * // 自动切换分辨率
- * // HDMI分辨率问题
- * // H264输入空图,VENC容易炸问题
- * // MJPEG/H264切换时卡退
- * // 再加一条手动清空全部内存
- * // deinit时free全部内存
- * // free 错内存时会炸的问题
- */
 #include "kvm_vision.h"
+#include "maix_basic.hpp"
+#include "maix_i2c.hpp"
 #include "vi_state_shared.hpp"
 #include "internal/vi_state_writer.hpp"
+#include "kvm_mmf.hpp"
 
+#include <atomic>
+#include <cstdarg>
+#include <mutex>
+#include <pthread.h>
 #include <errno.h>
 #include <sys/stat.h>
-
-#define default_venc_chn        1
 
 #define VENC_MJPEG              0
 #define VENC_H264               1
 
-#define KVMV_MAX_TRY_NUM	   	2
 #define vi_min_width            32
 #define vi_min_height           3
 #define vi_max_width            1920
 #define vi_max_height           1080
 
-#define Farame_sample_size      76800   // 320*240
-
 #define default_vi_width        1920
 #define default_vi_height       1080
-#define default_vpss_width      1920
-#define default_vpss_height     1080
-#define default_venc_type       VENC_MJPEG
-#define default_mjpeg_qlty      60
-#define default_h264_qlty       1000
 #define default_h264_gop        30
-#define fresh_frame_discard_count 5
 
-#define kvmv_data_buffer_size   4
 #define Try_rounds_HDMI_err_res 5
 
 #define vi_width_path           "/kvmapp/kvm/width"
@@ -56,7 +40,9 @@
 #define LT6911_READ 	0xFF
 #define LT6911_WRITE 	0x00
 
-pthread_mutex_t vi_mutex;
+std::mutex capture_mutex[2];
+pthread_t detection_thread, watchdog_thread;
+bool detection_started = false, watchdog_started = false;
 pthread_mutex_t hdmi_signal_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static char NanoKVM_edit[] = {
@@ -75,56 +61,30 @@ using namespace maix::sys;
 using namespace maix::peripheral;
 i2c::I2C LT6911_i2c(4, i2c::Mode::MASTER);
 
-typedef struct {
-	uint16_t vi_width = default_vi_width;
-	uint16_t vi_height = default_vi_height;
-	uint16_t vpss_width = default_vpss_width;
-	uint16_t vpss_height = default_vpss_height;
-	uint8_t venc_type;
-	uint16_t qlty;
-	uint8_t stream_stop;
-	uint8_t frame_detact = 0;
-	uint8_t display;
-    uint8_t reinit_flag = 1;
-    uint8_t reopen_cam_flag = 0;
-    uint8_t hdmi_cable_state = 0;
-    uint8_t try_exit_thread = 0;
-    uint8_t thread_is_running = 0;
-    uint8_t Auto_res = 0;
+enum ResolutionState { NORMAL_RES, NEW_RES, UNSUPPORT_RES, UNKNOWN_RES, ERROR_RES };
+
+struct {
+    std::atomic<uint16_t> vi_width{default_vi_width};
+    std::atomic<uint16_t> vi_height{default_vi_height};
+    uint8_t frame_detact = 0;
+    std::atomic<bool> reopen_cam_flag{false};
+    std::atomic<bool> try_exit_thread{false};
     uint8_t hdmi_version = 0;
     uint8_t hw_version = 0;
-    uint8_t hdmi_stop_flag = 0;
-    uint8_t hdmi_reading_flag = 0;
+    std::atomic<bool> hdmi_stop_flag{false};
+    std::atomic<bool> hdmi_reading_flag{false};
     uint8_t hdmi_mode = 0;
-    uint8_t hdmi_res_type = 0;
-    uint8_t hdmi_res_err = 0;
+    std::atomic<uint8_t> hdmi_res_type{NORMAL_RES};
+    std::atomic<uint8_t> hdmi_res_err{NORMAL_RES};
     uint8_t hdmi_try_rounds = 0;
-    uint8_t vi_detect_state = 0;
-    uint8_t venc_auto_recyc = 0;
-    uint8_t fresh_frame_count = 0;
-} kvmv_cfg_t;
+    std::atomic<uint8_t> vi_detect_state{0};
+} kvmv_cfg;
 
-typedef struct {
-	uint8_t* p_img_data = NULL;
-    uint8_t img_data_type = 0;
-    uint32_t img_data_size = 0;
-} kvmv_data_t;
-
-typedef struct {
-    uint8_t mmf_venc_chn;
-	uint8_t enc_h264_running;
-	uint8_t enc_h264_init;
-    mmf_venc_cfg_t kvm_venc_cfg;
-} kvm_venc_t;
-
-camera::Camera *cam = new camera::Camera(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
-// camera::Camera *cam = new camera::Camera(320, 240, image::FMT_RGB888);
-
-kvmv_cfg_t kvmv_cfg;
-
-kvmv_data_t kvmv_data_buffer[kvmv_data_buffer_size];
-
-uint8_t kvmv_data_buffer_index = 0;
+struct {
+    uint64_t hash = 0;
+    uint8_t count = 0;
+    bool unchanged = false;
+} jpeg_detection;
 
 uint8_t debug_en = 0;
 uint8_t last_vi_state_code = 0;
@@ -200,16 +160,13 @@ static void set_hdmi_capture_enabled(uint8_t enabled)
     pthread_mutex_unlock(&hdmi_signal_mutex);
 }
 
-static void set_hdmi_detection_state(uint8_t active)
-{
-    __atomic_store_n(&kvmv_cfg.hdmi_cable_state, active != 0 ? 1 : 0, __ATOMIC_RELEASE);
-    set_hdmi_signal_state(active);
-}
-
 void debug(const char *format, ...)
 {
     if(debug_en){
-        printf(format);
+        va_list args;
+        va_start(args, format);
+        vprintf(format, args);
+        va_end(args);
     }
 }
 
@@ -219,15 +176,8 @@ uint8_t refresh_vi_state()
 	// that the publication cadence measures wall-clock time, not read time plus it.
     last_vi_state_refresh_ms = vi_state_shared::monotonic_ms();
     last_vi_state_code = vi_state_shared::refresh();
-    set_hdmi_detection_state(last_vi_state_code == 1 || last_vi_state_code >= 3);
+    set_hdmi_signal_state(last_vi_state_code == 1 || last_vi_state_code >= 3);
     return last_vi_state_code;
-}
-
-uint8_t to_roll(int8_t _input)
-{
-    if(_input <                      0) return _input + kvmv_data_buffer_size;
-    if(_input >= kvmv_data_buffer_size) return _input - kvmv_data_buffer_size;
-    return _input;
 }
 
 int maxmin_data(int _max, int _min, int _data)
@@ -235,17 +185,6 @@ int maxmin_data(int _max, int _min, int _data)
 	if(_data > _max) return _max;
 	if(_data < _min) return _min;
 	return _data;
-}
-
-kvmv_data_t* get_save_buffer()
-{
-    kvmv_data_buffer_index = to_roll(kvmv_data_buffer_index + 1);
-    // debug("[kvmv]kvmv_data_buffer_index = %d\n", kvmv_data_buffer_index);
-    // debug("[kvmv]kvmv_data_buffer.p_img_data = %d\n", kvmv_data_buffer[kvmv_data_buffer_index].p_img_data);
-    if(kvmv_data_buffer[kvmv_data_buffer_index].p_img_data == NULL){
-        return &kvmv_data_buffer[kvmv_data_buffer_index];
-    }
-    return NULL;
 }
 
 // ====HDMI RES==================================================
@@ -435,12 +374,12 @@ int get_manual_resolution(void)
     // res change ?
     if(kvmv_cfg.vi_width != tmp_width){
         kvmv_cfg.vi_width = tmp_width;
-        printf("[kvmk] get new width = %d\n", kvmv_cfg.vi_width);
+        printf("[kvmk] get new width = %d\n", kvmv_cfg.vi_width.load());
         res = 1;
     }
     if(kvmv_cfg.vi_height != tmp_height){
         kvmv_cfg.vi_height = tmp_height;
-        printf("[kvmk] get new height = %d\n", kvmv_cfg.vi_height);
+        printf("[kvmk] get new height = %d\n", kvmv_cfg.vi_height.load());
         res = 1;
     }
     return res;
@@ -452,12 +391,12 @@ uint8_t auto_try_res()
     uint8_t err_code;
     uint8_t auto_trying_times = 0;
 
-    for (auto_trying_times = 0; auto_trying_times < sizeof(hdmi_res_list)/4; auto_trying_times++){
+    for (auto_trying_times = 0; auto_trying_times < sizeof(hdmi_res_list)/4 && !kvmv_cfg.try_exit_thread.load(); auto_trying_times++){
         err_code = refresh_vi_state();
         switch(err_code){
         case 0:
             // shouldn't be possible to run here
-            cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+            kvm_mmf::restart();
             printf("[kvmv] VI not init\n");
             break;
         case 1:
@@ -484,8 +423,8 @@ uint8_t auto_try_res()
 
             kvmv_cfg.vi_width = hdmi_res_list[auto_trying_times][0];
             kvmv_cfg.vi_height = hdmi_res_list[auto_trying_times][1];
-            printf("[kvmv] restart cam...\n");
-            cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+            printf("[kvmv] restart video...\n");
+            kvm_mmf::restart();
             time::sleep_ms(50);
             break;
         case 7: // Unknown reason
@@ -1121,7 +1060,7 @@ void* watchdog_sf_feed(void * arg)
 {
     while(true)
     {
-        if(kvmv_cfg.try_exit_thread == 1)
+        if(kvmv_cfg.try_exit_thread.load() == 1)
             break;
         time::sleep_ms(500);
         if (watchdog_sf_is_open()){
@@ -1133,6 +1072,7 @@ void* watchdog_sf_feed(void * arg)
             vision_update_watchdog();
         }
     }
+    return nullptr;
 }
 
 void get_hdmi_version()
@@ -1172,6 +1112,16 @@ void get_hdmi_version()
     }
 }
 
+static uint8_t update_hdmi_resolution()
+{
+    uint16_t width = kvmv_cfg.vi_width;
+    uint16_t height = kvmv_cfg.vi_height;
+    uint8_t result = lt6911_get_csi_res(&width, &height);
+    kvmv_cfg.vi_width = width;
+    kvmv_cfg.vi_height = height;
+    return result;
+}
+
 void* vi_subsystem_detection(void * arg)
 {
 	uint64_t __attribute__((unused)) int_time;
@@ -1184,7 +1134,6 @@ void* vi_subsystem_detection(void * arg)
     uint8_t falling_times = 0;
 	uint8_t cam_need_restart = 0;
     uint8_t auto_change_mode = 0;
-    kvmv_cfg.thread_is_running = 1;
 	if(access("/proc/lt_int", F_OK) != 0){
 		time::sleep_ms(10);
 		debug("[hdmi]/proc/lt_int not ok\n");
@@ -1196,7 +1145,7 @@ void* vi_subsystem_detection(void * arg)
     last_vi_state_refresh_ms = vi_state_shared::monotonic_ms() - vi_state_publish_interval_ms;
     while(true)
     {
-        if(kvmv_cfg.try_exit_thread == 1)
+        if(kvmv_cfg.try_exit_thread.load() == 1)
             break;
 
         uint8_t get_new_hdmi_mode = get_hdmi_mode();
@@ -1258,8 +1207,8 @@ void* vi_subsystem_detection(void * arg)
                                 if(lt6911_get_hdmi_res()){
                                     // hdmi get res
                                     debug("[hdmi] C HDMI cable insertion!\n");
-                                    set_hdmi_detection_state(1);
-                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    set_hdmi_signal_state(1);
+                                    kvmv_cfg.hdmi_res_type = update_hdmi_resolution();
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
                                         /* Move HDMI resolution modification directly
@@ -1270,7 +1219,7 @@ void* vi_subsystem_detection(void * arg)
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] C HDMI cable unplugged!\n");
-                                    set_hdmi_detection_state(0);
+                                    set_hdmi_signal_state(0);
                                 }
                                 lt6911_disable();
                             }
@@ -1283,8 +1232,8 @@ void* vi_subsystem_detection(void * arg)
                                 if(lt6911_get_hdmi_res()){
                                     // hdmi get res
                                     debug("[hdmi] UXC HDMI cable insertion!\n");
-                                    set_hdmi_detection_state(1);
-                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    set_hdmi_signal_state(1);
+                                    kvmv_cfg.hdmi_res_type = update_hdmi_resolution();
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
                                         /* Move HDMI resolution modification directly
@@ -1295,7 +1244,7 @@ void* vi_subsystem_detection(void * arg)
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] UXC HDMI cable unplugged!\n");
-                                    set_hdmi_detection_state(0);
+                                    set_hdmi_signal_state(0);
                                 }
                                 lt6911_disable();
                             }
@@ -1308,8 +1257,8 @@ void* vi_subsystem_detection(void * arg)
                                 if(lt6911_get_hdmi_res()){
                                     // hdmi get res
                                     debug("[hdmi] D HDMI cable insertion!\n");
-                                    set_hdmi_detection_state(1);
-                                    kvmv_cfg.hdmi_res_type = lt6911_get_csi_res(&kvmv_cfg.vi_width, &kvmv_cfg.vi_height);
+                                    set_hdmi_signal_state(1);
+                                    kvmv_cfg.hdmi_res_type = update_hdmi_resolution();
                                     if (kvmv_cfg.hdmi_res_type == NEW_RES) kvmv_cfg.reopen_cam_flag = 1;
                                     else if (kvmv_cfg.hdmi_res_type == UNKNOWN_RES){
                                         /* Move HDMI resolution modification directly
@@ -1320,7 +1269,7 @@ void* vi_subsystem_detection(void * arg)
                                 } else {
                                     // HDMI res = 0*0/x*0
                                     debug("[hdmi] D HDMI cable unplugged!\n");
-                                    set_hdmi_detection_state(0);
+                                    set_hdmi_signal_state(0);
                                 }
                                 lt6911_disable();
                             }
@@ -1392,8 +1341,8 @@ void* vi_subsystem_detection(void * arg)
                 if (kvmv_cfg.vi_detect_state == 1){
                     // detect_res
                     if (get_manual_resolution()) {
-                        debug("[kvmv] restart cam...\n");
-                        cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
+                        debug("[kvmv] restart video...\n");
+                        kvm_mmf::restart();
                     }
 
                     // Sample after a manual resolution change.
@@ -1442,554 +1391,121 @@ void* vi_subsystem_detection(void * arg)
 
 		time::sleep_ms(10);
     }
-    kvmv_cfg.thread_is_running = 0;
-}
-
-int sync_vi_res()
-{
-    int res = 0;
-    uint8_t RW_Data[35];
-    FILE *fp;
-    int file_size;
-    uint16_t tmp16;
-
-    // vi_width:
-    if (access(vi_width_path, F_OK) != 0){
-        kvmv_cfg.vi_width = default_vi_width;
-        kvmv_cfg.vi_height = default_vi_height;
-        res = -1;
-        return res;
-    } else {
-        fp = fopen(vi_width_path, "r");
-        fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-        fread(RW_Data, sizeof(char), file_size, fp);
-        fclose(fp);
-        RW_Data[file_size] = 0;
-        tmp16 = atoi((char*)RW_Data);
-        if(tmp16 != kvmv_cfg.vi_width){
-            kvmv_cfg.vi_width = tmp16;
-            debug("[hdmi] Get new HDMI width = %d\r\n", kvmv_cfg.vi_width);
-            res = 1;
-        }
-    }
-    // vi_height:
-    if (access(vi_height_path, F_OK) != 0){
-        kvmv_cfg.vi_height = default_vi_height;
-        res = -1;
-        return res;
-    } else {
-        fp = fopen(vi_height_path, "r");
-        fseek(fp, 0, SEEK_END);
-        file_size = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
-        fread(RW_Data, sizeof(char), file_size, fp);
-        fclose(fp);
-        RW_Data[file_size] = 0;
-        tmp16 = atoi((char*)RW_Data);
-        if(tmp16 != kvmv_cfg.vi_height){
-            kvmv_cfg.vi_height = tmp16;
-            debug("[hdmi] Get new HDMI height = %d\r\n", kvmv_cfg.vi_height);
-            res = 1;
-        }
-    }
-    return res;
-}
-
-uint8_t frame_changed(image::Image *raw)
-{
-    static int raw_size = 0;
-    static uint8_t Farame_sample[Farame_sample_size] = {0};
-    uint8_t ret = 0;
-    uint8_t sample_byte;
-    if(raw->data_size() != raw_size){
-        raw_size = raw->data_size();
-        ret = 1;
-    }
-    int Detection_Pixel_Interval = raw_size/(Farame_sample_size*1.5);
-    for(int i = 0; i < Farame_sample_size; i ++){
-        // printf("[kvmv] i = %d\n", i);
-        if(i >= raw_size){
-            ret = 0;
-        }
-        sample_byte = *(uint8_t*)(raw->data()+(i*Detection_Pixel_Interval));
-        if(sample_byte != Farame_sample[i]){
-            Farame_sample[i] = sample_byte;
-            ret = 1;
-        }
-    }
-    return ret;
-}
-
-bool jpg_dump(kvmv_data_t* dump_to, image::Image *raw)
-{
-    if(dump_to == NULL || raw == NULL || raw->data() == NULL || raw->data_size() == 0){
-        return false;
-    }
-    dump_to->p_img_data = (uint8_t *)malloc(raw->data_size());
-    if(dump_to->p_img_data == NULL){
-        dump_to->img_data_size = 0;
-        dump_to->img_data_type = 0;
-        return false;
-    }
-    dump_to->img_data_size = raw->data_size();
-    dump_to->img_data_type = VENC_MJPEG;
-    memcpy(dump_to->p_img_data, (uint8_t *)raw->data(), raw->data_size());
-    return true;
+    return nullptr;
 }
 
 uint8_t kvmvenc_gop = default_h264_gop;
-kvm_venc_t kvm_venc;
-mmf_venc_cfg_t cfg;
-void init_venc_h264(uint16_t _width, uint16_t _height, uint16_t _qlty)
+
+void set_h264_gop(uint8_t gop)
 {
-    cfg.type = 2; //1, h265, 2, h264
-    cfg.w = _width;
-    cfg.h = _height;
-    cfg.fmt = mmf_invert_format_to_mmf(image::Format::FMT_YVU420SP);
-    cfg.jpg_quality = 0;       // unused
-    cfg.gop = kvmvenc_gop;
-    cfg.intput_fps = 60;
-    cfg.output_fps = 60;
-    cfg.bitrate = _qlty;  // 码率
-
-    kvm_venc.mmf_venc_chn = default_venc_chn;
-    kvm_venc.enc_h264_init = 0;
-    kvm_venc.kvm_venc_cfg = cfg;
-
-	// if(mmf_vdec_is_used(kvm_venc.mmf_venc_chn)){
-		mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
-	// }
-    if (0 != mmf_add_venc_channel(kvm_venc.mmf_venc_chn, &kvm_venc.kvm_venc_cfg)) {
-        err::check_raise(err::ERR_RUNTIME, "mmf venc init failed!");
-    }
-    kvm_venc.enc_h264_init = 1;
-
-	// init_kvm_h264_stream(&kvm_h264_stream, mmf_stream_buf);
-	// init_h264_stream_struct(&kvm_h264_stream);
+    __atomic_store_n(&kvmvenc_gop, (uint8_t)maxmin_data(100, 1, gop), __ATOMIC_RELEASE);
 }
 
-int h264_stream_dump(kvmv_data_t* dump_to, mmf_stream_t* dump_from)
+void set_frame_detact(uint8_t interval)
 {
-    static int8_t I_Frame_index = -1;
-    // debug("[kvmv]dump_from->count = %d\n", dump_from->count);
-    if (dump_from->count == 3) {
+    std::lock_guard<std::mutex> lock(capture_mutex[VENC_MJPEG]);
+    kvmv_cfg.frame_detact = maxmin_data(100, 0, interval);
+    jpeg_detection = {};
+}
 
-        dump_to->p_img_data = (uint8_t *)malloc(dump_from->data_size[0]+dump_from->data_size[1]+dump_from->data_size[2]);
-        dump_to->img_data_size = dump_from->data_size[0]+dump_from->data_size[1]+dump_from->data_size[2];
-        dump_to->img_data_type = IMG_H264_TYPE_IF;
-        memcpy(dump_to->p_img_data, dump_from->data[0], dump_from->data_size[0]);
-        memcpy(dump_to->p_img_data+dump_from->data_size[0], dump_from->data[1], dump_from->data_size[1]);
-        memcpy(dump_to->p_img_data+dump_from->data_size[0]+dump_from->data_size[1], dump_from->data[2], dump_from->data_size[2]);
-
-        debug("[kvmv]SPS size = %d\n", dump_from->data_size[0]);
-        debug("[kvmv]PPS size = %d\n", dump_from->data_size[1]);
-        debug("[kvmv]I-Frame size = %d\n", dump_from->data_size[2]);
-
-        return IMG_H264_TYPE_IF;
-
-    } else if (dump_from->count == 1) {
-        // debug("[kvmv]dump P-Frame\r\n");
-        I_Frame_index = -1;
-        dump_to->p_img_data = (uint8_t *)malloc(dump_from->data_size[0]);
-        dump_to->img_data_size = dump_from->data_size[0];
-        dump_to->img_data_type = IMG_H264_TYPE_PF;
-        memcpy(dump_to->p_img_data, dump_from->data[0], dump_from->data_size[0]);
-        return IMG_H264_TYPE_PF;
-    } else {
-        debug("[kvmv]venc error!\r\n");
-        return IMG_VENC_ERROR;
+void kvmv_init(uint8_t debug_info)
+{
+    debug_en = debug_info != 0;
+    kvmv_cfg.try_exit_thread = false;
+    if (!kvm_mmf::initialize()) {
+        fprintf(stderr, "[kvmv] video initialization failed\n");
+    }
+    if (!detection_started) {
+        detection_started = pthread_create(&detection_thread, nullptr, vi_subsystem_detection, nullptr) == 0;
+    }
+    if (!watchdog_started) {
+        watchdog_started = pthread_create(&watchdog_thread, nullptr, watchdog_sf_feed, nullptr) == 0;
     }
 }
 
-void set_h264_gop(uint8_t _gop)
+int kvmv_read_img(uint16_t width, uint16_t height, uint8_t type,
+                  uint16_t quality, uint16_t fps, kvmv_frame_t *out)
 {
-    kvm_venc.enc_h264_init = 0; // call
-    kvmvenc_gop = maxmin_data(100, 1, (int)_gop);
-    debug("[kvmv] set_h264_gop = %d\n", kvmvenc_gop);
-}
-
-void set_frame_detact(uint8_t _frame_detact)
-{
-    uint8_t frame_detact = maxmin_data(100, 0, (int)_frame_detact);
-    kvmv_cfg.frame_detact = frame_detact;
-    debug("[kvmv] set_frame_detact = %d\n", kvmv_cfg.frame_detact);
-    kvmv_cfg.stream_stop = 0;
-}
-
-int8_t raw_to_h264(image::Image *raw, kvmv_data_t* ret_stream, uint16_t _qlty)
-{
-	uint64_t __attribute__((unused)) start_time;
-	uint64_t __attribute__((unused)) frame_time;
-	int8_t ret = 0;
-	static uint8_t P_Frame_Count = 0;
-		// start_time = time::time_ms();
-		// log::info("getimg: %d \r\n", (int)(time::time_ms()));
-    mmf_stream_t _stream = {0};
-    if(kvm_venc.enc_h264_init != 1 || raw->width() != kvm_venc.kvm_venc_cfg.w || raw->height() != kvm_venc.kvm_venc_cfg.h || _qlty != kvm_venc.kvm_venc_cfg.bitrate){
-		debug("[kvmv]init_venc_h264	enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n",
-				kvm_venc.enc_h264_init,
-				raw->width(), kvm_venc.kvm_venc_cfg.w,
-				raw->height(), kvm_venc.kvm_venc_cfg.h);
-
-		init_venc_h264(raw->width(), raw->height(), _qlty);
-        debug("[kvmv]init_venc_h264 finish enc_h264_init = %d; raw->width() = %d | %d raw->height() = %d | %d \n",
-				kvm_venc.enc_h264_init,
-				raw->width(), kvm_venc.kvm_venc_cfg.w,
-				raw->height(), kvm_venc.kvm_venc_cfg.h);
-        // if(kvm_venc.enc_h264_init == 1){
-		// 	init_venc_h264(raw->width(), raw->height(), _qlty);
-		// } else {
-		// 	init_venc_h264(default_vpss_width, default_vpss_height, default_h264_qlty);
-		// }
+    if (!out) return IMG_VENC_ERROR;
+    *out = {};
+    if (type > VENC_H264) return IMG_VENC_ERROR;
+    std::lock_guard<std::mutex> lock(capture_mutex[type]);
+    if (kvmv_cfg.try_exit_thread || kvmv_cfg.hdmi_stop_flag) return IMG_NOT_EXIST;
+    if (kvmv_cfg.hdmi_res_err == ERROR_RES) return -7;
+    if (kvmv_cfg.hdmi_res_type == UNSUPPORT_RES) return -6;
+    if (kvmv_cfg.vi_detect_state == 1) return -4;
+    if (kvmv_cfg.reopen_cam_flag.exchange(false) && !kvm_mmf::restart()) return IMG_VENC_ERROR;
+    if (width == 0 || height == 0) {
+        width = kvmv_cfg.vi_width;
+        height = kvmv_cfg.vi_height;
     }
-	// log::info("init(): %d \r\n", (int)(time::time_ms() - start_time));
-    if (mmf_venc_push(kvm_venc.mmf_venc_chn, (uint8_t *)raw->data(), raw->width(), raw->height(), mmf_invert_format_to_mmf(raw->format()))) {
-        mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
-        kvm_venc.enc_h264_init = 0;
-        // rtmp->unlock();
-		debug("[kvmv]mmf venc push failed!\n");
-        // err::check_raise(err::ERR_RUNTIME, "mmf venc push failed!\r\n");
-        return -1;
-    }
-	// log::info("push(): %d \r\n", (int)(time::time_ms() - start_time));
-    if (mmf_venc_pop(kvm_venc.mmf_venc_chn, &_stream)) {
-        // log::error("mmf_venc_pop failed\n");
-        mmf_venc_free(kvm_venc.mmf_venc_chn);
-        mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
-        kvm_venc.enc_h264_init = 0;
-		debug("[kvmv]mmf venc push failed!\n");
-        // rtmp->unlock();
-        return -1;
-    }
-	// log::info("pop(): %d \r\n", (int)(time::time_ms() - start_time));
-    ret = h264_stream_dump(ret_stream, &_stream);
-    mmf_venc_free(kvm_venc.mmf_venc_chn);
-	// log::info("dump(): %d \r\n", (int)(time::time_ms() - start_time));
+    quality = type == VENC_H264 ? maxmin_data(10000, 500, quality) : maxmin_data(100, 50, quality);
+    fps = maxmin_data(60, 1, fps);
+    auto codec = static_cast<kvm_mmf::Codec>(type);
+    kvm_mmf::Frame frame;
+    int result = kvm_mmf::acquire(codec, width, height, quality, fps,
+                                __atomic_load_n(&kvmvenc_gop, __ATOMIC_ACQUIRE), &frame);
+    if (result < 0) return result;
 
-	// debug("[kvmv]_stream.data[0][4] = %d;\n", _stream.data[0][4]);
-	debug("[kvmv]Frame size = %d;\n", ret_stream->img_data_size);
-
-    if(ret == IMG_H264_TYPE_IF){
-		debug("[kvmv]================ GOP = %d ================\n", kvm_venc.kvm_venc_cfg.gop);
-		debug("[kvmv]SPS; PPS; I-Frame, I-Frame size = %d\n", ret_stream->img_data_size);
-		P_Frame_Count = 0;
-
-    } else if(ret == IMG_H264_TYPE_PF){
-		debug("[kvmv]P-Frame size = %d, P-count = %d\n", ret_stream->img_data_size, P_Frame_Count);
-		P_Frame_Count++;
-    }
-    debug("[kvmv]dump ret = %d\n", ret);
-    return ret;
-}
-
-void kvmv_init(uint8_t _debug_info_en)
-{
-    pthread_t thread;
-    pthread_mutex_init(&vi_mutex, NULL);
-    if(_debug_info_en == 0) debug_en = 0;
-    else                    debug_en = 1;
-
-    // debug("[kvmv]kvmv_init - 1\r\n");
-
-    cam->hmirror(1);
-    cam->vflip(1);
-    cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
-    for(int i = 0; i < kvmv_data_buffer_size; i++){
-        kvmv_data_buffer[i].p_img_data = NULL;
-    }
-
-    kvmv_cfg.try_exit_thread = 0;
-    // debug("[kvmv]kvmv_init - 2\r\n");
-
-    if(kvmv_cfg.thread_is_running == 1){
-        debug("[kvmv]thread is running!\r\n");
-    } else {
-        if (0 != pthread_create(&thread, NULL, vi_subsystem_detection, NULL)) {
-            debug("[kvmv]create vi_subsystem_detection thread failed!\r\n");
-            // return -1;
-        }
-
-        if (0 != pthread_create(&thread, NULL, watchdog_sf_feed, NULL)) {
-            debug("[kvmv]create watchdog_sf_feed thread failed!\r\n");
-            // return -1;
-        }
-    }
-    // debug("[kvmv]kvmv_init - 3\r\n");
-}
-
-uint8_t check_kvmv(uint8_t _try_num)
-{
-    if(__atomic_load_n(&kvmv_cfg.hdmi_cable_state, __ATOMIC_ACQUIRE) == 0){
-        debug("[kvmv]HDMI Cable not exist!\n");
-        return 0;
-    }
-    if(_try_num >= KVMV_MAX_TRY_NUM){
-        debug("[kvmv]try_num >= KVMV_MAX_TRY_NUM!\n");
-        return 0;
-    }
-    // if(sync_vi_res() != 0){
-    if(kvmv_cfg.reopen_cam_flag == 1){
-        // vi size changed
-        kvmv_cfg.reopen_cam_flag = 0;
-        // cam->open(kvmv_cfg.vpss_width, kvmv_cfg.vpss_height, image::FMT_YVU420SP, 3);
-        cam->restart(default_vpss_width, default_vpss_height, image::FMT_YVU420SP);
-        debug("[kvmv]vi size changed, try again\n");
-        return 1;
-    }
-    debug("[kvmv]just try again\n");
-    return 1;
-}
-
-void set_venc_auto_recyc(uint8_t _enable)
-{
-    if(_enable) kvmv_cfg.venc_auto_recyc = 1;
-    else kvmv_cfg.venc_auto_recyc = 0;
-}
-
-/**********************************************************************************
- * @name    kvmv_read_img
- * @author  Sipeed BuGu
- * @date    2024/10/25
- * @version R1.0
- * @brief   Acquire the encoded image with auto init
- * @param	_width				@input: 	Output image width
- * @param	_height				@input: 	Output image height
- * @param	_type				@input: 	Encode type
- * @param	_qlty				@input: 	MJPEG: (50-100) | H264:  (500-10000)
- * @param	_pp_kvm_data		@output: 	Encode data
- * @param	_p_kvmv_data_size	@output: 	Encode data size
- * @return
-        -7: HDMI INPUT RES ERROR
-        -6: Unsupported resolution, please modify it in the host settings.
-        -5: Retrieving image, please wait
-        -4: Modifying image resolution, please wait
-        -3: img buffer full
-        -2: VENC Errorl
-        -1: No images were acquired
-         0: Acquire MJPEG encoded images
-         1: Acquire H264 encoded images(SPS)[Deprecated]
-         2: Acquire H264 encoded images(PPS)[Deprecated]
-         3: Acquire H264 encoded images(I)
-         4: Acquire H264 encoded images(P)
-         5: IMG not changed
- **********************************************************************************/
-int kvmv_read_img(uint16_t _width, uint16_t _height, uint8_t _type, uint16_t _qlty, uint8_t** _pp_kvm_data, uint32_t* _p_kvmv_data_size)
-{
-    *_pp_kvm_data = NULL;
-    *_p_kvmv_data_size = 0;
-    static uint8_t frame_undetact_count = 0;
-	// uint64_t __attribute__((unused)) start_time = time::time_ms();
-    debug("[kvmv]kvmv_read_img type = %d...\n", _type);
-    struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
-    ts.tv_sec += 1;
-    // pthread_mutex_lock(&vi_mutex);         // Add lock
-    int mutex_res = pthread_mutex_timedlock(&vi_mutex, &ts);
-    if(mutex_res != 0){
-        return -5;
-    }
-    if (kvmv_cfg.hdmi_res_err == ERROR_RES){
-        pthread_mutex_unlock(&vi_mutex);
-        return -7;
-    }
-    if (kvmv_cfg.hdmi_res_type == UNSUPPORT_RES){
-        pthread_mutex_unlock(&vi_mutex);
-        return -6;
-    }
-    if (kvmv_cfg.vi_detect_state == 1){
-        pthread_mutex_unlock(&vi_mutex);
-        return -4;
-    }
-    uint8_t try_num = 0;
-    do {
-        if(kvmv_cfg.vpss_width != _width || kvmv_cfg.vpss_height != _height){
-            if(_width == 0 || _height == 0){
-                // Follow the HDMI output
-                kvmv_cfg.vpss_width = kvmv_cfg.vi_width;
-                kvmv_cfg.vpss_height = kvmv_cfg.vi_height;
-
-                if(kvmv_cfg.Auto_res == 0){
-                    kvmv_cfg.Auto_res = 1;
-                    cam->set_resolution(kvmv_cfg.vpss_width, kvmv_cfg.vpss_height);
-                    kvmv_cfg.reinit_flag = 1;
-                }
-
-            } else {
-                kvmv_cfg.Auto_res = 0;
-                // Set the output
-                kvmv_cfg.vpss_width = _width;
-                kvmv_cfg.vpss_height = _height;
-
-                cam->set_resolution(kvmv_cfg.vpss_width, kvmv_cfg.vpss_height);
-                kvmv_cfg.reinit_flag = 1;
-            }
-        }
-
-        //
-        if (kvmv_cfg.reinit_flag == 1) {
-            cam->hmirror(1);
-            cam->vflip(1);
-			kvmv_cfg.reinit_flag = 0;
-        }
-        // debug("[kvmv]befor read img: %d \r\n", (int)(time::time_ms() - start_time));
-        image::Image *img = cam->read();
-        // debug("[kvmv]read img: %d \r\n", (int)(time::time_ms() - start_time));
-
-        if(img != NULL){
-            if(kvmv_cfg.fresh_frame_count != 0){
-                // Do not restart VI after HDMI idle. Reopening the MMF
-                // channel can exhaust the carveout heap when the detector
-                // thread is also transitioning. Consume queued frames
-                // instead; the camera buffer contains at most three frames.
-                kvmv_cfg.fresh_frame_count--;
-                delete img;
-                continue;
-            }
-
-            // frame detect
-            if(_type == VENC_MJPEG && kvmv_cfg.frame_detact != 0){
-                if(kvmv_cfg.stream_stop == 0){
-                    frame_undetact_count++;
-                } else {
-                    frame_undetact_count = kvmv_cfg.frame_detact;
-                }
-
-                if(frame_undetact_count == kvmv_cfg.frame_detact){
-                    frame_undetact_count = 0;
-
-                    if(frame_changed(img) == 0){
-                        debug("[kvmv]frame not changed...\n");
-                        kvmv_cfg.stream_stop = 1;
-                        delete img;
-                        pthread_mutex_unlock(&vi_mutex);
-                        return 5;
-                    } else {
-                        kvmv_cfg.stream_stop = 0;
-                    }
-                }
-            }
-        } else {
-            delete img;
-            debug("[kvmv]can`t get img...\n");
-            continue;
-            // pthread_mutex_unlock(&vi_mutex);
-            // return IMG_NOT_EXIST;
-        }
-        // debug("[kvmv]cheak img null?: %d \r\n", (int)(time::time_ms() - start_time));
-
-        // img exist
-        // Encode
-        if(kvmv_cfg.venc_type == VENC_MJPEG && kvmv_cfg.venc_type != _type){
-            if(kvmv_cfg.venc_auto_recyc == 1){
-                mmf_enc_jpg_deinit(0);
-            }
-            kvm_venc.enc_h264_init = 1;
-        }
-        if(kvmv_cfg.venc_type == VENC_H264 && kvmv_cfg.venc_type != _type){
-            if(kvmv_cfg.venc_auto_recyc == 1){
-                mmf_del_venc_channel(kvm_venc.mmf_venc_chn);
-            }
-            kvm_venc.enc_h264_init = 0;
-        }
-
-        kvmv_cfg.venc_type = _type;
-
-        if(kvmv_cfg.venc_type == VENC_MJPEG){
-            kvmv_data_t* p_kvmv_data = get_save_buffer();
-            if(p_kvmv_data == NULL){
-                // buffer full
-			    delete img;
-                debug("[kvmv]jpg buffer full\n");
-                pthread_mutex_unlock(&vi_mutex);
-                return IMG_BUFFER_FULL;
-            }
-            image::Image *jpg = img->to_jpeg(maxmin_data(99, 51, (int)_qlty));
-            if(jpg == NULL || !jpg_dump(p_kvmv_data, jpg)){
-                delete jpg;
-			    delete img;
-                debug("[kvmv]failed to allocate jpg buffer\n");
-                pthread_mutex_unlock(&vi_mutex);
-                return IMG_BUFFER_FULL;
-            }
-            delete jpg;
-			delete img;
-            *_pp_kvm_data = p_kvmv_data->p_img_data;
-            *_p_kvmv_data_size = p_kvmv_data->img_data_size;
-            pthread_mutex_unlock(&vi_mutex);
-            return IMG_MJPEG_TYPE;
-        } else if (kvmv_cfg.venc_type == VENC_H264){
-            int ret;
-            kvmv_data_t* p_kvmv_data = get_save_buffer();
-            if(p_kvmv_data == NULL){
-                // buffer full
-			    delete img;
-                *_pp_kvm_data = NULL;
-                pthread_mutex_unlock(&vi_mutex);
-                return IMG_BUFFER_FULL;
-            }
-            // debug("[kvmv]get_save_buffer: %d \r\n", (int)(time::time_ms() - start_time));
-            ret = raw_to_h264(img, p_kvmv_data, maxmin_data(10000, 500, (int)_qlty));
-            // debug("[kvmv]venc raw_to_h264: %d \r\n", (int)(time::time_ms() - start_time));
-			delete img;
-            *_pp_kvm_data = p_kvmv_data->p_img_data;
-            *_p_kvmv_data_size = p_kvmv_data->img_data_size;
-            pthread_mutex_unlock(&vi_mutex);
-            return ret;
-        }
-    } while (check_kvmv(try_num++));
-    // debug("[kvmv]return: %d \r\n", (int)(time::time_ms() - start_time));
-    *_pp_kvm_data = NULL;
-    pthread_mutex_unlock(&vi_mutex);
-    return IMG_NOT_EXIST;
-}
-
-int free_kvmv_data(uint8_t ** _pp_kvm_data)
-{
-        // debug("[kvmv]free_kvmv_data - 1\r\n");
-    for(int i = 0; i < kvmv_data_buffer_size; i++){
-        if(*_pp_kvm_data == kvmv_data_buffer[i].p_img_data){
-            // debug("[kvmv]free buffer : %d\n", *_pp_kvm_data);
-            if (*_pp_kvm_data != NULL){
-        // debug("[kvmv]free_kvmv_data - 2\r\n");
-                free(*_pp_kvm_data);
-        // debug("[kvmv]free_kvmv_data - 3\r\n");
-                kvmv_data_buffer[i].p_img_data = NULL;
-                uint8_t _type = kvmv_data_buffer[i].img_data_type;
-                return _type;
-            } else {
-                return IMG_NOT_EXIST;
+    // Detect unchanged JPEGs without reading raw VPSS pixels.
+    if (codec == kvm_mmf::MJPEG) {
+        uint8_t interval = kvmv_cfg.frame_detact;
+        if (interval == 0) {
+            jpeg_detection = {};
+        } else if (jpeg_detection.unchanged || ++jpeg_detection.count >= interval) {
+            jpeg_detection.count = 0;
+            uint64_t hash = 14695981039346656037ULL;
+            for (uint32_t i = 0; i < frame.size; ++i) hash = (hash ^ frame.data[i]) * 1099511628211ULL;
+            jpeg_detection.unchanged = hash == jpeg_detection.hash;
+            jpeg_detection.hash = hash;
+            if (jpeg_detection.unchanged) {
+                kvm_mmf::release(codec, frame.token);
+                free(frame.data);
+                return 5;
             }
         }
     }
-    return IMG_NOT_EXIST;
+
+    *out = {frame.data, frame.size, frame.timestamp, frame.token, type};
+    return codec == kvm_mmf::MJPEG ? IMG_MJPEG_TYPE :
+           (frame.keyframe ? IMG_H264_TYPE_IF : IMG_H264_TYPE_PF);
 }
 
-void free_all_kvmv_data()
+void kvmv_release_frame(kvmv_frame_t *frame)
 {
-    for(int i = 0; i < kvmv_data_buffer_size; i++){
-        if(kvmv_data_buffer[i].p_img_data != NULL){
-            free(kvmv_data_buffer[i].p_img_data);
-            kvmv_data_buffer[i].p_img_data = NULL;
-        }
-    }
+    if (!frame || !frame->data) return;
+    kvm_mmf::release(static_cast<kvm_mmf::Codec>(frame->codec), frame->token);
+    free(frame->data);
+    *frame = {};
+}
+
+void kvmv_stop_stream(uint8_t type)
+{
+    if (type > VENC_H264) return;
+    std::lock_guard<std::mutex> lock(capture_mutex[type]);
+    kvm_mmf::stop(static_cast<kvm_mmf::Codec>(type));
+    if (type == VENC_MJPEG) jpeg_detection = {};
 }
 
 void kvmv_deinit()
 {
     set_hdmi_capture_enabled(0);
-    pthread_mutex_destroy(&vi_mutex);
-    kvmv_cfg.try_exit_thread = 1;
-    cam->close();
-    mmf_deinit();
-    free_all_kvmv_data();
+    kvmv_cfg.try_exit_thread = true;
+    if (detection_started) { pthread_join(detection_thread, nullptr); detection_started = false; }
+    if (watchdog_started) { pthread_join(watchdog_thread, nullptr); watchdog_started = false; }
+    std::unique_lock<std::mutex> h264(capture_mutex[VENC_H264], std::defer_lock);
+    std::unique_lock<std::mutex> mjpeg(capture_mutex[VENC_MJPEG], std::defer_lock);
+    std::lock(h264, mjpeg);
+    kvm_mmf::deinitialize();
+    jpeg_detection = {};
 }
 
 uint8_t kvmv_hdmi_control(uint8_t _en)
 {
     if(_en == 0){
         set_hdmi_capture_enabled(0);
+        kvm_mmf::stop(kvm_mmf::H264);
+        kvm_mmf::stop(kvm_mmf::MJPEG);
     }
 
     if(kvmv_cfg.hw_version == 0){
@@ -2030,11 +1546,6 @@ uint8_t kvmv_hdmi_control(uint8_t _en)
     } else {
         kvmv_cfg.hdmi_stop_flag = 0;
         system("echo 1 > /sys/class/gpio/gpio451/value");
-
-        // Keep the existing VI channel and consume queued frames after idle.
-        // Reopening it here or from kvmv_read_img can exhaust the carveout
-        // heap while the HDMI detector is transitioning.
-        kvmv_cfg.fresh_frame_count = fresh_frame_discard_count;
         set_hdmi_capture_enabled(1);
         return 0;
     }

@@ -4,7 +4,9 @@ import (
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/service/stream"
 	"NanoKVM-Server/service/vm"
+	"bytes"
 	"fmt"
+	"image/jpeg"
 	"strconv"
 	"sync"
 	"sync/atomic"
@@ -83,32 +85,69 @@ func (s *Streamer) getClients() []*gin.Context {
 }
 
 func (s *Streamer) run() {
-	defer atomic.StoreInt32(&s.running, 0)
-
 	screen := common.GetScreen()
 	common.CheckScreen()
-	fps := screen.FPS
 
 	vision := common.GetKvmVision()
+	s.streamFrames(screen, vision.AcquireMjpeg, vision.StopMjpeg)
+}
 
-	ticker := time.NewTicker(time.Second / time.Duration(fps))
-	defer ticker.Stop()
+func (s *Streamer) streamFrames(screen *common.Screen, acquire func(uint16, uint16, uint16, uint16) *common.VideoFrame, stop func()) {
+	frames := make(chan *common.VideoFrame)
+	done := make(chan struct{})
+	captureDone := make(chan struct{})
+	go func() {
+		defer close(captureDone)
+		defer stop()
+		for {
+			select {
+			case <-done:
+				return
+			default:
+			}
+			frame := acquire(0, 0, screen.Quality, uint16(screen.FPS))
+			select {
+			case frames <- frame:
+				frame.Release()
+			case <-done:
+				frame.Release()
+				return
+			}
+			if frame.Result < 0 {
+				select {
+				case <-time.After(time.Second / time.Duration(max(screen.FPS, 1))):
+				case <-done:
+					return
+				}
+			}
+		}
+	}()
 
-	for range ticker.C {
+	for {
 		clients := s.getClients()
 		if len(clients) == 0 {
-			log.Debug("mjpeg stream stopped due to no clients")
-			return
+			s.mutex.Lock()
+			if len(s.clients) == 0 {
+				close(done)
+				<-captureDone
+				atomic.StoreInt32(&s.running, 0)
+				s.mutex.Unlock()
+				log.Debug("mjpeg stream stopped due to no clients")
+				return
+			}
+			s.mutex.Unlock()
+			continue
 		}
 
-		data, result := vision.ReadMjpeg(screen.Width, screen.Height, screen.Quality)
+		frame := <-frames
+		data, result := frame.Data, frame.Result
 		stream.UpdateCaptureStatus(stream.CaptureModeMJPEG, result)
 		if result < 0 || result == 5 || len(data) == 0 {
 			continue
 		}
 
 		if s.frameCacheEnabled() {
-			s.setLatestFrame(data, screen.Width, screen.Height)
+			s.setLatestFrame(data)
 		}
 
 		for _, client := range clients {
@@ -118,16 +157,15 @@ func (s *Streamer) run() {
 			}
 		}
 
-		if screen.FPS != fps && screen.FPS != 0 {
-			fps = screen.FPS
-			ticker.Reset(time.Second / time.Duration(fps))
-		}
-
 		stream.GetFrameRateCounter().Update()
 	}
 }
 
-func (s *Streamer) setLatestFrame(data []byte, width uint16, height uint16) {
+func (s *Streamer) setLatestFrame(data []byte) {
+	size, err := jpeg.DecodeConfig(bytes.NewReader(data))
+	if err != nil {
+		return
+	}
 	frameCopy := append([]byte(nil), data...)
 
 	s.frameMutex.Lock()
@@ -135,8 +173,8 @@ func (s *Streamer) setLatestFrame(data []byte, width uint16, height uint16) {
 
 	s.latestFrame = LatestFrame{
 		Data:       frameCopy,
-		Width:      width,
-		Height:     height,
+		Width:      uint16(size.Width),
+		Height:     uint16(size.Height),
 		CapturedAt: time.Now(),
 	}
 }

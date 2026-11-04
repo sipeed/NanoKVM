@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { updateScreen } from '@/api/vm';
 import * as ls from '@/lib/localstorage';
-import { resolutionAtom, videoModeAtom } from '@/jotai/screen.ts';
+import { videoModeAtom } from '@/jotai/screen.ts';
 import { MenuItem } from '@/components/menu-item.tsx';
 
 import { getQualityMap, getScreenType } from './constants.ts';
@@ -14,7 +14,6 @@ import { FrameDetect } from './frame-detect';
 import { Gop } from './gop.tsx';
 import { Quality } from './quality';
 import { Reset } from './reset.tsx';
-import { Resolution } from './resolution';
 import { Scale } from './scale';
 import { VideoMode } from './video-mode.tsx';
 
@@ -22,7 +21,6 @@ export const Screen = () => {
   const { t } = useTranslation();
 
   const videoMode = useAtomValue(videoModeAtom);
-  const resolution = useAtomValue(resolutionAtom);
   const isMjpeg = videoMode === 'mjpeg';
   const [fps, setFps] = useState(30);
   const [quality, setQuality] = useState(2);
@@ -33,7 +31,6 @@ export const Screen = () => {
     if (screenType !== null) {
       updateScreen('type', screenType);
     }
-    updateScreen('resolution', resolution!.height);
     updateQuality();
     updateFps();
     updateGop();
@@ -77,7 +74,6 @@ export const Screen = () => {
   const content = (
     <div className="flex flex-col space-y-1">
       <VideoMode />
-      <Resolution />
       <Quality quality={quality} setQuality={setQuality} />
       <Fps fps={fps} setFps={setFps} />
       <Scale />

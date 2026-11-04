@@ -81,22 +81,27 @@ manual download and does not change the on-device `latest.json` contract.
 | `server/web/` | `web/dist/` |
 | `kvm_system/kvm_system` | `support/sg2002` `build kvm_system` |
 | `system/tool/` | prebuilt binaries in `tools/nanokvm_update_edid/` |
-| `kvm/` | default runtime state (resolution, fps, quality) |
+| `kvm/` | default runtime state (input dimensions, fps, quality) |
 | everything else | tracked `kvmapp/` |
 
 Note that `kvm/` ships default runtime state, and `install.go` replaces
 `/kvmapp` wholesale, so an update resets those values on the device. That is
 long-standing behaviour, not something these scripts introduce.
 
-## The two copies of libkvm.so
+## Video library linking
 
-`NanoKVM-Server` is cgo-linked against the **tracked** `server/dl_lib/libkvm.so`
-(`server/common/kvm_vision.go`: `-L../dl_lib -lkvm`), but the package ships the
-library the `kvm_vision` build just produced. Those are two different files, and
-the tracked one can lag well behind — published releases have shipped this
-mismatch for a long time.
+`make app` and `server/build.sh` compile the server using the prebuilt libraries
+in `server/dl_lib/`. They do not rebuild the video libraries. The cgo directive
+in `server/common/kvm_vision.go` links against `libkvm.so`, which depends on
+`libkvm_mmf.so`.
 
-Because a symbol the binary imports could in principle be absent from the
-shipped library, and that would only surface as a crash on a real device,
-`build-in-container.sh` checks the shipped `libkvm.so` still exports every
-symbol `NanoKVM-Server` actually imports from it, and fails the build otherwise.
+`make vision` rebuilds the video libraries and stages them in
+`kvmapp/server/dl_lib/`; `make release-build` does this as part of the full build.
+After changing library interfaces, update both prebuilt files in
+`server/dl_lib/` from the same build. The tracked directory also supplies the
+SDK runtime libraries used by the video build and backfills libraries that
+are absent from the staged directory.
+
+`build-in-container.sh` checks that the staged `libkvm.so` exports every KVM
+symbol imported by the server. See the [server instructions](../server/README.md#compile--deploy)
+for manual compilation and deployment.

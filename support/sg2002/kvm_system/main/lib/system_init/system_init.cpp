@@ -134,7 +134,6 @@ void new_app_init(void)
 	system("echo 0 > /kvmapp/kvm/now_fps");
 	system("echo 30 > /kvmapp/kvm/fps");
 	system("echo 2000 > /kvmapp/kvm/qlty");
-	system("echo 720 > /kvmapp/kvm/res");
 	system("echo h264 > /kvmapp/kvm/type");
 	write_hdmi_state(0);
 	system("touch /etc/kvm/frame_detact");
