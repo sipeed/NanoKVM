@@ -660,8 +660,8 @@ const en = {
           previewDisabled: 'Preview Updates are unavailable while a custom update server is enabled'
         },
         offline: {
-          title: 'Offline Updates',
-          desc: 'Update through local installation package',
+          title: 'Offline App Updates',
+          desc: 'Update just the App through local installation package',
           upload: 'Upload',
           checksumPlaceholder: 'SHA-256 checksum (optional)',
           invalidChecksum: 'The SHA-256 checksum must contain 64 hexadecimal characters.',
