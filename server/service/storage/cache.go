@@ -3,6 +3,7 @@ package storage
 import (
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -46,11 +47,15 @@ const (
 )
 
 var (
-	partitionCacheMu     sync.Mutex
-	partitionLastChange  time.Time
-	partitionBrowsedPath string
-	partitionListeners   []func()
-	partitionWatchOnce   sync.Once
+	partitionCacheMu    sync.Mutex
+	partitionLastChange time.Time
+	// partitionWatchPaths is every directory the file browser is showing: the
+	// one it listed plus the folders it has expanded. A change inside a
+	// subdirectory does not move its parent's signature, so all of them have
+	// to be watched, not just the last one listed.
+	partitionWatchPaths []string
+	partitionListeners  []func()
+	partitionWatchOnce  sync.Once
 )
 
 // startPartitionWatcher starts the periodic refresh of the shared files view.
@@ -62,6 +67,13 @@ func startPartitionWatcher() {
 
 func watchPartitionChanges() {
 	var lastSignature string
+	var lastWatch []string
+	// While a transfer is in progress the UI labels zero-length entries as
+	// uploads. The quiet window ending is not a change on disk, so it is the
+	// one transition the signature cannot report: without its own
+	// notification, a finished copy keeps looking like an upload that never
+	// completes.
+	reportedWriting := false
 
 	for {
 		time.Sleep(partitionWatchInterval)
@@ -70,36 +82,81 @@ func watchPartitionChanges() {
 		// this device is the only writer, the filesystem's own caches are
 		// current and dropping them would be wasted work.
 		if !IsAttached(partitionDevice) {
+			lastSignature = ""
+			lastWatch = nil
+			reportedWriting = false
 			continue
 		}
 
 		invalidatePartitionCache()
 
+		watch := watchedDirectories()
+		signature := partitionSignature(watch)
+
+		// The browser changing which folders it shows is not a write: the
+		// signature is not comparable with the previous one, and treating the
+		// difference as a transfer keeps an empty file labelled as an upload
+		// forever. Re-baseline instead, without touching the quiet window.
+		if !sameDirectories(watch, lastWatch) {
+			lastWatch = watch
+			lastSignature = signature
+			continue
+		}
+
 		// The signature is taken after the drop, so it compares what a listing
 		// would show now. It is what tells a transfer in progress - the sizes
 		// grow - from an idle medium, and it is also what keeps an idle shared
 		// folder from making the web UI re-read it every second.
-		signature := partitionSignature()
-		if signature == lastSignature {
+		if signature != lastSignature {
+			lastSignature = signature
+
+			partitionCacheMu.Lock()
+			partitionLastChange = time.Now()
+			partitionCacheMu.Unlock()
+
+			reportedWriting = true
+			notifyPartitionListeners()
 			continue
 		}
-		lastSignature = signature
 
-		partitionCacheMu.Lock()
-		partitionLastChange = time.Now()
-		partitionCacheMu.Unlock()
-
-		notifyPartitionListeners()
+		if reportedWriting && !partitionWriting() {
+			reportedWriting = false
+			notifyPartitionListeners()
+		}
 	}
 }
 
-// SetPartitionBrowsePath tells the watcher which directory of the shared
-// folder the web UI is showing. A change inside a subdirectory does not move
-// the folder's own signature, so the directory being browsed is watched too.
-// An empty path stops watching a directory.
-func SetPartitionBrowsePath(browsePath string) {
+// watchedDirectories returns the directories to read, sorted so that a set the
+// browser sends in another order is still the same set.
+func watchedDirectories() []string {
 	partitionCacheMu.Lock()
-	partitionBrowsedPath = browsePath
+	paths := append([]string{}, partitionWatchPaths...)
+	partitionCacheMu.Unlock()
+
+	sort.Strings(paths)
+	return paths
+}
+
+func sameDirectories(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// SetPartitionWatchPaths tells the watcher which directories of the shared
+// folder the web UI is showing: the one being listed and every folder it has
+// expanded. A change inside a subdirectory does not move the folder's own
+// signature, so each open folder is watched on its own. An empty list stops
+// watching subdirectories.
+func SetPartitionWatchPaths(paths []string) {
+	partitionCacheMu.Lock()
+	partitionWatchPaths = append([]string{}, paths...)
 	partitionCacheMu.Unlock()
 }
 
@@ -152,25 +209,28 @@ func invalidatePartitionCache() {
 }
 
 // partitionSignature summarizes what a listing would show: the shared folder
-// itself, which is where files are exchanged, and the directory the file
+// itself, which is where files are exchanged, and every directory the file
 // browser has open. Names, sizes and timestamps are all compared, because a
 // copy changes the size of an entry it already added.
-func partitionSignature() string {
-	partitionCacheMu.Lock()
-	browsed := partitionBrowsedPath
-	partitionCacheMu.Unlock()
+func partitionSignature(paths []string) string {
+	var signature strings.Builder
+	signature.WriteString(directorySignature(mediaDirectory))
 
-	signature := directorySignature(mediaDirectory)
-	if browsed == "" || browsed == "/" {
-		return signature
+	seen := map[string]bool{"/": true}
+	for _, browsed := range paths {
+		if browsed == "" || seen[browsed] {
+			continue
+		}
+		seen[browsed] = true
+
+		dir, err := diskfs.ResolveInside(mediaDirectory, browsed)
+		if err != nil {
+			continue
+		}
+		signature.WriteString(directorySignature(dir))
 	}
 
-	dir, err := diskfs.ResolveInside(mediaDirectory, browsed)
-	if err != nil {
-		return signature
-	}
-
-	return signature + directorySignature(dir)
+	return signature.String()
 }
 
 func directorySignature(dir string) string {

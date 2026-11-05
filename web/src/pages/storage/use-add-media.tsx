@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button, Form, Input, Modal, Tooltip } from 'antd';
+import { Form, Input, Modal } from 'antd';
 import clsx from 'clsx';
-import { LinkIcon, UploadIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as downloadApi from '@/api/download.ts';
@@ -10,9 +9,9 @@ import { formatSize } from '@/lib/format.ts';
 import { getBaseUrl } from '@/lib/service.ts';
 
 type Props = {
-  // True while the target machine owns the removable disk: images can still be
-  // listed and browsed, but nothing may be written onto it.
-  dataOwned: boolean;
+  // True while writing onto the data partition is impossible: the target
+  // machine owns it, or the mount is still read-only.
+  writeBlocked: boolean;
   onChanged: () => void;
   onError: (message: string, description?: string) => void;
 };
@@ -53,7 +52,7 @@ function urlBaseName(url: string): string {
   }
 }
 
-export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
+export function useAddMedia({ writeBlocked, onChanged, onError }: Props) {
   const { t } = useTranslation();
 
   const [isUrlOpen, setIsUrlOpen] = useState(false);
@@ -334,38 +333,16 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
   const dropProps = {
     onDragOver: (event: React.DragEvent) => {
       event.preventDefault();
-      if (!dataOwned) setIsDragging(true);
+      if (!writeBlocked) setIsDragging(true);
     },
     onDragLeave: () => setIsDragging(false),
     onDrop: (event: React.DragEvent) => {
       event.preventDefault();
       setIsDragging(false);
-      if (dataOwned) return;
+      if (writeBlocked) return;
       setPendingFile(event.dataTransfer?.files?.[0] ?? null);
     }
   };
-
-  // The buttons belong in the image group's title row.
-  const actions = (
-    <div className="flex items-center space-x-1">
-      <Tooltip title={dataOwned ? t('storage.add.blocked') : t('storage.add.upload')}>
-        <Button
-          size="small"
-          icon={<UploadIcon size={14} />}
-          disabled={dataOwned}
-          onClick={() => setIsUploadOpen(true)}
-        />
-      </Tooltip>
-      <Tooltip title={dataOwned ? t('storage.add.blocked') : t('storage.add.fromUrl')}>
-        <Button
-          size="small"
-          icon={<LinkIcon size={14} />}
-          disabled={dataOwned}
-          onClick={() => setIsUrlOpen(true)}
-        />
-      </Tooltip>
-    </div>
-  );
 
   const overlays = (
     <>
@@ -457,5 +434,15 @@ export function useAddMedia({ dataOwned, onChanged, onError }: Props) {
     </>
   );
 
-  return { actions, transfer, cancelTransfer: cancel, dismissTransfer: dismiss, overlays };
+  return {
+    openUpload: () => setIsUploadOpen(true),
+    openUrl: () => setIsUrlOpen(true),
+    // Adding an image writes onto the data partition, which the target
+    // machine owns while it is attached.
+    addDisabled: writeBlocked,
+    transfer,
+    cancelTransfer: cancel,
+    dismissTransfer: dismiss,
+    overlays
+  };
 }

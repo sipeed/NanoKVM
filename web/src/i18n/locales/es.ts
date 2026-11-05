@@ -231,6 +231,11 @@ const es = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Montar disco',
+        share: 'Compartir archivos'
+      },
+      close: 'Cerrar',
       title: 'Imágenes y uso compartido de archivos',
       empty:
         'Aún no hay imágenes. Sube una ISO o IMG, o copia una en el disco desde el equipo remoto.',
@@ -303,7 +308,8 @@ const es = {
         downloading: 'Descargando {{name}}',
         done: '{{name}} está listo',
         checksumFailed: 'La imagen no coincide con la suma de comprobación SHA-256.',
-        blocked: 'El equipo remoto está usando el disco',
+        blocked:
+          'El equipo remoto está usando el disco. Expulsa de forma segura la unidad USB virtual en el equipo remoto y después apaga el interruptor Disco virtual en Ajustes > Dispositivo.',
         copyHint:
           'También puedes copiar una imagen a la partición de datos por SCP, o desde el equipo remoto.'
       },
@@ -326,7 +332,8 @@ const es = {
           size: 'Tamaño',
           type: 'Tipo',
           asc: 'Ascendente',
-          desc: 'Descendente'
+          desc: 'Descendente',
+          modified: 'Modificado'
         },
         upload: 'Subir un archivo al medio',
         deleteFolderTitle: 'Eliminar carpeta',
@@ -334,10 +341,24 @@ const es = {
           '¿Eliminar la carpeta {{name}} y todo su contenido? Esta acción no se puede deshacer.',
         uploading: 'Subiendo…',
         uploadFailed: 'La subida ha fallado',
+        exists: '{{name}} ya existe',
         download: 'Descargar',
         delete: 'Eliminar',
         deleteTitle: 'Eliminar el archivo',
-        deleteConfirm: '¿Eliminar {{name}} del medio?'
+        deleteConfirm: '¿Eliminar {{name}} del medio?',
+        folder: 'Carpeta',
+        itemCount: 'Elementos: {{count}}',
+        up: 'Ir a la carpeta superior',
+        uploadButton: 'Subir',
+        uploadFolder: 'Subir carpeta',
+        newFolder: 'Nueva carpeta',
+        newFolderPlaceholder: 'Nombre de la carpeta',
+        create: 'Crear',
+        dropHint: 'Suelta archivos aquí para subirlos a esta carpeta',
+        view: {
+          list: 'Vista de lista',
+          grid: 'Vista de iconos'
+        }
       },
       yes: 'Sí',
       no: 'No'

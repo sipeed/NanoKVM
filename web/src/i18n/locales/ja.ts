@@ -230,6 +230,11 @@ const ja = {
       }
     },
     storage: {
+      cards: {
+        mount: 'ディスクマウント',
+        share: 'ファイル共有'
+      },
+      close: '閉じる',
       title: 'イメージとファイル共有',
       empty:
         'イメージはまだありません。ISO または IMG をアップロードするか、ターゲットマシンからディスクにコピーしてください。',
@@ -302,7 +307,8 @@ const ja = {
         downloading: '{{name}} をダウンロード中',
         done: '{{name}} の準備ができました',
         checksumFailed: 'イメージが SHA-256 チェックサムと一致しません。',
-        blocked: 'ターゲットマシンがディスクを使用しています',
+        blocked:
+          'ターゲットマシンがディスクを使用しています。ターゲットマシンで仮想 USB ドライブを安全に取り出してから、設定 > デバイスで仮想ディスクのスイッチをオフにしてください。',
         copyHint:
           'イメージは SCP でデータパーティションにコピーするか、ターゲットマシンから直接コピーすることもできます。'
       },
@@ -325,7 +331,8 @@ const ja = {
           size: 'サイズ',
           type: '種類',
           asc: '昇順',
-          desc: '降順'
+          desc: '降順',
+          modified: '更新日時'
         },
         upload: 'メディアにファイルをアップロード',
         deleteFolderTitle: 'フォルダーを削除',
@@ -333,10 +340,24 @@ const ja = {
           'フォルダー {{name}} とその中身をすべて削除しますか？この操作は元に戻せません。',
         uploading: 'アップロード中…',
         uploadFailed: 'アップロードに失敗しました',
+        exists: '{{name}} は既に存在します',
         download: 'ダウンロード',
         delete: '削除',
         deleteTitle: 'ファイルを削除',
-        deleteConfirm: '{{name}} をメディアから削除しますか？'
+        deleteConfirm: '{{name}} をメディアから削除しますか？',
+        folder: 'フォルダー',
+        itemCount: '{{count}} 項目',
+        up: '親フォルダーへ移動',
+        uploadButton: 'アップロード',
+        uploadFolder: 'フォルダーをアップロード',
+        newFolder: '新しいフォルダー',
+        newFolderPlaceholder: 'フォルダー名',
+        create: '作成',
+        dropHint: 'ここにファイルをドロップして、このフォルダーにアップロード',
+        view: {
+          list: 'リスト表示',
+          grid: 'アイコン表示'
+        }
       },
       yes: 'はい',
       no: 'いいえ'

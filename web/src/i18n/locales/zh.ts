@@ -220,6 +220,11 @@ const zh = {
       }
     },
     storage: {
+      cards: {
+        mount: '磁盘挂载',
+        share: '文件共享'
+      },
+      close: '关闭',
       title: '镜像挂载/文件共享',
       empty: '还没有镜像。可以上传 ISO/IMG,也可以让被控机拷到这张盘上。',
       notAttached: '未装载任何介质',
@@ -289,7 +294,8 @@ const zh = {
         downloading: '正在下载 {{name}}',
         done: '{{name}} 已就绪',
         checksumFailed: '镜像与 SHA-256 校验值不符。',
-        blocked: '被控机正在使用这张盘',
+        blocked:
+          '被控机正在使用这张盘。请先在被控机上安全弹出虚拟 U 盘，再到设置 > 设备关闭虚拟 U 盘开关。',
         copyHint: '也可以通过 SCP 把镜像放进数据分区，或在被控机上直接拷贝。'
       },
       files: {
@@ -308,17 +314,32 @@ const zh = {
           size: '大小',
           type: '类型',
           asc: '升序',
-          desc: '降序'
+          desc: '降序',
+          modified: '修改时间'
         },
         upload: '上传文件到介质',
         deleteFolderTitle: '删除文件夹',
         deleteFolderConfirm: '删除文件夹 {{name}} 及其中的全部内容？此操作无法撤销。',
         uploading: '正在上传…',
         uploadFailed: '上传失败',
+        exists: '{{name}} 已存在',
         download: '下载',
         delete: '删除',
         deleteTitle: '删除文件',
-        deleteConfirm: '确定从介质中删除 {{name}}?'
+        deleteConfirm: '确定从介质中删除 {{name}}?',
+        folder: '文件夹',
+        itemCount: '{{count}} 项',
+        up: '返回上一级',
+        uploadButton: '上传文件',
+        uploadFolder: '上传文件夹',
+        newFolder: '新建文件夹',
+        newFolderPlaceholder: '文件夹名称',
+        create: '创建',
+        dropHint: '拖拽文件到此处即可上传到当前目录',
+        view: {
+          list: '列表视图',
+          grid: '图标视图'
+        }
       },
       yes: '确定',
       no: '取消'

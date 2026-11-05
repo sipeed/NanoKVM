@@ -4,7 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"sync"
+	"time"
 
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 )
 
@@ -55,6 +58,59 @@ func SetDataWritable(writable bool) error {
 	}
 
 	return nil
+}
+
+// DataWritable reports whether this side may write the data partition now.
+func DataWritable() bool {
+	var stat unix.Statfs_t
+	if err := unix.Statfs(mediaDirectory, &stat); err != nil {
+		return false
+	}
+	return stat.Flags&unix.ST_RDONLY == 0
+}
+
+// healFailureInterval throttles the warning a heal that keeps failing would
+// otherwise write: the state is polled every few seconds, and a mount that
+// cannot change would fill the log with the same line.
+const healFailureInterval = time.Minute
+
+var (
+	healFailureMu   sync.Mutex
+	healFailureLast time.Time
+)
+
+// logHealFailure reports a failed heal, at most once per interval.
+func logHealFailure(err error) {
+	healFailureMu.Lock()
+	defer healFailureMu.Unlock()
+
+	if time.Since(healFailureLast) < healFailureInterval {
+		return
+	}
+	healFailureLast = time.Now()
+	logrus.Warnf("heal data partition: %s", err)
+}
+
+// healDataPartition puts /data back to read-write when nothing is attached to
+// it. Two things leave it read-only with no owner: a release whose remount
+// failed, and the kernel itself switching the mount when the exFAT driver hit
+// an error (the mount carries errors=remount-ro). In both the target machine
+// cannot write the partition any more, so this side taking it back is safe -
+// and without it every upload, download and folder would fail with EROFS
+// until a reboot.
+func healDataPartition() error {
+	mediumOperationMu.Lock()
+	defer mediumOperationMu.Unlock()
+
+	status, err := readDiskStatus()
+	if err != nil {
+		return err
+	}
+	if status.State == diskStatePartition {
+		return nil
+	}
+
+	return SetDataWritable(true)
 }
 
 // DataDiskAttached reports whether the emulated disk serves the whole data

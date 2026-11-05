@@ -1,17 +1,29 @@
 import { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Alert, App, Button, Collapse, Modal, notification, Segmented, Tooltip } from 'antd';
+import {
+  Alert,
+  App,
+  Button,
+  ConfigProvider,
+  Modal,
+  notification,
+  Segmented,
+  theme,
+  Tooltip
+} from 'antd';
 import clsx from 'clsx';
 import {
   CheckIcon,
-  CircleHelpIcon,
   DiscIcon,
   DownloadIcon,
+  FolderSyncIcon,
   HardDriveIcon,
+  LinkIcon,
   LoaderCircleIcon,
   PlugIcon,
   Trash2Icon,
   UnplugIcon,
+  UploadIcon,
   XIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +34,7 @@ import { MediaIcon } from '@/lib/media-icons.tsx';
 import { WsClient } from '@/lib/websocket.ts';
 import { useMediaMount } from '@/hooks/useMediaMount.ts';
 import { Head } from '@/components/head.tsx';
+import { ButtonBase } from '@/components/ui/button-base.tsx';
 
 import { useAddMedia } from './use-add-media.tsx';
 import { useFileBrowser, type FileUpload } from './use-file-browser.tsx';
@@ -61,39 +74,56 @@ const MediaGroup = ({
 }) => (
   <div className="flex flex-col space-y-1">
     <div className="flex h-6 items-center justify-between px-2">
-      <span className="text-xs uppercase tracking-wide text-neutral-500">{title}</span>
+      <span className="text-xs font-medium uppercase tracking-wide text-neutral-300">{title}</span>
       {action}
     </div>
     {children}
   </div>
 );
 
-export const Storage = () => {
+type StorageViewProps = {
+  // 'mount' is the disk-mount manager; 'files' is the shared-files browser.
+  // The desktop menu opens each inside its own modal; the standalone page
+  // switches between them with a segmented control.
+  view: 'mount' | 'files';
+  active: boolean;
+  // Extra slot on the header's right side (the modals put their close button
+  // there, the page puts its view switch).
+  headerExtra?: ReactNode;
+  // The page fills the window; a modal sizes itself.
+  fullPage?: boolean;
+};
+
+const StorageContent = ({ view, active, headerExtra, fullPage }: StorageViewProps) => {
   const { t } = useTranslation();
   const { hasPermission } = useAuth();
+  const { token } = theme.useToken();
+  const [notificationApi, contextHolder] = notification.useNotification();
+  const { modal } = App.useApp();
+
   // Attaching a medium hands it to the target machine; writing changes what the
   // library keeps. Reading is implied by both, so the page itself is already
   // behind library.read.
   const canAttach = hasPermission('medium.attach');
   const canWrite = hasPermission('library.write');
-  // Turning the virtual disk on is a device setting, so only an account that may
-  // change device settings can do it from here.
+  // Turning the virtual disk on is a device setting, so only an account that
+  // may change device settings can do it from here.
   const canDevice = hasPermission('device');
-  const [notificationApi, contextHolder] = notification.useNotification();
-  const { modal } = App.useApp();
+  // The storage push rides on the console socket, so an account without the
+  // console grant waits for the refresh button instead.
+  const canWatchConsole = hasPermission('console.view');
 
   const [media, setMedia] = useState<api.MediaItem[]>([]);
-  const [caps, setCaps] = useState<api.MediaCapabilities>({ loop: true });
   const [state, setState] = useState<api.MediaStateInfo>({
     state: 'none',
     hidOnly: false,
     open: [],
-    cdrom: false
+    cdrom: false,
+    localWritable: true
   });
   // The mode the next mount uses. It follows what is attached, so the control
   // shows the mode the target machine is looking at rather than a stale choice.
   const [mountAsCdrom, setMountAsCdrom] = useState(false);
-  const [selected, setSelected] = useState<string>(''); // "<type>:<rel>"
   const [isLoading, setIsLoading] = useState(true);
   const [storageSignal, setStorageSignal] = useState(0);
   const [job, setJob] = useState<api.MediaStatus | null>(null);
@@ -105,10 +135,12 @@ export const Storage = () => {
   } | null>(null);
   const lastStatus = useRef<api.MediaStatus['status']>('idle');
   const [dismissedJob, setDismissedJob] = useState(readDismissedJob);
-  const [isTipsOpen, setIsTipsOpen] = useState(false);
-  // Names of file uploads the user cancelled: the server records the aborted
-  // request as a failed job, which is not news to the user who stopped it.
+  // Names of file uploads whose failure the page has already explained: a
+  // cancelled request and a name that is already taken both leave a failed
+  // media job behind, and the job is not news to a user who has been told.
   const cancelledUploads = useRef(new Set<string>());
+  const activeRef = useRef(active);
+  activeRef.current = active;
 
   // Both callbacks are handed to children that poll with them in their
   // dependency lists: a new identity on every render would tear the intervals
@@ -128,30 +160,36 @@ export const Storage = () => {
   // network dropping) is left to the next round instead of raising a
   // notification every few seconds.
   const refresh = useCallback(async () => {
+    if (!activeRef.current) return;
     try {
-      const rsp = await api.getMedia();
-      if (rsp.code === 0) {
-        setMedia(rsp.data?.media ?? []);
-        setCaps(rsp.data?.capabilities ?? { loop: true });
-      }
-
+      // State recovery recreates /data, so list files from the fresh mount.
       const stateRsp = await api.getMediaState();
+      if (!activeRef.current) return;
       if (stateRsp.code === 0) {
         setState(stateRsp.data);
+      }
+
+      const rsp = await api.getMedia();
+      if (!activeRef.current) return;
+      if (rsp.code === 0) {
+        setMedia(rsp.data?.media ?? []);
       }
     } catch {
       // Retried by the poll.
     }
   }, []);
 
-  const refreshMedia = useCallback(() => void refresh(), [refresh]);
+  const refreshMedia = useCallback(async () => {
+    await refresh();
+  }, [refresh]);
 
   useEffect(() => {
+    if (!active) return;
     void refresh().finally(() => setIsLoading(false));
 
     const timer = setInterval(() => void refresh(), statePollInterval);
     return () => clearInterval(timer);
-  }, [refresh]);
+  }, [active, refresh]);
 
   useEffect(() => {
     if (state.state === 'image' || state.state === 'partition') {
@@ -159,20 +197,12 @@ export const Storage = () => {
     }
   }, [state.state, state.cdrom]);
 
-  // The server refreshes the shared files view on a timer while the target
-  // machine owns the partition and pushes a storage event, which is how the
-  // file listing stays current. The medium list keeps its own poll above: a
-  // refresh only means the files changed, and re-walking the medium directory
-  // on every one of those events would cost more than it shows.
-  //
-  // The socket is the console one, so an account granted only the library has
-  // none to open. The medium list keeps its own poll either way; without the
-  // push the file listing waits for the refresh button.
-  // Depend on the grant, not on hasPermission: that changes identity with every
-  // account refresh, which would tear the socket down on each auth push.
-  const canWatchConsole = hasPermission('console.view');
+  // The server pushes "the shared files changed" over the console socket while
+  // the target machine owns the partition. Depend on the grant, not on
+  // hasPermission: that changes identity with every account refresh, which
+  // would tear the socket down on each auth push.
   useEffect(() => {
-    if (!canWatchConsole) return;
+    if (!active || !canWatchConsole || view !== 'files') return;
 
     const ws = new WsClient();
     ws.connect();
@@ -181,11 +211,28 @@ export const Storage = () => {
       unsubscribe();
       ws.close();
     };
-  }, [canWatchConsole]);
+  }, [active, canWatchConsole, view]);
+
+  // The push above rides on a socket an account may not have. Without it the
+  // listing only ever changes when the user asks, which reads as a broken file
+  // manager while the target machine writes: poll the way the NanoKVM Go file
+  // manager does instead. Only while the target machine owns the partition is
+  // there anything to see.
+  useEffect(() => {
+    if (!active || canWatchConsole || view !== 'files' || state.state !== 'partition') return;
+
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      setStorageSignal((signal) => signal + 1);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [active, canWatchConsole, view, state.state]);
 
   // Poll the media job while one is running: creating a medium writes
   // gigabytes to the card, so the page reports it like any other transfer.
+  // Only the file manager runs such a job, so only it polls.
   useEffect(() => {
+    if (!active || view !== 'files') return;
     let cancelled = false;
 
     async function poll() {
@@ -218,11 +265,10 @@ export const Storage = () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [refresh]);
+  }, [active, refresh, view]);
 
   // Operations the target machine can refuse are confirmed here rather than in
-  // the menu panel: this page is a full window, so a dialog cannot be
-  // swallowed by a popover closing.
+  // the menu panel: a dialog cannot be swallowed by a popover closing.
   const { mount, eject, busy } = useMediaMount({
     onError: notifyError,
     onNeedEnableDisk: canDevice
@@ -255,50 +301,23 @@ export const Storage = () => {
   // from writing anything: the image uploads and the file uploads inside a
   // medium both land on that one filesystem, so they share this condition.
   const dataOwned = state.state === 'partition';
+  // Both reasons a write would be refused: the target machine owns the disk, or
+  // the mount has not been handed back yet. The controls that write ask this.
+  const writeBlocked = dataOwned || !state.localWritable;
 
   const addMedia = useAddMedia({
-    dataOwned,
+    writeBlocked,
     onChanged: refreshMedia,
     onError: notifyError
   });
 
-  const volumeMedia = useMemo(() => media.filter((item) => item.type === 'partition'), [media]);
   const images = useMemo(() => media.filter((item) => item.type === 'image'), [media]);
-
-  const selectedMedia = useMemo(
-    () => media.find((item) => `${item.type}:${item.rel}` === selected) ?? null,
-    [media, selected]
+  // The partition is the one medium the file browser shows: it is what the
+  // emulated disk serves by default, and it needs no loop device to be read.
+  const sharedPartition = useMemo(
+    () => media.find((item) => item.type === 'partition') ?? null,
+    [media]
   );
-
-  // The listing and the toolbar above it read the same folder, and switching
-  // medium always starts at its root.
-  useEffect(() => {
-    setBrowsePath('/');
-  }, [selected]);
-
-  // Why the file browser is unavailable, if it is: each reason has its own
-  // sentence, because "you have to eject it on the target machine first" and
-  // "this image holds no browsable filesystem" are different problems. An ISO
-  // is the third case: it is a filesystem the kernel of this device does not
-  // carry (CONFIG_ISO9660_FS), so its contents cannot be listed even though the
-  // image itself is served to the target machine like any other medium.
-  const browseBlockReason = ((): 'attached' | 'notBrowsable' | 'isoImage' | 'noLoop' | '' => {
-    if (!selectedMedia) return '';
-
-    // The data partition is a directory on this device: it needs no loop
-    // device, and it can be read in every state, including while the target
-    // machine has it. Only writing to it has to wait for an eject.
-    if (selectedMedia.type === 'partition') return '';
-
-    if (!caps.loop) return 'noLoop';
-    if (!selectedMedia.browsable) {
-      return api.isOpticalImage(selectedMedia) ? 'isoImage' : 'notBrowsable';
-    }
-    // An image is mounted as a block device to be read, and a block device the
-    // target machine is writing underneath is not something to browse.
-    if (selectedMedia.attached) return 'attached';
-    return '';
-  })();
 
   // A download the browser starts on its own saves whatever comes back, so a
   // refused request ends up as a file named after the URL. The status is asked
@@ -356,37 +375,25 @@ export const Storage = () => {
           notifyError(rsp.msg);
           return;
         }
-        if (selected === `${item.type}:${item.rel}`) setSelected('');
         await refresh();
       }
     });
   }
 
   const browser = useFileBrowser({
-    media: selectedMedia,
-    share: volumeMedia[0] ?? null,
-    reason: browseBlockReason,
+    active: active && view === 'files',
+    // The file browser shows the shared partition; the mount view never
+    // browses, and passing null skips its listing poll.
+    media: sharedPartition,
     dataOwned,
+    localWritable: state.localWritable,
     path: browsePath,
     onPathChange: setBrowsePath,
     changeSignal: storageSignal,
     onMediaChanged: refreshMedia,
+    onNameTaken: (name) => cancelledUploads.current.add(name),
     onError: notifyError
   });
-
-  const attachedName = useMemo(() => {
-    if (state.state === 'partition') {
-      return t('storage.typePartition');
-    }
-    if (state.state === 'image') {
-      return (
-        media.find((item) => item.type === 'image' && item.rel === state.rel)?.name ??
-        state.rel ??
-        ''
-      );
-    }
-    return '';
-  }, [media, state, t]);
 
   // Every transfer the page runs is shown at the top in one shape: the media
   // job (a file written into a medium) and an image arriving from the browser
@@ -488,89 +495,62 @@ export const Storage = () => {
         ? t('storage.add.uploading', { name: addTransfer.name })
         : t('storage.add.downloading', { name: addTransfer.name });
 
-  const tipItems = [
-    {
-      key: 'usb',
-      label: 'USB',
-      children: (
-        <ul className="list-decimal pl-5">
-          <li>{t('storage.tips.usb1')}</li>
-          <li>{t('storage.tips.usb2')}</li>
-          <li>{t('storage.tips.usb3')}</li>
-          <li>{t('storage.tips.usb4')}</li>
-        </ul>
-      )
-    },
-    {
-      key: 'scp',
-      label: 'SCP',
-      children: (
-        <ul className="list-decimal pl-5">
-          <li>{t('storage.tips.scp1')}</li>
-          <li>{t('storage.tips.scp2')}</li>
-          <li>{t('storage.tips.scp3')}</li>
-        </ul>
-      )
-    },
-    {
-      key: 'tf',
-      label: t('storage.tips.tfCard'),
-      children: (
-        <>
-          <p className="text-sm text-neutral-400">{t('storage.tips.tf1')}</p>
-          <ul className="list-decimal pl-5">
-            <li>{t('storage.tips.tf2')}</li>
-            <li>{t('storage.tips.tf3')}</li>
-            <li>{t('storage.tips.tf4')}</li>
-            <li>{t('storage.tips.tf5')}</li>
-          </ul>
-        </>
-      )
-    }
-  ];
+  // A write the target machine would refuse is explained once, above the file
+  // manager: the buttons there are disabled, and a tooltip per button does not
+  // say why all of them are.
+  const filesReadOnlyHint = view === 'files' && dataOwned && (
+    <div className="shrink-0 pb-3 text-xs text-neutral-400">
+      {t('storage.files.reasonAttached')}
+    </div>
+  );
 
   return (
-    <div className="h-screen w-screen bg-neutral-950 p-6 text-neutral-200">
-      <Head title={t('head.storage')} />
+    <div
+      className={clsx(
+        'box-border w-full text-neutral-200',
+        view === 'files'
+          ? 'flex h-full min-h-0 flex-col overflow-hidden p-4 sm:p-5'
+          : 'overflow-auto p-4 sm:p-5',
+        fullPage && 'h-full'
+      )}
+      style={{ backgroundColor: token.colorBgElevated }}
+    >
       {contextHolder}
       {addMedia.overlays}
       {browser.overlays}
 
-      <div className="mx-auto flex h-full max-w-6xl flex-col">
-        <div className="flex items-center justify-between pb-4">
-          <div className="flex items-center space-x-2">
-            <HardDriveIcon size={18} />
-            <span className="text-lg font-bold">{t('storage.title')}</span>
+      <div
+        className={clsx(
+          'mx-auto flex min-h-0 flex-col',
+          view === 'files' ? 'h-full w-full max-w-6xl' : 'max-w-xl',
+          fullPage && view === 'mount' && 'h-full'
+        )}
+      >
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center text-neutral-300">
+              {view === 'mount' ? <HardDriveIcon size={20} /> : <FolderSyncIcon size={20} />}
+            </div>
+            <span className="text-lg font-semibold text-neutral-100">
+              {view === 'mount' ? t('storage.cards.mount') : t('storage.cards.share')}
+            </span>
           </div>
 
-          <div className="flex items-center space-x-3 text-sm">
-            {state.state === 'unsupported' ? (
-              <span className="text-neutral-500">
+          <div className="flex items-center gap-2 text-sm">
+            {state.state === 'unsupported' && (
+              <span className="rounded-full border border-solid border-neutral-600 px-3 py-1 text-xs text-neutral-300">
                 {state.hidOnly ? t('storage.hidOnly') : t('storage.disabled')}
               </span>
-            ) : state.state === 'none' ? (
-              <span className="text-neutral-500">{t('storage.notAttached')}</span>
-            ) : (
-              <>
-                <span className="text-blue-500">
-                  {t('storage.attached', { name: attachedName })}
-                </span>
-                {canAttach && (
-                  <Button
-                    size="small"
-                    icon={<UnplugIcon size={14} />}
-                    loading={busy === 'eject'}
-                    onClick={() => void eject()}
-                  >
-                    {t('storage.eject')}
-                  </Button>
-                )}
-              </>
             )}
+            {headerExtra}
           </div>
         </div>
 
-        {job &&
+        {/* The media job reports one thing only: a file being written into the
+            shared folder by the file manager. The mount window is a different
+            surface, so a transfer started over there must not appear here. */}
+        {view === 'files' &&
+          job &&
           showJob &&
           renderTransfer({
             key: 'job',
@@ -583,17 +563,18 @@ export const Storage = () => {
             onCancel: jobUpload ? () => cancelUpload(jobUpload) : undefined,
             onClose: () => dismissJob(jobKey(job))
           })}
-        {waitingUploads.map((upload) =>
-          renderTransfer({
-            key: `upload-${upload.id}`,
-            label: t('storage.add.uploading', { name: upload.name }),
-            percentage: '',
-            loaded: 0,
-            total: 0,
-            state: 'running',
-            onCancel: () => cancelUpload(upload)
-          })
-        )}
+        {view === 'files' &&
+          waitingUploads.map((upload) =>
+            renderTransfer({
+              key: `upload-${upload.id}`,
+              label: t('storage.add.uploading', { name: upload.name }),
+              percentage: '',
+              loaded: 0,
+              total: 0,
+              state: 'running',
+              onCancel: () => cancelUpload(upload)
+            })
+          )}
         {addTransfer &&
           renderTransfer({
             key: `add-${addTransfer.id}`,
@@ -613,23 +594,6 @@ export const Storage = () => {
           })}
 
         <Modal
-          title={t('storage.tips.title')}
-          open={isTipsOpen}
-          width={520}
-          footer={null}
-          centered
-          onCancel={() => setIsTipsOpen(false)}
-        >
-          <Collapse
-            accordion
-            items={tipItems}
-            bordered={false}
-            defaultActiveKey={['usb']}
-            style={{ backgroundColor: 'transparent' }}
-          />
-        </Modal>
-
-        <Modal
           title={confirm?.title}
           open={!!confirm}
           okText={t('storage.yes')}
@@ -644,137 +608,191 @@ export const Storage = () => {
           <p>{confirm?.description}</p>
         </Modal>
 
-        <div className="grid min-h-0 flex-1 grid-cols-[320px_1fr] gap-6">
-          <div className="flex min-h-0 flex-col space-y-3">
-            {/* The mount mode only shapes an attach, so an account that cannot
-                attach has nothing to pick here. */}
-            {canAttach && (
-              <div className="flex items-center justify-between px-2">
-                <span className="text-xs uppercase tracking-wide text-neutral-500">
-                  {t('storage.mountMode')}
-                </span>
-                <Segmented
-                  size="small"
-                  value={mountAsCdrom ? 'cdrom' : 'disk'}
-                  disabled={busy !== '' || state.state === 'unsupported'}
-                  onChange={(value) => setMountAsCdrom(value === 'cdrom')}
-                  options={[
-                    {
-                      value: 'disk',
-                      label: (
-                        <div className="flex items-center space-x-1">
-                          <HardDriveIcon size={14} />
-                          <span>{t('storage.mountModeDisk')}</span>
-                        </div>
-                      )
-                    },
-                    {
-                      value: 'cdrom',
-                      label: (
-                        <div className="flex items-center space-x-1">
-                          <DiscIcon size={14} />
-                          <span>{t('storage.mountModeCdrom')}</span>
-                        </div>
-                      )
-                    }
-                  ]}
-                />
-              </div>
-            )}
+        {view === 'mount' ? (
+          <div className="flex flex-col gap-4">
+            <div className="shrink-0">
+              <div className="flex flex-col gap-3">
+                <div className="h-px bg-neutral-700" />
 
-            <div className="flex min-h-0 flex-1 flex-col space-y-4 overflow-auto">
+                {canAttach && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-medium text-neutral-300">
+                        {t('storage.mountMode')}
+                      </span>
+                      <div className="grid grid-cols-2 gap-1">
+                        {[
+                          {
+                            value: 'disk',
+                            icon: HardDriveIcon,
+                            label: t('storage.mountModeDisk')
+                          },
+                          {
+                            value: 'cdrom',
+                            icon: DiscIcon,
+                            label: t('storage.mountModeCdrom')
+                          }
+                        ].map((modeOption) => {
+                          const cdrom = modeOption.value === 'cdrom';
+                          const isSelected = mountAsCdrom === cdrom;
+                          const disabled =
+                            busy !== '' || state.state === 'image' || state.state === 'unsupported';
+                          return (
+                            <ButtonBase
+                              key={modeOption.value}
+                              disabled={disabled}
+                              onClick={() => setMountAsCdrom(cdrom)}
+                              className={clsx(
+                                'relative flex min-h-10 min-w-0 items-center justify-center gap-2 rounded-md px-2 py-2 text-sm transition-colors',
+                                isSelected
+                                  ? 'bg-blue-600 text-white'
+                                  : 'bg-neutral-900 text-neutral-300 enabled:hover:bg-neutral-800 enabled:hover:text-white'
+                              )}
+                            >
+                              <modeOption.icon size={15} className="shrink-0" />
+                              <span className="min-w-0 whitespace-normal break-words text-center leading-tight">
+                                {modeOption.label}
+                              </span>
+                            </ButtonBase>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-neutral-700" />
+                  </>
+                )}
+
+                {canWrite && (
+                  <>
+                    <div className="flex flex-col gap-2">
+                      <span className="text-xs font-medium text-neutral-300">
+                        {t('storage.add.title')}
+                      </span>
+                      <div className="grid grid-cols-2 gap-1">
+                        {[
+                          {
+                            icon: UploadIcon,
+                            label: t('storage.add.upload'),
+                            open: addMedia.openUpload
+                          },
+                          {
+                            icon: LinkIcon,
+                            label: t('storage.add.fromUrl'),
+                            open: addMedia.openUrl
+                          }
+                        ].map((action) => (
+                          <Tooltip
+                            key={action.label}
+                            title={writeBlocked ? t('storage.add.blocked') : undefined}
+                          >
+                            <span className="block min-w-0">
+                              <ButtonBase
+                                disabled={addMedia.addDisabled}
+                                onClick={action.open}
+                                className="flex min-h-11 w-full min-w-0 items-center justify-center gap-2 rounded-md bg-neutral-900 px-2 py-2 text-center text-sm text-neutral-300 transition-colors enabled:hover:bg-neutral-800 enabled:hover:text-white disabled:text-neutral-400"
+                              >
+                                <action.icon size={16} className="shrink-0" />
+                                <span className="min-w-0 whitespace-normal break-words leading-snug">
+                                  {action.label}
+                                </span>
+                              </ButtonBase>
+                            </span>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-neutral-700" />
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="flex max-h-[55vh] flex-col gap-4 overflow-auto">
               {isLoading ? (
-                <div className="flex flex-1 items-center justify-center text-neutral-500">
+                <div className="flex items-center justify-center py-6 text-neutral-400">
                   <LoaderCircleIcon size={18} className="animate-spin" />
                 </div>
               ) : (
-                <>
-                  <MediaGroup title={t('storage.groups.share')} action={browser.toolbar}>
-                    {renderRows(volumeMedia)}
-                  </MediaGroup>
-
-                  <MediaGroup
-                    title={t('storage.groups.images')}
-                    action={
-                      <div className="flex items-center space-x-1">
-                        <Tooltip title={t('storage.tips.title')}>
-                          <Button
-                            size="small"
-                            type="text"
-                            icon={<CircleHelpIcon size={14} />}
-                            onClick={() => setIsTipsOpen(true)}
-                          />
-                        </Tooltip>
-                        {canWrite && addMedia.actions}
-                      </div>
-                    }
-                  >
-                    {images.length === 0 ? (
-                      <div className="flex flex-col space-y-1 px-2 py-1">
-                        <span className="text-xs text-neutral-500">{t('storage.empty')}</span>
-                        <span className="text-xs text-neutral-600">
-                          {t('storage.add.copyHint')}
-                        </span>
-                      </div>
-                    ) : (
-                      renderRows(images)
-                    )}
-                  </MediaGroup>
-                </>
+                <MediaGroup title={t('storage.groups.images')}>
+                  {images.length === 0 ? (
+                    <div className="rounded-lg border border-dashed border-neutral-600 px-3 py-3 text-center text-xs text-neutral-200">
+                      {t('storage.empty')}
+                    </div>
+                  ) : (
+                    renderRows(images)
+                  )}
+                </MediaGroup>
               )}
             </div>
           </div>
-
-          <div className="flex min-h-0 flex-col">{browser.content}</div>
-        </div>
+        ) : (
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            {filesReadOnlyHint}
+            {isLoading ? (
+              <div className="flex flex-1 items-center justify-center text-neutral-400">
+                <LoaderCircleIcon size={18} className="animate-spin" />
+              </div>
+            ) : (
+              browser.content
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 
   function renderRows(items: api.MediaItem[]) {
     return (
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         {items.map((item) => {
           const key = `${item.type}:${item.rel}`;
           const isBusy = busy === key;
+          // A CD-ROM mode only carries an optical image; the button says why it
+          // cannot be used on the others.
+          const wrongMode = mountAsCdrom && !api.isOpticalImage(item);
 
           return (
             <div
               key={key}
-              className={clsx(
-                'group flex cursor-pointer items-center justify-between rounded px-2 py-2 text-sm hover:bg-neutral-800/70',
-                selected === key && 'bg-neutral-800/70',
-                item.attached && 'text-blue-500'
-              )}
-              onClick={() => {
-                // The listing must not ask the new medium for the old path.
-                setBrowsePath('/');
-                setSelected(key);
-              }}
+              className="group flex items-center gap-3 rounded-lg border border-solid border-neutral-700 px-3 py-2.5 text-sm transition-colors"
             >
-              <div className="flex min-w-0 flex-1 items-center space-x-2">
-                <MediaIcon item={item} className="shrink-0" />
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate" title={item.name}>
-                    {item.type === 'partition' ? t('storage.typePartition') : item.name}
+              <div
+                className={clsx(
+                  'flex h-9 w-9 shrink-0 items-center justify-center',
+                  item.attached ? 'text-blue-400' : 'text-neutral-300'
+                )}
+              >
+                <MediaIcon item={item} size={17} />
+              </div>
+
+              <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-neutral-100" title={item.name}>
+                    {item.name}
                   </span>
-                  <span className="text-xs text-neutral-500">
-                    {item.type === 'partition' ? t('storage.volumeLabel') : formatSize(item.size)}
-                    {item.fs && item.fs !== 'unknown' ? ` · ${item.fs}` : ''}
-                  </span>
+                  {item.attached && (
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-400" />
+                  )}
                 </div>
+                <span className="text-xs text-neutral-300">
+                  {formatSize(item.size)}
+                  {item.fs && item.fs !== 'unknown' ? ` · ${item.fs}` : ''}
+                </span>
               </div>
 
               <div
-                className="flex shrink-0 items-center space-x-1 opacity-0 transition-opacity group-hover:opacity-100"
+                className="flex shrink-0 items-center space-x-1"
                 onClick={(event) => event.stopPropagation()}
               >
                 {canAttach &&
                   (item.attached ? (
                     <Tooltip title={t('storage.eject')}>
                       <Button
-                        type="text"
+                        type="default"
                         size="small"
+                        loading={busy === 'eject'}
                         icon={<UnplugIcon size={14} />}
                         onClick={() => void eject()}
                       />
@@ -782,54 +800,51 @@ export const Storage = () => {
                   ) : (
                     <Tooltip
                       title={
-                        mountAsCdrom && !api.isOpticalImage(item)
-                          ? t('storage.add.cdromOnlyIso')
-                          : t('storage.mount')
+                        state.state === 'image'
+                          ? t('storage.add.blocked')
+                          : wrongMode
+                            ? t('storage.add.cdromOnlyIso')
+                            : t('storage.mount')
                       }
                     >
                       <Button
-                        type="text"
+                        type="default"
                         size="small"
                         loading={isBusy}
-                        disabled={mountAsCdrom && !api.isOpticalImage(item)}
+                        disabled={busy !== '' || state.state === 'image' || wrongMode}
                         icon={<PlugIcon size={14} />}
                         onClick={() => void mount(item, mountAsCdrom)}
                       />
                     </Tooltip>
                   ))}
 
-                {item.type === 'image' && (
-                  <>
-                    <Tooltip
-                      title={item.attached ? t('storage.add.blocked') : t('storage.downloadImage')}
-                    >
-                      <Button
-                        type="text"
-                        size="small"
-                        disabled={item.attached}
-                        icon={<DownloadIcon size={14} />}
-                        onClick={() => void downloadImage(item)}
-                      />
-                    </Tooltip>
-                    {canWrite && (
-                      <Tooltip
-                        title={
-                          dataOwned || item.attached
-                            ? t('storage.add.blocked')
-                            : t('storage.delete')
-                        }
-                      >
-                        <Button
-                          type="text"
-                          size="small"
-                          danger
-                          disabled={dataOwned || item.attached}
-                          icon={<Trash2Icon size={14} />}
-                          onClick={() => confirmDelete(item)}
-                        />
-                      </Tooltip>
-                    )}
-                  </>
+                <Tooltip
+                  title={item.attached ? t('storage.add.blocked') : t('storage.downloadImage')}
+                >
+                  <Button
+                    type="default"
+                    size="small"
+                    disabled={item.attached}
+                    icon={<DownloadIcon size={14} />}
+                    onClick={() => void downloadImage(item)}
+                  />
+                </Tooltip>
+
+                {canWrite && (
+                  <Tooltip
+                    title={
+                      dataOwned || item.attached ? t('storage.add.blocked') : t('storage.delete')
+                    }
+                  >
+                    <Button
+                      type="default"
+                      size="small"
+                      danger
+                      disabled={dataOwned || item.attached}
+                      icon={<Trash2Icon size={14} />}
+                      onClick={() => confirmDelete(item)}
+                    />
+                  </Tooltip>
                 )}
               </div>
             </div>
@@ -838,4 +853,64 @@ export const Storage = () => {
       </div>
     );
   }
+};
+
+// One surface, two faces: the desktop menu mounts this inside the disk-mount
+// modal ('mount') and the file-manager modal ('files'), and the standalone
+// storage page switches between them.
+export const StorageView = ({ view, active, headerExtra, fullPage }: StorageViewProps) => {
+  const { token } = theme.useToken();
+
+  return (
+    <ConfigProvider theme={{ token: { colorBgContainer: token.colorBgElevated } }}>
+      <App className={clsx('h-full min-h-0', view === 'mount' && !fullPage && 'h-auto')}>
+        <StorageContent view={view} active={active} headerExtra={headerExtra} fullPage={fullPage} />
+      </App>
+    </ConfigProvider>
+  );
+};
+
+// The standalone page. Deep links and accounts that may only read the library
+// land here; the desktop menu opens the same two views in modals.
+export const Storage = () => {
+  const { t } = useTranslation();
+  const [view, setView] = useState<'mount' | 'files'>('mount');
+
+  return (
+    <div className="h-screen w-screen bg-neutral-950 text-neutral-200">
+      <Head title={t('head.storage')} />
+
+      <StorageView
+        view={view}
+        active
+        fullPage
+        headerExtra={
+          <Segmented
+            value={view}
+            onChange={(value) => setView(value as 'mount' | 'files')}
+            options={[
+              {
+                value: 'mount',
+                label: (
+                  <span className="flex items-center gap-1.5 px-1">
+                    <HardDriveIcon size={14} />
+                    <span>{t('storage.cards.mount')}</span>
+                  </span>
+                )
+              },
+              {
+                value: 'files',
+                label: (
+                  <span className="flex items-center gap-1.5 px-1">
+                    <FolderSyncIcon size={14} />
+                    <span>{t('storage.cards.share')}</span>
+                  </span>
+                )
+              }
+            ]}
+          />
+        }
+      />
+    </div>
+  );
 };

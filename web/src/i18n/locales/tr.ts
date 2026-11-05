@@ -229,6 +229,11 @@ const tr = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Disk bağlama',
+        share: 'Dosya paylaşımı'
+      },
+      close: 'Kapat',
       title: 'Disk imajları ve dosya paylaşımı',
       empty:
         'Henüz imaj yok. Bir ISO veya IMG yükleyin ya da hedef makineden diske bir tane kopyalayın.',
@@ -301,7 +306,8 @@ const tr = {
         downloading: '{{name}} indiriliyor',
         done: '{{name}} hazır',
         checksumFailed: 'İmaj, SHA-256 sağlama toplamıyla eşleşmiyor.',
-        blocked: 'Hedef makine diski kullanıyor',
+        blocked:
+          'Hedef makine bu diski kullanıyor. Hedef makinede sanal USB sürücüsünü güvenli şekilde çıkarın, ardından Ayarlar > Aygıt bölümünden Sanal Disk anahtarını kapatın.',
         copyHint: 'İmajı SCP ile veri bölümüne ya da hedef makineden doğrudan kopyalayabilirsiniz.'
       },
       files: {
@@ -322,7 +328,8 @@ const tr = {
           size: 'Boyut',
           type: 'Tür',
           asc: 'Artan',
-          desc: 'Azalan'
+          desc: 'Azalan',
+          modified: 'Değiştirilme'
         },
         upload: 'Ortama dosya yükle',
         deleteFolderTitle: 'Klasörü sil',
@@ -330,10 +337,24 @@ const tr = {
           '{{name}} klasörü ve içindeki her şey silinsin mi? Bu işlem geri alınamaz.',
         uploading: 'Yükleniyor…',
         uploadFailed: 'Yükleme başarısız oldu',
+        exists: '{{name}} zaten var',
         download: 'İndir',
         delete: 'Sil',
         deleteTitle: 'Dosyayı sil',
-        deleteConfirm: '{{name}} ortamdan silinsin mi?'
+        deleteConfirm: '{{name}} ortamdan silinsin mi?',
+        folder: 'Klasör',
+        itemCount: '{{count}} öğe',
+        up: 'Bir üst dizine çık',
+        uploadButton: 'Dosya yükle',
+        uploadFolder: 'Klasör yükle',
+        newFolder: 'Yeni klasör',
+        newFolderPlaceholder: 'Klasör adı',
+        create: 'Oluştur',
+        dropHint: 'Dosyaları geçerli klasöre yüklemek için buraya sürükleyin',
+        view: {
+          list: 'Liste görünümü',
+          grid: 'Izgara görünümü'
+        }
       },
       yes: 'Evet',
       no: 'Hayır'

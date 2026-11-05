@@ -225,6 +225,11 @@ const ko = {
       }
     },
     storage: {
+      cards: {
+        mount: '디스크 마운트',
+        share: '파일 공유'
+      },
+      close: '닫기',
       title: '이미지 및 파일 공유',
       empty:
         '아직 이미지가 없습니다. ISO 또는 IMG를 업로드하거나 대상 컴퓨터에서 디스크로 복사하세요.',
@@ -296,7 +301,8 @@ const ko = {
         downloading: '{{name}} 다운로드 중',
         done: '{{name}} 준비 완료',
         checksumFailed: '이미지가 SHA-256 체크섬과 일치하지 않습니다.',
-        blocked: '대상 컴퓨터가 디스크를 사용 중입니다',
+        blocked:
+          '대상 컴퓨터가 디스크를 사용 중입니다. 대상 컴퓨터에서 가상 USB 드라이브를 안전하게 꺼낸 다음 설정 > 장치에서 가상 디스크 스위치를 끄세요.',
         copyHint:
           'SCP로 데이터 파티션에 이미지를 복사하거나 대상 컴퓨터에서 직접 복사할 수도 있습니다.'
       },
@@ -317,7 +323,8 @@ const ko = {
           size: '크기',
           type: '종류',
           asc: '오름차순',
-          desc: '내림차순'
+          desc: '내림차순',
+          modified: '수정한 날짜'
         },
         upload: '미디어에 파일 업로드',
         deleteFolderTitle: '폴더 삭제',
@@ -325,10 +332,24 @@ const ko = {
           '폴더 {{name}}와(과) 그 안의 모든 내용을 삭제할까요? 되돌릴 수 없습니다.',
         uploading: '업로드 중…',
         uploadFailed: '업로드 실패',
+        exists: '{{name}}이(가) 이미 존재합니다',
         download: '다운로드',
         delete: '삭제',
         deleteTitle: '파일 삭제',
-        deleteConfirm: '미디어에서 {{name}}을(를) 삭제할까요?'
+        deleteConfirm: '미디어에서 {{name}}을(를) 삭제할까요?',
+        folder: '폴더',
+        itemCount: '{{count}}개 항목',
+        up: '상위 폴더로 이동',
+        uploadButton: '업로드',
+        uploadFolder: '폴더 업로드',
+        newFolder: '새 폴더',
+        newFolderPlaceholder: '폴더 이름',
+        create: '만들기',
+        dropHint: '여기에 파일을 놓으면 이 폴더에 업로드됩니다',
+        view: {
+          list: '목록 보기',
+          grid: '아이콘 보기'
+        }
       },
       yes: '예',
       no: '아니요'

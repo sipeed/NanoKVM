@@ -233,6 +233,11 @@ const nl = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Schijf koppelen',
+        share: 'Bestanden delen'
+      },
+      close: 'Sluiten',
       title: 'Afbeeldingen en bestandsdeling',
       empty:
         'Nog geen afbeeldingen. Upload een ISO of IMG, of kopieer er een naar de schijf vanaf de doelcomputer.',
@@ -306,7 +311,8 @@ const nl = {
         downloading: '{{name}} wordt gedownload',
         done: '{{name}} is klaar',
         checksumFailed: 'De image komt niet overeen met de SHA-256-controlesom.',
-        blocked: 'De doelcomputer gebruikt de schijf',
+        blocked:
+          'De doelcomputer gebruikt de schijf. Werp de virtuele USB-schijf veilig uit op de doelcomputer en schakel daarna de schakelaar Virtuele schijf uit via Instellingen > Apparaat.',
         copyHint:
           'Je kunt een image ook via SCP naar de datapartitie kopiëren, of vanaf de doelcomputer.'
       },
@@ -329,7 +335,8 @@ const nl = {
           size: 'Grootte',
           type: 'Type',
           asc: 'Oplopend',
-          desc: 'Aflopend'
+          desc: 'Aflopend',
+          modified: 'Gewijzigd'
         },
         upload: 'Een bestand naar het medium uploaden',
         deleteFolderTitle: 'Map verwijderen',
@@ -337,10 +344,24 @@ const nl = {
           'De map {{name}} en alles erin verwijderen? Dit kan niet ongedaan worden gemaakt.',
         uploading: 'Uploaden…',
         uploadFailed: 'Uploaden mislukt',
+        exists: '{{name}} bestaat al',
         download: 'Downloaden',
         delete: 'Verwijderen',
         deleteTitle: 'Bestand verwijderen',
-        deleteConfirm: '{{name}} van het medium verwijderen?'
+        deleteConfirm: '{{name}} van het medium verwijderen?',
+        folder: 'Map',
+        itemCount: 'Aantal items: {{count}}',
+        up: 'Naar de bovenliggende map',
+        uploadButton: 'Uploaden',
+        uploadFolder: 'Map uploaden',
+        newFolder: 'Nieuwe map',
+        newFolderPlaceholder: 'Mapnaam',
+        create: 'Aanmaken',
+        dropHint: 'Sleep bestanden hierheen om ze naar deze map te uploaden',
+        view: {
+          list: 'Lijstweergave',
+          grid: 'Pictogramweergave'
+        }
       },
       yes: 'Ja',
       no: 'Nee'

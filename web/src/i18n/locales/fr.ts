@@ -234,6 +234,11 @@ const fr = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Montage du disque',
+        share: 'Partage de fichiers'
+      },
+      close: 'Fermer',
       title: 'Images et partage de fichiers',
       empty:
         "Aucune image pour l'instant. Envoyez une ISO ou une IMG, ou copiez-en une sur le disque depuis la machine distante.",
@@ -306,7 +311,8 @@ const fr = {
         downloading: 'Téléchargement de {{name}}',
         done: '{{name}} est prêt',
         checksumFailed: "L'image ne correspond pas à la somme de contrôle SHA-256.",
-        blocked: 'La machine distante utilise le disque',
+        blocked:
+          'La machine distante utilise le disque. Éjectez en toute sécurité le lecteur USB virtuel sur cette machine, puis désactivez le commutateur Disque virtuel dans Paramètres > Appareil.',
         copyHint:
           'Vous pouvez aussi copier une image dans la partition de données via SCP, ou depuis la machine distante.'
       },
@@ -330,7 +336,8 @@ const fr = {
           size: 'Taille',
           type: 'Type',
           asc: 'Croissant',
-          desc: 'Décroissant'
+          desc: 'Décroissant',
+          modified: 'Modifié'
         },
         upload: 'Envoyer un fichier sur le support',
         deleteFolderTitle: 'Supprimer le dossier',
@@ -338,10 +345,24 @@ const fr = {
           'Supprimer le dossier {{name}} et tout son contenu ? Cette action est irréversible.',
         uploading: 'Envoi…',
         uploadFailed: "Échec de l'envoi",
+        exists: '{{name}} existe déjà',
         download: 'Télécharger',
         delete: 'Supprimer',
         deleteTitle: 'Supprimer le fichier',
-        deleteConfirm: 'Supprimer {{name}} du support ?'
+        deleteConfirm: 'Supprimer {{name}} du support ?',
+        folder: 'Dossier',
+        itemCount: 'Éléments : {{count}}',
+        up: 'Accéder au dossier parent',
+        uploadButton: 'Importer',
+        uploadFolder: 'Téléverser un dossier',
+        newFolder: 'Nouveau dossier',
+        newFolderPlaceholder: 'Nom du dossier',
+        create: 'Créer',
+        dropHint: 'Déposez des fichiers ici pour les importer dans ce dossier',
+        view: {
+          list: 'Vue en liste',
+          grid: 'Vue en icônes'
+        }
       },
       yes: 'Oui',
       no: 'Non'

@@ -18,14 +18,22 @@ import { extension } from '@/lib/file-names.ts';
 // shared folder is deliberately not a disk, because it is a directory this
 // device exchanges with the target machine while an .img is a disk image the
 // emulated USB disk carries, and the two used to share one icon.
-export function MediaIcon({ item, className }: { item: MediaItem; className?: string }) {
+export function MediaIcon({
+  item,
+  size = 14,
+  className
+}: {
+  item: MediaItem;
+  size?: number;
+  className?: string;
+}) {
   if (item.type === 'partition') {
-    return <FolderSyncIcon size={14} className={className} />;
+    return <FolderSyncIcon size={size} className={className} />;
   }
   if (isOpticalImage(item)) {
-    return <DiscIcon size={14} className={className} />;
+    return <DiscIcon size={size} className={className} />;
   }
-  return <HardDriveIcon size={14} className={className} />;
+  return <HardDriveIcon size={size} className={className} />;
 }
 
 // The shared folder carries whatever the two machines exchange, and a listing
@@ -122,7 +130,17 @@ const audioExtensions = new Set(['aac', 'flac', 'm4a', 'mp3', 'oga', 'ogg', 'opu
 
 // FileTypeIcon draws one entry of a listing, at the size and colour its rows
 // use. Directories are not its business: the caller draws the folder glyph.
-export function FileTypeIcon({ name }: { name: string }) {
+// The grid view draws the same glyphs much larger, so both the size and the
+// colour can be handed in.
+export function FileTypeIcon({
+  name,
+  size = 14,
+  className
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) {
   const ext = extension(name);
   const Icon = archiveExtensions.has(ext)
     ? FileArchiveIcon
@@ -136,5 +154,5 @@ export function FileTypeIcon({ name }: { name: string }) {
             ? FileTextIcon
             : FileIcon;
 
-  return <Icon size={14} className="shrink-0 text-neutral-500" />;
+  return <Icon size={size} className={className ?? 'shrink-0 text-neutral-500'} />;
 }

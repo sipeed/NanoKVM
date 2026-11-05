@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -113,14 +115,15 @@ func (s *Service) ListMediaFiles(c *gin.Context) {
 	}
 
 	if mediaType == proto.MediaTypePartition {
-		// The watcher pushes "the shared files changed" for the folder the UI
-		// has open, which is not necessarily its root, so it is told which one
-		// that is. Listing anything else stops that watch.
-		SetPartitionBrowsePath(dir)
+		// The browser tells the watcher every directory it is showing: the one
+		// it listed plus the folders it has expanded. Watching only the last
+		// one left the others stale until a manual refresh.
+		SetPartitionWatchPaths(watchPaths(dir, c.Query("watch")))
 		invalidatePartitionCache()
-	} else {
-		SetPartitionBrowsePath("")
 	}
+	// An image listing deliberately leaves that set alone: another browser may
+	// still be showing the shared folder, and clearing it would stop its
+	// updates until the next listing.
 
 	image, err := openMedium(mediaType, rel, false)
 	if err != nil {
@@ -309,6 +312,13 @@ func (s *Service) UploadMediaFile(c *gin.Context) {
 	if err != nil {
 		s.finishJob(done, jobStateFailed, err.Error())
 
+		// The UI translates this one: refusing to overwrite is a normal answer
+		// to an upload, not a failure whose English text needs to be shown.
+		if errors.Is(err, diskfs.ErrExists) {
+			rsp.ErrRsp(c, codeAlreadyExists, err.Error())
+			return
+		}
+
 		var tooLarge *http.MaxBytesError
 		if limitedBySpace && errors.As(err, &tooLarge) {
 			respondError(c, fmt.Errorf("%w: the medium could not hold the upload", errNoSpace))
@@ -415,6 +425,103 @@ func (s *Service) DeleteMediaFile(c *gin.Context) {
 
 	rsp.OkRsp(c)
 	log.Debugf("delete %s from medium %s success", entryPath, req.Rel)
+}
+
+// MkdirMediaFile creates a directory inside a medium. The web file manager
+// offers it next to the upload button: a folder the user can drop files into
+// is how a disk that started empty becomes organised. It is a write like any
+// other, so it goes through openMedium and is refused while the target machine
+// owns the partition.
+func (s *Service) MkdirMediaFile(c *gin.Context) {
+	var req proto.MediaPathReq
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, codeInvalidArgument, "invalid arguments")
+		return
+	}
+	if !requireFileWrite(c, req.Type) {
+		return
+	}
+
+	entryPath, err := utils.ValidateMediumPath(req.Path)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	if entryPath == "/" {
+		rsp.ErrRsp(c, codeInvalidArgument, "a directory path is required")
+		return
+	}
+
+	image, err := openMedium(req.Type, req.Rel, true)
+	if err != nil {
+		respondError(c, err)
+		return
+	}
+	defer closeMedia(image)
+
+	if err := image.Mkdir(entryPath); err != nil {
+		if errors.Is(err, diskfs.ErrExists) {
+			if !req.ExistsOK {
+				rsp.ErrRsp(c, codeAlreadyExists, fmt.Sprintf("%s already exists", entryPath))
+				return
+			}
+		} else {
+			respondError(c, fmt.Errorf("create %s: %w", entryPath, err))
+			return
+		}
+	}
+
+	// The shared partition has a metadata cache the listing reads; the
+	// directory has to show up in the next list.
+	if req.Type == proto.MediaTypePartition {
+		invalidatePartitionCache()
+	}
+
+	rsp.OkRsp(c)
+	log.Debugf("create directory %s in medium %s success", entryPath, req.Rel)
+}
+
+// maxWatchPaths caps the directories a single browser can ask the watcher to
+// read every second. The file manager expands a handful at most.
+const maxWatchPaths = 64
+
+// watchPaths reads the directories the file browser is showing: the one being
+// listed plus every folder it has expanded. Anything that does not name a
+// directory inside the medium is dropped.
+func watchPaths(listed string, raw string) []string {
+	paths := []string{listed}
+	seen := map[string]bool{listed: true}
+
+	var candidates []string
+	if raw = strings.TrimSpace(raw); raw != "" {
+		if err := json.Unmarshal([]byte(raw), &candidates); err != nil {
+			// An older client sent a comma separated list; a folder name may
+			// contain a comma, which is exactly why JSON is used now.
+			candidates = strings.Split(raw, ",")
+		}
+	}
+
+	for _, candidate := range candidates {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+
+		cleaned, err := utils.ValidateMediumPath(candidate)
+		if err != nil || seen[cleaned] {
+			continue
+		}
+
+		seen[cleaned] = true
+		paths = append(paths, cleaned)
+		if len(paths) >= maxWatchPaths {
+			break
+		}
+	}
+
+	return paths
 }
 
 // nextFilePart walks the multipart body to the uploaded file, skipping any

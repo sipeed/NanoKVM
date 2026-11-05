@@ -1,6 +1,7 @@
 package diskfs
 
 import (
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -126,5 +127,55 @@ func TestOpenFileRefusesSymlinks(t *testing.T) {
 	data, _ := io.ReadAll(file)
 	if string(data) != "ok" || entry.Size != 2 {
 		t.Errorf("openFile read %q, size %d", data, entry.Size)
+	}
+}
+
+func TestMkdirDir(t *testing.T) {
+	root := t.TempDir()
+
+	if err := mkdirDir(root, "photos"); err != nil {
+		t.Fatalf("mkdirDir: %v", err)
+	}
+	if info, err := os.Stat(filepath.Join(root, "photos")); err != nil || !info.IsDir() {
+		t.Fatalf("photos not created as a directory: %v", err)
+	}
+
+	// Nested paths work the way the file manager builds them.
+	if err := os.Mkdir(filepath.Join(root, "parent"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := mkdirDir(root, "parent/child"); err != nil {
+		t.Fatalf("mkdirDir nested: %v", err)
+	}
+
+	// An existing name is reported, not replaced. The sentinel lets a caller
+	// that recreates a whole tree treat it as success.
+	if err := mkdirDir(root, "photos"); !errors.Is(err, ErrExists) {
+		t.Errorf("mkdirDir on an existing directory = %v, want ErrExists", err)
+	}
+	if err := mkdirDir(root, "/"); err == nil {
+		t.Error("mkdirDir accepted the medium root")
+	}
+	if err := os.WriteFile(filepath.Join(root, "notes.txt"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := mkdirDir(root, "notes.txt"); err == nil || errors.Is(err, ErrExists) {
+		t.Errorf("mkdirDir on a file = %v, want a plain not-a-directory error", err)
+	}
+	if err := mkdirDir(root, "../escape"); err == nil {
+		t.Error("mkdirDir accepted a path outside the medium")
+	}
+
+	// A symlinked directory is not a place to create anything: the entry would
+	// land wherever the link points, outside the medium.
+	outside := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(root, "link")); err != nil {
+		t.Fatal(err)
+	}
+	if err := mkdirDir(root, "link/escape"); err == nil {
+		t.Error("mkdirDir followed a symlink out of the medium")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "escape")); err == nil {
+		t.Error("mkdirDir created a directory outside the medium")
 	}
 }

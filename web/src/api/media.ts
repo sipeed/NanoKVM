@@ -38,6 +38,9 @@ export interface MediaStateInfo {
   open: string[];
   // True while the attached medium is served as a CD-ROM.
   cdrom: boolean;
+  // False while /data is mounted read-only: every write would be refused, so
+  // the controls that write are disabled instead of failing on the server.
+  localWritable: boolean;
 }
 
 export interface MediaFileEntry {
@@ -77,6 +80,9 @@ export const codeNotBrowsable = -13;
 export const codeInsufficientSpace = -14;
 // A CD-ROM was asked for a medium that is not an ISO 9660 image.
 export const codeNotOptical = -15;
+// The target name is already taken; the UI words this itself instead of
+// showing the server's English message.
+export const codeAlreadyExists = -16;
 
 export function getMedia() {
   return http.get('/api/storage/media');
@@ -107,12 +113,32 @@ export function ejectMedia(force = false) {
   return http.post('/api/storage/media/eject', { force });
 }
 
-export function listMediaFiles(params: { type: MediaType; rel: string; path: string }) {
+export function listMediaFiles(params: {
+  type: MediaType;
+  rel: string;
+  path: string;
+  // Every directory the file manager is showing, comma separated: the server's
+  // watcher reads all of them, so a change in an expanded folder is noticed
+  // too. Omitted when the caller does not need change notifications.
+  watch?: string;
+}) {
   return http.get('/api/storage/media/files', params);
 }
 
 export function deleteMediaFile(data: { type: MediaType; rel: string; path: string }) {
   return http.post('/api/storage/media/files/delete', data);
+}
+
+// Creates one directory inside a medium. The path is the whole directory, so
+// the caller builds it the way the file browser builds a child path. existsOk
+// makes "already there" a success, which an upload of a whole tree needs.
+export function mkdirMediaFile(data: {
+  type: MediaType;
+  rel: string;
+  path: string;
+  existsOk?: boolean;
+}) {
+  return http.post('/api/storage/media/files/mkdir', data);
 }
 
 // enable/disable the emulated USB disk (Settings - Device). Without `enable`

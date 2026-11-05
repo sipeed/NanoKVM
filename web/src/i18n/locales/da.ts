@@ -229,6 +229,11 @@ const da = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Diskmontering',
+        share: 'Fildeling'
+      },
+      close: 'Luk',
       title: 'Diskbilleder og fildeling',
       empty:
         'Der er endnu ingen diskbilleder. Upload en ISO eller IMG, eller kopier en over på disken fra målcomputeren.',
@@ -301,7 +306,8 @@ const da = {
         downloading: 'Downloader {{name}}',
         done: '{{name}} er klar',
         checksumFailed: 'Billedet stemmer ikke overens med SHA-256-kontrolsummen.',
-        blocked: 'Målcomputeren bruger disken',
+        blocked:
+          'Målcomputeren bruger disken. Skub det virtuelle USB-drev sikkert ud på målcomputeren, og slå derefter kontakten Virtuel disk fra under Indstillinger > Enhed.',
         copyHint:
           'Du kan også kopiere et diskbillede til datapartitionen via SCP eller fra målcomputeren.'
       },
@@ -324,17 +330,32 @@ const da = {
           size: 'Størrelse',
           type: 'Type',
           asc: 'Stigende',
-          desc: 'Faldende'
+          desc: 'Faldende',
+          modified: 'Ændret'
         },
         upload: 'Upload en fil til mediet',
         deleteFolderTitle: 'Slet mappe',
         deleteFolderConfirm: 'Slet mappen {{name}} og alt dens indhold? Dette kan ikke fortrydes.',
         uploading: 'Uploader…',
         uploadFailed: 'Upload mislykkedes',
+        exists: '{{name}} findes allerede',
         download: 'Download',
         delete: 'Slet',
         deleteTitle: 'Slet fil',
-        deleteConfirm: 'Vil du slette {{name}} fra mediet?'
+        deleteConfirm: 'Vil du slette {{name}} fra mediet?',
+        folder: 'Mappe',
+        itemCount: 'Antal elementer: {{count}}',
+        up: 'Gå til den overordnede mappe',
+        uploadButton: 'Upload filer',
+        uploadFolder: 'Upload mappe',
+        newFolder: 'Ny mappe',
+        newFolderPlaceholder: 'Mappenavn',
+        create: 'Opret',
+        dropHint: 'Slip filer her for at uploade dem til denne mappe',
+        view: {
+          list: 'Listevisning',
+          grid: 'Ikonvisning'
+        }
       },
       yes: 'Ja',
       no: 'Nej'

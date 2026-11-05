@@ -12,6 +12,10 @@ type MenuItemProps = {
   className?: string;
   fresh?: boolean;
   onOpenChange?: (open: boolean) => void;
+  // A caller that opens its own window from inside the popover asks it to
+  // close with this: the global close signal would also collapse the menu bar,
+  // and a picker that hands over to a modal must not take the bar with it.
+  closeRequest?: number;
 };
 
 export const MenuItem = ({
@@ -20,7 +24,8 @@ export const MenuItem = ({
   content,
   className,
   fresh,
-  onOpenChange
+  onOpenChange,
+  closeRequest = 0
 }: MenuItemProps) => {
   const isBigScreen = useMediaQuery({ minWidth: 640 });
   const setSubmenuOpenCount = useSetAtom(submenuOpenCountAtom);
@@ -29,6 +34,7 @@ export const MenuItem = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isTooltipOpen, setIsTooltipOpen] = useState(false);
   const handledCloseSignalRef = useRef(0);
+  const handledCloseRequestRef = useRef(0);
 
   useEffect(() => {
     if (
@@ -45,6 +51,18 @@ export const MenuItem = ({
     setSubmenuOpenCount((count) => Math.max(0, count - 1));
     onOpenChange?.(false);
   }, [isPopoverOpen, menuCloseSignal, onOpenChange, setSubmenuOpenCount]);
+
+  useEffect(() => {
+    if (closeRequest === 0 || closeRequest === handledCloseRequestRef.current || !isPopoverOpen) {
+      return;
+    }
+
+    handledCloseRequestRef.current = closeRequest;
+    setIsPopoverOpen(false);
+    setIsTooltipOpen(false);
+    setSubmenuOpenCount((count) => Math.max(0, count - 1));
+    onOpenChange?.(false);
+  }, [closeRequest, isPopoverOpen, onOpenChange, setSubmenuOpenCount]);
 
   function togglePopover(open: boolean) {
     setIsTooltipOpen(false);

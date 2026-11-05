@@ -63,6 +63,7 @@ type Image interface {
 	List(rel string) ([]Entry, error)
 	Open(rel string) (io.ReadSeekCloser, Entry, error)
 	Write(rel string, r io.Reader) (int64, error)
+	Mkdir(rel string) error
 	Remove(rel string) error
 	StatFS() (total, available uint64, err error)
 	Close() error
@@ -315,6 +316,13 @@ func (h *handle) Remove(rel string) error {
 	return removeFile(h.mount.mountpoint, rel)
 }
 
+func (h *handle) Mkdir(rel string) error {
+	if !h.mount.writable {
+		return errors.New("medium is mounted read-only")
+	}
+	return mkdirDir(h.mount.mountpoint, rel)
+}
+
 func (h *handle) StatFS() (total, available uint64, err error) {
 	return utils.Statfs(h.mount.mountpoint)
 }
@@ -356,6 +364,10 @@ func (h *dirHandle) Write(rel string, r io.Reader) (int64, error) {
 
 func (h *dirHandle) Remove(rel string) error {
 	return removeFile(h.root, rel)
+}
+
+func (h *dirHandle) Mkdir(rel string) error {
+	return mkdirDir(h.root, rel)
 }
 
 func (h *dirHandle) StatFS() (total, available uint64, err error) {
@@ -437,7 +449,7 @@ func writeFile(root, rel string, r io.Reader) (int64, error) {
 		return 0, err
 	}
 	if _, err := os.Stat(full); err == nil {
-		return 0, fmt.Errorf("%s already exists", rel)
+		return 0, fmt.Errorf("%s: %w", rel, ErrExists)
 	}
 
 	tempPath := filepath.Join(filepath.Dir(full), UploadPrefix+randomSuffix())
@@ -464,6 +476,62 @@ func writeFile(root, rel string, r io.Reader) (int64, error) {
 	}
 
 	return written, nil
+}
+
+// ErrExists reports a name that is already taken inside the medium.
+var ErrExists = errors.New("already exists")
+
+// mkdirDir creates rel as a directory inside the medium. It refuses to replace
+// anything: a name the target machine or the user already put there is a
+// mistake to report, not to overwrite.
+func mkdirDir(root, rel string) error {
+	full, err := ResolveInside(root, rel)
+	if err != nil {
+		return err
+	}
+	if full == root {
+		return errors.New("refusing to create the medium root")
+	}
+	// ResolveInside is lexical. A directory the target machine put there can be
+	// a symlink elsewhere, and a create through it would land outside the
+	// medium; the parent is what has to be real, since the entry does not exist
+	// yet.
+	if err := ensureInside(root, filepath.Dir(full)); err != nil {
+		return err
+	}
+	if info, err := os.Stat(full); err == nil {
+		// A name taken by a file is not a folder that is already there: the
+		// caller's tree upload would otherwise treat it as success and fail on
+		// every file it puts inside.
+		if !info.IsDir() {
+			return fmt.Errorf("%s is not a directory", rel)
+		}
+		return fmt.Errorf("%s: %w", rel, ErrExists)
+	}
+	if err := os.Mkdir(full, 0o755); err != nil {
+		return fmt.Errorf("create directory %s: %w", rel, err)
+	}
+	return nil
+}
+
+// ensureInside refuses a directory whose real path leaves root through a
+// symlink. Both sides are resolved, so a medium that is itself reached through
+// a link still compares correctly.
+func ensureInside(root, dir string) error {
+	realRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return err
+	}
+	realDir, err := filepath.EvalSymlinks(dir)
+	if err != nil {
+		return err
+	}
+
+	inside, err := filepath.Rel(realRoot, realDir)
+	if err != nil || inside == ".." || strings.HasPrefix(inside, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("%w: %s leaves the medium", utils.ErrInvalidMediaPath, dir)
+	}
+	return nil
 }
 
 func removeFile(root, rel string) error {

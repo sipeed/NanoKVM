@@ -38,6 +38,10 @@ type MediaStateRsp struct {
 	HidOnly bool     `json:"hidOnly"` // the gadget has no mass storage at all
 	Open    []string `json:"open"`    // media the file manager currently holds open
 	Cdrom   bool     `json:"cdrom"`   // the attached medium is served as a CD-ROM
+	// LocalWritable is false while /data is mounted read-only, which is what
+	// the target machine owning the partition does. Every write would fail
+	// with EROFS, so the UI disables them instead of asking.
+	LocalWritable bool `json:"localWritable"`
 }
 
 type MediaRefReq struct {
@@ -89,4 +93,8 @@ type MediaPathReq struct {
 	Type string `json:"type" validate:"omitempty,oneof=image partition"`
 	Rel  string `json:"rel"`
 	Path string `json:"path" validate:"required"`
+	// ExistsOK turns "the directory is already there" into success. An upload
+	// of a whole tree recreates folders that may already exist on the medium,
+	// and stopping at the first one would leave the tree half copied.
+	ExistsOK bool `json:"existsOk"`
 }

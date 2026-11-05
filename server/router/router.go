@@ -9,6 +9,7 @@ import (
 	"NanoKVM-Server/service/controlmode"
 	"NanoKVM-Server/service/picoclaw"
 	"NanoKVM-Server/service/ws"
+	"NanoKVM-Server/webcache"
 
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
@@ -30,6 +31,7 @@ func web(r *gin.Engine) {
 	execDir := filepath.Dir(execPath)
 	webPath := fmt.Sprintf("%s/web", execDir)
 
+	r.Use(webcache.Headers(webPath))
 	r.Use(static.Serve("/", static.LocalFile(webPath, true)))
 }
 
