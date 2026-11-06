@@ -24,10 +24,6 @@ start_usb_dev(){
         echo 0x1009 > idProduct
     fi
 
-    echo 0xEF > bDeviceClass
-    echo 0x02 > bDeviceSubClass
-    echo 0x01 > bDeviceProtocol
-
     mkdir strings/0x409
     echo '0123456789ABCDEF' > strings/0x409/serialnumber
     echo 'sipeed' > strings/0x409/manufacturer
@@ -74,11 +70,26 @@ start_usb_dev(){
 
     if [ -e /boot/usb.ncm ] || [ -e /boot/usb.rndis0 ]
     then
+        # NCM/RNDIS carry an Interface Association Descriptor, which the
+        # USB-IF IAD ECN pairs with the Multi-interface Function class.
+        echo 0xEF > bDeviceClass
+        echo 0x02 > bDeviceSubClass
+        echo 0x01 > bDeviceProtocol
+
         # Microsoft OS 2.0 Descriptor
         echo 1 > os_desc/use
         echo 0xCD > os_desc/b_vendor_code
         echo MSFT100 > os_desc/qw_sign
         ln -s configs/c.1 os_desc
+    else
+        # HID and mass storage are single-interface functions: no IAD, so
+        # leave the class at the interface level. Firmware that matches its
+        # console keyboard by USB class (EDK2 MatchUsbClass) only looks at the
+        # interfaces when bDeviceClass is 0. Reset explicitly: toggling the
+        # virtual network re-runs this script on the existing gadget.
+        echo 0x00 > bDeviceClass
+        echo 0x00 > bDeviceSubClass
+        echo 0x00 > bDeviceProtocol
     fi
 
     if [ ! -e /boot/disable_hid ]
