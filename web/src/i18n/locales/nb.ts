@@ -230,6 +230,11 @@ const nb = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Diskmontering',
+        share: 'Fildeling'
+      },
+      close: 'Lukk',
       title: 'Diskbilder og fildeling',
       empty:
         'Ingen bilder ennå. Last opp en ISO eller IMG, eller kopier en over til disken fra målmaskinen.',
@@ -302,7 +307,8 @@ const nb = {
         downloading: 'Laster ned {{name}}',
         done: '{{name}} er klar',
         checksumFailed: 'Bildet samsvarer ikke med SHA-256-kontrollsummen.',
-        blocked: 'Målmaskinen bruker disken',
+        blocked:
+          'Målmaskinen bruker disken. Løs ut den virtuelle USB-disken på målmaskinen på en trygg måte, og slå deretter av Virtuell disk-bryteren under Innstillinger > Enhet.',
         copyHint: 'Du kan også kopiere et bilde til datapartisjonen via SCP, eller fra målmaskinen.'
       },
       files: {
@@ -324,17 +330,32 @@ const nb = {
           size: 'Størrelse',
           type: 'Type',
           asc: 'Stigende',
-          desc: 'Synkende'
+          desc: 'Synkende',
+          modified: 'Endret'
         },
         upload: 'Last opp en fil til mediet',
         deleteFolderTitle: 'Slett mappe',
         deleteFolderConfirm: 'Slette mappen {{name}} og alt innholdet? Dette kan ikke angres.',
         uploading: 'Laster opp…',
         uploadFailed: 'Opplasting mislyktes',
+        exists: '{{name}} finnes allerede',
         download: 'Last ned',
         delete: 'Slett',
         deleteTitle: 'Slett fil',
-        deleteConfirm: 'Vil du slette {{name}} fra mediet?'
+        deleteConfirm: 'Vil du slette {{name}} fra mediet?',
+        folder: 'Mappe',
+        itemCount: 'Antall elementer: {{count}}',
+        up: 'Gå til overordnet mappe',
+        uploadButton: 'Last opp',
+        uploadFolder: 'Last opp mappe',
+        newFolder: 'Ny mappe',
+        newFolderPlaceholder: 'Mappenavn',
+        create: 'Opprett',
+        dropHint: 'Slipp filer her for å laste dem opp til denne mappen',
+        view: {
+          list: 'Listevisning',
+          grid: 'Ikonvisning'
+        }
       },
       yes: 'Ja',
       no: 'Nei'

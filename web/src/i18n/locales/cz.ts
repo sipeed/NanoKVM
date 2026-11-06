@@ -230,6 +230,11 @@ const cz = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Připojení disku',
+        share: 'Sdílení souborů'
+      },
+      close: 'Zavřít',
       title: 'Obrázky a sdílení souborů',
       empty:
         'Zatím žádné obrazy. Nahrajte ISO nebo IMG, nebo zkopírujte obraz na disk ze vzdáleného počítače.',
@@ -302,7 +307,8 @@ const cz = {
         downloading: 'Stahování {{name}}',
         done: '{{name}} je připraven',
         checksumFailed: 'Obraz neodpovídá kontrolnímu součtu SHA-256.',
-        blocked: 'Vzdálený počítač disk používá',
+        blocked:
+          'Vzdálený počítač disk používá. Bezpečně vysuňte virtuální USB disk na vzdáleném počítači a potom vypněte přepínač Virtuální disk v Nastavení > Zařízení.',
         copyHint:
           'Obraz můžete také zkopírovat do datového oddílu přes SCP nebo ze vzdáleného počítače.'
       },
@@ -325,17 +331,32 @@ const cz = {
           size: 'Velikost',
           type: 'Typ',
           asc: 'Vzestupně',
-          desc: 'Sestupně'
+          desc: 'Sestupně',
+          modified: 'Změněno'
         },
         upload: 'Nahrát soubor do média',
         deleteFolderTitle: 'Smazat složku',
         deleteFolderConfirm: 'Smazat složku {{name}} a celý její obsah? Tuto akci nelze vrátit.',
         uploading: 'Nahrávání…',
         uploadFailed: 'Nahrání se nezdařilo',
+        exists: '{{name}} už existuje',
         download: 'Stáhnout',
         delete: 'Smazat',
         deleteTitle: 'Smazat soubor',
-        deleteConfirm: 'Smazat {{name}} z média?'
+        deleteConfirm: 'Smazat {{name}} z média?',
+        folder: 'Složka',
+        itemCount: 'Počet položek: {{count}}',
+        up: 'O úroveň výš',
+        uploadButton: 'Nahrát',
+        uploadFolder: 'Nahrát složku',
+        newFolder: 'Nová složka',
+        newFolderPlaceholder: 'Název složky',
+        create: 'Vytvořit',
+        dropHint: 'Přetažením sem nahrajete soubory do této složky',
+        view: {
+          list: 'Seznam',
+          grid: 'Zobrazení ikon'
+        }
       },
       yes: 'Ano',
       no: 'Ne'

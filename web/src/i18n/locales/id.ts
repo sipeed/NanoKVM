@@ -230,6 +230,11 @@ const id = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Pasang disk',
+        share: 'Berbagi berkas'
+      },
+      close: 'Tutup',
       title: 'Gambar dan berbagi file',
       empty: 'Belum ada gambar. Unggah ISO atau IMG, atau salin satu ke disk dari komputer target.',
       notAttached: 'Tidak ada yang terpasang',
@@ -301,7 +306,8 @@ const id = {
         downloading: 'Mengunduh {{name}}',
         done: '{{name}} siap',
         checksumFailed: 'Image tidak cocok dengan checksum SHA-256.',
-        blocked: 'Komputer target sedang menggunakan disk',
+        blocked:
+          'Komputer target sedang menggunakan disk. Keluarkan drive USB virtual dengan aman di komputer target, lalu matikan tombol Disk Virtual di Pengaturan > Perangkat.',
         copyHint:
           'Anda juga dapat menyalin citra ke partisi data lewat SCP, atau dari komputer target.'
       },
@@ -324,7 +330,8 @@ const id = {
           size: 'Ukuran',
           type: 'Jenis',
           asc: 'Naik',
-          desc: 'Turun'
+          desc: 'Turun',
+          modified: 'Diubah'
         },
         upload: 'Unggah file ke media',
         deleteFolderTitle: 'Hapus folder',
@@ -332,10 +339,24 @@ const id = {
           'Hapus folder {{name}} beserta seluruh isinya? Tindakan ini tidak dapat dibatalkan.',
         uploading: 'Mengunggah…',
         uploadFailed: 'Unggahan gagal',
+        exists: '{{name}} sudah ada',
         download: 'Unduh',
         delete: 'Hapus',
         deleteTitle: 'Hapus file',
-        deleteConfirm: 'Hapus {{name}} dari media?'
+        deleteConfirm: 'Hapus {{name}} dari media?',
+        folder: 'Folder',
+        itemCount: 'Jumlah item: {{count}}',
+        up: 'Ke folder induk',
+        uploadButton: 'Unggah',
+        uploadFolder: 'Unggah folder',
+        newFolder: 'Folder baru',
+        newFolderPlaceholder: 'Nama folder',
+        create: 'Buat',
+        dropHint: 'Letakkan berkas di sini untuk mengunggahnya ke folder ini',
+        view: {
+          list: 'Tampilan daftar',
+          grid: 'Tampilan ikon'
+        }
       },
       yes: 'Ya',
       no: 'Tidak'

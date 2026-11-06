@@ -33,6 +33,7 @@ const (
 	codeNotBrowsable      = -13
 	codeInsufficientSpace = -14
 	codeNotOptical        = -15
+	codeAlreadyExists     = -16
 )
 
 // partitionDevice is the whole data partition. It is what the emulated disk
@@ -114,6 +115,12 @@ func (s *Service) GetMedia(c *gin.Context) {
 func (s *Service) GetMediaState(c *gin.Context) {
 	var rsp proto.Response
 
+	// The UI polls this, so a /data left read-only by a failed release is put
+	// back here rather than waiting for the user to reboot.
+	if err := healDataPartition(); err != nil {
+		logHealFailure(err)
+	}
+
 	status, err := readDiskStatus()
 	if err != nil {
 		respondError(c, err)
@@ -132,10 +139,11 @@ func (s *Service) GetMediaState(c *gin.Context) {
 	}
 
 	state := &proto.MediaStateRsp{
-		State:   string(status.State),
-		HidOnly: status.HidOnly,
-		Open:    openMediaIDs(),
-		Cdrom:   cdrom,
+		State:         string(status.State),
+		HidOnly:       status.HidOnly,
+		Open:          openMediaIDs(),
+		Cdrom:         cdrom,
+		LocalWritable: DataWritable(),
 	}
 
 	switch status.State {
@@ -659,6 +667,13 @@ func openMediumLocked(mediaType, rel string, writable bool) (diskfs.Image, error
 	if writable && status.State == diskStatePartition {
 		return nil, errPartitionOwned
 	}
+	// Nothing owns the partition, so a read-only /data here is a leftover the
+	// mount did not clear. Writing through it would fail with EROFS.
+	if writable {
+		if err := SetDataWritable(true); err != nil {
+			return nil, fmt.Errorf("make %s writable: %w", mediaDirectory, err)
+		}
+	}
 
 	if mediaType == proto.MediaTypePartition {
 		// The partition needs no loop device: the emulated disk already hands
@@ -713,6 +728,10 @@ func BeginDataPartitionWrite() (func(), error) {
 	if status.State == diskStatePartition {
 		mediumOperationMu.Unlock()
 		return nil, ErrDataPartitionInUse
+	}
+	if err := SetDataWritable(true); err != nil {
+		mediumOperationMu.Unlock()
+		return nil, fmt.Errorf("make %s writable: %w", mediaDirectory, err)
 	}
 	partitionWriteRefs.Add(1)
 	mediumOperationMu.Unlock()

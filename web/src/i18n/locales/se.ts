@@ -226,6 +226,11 @@ const se = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Diskmontering',
+        share: 'Fildelning'
+      },
+      close: 'Stäng',
       title: 'Avbildningar och fildelning',
       empty:
         'Inga avbildningar än. Ladda upp en ISO eller IMG, eller kopiera en till disken från måldatorn.',
@@ -298,7 +303,8 @@ const se = {
         downloading: 'Laddar ner {{name}}',
         done: '{{name}} är klar',
         checksumFailed: 'Avbilden matchar inte SHA-256-kontrollsumman.',
-        blocked: 'Måldatorn använder disken',
+        blocked:
+          'Måldatorn använder disken. Mata ut den virtuella USB-enheten säkert på måldatorn och stäng sedan av reglaget Virtuell disk under Inställningar > Enhet.',
         copyHint:
           'Du kan också kopiera en avbildning till datapartitionen via SCP, eller från måldatorn.'
       },
@@ -320,17 +326,32 @@ const se = {
           size: 'Storlek',
           type: 'Typ',
           asc: 'Stigande',
-          desc: 'Fallande'
+          desc: 'Fallande',
+          modified: 'Ändrad'
         },
         upload: 'Ladda upp en fil till mediet',
         deleteFolderTitle: 'Ta bort mapp',
         deleteFolderConfirm: 'Ta bort mappen {{name}} och allt innehåll? Detta kan inte ångras.',
         uploading: 'Laddar upp…',
         uploadFailed: 'Uppladdningen misslyckades',
+        exists: '{{name}} finns redan',
         download: 'Hämta',
         delete: 'Ta bort',
         deleteTitle: 'Ta bort fil',
-        deleteConfirm: 'Ta bort {{name}} från mediet?'
+        deleteConfirm: 'Ta bort {{name}} från mediet?',
+        folder: 'Mapp',
+        itemCount: '{{count}} objekt',
+        up: 'Upp en nivå',
+        uploadButton: 'Ladda upp fil',
+        uploadFolder: 'Ladda upp mapp',
+        newFolder: 'Ny mapp',
+        newFolderPlaceholder: 'Mappnamn',
+        create: 'Skapa',
+        dropHint: 'Dra filer hit för att ladda upp dem till den aktuella mappen',
+        view: {
+          list: 'Listvy',
+          grid: 'Rutnätsvy'
+        }
       },
       yes: 'Ja',
       no: 'Nej'

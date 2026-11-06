@@ -56,11 +56,16 @@ export const Keyboard = () => {
     document.addEventListener('keyup', handleKeyUp);
     document.addEventListener('compositionstart', handleCompositionStart);
     document.addEventListener('compositionend', handleCompositionEnd);
+    document.addEventListener('focusin', handleFocusIn);
     window.addEventListener('blur', handleBlur);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     function handleKeyDown(event: KeyboardEvent) {
       if (!isKeyboardEnabled) return;
+      // An input, a textarea or a select owns the keyboard while it has focus.
+      // Forwarding the key and cancelling its default is what makes a paste
+      // land nowhere: the browser never gets to insert the text.
+      if (isEditableTarget(event.target)) return;
       if (isComposing.current || event.isComposing) return;
 
       event.preventDefault();
@@ -86,11 +91,17 @@ export const Keyboard = () => {
       if (!isKeyboardEnabled) return;
       if (isComposing.current || event.isComposing) return;
 
-      event.preventDefault();
-      event.stopPropagation();
-
       const code = normalizeKeyCode(event, os);
       if (!code) return;
+
+      // An input owns the keyboard while it has focus, but a key that was
+      // already forwarded has to be released anyway: dropping its keyup leaves
+      // the target machine holding it down, and every later key carries the
+      // modifier.
+      if (isEditableTarget(event.target) && !pressedKeys.current.has(code)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
 
       // Handle leader key release
       const leaderHandled = leaderKeyRef.current.handleKeyUp(code);
@@ -111,6 +122,16 @@ export const Keyboard = () => {
 
       pressedKeys.current.delete(code);
       sendKeyEvent('keyup', code);
+    }
+
+    // Focus moving into a text control must not leave a modifier held on the
+    // target machine: the matching keyup lands in the input, which is not
+    // forwarded, so it is released here instead.
+    function handleFocusIn(event: FocusEvent) {
+      if (!isKeyboardEnabled) return;
+      if (isEditableTarget(event.target)) {
+        releaseKeys();
+      }
     }
 
     function handleCompositionStart() {
@@ -157,6 +178,7 @@ export const Keyboard = () => {
       document.removeEventListener('keyup', handleKeyUp);
       document.removeEventListener('compositionstart', handleCompositionStart);
       document.removeEventListener('compositionend', handleCompositionEnd);
+      document.removeEventListener('focusin', handleFocusIn);
       window.removeEventListener('blur', handleBlur);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
 
@@ -175,3 +197,17 @@ export const Keyboard = () => {
     </>
   );
 };
+
+// isEditableTarget reports whether the event belongs to a control that takes
+// text: forwarding those keys to the target machine steals typing and pasting
+// from the field the user is filling in.
+function isEditableTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return (
+    target.isContentEditable ||
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.tagName === 'SELECT'
+  );
+}

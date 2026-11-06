@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/* A real button that looks like nothing: the storage menu's cards and the
+   mount-mode picker draw their own surface, and a browser-default button would
+   bring its own border, padding and font with it. */
+@layer components {
+  .nanokvm-button-base {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+  }
+}
+
 /* CJK punctuation (、。) exists in some Latin fonts that draw it above the
    baseline, so whichever font stack happens to claim those two characters
    decides whether a Chinese or Japanese sentence looks aligned. Pin them to a

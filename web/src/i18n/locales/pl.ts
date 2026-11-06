@@ -231,6 +231,11 @@ const pl = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Montowanie dysku',
+        share: 'Udostępnianie plików'
+      },
+      close: 'Zamknij',
       title: 'Obrazy i udostępnianie plików',
       empty:
         'Nie ma jeszcze obrazów. Prześlij plik ISO lub IMG albo skopiuj go na dysk ze zdalnego komputera.',
@@ -302,7 +307,8 @@ const pl = {
         downloading: 'Pobieranie {{name}}',
         done: '{{name}} jest gotowy',
         checksumFailed: 'Obraz nie zgadza się z sumą kontrolną SHA-256.',
-        blocked: 'Zdalny komputer używa dysku',
+        blocked:
+          'Zdalny komputer używa dysku. Bezpiecznie wysuń wirtualny dysk USB na zdalnym komputerze, a następnie wyłącz przełącznik Dysk wirtualny w Ustawienia > Urządzenie.',
         copyHint:
           'Obraz możesz też skopiować do partycji danych przez SCP albo ze zdalnego komputera.'
       },
@@ -324,7 +330,8 @@ const pl = {
           size: 'Rozmiar',
           type: 'Typ',
           asc: 'Rosnąco',
-          desc: 'Malejąco'
+          desc: 'Malejąco',
+          modified: 'Zmodyfikowano'
         },
         upload: 'Prześlij plik na nośnik',
         deleteFolderTitle: 'Usuń folder',
@@ -332,10 +339,24 @@ const pl = {
           'Usunąć folder {{name}} wraz z całą zawartością? Tej operacji nie można cofnąć.',
         uploading: 'Przesyłanie…',
         uploadFailed: 'Przesyłanie nie powiodło się',
+        exists: '{{name}} już istnieje',
         download: 'Pobierz',
         delete: 'Usuń',
         deleteTitle: 'Usuń plik',
-        deleteConfirm: 'Usunąć {{name}} z nośnika?'
+        deleteConfirm: 'Usunąć {{name}} z nośnika?',
+        folder: 'Folder',
+        itemCount: 'Liczba elementów: {{count}}',
+        up: 'Przejdź do folderu nadrzędnego',
+        uploadButton: 'Prześlij',
+        uploadFolder: 'Prześlij folder',
+        newFolder: 'Nowy folder',
+        newFolderPlaceholder: 'Nazwa folderu',
+        create: 'Utwórz',
+        dropHint: 'Upuść tutaj pliki, aby przesłać je do tego folderu',
+        view: {
+          list: 'Widok listy',
+          grid: 'Widok ikon'
+        }
       },
       yes: 'Tak',
       no: 'Nie'

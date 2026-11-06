@@ -228,6 +228,11 @@ const en = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Disk mount',
+        share: 'File sharing'
+      },
+      close: 'Close',
       title: 'Images & File sharing',
       empty:
         'No images yet. Upload an ISO or IMG, or copy one onto the disk from the target machine.',
@@ -300,7 +305,8 @@ const en = {
         downloading: 'Downloading {{name}}',
         done: '{{name}} is ready',
         checksumFailed: 'The image does not match the SHA-256 checksum.',
-        blocked: 'The target machine is using the disk',
+        blocked:
+          'The target machine is using the disk. Safely eject the virtual USB drive on the target machine, then turn off the Virtual Disk switch in Settings > Device.',
         copyHint:
           'You can also copy an image into the data partition over SCP, or from the target machine.'
       },
@@ -322,7 +328,8 @@ const en = {
           size: 'Size',
           type: 'Type',
           asc: 'Ascending',
-          desc: 'Descending'
+          desc: 'Descending',
+          modified: 'Modified'
         },
         upload: 'Upload a file into the medium',
         deleteFolderTitle: 'Delete folder',
@@ -330,10 +337,24 @@ const en = {
           'Delete the folder {{name}} and everything inside it? This cannot be undone.',
         uploading: 'Uploading…',
         uploadFailed: 'Upload failed',
+        exists: '{{name}} already exists',
         download: 'Download',
         delete: 'Delete',
         deleteTitle: 'Delete file',
-        deleteConfirm: 'Delete {{name}} from the medium?'
+        deleteConfirm: 'Delete {{name}} from the medium?',
+        folder: 'Folder',
+        itemCount: 'Items: {{count}}',
+        up: 'Up to the parent folder',
+        uploadButton: 'Upload',
+        uploadFolder: 'Upload folder',
+        newFolder: 'New folder',
+        newFolderPlaceholder: 'Folder name',
+        create: 'Create',
+        dropHint: 'Drop files here to upload them into this folder',
+        view: {
+          list: 'List view',
+          grid: 'Icon view'
+        }
       },
       yes: 'Yes',
       no: 'No'

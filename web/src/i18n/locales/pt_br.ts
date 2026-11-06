@@ -230,6 +230,11 @@ const pt_br = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Montagem do disco',
+        share: 'Compartilhamento de arquivos'
+      },
+      close: 'Fechar',
       title: 'Imagens e compartilhamento de arquivos',
       empty:
         'Ainda não há imagens. Envie uma ISO ou IMG, ou copie uma para o disco a partir da máquina remota.',
@@ -302,7 +307,8 @@ const pt_br = {
         downloading: 'Baixando {{name}}',
         done: '{{name}} está pronto',
         checksumFailed: 'A imagem não corresponde ao checksum SHA-256.',
-        blocked: 'A máquina remota está usando o disco',
+        blocked:
+          'A máquina de destino está usando este disco. Ejete com segurança a unidade USB virtual na máquina de destino e depois desative a chave Disco virtual em Configurações > Dispositivo.',
         copyHint:
           'Você também pode copiar uma imagem para a partição de dados via SCP, ou a partir da máquina remota.'
       },
@@ -325,7 +331,8 @@ const pt_br = {
           size: 'Tamanho',
           type: 'Tipo',
           asc: 'Crescente',
-          desc: 'Decrescente'
+          desc: 'Decrescente',
+          modified: 'Modificado'
         },
         upload: 'Enviar um arquivo para a mídia',
         deleteFolderTitle: 'Excluir pasta',
@@ -333,10 +340,24 @@ const pt_br = {
           'Excluir a pasta {{name}} e todo o seu conteúdo? Esta ação não pode ser desfeita.',
         uploading: 'Enviando…',
         uploadFailed: 'Falha no envio',
+        exists: '{{name}} já existe',
         download: 'Baixar',
         delete: 'Excluir',
         deleteTitle: 'Excluir arquivo',
-        deleteConfirm: 'Excluir {{name}} da mídia?'
+        deleteConfirm: 'Excluir {{name}} da mídia?',
+        folder: 'Pasta',
+        itemCount: '{{count}} itens',
+        up: 'Subir um nível',
+        uploadButton: 'Enviar arquivo',
+        uploadFolder: 'Enviar pasta',
+        newFolder: 'Nova pasta',
+        newFolderPlaceholder: 'Nome da pasta',
+        create: 'Criar',
+        dropHint: 'Arraste arquivos para cá para enviá-los à pasta atual',
+        view: {
+          list: 'Visualização em lista',
+          grid: 'Visualização em grade'
+        }
       },
       yes: 'Sim',
       no: 'Não'

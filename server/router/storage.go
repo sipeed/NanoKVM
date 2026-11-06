@@ -38,6 +38,7 @@ func storageRouter(r *gin.Engine) {
 	attach.POST("/storage/media/eject", service.EjectMedia)  // release the medium
 	write.POST("/storage/media/delete", service.DeleteMedia) // delete a medium
 	files.POST("/storage/media/files/upload", service.UploadMediaFile)
+	files.POST("/storage/media/files/mkdir", service.MkdirMediaFile)
 	files.POST("/storage/media/files/delete", service.DeleteMediaFile)
 
 	// The pre-2.6 image API, kept for scripts written against it.

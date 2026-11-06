@@ -232,6 +232,11 @@ const hu = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Lemez csatlakoztatása',
+        share: 'Fájlmegosztás'
+      },
+      close: 'Bezárás',
       title: 'Képek és fájlmegosztás',
       empty:
         'Még nincsenek képek. Töltsön fel egy ISO vagy IMG fájlt, vagy másoljon egyet a lemezre a célgépről.',
@@ -305,7 +310,8 @@ const hu = {
         downloading: '{{name}} letöltése',
         done: '{{name}} elkészült',
         checksumFailed: 'A lemezkép nem egyezik a SHA-256 ellenőrzőösszeggel.',
-        blocked: 'A célgép használja a lemezt',
+        blocked:
+          'A célgép használja a lemezt. Biztonságosan válassza le a virtuális USB-meghajtót a célgépen, majd kapcsolja ki a Virtuális lemez kapcsolót a Beállítások > Eszköz menüben.',
         copyHint:
           'A képet SCP-vel is a data partícióra másolhatja, vagy a célgépről is átmásolhatja.'
       },
@@ -328,7 +334,8 @@ const hu = {
           size: 'Méret',
           type: 'Típus',
           asc: 'Növekvő',
-          desc: 'Csökkenő'
+          desc: 'Csökkenő',
+          modified: 'Módosítva'
         },
         upload: 'Fájl feltöltése az adathordozóra',
         deleteFolderTitle: 'Mappa törlése',
@@ -336,10 +343,24 @@ const hu = {
           'Törli a(z) {{name}} mappát és a teljes tartalmát? Ez nem vonható vissza.',
         uploading: 'Feltöltés…',
         uploadFailed: 'A feltöltés nem sikerült',
+        exists: '{{name}} már létezik',
         download: 'Letöltés',
         delete: 'Törlés',
         deleteTitle: 'Fájl törlése',
-        deleteConfirm: 'Törli a következőt: {{name}} az adathordozóról?'
+        deleteConfirm: 'Törli a következőt: {{name}} az adathordozóról?',
+        folder: 'Mappa',
+        itemCount: 'Elemek száma: {{count}}',
+        up: 'Ugrás a szülőmappába',
+        uploadButton: 'Feltöltés',
+        uploadFolder: 'Mappa feltöltése',
+        newFolder: 'Új mappa',
+        newFolderPlaceholder: 'Mappa neve',
+        create: 'Létrehozás',
+        dropHint: 'Húzza ide a fájlokat a mappába való feltöltéshez',
+        view: {
+          list: 'Listanézet',
+          grid: 'Ikonnézet'
+        }
       },
       yes: 'Igen',
       no: 'Nem'

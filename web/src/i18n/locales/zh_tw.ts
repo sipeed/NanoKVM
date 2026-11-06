@@ -220,6 +220,11 @@ const zh_tw = {
       }
     },
     storage: {
+      cards: {
+        mount: '磁碟掛載',
+        share: '檔案分享'
+      },
+      close: '關閉',
       title: '映像檔掛載 / 檔案共享',
       empty: '還沒有映像檔。可以上傳 ISO/IMG，也可以讓受控裝置拷到這張磁碟上。',
       notAttached: '尚未裝載任何媒體',
@@ -289,7 +294,8 @@ const zh_tw = {
         downloading: '正在下載 {{name}}',
         done: '{{name}} 已就緒',
         checksumFailed: '映像檔與 SHA-256 校驗值不符。',
-        blocked: '受控裝置正在使用這張磁碟',
+        blocked:
+          '受控裝置正在使用這張磁碟。請先在受控裝置上安全退出虛擬隨身碟，再到設定 > 設備關閉虛擬隨身碟開關。',
         copyHint: '也可以透過 SCP 把映像檔放進資料分割區，或在受控裝置上直接複製。'
       },
       files: {
@@ -308,17 +314,32 @@ const zh_tw = {
           size: '大小',
           type: '類型',
           asc: '升冪',
-          desc: '降冪'
+          desc: '降冪',
+          modified: '修改時間'
         },
         upload: '上傳檔案到媒體',
         deleteFolderTitle: '刪除資料夾',
         deleteFolderConfirm: '刪除資料夾 {{name}} 及其中的所有內容？此操作無法復原。',
         uploading: '正在上傳…',
         uploadFailed: '上傳失敗',
+        exists: '{{name}} 已存在',
         download: '下載',
         delete: '刪除',
         deleteTitle: '刪除檔案',
-        deleteConfirm: '確定從媒體中刪除 {{name}}？'
+        deleteConfirm: '確定從媒體中刪除 {{name}}？',
+        folder: '資料夾',
+        itemCount: '{{count}} 個項目',
+        up: '回到上一層',
+        uploadButton: '上傳檔案',
+        uploadFolder: '上傳資料夾',
+        newFolder: '新增資料夾',
+        newFolderPlaceholder: '資料夾名稱',
+        create: '建立',
+        dropHint: '拖曳檔案到此處即可上傳到目前資料夾',
+        view: {
+          list: '清單檢視',
+          grid: '圖示檢視'
+        }
       },
       yes: '確定',
       no: '取消'

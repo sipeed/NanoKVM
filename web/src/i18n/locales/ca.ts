@@ -229,6 +229,11 @@ const ca = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Muntatge del disc',
+        share: 'Compartició de fitxers'
+      },
+      close: 'Tanca',
       title: 'Imatges i compartició de fitxers',
       empty:
         "Encara no hi ha imatges. Puja una ISO o una IMG, o copia'n una al disc des de l'ordinador remot.",
@@ -301,7 +306,8 @@ const ca = {
         downloading: "S'està baixant {{name}}",
         done: '{{name}} està llest',
         checksumFailed: 'La imatge no coincideix amb la suma de verificació SHA-256.',
-        blocked: "L'ordinador remot fa servir el disc",
+        blocked:
+          "La màquina objectiu està fent servir aquest disc. Expulsa de manera segura la unitat USB virtual a la màquina objectiu i després desactiva l'interruptor Disc virtual a Configuració > Dispositiu.",
         copyHint:
           "També podeu copiar una imatge a la partició de dades per SCP, o des de l'ordinador remot."
       },
@@ -323,7 +329,8 @@ const ca = {
           size: 'Mida',
           type: 'Tipus',
           asc: 'Ascendent',
-          desc: 'Descendent'
+          desc: 'Descendent',
+          modified: 'Modificat'
         },
         upload: 'Puja un fitxer al suport',
         deleteFolderTitle: 'Suprimeix la carpeta',
@@ -331,10 +338,24 @@ const ca = {
           'Voleu suprimir la carpeta {{name}} i tot el que conté? Aquesta acció no es pot desfer.',
         uploading: "S'està pujant…",
         uploadFailed: 'La pujada ha fallat',
+        exists: '{{name}} ja existeix',
         download: 'Baixa',
         delete: 'Elimina',
         deleteTitle: 'Elimina el fitxer',
-        deleteConfirm: 'Voleu eliminar {{name}} del suport?'
+        deleteConfirm: 'Voleu eliminar {{name}} del suport?',
+        folder: 'Carpeta',
+        itemCount: '{{count}} elements',
+        up: 'Puja un nivell',
+        uploadButton: 'Puja un fitxer',
+        uploadFolder: 'Puja una carpeta',
+        newFolder: 'Carpeta nova',
+        newFolderPlaceholder: 'Nom de la carpeta',
+        create: 'Crea',
+        dropHint: 'Arrossega fitxers aquí per pujar-los a la carpeta actual',
+        view: {
+          list: 'Vista de llista',
+          grid: 'Vista de graella'
+        }
       },
       yes: 'Sí',
       no: 'No'

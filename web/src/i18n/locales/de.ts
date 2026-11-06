@@ -235,6 +235,11 @@ const de = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Laufwerk einbinden',
+        share: 'Dateifreigabe'
+      },
+      close: 'Schliessen',
       title: 'Abbilder & Dateifreigabe',
       empty:
         'Noch keine Abbilder. Laden Sie eine ISO oder IMG hoch oder kopieren Sie eine vom Zielrechner auf die Festplatte.',
@@ -308,7 +313,8 @@ const de = {
         downloading: '{{name}} wird heruntergeladen',
         done: '{{name}} ist bereit',
         checksumFailed: 'Das Image stimmt nicht mit der SHA-256-Prüfsumme überein.',
-        blocked: 'Der Zielrechner verwendet die Festplatte',
+        blocked:
+          'Der Zielrechner verwendet die Festplatte. Werfen Sie das virtuelle USB-Laufwerk auf dem Zielrechner sicher aus und schalten Sie anschließend den Schalter „Virtueller Datenträger“ unter Einstellungen > Gerät aus.',
         copyHint:
           'Sie können ein Abbild auch per SCP auf die Datenpartition kopieren oder vom Zielrechner aus.'
       },
@@ -332,7 +338,8 @@ const de = {
           size: 'Größe',
           type: 'Typ',
           asc: 'Aufsteigend',
-          desc: 'Absteigend'
+          desc: 'Absteigend',
+          modified: 'Geändert'
         },
         upload: 'Eine Datei auf das Medium hochladen',
         deleteFolderTitle: 'Ordner löschen',
@@ -340,10 +347,24 @@ const de = {
           'Den Ordner {{name}} mit seinem gesamten Inhalt löschen? Dies kann nicht rückgängig gemacht werden.',
         uploading: 'Wird hochgeladen…',
         uploadFailed: 'Hochladen fehlgeschlagen',
+        exists: '{{name}} existiert bereits',
         download: 'Herunterladen',
         delete: 'Löschen',
         deleteTitle: 'Datei löschen',
-        deleteConfirm: '{{name}} vom Medium löschen?'
+        deleteConfirm: '{{name}} vom Medium löschen?',
+        folder: 'Ordner',
+        itemCount: 'Elemente: {{count}}',
+        up: 'Zum übergeordneten Ordner',
+        uploadButton: 'Hochladen',
+        uploadFolder: 'Ordner hochladen',
+        newFolder: 'Neuer Ordner',
+        newFolderPlaceholder: 'Ordnername',
+        create: 'Erstellen',
+        dropHint: 'Dateien hier ablegen, um sie in diesen Ordner hochzuladen',
+        view: {
+          list: 'Listenansicht',
+          grid: 'Symbolansicht'
+        }
       },
       yes: 'Ja',
       no: 'Nein'

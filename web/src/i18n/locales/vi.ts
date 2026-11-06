@@ -229,6 +229,11 @@ const vi = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Gắn đĩa',
+        share: 'Chia sẻ tệp'
+      },
+      close: 'Đóng',
       title: 'Hình ảnh và chia sẻ tệp',
       empty:
         'Chưa có hình ảnh nào. Hãy tải lên tệp ISO hoặc IMG, hoặc sao chép một tệp vào đĩa từ máy đích.',
@@ -299,7 +304,8 @@ const vi = {
         downloading: 'Đang tải xuống {{name}}',
         done: '{{name}} đã sẵn sàng',
         checksumFailed: 'Ảnh đĩa không khớp với mã kiểm tra SHA-256.',
-        blocked: 'Máy đích đang dùng đĩa',
+        blocked:
+          'Máy đích đang dùng đĩa. Hãy tháo an toàn ổ USB ảo trên máy đích, sau đó tắt công tắc Đĩa ảo trong Cài đặt > Thiết bị.',
         copyHint: 'Bạn cũng có thể sao chép ảnh vào phân vùng dữ liệu qua SCP, hoặc từ máy đích.'
       },
       files: {
@@ -320,7 +326,8 @@ const vi = {
           size: 'Kích thước',
           type: 'Loại',
           asc: 'Tăng dần',
-          desc: 'Giảm dần'
+          desc: 'Giảm dần',
+          modified: 'Ngày sửa đổi'
         },
         upload: 'Tải một tệp lên phương tiện',
         deleteFolderTitle: 'Xóa thư mục',
@@ -328,10 +335,24 @@ const vi = {
           'Xóa thư mục {{name}} và toàn bộ nội dung bên trong? Không thể hoàn tác thao tác này.',
         uploading: 'Đang tải lên…',
         uploadFailed: 'Tải lên không thành công',
+        exists: '{{name}} đã tồn tại',
         download: 'Tải xuống',
         delete: 'Xóa',
         deleteTitle: 'Xóa tệp',
-        deleteConfirm: 'Xóa {{name}} khỏi phương tiện?'
+        deleteConfirm: 'Xóa {{name}} khỏi phương tiện?',
+        folder: 'Thư mục',
+        itemCount: 'Số mục: {{count}}',
+        up: 'Đi đến thư mục cha',
+        uploadButton: 'Tải lên',
+        uploadFolder: 'Tải thư mục lên',
+        newFolder: 'Thư mục mới',
+        newFolderPlaceholder: 'Tên thư mục',
+        create: 'Tạo',
+        dropHint: 'Thả tệp vào đây để tải lên thư mục này',
+        view: {
+          list: 'Dạng danh sách',
+          grid: 'Dạng biểu tượng'
+        }
       },
       yes: 'Có',
       no: 'Không'

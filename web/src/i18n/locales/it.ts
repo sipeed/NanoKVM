@@ -232,6 +232,11 @@ const it = {
       }
     },
     storage: {
+      cards: {
+        mount: 'Monta disco',
+        share: 'Condivisione file'
+      },
+      close: 'Chiudi',
       title: 'Immagini e condivisione file',
       empty:
         'Nessuna immagine. Carica un file ISO o IMG oppure copiane uno sul disco dalla macchina remota.',
@@ -304,7 +309,8 @@ const it = {
         downloading: 'Download di {{name}}',
         done: '{{name}} è pronto',
         checksumFailed: "L'immagine non corrisponde al checksum SHA-256.",
-        blocked: 'La macchina remota sta usando il disco',
+        blocked:
+          'La macchina remota sta usando il disco. Espelli in modo sicuro l’unità USB virtuale sul computer remoto, poi disattiva l’interruttore Disco virtuale in Impostazioni > Dispositivo.',
         copyHint:
           "Puoi anche copiare un'immagine nella partizione dati via SCP, o dalla macchina remota."
       },
@@ -327,7 +333,8 @@ const it = {
           size: 'Dimensione',
           type: 'Tipo',
           asc: 'Crescente',
-          desc: 'Decrescente'
+          desc: 'Decrescente',
+          modified: 'Modificato'
         },
         upload: 'Carica un file nel supporto',
         deleteFolderTitle: 'Elimina cartella',
@@ -335,10 +342,24 @@ const it = {
           "Eliminare la cartella {{name}} e tutto il suo contenuto? L'operazione non può essere annullata.",
         uploading: 'Caricamento…',
         uploadFailed: 'Caricamento non riuscito',
+        exists: '{{name}} esiste già',
         download: 'Scarica',
         delete: 'Elimina',
         deleteTitle: 'Elimina file',
-        deleteConfirm: 'Eliminare {{name}} dal supporto?'
+        deleteConfirm: 'Eliminare {{name}} dal supporto?',
+        folder: 'Cartella',
+        itemCount: 'Elementi: {{count}}',
+        up: 'Vai alla cartella superiore',
+        uploadButton: 'Carica',
+        uploadFolder: 'Carica cartella',
+        newFolder: 'Nuova cartella',
+        newFolderPlaceholder: 'Nome della cartella',
+        create: 'Crea',
+        dropHint: 'Trascina qui i file per caricarli in questa cartella',
+        view: {
+          list: 'Vista elenco',
+          grid: 'Vista icone'
+        }
       },
       yes: 'Sì',
       no: 'No'
