@@ -1,16 +1,46 @@
 #!/bin/sh
 
-if [ "$1" = "start" ]
+: "${NANOKVM_DISK:=/dev/mmcblk0}"
+: "${NANOKVM_ROOT_START_FILE:=/sys/class/block/mmcblk0p2/start}"
+: "${NANOKVM_ROOT_SIZE_FILE:=/sys/class/block/mmcblk0p2/size}"
+: "${NANOKVM_DATA_ALIGNMENT_SECTORS:=2048}"
+: "${NANOKVM_PARTED:=parted}"
+
+read_uint_file() {
+        value=$(cat "$1" 2>/dev/null) || return 1
+        case "$value" in
+                ''|*[!0-9]*) return 1 ;;
+        esac
+        printf '%s\n' "$value"
+}
+
+data_partition_start_sector() {
+        start=$(read_uint_file "$NANOKVM_ROOT_START_FILE") || return 1
+        size=$(read_uint_file "$NANOKVM_ROOT_SIZE_FILE") || return 1
+        [ "$size" -gt 0 ] || return 1
+        [ "$NANOKVM_DATA_ALIGNMENT_SECTORS" -gt 0 ] || return 1
+
+        # Keep the official 1.5 GiB root filesystem unchanged. Place p3 at the
+        # next 1 MiB boundary after the live p2 geometry, so compact images do
+        # not waste the old gap up to 8193 MB and legacy enlarged roots remain
+        # safe without ever shrinking a mounted filesystem.
+        next=$((start + size))
+        alignment=$NANOKVM_DATA_ALIGNMENT_SECTORS
+        printf '%s\n' "$((((next + alignment - 1) / alignment) * alignment))"
+}
+
+create_default_data_partition() {
+        data_start=$(data_partition_start_sector) || {
+                echo "Could not read root partition geometry; data partition not created" >&2
+                return 1
+        }
+
+        "$NANOKVM_PARTED" -s "$NANOKVM_DISK" unit s \
+                mkpart primary "${data_start}s" 100%
+}
+
+if [ "${1:-}" = "start" ]
 then
-                # use all sdcard free space for data
-                parted -s /dev/mmcblk0 "resizepart 2 -0"
-                echo "yes
-                8192MB
-                " | parted ---pretend-input-tty /dev/mmcblk0 "resizepart 2 8192MB"
-                # resize data filesystem
-                (resize2fs /dev/mmcblk0p2) &
-
-
         . /etc/profile
         printf "mounting filesystem : "
         mkdir -p /boot
@@ -22,13 +52,17 @@ then
         then
                 if [ ! -e /etc/kvm.disk0 ]
                 then
-                        touch /etc/kvm.disk0
-                        # use all sdcard free space for data
-                        parted -s /dev/mmcblk0 "mkpart primary 8193MB 100%"
-                        sleep 1
-                        # resize data filesystem
-                        (mkfs.exfat /dev/mmcblk0p3) &
-                        sleep 1
+                        # use all space after the unchanged root partition
+                        if create_default_data_partition
+                        then
+                                touch /etc/kvm.disk0
+                                sleep 1
+                                # resize data filesystem
+                                (mkfs.exfat /dev/mmcblk0p3) &
+                                sleep 1
+                        else
+                                echo "data partition creation deferred" >&2
+                        fi
                 fi
         fi
 
