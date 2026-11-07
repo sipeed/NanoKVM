@@ -17,7 +17,7 @@ type SignalingMessage = {
 };
 
 const WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY = 'webrtc_connection_failed';
-const WEBRTC_CONNECTION_TIMEOUT = 10 * 1000;
+const WEBRTC_CONNECTION_TIMEOUT = 30 * 1000;
 const WEBRTC_RECONNECT_DELAY = 3 * 1000;
 
 const parseSignalingData = <T,>(data?: string): T | null => {
@@ -53,6 +53,17 @@ export const H264Webrtc = () => {
     let heartbeatTimer: ReturnType<typeof setInterval> | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
     let disposed = false;
+    let offerSent = false;
+    let connectionStage = 'opening signaling WebSocket';
+    let pendingLocalCandidates: RTCIceCandidateInit[] = [];
+    let localCandidateCount = 0;
+    let remoteCandidateCount = 0;
+    let noLocalCandidates = false;
+
+    const markStage = (stage: string) => {
+      connectionStage = stage;
+      console.info(`WebRTC: ${stage}`);
+    };
 
     const showConnectionFailureNotification = () => {
       notificationApi.error({
@@ -75,11 +86,11 @@ export const H264Webrtc = () => {
     };
 
     const scheduleReconnect = (reason: string, error?: unknown) => {
-      if (disposed) {
+      if (disposed || noLocalCandidates) {
         return;
       }
 
-      console.error(`WebRTC connection failed: ${reason}`, error);
+      console.error(`WebRTC connection failed at ${connectionStage}: ${reason}`, error);
       showConnectionFailureNotification();
       setIsLoading(false);
 
@@ -106,15 +117,17 @@ export const H264Webrtc = () => {
       }, 500);
     };
 
-    const sendMsg = (event: string, data: string) => {
+    const sendMsg = (event: string, data: string): boolean => {
       if (ws.readyState !== WebSocket.OPEN) {
-        return;
+        return false;
       }
 
       try {
         ws.send(JSON.stringify({ event, data }));
+        return true;
       } catch (err) {
         console.error('Error sending event: ', err);
+        return false;
       }
     };
 
@@ -127,6 +140,11 @@ export const H264Webrtc = () => {
       video = peer;
       videoOfferSent.current = false;
       videoIceCandidates.current = [];
+      offerSent = false;
+      pendingLocalCandidates = [];
+      localCandidateCount = 0;
+      remoteCandidateCount = 0;
+      markStage('creating offer');
 
       // --- Init Video ---
       peer.onnegotiationneeded = async () => {
@@ -144,7 +162,21 @@ export const H264Webrtc = () => {
 
           await peer.setLocalDescription(offer);
 
-          sendMsg('video-offer', JSON.stringify(peer.localDescription));
+          if (!sendMsg('video-offer', JSON.stringify(peer.localDescription))) {
+            throw new Error('the signaling WebSocket is unavailable');
+          }
+
+          // ICE gathering can start before setLocalDescription resolves. Always
+          // deliver the offer first so the server has a remote description when
+          // it receives candidates on this WebSocket.
+          offerSent = true;
+          markStage('offer sent');
+          for (const candidate of pendingLocalCandidates) {
+            if (!sendMsg('video-candidate', JSON.stringify(candidate))) {
+              throw new Error('the signaling WebSocket closed while sending ICE candidates');
+            }
+          }
+          pendingLocalCandidates = [];
         } catch (error) {
           videoOfferSent.current = false;
           console.error('Video negotiation failed:', error);
@@ -157,11 +189,38 @@ export const H264Webrtc = () => {
           return;
         }
 
+        markStage(`peer ${peer.connectionState}`);
         if (peer.connectionState === 'failed') {
           scheduleReconnect('peer connection state is failed');
         } else if (peer.connectionState === 'connected') {
           cancelReconnect();
           notificationApi.destroy(WEBRTC_CONNECTION_FAILED_NOTIFICATION_KEY);
+        }
+      };
+
+      peer.oniceconnectionstatechange = () => {
+        if (!disposed && peer === video) {
+          markStage(`ICE ${peer.iceConnectionState}`);
+        }
+      };
+
+      peer.onicegatheringstatechange = () => {
+        if (!disposed && peer === video) {
+          console.info(`WebRTC: ICE gathering ${peer.iceGatheringState}; local candidates ${localCandidateCount}`);
+
+          if (peer.iceGatheringState === 'complete' && localCandidateCount === 0) {
+            noLocalCandidates = true;
+            console.error('WebRTC: the browser gathered no local ICE candidates; a connection cannot be established');
+            showConnectionFailureNotification();
+            setIsLoading(false);
+            cancelReconnect();
+            if (heartbeatTimer) {
+              clearInterval(heartbeatTimer);
+              heartbeatTimer = null;
+            }
+            ws.close();
+            peer.close();
+          }
         }
       };
 
@@ -173,7 +232,15 @@ export const H264Webrtc = () => {
 
       peer.onicecandidate = (event) => {
         if (event.candidate) {
-          sendMsg('video-candidate', JSON.stringify(event.candidate));
+          localCandidateCount += 1;
+          console.info(`WebRTC: local ${event.candidate.type ?? 'unknown'} candidate ${localCandidateCount}`);
+          if (!offerSent) {
+            pendingLocalCandidates.push(event.candidate.toJSON());
+          } else if (!sendMsg('video-candidate', JSON.stringify(event.candidate))) {
+            scheduleReconnect('sending a local ICE candidate');
+          }
+        } else {
+          console.info(`WebRTC: local ICE gathering complete; ${localCandidateCount} candidates`);
         }
       };
 
@@ -195,6 +262,7 @@ export const H264Webrtc = () => {
       peer
         .setRemoteDescription(new RTCSessionDescription(data))
         .then(() => {
+          markStage('answer applied');
           videoOfferSent.current = false;
           videoIceCandidates.current.forEach((candidate) => {
             peer
@@ -217,6 +285,8 @@ export const H264Webrtc = () => {
       }
 
       const candidate = new RTCIceCandidate(data);
+      remoteCandidateCount += 1;
+      console.info(`WebRTC: remote ${candidate.type ?? 'unknown'} candidate ${remoteCandidateCount}`);
       if (peer.remoteDescription) {
         peer
           .addIceCandidate(candidate)
@@ -232,6 +302,8 @@ export const H264Webrtc = () => {
         return;
       }
 
+      markStage('signaling WebSocket open');
+
       heartbeatTimer = setInterval(() => {
         sendMsg('heartbeat', '');
       }, 60 * 1000);
@@ -242,6 +314,9 @@ export const H264Webrtc = () => {
     };
 
     ws.onclose = (event) => {
+      if (noLocalCandidates) {
+        return;
+      }
       if (event?.code === 4403) {
         notifyAuthRefresh();
         scheduleSilentReconnect();
@@ -256,11 +331,13 @@ export const H264Webrtc = () => {
 
         switch (msg.event) {
           case 'ice-servers': {
+            markStage('ICE configuration received');
             const iceServers = parseSignalingData<RTCIceServer[]>(msg.data);
             startVideo(Array.isArray(iceServers) ? iceServers : []);
             break;
           }
           case 'video-answer': {
+            markStage('answer received');
             const data = parseSignalingData<RTCSessionDescriptionInit>(msg.data);
             if (data) {
               handleVideoAnswer(data);
@@ -284,15 +361,10 @@ export const H264Webrtc = () => {
       }
     };
 
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-
-      if (!video || video.connectionState !== 'connected') {
-        showConnectionFailureNotification();
-      }
-    }, 5 * 1000);
-
     const connectionTimeoutTimer = setTimeout(() => {
+      if (noLocalCandidates) {
+        return;
+      }
       if (!video || video.connectionState !== 'connected') {
         scheduleReconnect(
           `connection timed out in state ${video?.connectionState ?? 'not initialized'}`
@@ -315,11 +387,11 @@ export const H264Webrtc = () => {
       }
       videoOfferSent.current = false;
       videoIceCandidates.current = [];
+      pendingLocalCandidates = [];
 
       if (heartbeatTimer) {
         clearInterval(heartbeatTimer);
       }
-      clearTimeout(loadingTimer);
       clearTimeout(connectionTimeoutTimer);
     };
   }, [connectionAttempt, notificationApi]);
