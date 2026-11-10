@@ -1,3 +1,38 @@
+## 2.5.4 (2026-11-10)
+
+### Features
+
+* Reworked the storage page around the NanoKVM Go file manager: the storage menu is now a two-card picker, "Disk mount" and "File sharing", that opens dedicated windows, and file sharing became a real file manager for the shared folder with list and icon views (remembered per browser), sorting by name, size, type and modified time, search in the current folder, breadcrumbs, inline folder expansion, new folder, download, delete, and uploads from the picker or by drag and drop, including folder upload with nested directories (thanks to [@liangzhuohua](https://github.com/liangzhuohua))
+* Kept the two storage windows openable while the virtual disk is switched off, and let a disabled write action name the steps that unlock it: eject the virtual USB drive on the target machine and turn off the Virtual Disk switch in Settings > Device
+* Removed the manual resolution setting: the video now follows the HDMI input resolution automatically, and the pointer and input-region code use the size of the frame the browser is actually showing
+
+### Bug Fixes
+
+* Fixed an application update leaving the page black or answering 404: service operations are serialized with an init-script lock, the migration finishes before services start, the startup script is installed atomically, recursive restarts are gone and the migration marker is kept until every required change succeeds
+* Fixed video recovery after an application update leaving the encoder and VPSS in a broken state: video ownership is claimed before orphan VENC/VPSS resources are cleared, and the recovery SYS cleanup always runs to completion
+* Fixed an updated web interface being hidden by a cached document: `index.html` now revalidates on every load and content-hashed assets are cached as immutable only while the file exists, so a stale document or a cached 404 is never pinned in the browser
+* Fixed keyboard input being stolen from text fields: forwarding now skips events aimed at an input, textarea, select or contenteditable element and releases held keys when focus moves into one, so typing and pasting in the new dialogs works
+* Fixed `/data` staying read-only while no medium was attached after a failed remount or an exFAT error; the media state poll now heals it and writable opens and transfers retry before failing
+* Fixed the disk mount window reporting transfers it did not start by keeping the media job in the file manager
+
+### Performance
+
+* Reworked H.264 and MJPEG capture on the Sophgo SDK: each codec gets its own capture session and lock with encoder backpressure, frame ownership is explicit, capture stops as soon as the last viewer leaves, and the bundled video libraries were rebuilt
+
+### UI Improvements
+
+* Made a menu picker that opens its own window close without collapsing the menu bar
+
+### Localization
+
+* Translated the new storage page and file manager strings for all supported locales
+
+### Chores
+
+* Added a `POST /api/storage/media/files/mkdir` endpoint for recreating a folder tree during upload, with the same permission model as upload and delete, path and symlinked-parent validation, and a distinct error when the name is already taken by a file
+* Rebuilt the bundled `libkvm.so` and `libkvm_mmf.so` against the Sophgo SDK and refreshed the build and deployment instructions
+* Added unit tests for media file creation, read-only `/data` healing and the static file cache headers
+
 ## 2.5.3 (2026-11-03)
 
 ### Features
