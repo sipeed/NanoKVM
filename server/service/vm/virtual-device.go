@@ -11,11 +11,13 @@ import (
 	"NanoKVM-Server/proto"
 	"NanoKVM-Server/service/hid"
 	"NanoKVM-Server/service/storage"
+	"NanoKVM-Server/service/storage/diskfs"
 )
 
 const (
 	virtualNetwork = "/boot/usb.rndis0"
 	virtualDisk    = "/boot/usb.disk0"
+	bootMountPoint = "/boot"
 )
 
 var (
@@ -170,6 +172,17 @@ func (s *Service) UpdateVirtualDevice(c *gin.Context) {
 		if commandErr = exec.Command("sh", "-c", command).Run(); commandErr != nil {
 			log.Errorf("run %q failed: %s", command, commandErr)
 			break
+		}
+	}
+
+	// The marker that turns a virtual device on or off lives on /boot, a FAT
+	// partition without a journal: the create or the unlink is only in the
+	// page cache until the directory is written back. A power cut right after
+	// the toggle brings the old marker back, so a device the user switched off
+	// is on again on the next boot.
+	if len(commands) > 0 {
+		if err := diskfs.SyncDir(bootMountPoint); err != nil {
+			log.Warnf("sync %s after virtual device change: %s", bootMountPoint, err)
 		}
 	}
 
