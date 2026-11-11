@@ -179,3 +179,17 @@ func TestMkdirDir(t *testing.T) {
 		t.Error("mkdirDir created a directory outside the medium")
 	}
 }
+
+// SyncDir is what makes a delete or a rename durable on the exFAT data
+// partition; it has to work on a plain directory and report a directory that
+// is not there instead of pretending the entry was flushed.
+func TestSyncDir(t *testing.T) {
+	dir := t.TempDir()
+
+	if err := SyncDir(dir); err != nil {
+		t.Fatalf("SyncDir(%q) = %v, want nil", dir, err)
+	}
+	if err := SyncDir(filepath.Join(dir, "missing")); err == nil {
+		t.Error("SyncDir on a missing directory returned nil")
+	}
+}

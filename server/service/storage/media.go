@@ -226,6 +226,14 @@ func deleteMedium(backing string) error {
 	if err := os.Remove(backing); err != nil {
 		return fmt.Errorf("remove %s: %w", backing, err)
 	}
+	// The name is only gone from the page cache until the directory is written
+	// back, and the data partition is exFAT: without the sync a power cut
+	// before writeback brings the deleted image back on the next boot. Images
+	// live in subdirectories too, so the entry to sync is the one holding
+	// this file, not the media root.
+	if err := diskfs.SyncDir(filepath.Dir(backing)); err != nil {
+		log.Warnf("delete %s: %s", backing, err)
+	}
 	return nil
 }
 
@@ -597,6 +605,10 @@ func openMediaIDs() []string {
 // image. The same lock used by gadget and file-manager operations covers both
 // the checks and the rename, so the destination cannot become attached or
 // loop-mounted in between.
+//
+// The caller owns tempPath and must have synced its bytes: this only makes the
+// name durable, the flush of a multi-gigabyte image does not belong under the
+// media lock.
 func InstallImage(tempPath, destPath string) error {
 	mediumOperationMu.Lock()
 	defer mediumOperationMu.Unlock()
@@ -627,6 +639,13 @@ func installImage(tempPath, destPath string, status diskStatus, mounted bool) er
 
 	if err := os.Rename(tempPath, destPath); err != nil {
 		return fmt.Errorf("install image %s: %w", filepath.Base(destPath), err)
+	}
+	// The caller synced the bytes of tempPath, the name is what is still only
+	// in the page cache. Logged like the other sync failures: the image is on
+	// the medium now, but a power cut can take it away, and nothing else would
+	// ever say so.
+	if err := diskfs.SyncDir(filepath.Dir(destPath)); err != nil {
+		log.Warnf("install image %s: %s", destPath, err)
 	}
 	return nil
 }
