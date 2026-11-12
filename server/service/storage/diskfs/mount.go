@@ -474,6 +474,11 @@ func writeFile(root, rel string, r io.Reader) (int64, error) {
 		_ = os.Remove(tempPath)
 		return 0, err
 	}
+	// The file itself is synced above; the name that now points at it is not
+	// until the directory is written back.
+	if err := SyncDir(filepath.Dir(full)); err != nil {
+		logrus.Warnf("upload %s: %s", rel, err)
+	}
 
 	return written, nil
 }
@@ -511,6 +516,36 @@ func mkdirDir(root, rel string) error {
 	if err := os.Mkdir(full, 0o755); err != nil {
 		return fmt.Errorf("create directory %s: %w", rel, err)
 	}
+	// The directory is empty but it is not durable until the entry in its
+	// parent is written back, same as a delete.
+	if err := SyncDir(filepath.Dir(full)); err != nil {
+		logrus.Warnf("create directory %s: %s", rel, err)
+	}
+	return nil
+}
+
+// SyncDir commits the directory entry changes made in dir: a creation, a
+// rename or an unlink is only in the page cache until the directory itself is
+// written back. The data partition is exFAT, which has no journal, so a power
+// cut before that writeback simply rolls the entry back: a file the user
+// deleted is there again after the reboot, and an image that finished
+// uploading is missing its last entries. fsync() on the directory is what
+// makes those changes survive.
+//
+// It is not a cheap directory-only write on exFAT: the inode's fsync also
+// writes the device's dirty metadata buffers and flushes the device cache, so
+// one call can cost a card flush. Callers that change many entries at once
+// should sync once at the end instead of per entry.
+func SyncDir(dir string) error {
+	handle, err := os.Open(dir)
+	if err != nil {
+		return fmt.Errorf("open %s: %w", dir, err)
+	}
+	defer handle.Close()
+
+	if err := handle.Sync(); err != nil {
+		return fmt.Errorf("sync %s: %w", dir, err)
+	}
 	return nil
 }
 
@@ -546,7 +581,17 @@ func removeFile(root, rel string) error {
 	// A directory goes with everything it holds: the web UI confirms the
 	// delete first, and answering an explicit yes with "directory not empty"
 	// helps no one. ResolveInside keeps the walk inside the medium.
-	return os.RemoveAll(full)
+	if err := os.RemoveAll(full); err != nil {
+		return err
+	}
+	// Without this the unlink stays in the page cache, and on the exFAT data
+	// partition a power cut before the writeback brings the file back. A sync
+	// failure does not turn a done delete into an error: the entry is already
+	// gone from the running system, the failure only says it may return.
+	if err := SyncDir(filepath.Dir(full)); err != nil {
+		logrus.Warnf("delete %s: %s", rel, err)
+	}
+	return nil
 }
 
 func (h *handle) Close() error {

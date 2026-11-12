@@ -390,10 +390,18 @@ func (s *Service) DownloadImageFile(c *gin.Context) {
 		// fails when it is mounted, not while it is stored.
 		_, copyErr := io.Copy(lw, part)
 		lw.Stop()
+		// The bytes have to be on the medium before the rename publishes the
+		// name, and the sync happens here rather than under the media lock
+		// the install takes: an image is large and the flush is slow. A
+		// failed copy has nothing worth syncing, it is removed below.
+		var syncErr error
+		if copyErr == nil {
+			syncErr = out.Sync()
+		}
 		partCloseErr := part.Close()
 		outCloseErr := out.Close()
-		if copyErr != nil || partCloseErr != nil || outCloseErr != nil {
-			log.Errorf("write uploaded image %q failed: %s", filename, errors.Join(copyErr, partCloseErr, outCloseErr))
+		if copyErr != nil || syncErr != nil || partCloseErr != nil || outCloseErr != nil {
+			log.Errorf("write uploaded image %q failed: %s", filename, errors.Join(copyErr, syncErr, partCloseErr, outCloseErr))
 			rsp.ErrRsp(c, -1, "write failed")
 			return
 		}
@@ -572,12 +580,23 @@ func (s *Service) downloadRemoteImage(
 	lw := utils.NewProgressWriter(io.MultiWriter(tempFile, hasher), resp.ContentLength, onProgress)
 	written, copyErr := io.Copy(lw, io.LimitReader(resp.Body, limit+1))
 	lw.Stop()
+	// Same as the upload side: the image is not installable until its bytes
+	// are on the medium, and the flush is done outside the media lock. A
+	// cancelled or failed download is removed by the caller, so it is not
+	// worth flushing it first.
+	var syncErr error
+	if copyErr == nil && ctx.Err() == nil {
+		syncErr = tempFile.Sync()
+	}
 	closeErr := tempFile.Close()
 	if ctx.Err() != nil {
 		return ctx.Err()
 	}
 	if copyErr != nil {
 		return fmt.Errorf("save downloaded image failed: %w", copyErr)
+	}
+	if syncErr != nil {
+		return fmt.Errorf("sync downloaded image failed: %w", syncErr)
 	}
 	if closeErr != nil {
 		return fmt.Errorf("close downloaded image failed: %w", closeErr)
