@@ -210,6 +210,14 @@ int main(int argc, char* argv[])
 
 	system("sync");
 
+	// Keep the factory picture until setup and self-checks finish.
+	while(access("/etc/nanokvm-factory-base", F_OK) == 0 &&
+	      access("/boot/factory.ini", F_OK) == 0){
+		if(app::need_exit()) return 0;
+		time::sleep_ms(100);
+	}
+	if(app::need_exit()) return 0;
+
 	OLED_state = oled_exist();
 	if(OLED_state){
 		printf("oled exist\r\n");
