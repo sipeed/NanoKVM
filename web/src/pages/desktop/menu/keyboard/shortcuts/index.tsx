@@ -29,7 +29,7 @@ export const Shortcuts = () => {
       keys: [
         { code: 'ControlLeft', label: 'Ctrl' },
         { code: 'AltLeft', label: 'Alt' },
-        { code: 'Delete', label: '⌫' }
+        { code: 'Delete', label: 'Del' }
       ]
     }
   ];
