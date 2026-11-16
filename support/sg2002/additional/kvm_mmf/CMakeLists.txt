@@ -31,6 +31,21 @@ endif()
 set(common "${middleware}/sample/common")
 set(sensor "${middleware}/component/isp/sensor/sg200x/lontium_lt6911")
 
+# The SDK's LT6911 driver tells the MIPI receiver to expect 1920x1080
+# whatever the target sends, so no frame arrives at any other resolution.
+# Build a copy that takes the size from kvm_mmf.cpp instead.
+file(READ "${sensor}/lt6911_cmos.c" lt6911_cmos)
+string(REGEX REPLACE "#define INPUT_WIDTH[^\n]*"
+    "extern int kvm_mmf_input_width;\n#define INPUT_WIDTH (kvm_mmf_input_width)"
+    lt6911_cmos "${lt6911_cmos}")
+string(REGEX REPLACE "#define INPUT_HEIGHT[^\n]*"
+    "extern int kvm_mmf_input_height;\n#define INPUT_HEIGHT (kvm_mmf_input_height)"
+    lt6911_cmos "${lt6911_cmos}")
+if(NOT lt6911_cmos MATCHES "kvm_mmf_input_width" OR NOT lt6911_cmos MATCHES "kvm_mmf_input_height")
+    message(FATAL_ERROR "lt6911_cmos.c no longer defines INPUT_WIDTH and INPUT_HEIGHT")
+endif()
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lt6911_cmos.c" "${lt6911_cmos}")
+
 add_library(kvm_mmf SHARED
     src/kvm_mmf.cpp
     "${common}/sample_common_sys.c"
@@ -39,7 +54,7 @@ add_library(kvm_mmf SHARED
     "${common}/sample_common_bin.c"
     "${common}/sample_common_platform.c"
     "${common}/sample_common_sensor.c"
-    "${sensor}/lt6911_cmos.c" "${sensor}/lt6911_sensor_ctl.c"
+    "${CMAKE_CURRENT_BINARY_DIR}/lt6911_cmos.c" "${sensor}/lt6911_sensor_ctl.c"
 )
 target_compile_features(kvm_mmf PRIVATE cxx_std_17)
 target_compile_definitions(kvm_mmf PRIVATE SENSOR_LONTIUM_LT6911 SENSOR2_TYPE=LONTIUM_LT6911_2M_60FPS_8BIT)
@@ -49,7 +64,7 @@ target_include_directories(kvm_mmf PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_include_directories(kvm_mmf PRIVATE
-    "${common}" "${middleware}/include" "${middleware}/uapi"
+    "${common}" "${sensor}" "${middleware}/include" "${middleware}/uapi"
     "${middleware}/include/isp/${SOPHGO_CHIP}"
     "${middleware}/component/panel/${SOPHGO_CHIP}"
     "${middleware}/3rdparty/inih"
