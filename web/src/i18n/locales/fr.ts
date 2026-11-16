@@ -163,6 +163,7 @@ const fr = {
       dropdownGerman: 'Allemand',
       dropdownFrench: 'Français',
       dropdownRussian: 'Russe',
+      dropdownSpanish: 'Espagnol',
       shortcut: {
         title: 'Raccourcis',
         custom: 'Personnalisé',

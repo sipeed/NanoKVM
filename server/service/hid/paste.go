@@ -166,6 +166,8 @@ func LangueSwitch(base map[rune]Char, lang string) map[rune]Char {
 		m['@'] = Char{0x40, 39}     // AltGr+0
 		m['\u20AC'] = Char{0x40, 8} // € AltGr+E
 
+	case "es":
+		applySpanishLayout(m)
 	}
 	return m
 }
@@ -186,13 +188,21 @@ func (s *Service) Paste(c *gin.Context) {
 	}
 
 	charMapLocal := LangueSwitch(charMap, req.Langue)
-	typeableRunes := 0
+	var followMap map[rune]Char
+	if req.Langue == "es" {
+		followMap = spanishDeadKeyContinuationMap
+	}
+
+	typeableKeys := 0
 	for _, char := range contentRunes {
 		if _, ok := charMapLocal[char]; ok {
-			typeableRunes++
+			typeableKeys++
+			if _, ok := followMap[char]; ok {
+				typeableKeys++
+			}
 		}
 	}
-	if time.Duration(typeableRunes)*defaultPasteDelay > maxPasteDuration {
+	if time.Duration(typeableKeys)*defaultPasteDelay > maxPasteDuration {
 		rsp.ErrRsp(c, -2, "paste duration exceeds 25s")
 		return
 	}
@@ -233,6 +243,18 @@ func (s *Service) Paste(c *gin.Context) {
 		if err = sleepPasteContext(c.Request.Context(), defaultPasteDelay); err != nil {
 			break
 		}
+		if followKey, ok := followMap[char]; ok {
+			followKeyDown := []byte{byte(followKey.Modifiers), 0x00, byte(followKey.Code), 0x00, 0x00, 0x00, 0x00, 0x00}
+			if err = writeKeyboardReport(followKeyDown); err != nil {
+				break
+			}
+			if err = writeKeyboardReport(keyUp); err != nil {
+				break
+			}
+			if err = sleepPasteContext(c.Request.Context(), defaultPasteDelay); err != nil {
+				break
+			}
+		}
 	}
 	if err == nil {
 		err = context.Cause(c.Request.Context())
@@ -266,6 +288,98 @@ func copyMap(src map[rune]Char) map[rune]Char {
 		dst[k] = v
 	}
 	return dst
+}
+
+var spanishDeadKeyContinuationMap = map[rune]Char{
+	'á': {0, 4},
+	'é': {0, 8},
+	'í': {0, 12},
+	'ó': {0, 18},
+	'ú': {0, 24},
+	'Á': {2, 4},
+	'É': {2, 8},
+	'Í': {2, 12},
+	'Ó': {2, 18},
+	'Ú': {2, 24},
+	'ü': {0, 24},
+	'Ü': {2, 24},
+	'´': {0, 44},
+	'¨': {0, 44},
+	'`': {0, 44},
+	'^': {0, 44},
+}
+
+func applySpanishLayout(m map[rune]Char) {
+	// Spanish (Spain) ISO layout
+	m['\u00F1'] = Char{0, 51} // ñ
+	m['\u00D1'] = Char{2, 51} // Ñ
+	m['\u00E7'] = Char{0, 49} // ç
+	m['\u00C7'] = Char{2, 49} // Ç
+
+	// Dead keys
+	m['`'] = Char{0, 47}      // `
+	m['^'] = Char{2, 47}      // ^
+	m['\u00B4'] = Char{0, 52} // ´
+	m['\u00A8'] = Char{2, 52} // ¨
+
+	// Accented vowels
+	m['\u00E1'] = Char{0, 52} // á
+	m['\u00E9'] = Char{0, 52} // é
+	m['\u00ED'] = Char{0, 52} // í
+	m['\u00F3'] = Char{0, 52} // ó
+	m['\u00FA'] = Char{0, 52} // ú
+	m['\u00C1'] = Char{0, 52} // Á
+	m['\u00C9'] = Char{0, 52} // É
+	m['\u00CD'] = Char{0, 52} // Í
+	m['\u00D3'] = Char{0, 52} // Ó
+	m['\u00DA'] = Char{0, 52} // Ú
+	m['\u00FC'] = Char{2, 52} // ü
+	m['\u00DC'] = Char{2, 52} // Ü
+
+	// Top left key (º ª \)
+	m['\u00BA'] = Char{0, 53}
+	m['\u00AA'] = Char{2, 53}
+	m['\\'] = Char{0x40, 53}
+
+	// Number row symbols
+	m['!'] = Char{2, 30}
+	m['|'] = Char{0x40, 30}
+	m['"'] = Char{2, 31}
+	m['@'] = Char{0x40, 31}
+	m['\u00B7'] = Char{2, 32}
+	m['#'] = Char{0x40, 32}
+	m['$'] = Char{2, 33}
+	m['~'] = Char{0x40, 33}
+	m['%'] = Char{2, 34}
+	m['&'] = Char{2, 35}
+	m['\u00AC'] = Char{0x40, 35}
+	m['/'] = Char{2, 36}
+	m['('] = Char{2, 37}
+	m[')'] = Char{2, 38}
+	m['='] = Char{2, 39}
+
+	// Punctuation & brackets
+	m['\''] = Char{0, 45}
+	m['?'] = Char{2, 45}
+	m['\u00A1'] = Char{0, 46}
+	m['\u00BF'] = Char{2, 46}
+	m['['] = Char{0x40, 47}
+	m['+'] = Char{0, 48}
+	m['*'] = Char{2, 48}
+	m[']'] = Char{0x40, 48}
+	m['{'] = Char{0x40, 52}
+	m['}'] = Char{0x40, 49}
+
+	// Bottom row & currency
+	m['<'] = Char{0, 100}
+	m['>'] = Char{2, 100}
+	m[','] = Char{0, 54}
+	m[';'] = Char{2, 54}
+	m['.'] = Char{0, 55}
+	m[':'] = Char{2, 55}
+	m['-'] = Char{0, 56}
+	m['_'] = Char{2, 56}
+	m['\u20AC'] = Char{0x40, 8} // €
 }
 
 func GetCharMap(lang string) map[rune]Char {

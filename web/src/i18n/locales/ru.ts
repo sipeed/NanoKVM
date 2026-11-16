@@ -159,6 +159,7 @@ const ru = {
       dropdownGerman: 'Немецкий',
       dropdownFrench: 'Французский',
       dropdownRussian: 'Русский',
+      dropdownSpanish: 'Испанский',
       shortcut: {
         title: 'Ярлыки',
         custom: 'Пользовательский',

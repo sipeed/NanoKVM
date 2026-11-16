@@ -161,6 +161,7 @@ const it = {
       dropdownGerman: 'Tedesco',
       dropdownFrench: 'Francese',
       dropdownRussian: 'Russo',
+      dropdownSpanish: 'Spagnolo',
       shortcut: {
         title: 'Scorciatoie',
         custom: 'Personalizzato',
