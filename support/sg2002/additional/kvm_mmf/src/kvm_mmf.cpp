@@ -217,6 +217,16 @@ bool deinitialize_locked()
     return true;
 }
 
+} // namespace
+
+// The input size the LT6911 driver expects (see CMakeLists.txt).
+extern "C" {
+int kvm_mmf_input_width = 1920;
+int kvm_mmf_input_height = 1080;
+}
+
+namespace {
+
 bool initialize_locked()
 {
     if (vi_started) return true;
@@ -250,6 +260,8 @@ bool initialize_locked()
         !check(SAMPLE_COMM_VI_IniToViCfg(&ini, &vi_config), "IniToViCfg") ||
         !check(SAMPLE_COMM_VI_GetSizeBySensor(ini.enSnsType[0], &picture), "GetSizeBySensor") ||
         !check(SAMPLE_COMM_SYS_GetPicSize(picture, &size), "GetPicSize")) return false;
+    kvm_mmf_input_width = size.u32Width;
+    kvm_mmf_input_height = size.u32Height;
 
     VB_CONFIG_S vb = {};
     vb.u32MaxPoolCnt = 1;

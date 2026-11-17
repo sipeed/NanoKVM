@@ -791,6 +791,13 @@ uint8_t lt6911_get_csi_res(uint16_t *p_width, uint16_t *p_height)
     }
 
     res_type = check_res(Hactive, Vactive);
+    // Forget the last size on an unsupported resolution, so that going
+    // back to the previous one counts as new and reopens the capture.
+    if(res_type != NORMAL_RES)
+    {
+        old_Hactive = 0;
+        old_Vactive = 0;
+    }
     if(res_type == NORMAL_RES)
     {
         if(old_Hactive != Hactive || old_Vactive != Vactive){
