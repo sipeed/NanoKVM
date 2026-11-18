@@ -3,10 +3,15 @@ package vm
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"os"
+	"os/exec"
 	"sort"
 	"sync"
 	"time"
 
+	"github.com/creack/pty"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
@@ -20,11 +25,23 @@ const (
 	terminalKindSerial = "serial"
 
 	maxTerminalSessionUserAgent = 256
+	// terminalOutputBufferSize bounds the output kept for replaying recent
+	// terminal history when a page reattaches to a detached session.
+	terminalOutputBufferSize = 256 * 1024
+	// terminalDetachedTimeout closes a session that no page reattached to, so
+	// abandoned shells do not linger on the device forever.
+	terminalDetachedTimeout = 10 * time.Minute
 )
 
-// terminalSession describes one web terminal connection. Metadata is
-// immutable after creation, only the websocket pointer is used to close it.
+var errTerminalSessionClosed = errors.New("terminal session is closed")
+
+// terminalSession owns the pty of one shell. It outlives the websocket page that
+// created it: when the page disconnects the session stays detached until a new
+// page reattaches (or the detach timeout expires).
 type terminalSession struct {
+	mutex      sync.Mutex
+	writeMutex sync.Mutex
+
 	ID        string
 	Kind      string
 	Username  string
@@ -34,16 +51,227 @@ type terminalSession struct {
 	UserAgent string
 	CreatedAt time.Time
 
-	ws        *websocket.Conn
-	closeOnce sync.Once
+	cmd  *exec.Cmd
+	ptmx *os.File
+	ws   *websocket.Conn
+
+	output      []byte
+	closed      bool
+	closeOnce   sync.Once
+	detachTimer *time.Timer
+}
+
+// attach binds a websocket page to the session, replaying the retained output.
+// A second page takes the session over from the previous one.
+func (s *terminalSession) attach(ws *websocket.Conn) error {
+	s.writeMutex.Lock()
+	defer s.writeMutex.Unlock()
+
+	s.mutex.Lock()
+	if s.closed {
+		s.mutex.Unlock()
+		return errTerminalSessionClosed
+	}
+	previous := s.ws
+	s.ws = ws
+	if s.detachTimer != nil {
+		s.detachTimer.Stop()
+		s.detachTimer = nil
+	}
+	replay := append([]byte(nil), s.output...)
+	s.mutex.Unlock()
+
+	if previous != nil && previous != ws {
+		_ = previous.Close()
+	}
+
+	if len(replay) == 0 {
+		return nil
+	}
+
+	_ = ws.SetWriteDeadline(time.Now().Add(messageWait))
+	return ws.WriteMessage(websocket.BinaryMessage, replay)
+}
+
+// detach unbinds the page and starts the idle timer. It ignores a page that was
+// already replaced by a takeover.
+func (s *terminalSession) detach(ws *websocket.Conn) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	if s.closed || s.ws != ws {
+		return
+	}
+	s.ws = nil
+	if s.detachTimer != nil {
+		s.detachTimer.Stop()
+	}
+	s.detachTimer = time.AfterFunc(terminalDetachedTimeout, func() {
+		// A page may have reattached after the timer fired but before this
+		// callback ran; only close sessions that are still detached.
+		s.mutex.Lock()
+		detached := !s.closed && s.ws == nil
+		s.mutex.Unlock()
+		if !detached {
+			return
+		}
+
+		log.Debugf("closing detached terminal session %s", s.ID)
+		s.close()
+	})
+}
+
+func (s *terminalSession) isAttached() bool {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	return s.ws != nil
+}
+
+// writeOutput appends pty output to the replay buffer and forwards it to the
+// attached page, if any.
+func (s *terminalSession) writeOutput(data []byte) {
+	s.writeMutex.Lock()
+	defer s.writeMutex.Unlock()
+
+	s.mutex.Lock()
+	if s.closed {
+		s.mutex.Unlock()
+		return
+	}
+	s.output = appendBounded(s.output, data, terminalOutputBufferSize)
+	ws := s.ws
+	s.mutex.Unlock()
+
+	if ws == nil {
+		return
+	}
+
+	_ = ws.SetWriteDeadline(time.Now().Add(messageWait))
+	if err := ws.WriteMessage(websocket.BinaryMessage, data); err != nil {
+		log.Debugf("write terminal session %s output failed: %s", s.ID, err)
+		s.detach(ws)
+	}
+}
+
+// writeControl sends a text message to the attached page. The write mutex is
+// shared with the pty output so the websocket keeps a single writer.
+func (s *terminalSession) writeControl(data []byte) error {
+	s.writeMutex.Lock()
+	defer s.writeMutex.Unlock()
+
+	s.mutex.Lock()
+	ws := s.ws
+	s.mutex.Unlock()
+
+	if ws == nil {
+		return nil
+	}
+
+	_ = ws.SetWriteDeadline(time.Now().Add(messageWait))
+	return ws.WriteMessage(websocket.TextMessage, data)
+}
+
+// pty to page
+func (s *terminalSession) readOutput() {
+	data := make([]byte, maxMessageSize)
+
+	for {
+		n, err := s.ptmx.Read(data)
+		if n > 0 {
+			s.writeOutput(data[:n])
+		}
+		if err != nil {
+			s.close()
+			return
+		}
+	}
+}
+
+// page to pty
+func (s *terminalSession) readInput(ws *websocket.Conn) {
+	var zeroTime time.Time
+	_ = ws.SetReadDeadline(zeroTime)
+
+	for {
+		msgType, data, err := ws.ReadMessage()
+		if err != nil {
+			return
+		}
+
+		// control and resize messages
+		if msgType == websocket.BinaryMessage {
+			var message terminalMessage
+			if err := json.Unmarshal(data, &message); err == nil {
+				// The page pings the session and expects a pong back, so a
+				// dropped page can show how long the terminal has been silent.
+				if message.Type == terminalHeartbeatType {
+					if err := s.writeControl([]byte(terminalHeartbeatResponse)); err != nil {
+						log.Debugf("write terminal session %s heartbeat failed: %s", s.ID, err)
+						return
+					}
+					continue
+				}
+
+				_ = pty.Setsize(s.ptmx, &pty.Winsize{
+					Rows: message.Rows,
+					Cols: message.Cols,
+				})
+			}
+			continue
+		}
+
+		if _, err := s.ptmx.Write(data); err != nil {
+			log.Debugf("write terminal session %s input failed: %s", s.ID, err)
+			return
+		}
+	}
 }
 
 func (s *terminalSession) close() {
 	s.closeOnce.Do(func() {
-		if s.ws != nil {
-			_ = s.ws.Close()
+		s.mutex.Lock()
+		s.closed = true
+		ws := s.ws
+		s.ws = nil
+		if s.detachTimer != nil {
+			s.detachTimer.Stop()
+			s.detachTimer = nil
 		}
+		s.mutex.Unlock()
+
+		terminalSessions.remove(s.ID)
+
+		if ws != nil {
+			_ = ws.Close()
+		}
+		if s.ptmx != nil {
+			_ = s.ptmx.Close()
+		}
+		if s.cmd != nil && s.cmd.Process != nil {
+			_ = s.cmd.Process.Kill()
+		}
+		if s.cmd != nil {
+			_ = s.cmd.Wait()
+		}
+
+		log.Debugf("terminal session %s closed", s.ID)
 	})
+}
+
+// appendBounded appends data to buffer and keeps at most limit trailing bytes.
+func appendBounded(buffer, data []byte, limit int) []byte {
+	if len(data) >= limit {
+		return append(buffer[:0], data[len(data)-limit:]...)
+	}
+
+	buffer = append(buffer, data...)
+	if len(buffer) > limit {
+		copy(buffer, buffer[len(buffer)-limit:])
+		buffer = buffer[:limit]
+	}
+
+	return buffer
 }
 
 type terminalSessionRegistry struct {
@@ -64,16 +292,22 @@ func newTerminalSessionID() string {
 	return hex.EncodeToString(buf)
 }
 
-// registerTerminalSession records a newly upgraded terminal websocket so it can
-// be listed and closed from the settings page.
-func registerTerminalSession(ws *websocket.Conn, c *gin.Context) *terminalSession {
+func newTerminalSession(c *gin.Context) (*terminalSession, error) {
+	cmd := exec.Command("/bin/sh", "-l")
+	cmd.Dir = "/root"
+	ptmx, err := pty.Start(cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	session := &terminalSession{
 		ID:        newTerminalSessionID(),
 		Kind:      terminalKindShell,
 		ClientIP:  c.ClientIP(),
 		UserAgent: truncate(c.Request.UserAgent(), maxTerminalSessionUserAgent),
 		CreatedAt: time.Now(),
-		ws:        ws,
+		cmd:       cmd,
+		ptmx:      ptmx,
 	}
 
 	if principal, ok := middleware.CurrentPrincipal(c); ok {
@@ -87,7 +321,9 @@ func registerTerminalSession(ws *websocket.Conn, c *gin.Context) *terminalSessio
 	}
 
 	terminalSessions.add(session)
-	return session
+	go session.readOutput()
+
+	return session, nil
 }
 
 func truncate(value string, limit int) string {
@@ -150,6 +386,7 @@ func (s *Service) GetTerminalSessions(c *gin.Context) {
 			ClientIP:  session.ClientIP,
 			UserAgent: session.UserAgent,
 			CreatedAt: session.CreatedAt.UnixMilli(),
+			Attached:  session.isAttached(),
 		})
 	}
 
@@ -168,7 +405,6 @@ func (s *Service) CloseTerminalSession(c *gin.Context) {
 		return
 	}
 
-	terminalSessions.remove(id)
 	session.close()
 
 	rsp.OkRsp(c)

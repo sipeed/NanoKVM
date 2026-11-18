@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button, Divider, Modal, Spin, Tooltip, message } from 'antd';
-import { RefreshCcwIcon, SquareTerminalIcon, UsbIcon, XIcon } from 'lucide-react';
+import clsx from 'clsx';
+import { PlugZapIcon, RefreshCcwIcon, SquareTerminalIcon, UsbIcon, XIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
@@ -38,10 +39,11 @@ type SessionRowProps = {
   session: TerminalSession;
   now: number;
   closing: boolean;
+  onReconnect: () => void;
   onClose: () => void;
 };
 
-const SessionRow = ({ session, now, closing, onClose }: SessionRowProps) => {
+const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowProps) => {
   const { t, i18n } = useTranslation();
   const { seconds, minutes, hours } = splitDuration(now - session.createdAt);
 
@@ -87,23 +89,45 @@ const SessionRow = ({ session, now, closing, onClose }: SessionRowProps) => {
             <Tooltip title={session.userAgent || '-'} placement="top" mouseEnterDelay={0.4}>
               <span className="truncate cursor-default">{session.clientIp || '-'}</span>
             </Tooltip>
+            <span>·</span>
+            <span className="flex shrink-0 items-center space-x-1">
+              <span
+                className={clsx(
+                  'h-1.5 w-1.5 rounded-full',
+                  session.attached ? 'bg-green-500' : 'bg-neutral-500'
+                )}
+              />
+              <span>{session.attached ? t('settings.terminal.attached') : t('settings.terminal.detached')}</span>
+            </span>
           </div>
 
           <span className="truncate text-xs text-neutral-500">{startedAtText}</span>
         </div>
       </div>
 
-      <Tooltip title={t('settings.terminal.close')} placement="top" mouseEnterDelay={0.4}>
-        <Button
-          type="text"
-          size="small"
-          danger
-          loading={closing}
-          className="shrink-0 text-neutral-400 hover:text-red-400"
-          icon={<XIcon size={15} />}
-          onClick={onClose}
-        />
-      </Tooltip>
+      <div className="flex shrink-0 items-center space-x-1">
+        <Tooltip title={t('settings.terminal.reconnect')} placement="top" mouseEnterDelay={0.4}>
+          <Button
+            type="text"
+            size="small"
+            className="text-neutral-400 hover:text-white"
+            icon={<PlugZapIcon size={15} />}
+            onClick={onReconnect}
+          />
+        </Tooltip>
+
+        <Tooltip title={t('settings.terminal.close')} placement="top" mouseEnterDelay={0.4}>
+          <Button
+            type="text"
+            size="small"
+            danger
+            loading={closing}
+            className="text-neutral-400 hover:text-red-400"
+            icon={<XIcon size={15} />}
+            onClick={onClose}
+          />
+        </Tooltip>
+      </div>
     </div>
   );
 };
@@ -196,6 +220,27 @@ export const TerminalSessions = () => {
     });
   }
 
+  function reconnectSession(session: TerminalSession) {
+    const openTerminal = () => {
+      window.open(`/#terminal?session=${encodeURIComponent(session.id)}`, '_blank');
+    };
+
+    if (!session.attached) {
+      openTerminal();
+      return;
+    }
+
+    modal.confirm({
+      title: t('settings.terminal.reconnectTitle'),
+      content: (
+        <span className="text-sm text-neutral-400">{t('settings.terminal.reconnectDesc')}</span>
+      ),
+      okText: t('settings.terminal.reconnectOk'),
+      cancelText: t('settings.terminal.reconnectCancel'),
+      onOk: openTerminal
+    });
+  }
+
   return (
     <>
       {contextHolder}
@@ -238,6 +283,7 @@ export const TerminalSessions = () => {
                   session={session}
                   now={now}
                   closing={closingId === session.id}
+                  onReconnect={() => reconnectSession(session)}
                   onClose={() => closeSession(session)}
                 />
               </div>

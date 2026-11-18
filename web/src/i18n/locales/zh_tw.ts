@@ -375,6 +375,8 @@ const zh_tw = {
       dataBits: '資料位元',
       stopBits: '停止位元',
       confirm: '確定',
+      sessionUnavailable: '此終端機工作階段已結束或不存在',
+      newTerminal: '開啟新終端機',
       unresponsive: '終端機未回應',
       lastResponse: '終端機上一次回應於 {{time}}（{{seconds}}秒前）',
       reconnect: '重新連線',
@@ -445,7 +447,14 @@ const zh_tw = {
         startedAt: '工作階段建立於 {{time}}（{{duration}}前）',
         elapsedSeconds: '{{seconds}} 秒',
         elapsedMinutes: '{{minutes}} 分鐘',
-        elapsedHours: '{{hours}} 小時 {{minutes}} 分鐘'
+        elapsedHours: '{{hours}} 小時 {{minutes}} 分鐘',
+        reconnect: '重新連線',
+        attached: '已連線',
+        detached: '已中斷',
+        reconnectTitle: '接管此終端機？',
+        reconnectDesc: '此工作階段正在其他頁面連線，重新連線會中斷原頁面。',
+        reconnectOk: '重新連線',
+        reconnectCancel: '取消'
       },
       about: {
         title: '關於 NanoKVM',

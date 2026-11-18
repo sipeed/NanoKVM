@@ -252,6 +252,7 @@ export type TerminalSession = {
   clientIp: string;
   userAgent: string;
   createdAt: number;
+  attached: boolean;
 };
 
 // get all web terminal sessions opened from any page

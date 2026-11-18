@@ -390,6 +390,8 @@ const en = {
       dataBits: 'Data bits',
       stopBits: 'Stop bits',
       confirm: 'Ok',
+      sessionUnavailable: 'This terminal session has ended or does not exist',
+      newTerminal: 'Open a new terminal',
       unresponsive: 'Terminal is not responding',
       lastResponse: 'The terminal last responded at {{time}} ({{seconds}} seconds ago)',
       reconnect: 'Reconnect',
@@ -462,7 +464,15 @@ const en = {
         startedAt: 'Session started {{time}} ({{duration}} ago)',
         elapsedSeconds: '{{seconds}}s',
         elapsedMinutes: '{{minutes}} min',
-        elapsedHours: '{{hours}} h {{minutes}} min'
+        elapsedHours: '{{hours}} h {{minutes}} min',
+        reconnect: 'Reconnect',
+        attached: 'Attached',
+        detached: 'Detached',
+        reconnectTitle: 'Take over this terminal?',
+        reconnectDesc:
+          'This session is connected in another page. Reconnecting will disconnect that page.',
+        reconnectOk: 'Reconnect',
+        reconnectCancel: 'Cancel'
       },
       about: {
         title: 'About NanoKVM',

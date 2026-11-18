@@ -375,6 +375,8 @@ const zh = {
       dataBits: '数据位',
       stopBits: '停止位',
       confirm: '确定',
+      sessionUnavailable: '该终端会话已结束或不存在',
+      newTerminal: '打开新终端',
       unresponsive: '终端未响应',
       lastResponse: '终端上一次响应于 {{time}}（{{seconds}}秒前）',
       reconnect: '重新连接',
@@ -444,7 +446,14 @@ const zh = {
         startedAt: '会话建立于 {{time}}（{{duration}}前）',
         elapsedSeconds: '{{seconds}} 秒',
         elapsedMinutes: '{{minutes}} 分钟',
-        elapsedHours: '{{hours}} 小时 {{minutes}} 分钟'
+        elapsedHours: '{{hours}} 小时 {{minutes}} 分钟',
+        reconnect: '重新连接',
+        attached: '已连接',
+        detached: '已断开',
+        reconnectTitle: '接管该终端？',
+        reconnectDesc: '该会话正在其他页面连接，重新连接会断开原页面。',
+        reconnectOk: '重新连接',
+        reconnectCancel: '取消'
       },
       about: {
         title: '关于 NanoKVM',

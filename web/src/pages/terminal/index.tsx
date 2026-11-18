@@ -42,10 +42,11 @@ function formatLastResponseTime(timestamp: number, language: string) {
   }
 }
 
-// The terminal page receives the serial port parameters through the hash query,
-// e.g. /#terminal?port=/dev/ttyUSB0&baud=115200. Forward them to the websocket
-// so the backend can describe the session in the settings terminal manager.
-const terminalQueryKeys = ['port', 'baud', 'parity', 'flowControl', 'dataBits', 'stopBits'];
+// The terminal page forwards its hash query to the websocket: the session id
+// used to reattach to an existing session (e.g. /#terminal?session=<id>) and the
+// serial port parameters (e.g. /#terminal?port=/dev/ttyUSB0&baud=115200) used to
+// describe a new serial session.
+const terminalQueryKeys = ['session', 'port', 'baud', 'parity', 'flowControl', 'dataBits', 'stopBits'];
 
 function getTerminalQuery() {
   const urls = window.location.href.split('?');
@@ -75,6 +76,7 @@ export const Terminal = () => {
   const [notify, contextHolder] = notification.useNotification();
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [isDisconnected, setIsDisconnected] = useState(false);
+  const [isSessionUnavailable, setIsSessionUnavailable] = useState(false);
   const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
   const language = i18n.resolvedLanguage || i18n.language;
@@ -109,11 +111,15 @@ export const Terminal = () => {
     terminal.open(terminalEle);
     fitAddon.fit();
 
+    // A session id in the page URL means "reattach to this session"; without it
+    // a new shell is created.
+    const isReconnect = Boolean(getTerminalQuery().get('session'));
     const url = getTerminalWsUrl();
     const ws = new WebSocket(url);
     let isPicocomRunning = false;
     let isDisposed = false;
     let hasDisconnected = false;
+    let hasOpened = false;
     let picocomTimer: number | undefined;
     let closeTimer: number | undefined;
     let heartbeatTimer: number | undefined;
@@ -121,6 +127,11 @@ export const Terminal = () => {
     lastResponseAtRef.current = Date.now();
 
     ws.addEventListener('close', (event) => {
+      if (!hasOpened) {
+        setIsSessionUnavailable(true);
+        return;
+      }
+
       if (event.code === 4401) {
         notifyAuthExpired();
         return;
@@ -274,6 +285,8 @@ export const Terminal = () => {
     ws.onopen = () => {
       if (isDisposed) return;
 
+      hasOpened = true;
+      setIsSessionUnavailable(false);
       lastResponseAtRef.current = Date.now();
       setIsDisconnected(false);
       terminal.options.disableStdin = false;
@@ -285,9 +298,17 @@ export const Terminal = () => {
 
       sendSize();
       sendHeartbeat();
-      picocomTimer = window.setTimeout(runPicocom, 300);
+      if (!isReconnect) {
+        picocomTimer = window.setTimeout(runPicocom, 300);
+      }
     };
-    ws.onclose = showDisconnectedNotification;
+    ws.onclose = () => {
+      // A page that never opened shows the unavailable-session overlay instead;
+      // only a live terminal that goes silent is treated as unresponsive.
+      if (!hasOpened) return;
+
+      showDisconnectedNotification();
+    };
     ws.addEventListener('message', handleMessage);
 
     window.addEventListener('resize', resizeScreen, false);
@@ -310,6 +331,10 @@ export const Terminal = () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [connectionAttempt, language, notify, stopDisconnectedTimer, t]);
+
+  function openNewTerminal() {
+    window.open('/#terminal', '_blank');
+  }
 
   return (
     <>
@@ -339,6 +364,19 @@ export const Terminal = () => {
                   {t('terminal.reconnect')}
                 </Button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {isSessionUnavailable && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="flex flex-col items-center gap-4 rounded-lg bg-neutral-900/90 px-8 py-6 text-center">
+              <div className="text-lg font-medium text-white">
+                {t('terminal.sessionUnavailable')}
+              </div>
+              <Button type="primary" onClick={openNewTerminal}>
+                {t('terminal.newTerminal')}
+              </Button>
             </div>
           </div>
         )}
