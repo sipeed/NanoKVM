@@ -389,7 +389,11 @@ const en = {
       flowControlHard: 'Hard',
       dataBits: 'Data bits',
       stopBits: 'Stop bits',
-      confirm: 'Ok'
+      confirm: 'Ok',
+      unresponsive: 'Terminal is not responding',
+      lastResponse: 'The terminal last responded {{seconds}} seconds ago',
+      reconnect: 'Reconnect',
+      refreshPage: 'Refresh Page'
     },
     wol: {
       title: 'Wake-on-LAN',

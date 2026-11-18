@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/creack/pty"
@@ -14,13 +15,20 @@ import (
 )
 
 const (
-	messageWait    = 10 * time.Second
-	maxMessageSize = 1024
+	messageWait               = 10 * time.Second
+	maxMessageSize            = 1024
+	terminalHeartbeatType     = "ping"
+	terminalHeartbeatResponse = `{"type":"pong"}`
 )
 
 type WinSize struct {
 	Rows uint16 `json:"rows"`
 	Cols uint16 `json:"cols"`
+}
+
+type terminalMessage struct {
+	Type string `json:"type"`
+	WinSize
 }
 
 var upgrader = websocket.Upgrader{
@@ -54,12 +62,21 @@ func (s *Service) Terminal(c *gin.Context) {
 		_ = cmd.Wait()
 	}()
 
-	go wsWrite(ws, ptmx)
-	wsRead(ws, ptmx)
+	var writeMu sync.Mutex
+	go wsWrite(ws, ptmx, &writeMu)
+	wsRead(ws, ptmx, &writeMu)
+}
+
+func writeWsMessage(ws *websocket.Conn, writeMu *sync.Mutex, msgType int, data []byte) error {
+	writeMu.Lock()
+	defer writeMu.Unlock()
+
+	_ = ws.SetWriteDeadline(time.Now().Add(messageWait))
+	return ws.WriteMessage(msgType, data)
 }
 
 // pty to ws
-func wsWrite(ws *websocket.Conn, ptmx *os.File) {
+func wsWrite(ws *websocket.Conn, ptmx *os.File, writeMu *sync.Mutex) {
 	data := make([]byte, maxMessageSize)
 
 	for {
@@ -69,9 +86,7 @@ func wsWrite(ws *websocket.Conn, ptmx *os.File) {
 		}
 
 		if n > 0 {
-			_ = ws.SetWriteDeadline(time.Now().Add(messageWait))
-
-			err = ws.WriteMessage(websocket.BinaryMessage, data[:n])
+			err = writeWsMessage(ws, writeMu, websocket.BinaryMessage, data[:n])
 			if err != nil {
 				log.Errorf("write ws message failed: %s", err)
 				return
@@ -81,7 +96,7 @@ func wsWrite(ws *websocket.Conn, ptmx *os.File) {
 }
 
 // ws to pty
-func wsRead(ws *websocket.Conn, ptmx *os.File) {
+func wsRead(ws *websocket.Conn, ptmx *os.File, writeMu *sync.Mutex) {
 	var zeroTime time.Time
 	_ = ws.SetReadDeadline(zeroTime)
 
@@ -91,13 +106,21 @@ func wsRead(ws *websocket.Conn, ptmx *os.File) {
 			return
 		}
 
-		// resize message
+		// control and resize messages
 		if msgType == websocket.BinaryMessage {
-			var winSize WinSize
-			if err := json.Unmarshal(p, &winSize); err == nil {
+			var message terminalMessage
+			if err := json.Unmarshal(p, &message); err == nil {
+				if message.Type == terminalHeartbeatType {
+					if err := writeWsMessage(ws, writeMu, websocket.TextMessage, []byte(terminalHeartbeatResponse)); err != nil {
+						log.Errorf("write terminal heartbeat failed: %s", err)
+						return
+					}
+					continue
+				}
+
 				_ = pty.Setsize(ptmx, &pty.Winsize{
-					Rows: winSize.Rows,
-					Cols: winSize.Cols,
+					Rows: message.Rows,
+					Cols: message.Cols,
 				})
 			}
 			continue

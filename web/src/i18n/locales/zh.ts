@@ -374,7 +374,11 @@ const zh = {
       flowControlHard: '硬件',
       dataBits: '数据位',
       stopBits: '停止位',
-      confirm: '确定'
+      confirm: '确定',
+      unresponsive: '终端未响应',
+      lastResponse: '终端上一次响应是 {{seconds}} 秒前',
+      reconnect: '重新连接',
+      refreshPage: '刷新页面'
     },
     wol: {
       title: 'Wake-on-LAN',
