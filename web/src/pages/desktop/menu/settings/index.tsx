@@ -11,6 +11,7 @@ import {
   PaletteIcon,
   SettingsIcon,
   SmartphoneIcon,
+  SquareTerminalIcon,
   UserRoundIcon
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +30,7 @@ import { Device } from './device';
 import { MCP } from './mcp';
 import { Network } from './network';
 import { Tailscale } from './tailscale';
+import { TerminalSessions } from './terminal';
 import { Update } from './update';
 
 export const Settings = () => {
@@ -39,6 +41,7 @@ export const Settings = () => {
   const canUpdate = hasPermission('update');
   const canMcp = hasPermission('mcp');
   const canTailscale = hasPermission('tailscale');
+  const canTerminal = hasPermission('terminal');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
@@ -59,6 +62,9 @@ export const Settings = () => {
       ? [{ id: 'network', icon: <NetworkIcon size={16} />, component: <Network /> }]
       : []),
     ...(canMcp ? [{ id: 'mcp', icon: <BotIcon size={16} />, component: <MCP /> }] : []),
+    ...(canTerminal
+      ? [{ id: 'terminal', icon: <SquareTerminalIcon size={16} />, component: <TerminalSessions /> }]
+      : []),
     ...(canTailscale
       ? [
           {
