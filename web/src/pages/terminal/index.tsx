@@ -71,16 +71,19 @@ function getTerminalWsUrl() {
   return query ? `${url}?${query}` : url;
 }
 
-// The backend uses this application-defined close code when another page takes
-// over the same terminal session.
+// The backend uses these application-defined close codes when another page
+// takes over the session or when the session is closed from the settings page.
 const terminalTakenOverCode = 4409;
+const terminalClosedCode = 4410;
 
 export const Terminal = () => {
   const { t, i18n } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [isDisconnected, setIsDisconnected] = useState(false);
-  const [closedReason, setClosedReason] = useState<'unavailable' | 'takenOver' | null>(null);
+  const [closedReason, setClosedReason] = useState<
+    'unavailable' | 'takenOver' | 'closed' | null
+  >(null);
   const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
   const language = i18n.resolvedLanguage || i18n.language;
@@ -139,6 +142,11 @@ export const Terminal = () => {
 
       if (event.code === terminalTakenOverCode) {
         setClosedReason('takenOver');
+        return;
+      }
+
+      if (event.code === terminalClosedCode) {
+        setClosedReason('closed');
         return;
       }
 
@@ -319,6 +327,7 @@ export const Terminal = () => {
       if (!hasOpened) return;
       if (
         event.code === terminalTakenOverCode ||
+        event.code === terminalClosedCode ||
         event.code === 4401 ||
         event.code === 4403
       ) {
@@ -396,11 +405,17 @@ export const Terminal = () => {
               <div className="text-lg font-medium text-white">
                 {closedReason === 'takenOver'
                   ? t('terminal.takenOver')
-                  : t('terminal.sessionUnavailable')}
+                  : closedReason === 'closed'
+                    ? t('terminal.closedRemotely')
+                    : t('terminal.sessionUnavailable')}
               </div>
 
               {closedReason === 'takenOver' && (
                 <div className="text-sm text-neutral-400">{t('terminal.takenOverHint')}</div>
+              )}
+
+              {closedReason === 'closed' && (
+                <div className="text-sm text-neutral-400">{t('terminal.closedRemotelyHint')}</div>
               )}
 
               {closedReason === 'takenOver' && sessionID ? (

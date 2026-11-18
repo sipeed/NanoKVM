@@ -37,6 +37,9 @@ const (
 	// terminalSessionTakenOverCode is an application-defined close code (4000-
 	// 4999) that tells a page another page attached to its session.
 	terminalSessionTakenOverCode = 4409
+	// terminalSessionClosedCode tells a page its session was closed remotely
+	// from the settings page.
+	terminalSessionClosedCode = 4410
 )
 
 var errTerminalSessionClosed = errors.New("terminal session is closed")
@@ -258,6 +261,12 @@ func (s *terminalSession) readInput(ws *websocket.Conn) {
 }
 
 func (s *terminalSession) close() {
+	s.closeWithCode(0, "")
+}
+
+// closeWithCode closes the session and, when code is non-zero, tells the
+// attached page why with an application-defined websocket close code.
+func (s *terminalSession) closeWithCode(code int, reason string) {
 	s.closeOnce.Do(func() {
 		s.mutex.Lock()
 		s.closed = true
@@ -272,6 +281,13 @@ func (s *terminalSession) close() {
 		terminalSessions.remove(s.ID)
 
 		if ws != nil {
+			if code != 0 {
+				_ = ws.WriteControl(
+					websocket.CloseMessage,
+					websocket.FormatCloseMessage(code, reason),
+					time.Now().Add(messageWait),
+				)
+			}
 			_ = ws.Close()
 		}
 		if s.ptmx != nil {
@@ -435,7 +451,7 @@ func (s *Service) CloseTerminalSession(c *gin.Context) {
 		return
 	}
 
-	session.close()
+	session.closeWithCode(terminalSessionClosedCode, "terminal session closed from settings")
 
 	rsp.OkRsp(c)
 	log.Debugf("terminal session %s closed", id)

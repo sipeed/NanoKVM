@@ -401,7 +401,9 @@ const en = {
       unresponsive: 'Terminal is not responding',
       lastResponse: 'The terminal last responded at {{time}} ({{seconds}} seconds ago)',
       reconnect: 'Reconnect',
-      refreshPage: 'Refresh Page'
+      refreshPage: 'Refresh Page',
+      closedRemotely: 'This terminal session was closed from the settings page',
+      closedRemotelyHint: 'The session was closed remotely. Open a new terminal to continue.'
     },
     wol: {
       title: 'Wake-on-LAN',

@@ -386,7 +386,9 @@ const zh = {
       unresponsive: '终端未响应',
       lastResponse: '终端上一次响应于 {{time}}（{{seconds}}秒前）',
       reconnect: '重新连接',
-      refreshPage: '刷新页面'
+      refreshPage: '刷新页面',
+      closedRemotely: '该终端会话已在设置中被关闭',
+      closedRemotelyHint: '会话已被远端关闭，如需继续使用请打开新终端。'
     },
     wol: {
       title: 'Wake-on-LAN',

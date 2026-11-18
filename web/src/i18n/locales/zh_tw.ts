@@ -386,7 +386,9 @@ const zh_tw = {
       unresponsive: '終端機未回應',
       lastResponse: '終端機上一次回應於 {{time}}（{{seconds}}秒前）',
       reconnect: '重新連線',
-      refreshPage: '重新整理頁面'
+      refreshPage: '重新整理頁面',
+      closedRemotely: '此終端機工作階段已在設定中關閉',
+      closedRemotelyHint: '工作階段已被遠端關閉，如需繼續使用請開啟新終端機。'
     },
     wol: {
       title: 'Wake-on-LAN',
