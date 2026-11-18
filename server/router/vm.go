@@ -42,6 +42,9 @@ func vmRouter(r *gin.Engine) {
 
 	terminal.GET("/vm/terminal", service.Terminal) // web terminal
 
+	terminal.GET("/vm/terminal/sessions", service.GetTerminalSessions)         // list web terminal sessions
+	terminal.DELETE("/vm/terminal/sessions/:id", service.CloseTerminalSession) // close web terminal session
+
 	terminal.GET("/vm/script", service.GetScripts)           // get script
 	terminal.POST("/vm/script/upload", service.UploadScript) // upload script
 	terminal.POST("/vm/script/run", service.RunScript)       // run script

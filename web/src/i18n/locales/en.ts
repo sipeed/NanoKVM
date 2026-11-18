@@ -444,6 +444,25 @@ const en = {
         okBtn: 'Confirm',
         cancelBtn: 'Cancel'
       },
+      terminal: {
+        title: 'Terminal',
+        description:
+          'Manage the web terminals opened from any page or browser. Closing a session disconnects its terminal page immediately.',
+        refresh: 'Refresh',
+        empty: 'No terminal session is currently open',
+        shell: 'NanoKVM Terminal',
+        serial: 'Serial Terminal',
+        serialParams: '{{port}} @ {{baud}}',
+        close: 'Close',
+        closeTitle: 'Close this terminal?',
+        closeDesc: 'The terminal page will be disconnected immediately.',
+        closeOk: 'Close',
+        closeCancel: 'Cancel',
+        failed: 'Operation failed',
+        durationSeconds: 'Connected for {{seconds}}s',
+        durationMinutes: 'Connected for {{minutes}} min',
+        durationHours: 'Connected for {{hours}} h {{minutes}} min'
+      },
       about: {
         title: 'About NanoKVM',
         information: 'Information',

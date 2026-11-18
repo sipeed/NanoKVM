@@ -240,3 +240,26 @@ export function setTLS(enabled: boolean) {
 export function reboot() {
   return http.post('/api/vm/system/reboot');
 }
+
+export type TerminalSessionKind = 'shell' | 'serial';
+
+export type TerminalSession = {
+  id: string;
+  kind: TerminalSessionKind;
+  username?: string;
+  port?: string;
+  baud?: string;
+  clientIp: string;
+  userAgent: string;
+  createdAt: number;
+};
+
+// get all web terminal sessions opened from any page
+export function getTerminalSessions() {
+  return http.get('/api/vm/terminal/sessions');
+}
+
+// force close a web terminal session
+export function closeTerminalSession(id: string) {
+  return http.delete(`/api/vm/terminal/sessions/${encodeURIComponent(id)}`);
+}

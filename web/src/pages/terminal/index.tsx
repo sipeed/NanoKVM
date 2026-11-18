@@ -42,6 +42,34 @@ function formatLastResponseTime(timestamp: number, language: string) {
   }
 }
 
+// The terminal page receives the serial port parameters through the hash query,
+// e.g. /#terminal?port=/dev/ttyUSB0&baud=115200. Forward them to the websocket
+// so the backend can describe the session in the settings terminal manager.
+const terminalQueryKeys = ['port', 'baud', 'parity', 'flowControl', 'dataBits', 'stopBits'];
+
+function getTerminalQuery() {
+  const urls = window.location.href.split('?');
+  if (urls.length < 2) return new URLSearchParams();
+
+  return new URLSearchParams(urls[1]);
+}
+
+function getTerminalWsUrl() {
+  const url = `${getBaseUrl('ws')}/api/vm/terminal`;
+  const source = getTerminalQuery();
+  const params = new URLSearchParams();
+
+  for (const key of terminalQueryKeys) {
+    const value = source.get(key);
+    if (value) {
+      params.set(key, value);
+    }
+  }
+
+  const query = params.toString();
+  return query ? `${url}?${query}` : url;
+}
+
 export const Terminal = () => {
   const { t, i18n } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
@@ -81,7 +109,7 @@ export const Terminal = () => {
     terminal.open(terminalEle);
     fitAddon.fit();
 
-    const url = `${getBaseUrl('ws')}/api/vm/terminal`;
+    const url = getTerminalWsUrl();
     const ws = new WebSocket(url);
     let isPicocomRunning = false;
     let isDisposed = false;
@@ -168,10 +196,7 @@ export const Terminal = () => {
     const runPicocom = () => {
       if (isDisposed || ws.readyState !== WebSocket.OPEN) return;
 
-      const urls = window.location.href.split('?');
-      if (urls.length < 2) return;
-
-      const searchParams = new URLSearchParams(urls[1]);
+      const searchParams = getTerminalQuery();
       const port = searchParams.get('port');
       const baud = searchParams.get('baud');
       const parity = searchParams.get('parity');

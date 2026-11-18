@@ -428,6 +428,24 @@ const zh_tw = {
         okBtn: '確認',
         cancelBtn: '取消'
       },
+      terminal: {
+        title: '終端機',
+        description: '管理從任意頁面或瀏覽器開啟的 Web 終端機。關閉工作階段會立即中斷對應的終端機頁面。',
+        refresh: '重新整理',
+        empty: '目前沒有開啟的終端機工作階段',
+        shell: 'NanoKVM 終端機',
+        serial: '序列埠終端機',
+        serialParams: '{{port}} @ {{baud}}',
+        close: '關閉',
+        closeTitle: '關閉此終端機？',
+        closeDesc: '對應的終端機頁面會立即中斷連線。',
+        closeOk: '關閉',
+        closeCancel: '取消',
+        failed: '操作失敗',
+        durationSeconds: '已連線 {{seconds}} 秒',
+        durationMinutes: '已連線 {{minutes}} 分鐘',
+        durationHours: '已連線 {{hours}} 小時 {{minutes}} 分鐘'
+      },
       about: {
         title: '關於 NanoKVM',
         information: '資訊',

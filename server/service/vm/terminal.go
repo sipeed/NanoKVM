@@ -43,6 +43,8 @@ func (s *Service) Terminal(c *gin.Context) {
 		log.Errorf("failed to init websocket: %s", err)
 		return
 	}
+	session := registerTerminalSession(ws, c)
+	defer terminalSessions.remove(session.ID)
 	stopSessionWatcher := middleware.WatchWebSocket(c.Request.Context(), ws)
 	defer stopSessionWatcher()
 	defer func() {

@@ -427,6 +427,24 @@ const zh = {
         okBtn: '确认',
         cancelBtn: '取消'
       },
+      terminal: {
+        title: '终端',
+        description: '管理从任意页面或浏览器打开的 Web 终端。关闭会话会立即断开对应的终端页面。',
+        refresh: '刷新',
+        empty: '当前没有打开的终端会话',
+        shell: 'NanoKVM 终端',
+        serial: '串口终端',
+        serialParams: '{{port}} @ {{baud}}',
+        close: '关闭',
+        closeTitle: '关闭该终端？',
+        closeDesc: '对应的终端页面会立即断开连接。',
+        closeOk: '关闭',
+        closeCancel: '取消',
+        failed: '操作失败',
+        durationSeconds: '已连接 {{seconds}} 秒',
+        durationMinutes: '已连接 {{minutes}} 分钟',
+        durationHours: '已连接 {{hours}} 小时 {{minutes}} 分钟'
+      },
       about: {
         title: '关于 NanoKVM',
         information: '信息',

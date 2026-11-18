@@ -207,3 +207,18 @@ type GetInputResolutionRsp struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
+
+type TerminalSessionInfo struct {
+	ID        string `json:"id"`
+	Kind      string `json:"kind"` // shell | serial
+	Username  string `json:"username,omitempty"`
+	Port      string `json:"port,omitempty"`
+	Baud      string `json:"baud,omitempty"`
+	ClientIP  string `json:"clientIp"`
+	UserAgent string `json:"userAgent"`
+	CreatedAt int64  `json:"createdAt"` // unix milliseconds
+}
+
+type GetTerminalSessionsRsp struct {
+	Sessions []TerminalSessionInfo `json:"sessions"`
+}
