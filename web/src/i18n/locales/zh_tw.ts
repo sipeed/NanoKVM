@@ -381,6 +381,8 @@ const zh_tw = {
       newSession: '新增工作階段',
       noSessions: '目前沒有歷史工作階段',
       reuseHint: '重複使用已連線的工作階段會接管原頁面。',
+      takenOver: '此終端機工作階段已在其他頁面開啟',
+      takenOverHint: '同一工作階段同時只能在一個頁面使用。',
       unresponsive: '終端機未回應',
       lastResponse: '終端機上一次回應於 {{time}}（{{seconds}}秒前）',
       reconnect: '重新連線',

@@ -34,6 +34,9 @@ const (
 	terminalDetachedTimeout = 10 * time.Minute
 	// maxTerminalSessionNameLength limits the custom session name in runes.
 	maxTerminalSessionNameLength = 64
+	// terminalSessionTakenOverCode is an application-defined close code (4000-
+	// 4999) that tells a page another page attached to its session.
+	terminalSessionTakenOverCode = 4409
 )
 
 var errTerminalSessionClosed = errors.New("terminal session is closed")
@@ -86,6 +89,14 @@ func (s *terminalSession) attach(ws *websocket.Conn) error {
 	s.mutex.Unlock()
 
 	if previous != nil && previous != ws {
+		// Tell the page that lost the session why it was disconnected. The close
+		// frame is written before closing the underlying connection so the
+		// browser receives the application code instead of a bare network error.
+		_ = previous.WriteControl(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(terminalSessionTakenOverCode, "terminal session taken over"),
+			time.Now().Add(messageWait),
+		)
 		_ = previous.Close()
 	}
 

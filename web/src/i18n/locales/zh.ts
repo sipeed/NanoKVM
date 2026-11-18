@@ -381,6 +381,8 @@ const zh = {
       newSession: '新建一个会话',
       noSessions: '暂无历史会话',
       reuseHint: '复用已连接的会话会接管原页面。',
+      takenOver: '该终端会话已在其他页面打开',
+      takenOverHint: '同一会话同时只能在一个页面使用。',
       unresponsive: '终端未响应',
       lastResponse: '终端上一次响应于 {{time}}（{{seconds}}秒前）',
       reconnect: '重新连接',

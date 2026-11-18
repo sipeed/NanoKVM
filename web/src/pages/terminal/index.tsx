@@ -71,15 +71,20 @@ function getTerminalWsUrl() {
   return query ? `${url}?${query}` : url;
 }
 
+// The backend uses this application-defined close code when another page takes
+// over the same terminal session.
+const terminalTakenOverCode = 4409;
+
 export const Terminal = () => {
   const { t, i18n } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [isDisconnected, setIsDisconnected] = useState(false);
-  const [isSessionUnavailable, setIsSessionUnavailable] = useState(false);
+  const [closedReason, setClosedReason] = useState<'unavailable' | 'takenOver' | null>(null);
   const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
   const language = i18n.resolvedLanguage || i18n.language;
+  const sessionID = getTerminalQuery().get('session');
 
   const stopDisconnectedTimer = useCallback(() => {
     if (disconnectedTimerRef.current !== undefined) {
@@ -128,7 +133,12 @@ export const Terminal = () => {
 
     ws.addEventListener('close', (event) => {
       if (!hasOpened) {
-        setIsSessionUnavailable(true);
+        setClosedReason('unavailable');
+        return;
+      }
+
+      if (event.code === terminalTakenOverCode) {
+        setClosedReason('takenOver');
         return;
       }
 
@@ -286,7 +296,7 @@ export const Terminal = () => {
       if (isDisposed) return;
 
       hasOpened = true;
-      setIsSessionUnavailable(false);
+      setClosedReason(null);
       lastResponseAtRef.current = Date.now();
       setIsDisconnected(false);
       terminal.options.disableStdin = false;
@@ -302,10 +312,18 @@ export const Terminal = () => {
         picocomTimer = window.setTimeout(runPicocom, 300);
       }
     };
-    ws.onclose = () => {
-      // A page that never opened shows the unavailable-session overlay instead;
-      // only a live terminal that goes silent is treated as unresponsive.
+    ws.onclose = (event) => {
+      // A page that never opened, lost the session to another page or lost its
+      // login shows its own overlay instead; only a live terminal that goes
+      // silent is treated as unresponsive.
       if (!hasOpened) return;
+      if (
+        event.code === terminalTakenOverCode ||
+        event.code === 4401 ||
+        event.code === 4403
+      ) {
+        return;
+      }
 
       showDisconnectedNotification();
     };
@@ -334,6 +352,10 @@ export const Terminal = () => {
 
   function openNewTerminal() {
     window.open('/#terminal', '_blank');
+  }
+
+  function reconnectSession() {
+    window.location.reload();
   }
 
   return (
@@ -368,15 +390,28 @@ export const Terminal = () => {
           </div>
         )}
 
-        {isSessionUnavailable && (
+        {closedReason && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-4 rounded-lg bg-neutral-900/90 px-8 py-6 text-center">
+            <div className="flex max-w-[420px] flex-col items-center gap-3 rounded-lg bg-neutral-900/90 px-8 py-6 text-center">
               <div className="text-lg font-medium text-white">
-                {t('terminal.sessionUnavailable')}
+                {closedReason === 'takenOver'
+                  ? t('terminal.takenOver')
+                  : t('terminal.sessionUnavailable')}
               </div>
-              <Button type="primary" onClick={openNewTerminal}>
-                {t('terminal.newTerminal')}
-              </Button>
+
+              {closedReason === 'takenOver' && (
+                <div className="text-sm text-neutral-400">{t('terminal.takenOverHint')}</div>
+              )}
+
+              {closedReason === 'takenOver' && sessionID ? (
+                <Button type="primary" onClick={reconnectSession}>
+                  {t('terminal.reconnect')}
+                </Button>
+              ) : (
+                <Button type="primary" onClick={openNewTerminal}>
+                  {t('terminal.newTerminal')}
+                </Button>
+              )}
             </div>
           </div>
         )}

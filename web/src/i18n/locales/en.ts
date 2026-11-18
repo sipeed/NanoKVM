@@ -396,6 +396,8 @@ const en = {
       newSession: 'New session',
       noSessions: 'No previous sessions',
       reuseHint: 'Reusing an attached session takes it over from its page.',
+      takenOver: 'This terminal session was opened in another page',
+      takenOverHint: 'A session can be used by one page at a time.',
       unresponsive: 'Terminal is not responding',
       lastResponse: 'The terminal last responded at {{time}} ({{seconds}} seconds ago)',
       reconnect: 'Reconnect',
