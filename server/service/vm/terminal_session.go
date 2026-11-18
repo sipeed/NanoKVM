@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -31,6 +32,8 @@ const (
 	// terminalDetachedTimeout closes a session that no page reattached to, so
 	// abandoned shells do not linger on the device forever.
 	terminalDetachedTimeout = 10 * time.Minute
+	// maxTerminalSessionNameLength limits the custom session name in runes.
+	maxTerminalSessionNameLength = 64
 )
 
 var errTerminalSessionClosed = errors.New("terminal session is closed")
@@ -45,6 +48,7 @@ type terminalSession struct {
 	ID        string
 	Kind      string
 	Username  string
+	Name      string
 	Port      string
 	Baud      string
 	ClientIP  string
@@ -126,6 +130,20 @@ func (s *terminalSession) isAttached() bool {
 	defer s.mutex.Unlock()
 
 	return s.ws != nil
+}
+
+func (s *terminalSession) getName() string {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	return s.Name
+}
+
+func (s *terminalSession) setName(name string) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	s.Name = name
 }
 
 // writeOutput appends pty output to the replay buffer and forwards it to the
@@ -381,6 +399,7 @@ func (s *Service) GetTerminalSessions(c *gin.Context) {
 			ID:        session.ID,
 			Kind:      session.Kind,
 			Username:  session.Username,
+			Name:      session.getName(),
 			Port:      session.Port,
 			Baud:      session.Baud,
 			ClientIP:  session.ClientIP,
@@ -409,4 +428,45 @@ func (s *Service) CloseTerminalSession(c *gin.Context) {
 
 	rsp.OkRsp(c)
 	log.Debugf("terminal session %s closed", id)
+}
+
+// sanitizeTerminalSessionName trims the name, drops control characters and
+// limits its length so it stays a single display line in the session list.
+func sanitizeTerminalSessionName(name string) string {
+	name = strings.TrimSpace(name)
+	name = strings.Map(func(r rune) rune {
+		if r < 0x20 || r == 0x7f {
+			return -1
+		}
+		return r
+	}, name)
+
+	runes := []rune(name)
+	if len(runes) > maxTerminalSessionNameLength {
+		return string(runes[:maxTerminalSessionNameLength])
+	}
+
+	return name
+}
+
+func (s *Service) RenameTerminalSession(c *gin.Context) {
+	var req proto.RenameTerminalSessionReq
+	var rsp proto.Response
+
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+
+	id := c.Param("id")
+	session := terminalSessions.get(id)
+	if session == nil {
+		rsp.ErrRsp(c, -1, "terminal session not found")
+		return
+	}
+
+	session.setName(sanitizeTerminalSessionName(req.Name))
+
+	rsp.OkRsp(c)
+	log.Debugf("terminal session %s renamed", id)
 }

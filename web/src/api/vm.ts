@@ -247,6 +247,7 @@ export type TerminalSession = {
   id: string;
   kind: TerminalSessionKind;
   username?: string;
+  name?: string;
   port?: string;
   baud?: string;
   clientIp: string;
@@ -263,4 +264,9 @@ export function getTerminalSessions() {
 // force close a web terminal session
 export function closeTerminalSession(id: string) {
   return http.delete(`/api/vm/terminal/sessions/${encodeURIComponent(id)}`);
+}
+
+// give a web terminal session a custom name; an empty name restores the default
+export function renameTerminalSession(id: string, name: string) {
+  return http.post(`/api/vm/terminal/sessions/${encodeURIComponent(id)}/rename`, { name });
 }

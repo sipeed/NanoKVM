@@ -1,7 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Modal, Spin, Tooltip, message } from 'antd';
+import { Button, Divider, Input, Modal, Spin, Tooltip, message } from 'antd';
 import clsx from 'clsx';
-import { PlugZapIcon, RefreshCcwIcon, SquareTerminalIcon, UsbIcon, XIcon } from 'lucide-react';
+import {
+  PencilIcon,
+  PlugZapIcon,
+  RefreshCcwIcon,
+  SquareTerminalIcon,
+  UsbIcon,
+  XIcon
+} from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import * as api from '@/api/vm.ts';
@@ -39,11 +46,12 @@ type SessionRowProps = {
   session: TerminalSession;
   now: number;
   closing: boolean;
+  onRename: () => void;
   onReconnect: () => void;
   onClose: () => void;
 };
 
-const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowProps) => {
+const SessionRow = ({ session, now, closing, onRename, onReconnect, onClose }: SessionRowProps) => {
   const { t, i18n } = useTranslation();
   const { seconds, minutes, hours } = splitDuration(now - session.createdAt);
 
@@ -58,7 +66,7 @@ const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowP
   const startedAtText = t('settings.terminal.startedAt', { time: startedAt, duration: elapsed });
 
   const isSerial = session.kind === 'serial';
-  const title = isSerial
+  const defaultTitle = isSerial
     ? `${t('settings.terminal.serial')}${
         session.port
           ? ` · ${t('settings.terminal.serialParams', {
@@ -68,6 +76,8 @@ const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowP
           : ''
       }`
     : t('settings.terminal.shell');
+  const customName = session.name?.trim() || '';
+  const title = customName || defaultTitle;
 
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3.5 transition-colors hover:bg-neutral-800/40">
@@ -77,7 +87,13 @@ const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowP
         </div>
 
         <div className="flex min-w-0 flex-col space-y-0.5">
-          <span className="truncate text-sm font-medium text-neutral-200">{title}</span>
+          {customName ? (
+            <Tooltip title={defaultTitle} placement="top" mouseEnterDelay={0.4}>
+              <span className="truncate text-sm font-medium text-neutral-200">{title}</span>
+            </Tooltip>
+          ) : (
+            <span className="truncate text-sm font-medium text-neutral-200">{title}</span>
+          )}
 
           <div className="flex min-w-0 items-center space-x-1.5 text-xs text-neutral-500">
             {session.username && (
@@ -106,6 +122,16 @@ const SessionRow = ({ session, now, closing, onReconnect, onClose }: SessionRowP
       </div>
 
       <div className="flex shrink-0 items-center space-x-1">
+        <Tooltip title={t('settings.terminal.rename')} placement="top" mouseEnterDelay={0.4}>
+          <Button
+            type="text"
+            size="small"
+            className="text-neutral-400 hover:text-white"
+            icon={<PencilIcon size={15} />}
+            onClick={onRename}
+          />
+        </Tooltip>
+
         <Tooltip title={t('settings.terminal.reconnect')} placement="top" mouseEnterDelay={0.4}>
           <Button
             type="text"
@@ -140,6 +166,9 @@ export const TerminalSessions = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [closingId, setClosingId] = useState('');
+  const [renamingSession, setRenamingSession] = useState<TerminalSession | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const silentRefreshRef = useRef(false);
   const mountedRef = useRef(true);
@@ -241,6 +270,36 @@ export const TerminalSessions = () => {
     });
   }
 
+  function startRename(session: TerminalSession) {
+    setRenamingSession(session);
+    setRenameValue(session.name ?? '');
+  }
+
+  async function submitRename() {
+    const target = renamingSession;
+    if (!target || isRenaming) return;
+
+    const name = renameValue.trim();
+    setIsRenaming(true);
+    try {
+      const rsp = await api.renameTerminalSession(target.id, name);
+      if (rsp.code !== 0) {
+        message.error(rsp.msg || t('settings.terminal.failed'));
+        return;
+      }
+      setSessions((items) =>
+        items.map((item) => (item.id === target.id ? { ...item, name } : item))
+      );
+      setRenamingSession(null);
+    } catch {
+      message.error(t('settings.terminal.failed'));
+    } finally {
+      if (mountedRef.current) {
+        setIsRenaming(false);
+      }
+    }
+  }
+
   return (
     <>
       {contextHolder}
@@ -283,6 +342,7 @@ export const TerminalSessions = () => {
                   session={session}
                   now={now}
                   closing={closingId === session.id}
+                  onRename={() => startRename(session)}
                   onReconnect={() => reconnectSession(session)}
                   onClose={() => closeSession(session)}
                 />
@@ -291,6 +351,30 @@ export const TerminalSessions = () => {
           </div>
         )}
       </div>
+
+      <Modal
+        open={renamingSession !== null}
+        title={t('settings.terminal.renameTitle')}
+        okText={t('settings.terminal.renameOk')}
+        cancelText={t('settings.terminal.renameCancel')}
+        confirmLoading={isRenaming}
+        onOk={submitRename}
+        onCancel={() => {
+          if (!isRenaming) {
+            setRenamingSession(null);
+          }
+        }}
+        destroyOnHidden
+      >
+        <Input
+          autoFocus
+          maxLength={64}
+          value={renameValue}
+          placeholder={t('settings.terminal.renamePlaceholder')}
+          onChange={(event) => setRenameValue(event.target.value)}
+          onPressEnter={submitRename}
+        />
+      </Modal>
     </>
   );
 };

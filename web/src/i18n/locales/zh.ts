@@ -453,7 +453,12 @@ const zh = {
         reconnectTitle: '接管该终端？',
         reconnectDesc: '该会话正在其他页面连接，重新连接会断开原页面。',
         reconnectOk: '重新连接',
-        reconnectCancel: '取消'
+        reconnectCancel: '取消',
+        rename: '重命名',
+        renameTitle: '重命名终端',
+        renamePlaceholder: '留空使用默认名称',
+        renameOk: '保存',
+        renameCancel: '取消'
       },
       about: {
         title: '关于 NanoKVM',

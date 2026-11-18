@@ -454,7 +454,12 @@ const zh_tw = {
         reconnectTitle: '接管此終端機？',
         reconnectDesc: '此工作階段正在其他頁面連線，重新連線會中斷原頁面。',
         reconnectOk: '重新連線',
-        reconnectCancel: '取消'
+        reconnectCancel: '取消',
+        rename: '重新命名',
+        renameTitle: '重新命名終端機',
+        renamePlaceholder: '留空使用預設名稱',
+        renameOk: '儲存',
+        renameCancel: '取消'
       },
       about: {
         title: '關於 NanoKVM',

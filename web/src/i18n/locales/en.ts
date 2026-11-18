@@ -472,7 +472,12 @@ const en = {
         reconnectDesc:
           'This session is connected in another page. Reconnecting will disconnect that page.',
         reconnectOk: 'Reconnect',
-        reconnectCancel: 'Cancel'
+        reconnectCancel: 'Cancel',
+        rename: 'Rename',
+        renameTitle: 'Rename terminal',
+        renamePlaceholder: 'Leave empty to use the default name',
+        renameOk: 'Save',
+        renameCancel: 'Cancel'
       },
       about: {
         title: 'About NanoKVM',
