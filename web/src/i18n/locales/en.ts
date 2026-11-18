@@ -403,7 +403,12 @@ const en = {
       reconnect: 'Reconnect',
       refreshPage: 'Refresh Page',
       closedRemotely: 'This terminal session was closed from the settings page',
-      closedRemotelyHint: 'The session was closed remotely. Open a new terminal to continue.'
+      closedRemotelyHint: 'The session was closed remotely. Open a new terminal to continue.',
+      sessionEnded: 'Terminal session ended',
+      sessionEndedHint: 'The session was ended on the device. Open a new terminal to continue.',
+      remoteClosed: 'Disconnected by the remote device',
+      remoteClosedHint:
+        'The connection was closed remotely. Reconnect or open a new terminal to continue.'
     },
     wol: {
       title: 'Wake-on-LAN',

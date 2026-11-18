@@ -388,7 +388,11 @@ const zh_tw = {
       reconnect: '重新連線',
       refreshPage: '重新整理頁面',
       closedRemotely: '此終端機工作階段已在設定中關閉',
-      closedRemotelyHint: '工作階段已被遠端關閉，如需繼續使用請開啟新終端機。'
+      closedRemotelyHint: '工作階段已被遠端關閉，如需繼續使用請開啟新終端機。',
+      sessionEnded: '終端機工作階段已結束',
+      sessionEndedHint: '工作階段已在裝置端結束，如需繼續使用請開啟新終端機。',
+      remoteClosed: '遠端已主動中斷連線',
+      remoteClosedHint: '連線已被遠端中斷，如需繼續使用請重新連線或開啟新終端機。'
     },
     wol: {
       title: 'Wake-on-LAN',

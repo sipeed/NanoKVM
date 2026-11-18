@@ -72,9 +72,13 @@ function getTerminalWsUrl() {
 }
 
 // The backend uses these application-defined close codes when another page
-// takes over the session or when the session is closed from the settings page.
+// takes over the session, when the session is closed from the settings page or
+// when the session ends on the device side.
 const terminalTakenOverCode = 4409;
 const terminalClosedCode = 4410;
+const terminalSessionEndedCode = 4411;
+const terminalAppCloseCodeMin = 4000;
+const terminalAppCloseCodeMax = 4999;
 
 export const Terminal = () => {
   const { t, i18n } = useTranslation();
@@ -82,7 +86,7 @@ export const Terminal = () => {
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [isDisconnected, setIsDisconnected] = useState(false);
   const [closedReason, setClosedReason] = useState<
-    'unavailable' | 'takenOver' | 'closed' | null
+    'unavailable' | 'takenOver' | 'closed' | 'ended' | 'remoteClosed' | null
   >(null);
   const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
@@ -150,6 +154,11 @@ export const Terminal = () => {
         return;
       }
 
+      if (event.code === terminalSessionEndedCode) {
+        setClosedReason('ended');
+        return;
+      }
+
       if (event.code === 4401) {
         notifyAuthExpired();
         return;
@@ -160,6 +169,13 @@ export const Terminal = () => {
         // account lets the route guard move away from a shell the account may
         // no longer use.
         notifyAuthRefresh();
+        return;
+      }
+
+      // Any other application-defined close means the server actively dropped
+      // the connection; show that instead of leaving a frozen terminal.
+      if (event.code >= terminalAppCloseCodeMin && event.code <= terminalAppCloseCodeMax) {
+        setClosedReason('remoteClosed');
       }
     });
 
@@ -321,16 +337,11 @@ export const Terminal = () => {
       }
     };
     ws.onclose = (event) => {
-      // A page that never opened, lost the session to another page or lost its
-      // login shows its own overlay instead; only a live terminal that goes
-      // silent is treated as unresponsive.
+      // A page that never opened, lost the session to another page, lost its
+      // login or was closed by the server shows its own overlay instead; only a
+      // live terminal that goes silent is treated as unresponsive.
       if (!hasOpened) return;
-      if (
-        event.code === terminalTakenOverCode ||
-        event.code === terminalClosedCode ||
-        event.code === 4401 ||
-        event.code === 4403
-      ) {
+      if (event.code >= terminalAppCloseCodeMin && event.code <= terminalAppCloseCodeMax) {
         return;
       }
 
@@ -365,6 +376,26 @@ export const Terminal = () => {
 
   function reconnectSession() {
     window.location.reload();
+  }
+
+  let closedTitle = t('terminal.sessionUnavailable');
+  let closedHint = '';
+  let canReconnect = false;
+
+  if (closedReason === 'takenOver') {
+    closedTitle = t('terminal.takenOver');
+    closedHint = t('terminal.takenOverHint');
+    canReconnect = Boolean(sessionID);
+  } else if (closedReason === 'closed') {
+    closedTitle = t('terminal.closedRemotely');
+    closedHint = t('terminal.closedRemotelyHint');
+  } else if (closedReason === 'ended') {
+    closedTitle = t('terminal.sessionEnded');
+    closedHint = t('terminal.sessionEndedHint');
+  } else if (closedReason === 'remoteClosed') {
+    closedTitle = t('terminal.remoteClosed');
+    closedHint = t('terminal.remoteClosedHint');
+    canReconnect = Boolean(sessionID);
   }
 
   return (
@@ -402,23 +433,13 @@ export const Terminal = () => {
         {closedReason && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 backdrop-blur-sm">
             <div className="flex max-w-[420px] flex-col items-center gap-3 rounded-lg bg-neutral-900/90 px-8 py-6 text-center">
-              <div className="text-lg font-medium text-white">
-                {closedReason === 'takenOver'
-                  ? t('terminal.takenOver')
-                  : closedReason === 'closed'
-                    ? t('terminal.closedRemotely')
-                    : t('terminal.sessionUnavailable')}
-              </div>
+              <div className="text-lg font-medium text-white">{closedTitle}</div>
 
-              {closedReason === 'takenOver' && (
-                <div className="text-sm text-neutral-400">{t('terminal.takenOverHint')}</div>
+              {closedHint && (
+                <div className="text-sm text-neutral-400">{closedHint}</div>
               )}
 
-              {closedReason === 'closed' && (
-                <div className="text-sm text-neutral-400">{t('terminal.closedRemotelyHint')}</div>
-              )}
-
-              {closedReason === 'takenOver' && sessionID ? (
+              {canReconnect ? (
                 <Button type="primary" onClick={reconnectSession}>
                   {t('terminal.reconnect')}
                 </Button>

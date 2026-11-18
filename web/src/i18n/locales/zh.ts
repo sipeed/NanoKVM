@@ -388,7 +388,11 @@ const zh = {
       reconnect: '重新连接',
       refreshPage: '刷新页面',
       closedRemotely: '该终端会话已在设置中被关闭',
-      closedRemotelyHint: '会话已被远端关闭，如需继续使用请打开新终端。'
+      closedRemotelyHint: '会话已被远端关闭，如需继续使用请打开新终端。',
+      sessionEnded: '终端会话已结束',
+      sessionEndedHint: '会话已在设备端结束，如需继续使用请打开新终端。',
+      remoteClosed: '远端已主动断开连接',
+      remoteClosedHint: '连接已被远端断开，如需继续使用请重新连接或打开新终端。'
     },
     wol: {
       title: 'Wake-on-LAN',

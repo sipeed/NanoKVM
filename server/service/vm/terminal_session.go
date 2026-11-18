@@ -40,6 +40,9 @@ const (
 	// terminalSessionClosedCode tells a page its session was closed remotely
 	// from the settings page.
 	terminalSessionClosedCode = 4410
+	// terminalSessionEndedCode tells the page the session ended on the device
+	// side (shell exited or the idle timeout closed it).
+	terminalSessionEndedCode = 4411
 )
 
 var errTerminalSessionClosed = errors.New("terminal session is closed")
@@ -261,7 +264,9 @@ func (s *terminalSession) readInput(ws *websocket.Conn) {
 }
 
 func (s *terminalSession) close() {
-	s.closeWithCode(0, "")
+	// A server-initiated close always carries a close code, so the page can
+	// tell it apart from a network drop and show why it was disconnected.
+	s.closeWithCode(terminalSessionEndedCode, "terminal session ended")
 }
 
 // closeWithCode closes the session and, when code is non-zero, tells the
