@@ -442,9 +442,10 @@ const zh_tw = {
         closeOk: '關閉',
         closeCancel: '取消',
         failed: '操作失敗',
-        durationSeconds: '已連線 {{seconds}} 秒',
-        durationMinutes: '已連線 {{minutes}} 分鐘',
-        durationHours: '已連線 {{hours}} 小時 {{minutes}} 分鐘'
+        startedAt: '工作階段建立於 {{time}}（{{duration}}前）',
+        elapsedSeconds: '{{seconds}} 秒',
+        elapsedMinutes: '{{minutes}} 分鐘',
+        elapsedHours: '{{hours}} 小時 {{minutes}} 分鐘'
       },
       about: {
         title: '關於 NanoKVM',

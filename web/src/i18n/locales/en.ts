@@ -459,9 +459,10 @@ const en = {
         closeOk: 'Close',
         closeCancel: 'Cancel',
         failed: 'Operation failed',
-        durationSeconds: 'Connected for {{seconds}}s',
-        durationMinutes: 'Connected for {{minutes}} min',
-        durationHours: 'Connected for {{hours}} h {{minutes}} min'
+        startedAt: 'Session started {{time}} ({{duration}} ago)',
+        elapsedSeconds: '{{seconds}}s',
+        elapsedMinutes: '{{minutes}} min',
+        elapsedHours: '{{hours}} h {{minutes}} min'
       },
       about: {
         title: 'About NanoKVM',

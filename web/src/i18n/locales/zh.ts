@@ -441,9 +441,10 @@ const zh = {
         closeOk: '关闭',
         closeCancel: '取消',
         failed: '操作失败',
-        durationSeconds: '已连接 {{seconds}} 秒',
-        durationMinutes: '已连接 {{minutes}} 分钟',
-        durationHours: '已连接 {{hours}} 小时 {{minutes}} 分钟'
+        startedAt: '会话建立于 {{time}}（{{duration}}前）',
+        elapsedSeconds: '{{seconds}} 秒',
+        elapsedMinutes: '{{minutes}} 分钟',
+        elapsedHours: '{{hours}} 小时 {{minutes}} 分钟'
       },
       about: {
         title: '关于 NanoKVM',

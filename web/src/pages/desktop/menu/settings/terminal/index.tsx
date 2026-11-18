@@ -16,6 +16,24 @@ function splitDuration(milliseconds: number) {
   return { seconds, minutes, hours };
 }
 
+function formatSessionStart(createdAt: number, language: string) {
+  const date = new Date(createdAt);
+
+  try {
+    return new Intl.DateTimeFormat(language.replace('_', '-'), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(date);
+  } catch {
+    return date.toLocaleString();
+  }
+}
+
 type SessionRowProps = {
   session: TerminalSession;
   now: number;
@@ -24,15 +42,18 @@ type SessionRowProps = {
 };
 
 const SessionRow = ({ session, now, closing, onClose }: SessionRowProps) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { seconds, minutes, hours } = splitDuration(now - session.createdAt);
 
-  let duration = t('settings.terminal.durationSeconds', { seconds });
+  let elapsed = t('settings.terminal.elapsedSeconds', { seconds });
   if (hours > 0) {
-    duration = t('settings.terminal.durationHours', { hours, minutes: minutes % 60 });
+    elapsed = t('settings.terminal.elapsedHours', { hours, minutes: minutes % 60 });
   } else if (minutes > 0) {
-    duration = t('settings.terminal.durationMinutes', { minutes });
+    elapsed = t('settings.terminal.elapsedMinutes', { minutes });
   }
+
+  const startedAt = formatSessionStart(session.createdAt, i18n.resolvedLanguage || i18n.language);
+  const startedAtText = t('settings.terminal.startedAt', { time: startedAt, duration: elapsed });
 
   const isSerial = session.kind === 'serial';
   const title = isSerial
@@ -66,9 +87,9 @@ const SessionRow = ({ session, now, closing, onClose }: SessionRowProps) => {
             <Tooltip title={session.userAgent || '-'} placement="top" mouseEnterDelay={0.4}>
               <span className="truncate cursor-default">{session.clientIp || '-'}</span>
             </Tooltip>
-            <span>·</span>
-            <span className="shrink-0">{duration}</span>
           </div>
+
+          <span className="truncate text-xs text-neutral-500">{startedAtText}</span>
         </div>
       </div>
 
