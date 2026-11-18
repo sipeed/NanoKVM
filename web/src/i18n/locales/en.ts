@@ -391,7 +391,7 @@ const en = {
       stopBits: 'Stop bits',
       confirm: 'Ok',
       unresponsive: 'Terminal is not responding',
-      lastResponse: 'The terminal last responded {{seconds}} seconds ago',
+      lastResponse: 'The terminal last responded at {{time}} ({{seconds}} seconds ago)',
       reconnect: 'Reconnect',
       refreshPage: 'Refresh Page'
     },

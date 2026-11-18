@@ -376,7 +376,7 @@ const zh = {
       stopBits: '停止位',
       confirm: '确定',
       unresponsive: '终端未响应',
-      lastResponse: '终端上一次响应是 {{seconds}} 秒前',
+      lastResponse: '终端上一次响应于 {{time}}（{{seconds}}秒前）',
       reconnect: '重新连接',
       refreshPage: '刷新页面'
     },

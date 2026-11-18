@@ -19,26 +19,50 @@ const heartbeatTimeout = 1000;
 const heartbeatPing = JSON.stringify({ type: 'ping' });
 const heartbeatPong = '{"type":"pong"}';
 
+function formatLastResponseTime(timestamp: number, language: string) {
+  const date = new Date(timestamp);
+
+  if (language.toLowerCase().startsWith('zh')) {
+    const pad = (value: number) => String(value).padStart(2, '0');
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日${pad(date.getHours())}：${pad(date.getMinutes())}：${pad(date.getSeconds())}`;
+  }
+
+  try {
+    return new Intl.DateTimeFormat(language.replace('_', '-'), {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    }).format(date);
+  } catch {
+    return date.toLocaleString();
+  }
+}
+
 export const Terminal = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [notify, contextHolder] = notification.useNotification();
   const [connectionAttempt, setConnectionAttempt] = useState(0);
   const [isDisconnected, setIsDisconnected] = useState(false);
-  const terminalRef = useRef<XtermTerminal | null>(null);
+  const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
+  const language = i18n.resolvedLanguage || i18n.language;
 
-  const stopDisconnectedTimer = () => {
+  const stopDisconnectedTimer = useCallback(() => {
     if (disconnectedTimerRef.current !== undefined) {
       window.clearInterval(disconnectedTimerRef.current);
       disconnectedTimerRef.current = undefined;
     }
-  };
+  }, []);
 
   const handleReconnect = useCallback(() => {
     stopDisconnectedTimer();
     notify.destroy(disconnectedNotificationKey);
     setConnectionAttempt((attempt) => attempt + 1);
-  }, [notify]);
+  }, [notify, stopDisconnectedTimer]);
 
   const handleRefresh = useCallback(() => {
     window.location.reload();
@@ -51,7 +75,6 @@ export const Terminal = () => {
     const terminal = new XtermTerminal({
       cursorBlink: true
     });
-    terminalRef.current = terminal;
 
     const fitAddon = new FitAddon();
     terminal.loadAddon(fitAddon);
@@ -63,11 +86,11 @@ export const Terminal = () => {
     let isPicocomRunning = false;
     let isDisposed = false;
     let hasDisconnected = false;
-    let lastResponseAt = Date.now();
     let picocomTimer: number | undefined;
     let closeTimer: number | undefined;
     let heartbeatTimer: number | undefined;
     let heartbeatResponseTimer: number | undefined;
+    lastResponseAtRef.current = Date.now();
 
     ws.addEventListener('close', (event) => {
       if (event.code === 4401) {
@@ -106,11 +129,14 @@ export const Terminal = () => {
       const updateNotification = () => {
         if (isDisposed) return;
 
+        const lastResponseAt = lastResponseAtRef.current;
         const seconds = Math.max(0, Math.floor((Date.now() - lastResponseAt) / 1000));
-        // 只更新中间磨砂的计时文本，不再弹右下角通知
         const timerEle = document.getElementById('terminal-disconnected-timer');
         if (timerEle) {
-          timerEle.textContent = t('terminal.lastResponse', { seconds });
+          timerEle.textContent = t('terminal.lastResponse', {
+            time: formatLastResponseTime(lastResponseAt, language),
+            seconds
+          });
         }
       };
 
@@ -210,7 +236,7 @@ export const Terminal = () => {
       }
       if (isDisposed || hasDisconnected) return;
 
-      lastResponseAt = Date.now();
+      lastResponseAtRef.current = Date.now();
       if (event.data !== heartbeatPong) return;
 
       if (heartbeatResponseTimer !== undefined) {
@@ -223,7 +249,7 @@ export const Terminal = () => {
     ws.onopen = () => {
       if (isDisposed) return;
 
-      lastResponseAt = Date.now();
+      lastResponseAtRef.current = Date.now();
       setIsDisconnected(false);
       terminal.options.disableStdin = false;
       stopDisconnectedTimer();
@@ -258,7 +284,7 @@ export const Terminal = () => {
       window.removeEventListener('resize', resizeScreen, false);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [connectionAttempt, notify, t]);
+  }, [connectionAttempt, language, notify, stopDisconnectedTimer, t]);
 
   return (
     <>
@@ -277,7 +303,10 @@ export const Terminal = () => {
             <div className="flex flex-col items-center gap-4 rounded-lg bg-neutral-900/80 px-8 py-6 text-center">
               <div className="text-lg font-medium text-white">{t('terminal.unresponsive')}</div>
               <div id="terminal-disconnected-timer" className="text-sm text-neutral-400">
-                {t('terminal.lastResponse', { seconds: 0 })}
+                {t('terminal.lastResponse', {
+                  time: formatLastResponseTime(lastResponseAtRef.current, language),
+                  seconds: Math.max(0, Math.floor((Date.now() - lastResponseAtRef.current) / 1000))
+                })}
               </div>
               <div className="flex gap-3">
                 <Button onClick={handleRefresh}>{t('terminal.refreshPage')}</Button>

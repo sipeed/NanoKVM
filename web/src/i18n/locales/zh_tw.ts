@@ -376,8 +376,9 @@ const zh_tw = {
       stopBits: '停止位元',
       confirm: '確定',
       unresponsive: '終端機未回應',
-      lastResponse: '終端機上一次回應是 {{seconds}} 秒前',
-      reconnect: '重新連線'
+      lastResponse: '終端機上一次回應於 {{time}}（{{seconds}}秒前）',
+      reconnect: '重新連線',
+      refreshPage: '重新整理頁面'
     },
     wol: {
       title: 'Wake-on-LAN',
