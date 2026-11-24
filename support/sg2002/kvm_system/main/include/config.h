@@ -24,7 +24,7 @@
 #include "system_init.h"
 #include "oled_ctrl.h"
 #include "oled_ui.h"
-#include "hdmi.h"
+#include "hdmi_display.hpp"
 
 #define IP_Change_time 				5000
 #define QR_Change_time 				5000
@@ -51,14 +51,12 @@ typedef struct {
 	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
 	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
 	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep 'inet addr' | awk '{print $2}'
-	int8_t  hdmi_state = -1;		// Shared VI state, with a native fallback on failure
+	hdmi_display::View hdmi;		// Owned by the OLED thread
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
 	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
 	int8_t  udisk_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0
 	int8_t  host_pwr_state = -1;	// cat /sys/class/gpio/gpio504/value
-	int16_t hdmi_width = 0;			// cat /kvmapp/kvm/width
-	int16_t hdmi_height = 0;		// cat /kvmapp/kvm/height
 	int8_t type = 0;				// cat /kvmapp/kvm/type
 	int8_t now_fps = 0;				// cat /kvmapp/kvm/now_fps
 	int16_t qlty = 0;				// cat /kvmapp/kvm/qlty
@@ -84,21 +82,18 @@ typedef struct {
 	int8_t  eth_state = -1;			// cat /sys/class/net/eth0/carrier
 	int8_t  wifi_state = -1;		// cat /sys/class/net/wlan0/carrier
 	int8_t  tail_state = -1;		// ifconfig tailscale0 | grep inet\ addr | awk '{print $2}'
-	int8_t  hdmi_state = -1;		// Shared VI state, with a native fallback on failure
+	hdmi_display::View hdmi;		// Owned by the OLED thread
 	int8_t  usb_state = -1;			// cat /sys/class/udc/4340000.usb/state
 	int8_t  hid_state = -1;			// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/hid.GSn(n=012)
 	int8_t  rndis_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/rndis.usb0
 	int8_t  udisk_state = -1;		// (exist?) /sys/kernel/config/usb_gadget/g0/configs/c.1/mass_storage.disk0
 	int8_t  host_pwr_state = -1;	// cat /sys/class/gpio/gpio504/value
-	int16_t hdmi_width = -1;		// cat /kvmapp/kvm/width
-	int16_t hdmi_height = -1;		// cat /kvmapp/kvm/height
 	int8_t type = -1;				// cat /kvmapp/kvm/type
 	int8_t now_fps = -1;			// cat /kvmapp/kvm/now_fps
 	int16_t qlty = -1;				// cat /kvmapp/kvm/qlty
     uint16_t oled_sleep_param = 0;
     uint8_t oled_sleep_state = 0;	// 0:wakeup; 1:sleep;
 	uint64_t oled_sleep_start = 0;
-	uint64_t ue_patch_state = 0;
 } kvm_oled_state_t;
 
 #endif // CONFIG_H_

@@ -362,7 +362,7 @@ void OLED_Showline();
 void OLED_Showline_1();
 void OLED_ShowIMG(uint8_t x,uint8_t y,char *chr,uint8_t width,uint8_t height);
 void OLED_ShowKVMStreamState(uint8_t kvm_state_s, void* pdata);
-void OLED_Show_Res(uint16_t _w, uint16_t _h);
+void OLED_Show_Res(uint32_t _w, uint32_t _h);
 void OLED_ShowKVMState(uint8_t _Interface, int8_t _EN);
 void OLED_Show_Network_Error(uint8_t _state);
 

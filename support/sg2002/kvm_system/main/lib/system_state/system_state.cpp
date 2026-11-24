@@ -1,6 +1,5 @@
 #include "config.h"
 #include "system_state.h"
-#include "vi_state_shared.hpp"
 #include <sys/socket.h>
 #include <net/if.h>
 #include <sys/ioctl.h>
@@ -237,68 +236,9 @@ void kvm_update_usb_state()
 
 void kvm_update_hdmi_state()
 {
-	const uint32_t shared_state_ttl_ms = 30000U;
-	const uint32_t fallback_state_ttl_ms = 10000U;
-	static uint8_t check_times = 4;
-	static vi_state_shared::State fallback_state = {};
-	static uint32_t fallback_updated_ms = 0;
-	static uint32_t fallback_attempted_ms = 0;
-	static bool fallback_valid = false;
-	static bool fallback_attempted = false;
-	static bool shared_failure_logged = false;
-	static bool fallback_failure_logged = false;
-	if(++check_times > 5){
-		check_times = 0;
-		vi_state_shared::State state = {};
-		vi_state_shared::ReadStatus status = vi_state_shared::read_state(&state, shared_state_ttl_ms);
-		if (status == vi_state_shared::READ_OK) {
-			kvm_sys_state.hdmi_state = state.fps == 0 ? 0 : 1;
-			if (shared_failure_logged) {
-				fprintf(stderr, "[kvm_system] VI shared state recovered\n");
-			}
-			shared_failure_logged = false;
-			fallback_failure_logged = false;
-			return;
-		}
-
-		if (!shared_failure_logged) {
-			fprintf(stderr, "[kvm_system] VI shared state %s; using direct fallback\n",
-				vi_state_shared::read_status_name(status));
-			shared_failure_logged = true;
-		}
-
-		uint32_t now = vi_state_shared::monotonic_ms();
-		if (!fallback_attempted || now - fallback_attempted_ms >= fallback_state_ttl_ms) {
-			fallback_attempted_ms = now;
-			fallback_attempted = true;
-			uint32_t fields = vi_state_shared::FIELD_NONE;
-			vi_state_shared::State direct_state = {};
-			vi_state_shared::ProcReadStatus direct_status =
-				vi_state_shared::read_proc_state(&direct_state, &fields);
-			if (direct_status == vi_state_shared::PROC_READ_OK &&
-				(fields & vi_state_shared::FIELD_FPS) != 0U) {
-				fallback_state = direct_state;
-				fallback_updated_ms = now;
-				fallback_valid = true;
-				if (fallback_failure_logged) {
-					fprintf(stderr, "[kvm_system] direct VI fallback recovered\n");
-				}
-				fallback_failure_logged = false;
-			} else {
-				fallback_valid = false;
-				if (!fallback_failure_logged) {
-					fprintf(stderr, "[kvm_system] direct VI fallback unavailable\n");
-					fallback_failure_logged = true;
-				}
-			}
-		}
-
-		if (fallback_valid && now - fallback_updated_ms <= fallback_state_ttl_ms) {
-			kvm_sys_state.hdmi_state = fallback_state.fps == 0 ? 0 : 1;
-		} else {
-			kvm_sys_state.hdmi_state = -1;
-		}
-	}
+    // Only the OLED thread reads and updates this view. A single read supplies
+    // signal, validity and CSI dimensions, including when the server is stopped.
+    kvm_sys_state.hdmi = hdmi_display::read_view();
 }
 
 void kvm_update_stream_fps(void)
@@ -365,31 +305,6 @@ void kvm_update_stream_qlty(void)
 		else if(tmp16 >= 3500 && tmp16 <= 5000) kvm_sys_state.qlty = 4;
 		else 									kvm_sys_state.qlty = 4;
 	}
-}
-
-void kvm_update_hdmi_res(void)
-{
-	FILE *fp;
-	int file_size;
-	uint8_t RW_Data[10];
-	// HDMI width
-	fp = fopen("/kvmapp/kvm/width", "r");
-	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
-	fseek(fp, 0, SEEK_SET);
-	fread(RW_Data, sizeof(char), file_size, fp);
-	fclose(fp);
-	RW_Data[file_size] = 0;
-	kvm_sys_state.hdmi_width = atoi((char*)RW_Data);
-	// HDMI height
-	fp = fopen("/kvmapp/kvm/height", "r");
-	fseek(fp, 0, SEEK_END);
-	file_size = ftell(fp); 
-	fseek(fp, 0, SEEK_SET);
-	fread(RW_Data, sizeof(char), file_size, fp);
-	fclose(fp);
-	RW_Data[file_size] = 0;
-	kvm_sys_state.hdmi_height = atoi((char*)RW_Data);
 }
 
 void kvm_update_eth_state(void)

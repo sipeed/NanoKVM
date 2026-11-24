@@ -1,5 +1,7 @@
 package proto
 
+import "NanoKVM-Server/hardware/lontium"
+
 type IP struct {
 	Name    string `json:"name"`
 	Addr    string `json:"addr"`
@@ -102,9 +104,18 @@ type GetOLEDRsp struct {
 }
 
 type GetGetHdmiStateRsp struct {
-	Enabled     bool `json:"enabled"`
-	Signal      bool `json:"signal"`
-	IdleTimeout int  `json:"idleTimeout"`
+	Enabled     bool              `json:"enabled"` // Saved user preference, independent of idle power-off.
+	Signal      bool              `json:"signal"`  // Physical receiver timing, not SDK capture health.
+	IdleTimeout int               `json:"idleTimeout"`
+	Receiver    *lontium.Status   `json:"receiver,omitempty"`
+	Capture     *HDMICaptureState `json:"capture,omitempty"`
+	ReadError   string            `json:"readError,omitempty"`
+}
+
+type HDMICaptureState struct {
+	State            string `json:"state"`
+	Result           int    `json:"result"`
+	ReceiverSequence uint64 `json:"receiverSequence"`
 }
 
 type SetHdmiIdleTimeoutReq struct {
@@ -204,6 +215,9 @@ type GetInputRegionRsp struct {
 }
 
 type GetInputResolutionRsp struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+	Width     uint32          `json:"width"` // Confirmed CSI output, used by capture.
+	Height    uint32          `json:"height"`
+	Valid     bool            `json:"valid"`
+	Receiver  *lontium.Status `json:"receiver,omitempty"`
+	ReadError string          `json:"readError,omitempty"`
 }

@@ -15,7 +15,7 @@
 # scripts/build-in-container.sh and the "web" target in the Makefile):
 #   server/NanoKVM-Server           riscv64 server binary
 #   kvmapp/kvm_system/kvm_system    kvm_system daemon
-#   kvmapp/server/dl_lib/libkvm.so  freshly built video library (optional)
+#   kvmapp/server/dl_lib/           release link inputs, libkvm.so and libkvm_mmf.so
 #   web/dist/                       built frontend
 #
 # Usage: scripts/package.sh <version>
@@ -70,17 +70,24 @@ require_riscv64() {
     fi
 }
 
-require_file "$ROOT/server/NanoKVM-Server" "run: make app"
+require_file "$ROOT/server/NanoKVM-Server" "run: make release-build"
 require_file "$ROOT/kvmapp/kvm_system/kvm_system" "run: make support"
 require_file "$ROOT/web/dist/index.html" "run: make web"
-# libkvm.so is the one runtime library that must come from the build: the copy
-# tracked in server/dl_lib/ exists for cgo link time and lags far behind. If it
-# were optional here, "make package" on its own would quietly ship the stale one.
-require_file "$ROOT/kvmapp/server/dl_lib/libkvm.so" "run: make vision"
+for name in boot.sd lontium_hdmi.ko soph_mipi_rx.ko; do
+    firmware="$ROOT/kvmapp/system/firmware/$name"
+    if [[ ! -f "$firmware" || ! -s "$firmware" ]]; then
+        echo "[ERROR] missing or empty firmware file: $name" >&2
+        exit 1
+    fi
+done
+# The release server links against this pair before packaging.
+require_file "$ROOT/kvmapp/server/dl_lib/libkvm.so" "run: make release-build"
+require_file "$ROOT/kvmapp/server/dl_lib/libkvm_mmf.so" "run: make release-build"
 
 require_riscv64 "$ROOT/server/NanoKVM-Server"
 require_riscv64 "$ROOT/kvmapp/kvm_system/kvm_system"
 require_riscv64 "$ROOT/kvmapp/server/dl_lib/libkvm.so"
+require_riscv64 "$ROOT/kvmapp/server/dl_lib/libkvm_mmf.so"
 
 echo "[INFO] staging nanokvm_$VERSION"
 # Clear the whole output directory: release.yml uploads build/release/nanokvm_*
@@ -88,8 +95,8 @@ echo "[INFO] staging nanokvm_$VERSION"
 rm -rf "$OUT"
 mkdir -p "$STAGE"
 
-# 1. Everything tracked under kvmapp/ (init scripts, picoclaw bundle, kernel
-#    module, jpg_stream, kvm_stream) plus whatever the support build dropped in
+# 1. Everything tracked under kvmapp/ (init scripts, picoclaw bundle,
+#    jpg_stream, kvm_stream) plus whatever the support build dropped in
 #    (kvm_system, server/dl_lib). -a carries the exec bits over from git, which
 #    only matters for reading the archive by hand: install.go chmods the whole
 #    tree to 0755 on the device regardless.
@@ -145,7 +152,7 @@ rm -rf "$STAGE/server/web"
 mkdir -p "$STAGE/server/web"
 cp -a "$ROOT/web/dist/." "$STAGE/server/web/"
 
-# 6. EDID helper shipped under system/tool/ (prebuilt riscv64 binary in tools/).
+# 6. EDID helper built with its matching maintenance/init protocol.
 mkdir -p "$STAGE/system/tool"
 cp -a "$ROOT/tools/nanokvm_update_edid/nanokvm_update_edid" "$STAGE/system/tool/"
 cp -a "$ROOT/tools/nanokvm_update_edid/E21_NanoKVM.bin" "$STAGE/system/tool/"

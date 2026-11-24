@@ -15,20 +15,19 @@ const (
 	MaxHDMIIdleTimeoutMinutes = 7 * 24 * 60
 )
 
-func PersistHDMIDisabled() {
+func PersistHDMIDisabled() error {
 	f, err := os.OpenFile(HDMIDisableFile, os.O_CREATE|os.O_RDONLY, 0644)
 	if err != nil {
-		log.Error("failed to create hdmi disable file:", err)
-		return
+		return err
 	}
-	f.Close()
+	return f.Close()
 }
 
-func PersistHDMIEnabled() {
-	if err := os.Remove(HDMIDisableFile); err != nil {
-		log.Error("failed to remove hdmi disable file:", err)
-		return
+func PersistHDMIEnabled() error {
+	if err := os.Remove(HDMIDisableFile); err != nil && !os.IsNotExist(err) {
+		return err
 	}
+	return nil
 }
 
 func IsHdmiDisabled() bool {
@@ -42,10 +41,8 @@ func IsHdmiDisabled() bool {
 	return true // HDMI is disabled
 }
 
-func PersistHDMIIdleTimeout(minutes int) {
-	if err := os.WriteFile(HDMIIdleTimeoutFile, []byte(strconv.Itoa(minutes)), 0644); err != nil {
-		log.Error("failed to persist hdmi idle timeout:", err)
-	}
+func PersistHDMIIdleTimeout(minutes int) error {
+	return os.WriteFile(HDMIIdleTimeoutFile, []byte(strconv.Itoa(minutes)), 0644)
 }
 
 func GetHDMIIdleTimeout() int {

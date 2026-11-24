@@ -26,16 +26,10 @@ void* thread_oled_handle(void * arg)
 	OLED_ColorTurn(0);		//0正常显示 1 反色显示
 	OLED_DisplayTurn(0);	//0正常显示 1 屏幕翻转显示
 	OLED_Clear();
-	if(kvm_oled_state.ue_patch_state == 1){
-		kvm_show_UE();
-		while(kvm_sys_state.oled_thread_running){
-			time::sleep_ms(100);
-		}
-		OLED_Clear();
-	}
 
     while(kvm_sys_state.oled_thread_running)
     {
+		kvm_update_hdmi_state();
 		oled_auto_sleep();
 		// printf("[kvmd]thread_oled_handle - while\n");
 		uint8_t page_changed = (kvm_oled_state.page == kvm_sys_state.page)? 0:1;
@@ -155,9 +149,7 @@ void* thread_sys_handle(void * arg)
 			// kvm_update_tailscale_state();
 			// sys_state
 			kvm_update_usb_state();
-			kvm_update_hdmi_state();
 			kvm_update_stream_fps();
-			kvm_update_hdmi_res();
 			kvm_update_stream_type();
 			kvm_update_stream_qlty();
 			kvm_wifi_web_config_process();

@@ -1,125 +1,216 @@
 #!/bin/sh
 # nanokvm Rev3.1
 
-exec 9>/run/nanokvm-service.lock || exit 1
+server_bin=/tmp/server/NanoKVM-Server
+system_bin=/tmp/kvm_system/kvm_system
+maintenance_marker=/run/nanokvm-hdmi-maintenance
+factory=/var/lib/nanokvm-factory
+factory_boot=/run/nanokvm-factory-reboot
+stock_edid=/usr/lib/nanokvm-factory/test/nanokvm_update_edid
+app_edid=/kvmapp/system/tool/nanokvm_update_edid
+
+if [ "${NANOKVM_SERVICE_LOCK_FD:-}" = 9 ]; then
+    # The EDID tool holds this lock across stop, driver handoff and resume.
+    [ /proc/self/fd/9 -ef /run/nanokvm-service.lock ] || {
+        echo "Invalid inherited NanoKVM service lock" >&2; exit 1;
+    }
+else
+    case "$1" in
+        maintenance-check|maintenance-stop|maintenance-resume) exit 1 ;;
+    esac
+    exec 9>/run/nanokvm-service.lock || exit 1
+fi
+unset NANOKVM_SERVICE_LOCK_FD
 flock -n 9 || { echo "NanoKVM service operation already in progress" >&2; exit 1; }
 
-wait_for_exit() {
-    process="$1"
-    timeout="$2"
-    elapsed=0
+if [ -e "$maintenance_marker" ]; then
+    case "$1" in
+        start|restart)
+            echo "HDMI maintenance needs recovery; run nanokvm_update_edid --recover" >&2
+            exit 1
+            ;;
+    esac
+fi
 
-    while pidof "$process" >/dev/null 2>&1; do
-        if [ "$elapsed" -ge "$timeout" ]; then
-            return 1
-        fi
+running() {
+    pidof "${1##*/}" >/dev/null 2>&1
+}
+
+stop_with_signal() {
+    killall "-$2" "$1" 2>/dev/null
+    remaining=$3
+    while running "$1"; do
+        [ "$remaining" -gt 0 ] || return 1
         sleep 1
-        elapsed=$((elapsed + 1))
+        remaining=$((remaining - 1))
     done
     return 0
 }
 
 stop_process() {
-    process="$1"
-
-    if ! pidof "$process" >/dev/null 2>&1; then
-        return
-    fi
-
-    killall -INT "$process" 2>/dev/null || true
-    if wait_for_exit "$process" 20; then
-        return
-    fi
-
-    killall -TERM "$process" 2>/dev/null || true
-    if wait_for_exit "$process" 5; then
-        return
-    fi
-
-    killall -KILL "$process" 2>/dev/null || true
-    wait_for_exit "$process" 2 || {
-        echo "Failed to stop $process" >&2
-        return 1
-    }
+    running "$1" || return 0
+    stop_with_signal "$1" INT 20 && return 0
+    stop_with_signal "$1" TERM 5 && return 0
+    stop_with_signal "$1" KILL 2 && return 0
+    echo "Failed to stop $1" >&2
+    return 1
 }
 
 stop_services() {
     # The server owns VI/VPSS. Let it release MMF before stopping kvm_system.
-    stop_process NanoKVM-Server || return 1
-    stop_process kvm_system || return 1
+    stop_process NanoKVM-Server && stop_process kvm_system
+}
+
+# The stock format prints one address or "--" on the row for a single probe.
+i2c_reply() {
+    i2cdetect -ry 4 "$1" "$1" | awk 'NF == 2 {print $2}'
 }
 
 start_services() {
-    if pidof NanoKVM-Server >/dev/null 2>&1 && pidof kvm_system >/dev/null 2>&1; then
-        return 0
+    if [ -w /sys/module/soph_base/parameters/base_log_lv ]; then
+        echo 0 > /sys/module/soph_base/parameters/base_log_lv
     fi
-    if pidof NanoKVM-Server >/dev/null 2>&1 || pidof kvm_system >/dev/null 2>&1; then
+
+    if running "$server_bin" || running "$system_bin"; then
+        running "$server_bin" && running "$system_bin" && return 0
         echo "NanoKVM is partially running; use restart" >&2
         return 1
     fi
 
     rm -rf /tmp/kvm_system /tmp/server || return 1
     cp -r /kvmapp/kvm_system /tmp/ || return 1
+    migration_result=0
+    factory_chip=
     if [ -f /kvmapp/kvm_new_app ]; then
-        /tmp/kvm_system/kvm_system --migrate 9>&-
-        case "$?" in
-            0) ;;
-            2) sync; reboot; return "$?" ;;
+        if [ -f /boot/factory.ini ] && [ -x "$stock_edid" ] && [ ! -e /etc/init.d/S16lontium ] &&
+           [ ! -e /sys/module/lontium_hdmi ] && [ ! -e /proc/lontium/status ] &&
+           grep -q '"profile": "sipeed"' /kvmapp/.factory-release.json &&
+           grep -q '"phase": "migrating"' "$factory/current.json" &&
+           [ -f "$factory/worker.lock" ] && ! flock -sn 8 8<"$factory/worker.lock"; then
+            case "$(i2c_reply 0x2b) $(i2c_reply 0x2c) $(i2c_reply 0x44) $(i2c_reply 0x41)" in
+                '2b 2c -- --') factory_chip=c ;;
+                '2b -- 44 --') factory_chip=ux ;;
+                '2b -- -- --') factory_chip=d ;;
+            esac
+        fi
+        "$system_bin" --migrate 9>&- || migration_result=$?
+        case "$migration_result" in
+            0|2) ;;
             *) echo "NanoKVM migration failed" >&2; return 1 ;;
         esac
     fi
 
+    if [ "$migration_result" = 2 ] || [ -f /run/nanokvm-hardware-reboot ]; then
+        sync
+        if [ -n "$factory_chip" ]; then
+            # additional.py calls this exact path. The bind is local to this boot.
+            echo "$factory_chip" > /etc/kvm/hdmi_version &&
+                mount -o bind "$stock_edid" "$app_edid" &&
+                mv /run/nanokvm-hardware-reboot "$factory_boot" || return 1
+            return 0
+        fi
+        reboot
+        return "$?"
+    fi
+
+    if [ -f "$factory_boot" ]; then
+        grep -Eq '"phase": "(starting_runtime|verifying|awaiting_acceptance)"' "$factory/current.json" || return 0
+        if [ "$stock_edid" -ef "$app_edid" ]; then
+            umount "$app_edid" && rm -f /etc/kvm/hdmi_version /tmp/watchdog || return 1
+        fi
+        cp -r /kvmapp/server /tmp/ || return 1
+        "$server_bin" 9>&- &
+        server_pid=$!
+        # The worker releases this lock after removing factory.ini and syncing the result.
+        ( flock -s 8 && kill -0 "$server_pid" 2>/dev/null && [ ! -e /boot/factory.ini ] &&
+          grep -q '"phase": "awaiting_acceptance"' "$factory/current.json" &&
+          grep -q '"factory_config_removed": true' "$factory/current.json" &&
+          exec "$system_bin" 8<&- ) 8<"$factory/worker.lock" 9>&- &
+        return 0
+    fi
+    NANOKVM_SERVICE_LOCK_FD=9 /etc/init.d/S16lontium start || return 1
+
     cp -r /kvmapp/server /tmp/ || return 1
     # Daemons must not inherit the service-operation lock.
-    /tmp/kvm_system/kvm_system 9>&- &
-    /tmp/server/NanoKVM-Server 9>&- &
+    "$system_bin" 9>&- &
+    "$server_bin" 9>&- &
+}
+
+can_resume() {
+    case "$2" in
+        0) ! running "$1" ;;
+        1) [ -x "$1" ] ;;
+        *) return 1 ;;
+    esac
+}
+
+resume_saved_services() {
+    server_was_running=$1
+    system_was_running=$2
+    [ -e "$maintenance_marker" ] && [ -r /proc/lontium/status ] || return 1
+    # Check both saved states before launching either temporary executable.
+    can_resume "$server_bin" "$server_was_running" || return 1
+    can_resume "$system_bin" "$system_was_running" || return 1
+    if [ "$system_was_running" = 1 ] && ! running "$system_bin"; then
+        "$system_bin" 9>&- </dev/null >/dev/null 2>&1 &
+    fi
+    if [ "$server_was_running" = 1 ] && ! running "$server_bin"; then
+        "$server_bin" 9>&- </dev/null >/dev/null 2>&1 &
+    fi
+    for attempt in 1 2 3 4 5 6 7 8 9 10; do
+        if { [ "$server_was_running" = 0 ] || running "$server_bin"; } &&
+           { [ "$system_was_running" = 0 ] || running "$system_bin"; }; then
+            return 0
+        fi
+        sleep 0.1
+    done
+    echo "Failed to resume NanoKVM services after HDMI maintenance" >&2
+    return 1
+}
+
+ensure_iptables_rule() {
+    iptables -C "$@" 2>/dev/null || iptables -A "$@"
 }
 
 case "$1" in
+  maintenance-check)
+    [ "$2" = 1 ] || exit 1
+    NANOKVM_SERVICE_LOCK_FD=9 /etc/init.d/S16lontium maintenance-check 1 || exit 1
+   ;;
+
+  maintenance-stop)
+    [ -e "$maintenance_marker" ] || exit 1
+    stop_services || exit 1
+   ;;
+
+  maintenance-resume)
+    resume_saved_services "$2" "$3" || exit 1
+   ;;
+
   start)
     echo -n kvm > /boot/hostname.prefix
     [ -e /root/.profile ] || printf '%s\n' 'export PS1="\u@\h:\w# "' > /root/.profile
 
-    # Copy sensor config if the file exists
-    [ -f /mnt/data/sensor_cfg.ini.LT ] && cp /mnt/data/sensor_cfg.ini.LT /mnt/data/sensor_cfg.ini
-
-    # Generate unique device key
     if [ -f /sys/class/cvi-base/base_uid ]; then
-        str_value=$(awk '{print $2}' /sys/class/cvi-base/base_uid)
-        first_uint=$(echo "$str_value" | cut -d'_' -f1)
-        second_uint=$(echo "$str_value" | cut -d'_' -f2)
-        echo "$first_uint$second_uint" > /device_key
+        awk '{split($2, uid, "_"); print uid[1] uid[2]}' /sys/class/cvi-base/base_uid > /device_key
     fi
 
-    # Set iptables rules (skip if already present)
-    iptables -C INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A INPUT -i eth0 -p tcp --dport 80 -m state --state NEW,ESTABLISHED -j ACCEPT
+    ensure_iptables_rule INPUT  -i eth0 -p tcp --dport 80   -m state --state NEW,ESTABLISHED -j ACCEPT
+    ensure_iptables_rule OUTPUT -o eth0 -p tcp --sport 80   -m state --state ESTABLISHED -j ACCEPT
+    ensure_iptables_rule INPUT  -i eth0 -p tcp --sport 22   -m state --state NEW,ESTABLISHED -j ACCEPT
+    ensure_iptables_rule OUTPUT -o eth0 -p tcp --dport 22   -m state --state ESTABLISHED -j ACCEPT
+    ensure_iptables_rule OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
 
-    iptables -C OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A OUTPUT -o eth0 -p tcp --sport 80 -m state --state ESTABLISHED -j ACCEPT
-
-    iptables -C INPUT -i eth0 -p tcp --sport 22 -m state --state NEW,ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A INPUT -i eth0 -p tcp --sport 22 -m state --state NEW,ESTABLISHED -j ACCEPT
-
-    iptables -C OUTPUT -o eth0 -p tcp --dport 22 -m state --state ESTABLISHED -j ACCEPT 2>/dev/null || \
-    iptables -A OUTPUT -o eth0 -p tcp --dport 22 -m state --state ESTABLISHED -j ACCEPT
-
-    iptables -C OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP 2>/dev/null || \
-    iptables -A OUTPUT -o eth0 -p tcp --sport 8000 -m state --state ESTABLISHED -j DROP
-
-    # Logo selection
+    web_dir=/kvmapp/server/web
     if [ -f /boot/logo.ico ]; then
-        if [ ! -f /kvmapp/server/web/original.ico ]; then
-            mv /kvmapp/server/web/sipeed.ico /kvmapp/server/web/original.ico
-            cp /boot/logo.ico /kvmapp/server/web/sipeed.ico
+        if [ ! -f "$web_dir/original.ico" ]; then
+            mv "$web_dir/sipeed.ico" "$web_dir/original.ico"
+            cp /boot/logo.ico "$web_dir/sipeed.ico"
         fi
-    else
-        if [ -f /kvmapp/server/web/original.ico ]; then
-            mv /kvmapp/server/web/original.ico /kvmapp/server/web/sipeed.ico
-        fi
+    elif [ -f "$web_dir/original.ico" ]; then
+        mv "$web_dir/original.ico" "$web_dir/sipeed.ico"
     fi
 
-    # Start services
     start_services || exit 1
    ;;
 
@@ -135,7 +226,7 @@ case "$1" in
     sync
     echo "OK"
    ;;
-    
+
   *)
     echo "Usage: $0 {start|stop|restart}"
     exit 1

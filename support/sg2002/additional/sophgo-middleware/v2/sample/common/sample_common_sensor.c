@@ -17,6 +17,9 @@
 #include "cvi_comm_isp.h"
 #include "sample_comm.h"
 #include "ini.h"
+#ifdef KVM_MMF_SOURCE_CONFIG
+#include "source_config.h"
+#endif
 
 #define INI_FILE_PATH	"/mnt/data/sensor_cfg.ini"
 #define INI_DEF_PATH	"/mnt/system/usr/bin/sensor_cfg.ini"
@@ -688,48 +691,19 @@ CVI_S32 SAMPLE_COMM_SNS_GetPicSize(PIC_SIZE_E enPicSize, SIZE_S *pstSize)
 		pstSize->u32Width  = 384;
 		pstSize->u32Height = 288;
 		break;
-	case PIC_CUSTOMIZE:  /* env * env */
+	case PIC_CUSTOMIZE:
 	{
-		uint8_t RW_Data[35];
-		FILE *fp;
-		int file_size;
-		if(access("/kvmapp/kvm/width", F_OK) == 0){
-			fp = fopen("/kvmapp/kvm/width", "r");
-			fseek(fp, 0, SEEK_END);
-			file_size = ftell(fp); 
-			fseek(fp, 0, SEEK_SET);
-			fread(RW_Data, sizeof(char), file_size, fp);
-			fclose(fp);
-			RW_Data[file_size] = 0;
-			pstSize->u32Width = atoi((char*)RW_Data);
-		} else {
-			pstSize->u32Width = 1920;
-		}
-		if(access("/kvmapp/kvm/height", F_OK) == 0){
-			fp = fopen("/kvmapp/kvm/height", "r");
-			fseek(fp, 0, SEEK_END);
-			file_size = ftell(fp); 
-			fseek(fp, 0, SEEK_SET);
-			fread(RW_Data, sizeof(char), file_size, fp);
-			fclose(fp);
-			RW_Data[file_size] = 0;
-			pstSize->u32Height = atoi((char*)RW_Data);
-		} else {
-			pstSize->u32Height = 1080;
-		}
-
-		// if(getenv("KVM_CSI_HEIGHT") == NULL || getenv("KVM_CSI_WIDTH") == NULL){
-		// 	pstSize->u32Width  = 1920;
-		// 	pstSize->u32Height = 1080;
-		// 	printf("KVM_CSI_H/W = NULL%d\n");
-		// } else {
-		// 	pstSize->u32Width  = atoi(getenv("KVM_CSI_HEIGHT"));
-		// 	pstSize->u32Height = atoi(getenv("KVM_CSI_WIDTH"));
-		// }
-		
-		printf("pstSize->u32Width = %d\n", pstSize->u32Width);
-		printf("pstSize->u32Height = %d\n", pstSize->u32Height);
+		memset(pstSize, 0, sizeof(*pstSize));
+#ifdef KVM_MMF_SOURCE_CONFIG
+		struct kvm_source_config source;
+		if (kvm_source_get(&source) != 0)
+			return CVI_FAILURE;
+		pstSize->u32Width = source.width;
+		pstSize->u32Height = source.height;
 		break;
+#else
+		return CVI_FAILURE;
+#endif
 	}
 		
 	default:
@@ -749,8 +723,9 @@ CVI_S32 SAMPLE_COMM_SNS_GetDevAttr(SAMPLE_SNS_TYPE_E enSnsType, VI_DEV_ATTR_S *p
 
 	memcpy(pstViDevAttr, &DEV_ATTR_SENSOR_BASE, sizeof(VI_DEV_ATTR_S));
 
-	SAMPLE_COMM_SNS_GetSize(enSnsType, &enPicSize);
-	SAMPLE_COMM_SNS_GetPicSize(enPicSize, &stSize);
+	if (SAMPLE_COMM_SNS_GetSize(enSnsType, &enPicSize) != CVI_SUCCESS ||
+	    SAMPLE_COMM_SNS_GetPicSize(enPicSize, &stSize) != CVI_SUCCESS)
+		return CVI_FAILURE;
 
 	pstViDevAttr->stSize.u32Width = stSize.u32Width;
 	pstViDevAttr->stSize.u32Height = stSize.u32Height;
@@ -1017,8 +992,9 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 
 	memcpy(pstPubAttr, &ISP_PUB_ATTR_SAMPLE, sizeof(ISP_PUB_ATTR_S));
 
-	SAMPLE_COMM_SNS_GetSize(enSnsType, &enPicSize);
-	SAMPLE_COMM_SNS_GetPicSize(enPicSize, &stSize);
+	if (SAMPLE_COMM_SNS_GetSize(enSnsType, &enPicSize) != CVI_SUCCESS ||
+	    SAMPLE_COMM_SNS_GetPicSize(enPicSize, &stSize) != CVI_SUCCESS)
+		return CVI_FAILURE;
 
 	pstPubAttr->stSnsSize.u32Width = stSize.u32Width;
 	pstPubAttr->stSnsSize.u32Height = stSize.u32Height;
@@ -1107,7 +1083,15 @@ CVI_S32 SAMPLE_COMM_SNS_GetIspAttrBySns(SAMPLE_SNS_TYPE_E enSnsType, ISP_PUB_ATT
 		break;
 	case LONTIUM_LT6911_2M_60FPS_8BIT:
 		pstPubAttr->enBayer = BAYER_BGGR;
-		pstPubAttr->f32FrameRate = 60;
+#ifdef KVM_MMF_SOURCE_CONFIG
+		{
+			struct kvm_source_config source;
+
+			if (kvm_source_get(&source) != 0)
+				return CVI_FAILURE;
+			pstPubAttr->f32FrameRate = kvm_source_sdk_fps(&source);
+		}
+#endif
 		break;
 	// Sony
 	case SONY_IMX307_MIPI_2M_30FPS_12BIT:

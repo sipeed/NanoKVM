@@ -7,7 +7,6 @@ list(APPEND ADD_INCLUDE
                         "lib/system_init"
                         "lib/oled_ctrl"
                         "lib/oled_ui"
-                        "lib/hdmi"
                         )
 
 list(APPEND ADD_PRIVATE_INCLUDE "../../additional/kvm/include")
@@ -20,7 +19,6 @@ append_srcs_dir(ADD_SRCS
                         "lib/system_init"
                         "lib/oled_ctrl"
                         "lib/oled_ui"
-                        "lib/hdmi"
                         )       # append source file in src dir to var ADD_SRCS
 
 list(APPEND ADD_REQUIREMENTS basic peripheral)

@@ -45,7 +45,7 @@ export GOEXPERIMENT=boringcrypto
 export CC="$CC_COMPILER"
 export CGO_CFLAGS="$CGO_CFLAGS_OPTS"
 
-go build -o "$BINARY_NAME" -v
+go build -o "$BINARY_NAME" -v "$@"
 
 if [ -f "$BINARY_NAME" ]; then
     echo -e "${GREEN}[SUCCESS] Binary '$BINARY_NAME' created successfully.${NC}"

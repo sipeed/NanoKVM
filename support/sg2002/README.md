@@ -31,5 +31,5 @@ libraries in `server/dl_lib/`.
 3. Execute `./build kvm_vision` to build both libraries and the example. The library build and install directories are `kvm_vision_test/build/kvm_mmf-build/` and `kvm_vision_test/build/kvm_mmf-install/`.
 4. The resulting libraries are in `kvm_vision_test/dist/kvm_vision_test_release/dl_lib/`.
 5. Run `./build kvm_vision add_to_kvmapp` to stage them in the repository's `kvmapp/server/dl_lib/`.
-6. After changing the video library interfaces, update both prebuilt files `server/dl_lib/libkvm.so` and `server/dl_lib/libkvm_mmf.so` from the same build. Server compilation uses these files directly; see the [server build instructions](../../server/README.md#compile--deploy).
+6. `make release-build` links the Go server against the staged pair in `kvmapp/server/dl_lib/`. Packaging takes both libraries from that directory. For server-only builds with `make app`, refresh both prebuilts in `server/dl_lib/` after changing their interfaces. See the [server build instructions](../../server/README.md#compile--deploy).
 7. Use `./build kvm_vision clean` to remove the build outputs, including both library build and install directories.

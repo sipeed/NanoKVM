@@ -2,12 +2,17 @@ package common
 
 /*
 	#cgo CFLAGS: -I../include
-	#cgo LDFLAGS: -L../dl_lib -lkvm
+	#cgo !kvm_staged LDFLAGS: -L${SRCDIR}/../dl_lib
+	#cgo kvm_staged LDFLAGS: -L${SRCDIR}/../../kvmapp/server/dl_lib -Wl,-rpath-link,${SRCDIR}/../../kvmapp/server/dl_lib
+	#cgo LDFLAGS: -lkvm
 	#include "kvm_vision.h"
 */
 import "C"
 import (
+	"fmt"
+	"os"
 	"sync"
+	"syscall"
 	"unsafe"
 
 	log "github.com/sirupsen/logrus"
@@ -80,11 +85,11 @@ func (k *KvmVision) stopStream(codec uint8) {
 	}
 }
 
-func (k *KvmVision) SetHDMI(enable bool) int {
+func (k *KvmVision) SetHDMI(enable bool) error {
 	k.mutex.RLock()
 	defer k.mutex.RUnlock()
 	if k.closed {
-		return -1
+		return os.ErrClosed
 	}
 
 	hdmiEnable := C.uint8_t(0)
@@ -94,21 +99,24 @@ func (k *KvmVision) SetHDMI(enable bool) int {
 
 	result := int(C.kvmv_hdmi_control(hdmiEnable))
 	if result < 0 {
-		log.Errorf("failed to set hdmi to %t", enable)
-		return result
+		return fmt.Errorf("set HDMI power to %t: %w", enable, syscall.Errno(-result))
 	}
 
-	return result
+	return nil
 }
 
-func (k *KvmVision) HasHDMISignal() bool {
+// CaptureState reports SDK configuration separately from physical HDMI signal.
+// Sequence identifies the kernel snapshot processed by the capture monitor.
+func (k *KvmVision) CaptureState() (result int, sequence uint64, err error) {
 	k.mutex.RLock()
 	defer k.mutex.RUnlock()
 	if k.closed {
-		return false
+		return 0, 0, os.ErrClosed
 	}
 
-	return C.kvmv_hdmi_signal_active() != 0
+	var seq C.uint64_t
+	result = int(C.kvmv_capture_state(&seq))
+	return result, uint64(seq), nil
 }
 
 func (k *KvmVision) SetGop(gop uint8) {

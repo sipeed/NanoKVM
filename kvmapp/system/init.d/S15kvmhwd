@@ -1,5 +1,5 @@
 #!/bin/sh
-# kvmhwd Rev2.5
+# Board, OLED and ATX initialization. HDMI is managed by lontium_hdmi.
 
 Alpha_OLED_RST_Pin=371
 Beta_OLED_RST_Pin=502
@@ -13,7 +13,14 @@ Alpha_RST_KEY_Pin=507
 Beta_PWR_LED_Pin=504
 Beta_PWR_KEY_Pin=503
 Beta_RST_KEY_Pin=505
-PCIe_HDMI_RST_Pin=451
+
+init_csi_hw(){
+  for reg in 0x0300116C 0x03001170 0x03001174 0x03001178 0x0300117C \
+             0x03001180 0x03001184 0x03001188 0x0300118C 0x03001190
+  do
+    devmem "$reg" 32 0x3 || return 1
+  done
+}
 
 init_alpha_hw(){
   devmem 0x030010D0 32 0x2  # I2C1_SCL
@@ -79,14 +86,10 @@ init_beta_pcie_hw(){
   echo ${Beta_PWR_LED_Pin} > /sys/class/gpio/export   # pwr led
   echo ${Beta_PWR_KEY_Pin} > /sys/class/gpio/export   # pwr key
   echo ${Beta_RST_KEY_Pin} > /sys/class/gpio/export   # rst key
-  echo ${PCIe_HDMI_RST_Pin} > /sys/class/gpio/export   # hdmi rst key
 
   echo in > /sys/class/gpio/gpio${Beta_PWR_LED_Pin}/direction     # pwr led
   echo out > /sys/class/gpio/gpio${Beta_PWR_KEY_Pin}/direction    # pwr key
   echo out > /sys/class/gpio/gpio${Beta_RST_KEY_Pin}/direction    # rst key
-  echo out > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/direction    # rst key
-
-  echo 1 > /sys/class/gpio/gpio${PCIe_HDMI_RST_Pin}/value    # rst key
 
   rmmod /mnt/system/ko/i2c-gpio.ko
   rmmod /mnt/system/ko/i2c-algo-bit.ko
@@ -95,10 +98,6 @@ init_beta_pcie_hw(){
 }
 
 kvm_hw_detect(){
-  if [ ! -e /etc/kvm/hdmi_version ]
-  then
-    rm /etc/kvm/hw
-  fi
   if [ -e /etc/kvm/hw ]
   then
     echo "/etc/kvm/hw exist"
@@ -146,8 +145,6 @@ kvm_hw_detect(){
       insmod /mnt/system/ko/i2c-algo-bit.ko
       insmod /mnt/system/ko/i2c-gpio.ko
 
-      kvm_hdmi_version_detect
-
       kvm_tmp=$(i2cdetect -ry 5 0x3c 0x3c | grep 3c)
       if [ -n "$kvm_tmp" ]
       then
@@ -169,6 +166,7 @@ kvm_hw_detect(){
 }
 
 kvm_hw_init(){
+    init_csi_hw || return 1
     FIND_FILE="/etc/kvm/hw"
     if [ `grep -c "alpha" $FIND_FILE` -ne '0' ]
     then
@@ -187,21 +185,6 @@ kvm_hw_init(){
     fi
 }
 
-kvm_hdmi_version_detect()
-{
-    if i2cdetect -ry 4 0x2c 0x2c | grep -qw "2c"; then
-        echo "c" > /etc/kvm/hdmi_version
-    elif i2cdetect -ry 4 0x2b 0x2b | grep -qw "2b"; then
-        if i2cdetect -ry 4 0x44 0x44 | grep -qw "44"; then
-            echo "ux" > /etc/kvm/hdmi_version
-        else
-            echo "d" > /etc/kvm/hdmi_version
-        fi
-    else
-        echo "ue" > /etc/kvm/hdmi_version
-    fi
-}
-
 case "$1" in
   start)
     kvm_hw_detect
@@ -214,8 +197,5 @@ case "$1" in
   ;;
   re-init)
     kvm_hw_init
-  ;;
-  get_hdmi_version)
-    kvm_hdmi_version_detect
   ;;
 esac

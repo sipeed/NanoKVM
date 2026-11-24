@@ -630,31 +630,24 @@ void OLED_ShowKVMStreamState(uint8_t kvm_state_s, void* pdata)
     }
 }
 
-void OLED_Show_Res(uint16_t _w, uint16_t _h)
+void OLED_Show_Res(uint32_t _w, uint32_t _h)
 {
-	// PCIe
-	if(_w != 0 || _h != 0){
-		char res_char[20]={0};
-		sprintf(res_char,"%d*%d", _w, _h);
-		
-		if(kvm_hw_ver != 2){
-			// cube
-			OLED_ShowString(10, 4, "RES:               ", 8);
+	char res_char[24] = {};
+	if(_w != 0 && _h != 0)
+		snprintf(res_char, sizeof(res_char), "%u*%u", _w, _h);
+	// Keep the existing labels, positions and empty-state appearance. Values
+	// too wide for the field must not wrap coordinates or become partial sizes.
+	const size_t max_chars = kvm_hw_ver == 2 ? 9 : 14;
+	if(strlen(res_char) > max_chars) res_char[0] = 0;
+	if(kvm_hw_ver != 2){
+		OLED_ShowString(10, 4, "RES:               ", 8);
+		if(res_char[0])
 			OLED_ShowString_AlignRight(AlignRightEND, 4, res_char, 8);
-		} else {
-			// pcie
-			res_char[10]=0;
-			OLED_ShowString_AlignRight(36, 3, "         ", 4);
-			OLED_ShowString_AlignRight(36, 3, res_char, 4);
-		}
-	} else {
-		if(kvm_hw_ver != 2){
-			// cube
+		else
 			OLED_ShowString(10, 4, "RES:             --", 8);
-		} else {
-			// pcie
-			OLED_ShowString_AlignRight(36, 3, "         ", 4);
-		}
+	} else {
+		OLED_ShowString_AlignRight(36, 3, "         ", 4);
+		if(res_char[0]) OLED_ShowString_AlignRight(36, 3, res_char, 4);
 	}
 }
 

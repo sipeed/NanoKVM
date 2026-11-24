@@ -189,10 +189,8 @@ uint8_t kvm_state_is_changed()
 	if(	(kvm_sys_state.eth_state 	!= kvm_oled_state.eth_state) 	|| 
 		(kvm_sys_state.wifi_state 	!= kvm_oled_state.wifi_state) 	|| 
 		(kvm_sys_state.usb_state 	!= kvm_oled_state.usb_state) 	|| 
-		(kvm_sys_state.hdmi_state 	!= kvm_oled_state.hdmi_state) 	|| 
+		(kvm_sys_state.hdmi 		!= kvm_oled_state.hdmi) 		||
 	/*	(kvm_sys_state.now_fps 		!= kvm_oled_state.now_fps) 		|| */
-		(kvm_sys_state.hdmi_width 	!= kvm_oled_state.hdmi_width) 	|| 
-		(kvm_sys_state.hdmi_height 	!= kvm_oled_state.hdmi_height) 	|| 
 		(kvm_sys_state.type 		!= kvm_oled_state.type) 		|| 
 		(kvm_sys_state.qlty 		!= kvm_oled_state.qlty) )
 		return 1;
@@ -291,19 +289,12 @@ void kvm_usb_state_disp(uint8_t first_disp)
 	}
 }
 
-void kvm_hdmi_state_disp(uint8_t first_disp)
+void kvm_hdmi_disp(uint8_t first_disp)
 {
-	if((kvm_oled_state.hdmi_state != kvm_sys_state.hdmi_state) || first_disp){
-		kvm_oled_state.hdmi_state = kvm_sys_state.hdmi_state;
-		switch(kvm_oled_state.hdmi_state){
-			case -1:
-			case  0:
-				OLED_ShowKVMState(HDMI_STATE, 	0);
-				break;
-			case  1:
-				OLED_ShowKVMState(HDMI_STATE, 	1);
-				break;
-		}
+	if(kvm_oled_state.hdmi != kvm_sys_state.hdmi || first_disp){
+		kvm_oled_state.hdmi = kvm_sys_state.hdmi;
+		OLED_ShowKVMState(HDMI_STATE, kvm_oled_state.hdmi.has_signal() ? 1 : 0);
+		OLED_Show_Res(kvm_oled_state.hdmi.width, kvm_oled_state.hdmi.height);
 	}
 }
 
@@ -312,17 +303,6 @@ void kvm_fps_disp(uint8_t first_disp)
 	if((kvm_oled_state.now_fps != kvm_sys_state.now_fps) || first_disp){
 		kvm_oled_state.now_fps = kvm_sys_state.now_fps;
 		OLED_ShowKVMStreamState(KVM_STEAM_FPS, &kvm_oled_state.now_fps);
-	}
-}
-
-void kvm_res_disp(uint8_t first_disp)
-{
-	if(	(kvm_oled_state.hdmi_width != kvm_sys_state.hdmi_width) || \
-		(kvm_oled_state.hdmi_height != kvm_sys_state.hdmi_height) || \
-		first_disp ){
-		kvm_oled_state.hdmi_width = kvm_sys_state.hdmi_width;
-		kvm_oled_state.hdmi_height = kvm_sys_state.hdmi_height;
-		OLED_Show_Res(kvm_sys_state.hdmi_width, kvm_sys_state.hdmi_height);
 	}
 }
 
@@ -379,9 +359,8 @@ void kvm_main_ui_disp(uint8_t first_disp, uint8_t subpage_changed)
 		kvm_eth_state_disp(now_ip_type, first_disp || subpage_changed);
 		kvm_wifi_state_disp(now_ip_type, first_disp || subpage_changed);
 		kvm_usb_state_disp(first_disp || subpage_changed);
-		kvm_hdmi_state_disp(first_disp || subpage_changed);
+		kvm_hdmi_disp(first_disp || subpage_changed);
 		kvm_fps_disp(first_disp || subpage_changed);
-		kvm_res_disp(first_disp || subpage_changed);
 		kvm_type_disp(first_disp || subpage_changed);
 		kvm_qlty_disp(first_disp || subpage_changed);
 	}
@@ -543,17 +522,5 @@ void oled_auto_sleep(void)
 				kvm_sys_state.sub_page = 0;
 			}
 		}
-	}
-}
-
-void kvm_show_UE(void)
-{
-	if(kvm_hw_ver != 2){
-		OLED_ShowString(0, 0, "HDMI: UE", 16);
-	} else {
-		OLED_Revolve();
-		OLED_ShowString(0, 0, "HDMI: UE", 16);
-		// OLED_ShowString_AlignRight(AlignRightEND_P, 3, "  FPS", 4);
-		// kvm_init_pcie_ui();
 	}
 }

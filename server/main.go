@@ -6,7 +6,6 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
-	"time"
 
 	"NanoKVM-Server/common"
 	"NanoKVM-Server/config"
@@ -23,6 +22,14 @@ import (
 )
 
 func main() {
+	// The 2.4.3 init script starts both daemons concurrently. kvm_system
+	// owns migration; the new init script starts us after the required boot.
+	for _, marker := range []string{"/kvmapp/kvm_new_app", "/run/nanokvm-hardware-reboot"} {
+		if _, err := os.Stat(marker); !os.IsNotExist(err) {
+			log.Printf("waiting for application migration before starting the server (%s)", marker)
+			return
+		}
+	}
 	initialize()
 	defer dispose()
 
@@ -39,11 +46,15 @@ func initialize() {
 	// init screen parameters
 	_ = common.GetScreen()
 
-	// init HDMI
-	vm.DisableHdmiCapture()
-	time.Sleep(10 * time.Millisecond)
-	if !utils.IsHdmiDisabled() {
-		vm.EnableHdmiCapture()
+	// Apply the saved state once; starting the server must not pulse reset.
+	var hdmiErr error
+	if utils.IsHdmiDisabled() {
+		hdmiErr = vm.DisableHdmiCapture()
+	} else {
+		hdmiErr = vm.EnableHdmiCapture()
+	}
+	if hdmiErr != nil {
+		log.Printf("failed to apply HDMI power preference: %v", hdmiErr)
 	}
 	vm.SetHdmiViewerCount(0)
 

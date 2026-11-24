@@ -29,26 +29,27 @@ else()
     set(runtime "${middleware}/lib")
 endif()
 set(common "${middleware}/sample/common")
-set(sensor "${middleware}/component/isp/sensor/sg200x/lontium_lt6911")
+set(sensor_common "${CMAKE_CURRENT_SOURCE_DIR}/../sophgo-middleware/v2/sample/common/sample_common_sensor.c")
 
 add_library(kvm_mmf SHARED
     src/kvm_mmf.cpp
+    src/source_config.c src/lontium_sensor.c
     "${common}/sample_common_sys.c"
     "${common}/sample_common_vi.c"
     "${common}/sample_common_isp.c"
     "${common}/sample_common_bin.c"
     "${common}/sample_common_platform.c"
-    "${common}/sample_common_sensor.c"
-    "${sensor}/lt6911_cmos.c" "${sensor}/lt6911_sensor_ctl.c"
+    "${sensor_common}"
 )
 target_compile_features(kvm_mmf PRIVATE cxx_std_17)
-target_compile_definitions(kvm_mmf PRIVATE SENSOR_LONTIUM_LT6911 SENSOR2_TYPE=LONTIUM_LT6911_2M_60FPS_8BIT)
+target_compile_definitions(kvm_mmf PRIVATE KVM_MMF_SOURCE_CONFIG SENSOR_LONTIUM_LT6911 SENSOR2_TYPE=LONTIUM_LT6911_2M_60FPS_8BIT)
 target_compile_options(kvm_mmf PRIVATE -Wall -ffunction-sections -fdata-sections)
 target_include_directories(kvm_mmf PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 target_include_directories(kvm_mmf PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/src"
     "${common}" "${middleware}/include" "${middleware}/uapi"
     "${middleware}/include/isp/${SOPHGO_CHIP}"
     "${middleware}/component/panel/${SOPHGO_CHIP}"

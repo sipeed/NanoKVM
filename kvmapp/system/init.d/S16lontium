@@ -1,0 +1,54 @@
+#!/bin/sh
+# Load after S15kvmhwd has prepared the board and CSI pads.
+
+if [ "${NANOKVM_SERVICE_LOCK_FD:-}" = 9 ]; then
+    [ /proc/self/fd/9 -ef /run/nanokvm-service.lock ] || exit 1
+else
+    exec 9>/run/nanokvm-service.lock || exit 1
+fi
+flock -n 9 || { echo "NanoKVM service operation already in progress" >&2; exit 1; }
+
+if [ "$1" = maintenance-check ]; then
+    [ "${NANOKVM_SERVICE_LOCK_FD:-}" = 9 ] && [ "$2" = 1 ]
+    exit "$?"
+fi
+
+if [ -e /run/nanokvm-hdmi-maintenance ]; then
+    echo "HDMI maintenance is active; use nanokvm_update_edid --recover before changing the driver" >&2
+    exit 1
+fi
+
+receiver_start() {
+    if [ -r /proc/lontium/status ]; then
+        return 0
+    fi
+    if pidof NanoKVM-Server >/dev/null 2>&1 || pidof kvm_system >/dev/null 2>&1; then
+        echo "Stop NanoKVM before loading lontium_hdmi" >&2
+        return 1
+    fi
+    if [ ! -d /sys/module/lontium_hdmi ]; then
+        insmod /mnt/system/ko/lontium_hdmi.ko || return 1
+    fi
+
+    if [ ! -r /proc/lontium/status ]; then
+        echo "HDMI receiver unavailable; check the kernel, device tree and lontium_hdmi module" >&2
+        return 1
+    fi
+}
+
+receiver_stop() {
+    if [ ! -d /sys/module/lontium_hdmi ]; then
+        return 0
+    fi
+    if pidof NanoKVM-Server >/dev/null 2>&1 || pidof kvm_system >/dev/null 2>&1; then
+        echo "Stop NanoKVM before unloading lontium_hdmi" >&2
+        return 1
+    fi
+    rmmod lontium_hdmi
+}
+
+case "$1" in
+    start) receiver_start ;;
+    stop) receiver_stop ;;
+    *) echo "Usage: $0 {start|stop}" >&2; exit 1 ;;
+esac

@@ -80,7 +80,8 @@ manual download and does not change the on-device `latest.json` contract.
 | `server/dl_lib/` | whatever the `kvm_vision` build emits, with any library it does not emit backfilled from the tracked `server/dl_lib/` |
 | `server/web/` | `web/dist/` |
 | `kvm_system/kvm_system` | `support/sg2002` `build kvm_system` |
-| `system/tool/` | prebuilt binaries in `tools/nanokvm_update_edid/` |
+| `system/tool/` | matching EDID maintenance binary built from `tools/nanokvm_update_edid/` |
+| `system/firmware/` | complete SG2002 SD boot image and matching MIPI and Lontium modules |
 | `kvm/` | default runtime state (input dimensions, fps, quality) |
 | everything else | tracked `kvmapp/` |
 
@@ -88,20 +89,33 @@ Note that `kvm/` ships default runtime state, and `install.go` replaces
 `/kvmapp` wholesale, so an update resets those values on the device. That is
 long-standing behaviour, not something these scripts introduce.
 
+The SG2002 OTA includes a complete `boot.sd` and its matched
+`soph_mipi_rx.ko` and `lontium_hdmi.ko`. The supported upgrade baseline is
+image `2026-06-10-1_4_3.img` with application `2.4.3`. That updater starts
+both daemons through its installed S95. During migration `kvm_system` installs
+the firmware and init scripts, and the server waits for the next service start.
+After reboot S16 loads the manager and S95 starts both daemons.
+
+The installer compares each firmware file and stages the modules that changed.
+If `boot.sd` differs, it removes the old file from the 16 MiB FAT partition
+and writes the complete new image directly. A write error stops the migration.
+Retry while Linux is running, or copy the packaged `boot.sd` to the boot
+partition with a card reader if the device can no longer boot.
+
 ## Video library linking
 
-`make app` and `server/build.sh` compile the server using the prebuilt libraries
-in `server/dl_lib/`. They do not rebuild the video libraries. The cgo directive
-in `server/common/kvm_vision.go` links against `libkvm.so`, which depends on
-`libkvm_mmf.so`.
+`make release-build` builds `libkvm.so` and its dependency `libkvm_mmf.so`,
+stages both in `kvmapp/server/dl_lib/`, then runs `server/build.sh -a -tags=kvm_staged`.
+The tag selects the staged directory for cgo. The rebuild ensures the linker
+sees changes to the shared libraries even with a warm Go build cache.
+The release script checks the KVM symbols the server imports, and
+`make package` copies the same staged libraries into the archive.
 
-`make vision` rebuilds the video libraries and stages them in
-`kvmapp/server/dl_lib/`; `make release-build` does this as part of the full build.
-After changing library interfaces, update both prebuilt files in
-`server/dl_lib/` from the same build. The tracked directory also supplies the
-SDK runtime libraries used by the video build and backfills libraries that
-are absent from the staged directory.
+For server-only builds, `make app` and `server/build.sh` use the prebuilt pair
+in `server/dl_lib/`. Refresh both prebuilts together when changing their
+interfaces. To test local video changes, run `make vision` and then
+`./build.sh -a -tags=kvm_staged` from `server/` in the builder.
 
-`build-in-container.sh` checks that the staged `libkvm.so` exports every KVM
-symbol imported by the server. See the [server instructions](../server/README.md#compile--deploy)
-for manual compilation and deployment.
+EDID 维护工具与 S95/S16 使用同一服务锁和维护协议。构建会从源码编译该工具；
+需要配套的内核 proc 接口和启动脚本，不能只替换单个工具后直接擦写。使用方式及
+恢复流程见 [EDID 工具说明](../tools/nanokvm_update_edid/README.md)。

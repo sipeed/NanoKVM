@@ -8,6 +8,7 @@
 #   kvmapp/kvm_system/kvm_system    kvm_system daemon
 #   kvmapp/server/dl_lib/           video libraries, including a fresh libkvm.so
 #   server/NanoKVM-Server           Go server (BoringCrypto, RPATH $ORIGIN/dl_lib)
+#   tools/nanokvm_update_edid/nanokvm_update_edid  managed EDID maintenance
 
 set -euo pipefail
 
@@ -34,7 +35,7 @@ done
 # Check the toolchain up front. builder-image reuses any existing image, so an
 # image built before a tooling change silently lacks it - and without this the
 # SDK build would run for minutes before server/build.sh failed at the end.
-for tool in go riscv64-unknown-linux-musl-gcc patchelf; do
+for tool in go riscv64-unknown-linux-musl-gcc riscv64-unknown-linux-musl-g++ make patchelf; do
     if ! command -v "$tool" >/dev/null 2>&1; then
         echo "[ERROR] '$tool' is missing from the builder image" >&2
         echo "        the image is out of date; rebuild it with: make rebuild-image" >&2
@@ -70,7 +71,13 @@ echo "::endgroup::"
 
 echo "::group::server: cross-compile NanoKVM-Server"
 cd "$NANOKVM_PATH/server"
-./build.sh
+# cgo's cache does not track changes to external .so files at the same path.
+./build.sh -a -tags=kvm_staged
+echo "::endgroup::"
+
+# Compile the helper from the same tree as the init scripts it coordinates.
+echo "::group::tools: cross-compile EDID maintenance helper"
+make -C "$NANOKVM_PATH/tools/nanokvm_update_edid" CROSS_COMPILE=riscv64-unknown-linux-musl-
 echo "::endgroup::"
 
 # support/sg2002/build reports "Build Error!" without a non-zero exit status for
@@ -80,7 +87,9 @@ missing=0
 for artifact in \
     "$NANOKVM_PATH/kvmapp/kvm_system/kvm_system" \
     "$NANOKVM_PATH/kvmapp/server/dl_lib/libkvm.so" \
-    "$NANOKVM_PATH/server/NanoKVM-Server"
+    "$NANOKVM_PATH/kvmapp/server/dl_lib/libkvm_mmf.so" \
+    "$NANOKVM_PATH/server/NanoKVM-Server" \
+    "$NANOKVM_PATH/tools/nanokvm_update_edid/nanokvm_update_edid"
 do
     if [ -f "$artifact" ]; then
         echo "  ok      ${artifact#$NANOKVM_PATH/}"

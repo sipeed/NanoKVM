@@ -8,6 +8,7 @@ import (
 	"time"
 
 	mcpservice "NanoKVM-Server/service/mcp"
+	hdmistate "NanoKVM-Server/service/vm/hdmi_state"
 )
 
 const (
@@ -24,7 +25,7 @@ type VisionReader interface {
 }
 
 type ScreenReader func() (width uint16, height uint16)
-type CaptureLeaseAcquirer func(context.Context) (release func(), claimFresh func() bool, err error)
+type CaptureLeaseAcquirer func(context.Context) (hdmistate.ReadLease, error)
 
 type Snapshotter struct {
 	vision       VisionReader
@@ -52,7 +53,7 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 	if req.X != 0 || req.Y != 0 || req.W != 0 || req.H != 0 {
 		return mcpservice.Snapshot{}, fmt.Errorf("screenshot cropping is not supported")
 	}
-	if s.vision == nil || s.readScreen == nil {
+	if s.vision == nil || (s.acquireLease == nil && s.readScreen == nil) {
 		return mcpservice.Snapshot{}, fmt.Errorf("screenshot capture is unavailable")
 	}
 
@@ -76,21 +77,26 @@ func (s *Snapshotter) Capture(ctx context.Context, req mcpservice.SnapshotReques
 	if err := ctx.Err(); err != nil {
 		return mcpservice.Snapshot{}, err
 	}
+	// Queueing preserves the existing timeout semantics; wake and frame reads
+	// share the capture budget once this request owns the slot.
+	deadline := time.Now().Add(time.Duration(timeoutMS) * time.Millisecond)
+	if timeoutMS > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithDeadline(ctx, deadline)
+		defer cancel()
+	}
 	if s.acquireLease != nil {
-		releaseLease, claimFresh, err := s.acquireLease(ctx)
+		lease, err := s.acquireLease(ctx)
 		if err != nil {
 			return mcpservice.Snapshot{}, err
 		}
-		if releaseLease != nil {
-			defer releaseLease()
+		if lease.Release != nil {
+			defer lease.Release()
 		}
 
-		deadline := time.Now().Add(time.Duration(timeoutMS) * time.Millisecond)
-		width, height := s.readScreen()
-		return s.capture(ctx, width, height, quality, deadline, timeoutMS, claimFresh)
+		return s.capture(ctx, lease.Width, lease.Height, quality, deadline, timeoutMS, lease.ClaimFresh)
 	}
 
-	deadline := time.Now().Add(time.Duration(timeoutMS) * time.Millisecond)
 	width, height := s.readScreen()
 	return s.capture(ctx, width, height, quality, deadline, timeoutMS, nil)
 }
@@ -113,10 +119,6 @@ func (s *Snapshotter) capture(ctx context.Context, width uint16, height uint16, 
 		}
 		switch {
 		case result >= 0 && result != 5 && len(data) > 0:
-			if claimFresh != nil && claimFresh() {
-				claimFresh = nil
-				continue
-			}
 			if len(data) > maximumJPEGBytes {
 				snapshot.JPEG = nil
 				snapshot.Message = "captured JPEG exceeds the MCP response size limit"
@@ -126,6 +128,10 @@ func (s *Snapshotter) capture(ctx context.Context, width uint16, height uint16, 
 			if err != nil {
 				snapshot.Message = "captured data is not a valid JPEG"
 				break
+			}
+			if claimFresh != nil && claimFresh() {
+				claimFresh = nil
+				continue
 			}
 			snapshot.OK = true
 			snapshot.Width = config.Width

@@ -1,6 +1,12 @@
 package hdmi_state
 
-import "time"
+// ReadLease carries the CSI dimensions confirmed for a screenshot reader.
+type ReadLease struct {
+	Width      uint16
+	Height     uint16
+	Release    func()
+	ClaimFresh func() bool
+}
 
 type viewerSource struct {
 	count   int
@@ -12,7 +18,6 @@ type State struct {
 	viewerCount     int
 	leaseCount      int
 	sources         map[string]viewerSource
-	readyAt         time.Time
 	needsFreshFrame bool
 }
 
@@ -66,18 +71,12 @@ func (s *State) LeaseCount() int {
 	return s.leaseCount
 }
 
-func (s *State) MarkWarming(readyAt time.Time) {
-	s.readyAt = readyAt
+func (s *State) RequireFreshFrame() {
 	s.needsFreshFrame = true
 }
 
-func (s *State) ClearReadyAt() {
-	s.readyAt = time.Time{}
+func (s *State) ClearFreshFrame() {
 	s.needsFreshFrame = false
-}
-
-func (s *State) ReadyAt() time.Time {
-	return s.readyAt
 }
 
 func (s *State) NeedsFreshFrame() bool {

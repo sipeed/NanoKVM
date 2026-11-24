@@ -12,6 +12,7 @@ import (
 	"time"
 
 	mcpservice "NanoKVM-Server/service/mcp"
+	hdmistate "NanoKVM-Server/service/vm/hdmi_state"
 )
 
 func testJPEG(t *testing.T, width int, height int) []byte {
@@ -192,16 +193,26 @@ func TestCaptureDropsClaimedFirstFreshFrame(t *testing.T) {
 		{data: second, result: 0},
 	}}
 	claimed := 0
-	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 640, 480 }, func(context.Context) (func(), func() bool, error) {
-		return nil, func() bool {
-			claimed++
-			return claimed == 1
+	readScreen := func() (uint16, uint16) {
+		t.Fatal("unexpected screen read after acquiring a capture lease")
+		return 0, 0
+	}
+	snapshotter := NewWithCaptureLease(vision, readScreen, func(context.Context) (hdmistate.ReadLease, error) {
+		return hdmistate.ReadLease{
+			Width: 1920, Height: 1080,
+			ClaimFresh: func() bool {
+				claimed++
+				return claimed == 1
+			},
 		}, nil
 	})
 
 	snapshot, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{})
 	if err != nil || !snapshot.OK || !bytes.Equal(snapshot.JPEG, second) || vision.calls != 2 || claimed != 1 {
 		t.Fatalf("snapshot=%+v calls=%d claimed=%d err=%v", snapshot, vision.calls, claimed, err)
+	}
+	if vision.width != 1920 || vision.height != 1080 || snapshot.Width != 640 || snapshot.Height != 480 {
+		t.Fatalf("capture=%dx%d JPEG=%dx%d", vision.width, vision.height, snapshot.Width, snapshot.Height)
 	}
 }
 
@@ -263,9 +274,9 @@ func TestCaptureReleasesLeaseOnSuccessAndCancellation(t *testing.T) {
 	vision := &fakeVision{responses: []visionResponse{{data: testJPEG(t, 320, 240), result: 0}}}
 	acquired := 0
 	released := 0
-	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 320, 240 }, func(context.Context) (func(), func() bool, error) {
+	snapshotter := NewWithCaptureLease(vision, nil, func(context.Context) (hdmistate.ReadLease, error) {
 		acquired++
-		return func() { released++ }, nil, nil
+		return hdmistate.ReadLease{Width: 320, Height: 240, Release: func() { released++ }}, nil
 	})
 
 	if _, err := snapshotter.Capture(context.Background(), mcpservice.SnapshotRequest{}); err != nil {
@@ -300,9 +311,9 @@ func TestCaptureReleasesLeaseAfterAcquisitionCancellation(t *testing.T) {
 	vision := &blockingVision{started: make(chan struct{}, 1), finish: make(chan struct{})}
 	acquired := 0
 	released := 0
-	snapshotter := NewWithCaptureLease(vision, func() (uint16, uint16) { return 320, 240 }, func(context.Context) (func(), func() bool, error) {
+	snapshotter := NewWithCaptureLease(vision, nil, func(context.Context) (hdmistate.ReadLease, error) {
 		acquired++
-		return func() { released++ }, nil, nil
+		return hdmistate.ReadLease{Width: 320, Height: 240, Release: func() { released++ }}, nil
 	})
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -1,10 +1,9 @@
 package common
 
 import (
-	"os"
-	"strconv"
-	"strings"
 	"sync"
+
+	"NanoKVM-Server/hardware/lontium"
 )
 
 type Screen struct {
@@ -74,18 +73,11 @@ func CheckScreen() {
 }
 
 func InputSize() (uint16, uint16) {
-	read := func(path string) uint16 {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return 0
-		}
-		value, err := strconv.ParseUint(strings.TrimSpace(string(data)), 10, 16)
-		if err != nil {
-			return 0
-		}
-		return uint16(value)
+	status, err := lontium.ReadStatus()
+	if err != nil {
+		return 0, 0
 	}
-	return read("/kvmapp/kvm/width"), read("/kvmapp/kvm/height")
+	return status.VideoSize()
 }
 
 func validateFPS(fps int) int {

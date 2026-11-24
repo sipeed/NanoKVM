@@ -1,4 +1,5 @@
 #include "kvm_mmf.hpp"
+#include "source_config.h"
 
 #include "cvi_buffer.h"
 #include "cvi_venc.h"
@@ -10,8 +11,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <fcntl.h>
+#include <fstream>
+#include <iterator>
 #include <limits>
 #include <mutex>
+#include <string>
 #include <sys/file.h>
 #include <sys/ioctl.h>
 #include <time.h>
@@ -23,7 +27,6 @@ namespace kvm_mmf {
 namespace {
 
 constexpr int group = 0;
-constexpr int source_fps = 60; // LT6911's configured VI rate.
 constexpr unsigned max_packs = 8;
 
 struct Channel {
@@ -46,6 +49,8 @@ bool vi_bound = false, vi_started = false;
 uint64_t next_token[2] = {}, last_pts[2] = {};
 int owner_fd = -1; // Held until process exit, including across HDMI restarts.
 bool stale_resources_cleared = false;
+InputTiming source;
+bool source_ready = false;
 
 int channel_id(Codec codec) { return codec == H264 ? 0 : 1; }
 bool valid_codec(Codec codec) { return codec == H264 || codec == MJPEG; }
@@ -164,8 +169,9 @@ bool configure_output(Codec codec, uint16_t width, uint16_t height, uint16_t fps
     attr.u32Height = height;
     attr.enVideoFormat = VIDEO_FORMAT_LINEAR;
     attr.enPixelFormat = PIXEL_FORMAT_NV21;
-    attr.stFrameRate.s32SrcFrameRate = source_fps;
-    attr.stFrameRate.s32DstFrameRate = fps;
+    attr.stFrameRate.s32SrcFrameRate = source.fps_millihz ?
+        static_cast<int>(std::max<uint64_t>(1, (uint64_t(source.fps_millihz) + 500) / 1000)) : -1;
+    attr.stFrameRate.s32DstFrameRate = source.fps_millihz ? fps : -1;
     attr.u32Depth = 0; // No userspace raw-frame queue.
     // The old Maix wrapper inverted its mirror/flip flags. Direct SDK calls
     // use false for the same normal LT6911 orientation, as in the demo.
@@ -198,8 +204,8 @@ bool deinitialize_locked()
         vi_bound = false;
     }
     if (vi_started) {
-        SAMPLE_COMM_VI_DestroyIsp(&vi_config);
-        SAMPLE_COMM_VI_DestroyVi(&vi_config);
+        if (!check(SAMPLE_COMM_VI_DestroyIsp(&vi_config), "DestroyIsp") ||
+            !check(SAMPLE_COMM_VI_DestroyVi(&vi_config), "DestroyVi")) return false;
         vi_started = false;
     }
     if (group_started) {
@@ -217,9 +223,15 @@ bool deinitialize_locked()
     return true;
 }
 
+bool file_has_value(const char *path, const char *expected)
+{
+    std::ifstream stream(path);
+    std::string value;
+    return std::getline(stream, value) && value == expected;
+}
+
 bool initialize_locked()
 {
-    if (vi_started) return true;
     if (owner_fd < 0) {
         int fd = open("/run/nanokvm-video.lock", O_CREAT | O_RDWR | O_CLOEXEC, 0600);
         if (fd < 0 || flock(fd, LOCK_EX | LOCK_NB) != 0) {
@@ -237,14 +249,27 @@ bool initialize_locked()
         stale_resources_cleared = true;
     }
     if (system_ready && !deinitialize_locked()) return false;
+
     SAMPLE_INI_CFG_S ini = {};
-    PIC_SIZE_E picture;
-    SIZE_S size = {};
-    if (!check(SAMPLE_COMM_VI_ParseIni(&ini), "ParseIni")) return false;
-    if (ini.devNum != 1 || ini.enSnsType[0] != LONTIUM_LT6911_2M_60FPS_8BIT) {
-        fprintf(stderr, "[kvm_mmf] expected one LT6911 input in sensor_cfg.ini\n");
+    ini.enSource = VI_PIPE_FRAME_SOURCE_DEV;
+    ini.devNum = 1;
+    ini.enSnsType[0] = LONTIUM_LT6911_2M_60FPS_8BIT;
+    ini.enWDRMode[0] = WDR_MODE_NONE;
+    ini.s32BusId[0] = 4;
+    ini.MipiDev[0] = 0;
+    constexpr CVI_S16 default_lanes[] = {2, 4, 3, 1, 0};
+    constexpr CVI_S16 pcie_exs_lanes[] = {2, 0, 1, 3, 4};
+    const bool pcie_exs = file_has_value("/etc/kvm/hw", "pcie") &&
+                          file_has_value("/proc/lontium/chip", "LT7911EXS");
+    const auto &lanes = pcie_exs ? pcie_exs_lanes : default_lanes;
+    std::copy_n(lanes, std::size(lanes), ini.as16LaneId[0]);
+    if (setenv("SENSORNAME0", "LONTIUM_LT6911_2M_60FPS_8BIT", 1) != 0) {
+        perror("[kvm_mmf] set SENSORNAME0");
         return false;
     }
+
+    PIC_SIZE_E picture;
+    SIZE_S size = {};
     vi_config = {};
     if (!check(CVI_VI_SetDevNum(ini.devNum), "SetDevNum") ||
         !check(SAMPLE_COMM_VI_IniToViCfg(&ini, &vi_config), "IniToViCfg") ||
@@ -258,7 +283,7 @@ bool initialize_locked()
                                DATA_BITWIDTH_8, COMPRESS_MODE_NONE, DEFAULT_ALIGN),
         COMMON_GetPicBufferSize(size.u32Height, size.u32Width, PIXEL_FORMAT_UYVY,
                                DATA_BITWIDTH_8, COMPRESS_MODE_NONE, DEFAULT_ALIGN));
-    vb.astCommPool[0].u32BlkCnt = 2;
+    vb.astCommPool[0].u32BlkCnt = 3; // Two VI capture buffers plus one held by VPSS.
     vb.astCommPool[0].enRemapMode = VB_REMAP_MODE_CACHED;
     if (!check(SAMPLE_COMM_SYS_Init(&vb), "SYS_Init")) return false;
     system_ready = true;
@@ -365,23 +390,33 @@ uint64_t timestamp_locked(Codec codec, uint64_t pts)
 
 } // namespace
 
-bool initialize()
+bool configure(const InputTiming &input)
 {
     std::scoped_lock lock(channel_mutex[H264], channel_mutex[MJPEG]);
-    return initialize_locked();
-}
-
-bool restart()
-{
-    std::scoped_lock lock(channel_mutex[H264], channel_mutex[MJPEG]);
+    if (source_ready && vi_started && same_input(source, input)) return true;
+    source_ready = false;
     if (!deinitialize_locked()) return false;
-    return initialize_locked();
+    kvm_source_set(nullptr);
+    if (!supported_input(input)) return false;
+    source = input;
+    const kvm_source_config config = {input.width, input.height, input.fps_millihz};
+    kvm_source_set(&config);
+    if (!initialize_locked()) {
+        if (deinitialize_locked()) kvm_source_set(nullptr);
+        return false;
+    }
+    source_ready = true;
+    return true;
 }
 
-void deinitialize()
+bool deinitialize()
 {
     std::scoped_lock lock(channel_mutex[H264], channel_mutex[MJPEG]);
-    deinitialize_locked();
+    source_ready = false;
+    if (!deinitialize_locked()) return false;
+    kvm_source_set(nullptr);
+    source = {};
+    return true;
 }
 
 void stop(Codec codec)
@@ -396,15 +431,12 @@ int acquire(Codec codec, uint16_t width, uint16_t height, uint16_t quality,
 {
     if (frame) *frame = Frame{};
     if (!frame || !valid_codec(codec) || width == 0 || height == 0 ||
-        width > 1920 || height > 1080 || width % 2 || height % 2 || fps == 0 || fps > source_fps ||
+        width > 1920 || height > 1080 || width % 2 || height % 2 || fps == 0 || fps > 60 ||
         quality == 0 || (codec == MJPEG && quality > 100) || (codec == H264 && gop == 0)) return -2;
     std::unique_lock<std::mutex> lock(channel_mutex[codec]);
-    if (!vi_started) {
-        lock.unlock();
-        if (!initialize()) return -2;
-        lock.lock();
-        if (!vi_started) return -2;
-    }
+    if (!source_ready || !vi_started) return -1;
+    if (source.fps_millihz) fps = std::min<uint64_t>(fps,
+        std::max<uint64_t>(1, (uint64_t(source.fps_millihz) + 500) / 1000));
     Channel &ch = channels[codec];
     // Recover even if ReleaseStream failed: the Go sender only releases once.
     if (ch.failed && !stop_locked(codec)) return -2;

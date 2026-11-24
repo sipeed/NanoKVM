@@ -37,8 +37,9 @@ void kvmv_release_frame(kvmv_frame_t *frame);
 void kvmv_stop_stream(uint8_t type);
 void set_h264_gop(uint8_t gop);
 void set_frame_detact(uint8_t interval);
-uint8_t kvmv_hdmi_control(uint8_t enable);
+int kvmv_hdmi_control(uint8_t enable);
 uint8_t kvmv_hdmi_signal_active(void);
+int kvmv_capture_state(uint64_t *receiver_sequence);
 
 #ifdef __cplusplus
 }

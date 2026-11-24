@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"sync"
 
 	"NanoKVM-Server/proto"
@@ -22,25 +20,20 @@ var (
 
 func (s *Service) GetInputResolution(c *gin.Context) {
 	var rsp proto.Response
-	width, widthErr := readPositiveInt("/kvmapp/kvm/width")
-	height, heightErr := readPositiveInt("/kvmapp/kvm/height")
-	if widthErr != nil || heightErr != nil {
-		rsp.ErrRsp(c, -1, "failed to read input resolution")
+	data := &proto.GetInputResolutionRsp{}
+	status, err := readHdmiStatus()
+	if err != nil {
+		data.ReadError = err.Error()
+		rsp.Data = data
+		rsp.ErrRsp(c, -1, "failed to read HDMI receiver status")
 		return
 	}
-	rsp.OkRspWithData(c, &proto.GetInputResolutionRsp{Width: width, Height: height})
-}
-
-func readPositiveInt(path string) (int, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return 0, err
+	data.Receiver = &status
+	data.Valid = status.HasVideo()
+	if data.Valid {
+		data.Width, data.Height = status.CSI.Width, status.CSI.Height
 	}
-	value, err := strconv.Atoi(strings.TrimSpace(string(data)))
-	if err != nil || value <= 0 {
-		return 0, errors.New("invalid positive integer")
-	}
-	return value, nil
+	rsp.OkRspWithData(c, data)
 }
 
 func (s *Service) GetInputRegion(c *gin.Context) {

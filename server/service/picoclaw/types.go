@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"NanoKVM-Server/service/controlmode"
+	hdmistate "NanoKVM-Server/service/vm/hdmi_state"
 
 	"github.com/gorilla/websocket"
 )
@@ -34,7 +35,7 @@ type Service struct {
 	releaseHID         func() error
 	operations         *controlOperationTracker
 	acquireHDMILease   func() func()
-	acquireHDMIForRead func(context.Context) (func(), func() bool, error)
+	acquireHDMIForRead func(context.Context) (hdmistate.ReadLease, error)
 	captureLeaseMu     sync.Mutex
 	captureLeases      map[string]func()
 	captureLeaseTimers map[string]*time.Timer

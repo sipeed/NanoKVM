@@ -12,7 +12,7 @@ maixcdk_build() {
   local input_value="$1"
 
   DIST_PATH="./dist"
-  rm -rf $DIST_PATH
+  rm -rf "$DIST_PATH" || return 1
 
   if [ "$input_value" = "from_zero" ]
   then
@@ -43,8 +43,6 @@ update_components() {
   cp -rf "$NanoKVM_PATH/support/sg2002/additional/kvm_mmf" "$MAIXCDK_PATH/components/" || return 1
   cp -f "$NanoKVM_PATH/support/sg2002/additional/peripheral/port/maixcam/maix_i2c.cpp" \
     "$MAIXCDK_PATH/components/peripheral/port/maixcam/maix_i2c.cpp" || return 1
-  cp -f "$NanoKVM_PATH/support/sg2002/additional/sophgo-middleware/v2/sample/common/sample_common_sensor.c" \
-    "$MAIXCDK_PATH/components/3rd_party/sophgo-middleware/sophgo-middleware/v2/sample/common/" || return 1
 }
 
 chack_build(){
@@ -131,7 +129,7 @@ then
 
       update_components || exit 1
 
-      cd "$Project_PATH"
+      cd "$Project_PATH" || exit 1
       if [ -f "$JSON_PATH" ] && ! grep -q "$Platform_Char" "$JSON_PATH"; then
         maixcdk_clean || exit 1
       fi
@@ -142,9 +140,9 @@ then
 
       if [ -f "$JSON_PATH" ]
       then
-        maixcdk_build
+        maixcdk_build || exit 1
       else
-        maixcdk_build "from_zero"
+        maixcdk_build "from_zero" || exit 1
       fi
 
       RES=$(chack_build)
@@ -170,15 +168,18 @@ then
         chmod +x $SOURCE_PATH
       else
         SOURCE_PATH="$Project_PATH/dist/kvm_vision_test_release/dl_lib"
+        for lib in libkvm.so libkvm_mmf.so; do
+          if [ ! -s "$SOURCE_PATH/$lib" ]; then
+            echo "[build] Missing video library: $SOURCE_PATH/$lib" >&2
+            exit 1
+          fi
+        done
         TARGET_PATH="$KVMAPP_PATH/server/"
       fi
-      if [ ! -d $TARGET_PATH ]
+      mkdir -p "$TARGET_PATH" || exit 1
+      if [ -e "$SOURCE_PATH" ]
       then
-        mkdir -p $TARGET_PATH
-      fi
-      if [ -e $SOURCE_PATH ]
-      then
-        cp -rf $SOURCE_PATH $TARGET_PATH
+        cp -rf "$SOURCE_PATH" "$TARGET_PATH" || exit 1
         if [ "$Project_Name" = "kvm_system" ]
         then
           echo -e "\e[36m[build] \e[32mkvm_system has been moved to kvmapp.\e[0m"

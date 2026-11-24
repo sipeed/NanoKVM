@@ -3,6 +3,7 @@ package picoclaw
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -58,15 +59,14 @@ func (s *Service) Screenshot(c *gin.Context) {
 }
 
 func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) ([]byte, ScreenshotMeta, *PicoclawError) {
-	width, height, quality := resolveScreenshotRequest(query)
-
-	sourceWidth, sourceHeight := common.InputSize()
-	common.CheckScreen()
-	releaseLease, claimFresh, leaseErr := s.acquireCaptureLease(ctx)
+	lease, leaseErr := s.acquireCaptureLease(ctx)
 	if leaseErr != nil {
-		return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "screenshot capture canceled")
+		return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, fmt.Sprintf("HDMI capture unavailable: %v", leaseErr))
 	}
-	defer releaseLease()
+	defer lease.Release()
+
+	width, height, quality := resolveScreenshotRequest(query, lease.Width, lease.Height)
+	common.CheckScreen()
 
 	for attempt := 0; attempt < screenshotRetryCount; attempt++ {
 		if err := ctx.Err(); err != nil {
@@ -89,13 +89,13 @@ func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) 
 		case result < 0 || len(data) == 0:
 			return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "failed to capture screenshot")
 		default:
-			if claimFresh != nil && claimFresh() {
-				claimFresh = nil
+			if lease.ClaimFresh != nil && lease.ClaimFresh() {
+				lease.ClaimFresh = nil
 				continue
 			}
 			return data, ScreenshotMeta{
-				SourceWidth:   sourceWidth,
-				SourceHeight:  sourceHeight,
+				SourceWidth:   lease.Width,
+				SourceHeight:  lease.Height,
 				CaptureWidth:  width,
 				CaptureHeight: height,
 				Format:        "jpeg",
@@ -106,9 +106,8 @@ func (s *Service) captureScreenshot(ctx context.Context, query ScreenshotQuery) 
 	return nil, ScreenshotMeta{}, newPicoclawError(CodeScreenshotFailed, "failed to capture screenshot")
 }
 
-func resolveScreenshotRequest(query ScreenshotQuery) (uint16, uint16, uint16) {
+func resolveScreenshotRequest(query ScreenshotQuery, width, height uint16) (uint16, uint16, uint16) {
 	screen := common.GetScreen()
-	width, height := common.InputSize()
 	quality := screen.Quality
 
 	if query.Format == "base64" {

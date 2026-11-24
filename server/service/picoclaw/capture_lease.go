@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"NanoKVM-Server/service/vm"
+	hdmistate "NanoKVM-Server/service/vm/hdmi_state"
 )
 
 const defaultTaskCaptureLeaseDuration = 2 * time.Minute
 const maxTaskCaptureLeaseDuration = 30 * time.Minute
 
-func (s *Service) acquireCaptureLease(ctx context.Context) (func(), func() bool, error) {
+func (s *Service) acquireCaptureLease(ctx context.Context) (hdmistate.ReadLease, error) {
 	if s != nil && s.acquireHDMIForRead != nil {
 		return s.acquireHDMIForRead(ctx)
 	}

@@ -1,22 +1,29 @@
-# CROSS_COMPILE = aarch64-none-linux-gnu-
-# CROSS_COMPILE = riscv64-unknown-linux-gnu-
-CROSS_COMPILE = riscv64-unknown-linux-musl-
-# CROSS_COMPILE = riscv64-unknown-elf-
-
-CFLAGS += -I/usr/local/RISC-V-toolchain/riscv64-linux-musl-x86_64/sysroot/usr/include
-
+CROSS_COMPILE ?= riscv64-unknown-linux-musl-
 CC = $(CROSS_COMPILE)gcc
-
-SRC = nanokvm_update_edid.c
-
-TARGET = nanokvm_update_edid
+CXX = $(CROSS_COMPILE)g++
+TARGET ?= nanokvm_update_edid
+BUILD_DIR ?= build
+ARCH_FLAGS ?= -march=rv64gc -mabi=lp64d
+HDMI_INCLUDE = ../../support/sg2002/additional/kvm/include
+CPPFLAGS += -D_DEFAULT_SOURCE -I$(HDMI_INCLUDE)
+CFLAGS ?= -Os -std=c11 -Wall -Wextra -Werror
+CXXFLAGS ?= -Os -std=c++17 -Wall -Wextra -Werror
+LDFLAGS ?= -s -static-libstdc++ -static-libgcc
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
-	$(CC) -march=rv64gc -o $@ $^
+$(TARGET): $(BUILD_DIR)/main.o $(BUILD_DIR)/edid.o
+	$(CXX) $(ARCH_FLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+$(BUILD_DIR)/main.o: main.cpp nanokvm_update_edid.h $(HDMI_INCLUDE)/lontium_hdmi.hpp Makefile
+	mkdir -p $(BUILD_DIR)
+	$(CXX) $(CPPFLAGS) $(ARCH_FLAGS) $(CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/edid.o: nanokvm_update_edid.c nanokvm_update_edid.h Makefile
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CPPFLAGS) $(ARCH_FLAGS) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(BUILD_DIR)/main.o $(BUILD_DIR)/edid.o
 
 .PHONY: all clean
