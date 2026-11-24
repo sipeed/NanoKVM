@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ "$1" != "stop" ] && [ ! -d /sys/class/net/wlan0 ]; then
+    exit 0
+fi
+
 . /etc/profile
 
 APFLAG_FILE=/tmp/wifiap

@@ -73,15 +73,12 @@ AppInitResult new_app_init(void)
 	if(!init_command("cp -f /kvmapp/system/init.d/S00kmod /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S01fs /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S03usbdev /etc/init.d/")) return APP_INIT_FAILED;
+	if(!init_command("cp -f /kvmapp/system/init.d/S10uuid /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S15kvmhwd /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S16lontium /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S30eth /etc/init.d/")) return APP_INIT_FAILED;
 	if(!init_command("cp -f /kvmapp/system/init.d/S50sshd /etc/init.d/")) return APP_INIT_FAILED;
-	if(kvm_wifi_exist()) {
-		if(!init_command("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/")) return APP_INIT_FAILED;
-	} else {
-		system("rm -f /etc/init.d/S30wifi");
-	}
+	if(!init_command("cp -f /kvmapp/system/init.d/S30wifi /etc/init.d/")) return APP_INIT_FAILED;
 	
 	// if exit /etc/init.d/S98tailscaled then cp -f /kvmapp/system/init.d/S98tailscaled /etc/init.d/
 	if(access("/etc/init.d/S98tailscaled", F_OK) == 0){

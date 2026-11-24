@@ -97,18 +97,24 @@ init_beta_pcie_hw(){
   insmod /mnt/system/ko/i2c-gpio.ko
 }
 
+detect_beta_pcie_hw(){
+  oled_scan=$(i2cdetect -ry 5 0x3c 0x3c) || return 1
+  case "$oled_scan" in
+    *" 3c"*) detected_hw=pcie ;;
+    *" --"*) detected_hw=beta ;;
+    *) echo "Unexpected OLED probe result on I2C5 at 0x3c" >&2; return 1 ;;
+  esac
+  if [ "$detected_hw" != "$1" ]; then
+    hw_tmp=/etc/kvm/.hw.$$
+    printf '%s\n' "$detected_hw" > "$hw_tmp" && mv -f "$hw_tmp" /etc/kvm/hw || {
+      rm -f "$hw_tmp"
+      return 1
+    }
+  fi
+}
+
 kvm_hw_detect(){
-  if [ -e /etc/kvm/hw ]
-  then
-    echo "/etc/kvm/hw exist"
-  else
-    echo "/etc/kvm/hw not exist"
-    if [ -d "/etc/kvm/" ]
-    then
-      echo "/etc/kvm/ exist"
-    else
-      mkdir /etc/kvm/
-    fi
+    mkdir -p /etc/kvm || return 1
     devmem 0x0300104C 32 0x3  # GPIOA26 / WiFi_EN
     echo ${WiFi_EN_Pin} > /sys/class/gpio/export  # WiFi_EN
     echo out > /sys/class/gpio/gpio${WiFi_EN_Pin}/direction
@@ -132,7 +138,7 @@ kvm_hw_detect(){
     if [ -n "$kvm_tmp" ]
     then
       # alpha hw
-      echo "alpha" > /etc/kvm/hw
+      echo "alpha" > /etc/kvm/hw || return 1
     else
       # beta/pcie hw
       echo ${Alpha_OLED_RST_Pin} > /sys/class/gpio/unexport  # OLED_RST
@@ -145,24 +151,20 @@ kvm_hw_detect(){
       insmod /mnt/system/ko/i2c-algo-bit.ko
       insmod /mnt/system/ko/i2c-gpio.ko
 
-      kvm_tmp=$(i2cdetect -ry 5 0x3c 0x3c | grep 3c)
-      if [ -n "$kvm_tmp" ]
-      then
-        echo "pcie" > /etc/kvm/hw
-        sync
-        reboot
-      else
-        echo "beta" > /etc/kvm/hw
-        # rm /etc/init.d/S25wifimod
-        # rm /etc/init.d/S30wifi
-        sync
-      fi
-
+      detect_beta_pcie_hw ""
+      probe_status=$?
       echo 1 > /sys/class/gpio/gpio${WiFi_EN_Pin}/value
       echo ${WiFi_EN_Pin} > /sys/class/gpio/unexport  # WiFi_EN
+      if [ "$probe_status" -ne 0 ]; then
+        init_beta_pcie_hw
+        return 1
+      fi
+      if [ "$detected_hw" = pcie ]; then
+        sync
+        reboot
+      fi
     fi
-  fi
-  sync
+    sync
 }
 
 kvm_hw_init(){
@@ -187,13 +189,20 @@ kvm_hw_init(){
 
 case "$1" in
   start)
-    kvm_hw_detect
-    kvm_hw_init
+    cached_hw=$(cat /etc/kvm/hw 2>/dev/null)
+    case "$cached_hw" in
+      alpha) kvm_hw_init ;;
+      beta|pcie)
+        init_csi_hw || exit 1
+        init_beta_pcie_hw || exit 1
+        detect_beta_pcie_hw "$cached_hw" || exit 1
+        echo "hw = $detected_hw!"
+        ;;
+      *) kvm_hw_detect && kvm_hw_init ;;
+    esac
   ;;
   re-detect)
-    rm /etc/kvm/hw
-    kvm_hw_detect
-    kvm_hw_init
+    kvm_hw_detect && kvm_hw_init
   ;;
   re-init)
     kvm_hw_init

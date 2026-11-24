@@ -1,0 +1,107 @@
+#!/bin/sh
+hex2mac() {
+	MAC=""
+	seq 2 2 12 | while read i
+	do
+		echo -n ${1} | head -c $i | tail -c 2
+		if [ $i != 12 ]
+		then
+			echo -n ':'
+		fi
+	done | tr '[:upper:]' '[:lower:]'
+}
+
+read_efuse_ethmac() {
+	local bytes stored_crc mac crc octet bit
+	bytes=$(hexdump -v -s 64 -n 12 -e '1/1 "%02x "' /sys/class/cvi-base/base_efuse_shadow) || return 1
+	set -- $bytes
+	if [ "$#" -ne 12 ]; then
+		echo "Incomplete Ethernet MAC eFuse record" >&2
+		return 1
+	fi
+	stored_crc=$((0x${11}${12}))
+	set -- "$1" "$2" "$3" "$4" "$9" "${10}"
+	mac="$1:$2:$3:$4:$5:$6"
+	if [ "$mac" = 00:00:00:00:00:00 ] && [ "$stored_crc" -eq 0 ]; then
+		return 1
+	fi
+
+	crc=65535
+	for octet in "$@"; do
+		crc=$((crc ^ (0x$octet << 8)))
+		for bit in 1 2 3 4 5 6 7 8; do
+			if [ $((crc & 0x8000)) -ne 0 ]; then
+				crc=$(((crc << 1) ^ 0x1021))
+			else
+				crc=$((crc << 1))
+			fi
+			crc=$((crc & 0xffff))
+		done
+	done
+	if [ "$crc" -ne "$stored_crc" ] || [ $((0x$1 & 3)) -ne 0 ] ||
+	   [ "$mac" = 00:00:00:00:00:00 ] || [ $((0x$4$5$6)) -gt $((0xfffffd)) ]; then
+		echo "Invalid Ethernet MAC eFuse record" >&2
+		return 1
+	fi
+	printf '%s\n' "$mac"
+}
+
+if [ "${1}" = start ]
+then
+	prefix=kvm
+	if [ -e /boot/hostname.prefix ]
+	then
+		prefix=$(cat /boot/hostname.prefix)
+	fi
+	old_hostname=$(cat /etc/hostname)
+	new_hostname=${prefix}-$(sha512sum /sys/class/cvi-base/base_uid | head -c 4)
+
+	if [ -e /boot/hostname ]
+	then
+		new_hostname=$(cat /boot/hostname)
+	fi
+
+	if [ "${old_hostname}" != "${new_hostname}" ]
+	then
+		hostname ${new_hostname}
+		echo ${new_hostname} > /etc/hostname
+		sed -i -e "s/${old_hostname}/${new_hostname}/g" /etc/hosts
+	fi
+	echo "hostname: ${new_hostname}"
+
+	new_ethmac=
+	if [ -s /boot/eth.mac ]; then
+		new_ethmac=$(tr -d '[:space:]' < /boot/eth.mac)
+	fi
+	if [ -z "$new_ethmac" ] && ! new_ethmac=$(read_efuse_ethmac); then
+		# Older images copied base_uid verbatim to /device_key_legacy.
+		uid_file=/device_key_legacy
+		[ -s "$uid_file" ] || uid_file=/sys/class/cvi-base/base_uid
+		uid_suffix=$(sha512sum "$uid_file" | head -c 4)
+		if [ "${#uid_suffix}" -eq 4 ]; then
+			new_ethmac=$(hex2mac "48da356f$uid_suffix")
+		fi
+	fi
+
+	if [ -n "$new_ethmac" ]; then
+		ifconfig eth0 down
+		if ip link set eth0 address "$new_ethmac"; then
+			echo "ethernet mac address: ${new_ethmac}"
+		fi
+		ifconfig eth0 up
+	fi
+
+	if [ -e /boot/usb.rndis0 ]
+	then
+		if [ -e /boot/usb.rndis0.mac ]
+		then
+			new_rndismac=$(cat /boot/usb.rndis0.mac)
+		else
+			new_rndismac=$(hex2mac 06$(sha512sum /sys/class/cvi-base/base_uid | head -c 10))
+		fi
+		ifconfig usb0 down
+		ip link set usb0 address ${new_rndismac}
+		ifconfig usb0 up
+		echo "rndis mac address: ${new_rndismac}"
+	fi
+fi
