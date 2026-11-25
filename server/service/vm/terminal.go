@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -16,6 +17,7 @@ const (
 	maxMessageSize            = 1024
 	terminalHeartbeatType     = "ping"
 	terminalHeartbeatResponse = `{"type":"pong"}`
+	terminalSessionIDType     = "session"
 )
 
 type WinSize struct {
@@ -26,6 +28,11 @@ type WinSize struct {
 type terminalMessage struct {
 	Type string `json:"type"`
 	WinSize
+}
+
+type terminalSessionControlMessage struct {
+	Type      string `json:"type"`
+	SessionID string `json:"sessionId"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -75,6 +82,19 @@ func (s *Service) Terminal(c *gin.Context) {
 		return
 	}
 	defer session.detach(ws)
+
+	sessionMessage, err := json.Marshal(terminalSessionControlMessage{
+		Type:      terminalSessionIDType,
+		SessionID: session.ID,
+	})
+	if err != nil {
+		log.Errorf("failed to encode terminal session %s id: %s", session.ID, err)
+		return
+	}
+	if err := session.writeControl(sessionMessage); err != nil {
+		log.Debugf("failed to send terminal session %s id: %s", session.ID, err)
+		return
+	}
 
 	session.readInput(ws)
 

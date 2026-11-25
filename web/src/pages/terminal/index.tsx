@@ -18,6 +18,7 @@ const heartbeatDelay = 250;
 const heartbeatTimeout = 1000;
 const heartbeatPing = JSON.stringify({ type: 'ping' });
 const heartbeatPong = '{"type":"pong"}';
+const terminalSessionIDType = 'session';
 
 function formatLastResponseTime(timestamp: number, language: string) {
   const date = new Date(timestamp);
@@ -71,6 +72,17 @@ function getTerminalWsUrl() {
   return query ? `${url}?${query}` : url;
 }
 
+function rememberTerminalSession(sessionID: string) {
+  const hashRoute = window.location.hash.split('?')[0] || '#terminal';
+  const params = getTerminalQuery();
+  params.set('session', sessionID);
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${window.location.pathname}${window.location.search}${hashRoute}?${params.toString()}`
+  );
+}
+
 // The backend uses these application-defined close codes when another page
 // takes over the session, when the session is closed from the settings page or
 // when the session ends on the device side.
@@ -91,7 +103,7 @@ export const Terminal = () => {
   const lastResponseAtRef = useRef(Date.now());
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
   const language = i18n.resolvedLanguage || i18n.language;
-  const sessionID = getTerminalQuery().get('session');
+  const [sessionID, setSessionID] = useState(() => getTerminalQuery().get('session'));
 
   const stopDisconnectedTimer = useCallback(() => {
     if (disconnectedTimerRef.current !== undefined) {
@@ -305,6 +317,24 @@ export const Terminal = () => {
         event.stopImmediatePropagation();
       }
       if (isDisposed || hasDisconnected) return;
+
+      if (typeof event.data === 'string') {
+        try {
+          const message = JSON.parse(event.data) as { type?: string; sessionId?: string };
+          if (
+            message.type === terminalSessionIDType &&
+            typeof message.sessionId === 'string' &&
+            message.sessionId.length > 0
+          ) {
+            rememberTerminalSession(message.sessionId);
+            setSessionID(message.sessionId);
+            event.stopImmediatePropagation();
+            return;
+          }
+        } catch {
+          // Regular terminal output is not a control message.
+        }
+      }
 
       lastResponseAtRef.current = Date.now();
       if (event.data !== heartbeatPong) return;
