@@ -50,10 +50,10 @@ function formatLastResponseTime(timestamp: number, language: string) {
 const terminalQueryKeys = ['session', 'port', 'baud', 'parity', 'flowControl', 'dataBits', 'stopBits'];
 
 function getTerminalQuery() {
-  const urls = window.location.href.split('?');
-  if (urls.length < 2) return new URLSearchParams();
+  const queryStart = window.location.hash.indexOf('?');
+  if (queryStart < 0) return new URLSearchParams();
 
-  return new URLSearchParams(urls[1]);
+  return new URLSearchParams(window.location.hash.slice(queryStart + 1));
 }
 
 function getTerminalWsUrl() {
@@ -73,13 +73,23 @@ function getTerminalWsUrl() {
 }
 
 function rememberTerminalSession(sessionID: string) {
-  const hashRoute = window.location.hash.split('?')[0] || '#terminal';
+  updateTerminalSessionURL(sessionID);
+}
+
+function updateTerminalSessionURL(sessionID: string | null) {
+  const url = new URL(window.location.href);
+  const hashRoute = url.hash.split('?')[0] || '#terminal';
   const params = getTerminalQuery();
-  params.set('session', sessionID);
+  if (sessionID) {
+    params.set('session', sessionID);
+  } else {
+    params.delete('session');
+  }
+  url.hash = params.size > 0 ? `${hashRoute}?${params.toString()}` : hashRoute;
   window.history.replaceState(
     window.history.state,
     '',
-    `${window.location.pathname}${window.location.search}${hashRoute}?${params.toString()}`
+    url.toString()
   );
 }
 
@@ -104,6 +114,13 @@ export const Terminal = () => {
   const disconnectedTimerRef = useRef<number | undefined>(undefined);
   const language = i18n.resolvedLanguage || i18n.language;
   const [sessionID, setSessionID] = useState(() => getTerminalQuery().get('session'));
+  const sessionIDRef = useRef(sessionID);
+
+  const clearTerminalSession = useCallback(() => {
+    sessionIDRef.current = null;
+    setSessionID(null);
+    updateTerminalSessionURL(null);
+  }, []);
 
   const stopDisconnectedTimer = useCallback(() => {
     if (disconnectedTimerRef.current !== undefined) {
@@ -163,11 +180,13 @@ export const Terminal = () => {
 
       if (event.code === terminalClosedCode) {
         setClosedReason('closed');
+        clearTerminalSession();
         return;
       }
 
       if (event.code === terminalSessionEndedCode) {
         setClosedReason('ended');
+        clearTerminalSession();
         return;
       }
 
@@ -274,7 +293,8 @@ export const Terminal = () => {
     };
 
     const exitPicocom = () => {
-      if (ws.readyState === WebSocket.OPEN && isPicocomRunning) {
+      // The PTY outlives this page so a reconnect can resume its serial console.
+      if (ws.readyState === WebSocket.OPEN && isPicocomRunning && !sessionIDRef.current) {
         ws.send('\x01\x18');
         isPicocomRunning = false;
       }
@@ -316,7 +336,6 @@ export const Terminal = () => {
       if (event.data === heartbeatPong) {
         event.stopImmediatePropagation();
       }
-      if (isDisposed || hasDisconnected) return;
 
       if (typeof event.data === 'string') {
         try {
@@ -326,15 +345,20 @@ export const Terminal = () => {
             typeof message.sessionId === 'string' &&
             message.sessionId.length > 0
           ) {
-            rememberTerminalSession(message.sessionId);
-            setSessionID(message.sessionId);
             event.stopImmediatePropagation();
+            if (isDisposed) return;
+            rememberTerminalSession(message.sessionId);
+            sessionIDRef.current = message.sessionId;
+            setSessionID(message.sessionId);
+            lastResponseAtRef.current = Date.now();
             return;
           }
         } catch {
           // Regular terminal output is not a control message.
         }
       }
+
+      if (isDisposed || hasDisconnected) return;
 
       lastResponseAtRef.current = Date.now();
       if (event.data !== heartbeatPong) return;
@@ -398,7 +422,7 @@ export const Terminal = () => {
       window.removeEventListener('resize', resizeScreen, false);
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [connectionAttempt, language, notify, stopDisconnectedTimer, t]);
+  }, [clearTerminalSession, connectionAttempt, language, notify, stopDisconnectedTimer, t]);
 
   function openNewTerminal() {
     window.open('/#terminal', '_blank');

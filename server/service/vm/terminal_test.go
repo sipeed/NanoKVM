@@ -3,6 +3,7 @@ package vm
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -14,24 +15,24 @@ import (
 func TestTerminalSendsSessionIDOnWebSocketConnect(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	existing := make(map[string]struct{})
-	for _, session := range terminalSessions.list() {
-		existing[session.ID] = struct{}{}
+	request := httptest.NewRequest("GET", "/api/vm/terminal", nil)
+	context, _ := gin.CreateTestContext(httptest.NewRecorder())
+	context.Request = request
+	if _, err := os.Stat("/root"); err != nil {
+		t.Skipf("terminal test requires /root as the shell working directory: %v", err)
 	}
-	t.Cleanup(func() {
-		for _, session := range terminalSessions.list() {
-			if _, ok := existing[session.ID]; !ok {
-				session.closeWithCode(0, "")
-			}
-		}
-	})
+	session, err := newTerminalSession(context)
+	if err != nil {
+		t.Fatalf("start terminal PTY: %v", err)
+	}
+	t.Cleanup(func() { session.closeWithCode(0, "") })
 
 	router := gin.New()
 	router.GET("/api/vm/terminal", NewService().Terminal)
 	server := httptest.NewServer(router)
 	defer server.Close()
 
-	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/api/vm/terminal"
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http") + "/api/vm/terminal?session=" + session.ID
 	connection, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		t.Fatalf("connect terminal websocket: %v", err)
@@ -50,13 +51,16 @@ func TestTerminalSendsSessionIDOnWebSocketConnect(t *testing.T) {
 			continue
 		}
 
-		var message terminalSessionControlMessage
-		if err := json.Unmarshal(data, &message); err == nil &&
-			message.Type == terminalSessionIDType && message.SessionID != "" {
-			if terminalSessions.get(message.SessionID) == nil {
-				t.Fatalf("session %q was not registered", message.SessionID)
-			}
-			return
+		var message map[string]string
+		if err := json.Unmarshal(data, &message); err != nil {
+			continue
 		}
+		if len(message) != 2 || message["type"] != "session" || message["sessionId"] != session.ID {
+			t.Fatalf("unexpected terminal session control frame: %s", data)
+		}
+		if terminalSessions.get(message["sessionId"]) != session {
+			t.Fatalf("session %q was not registered", message["sessionId"])
+		}
+		return
 	}
 }
