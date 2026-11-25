@@ -4,6 +4,7 @@ import {
   Alert,
   Button,
   Checkbox,
+  ConfigProvider,
   Form,
   Input,
   message,
@@ -13,6 +14,7 @@ import {
   Switch,
   Tooltip
 } from 'antd';
+import type { ThemeConfig } from 'antd';
 import { KeyRoundIcon, ShieldCheckIcon, Trash2Icon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -49,6 +51,15 @@ function reachesMcp(user: Pick<User, 'role' | 'enabled' | 'permissions'> | null)
 // AccountRefused marks a change the server turned down, which carries a reason
 // the administrator can act on (an invalid role, the last administrator, ...).
 class AccountRefused extends Error {}
+
+// The row's icon buttons are 24px tall (antd's small control height) while the
+// default switch track is 22px, so the enable switch would sit a pixel short of
+// their edges. This one-off theme raises the track to 24px; the knob must grow
+// with it (handleSize = trackHeight - 2 * padding) because it is pinned to the
+// track padding, not centered, and would otherwise hang off-center.
+const buttonHeightSwitchTheme: ThemeConfig = {
+  components: { Switch: { trackHeight: 24, handleSize: 20 } }
+};
 
 export const Users = () => {
   const { t } = useTranslation();
@@ -394,17 +405,6 @@ export const Users = () => {
                     onClick={() => openPermissionEditor(user)}
                   />
                 </Tooltip>
-                <Switch
-                  checked={user.enabled}
-                  disabled={isLoading || isProtected}
-                  checkedChildren={t('settings.account.users.enabled')}
-                  unCheckedChildren={t('settings.account.users.disabled')}
-                  onChange={(enabled) =>
-                    guardMcpLoss(user, { ...user, enabled }, (rotate) =>
-                      updateUser(user, { enabled }, rotate)
-                    )
-                  }
-                />
                 <Tooltip title={t('settings.account.users.resetPassword')}>
                   <Button
                     size="small"
@@ -433,6 +433,17 @@ export const Users = () => {
                     />
                   </Tooltip>
                 </Popconfirm>
+                <ConfigProvider theme={buttonHeightSwitchTheme}>
+                  <Switch
+                    checked={user.enabled}
+                    disabled={isLoading || isProtected}
+                    onChange={(enabled) =>
+                      guardMcpLoss(user, { ...user, enabled }, (rotate) =>
+                        updateUser(user, { enabled }, rotate)
+                      )
+                    }
+                  />
+                </ConfigProvider>
               </div>
             </div>
           );
