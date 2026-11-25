@@ -189,17 +189,18 @@ func (s *terminalSession) writeOutput(data []byte) {
 	}
 }
 
-// writeControl sends a text message to the attached page. The write mutex is
-// shared with the pty output so the websocket keeps a single writer.
-func (s *terminalSession) writeControl(data []byte) error {
+// writeControl sends a text message to the connection that requested it. The
+// write mutex is shared with pty output and prevents a takeover from redirecting
+// a control frame to the newly attached page.
+func (s *terminalSession) writeControl(ws *websocket.Conn, data []byte) error {
 	s.writeMutex.Lock()
 	defer s.writeMutex.Unlock()
 
 	s.mutex.Lock()
-	ws := s.ws
+	attached := !s.closed && s.ws == ws
 	s.mutex.Unlock()
 
-	if ws == nil {
+	if !attached {
 		return nil
 	}
 
@@ -241,7 +242,7 @@ func (s *terminalSession) readInput(ws *websocket.Conn) {
 				// The page pings the session and expects a pong back, so a
 				// dropped page can show how long the terminal has been silent.
 				if message.Type == terminalHeartbeatType {
-					if err := s.writeControl([]byte(terminalHeartbeatResponse)); err != nil {
+					if err := s.writeControl(ws, []byte(terminalHeartbeatResponse)); err != nil {
 						log.Debugf("write terminal session %s heartbeat failed: %s", s.ID, err)
 						return
 					}

@@ -91,7 +91,7 @@ func (s *Service) Terminal(c *gin.Context) {
 		log.Errorf("failed to encode terminal session %s id: %s", session.ID, err)
 		return
 	}
-	if err := session.writeControl(sessionMessage); err != nil {
+	if err := session.writeControl(ws, sessionMessage); err != nil {
 		log.Debugf("failed to send terminal session %s id: %s", session.ID, err)
 		return
 	}
