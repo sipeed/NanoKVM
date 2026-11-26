@@ -29,7 +29,7 @@ CORS 制限のため、ローカル開発中は認証を無効にする必要が
 認証機能を開発するには、プロジェクトをビルドして NanoKVM でテストする必要があります。
 
 1. SSH を介して NanoKVM にログインします：`ssh root@your-nanokvm-ip`（デフォルトのパスワードは root です）。
-2. 設定ファイル `/etc/kvm/server.yaml/` を開き、`authentication: disable` を追加します。⚠️注意：このオプションはすべての認証を無効にし、本番環境では有効にしないでください！
+2. 設定ファイル `/etc/kvm/server.yaml` を開き、`authentication: disable` を追加します。⚠️注意：このオプションはすべての認証を無効にし、本番環境では有効にしないでください！
 3. サービスを再起動します：`/etc/init.d/S95nanokvm restart`。
 4. `.env.development` ファイルを編集し、`VITE_SERVER_IP` を NanoKVM の IP アドレスに変更します。
 5. `pnpm dev` を実行してサーバーを起動し、ブラウザで http://localhost:3001/ にアクセスします。
