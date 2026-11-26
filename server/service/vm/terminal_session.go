@@ -19,6 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"NanoKVM-Server/authn"
+	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
 )
@@ -28,7 +29,7 @@ const (
 	terminalKindSerial = "serial"
 
 	maxTerminalSessionUserAgent = 256
-	maxTerminalSessions         = 8
+	maxTerminalSessions         = config.DefaultMaxTerminalSessions
 	// terminalOutputBufferSize bounds the output kept for replaying recent
 	// terminal history when a page reattaches to a detached session.
 	terminalOutputBufferSize = 256 * 1024
@@ -404,9 +405,13 @@ func truncate(value string, limit int) string {
 }
 
 func (r *terminalSessionRegistry) add(session *terminalSession) bool {
+	return r.addWithConfig(session, config.GetMaxTerminalSessions(), config.IsTerminalSessionsUnlimited())
+}
+
+func (r *terminalSessionRegistry) addWithConfig(session *terminalSession, maxSessions int, unlimited bool) bool {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if len(r.sessions) >= maxTerminalSessions {
+	if !unlimited && len(r.sessions) >= maxSessions {
 		return false
 	}
 
@@ -418,7 +423,7 @@ func (r *terminalSessionRegistry) hasCapacity() bool {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	return len(r.sessions) < maxTerminalSessions
+	return config.IsTerminalSessionsUnlimited() || len(r.sessions) < config.GetMaxTerminalSessions()
 }
 
 func (r *terminalSessionRegistry) remove(id string) {

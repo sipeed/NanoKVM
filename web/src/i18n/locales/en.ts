@@ -492,7 +492,14 @@ const en = {
         renameTitle: 'Rename terminal',
         renamePlaceholder: 'Leave empty to use the default name',
         renameOk: 'Save',
-        renameCancel: 'Cancel'
+        renameCancel: 'Cancel',
+        sessionLimit: 'Terminal session limit',
+        sessionLimitDescription: 'Choose how many terminal sessions can be kept on this device.',
+        unlimitedSessions: 'Unlimited',
+        maxSessions: 'Maximum sessions',
+        sessionsUnit: 'sessions',
+        saveSessionLimit: 'Save',
+        sessionLimitSaved: 'Terminal session limit saved'
       },
       about: {
         title: 'About NanoKVM',

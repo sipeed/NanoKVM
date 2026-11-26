@@ -261,6 +261,19 @@ export function getTerminalSessions() {
   return http.get('/api/vm/terminal/sessions');
 }
 
+export type TerminalSessionConfig = {
+  maxSessions: number;
+  unlimited: boolean;
+};
+
+export function getTerminalSessionConfig() {
+  return http.get('/api/vm/terminal/config');
+}
+
+export function setTerminalSessionConfig(config: TerminalSessionConfig) {
+  return http.post('/api/vm/terminal/config', config);
+}
+
 // force close a web terminal session
 export function closeTerminalSession(id: string) {
   return http.delete(`/api/vm/terminal/sessions/${encodeURIComponent(id)}`);

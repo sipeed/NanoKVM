@@ -43,6 +43,8 @@ func vmRouter(r *gin.Engine) {
 	terminal.GET("/vm/terminal", service.Terminal) // web terminal
 
 	terminal.GET("/vm/terminal/sessions", service.GetTerminalSessions)               // list web terminal sessions
+	terminal.GET("/vm/terminal/config", service.GetTerminalSessionConfig)            // get terminal session limit
+	device.POST("/vm/terminal/config", service.SetTerminalSessionConfig)             // set terminal session limit
 	terminal.DELETE("/vm/terminal/sessions/:id", service.CloseTerminalSession)       // close web terminal session
 	terminal.POST("/vm/terminal/sessions/:id/rename", service.RenameTerminalSession) // rename web terminal session
 

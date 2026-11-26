@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button, Divider, Input, Modal, Spin, Tooltip, message } from 'antd';
+import { useAuth } from '@/contexts/auth.ts';
+import { Button, Divider, Input, InputNumber, message, Modal, Spin, Switch, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
   PencilIcon,
@@ -103,7 +104,7 @@ const SessionRow = ({ session, now, closing, onRename, onReconnect, onClose }: S
               </>
             )}
             <Tooltip title={session.userAgent || '-'} placement="top" mouseEnterDelay={0.4}>
-              <span className="truncate cursor-default">{session.clientIp || '-'}</span>
+              <span className="cursor-default truncate">{session.clientIp || '-'}</span>
             </Tooltip>
             <span>·</span>
             <span className="flex shrink-0 items-center space-x-1">
@@ -113,7 +114,11 @@ const SessionRow = ({ session, now, closing, onRename, onReconnect, onClose }: S
                   session.attached ? 'bg-green-500' : 'bg-neutral-500'
                 )}
               />
-              <span>{session.attached ? t('settings.terminal.attached') : t('settings.terminal.detached')}</span>
+              <span>
+                {session.attached
+                  ? t('settings.terminal.attached')
+                  : t('settings.terminal.detached')}
+              </span>
             </span>
           </div>
 
@@ -160,9 +165,14 @@ const SessionRow = ({ session, now, closing, onRename, onReconnect, onClose }: S
 
 export const TerminalSessions = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
   const [modal, contextHolder] = Modal.useModal();
 
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
+  const [maxSessions, setMaxSessions] = useState(8);
+  const [unlimited, setUnlimited] = useState(false);
+  const [isConfigLoading, setIsConfigLoading] = useState(true);
+  const [isConfigSaving, setIsConfigSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const [closingId, setClosingId] = useState('');
@@ -172,6 +182,29 @@ export const TerminalSessions = () => {
 
   const silentRefreshRef = useRef(false);
   const mountedRef = useRef(true);
+
+  const canManageConfig = hasPermission('device');
+
+  const loadConfig = useCallback(() => {
+    setIsConfigLoading(true);
+    api
+      .getTerminalSessionConfig()
+      .then((rsp) => {
+        if (!mountedRef.current) return;
+        if (rsp.code !== 0) {
+          message.error(rsp.msg || t('settings.terminal.failed'));
+          return;
+        }
+        setMaxSessions(rsp.data?.maxSessions ?? 8);
+        setUnlimited(rsp.data?.unlimited ?? false);
+      })
+      .catch(() => {
+        if (mountedRef.current) message.error(t('settings.terminal.failed'));
+      })
+      .finally(() => {
+        if (mountedRef.current) setIsConfigLoading(false);
+      });
+  }, [t]);
 
   const load = useCallback(
     (silent = false) => {
@@ -209,6 +242,7 @@ export const TerminalSessions = () => {
   useEffect(() => {
     mountedRef.current = true;
     load();
+    loadConfig();
 
     const refreshTimer = window.setInterval(() => load(true), refreshInterval);
     const clockTimer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -218,14 +252,32 @@ export const TerminalSessions = () => {
       window.clearInterval(refreshTimer);
       window.clearInterval(clockTimer);
     };
-  }, [load]);
+  }, [load, loadConfig]);
+
+  async function saveConfig() {
+    if (!canManageConfig || isConfigSaving) return;
+
+    setIsConfigSaving(true);
+    try {
+      const rsp = await api.setTerminalSessionConfig({ maxSessions, unlimited });
+      if (rsp.code !== 0) {
+        message.error(rsp.msg || t('settings.terminal.failed'));
+        return;
+      }
+      setMaxSessions(rsp.data?.maxSessions ?? maxSessions);
+      setUnlimited(rsp.data?.unlimited ?? unlimited);
+      message.success(t('settings.terminal.sessionLimitSaved'));
+    } catch {
+      message.error(t('settings.terminal.failed'));
+    } finally {
+      if (mountedRef.current) setIsConfigSaving(false);
+    }
+  }
 
   function closeSession(session: TerminalSession) {
     modal.confirm({
       title: t('settings.terminal.closeTitle'),
-      content: (
-        <span className="text-sm text-neutral-400">{t('settings.terminal.closeDesc')}</span>
-      ),
+      content: <span className="text-sm text-neutral-400">{t('settings.terminal.closeDesc')}</span>,
       okText: t('settings.terminal.closeOk'),
       cancelText: t('settings.terminal.closeCancel'),
       okButtonProps: { danger: true },
@@ -323,6 +375,54 @@ export const TerminalSessions = () => {
 
       <div className="flex flex-col space-y-4">
         <span className="text-xs text-neutral-500">{t('settings.terminal.description')}</span>
+
+        <div className="flex flex-col space-y-4 rounded-lg border border-neutral-700/50 bg-neutral-800/40 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-col space-y-1">
+              <span className="text-sm">{t('settings.terminal.sessionLimit')}</span>
+              <span className="text-xs text-neutral-500">
+                {t('settings.terminal.sessionLimitDescription')}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-neutral-400">
+                {t('settings.terminal.unlimitedSessions')}
+              </span>
+              <Switch
+                checked={unlimited}
+                disabled={isConfigLoading || !canManageConfig}
+                onChange={setUnlimited}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-sm text-neutral-400">{t('settings.terminal.maxSessions')}</span>
+            <div className="flex items-center space-x-3">
+              <InputNumber
+                min={1}
+                max={64}
+                precision={0}
+                value={maxSessions}
+                disabled={isConfigLoading || !canManageConfig || unlimited}
+                addonAfter={t('settings.terminal.sessionsUnit')}
+                onChange={(value) => {
+                  if (value !== null) setMaxSessions(value);
+                }}
+              />
+              {canManageConfig && (
+                <Button
+                  type="primary"
+                  loading={isConfigSaving}
+                  disabled={isConfigLoading || maxSessions < 1 || maxSessions > 64}
+                  onClick={saveConfig}
+                >
+                  {t('settings.terminal.saveSessionLimit')}
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
 
         {isLoading && sessions.length === 0 ? (
           <div className="flex items-center justify-center py-10">

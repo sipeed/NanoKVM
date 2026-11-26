@@ -472,7 +472,14 @@ const zh = {
         renameTitle: '重命名终端',
         renamePlaceholder: '留空使用默认名称',
         renameOk: '保存',
-        renameCancel: '取消'
+        renameCancel: '取消',
+        sessionLimit: '终端会话数量限制',
+        sessionLimitDescription: '设置此设备可保留的终端会话数量。',
+        unlimitedSessions: '无上限',
+        maxSessions: '最大会话数量',
+        sessionsUnit: '个',
+        saveSessionLimit: '保存',
+        sessionLimitSaved: '终端会话数量设置已保存'
       },
       about: {
         title: '关于 NanoKVM',

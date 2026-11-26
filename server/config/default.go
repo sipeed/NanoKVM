@@ -31,9 +31,18 @@ var defaultConfig = &Config{
 		LoginLockoutDuration: 0,
 		LoginMaxFailures:     5,
 	},
+	Terminal: Terminal{
+		MaxSessions: DefaultMaxTerminalSessions,
+	},
 }
 
 func checkDefaultValue() {
+	if instance.Terminal.MaxSessions < MinTerminalSessions || instance.Terminal.MaxSessions > MaxTerminalSessions {
+		instance.Terminal.MaxSessions = DefaultMaxTerminalSessions
+	}
+	storeMaxTerminalSessions(instance.Terminal.MaxSessions)
+	storeTerminalSessionsUnlimited(instance.Terminal.Unlimited)
+
 	if instance.JWT.SecretKey == "" {
 		instance.JWT.SecretKey = generateRandomSecretKey()
 		instance.JWT.RevokeTokensOnLogout = true

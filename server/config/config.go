@@ -6,20 +6,72 @@ import (
 	"log"
 	"os"
 	"sync"
+	"sync/atomic"
 
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	instance Config
-	once     sync.Once
+	instance                  Config
+	once                      sync.Once
+	terminalConfigMu          sync.Mutex
+	maxTerminalSessions       atomic.Int64
+	terminalSessionsUnlimited atomic.Bool
 )
+
+const (
+	DefaultMaxTerminalSessions = 8
+	MinTerminalSessions        = 1
+	MaxTerminalSessions        = 64
+)
+
+func init() {
+	maxTerminalSessions.Store(DefaultMaxTerminalSessions)
+	terminalSessionsUnlimited.Store(false)
+}
 
 func GetInstance() *Config {
 	once.Do(initialize)
 
 	return &instance
+}
+
+func GetMaxTerminalSessions() int {
+	return int(maxTerminalSessions.Load())
+}
+
+func IsTerminalSessionsUnlimited() bool {
+	return terminalSessionsUnlimited.Load()
+}
+
+func SetTerminalSessionsConfig(value int, unlimited bool) error {
+	if value < MinTerminalSessions || value > MaxTerminalSessions {
+		return errors.New("maximum terminal sessions must be between 1 and 64")
+	}
+
+	terminalConfigMu.Lock()
+	defer terminalConfigMu.Unlock()
+
+	conf := *GetInstance()
+	conf.Terminal.MaxSessions = value
+	conf.Terminal.Unlimited = unlimited
+	if err := Write(&conf); err != nil {
+		return err
+	}
+	instance.Terminal.MaxSessions = value
+	instance.Terminal.Unlimited = unlimited
+	storeMaxTerminalSessions(value)
+	terminalSessionsUnlimited.Store(unlimited)
+	return nil
+}
+
+func storeMaxTerminalSessions(value int) {
+	maxTerminalSessions.Store(int64(value))
+}
+
+func storeTerminalSessionsUnlimited(value bool) {
+	terminalSessionsUnlimited.Store(value)
 }
 
 func initialize() {

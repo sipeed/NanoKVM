@@ -10,7 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 
+	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
+	"NanoKVM-Server/proto"
 )
 
 const (
@@ -124,4 +126,32 @@ func (s *Service) Terminal(c *gin.Context) {
 		session.close()
 	default:
 	}
+}
+
+func (s *Service) GetTerminalSessionConfig(c *gin.Context) {
+	var rsp proto.Response
+	rsp.OkRspWithData(c, gin.H{
+		"maxSessions": config.GetMaxTerminalSessions(),
+		"unlimited":   config.IsTerminalSessionsUnlimited(),
+	})
+}
+
+func (s *Service) SetTerminalSessionConfig(c *gin.Context) {
+	var req struct {
+		MaxSessions int  `json:"maxSessions"`
+		Unlimited   bool `json:"unlimited"`
+	}
+	var rsp proto.Response
+	if err := proto.ParseFormRequest(c, &req); err != nil {
+		rsp.ErrRsp(c, -1, "invalid arguments")
+		return
+	}
+	if err := config.SetTerminalSessionsConfig(req.MaxSessions, req.Unlimited); err != nil {
+		rsp.ErrRsp(c, -1, err.Error())
+		return
+	}
+	rsp.OkRspWithData(c, gin.H{
+		"maxSessions": config.GetMaxTerminalSessions(),
+		"unlimited":   config.IsTerminalSessionsUnlimited(),
+	})
 }

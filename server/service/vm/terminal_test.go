@@ -71,17 +71,27 @@ func TestTerminalSendsSessionIDOnWebSocketConnect(t *testing.T) {
 
 func TestTerminalSessionRegistryEnforcesLimit(t *testing.T) {
 	registry := &terminalSessionRegistry{sessions: make(map[string]*terminalSession)}
-	for i := 0; i < maxTerminalSessions; i++ {
-		if !registry.add(&terminalSession{ID: fmt.Sprintf("session-%d", i)}) {
+	const limit = 3
+	for i := 0; i < limit; i++ {
+		if !registry.addWithConfig(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, limit, false) {
 			t.Fatalf("session %d was rejected below the limit", i)
 		}
 	}
 
-	if registry.add(&terminalSession{ID: "one-too-many"}) {
+	if registry.addWithConfig(&terminalSession{ID: "one-too-many"}, limit, false) {
 		t.Fatal("session above the configured limit was accepted")
 	}
-	if got := len(registry.list()); got != maxTerminalSessions {
-		t.Fatalf("registry contains %d sessions, want %d", got, maxTerminalSessions)
+	if got := len(registry.list()); got != limit {
+		t.Fatalf("registry contains %d sessions, want %d", got, limit)
+	}
+}
+
+func TestTerminalSessionRegistrySupportsUnlimited(t *testing.T) {
+	registry := &terminalSessionRegistry{sessions: make(map[string]*terminalSession)}
+	for i := 0; i < 10; i++ {
+		if !registry.addWithConfig(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, 1, true) {
+			t.Fatalf("unlimited configuration rejected session %d", i)
+		}
 	}
 }
 
