@@ -391,6 +391,8 @@ const en = {
       stopBits: 'Stop bits',
       confirm: 'Ok',
       sessionUnavailable: 'This terminal session has ended or does not exist',
+      sessionLimit: 'Terminal session limit reached',
+      sessionLimitHint: 'Close an existing terminal session before opening another.',
       newTerminal: 'Open a new terminal',
       selectSession: 'Select a terminal session',
       newSession: 'New session',

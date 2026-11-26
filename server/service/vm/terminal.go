@@ -2,6 +2,7 @@ package vm
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -18,6 +19,7 @@ const (
 	terminalHeartbeatType     = "ping"
 	terminalHeartbeatResponse = `{"type":"pong"}`
 	terminalSessionIDType     = "session"
+	terminalSessionLimitCode  = 4412
 )
 
 type WinSize struct {
@@ -47,7 +49,8 @@ var upgrader = websocket.Upgrader{
 // same shell from another tab or browser.
 func (s *Service) Terminal(c *gin.Context) {
 	sessionID := c.Query("session")
-	if sessionID != "" && terminalSessions.get(sessionID) == nil {
+	session := terminalSessions.get(sessionID)
+	if sessionID != "" && (session == nil || !canAccessTerminalSession(c, session)) {
 		log.Debugf("terminal session %s not found", sessionID)
 		c.JSON(http.StatusNotFound, "terminal session not found")
 		return
@@ -64,15 +67,30 @@ func (s *Service) Terminal(c *gin.Context) {
 	stopSessionWatcher := middleware.WatchWebSocket(c.Request.Context(), ws)
 	defer stopSessionWatcher()
 
-	session := terminalSessions.get(sessionID)
-	if sessionID != "" && session == nil {
-		// The session ended between the existence check and the upgrade.
+	session = terminalSessions.get(sessionID)
+	if sessionID != "" && (session == nil || !canAccessTerminalSession(c, session)) {
+		// The session ended or changed ownership between the check and upgrade.
 		return
 	}
 	if session == nil {
+		if !terminalSessions.hasCapacity() {
+			_ = ws.WriteControl(
+				websocket.CloseMessage,
+				websocket.FormatCloseMessage(terminalSessionLimitCode, "terminal session limit reached"),
+				time.Now().Add(messageWait),
+			)
+			return
+		}
 		session, err = newTerminalSession(c)
 		if err != nil {
 			log.Errorf("failed to start pty: %s", err)
+			if errors.Is(err, errTerminalSessionLimit) {
+				_ = ws.WriteControl(
+					websocket.CloseMessage,
+					websocket.FormatCloseMessage(terminalSessionLimitCode, "terminal session limit reached"),
+					time.Now().Add(messageWait),
+				)
+			}
 			return
 		}
 	}

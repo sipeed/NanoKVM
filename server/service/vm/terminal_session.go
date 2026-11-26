@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"net"
 	"os"
 	"os/exec"
 	"sort"
@@ -17,6 +18,7 @@ import (
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 
+	"NanoKVM-Server/authn"
 	"NanoKVM-Server/middleware"
 	"NanoKVM-Server/proto"
 )
@@ -26,6 +28,7 @@ const (
 	terminalKindSerial = "serial"
 
 	maxTerminalSessionUserAgent = 256
+	maxTerminalSessions         = 8
 	// terminalOutputBufferSize bounds the output kept for replaying recent
 	// terminal history when a page reattaches to a detached session.
 	terminalOutputBufferSize = 256 * 1024
@@ -45,7 +48,10 @@ const (
 	terminalSessionEndedCode = 4411
 )
 
-var errTerminalSessionClosed = errors.New("terminal session is closed")
+var (
+	errTerminalSessionClosed = errors.New("terminal session is closed")
+	errTerminalSessionLimit  = errors.New("maximum terminal session count reached")
+)
 
 // terminalSession owns the pty of one shell. It outlives the websocket page that
 // created it: when the page disconnects the session stays detached until a new
@@ -186,6 +192,7 @@ func (s *terminalSession) writeOutput(data []byte) {
 	if err := ws.WriteMessage(websocket.BinaryMessage, data); err != nil {
 		log.Debugf("write terminal session %s output failed: %s", s.ID, err)
 		s.detach(ws)
+		_ = ws.Close()
 	}
 }
 
@@ -354,7 +361,7 @@ func newTerminalSession(c *gin.Context) (*terminalSession, error) {
 	session := &terminalSession{
 		ID:        newTerminalSessionID(),
 		Kind:      terminalKindShell,
-		ClientIP:  c.ClientIP(),
+		ClientIP:  remoteClientIP(c.Request.RemoteAddr),
 		UserAgent: truncate(c.Request.UserAgent(), maxTerminalSessionUserAgent),
 		CreatedAt: time.Now(),
 		cmd:       cmd,
@@ -371,10 +378,21 @@ func newTerminalSession(c *gin.Context) (*terminalSession, error) {
 		session.Baud = truncate(c.Query("baud"), 16)
 	}
 
-	terminalSessions.add(session)
+	if !terminalSessions.add(session) {
+		session.closeWithCode(0, "")
+		return nil, errTerminalSessionLimit
+	}
 	go session.readOutput()
 
 	return session, nil
+}
+
+func remoteClientIP(remoteAddr string) string {
+	host, _, err := net.SplitHostPort(remoteAddr)
+	if err == nil {
+		return host
+	}
+	return remoteAddr
 }
 
 func truncate(value string, limit int) string {
@@ -385,11 +403,22 @@ func truncate(value string, limit int) string {
 	return value[:limit]
 }
 
-func (r *terminalSessionRegistry) add(session *terminalSession) {
+func (r *terminalSessionRegistry) add(session *terminalSession) bool {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
+	if len(r.sessions) >= maxTerminalSessions {
+		return false
+	}
 
 	r.sessions[session.ID] = session
+	return true
+}
+
+func (r *terminalSessionRegistry) hasCapacity() bool {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+
+	return len(r.sessions) < maxTerminalSessions
 }
 
 func (r *terminalSessionRegistry) remove(id string) {
@@ -428,6 +457,9 @@ func (s *Service) GetTerminalSessions(c *gin.Context) {
 	sessions := terminalSessions.list()
 	infos := make([]proto.TerminalSessionInfo, 0, len(sessions))
 	for _, session := range sessions {
+		if !canAccessTerminalSession(c, session) {
+			continue
+		}
 		infos = append(infos, proto.TerminalSessionInfo{
 			ID:        session.ID,
 			Kind:      session.Kind,
@@ -447,12 +479,20 @@ func (s *Service) GetTerminalSessions(c *gin.Context) {
 	})
 }
 
+func canAccessTerminalSession(c *gin.Context, session *terminalSession) bool {
+	principal, ok := middleware.CurrentPrincipal(c)
+	if !ok {
+		return false
+	}
+	return principal.Role == authn.RoleAdmin || session.Username == principal.Username
+}
+
 func (s *Service) CloseTerminalSession(c *gin.Context) {
 	var rsp proto.Response
 
 	id := c.Param("id")
 	session := terminalSessions.get(id)
-	if session == nil {
+	if session == nil || !canAccessTerminalSession(c, session) {
 		rsp.ErrRsp(c, -1, "terminal session not found")
 		return
 	}
@@ -493,7 +533,7 @@ func (s *Service) RenameTerminalSession(c *gin.Context) {
 
 	id := c.Param("id")
 	session := terminalSessions.get(id)
-	if session == nil {
+	if session == nil || !canAccessTerminalSession(c, session) {
 		rsp.ErrRsp(c, -1, "terminal session not found")
 		return
 	}

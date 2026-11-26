@@ -376,6 +376,8 @@ const zh = {
       stopBits: '停止位',
       confirm: '确定',
       sessionUnavailable: '该终端会话已结束或不存在',
+      sessionLimit: '终端会话数量已达上限',
+      sessionLimitHint: '请先关闭一个现有终端会话，再打开新终端。',
       newTerminal: '打开新终端',
       selectSession: '选择终端会话',
       newSession: '新建一个会话',
