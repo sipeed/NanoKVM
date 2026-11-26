@@ -274,6 +274,33 @@ export const TerminalSessions = () => {
     }
   }
 
+  async function toggleUnlimited(nextUnlimited: boolean) {
+    if (!canManageConfig || isConfigLoading || isConfigSaving) return;
+
+    const previousUnlimited = unlimited;
+    setUnlimited(nextUnlimited);
+    setIsConfigSaving(true);
+    try {
+      const rsp = await api.setTerminalSessionConfig({
+        maxSessions,
+        unlimited: nextUnlimited
+      });
+      if (rsp.code !== 0) {
+        setUnlimited(previousUnlimited);
+        message.error(rsp.msg || t('settings.terminal.failed'));
+        return;
+      }
+      setMaxSessions(rsp.data?.maxSessions ?? maxSessions);
+      setUnlimited(rsp.data?.unlimited ?? nextUnlimited);
+      message.success(t('settings.terminal.sessionLimitSaved'));
+    } catch {
+      setUnlimited(previousUnlimited);
+      message.error(t('settings.terminal.failed'));
+    } finally {
+      if (mountedRef.current) setIsConfigSaving(false);
+    }
+  }
+
   function closeSession(session: TerminalSession) {
     modal.confirm({
       title: t('settings.terminal.closeTitle'),
@@ -390,8 +417,8 @@ export const TerminalSessions = () => {
               </span>
               <Switch
                 checked={unlimited}
-                disabled={isConfigLoading || !canManageConfig}
-                onChange={setUnlimited}
+                disabled={isConfigLoading || !canManageConfig || isConfigSaving}
+                onChange={toggleUnlimited}
               />
             </div>
           </div>
