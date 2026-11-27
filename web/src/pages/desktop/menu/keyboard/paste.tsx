@@ -30,7 +30,8 @@ export const Paste = () => {
     { value: 'en', label: t('keyboard.dropdownEnglish') },
     { value: 'de', label: t('keyboard.dropdownGerman') },
     { value: 'fr', label: t('keyboard.dropdownFrench') },
-    { value: 'ru', label: t('keyboard.dropdownRussian') }
+    { value: 'ru', label: t('keyboard.dropdownRussian') },
+    { value: 'es', label: t('keyboard.dropdownSpanish') }
   ];
 
   useEffect(() => {
@@ -163,6 +164,7 @@ export const Paste = () => {
   function isValidForLanguage(value: string, selectedLangue: string) {
     const isRussian = selectedLangue === 'ru';
     const isFrench = selectedLangue === 'fr';
+    const isSpanish = selectedLangue === 'es';
 
     for (const ch of value) {
       const code = ch.codePointAt(0) ?? 0;
@@ -183,11 +185,12 @@ export const Paste = () => {
           continue;
         }
         return false;
-      } else if (isFrench) {
-        // For French, allow ASCII and Latin-1/Extended accented characters
-        // (é è ê ë à â ù û ç î ï ô œ æ ° µ £ § ¨ etc.)
+      } else if (isFrench || isSpanish) {
+        // For French and Spanish, allow ASCII and Latin-1/Extended accented characters
+        // (é è ê ë á é í ó ú ñ Ñ ü Ü ¡ ¿ ° µ £ § ¨ etc.) and € (U+20AC)
         if (code <= 0x7f) continue;
         if (code >= 0x00a0 && code <= 0x017e) continue;
+        if (code === 0x20ac) continue;
         return false;
       } else {
         // For English/German, only allow ASCII

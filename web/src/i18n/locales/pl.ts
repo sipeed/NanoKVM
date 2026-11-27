@@ -160,6 +160,7 @@ const pl = {
       dropdownGerman: 'niemiecki',
       dropdownFrench: 'Francuski',
       dropdownRussian: 'Rosyjski',
+      dropdownSpanish: 'Hiszpański',
       shortcut: {
         title: 'Skróty',
         custom: 'Niestandardowe',

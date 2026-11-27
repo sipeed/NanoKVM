@@ -159,6 +159,7 @@ const pt_br = {
       dropdownGerman: 'Alemão',
       dropdownFrench: 'Francês',
       dropdownRussian: 'Russo',
+      dropdownSpanish: 'Espanhol',
       shortcut: {
         title: 'Atalhos',
         custom: 'Personalizado',

@@ -159,6 +159,7 @@ const cz = {
       dropdownGerman: 'německy',
       dropdownFrench: 'francouzsky',
       dropdownRussian: 'rusky',
+      dropdownSpanish: 'španělsky',
       shortcut: {
         title: 'Zkratky',
         custom: 'Vlastní',

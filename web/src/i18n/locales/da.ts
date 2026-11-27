@@ -159,6 +159,7 @@ const da = {
       dropdownGerman: 'tysk',
       dropdownFrench: 'Fransk',
       dropdownRussian: 'russisk',
+      dropdownSpanish: 'Spansk',
       shortcut: {
         title: 'Genveje',
         custom: 'Brugerdefineret',
