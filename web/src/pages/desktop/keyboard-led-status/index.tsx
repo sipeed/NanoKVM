@@ -4,9 +4,9 @@ import clsx from 'clsx';
 import { useKeyboardLedStatus } from './use-keyboard-led-status';
 
 const LOCK_INDICATORS = {
-  numLock: { label: 'Num Lock', shortLabel: 'Num' },
-  capsLock: { label: 'Caps Lock', shortLabel: 'Caps' },
-  scrollLock: { label: 'Scroll Lock', shortLabel: 'Scr' }
+  numLock: { label: 'Num Lock', shortLabel: 'Num', microLabel: '1' },
+  capsLock: { label: 'Caps Lock', shortLabel: 'Caps', microLabel: 'A' },
+  scrollLock: { label: 'Scroll Lock', shortLabel: 'Scr', microLabel: '⤓' }
 } as const;
 
 type LockIndicatorProps = {
@@ -16,7 +16,7 @@ type LockIndicatorProps = {
 };
 
 function LockIndicator({ labelKey, active, known }: LockIndicatorProps) {
-  const { label, shortLabel } = LOCK_INDICATORS[labelKey];
+  const { label, shortLabel, microLabel } = LOCK_INDICATORS[labelKey];
   const state = known ? (active ? 'On' : 'Off') : 'Unknown';
   const indicatorLabel = `${label}: ${state}`;
 
@@ -37,12 +37,15 @@ function LockIndicator({ labelKey, active, known }: LockIndicatorProps) {
             'flex h-2 w-2 items-center justify-center rounded-full text-[7px] leading-none',
             known
               ? active
-                ? 'bg-emerald-400'
+                ? 'bg-green-600'
                 : 'bg-neutral-600'
               : 'border border-dashed border-neutral-500 text-neutral-300'
           )}
         >
-          {!known && '?'}
+          { known 
+              ? <span className="text-neutral-900 sm:hidden inline">{microLabel}</span>
+              : '?'
+          }
         </span>
         <span className="hidden sm:inline">{shortLabel}</span>
       </div>
@@ -56,7 +59,7 @@ export function KeyboardLedStatus() {
 
   return (
     <div
-      className="flex h-full w-[40px] flex-col items-start justify-center rounded bg-neutral-800/80"
+      className="flex h-full gap-[2px] font-mono w-[16px] sm:w-[40px] flex-col items-start justify-center rounded bg-neutral-800/80"
       aria-label="Keyboard lock status"
       role="group"
     >
