@@ -263,7 +263,6 @@ export function getTerminalSessions() {
 
 export type TerminalSessionConfig = {
   maxSessions: number;
-  unlimited: boolean;
 };
 
 export function getTerminalSessionConfig() {

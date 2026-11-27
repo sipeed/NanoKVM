@@ -18,7 +18,7 @@ type Config struct {
 
 type Terminal struct {
 	MaxSessions int  `yaml:"maxSessions"`
-	Unlimited   bool `yaml:"unlimited"`
+	Unlimited   bool `yaml:"unlimited,omitempty"` // legacy setting, migrated to maxSessions=0
 }
 
 type Logger struct {

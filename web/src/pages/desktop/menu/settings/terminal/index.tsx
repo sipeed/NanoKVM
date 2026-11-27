@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/auth.ts';
-import { Button, Divider, Input, InputNumber, message, Modal, Spin, Switch, Tooltip } from 'antd';
+import { Button, Divider, Input, InputNumber, message, Modal, Spin, Tooltip } from 'antd';
 import clsx from 'clsx';
 import {
   PencilIcon,
@@ -170,7 +170,6 @@ export const TerminalSessions = () => {
 
   const [sessions, setSessions] = useState<TerminalSession[]>([]);
   const [maxSessions, setMaxSessions] = useState(8);
-  const [unlimited, setUnlimited] = useState(false);
   const [isConfigLoading, setIsConfigLoading] = useState(true);
   const [isConfigSaving, setIsConfigSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -196,7 +195,6 @@ export const TerminalSessions = () => {
           return;
         }
         setMaxSessions(rsp.data?.maxSessions ?? 8);
-        setUnlimited(rsp.data?.unlimited ?? false);
       })
       .catch(() => {
         if (mountedRef.current) message.error(t('settings.terminal.failed'));
@@ -259,42 +257,14 @@ export const TerminalSessions = () => {
 
     setIsConfigSaving(true);
     try {
-      const rsp = await api.setTerminalSessionConfig({ maxSessions, unlimited });
+      const rsp = await api.setTerminalSessionConfig({ maxSessions });
       if (rsp.code !== 0) {
         message.error(rsp.msg || t('settings.terminal.failed'));
         return;
       }
       setMaxSessions(rsp.data?.maxSessions ?? maxSessions);
-      setUnlimited(rsp.data?.unlimited ?? unlimited);
       message.success(t('settings.terminal.sessionLimitSaved'));
     } catch {
-      message.error(t('settings.terminal.failed'));
-    } finally {
-      if (mountedRef.current) setIsConfigSaving(false);
-    }
-  }
-
-  async function toggleUnlimited(nextUnlimited: boolean) {
-    if (!canManageConfig || isConfigLoading || isConfigSaving) return;
-
-    const previousUnlimited = unlimited;
-    setUnlimited(nextUnlimited);
-    setIsConfigSaving(true);
-    try {
-      const rsp = await api.setTerminalSessionConfig({
-        maxSessions,
-        unlimited: nextUnlimited
-      });
-      if (rsp.code !== 0) {
-        setUnlimited(previousUnlimited);
-        message.error(rsp.msg || t('settings.terminal.failed'));
-        return;
-      }
-      setMaxSessions(rsp.data?.maxSessions ?? maxSessions);
-      setUnlimited(rsp.data?.unlimited ?? nextUnlimited);
-      message.success(t('settings.terminal.sessionLimitSaved'));
-    } catch {
-      setUnlimited(previousUnlimited);
       message.error(t('settings.terminal.failed'));
     } finally {
       if (mountedRef.current) setIsConfigSaving(false);
@@ -403,51 +373,35 @@ export const TerminalSessions = () => {
       <div className="flex flex-col space-y-4">
         <span className="text-xs text-neutral-500">{t('settings.terminal.description')}</span>
 
-        <div className="flex flex-col space-y-4 rounded-lg border border-neutral-700/50 bg-neutral-800/40 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-col space-y-1">
-              <span className="text-sm">{t('settings.terminal.sessionLimit')}</span>
-              <span className="text-xs text-neutral-500">
-                {t('settings.terminal.sessionLimitDescription')}
-              </span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-neutral-400">
-                {t('settings.terminal.unlimitedSessions')}
-              </span>
-              <Switch
-                checked={unlimited}
-                disabled={isConfigLoading || !canManageConfig || isConfigSaving}
-                onChange={toggleUnlimited}
-              />
-            </div>
+        <div className="flex w-full flex-wrap items-start justify-between gap-4">
+          <div className="flex min-w-0 flex-col space-y-1">
+            <span className="text-sm">{t('settings.terminal.sessionLimit')}</span>
+            <span className="text-xs text-neutral-500">
+              {t('settings.terminal.sessionLimitHint')}
+            </span>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-sm text-neutral-400">{t('settings.terminal.maxSessions')}</span>
-            <div className="flex items-center space-x-3">
-              <InputNumber
-                min={1}
-                max={64}
-                precision={0}
-                value={maxSessions}
-                disabled={isConfigLoading || !canManageConfig || unlimited}
-                addonAfter={t('settings.terminal.sessionsUnit')}
-                onChange={(value) => {
-                  if (value !== null) setMaxSessions(value);
-                }}
-              />
-              {canManageConfig && (
-                <Button
-                  type="primary"
-                  loading={isConfigSaving}
-                  disabled={isConfigLoading || maxSessions < 1 || maxSessions > 64}
-                  onClick={saveConfig}
-                >
-                  {t('settings.terminal.saveSessionLimit')}
-                </Button>
-              )}
-            </div>
+          <div className="flex shrink-0 items-start gap-3">
+            <InputNumber
+              min={0}
+              precision={0}
+              value={maxSessions}
+              disabled={isConfigLoading || !canManageConfig}
+              addonAfter={t('settings.terminal.sessionsUnit')}
+              onChange={(value) => {
+                if (value !== null) setMaxSessions(value);
+              }}
+            />
+            {canManageConfig && (
+              <Button
+                type="primary"
+                loading={isConfigSaving}
+                disabled={isConfigLoading || maxSessions < 0}
+                onClick={saveConfig}
+              >
+                {t('settings.terminal.saveSessionLimit')}
+              </Button>
+            )}
           </div>
         </div>
 

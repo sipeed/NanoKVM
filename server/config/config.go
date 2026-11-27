@@ -13,22 +13,19 @@ import (
 )
 
 var (
-	instance                  Config
-	once                      sync.Once
-	terminalConfigMu          sync.Mutex
-	maxTerminalSessions       atomic.Int64
-	terminalSessionsUnlimited atomic.Bool
+	instance            Config
+	once                sync.Once
+	terminalConfigMu    sync.Mutex
+	maxTerminalSessions atomic.Int64
 )
 
 const (
 	DefaultMaxTerminalSessions = 8
-	MinTerminalSessions        = 1
-	MaxTerminalSessions        = 64
+	MinTerminalSessions        = 0
 )
 
 func init() {
 	maxTerminalSessions.Store(DefaultMaxTerminalSessions)
-	terminalSessionsUnlimited.Store(false)
 }
 
 func GetInstance() *Config {
@@ -41,13 +38,9 @@ func GetMaxTerminalSessions() int {
 	return int(maxTerminalSessions.Load())
 }
 
-func IsTerminalSessionsUnlimited() bool {
-	return terminalSessionsUnlimited.Load()
-}
-
-func SetTerminalSessionsConfig(value int, unlimited bool) error {
-	if value < MinTerminalSessions || value > MaxTerminalSessions {
-		return errors.New("maximum terminal sessions must be between 1 and 64")
+func SetTerminalSessionsConfig(value int) error {
+	if value < MinTerminalSessions {
+		return errors.New("maximum terminal sessions must be zero or greater")
 	}
 
 	terminalConfigMu.Lock()
@@ -55,23 +48,18 @@ func SetTerminalSessionsConfig(value int, unlimited bool) error {
 
 	conf := *GetInstance()
 	conf.Terminal.MaxSessions = value
-	conf.Terminal.Unlimited = unlimited
+	conf.Terminal.Unlimited = false
 	if err := Write(&conf); err != nil {
 		return err
 	}
 	instance.Terminal.MaxSessions = value
-	instance.Terminal.Unlimited = unlimited
+	instance.Terminal.Unlimited = false
 	storeMaxTerminalSessions(value)
-	terminalSessionsUnlimited.Store(unlimited)
 	return nil
 }
 
 func storeMaxTerminalSessions(value int) {
 	maxTerminalSessions.Store(int64(value))
-}
-
-func storeTerminalSessionsUnlimited(value bool) {
-	terminalSessionsUnlimited.Store(value)
 }
 
 func initialize() {

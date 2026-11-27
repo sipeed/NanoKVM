@@ -29,7 +29,6 @@ const (
 	terminalKindSerial = "serial"
 
 	maxTerminalSessionUserAgent = 256
-	maxTerminalSessions         = config.DefaultMaxTerminalSessions
 	// terminalOutputBufferSize bounds the output kept for replaying recent
 	// terminal history when a page reattaches to a detached session.
 	terminalOutputBufferSize = 256 * 1024
@@ -405,13 +404,13 @@ func truncate(value string, limit int) string {
 }
 
 func (r *terminalSessionRegistry) add(session *terminalSession) bool {
-	return r.addWithConfig(session, config.GetMaxTerminalSessions(), config.IsTerminalSessionsUnlimited())
+	return r.addWithLimit(session, config.GetMaxTerminalSessions())
 }
 
-func (r *terminalSessionRegistry) addWithConfig(session *terminalSession, maxSessions int, unlimited bool) bool {
+func (r *terminalSessionRegistry) addWithLimit(session *terminalSession, maxSessions int) bool {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
-	if !unlimited && len(r.sessions) >= maxSessions {
+	if maxSessions > 0 && len(r.sessions) >= maxSessions {
 		return false
 	}
 
@@ -423,7 +422,8 @@ func (r *terminalSessionRegistry) hasCapacity() bool {
 	r.mutex.RLock()
 	defer r.mutex.RUnlock()
 
-	return config.IsTerminalSessionsUnlimited() || len(r.sessions) < config.GetMaxTerminalSessions()
+	maxSessions := config.GetMaxTerminalSessions()
+	return maxSessions == 0 || len(r.sessions) < maxSessions
 }
 
 func (r *terminalSessionRegistry) remove(id string) {

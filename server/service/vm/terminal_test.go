@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"NanoKVM-Server/authn"
+	"NanoKVM-Server/config"
 	"NanoKVM-Server/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -73,12 +74,12 @@ func TestTerminalSessionRegistryEnforcesLimit(t *testing.T) {
 	registry := &terminalSessionRegistry{sessions: make(map[string]*terminalSession)}
 	const limit = 3
 	for i := 0; i < limit; i++ {
-		if !registry.addWithConfig(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, limit, false) {
+		if !registry.addWithLimit(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, limit) {
 			t.Fatalf("session %d was rejected below the limit", i)
 		}
 	}
 
-	if registry.addWithConfig(&terminalSession{ID: "one-too-many"}, limit, false) {
+	if registry.addWithLimit(&terminalSession{ID: "one-too-many"}, limit) {
 		t.Fatal("session above the configured limit was accepted")
 	}
 	if got := len(registry.list()); got != limit {
@@ -89,7 +90,7 @@ func TestTerminalSessionRegistryEnforcesLimit(t *testing.T) {
 func TestTerminalSessionRegistrySupportsUnlimited(t *testing.T) {
 	registry := &terminalSessionRegistry{sessions: make(map[string]*terminalSession)}
 	for i := 0; i < 10; i++ {
-		if !registry.addWithConfig(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, 1, true) {
+		if !registry.addWithLimit(&terminalSession{ID: fmt.Sprintf("session-%d", i)}, 0) {
 			t.Fatalf("unlimited configuration rejected session %d", i)
 		}
 	}
@@ -99,7 +100,7 @@ func TestTerminalRejectsNewShellAtSessionLimit(t *testing.T) {
 	previousRegistry := terminalSessions
 	terminalSessions = &terminalSessionRegistry{sessions: make(map[string]*terminalSession)}
 	t.Cleanup(func() { terminalSessions = previousRegistry })
-	for i := 0; i < maxTerminalSessions; i++ {
+	for i := 0; i < config.DefaultMaxTerminalSessions; i++ {
 		if !terminalSessions.add(&terminalSession{ID: fmt.Sprintf("occupied-%d", i)}) {
 			t.Fatalf("failed to register occupied session %d", i)
 		}
@@ -160,8 +161,8 @@ func TestTerminalSessionAccessIsScopedToOwner(t *testing.T) {
 	}
 }
 
-func TestTerminalSessionRegistryLimitIsEight(t *testing.T) {
-	if maxTerminalSessions != 8 {
-		t.Fatalf("maxTerminalSessions = %d, want 8", maxTerminalSessions)
+func TestTerminalSessionRegistryDefaultLimitIsEight(t *testing.T) {
+	if config.DefaultMaxTerminalSessions != 8 {
+		t.Fatalf("DefaultMaxTerminalSessions = %d, want 8", config.DefaultMaxTerminalSessions)
 	}
 }
