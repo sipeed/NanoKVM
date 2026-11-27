@@ -1,5 +1,7 @@
 package config
 
+import "github.com/spf13/viper"
+
 var defaultConfig = &Config{
 	Proto: "http",
 	Host:  "",
@@ -31,9 +33,20 @@ var defaultConfig = &Config{
 		LoginLockoutDuration: 0,
 		LoginMaxFailures:     5,
 	},
+	Terminal: Terminal{
+		MaxSessions: DefaultMaxTerminalSessions,
+	},
 }
 
 func checkDefaultValue() {
+	if instance.Terminal.Unlimited {
+		instance.Terminal.MaxSessions = 0
+		instance.Terminal.Unlimited = false
+	} else if !viper.IsSet("terminal.maxSessions") || instance.Terminal.MaxSessions < MinTerminalSessions {
+		instance.Terminal.MaxSessions = DefaultMaxTerminalSessions
+	}
+	storeMaxTerminalSessions(instance.Terminal.MaxSessions)
+
 	if instance.JWT.SecretKey == "" {
 		instance.JWT.SecretKey = generateRandomSecretKey()
 		instance.JWT.RevokeTokensOnLogout = true

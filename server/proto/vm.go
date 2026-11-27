@@ -221,3 +221,24 @@ type GetInputResolutionRsp struct {
 	Receiver  *lontium.Status `json:"receiver,omitempty"`
 	ReadError string          `json:"readError,omitempty"`
 }
+
+type TerminalSessionInfo struct {
+	ID        string `json:"id"`
+	Kind      string `json:"kind"` // shell | serial
+	Username  string `json:"username,omitempty"`
+	Name      string `json:"name,omitempty"`
+	Port      string `json:"port,omitempty"`
+	Baud      string `json:"baud,omitempty"`
+	ClientIP  string `json:"clientIp"`
+	UserAgent string `json:"userAgent"`
+	CreatedAt int64  `json:"createdAt"` // unix milliseconds
+	Attached  bool   `json:"attached"`
+}
+
+type GetTerminalSessionsRsp struct {
+	Sessions []TerminalSessionInfo `json:"sessions"`
+}
+
+type RenameTerminalSessionReq struct {
+	Name string `json:"name"`
+}

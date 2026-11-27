@@ -11,8 +11,14 @@ type Config struct {
 	Stun           string   `yaml:"stun"`
 	Turn           Turn     `yaml:"turn"`
 	Security       Security `yaml:"security"`
+	Terminal       Terminal `yaml:"terminal"`
 
 	Hardware Hardware `yaml:"-"`
+}
+
+type Terminal struct {
+	MaxSessions int  `yaml:"maxSessions"`
+	Unlimited   bool `yaml:"unlimited,omitempty"` // legacy setting, migrated to maxSessions=0
 }
 
 type Logger struct {
