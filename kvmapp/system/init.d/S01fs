@@ -24,10 +24,11 @@ then
                 then
                         touch /etc/kvm.disk0
                         # use all sdcard free space for data
-                        parted -s /dev/mmcblk0 "mkpart primary 8193MB 100%"
+                        # Create as NTFS type so MBR ID is 0x07 (Microsoft basic data, used by exFAT).
+                        parted -s /dev/mmcblk0 "mkpart primary ntfs 8193MB 100%"
                         sleep 1
-                        # resize data filesystem
-                        (mkfs.exfat /dev/mmcblk0p3) &
+                        # format data filesystem and set volume label
+                        mkfs.exfat -L data /dev/mmcblk0p3
                         sleep 1
                 fi
         fi
